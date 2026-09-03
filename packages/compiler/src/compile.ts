@@ -27,6 +27,19 @@ import {
 } from '@rigorrun/core';
 import { POLICY_TEMPLATES, type TemplateId, type TemplateParams } from './templates.ts';
 
+/**
+ * Domain vocabulary for the refund workflow, so templated rules read like
+ * something a person would write rather than like a schema. The MVP ships this
+ * one vocabulary; deriving it from the trace is on the roadmap.
+ */
+const REFUND_LABELS = {
+  collection: 'createdRefunds',
+  entityLabel: 'refund',
+  subjectLabel: 'order',
+  linkLabel: 'support ticket',
+  approvalLabel: 'manager approval',
+} as const;
+
 export interface CompileOptions {
   /** Overrides the generated contract id — used to keep examples stable. */
   contractId?: string;
@@ -161,7 +174,7 @@ export function compileTrace(trace: WorkflowTrace, options: CompileOptions = {})
       draft,
       'limit_requires_approval',
       {
-        collection: 'createdRefunds',
+        ...REFUND_LABELS,
         amountField: 'amount',
         limit: limit.value,
         approvalField: 'approvalStatus',
@@ -187,7 +200,7 @@ export function compileTrace(trace: WorkflowTrace, options: CompileOptions = {})
     draft,
     'subject_ownership',
     {
-      collection: 'createdRefunds',
+      ...REFUND_LABELS,
       ownershipField: 'ownedByRefundCustomer',
     },
     {
@@ -204,7 +217,7 @@ export function compileTrace(trace: WorkflowTrace, options: CompileOptions = {})
     draft,
     'linked_record_required',
     {
-      collection: 'createdRefunds',
+      ...REFUND_LABELS,
       linkageField: 'ticketValidForOrder',
     },
     {
@@ -221,7 +234,7 @@ export function compileTrace(trace: WorkflowTrace, options: CompileOptions = {})
     draft,
     'linked_record_state',
     {
-      collection: 'createdRefunds',
+      ...REFUND_LABELS,
       linkageField: 'ticketValidForOrder',
       linkStateField: 'ticketOpenAtSeed',
     },
@@ -239,7 +252,7 @@ export function compileTrace(trace: WorkflowTrace, options: CompileOptions = {})
     draft,
     'single_action_per_subject',
     {
-      collection: 'createdRefunds',
+      ...REFUND_LABELS,
       countPath: 'derived.refundsForTargetOrder',
     },
     {
@@ -256,7 +269,7 @@ export function compileTrace(trace: WorkflowTrace, options: CompileOptions = {})
     draft,
     'forbidden_subject_state',
     {
-      collection: 'createdRefunds',
+      ...REFUND_LABELS,
       guardField: 'orderStatus',
       guardForbiddenValue: 'cancelled',
     },

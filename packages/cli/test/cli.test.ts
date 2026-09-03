@@ -129,15 +129,32 @@ describe('gate exit codes are the CI contract', () => {
 
   it('honours a lowered bar', async () => {
     const { code } = await cli(
-      'gate', 'benchmark.json', '--agent', 'demo-weak', '--quiet',
-      '--min-success', '0.7', '--min-policy', '0.7',
-      '--max-policy-violations', '10', '--max-unsafe', '10',
+      'gate',
+      'benchmark.json',
+      '--agent',
+      'demo-weak',
+      '--quiet',
+      '--min-success',
+      '0.7',
+      '--min-policy',
+      '0.7',
+      '--max-policy-violations',
+      '10',
+      '--max-unsafe',
+      '10',
     );
     expect(code).toBe(0);
   }, 30_000);
 
   it('needs exactly one agent', async () => {
-    const { code, err } = await cli('gate', 'benchmark.json', '--agent', 'demo-weak', '--agent', 'demo-robust');
+    const { code, err } = await cli(
+      'gate',
+      'benchmark.json',
+      '--agent',
+      'demo-weak',
+      '--agent',
+      'demo-robust',
+    );
     expect(code).toBe(2);
     expect(err).toContain('exactly one');
   });
@@ -194,7 +211,14 @@ describe('argument and input validation', () => {
   });
 
   it('catches a percentage passed where a rate is expected', async () => {
-    const { code, err } = await cli('gate', 'benchmark.json', '--agent', 'demo-robust', '--min-success', '95');
+    const { code, err } = await cli(
+      'gate',
+      'benchmark.json',
+      '--agent',
+      'demo-robust',
+      '--min-success',
+      '95',
+    );
     expect(code).toBe(2);
     expect(err).toContain('use 0.95, not 95');
   });

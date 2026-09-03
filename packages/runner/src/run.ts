@@ -42,7 +42,13 @@ export interface RunOptions {
   runId?: string;
   /** Repeat every case this many times, enabling pass@k. */
   repeats?: number;
-  onProgress?: (event: RunProgress) => void;
+  /**
+   * Progress callback. It may return a promise, which the runner awaits — that
+   * lets the dashboard pace the run for a human to watch without distorting
+   * any measurement, since each case's duration is recorded before its event
+   * is emitted.
+   */
+  onProgress?: (event: RunProgress) => void | Promise<void>;
   /** Injectable clock so tests and examples can be byte-reproducible. */
   now?: () => Date;
   version?: string;
@@ -62,7 +68,7 @@ export async function runBenchmark(
   const repeats = Math.max(1, options.repeats ?? 1);
   const startedAt = now().toISOString();
 
-  options.onProgress?.({
+  await options.onProgress?.({
     type: 'run_started',
     runId,
     totalCases: benchmark.cases.length * agents.length * repeats,
@@ -74,7 +80,7 @@ export async function runBenchmark(
   for (const agent of agents) {
     for (const testCase of benchmark.cases) {
       for (let attempt = 0; attempt < repeats; attempt += 1) {
-        options.onProgress?.({
+        await options.onProgress?.({
           type: 'case_started',
           runId,
           agentId: agent.id,
@@ -83,10 +89,10 @@ export async function runBenchmark(
         });
         const result = await executeCase(runId, testCase, agent, now);
         caseResults.push(result);
-        options.onProgress?.({ type: 'case_finished', runId, result });
+        await options.onProgress?.({ type: 'case_finished', runId, result });
       }
     }
-    options.onProgress?.({ type: 'agent_finished', runId, agentId: agent.id });
+    await options.onProgress?.({ type: 'agent_finished', runId, agentId: agent.id });
   }
 
   const scores = agents.map((agent) =>
@@ -117,7 +123,7 @@ export async function runBenchmark(
 
   // Sealed last, over everything above it.
   result.resultHash = await hashValue({ ...result, resultHash: '' });
-  options.onProgress?.({ type: 'run_finished', runId, result });
+  await options.onProgress?.({ type: 'run_finished', runId, result });
   return result;
 }
 

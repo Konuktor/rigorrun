@@ -131,7 +131,9 @@ describe('publishing a sanitised report', () => {
   });
 
   it('masks record identifiers and amounts in check descriptions', () => {
-    const descriptions = sanitized.caseResults.flatMap((r) => r.assertions.map((a) => a.description));
+    const descriptions = sanitized.caseResults.flatMap((r) =>
+      r.assertions.map((a) => a.description),
+    );
     expect(descriptions.join(' ')).not.toMatch(/\b[A-Z]{2,6}-\d{3,}\b/);
     expect(descriptions.some((d) => d.includes('\u2039id\u203a'))).toBe(true);
   });

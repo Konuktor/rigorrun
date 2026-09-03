@@ -44,7 +44,8 @@ export async function receiveTrace(port: number, outPath?: string): Promise<numb
         return;
       }
       if (req.method === 'GET' && req.url === '/health') {
-        res.writeHead(200, { ...cors, 'content-type': 'application/json' })
+        res
+          .writeHead(200, { ...cors, 'content-type': 'application/json' })
           .end(JSON.stringify({ ok: true, service: 'rigorrun-ingest' }));
         return;
       }

@@ -23,6 +23,7 @@
 
     "jsx": "react-jsx",
     "types": [],
+    "allowJs": false,
     "paths": {
       "@rigorrun/core": ["./packages/core/src/index.ts"],
       "@rigorrun/core/*": ["./packages/core/src/*"],

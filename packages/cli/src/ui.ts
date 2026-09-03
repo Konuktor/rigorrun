@@ -7,7 +7,8 @@ const CSI = `${String.fromCharCode(27)}[`;
 const useColor =
   !process.env['NO_COLOR'] && process.stdout.isTTY === true && process.env['TERM'] !== 'dumb';
 
-const wrap = (code: string) => (text: string) => (useColor ? `${CSI}${code}m${text}${CSI}0m` : text);
+const wrap = (code: string) => (text: string) =>
+  useColor ? `${CSI}${code}m${text}${CSI}0m` : text;
 
 export const c = {
   bold: wrap('1'),

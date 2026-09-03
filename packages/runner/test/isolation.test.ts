@@ -142,13 +142,35 @@ describe('progress reporting', () => {
     const small = { ...pipeline.benchmark, cases: pipeline.benchmark.cases.slice(0, 3) };
     await runBenchmark(small, [demoRobustAgent], {
       runId: 'r7',
-      onProgress: (e) => events.push(e),
+      onProgress: (e) => void events.push(e),
     });
 
     expect(events[0]?.type).toBe('run_started');
     expect(events.filter((e) => e.type === 'case_started')).toHaveLength(3);
     expect(events.filter((e) => e.type === 'case_finished')).toHaveLength(3);
     expect(events.at(-1)?.type).toBe('run_finished');
+  });
+});
+
+describe('progress callbacks can be awaited', () => {
+  it('waits for an async listener before running the next case', async () => {
+    const order: string[] = [];
+    const small = { ...pipeline.benchmark, cases: pipeline.benchmark.cases.slice(0, 3) };
+    await runBenchmark(small, [demoRobustAgent], {
+      runId: 'r9',
+      onProgress: async (event) => {
+        if (event.type !== 'case_finished') return;
+        order.push(`start:${event.result.caseId}`);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        order.push(`end:${event.result.caseId}`);
+      },
+    });
+    // Every listener finished before the next one began.
+    for (let i = 0; i < order.length; i += 2) {
+      expect(order[i]?.startsWith('start:')).toBe(true);
+      expect(order[i + 1]?.startsWith('end:')).toBe(true);
+    }
+    expect(order).toHaveLength(6);
   });
 });
 

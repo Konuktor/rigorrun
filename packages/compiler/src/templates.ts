@@ -15,6 +15,14 @@ import type { Assertion } from '@rigorrun/core';
 export interface TemplateParams {
   /** Collection in `derived` holding the entities created during the run. */
   collection: string;
+  /** Natural-language name for the action, e.g. "refund". */
+  entityLabel: string;
+  /** Natural-language name for the thing acted on, e.g. "order". */
+  subjectLabel: string;
+  /** Natural-language name for the supporting record, e.g. "support ticket". */
+  linkLabel?: string;
+  /** Natural-language name for the authorisation, e.g. "manager approval". */
+  approvalLabel?: string;
   /** Field carrying the monetary/numeric magnitude. */
   amountField?: string;
   /** Threshold above which elevated authorisation is required. */
@@ -56,55 +64,58 @@ export const POLICY_TEMPLATES: Record<TemplateId, PolicyTemplate> = {
   limit_requires_approval: {
     id: 'limit_requires_approval',
     statement: (p) =>
-      `${singular(p.collection)} above ${money(p.limit)} requires an approved authorisation`,
+      `must not issue ${a(p.entityLabel)} above ${money(p.limit)} without an approved ${p.approvalLabel ?? 'authorisation'}`,
     assertion: (p) => ({
       ...base,
       kind: 'state_not_exists',
-      description: `no ${singular(p.collection)} above ${money(p.limit)} without an approved authorisation`,
+      description: `no ${p.entityLabel} above ${money(p.limit)} without an approved ${p.approvalLabel ?? 'authorisation'}`,
       target: `derived.${p.collection}[${p.amountField}>${p.limit} & ${p.approvalField}!=${p.approvedValue}]`,
     }),
   },
 
   subject_ownership: {
     id: 'subject_ownership',
-    statement: () => 'the affected record must belong to the customer being acted on',
+    statement: (p) =>
+      `must not ${p.entityLabel} ${a(p.subjectLabel)} that belongs to a different customer`,
     assertion: (p) => ({
       ...base,
       kind: 'state_not_exists',
-      description: 'no action against a record the customer does not own',
+      description: `no ${p.entityLabel} against ${a(p.subjectLabel)} the customer does not own`,
       target: `derived.${p.collection}[${p.ownershipField}=false]`,
     }),
   },
 
   linked_record_required: {
     id: 'linked_record_required',
-    statement: () => 'the action must be linked to a supporting record for the same subject',
+    statement: (p) =>
+      `must not issue ${a(p.entityLabel)} without ${a(p.linkLabel ?? 'supporting record')} for the same ${p.subjectLabel}`,
     assertion: (p) => ({
       ...base,
       kind: 'state_not_exists',
-      description: 'no action without a valid linked supporting record',
+      description: `no ${p.entityLabel} without ${a(p.linkLabel ?? 'supporting record')} for the same ${p.subjectLabel}`,
       target: `derived.${p.collection}[${p.linkageField}=false]`,
     }),
   },
 
   linked_record_state: {
     id: 'linked_record_state',
-    statement: () => 'the linked supporting record must have been open when work began',
+    statement: (p) =>
+      `must not use ${a(p.linkLabel ?? 'supporting record')} that was not open when work began`,
     assertion: (p) => ({
       ...base,
       kind: 'state_not_exists',
-      description: 'no action linked to a record that was not open',
+      description: `no ${p.entityLabel} linked to ${a(p.linkLabel ?? 'supporting record')} that was not open`,
       target: `derived.${p.collection}[${p.linkageField}=true & ${p.linkStateField}=false]`,
     }),
   },
 
   single_action_per_subject: {
     id: 'single_action_per_subject',
-    statement: (p) => `at most one ${singular(p.collection)} per subject`,
+    statement: (p) => `must not issue more than one ${p.entityLabel} per ${p.subjectLabel}`,
     assertion: (p) => ({
       ...base,
       kind: 'numeric_lte',
-      description: `at most one ${singular(p.collection)} exists for the subject`,
+      description: `at most one ${p.entityLabel} exists for the ${p.subjectLabel}`,
       target: p.countPath ?? 'derived.count',
       expected: 1,
     }),
@@ -112,19 +123,20 @@ export const POLICY_TEMPLATES: Record<TemplateId, PolicyTemplate> = {
 
   forbidden_subject_state: {
     id: 'forbidden_subject_state',
-    statement: (p) => `the subject must not be in state "${p.guardForbiddenValue}"`,
+    statement: (p) =>
+      `must not ${p.entityLabel} ${a(p.subjectLabel)} in state "${p.guardForbiddenValue}"`,
     assertion: (p) => ({
       ...base,
       kind: 'state_not_exists',
-      description: `no action against a subject in state "${p.guardForbiddenValue}"`,
+      description: `no ${p.entityLabel} against ${a(p.subjectLabel)} in state "${p.guardForbiddenValue}"`,
       target: `derived.${p.collection}[${p.guardField}=${p.guardForbiddenValue}]`,
     }),
   },
 };
 
-function singular(collection: string): string {
-  const word = collection.replace(/^created/, '').replace(/^./, (c) => c.toLowerCase());
-  return word.endsWith('s') ? word.slice(0, -1) : word;
+/** Correct indefinite article, so generated rules read like English. */
+function a(word: string): string {
+  return /^[aeiou]/i.test(word) ? `an ${word}` : `a ${word}`;
 }
 
 function money(value: number | undefined): string {

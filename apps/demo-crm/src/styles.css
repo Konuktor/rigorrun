@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+/*
+ * Northstar Support deliberately does not look like RigorRun. It is a plain,
+ * light, dense enterprise CRM — the kind of application a support team
+ * actually works in. The contrast is the point of the demo: RigorRun is the
+ * instrument, Northstar is the system under observation.
+ */
+@theme {
+  --color-ink: #0f172a;
+  --color-ink-soft: #475569;
+  --color-ink-faint: #94a3b8;
+  --color-rule: #e2e8f0;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f7f9;
+  --color-brand: #1d4ed8;
+  --color-brand-soft: #eff4ff;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

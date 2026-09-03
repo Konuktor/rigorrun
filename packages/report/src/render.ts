@@ -352,7 +352,8 @@ function metadata(
 }
 
 function evaluatorTag(evaluator: string): string {
-  const cls = evaluator === 'deterministic' ? 'det' : evaluator === 'model_judged' ? 'judge' : 'human';
+  const cls =
+    evaluator === 'deterministic' ? 'det' : evaluator === 'model_judged' ? 'judge' : 'human';
   const label =
     evaluator === 'deterministic'
       ? 'DETERMINISTIC'
