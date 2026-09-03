@@ -20,6 +20,9 @@ export default defineConfig({
   },
   test: {
     include: ['packages/**/test/**/*.test.ts', 'apps/**/test/**/*.test.ts'],
+    // The CLI test chdirs into a temp workspace, so it must not share a
+    // process with tests that resolve paths relative to the repo root.
+    fileParallelism: true,
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
     environment: 'node',
     reporters: ['default'],

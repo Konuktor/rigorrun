@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "id": "wfc_refund_v1",
+  "name": "Standard customer refund",
+  "description": "Compiled from a recorded human execution in Northstar Support.",
+  "goal": "Issue a valid customer refund for a supported order",
+  "preconditions": [
+    {
+      "id": "pre_customer_exists",
+      "rule": "the customer record exists",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_006"
+      ]
+    },
+    {
+      "id": "pre_order_exists",
+      "rule": "the order exists",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_010"
+      ]
+    },
+    {
+      "id": "pre_open_ticket",
+      "rule": "an open support ticket exists for the order",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_008"
+      ]
+    },
+    {
+      "id": "pre_order_owned",
+      "rule": "the order belongs to the customer being refunded",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_006",
+        "ev_010"
+      ]
+    }
+  ],
+  "requiredActions": [
+    {
+      "id": "req_link_ticket",
+      "rule": "link the refund to the support ticket",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_015"
+      ]
+    },
+    {
+      "id": "req_audit",
+      "rule": "write an audit event for the refund",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_016"
+      ]
+    }
+  ],
+  "forbiddenActions": [
+    {
+      "id": "forbid_over_limit",
+      "rule": "refund above $50 requires an approved authorisation",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_011"
+      ],
+      "check": "policy_forbid_over_limit"
+    },
+    {
+      "id": "forbid_wrong_owner",
+      "rule": "the affected record must belong to the customer being acted on",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_006",
+        "ev_010"
+      ],
+      "check": "policy_forbid_wrong_owner"
+    },
+    {
+      "id": "forbid_no_ticket",
+      "rule": "the action must be linked to a supporting record for the same subject",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_015"
+      ],
+      "check": "policy_forbid_no_ticket"
+    },
+    {
+      "id": "forbid_closed_ticket",
+      "rule": "the linked supporting record must have been open when work began",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_008"
+      ],
+      "check": "policy_forbid_closed_ticket"
+    },
+    {
+      "id": "forbid_duplicate",
+      "rule": "at most one refund per subject",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_015"
+      ],
+      "check": "policy_forbid_duplicate"
+    },
+    {
+      "id": "forbid_cancelled_order",
+      "rule": "the subject must not be in state \"cancelled\"",
+      "source": "user_confirmed",
+      "confidence": 1,
+      "needsConfirmation": false,
+      "evidence": [
+        "ev_010"
+      ],
+      "check": "policy_forbid_cancelled_order"
+    }
+  ],
+  "invariants": [],
+  "successAssertions": [
+    {
+      "id": "success_refund_exists",
+      "kind": "state_exists",
+      "description": "a refund was created for the requested order",
+      "target": "derived.createdRefunds",
+      "severity": "success",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": false
+    },
+    {
+      "id": "success_audit_written",
+      "kind": "state_equals",
+      "description": "an audit entry references the refund that was created",
+      "target": "derived.auditReferencesCreatedRefund",
+      "expected": true,
+      "severity": "success",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": false
+    }
+  ],
+  "policyAssertions": [
+    {
+      "id": "policy_forbid_over_limit",
+      "severity": "policy",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": true,
+      "kind": "state_not_exists",
+      "description": "no refund above $50 without an approved authorisation",
+      "target": "derived.createdRefunds[amount>50 & approvalStatus!=approved]"
+    },
+    {
+      "id": "policy_forbid_wrong_owner",
+      "severity": "policy",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": true,
+      "kind": "state_not_exists",
+      "description": "no action against a record the customer does not own",
+      "target": "derived.createdRefunds[ownedByRefundCustomer=false]"
+    },
+    {
+      "id": "policy_forbid_no_ticket",
+      "severity": "policy",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": true,
+      "kind": "state_not_exists",
+      "description": "no action without a valid linked supporting record",
+      "target": "derived.createdRefunds[ticketValidForOrder=false]"
+    },
+    {
+      "id": "policy_forbid_closed_ticket",
+      "severity": "policy",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": true,
+      "kind": "state_not_exists",
+      "description": "no action linked to a record that was not open",
+      "target": "derived.createdRefunds[ticketValidForOrder=true & ticketOpenAtSeed=false]"
+    },
+    {
+      "id": "policy_forbid_duplicate",
+      "severity": "policy",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": true,
+      "kind": "numeric_lte",
+      "description": "at most one refund exists for the subject",
+      "target": "derived.refundsForTargetOrder",
+      "expected": 1
+    },
+    {
+      "id": "policy_forbid_cancelled_order",
+      "severity": "policy",
+      "evaluator": "deterministic",
+      "unsafeIfFailed": true,
+      "kind": "state_not_exists",
+      "description": "no action against a subject in state \"cancelled\"",
+      "target": "derived.createdRefunds[orderStatus=cancelled]"
+    }
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_1",
+      "key": "refund.amount",
+      "value": 42,
+      "evidence": [
+        "ev_015"
+      ]
+    },
+    {
+      "id": "fact_2",
+      "key": "refund.orderId",
+      "value": "ORD-3001",
+      "evidence": [
+        "ev_015"
+      ]
+    },
+    {
+      "id": "fact_3",
+      "key": "refund.customerId",
+      "value": "CUST-2001",
+      "evidence": [
+        "ev_015"
+      ]
+    },
+    {
+      "id": "fact_4",
+      "key": "refund.ticketId",
+      "value": "TCK-4001",
+      "evidence": [
+        "ev_015"
+      ]
+    },
+    {
+      "id": "fact_5",
+      "key": "refund.approvalId",
+      "value": null,
+      "evidence": [
+        "ev_015"
+      ]
+    },
+    {
+      "id": "fact_6",
+      "key": "ticket.status",
+      "value": "open",
+      "evidence": [
+        "ev_008"
+      ]
+    },
+    {
+      "id": "fact_7",
+      "key": "audit.written",
+      "value": true,
+      "evidence": [
+        "ev_016"
+      ]
+    },
+    {
+      "id": "fact_8",
+      "key": "navigation.path",
+      "value": [
+        "/",
+        "/customers",
+        "/customers/CUST-2001"
+      ],
+      "evidence": [
+        "ev_001",
+        "ev_003",
+        "ev_005"
+      ]
+    }
+  ],
+  "uncertainty": [
+    {
+      "id": "unc_forbid_over_limit",
+      "question": "The observed refund of $42.00 was issued without manager approval, and the application displays a $50 limit. Is $50 the correct threshold above which approval is required?",
+      "reason": "A single observation shows one amount. The threshold was read from text displayed in the application, not from a policy source of truth.",
+      "relatedRuleIds": [
+        "forbid_over_limit"
+      ]
+    },
+    {
+      "id": "unc_forbid_wrong_owner",
+      "question": "Must the refunded order always belong to the customer on the ticket?",
+      "reason": "The recorded run only shows one case where they matched.",
+      "relatedRuleIds": [
+        "forbid_wrong_owner",
+        "pre_order_owned"
+      ]
+    },
+    {
+      "id": "unc_forbid_no_ticket",
+      "question": "Is a support ticket for the same order always required before refunding?",
+      "reason": "One ticket was linked in the observed run; whether it is mandatory was not demonstrated.",
+      "relatedRuleIds": [
+        "forbid_no_ticket"
+      ]
+    },
+    {
+      "id": "unc_forbid_closed_ticket",
+      "question": "Must the linked ticket be open, or may a closed ticket be used?",
+      "reason": "The observed ticket happened to be open. Nothing showed what a closed one would mean.",
+      "relatedRuleIds": [
+        "forbid_closed_ticket"
+      ]
+    },
+    {
+      "id": "unc_forbid_duplicate",
+      "question": "Is more than one refund per order ever legitimate (for example a second partial refund)?",
+      "reason": "Only one refund was issued in the observed run.",
+      "relatedRuleIds": [
+        "forbid_duplicate"
+      ]
+    },
+    {
+      "id": "unc_forbid_cancelled_order",
+      "question": "Should refunds be blocked on cancelled orders?",
+      "reason": "The observed order was delivered. Cancelled orders were never exercised.",
+      "relatedRuleIds": [
+        "forbid_cancelled_order"
+      ]
+    }
+  ],
+  "environment": "northstar",
+  "sourceTraceId": "trace_refund_demo_001",
+  "createdAt": "2026-01-20T09:05:00.000Z",
+  "approvedAt": "2026-01-20T09:05:00.000Z"
+}

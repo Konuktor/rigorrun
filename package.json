@@ -11,8 +11,8 @@
   "scripts": {
     "demo": "node scripts/demo.mjs",
     "dev": "concurrently -n crm,web -c magenta,cyan \"pnpm -F @rigorrun/demo-crm dev\" \"pnpm -F @rigorrun/web dev\"",
-    "cli": "node --experimental-strip-types packages/cli/src/bin.ts",
-    "rigorrun": "node --experimental-strip-types packages/cli/src/bin.ts",
+    "cli": "tsx packages/cli/src/bin.ts",
+    "rigorrun": "tsx packages/cli/src/bin.ts",
     "build": "pnpm build:cli && pnpm build:crm && pnpm build:web && pnpm build:extension",
     "build:cli": "pnpm -F @rigorrun/cli build",
     "build:crm": "pnpm -F @rigorrun/demo-crm build",

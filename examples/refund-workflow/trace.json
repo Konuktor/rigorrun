@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "id": "trace_refund_demo_001",
+  "name": "Standard customer refund",
+  "recordedAt": "2026-01-20T09:00:00.000Z",
+  "durationMs": 14750,
+  "app": {
+    "origin": "http://localhost:5174",
+    "title": "Northstar Support"
+  },
+  "events": [
+    {
+      "id": "ev_001",
+      "index": 0,
+      "type": "navigate",
+      "at": 0,
+      "url": "http://localhost:5174/",
+      "pageTitle": "Northstar Support"
+    },
+    {
+      "id": "ev_002",
+      "index": 1,
+      "type": "click",
+      "at": 1200,
+      "url": "http://localhost:5174/",
+      "pageTitle": "Northstar Support",
+      "target": {
+        "tagName": "a",
+        "role": "link",
+        "accessibleName": "Customers",
+        "testId": "nav-customers",
+        "selector": "[data-testid=\"nav-customers\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"nav-customers\"]",
+            "score": 100
+          },
+          {
+            "strategy": "role_name",
+            "value": "role=link[name=\"Customers\"]",
+            "score": 70
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_003",
+      "index": 2,
+      "type": "navigate",
+      "at": 2400,
+      "url": "http://localhost:5174/customers",
+      "pageTitle": "Customers · Northstar Support"
+    },
+    {
+      "id": "ev_004",
+      "index": 3,
+      "type": "click",
+      "at": 3600,
+      "url": "http://localhost:5174/customers",
+      "pageTitle": "Customers · Northstar Support",
+      "target": {
+        "tagName": "button",
+        "role": "button",
+        "accessibleName": "Maya Okafor",
+        "testId": "customer-row-CUST-2001",
+        "nearbyText": "Maya Okafor · maya.okafor@example.com · standard",
+        "selector": "[data-testid=\"customer-row-CUST-2001\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"customer-row-CUST-2001\"]",
+            "score": 100
+          },
+          {
+            "strategy": "role_name",
+            "value": "role=button[name=\"Maya Okafor\"]",
+            "score": 70
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_005",
+      "index": 4,
+      "type": "navigate",
+      "at": 4800,
+      "url": "http://localhost:5174/customers/CUST-2001",
+      "pageTitle": "Maya Okafor · Northstar Support"
+    },
+    {
+      "id": "ev_006",
+      "index": 5,
+      "type": "app_observation",
+      "at": 5000,
+      "url": "http://localhost:5174/customers/CUST-2001",
+      "pageTitle": "Maya Okafor · Northstar Support",
+      "observation": {
+        "name": "customer.viewed",
+        "data": {
+          "customerId": "CUST-2001",
+          "tier": "standard"
+        }
+      }
+    },
+    {
+      "id": "ev_007",
+      "index": 6,
+      "type": "click",
+      "at": 6200,
+      "url": "http://localhost:5174/customers/CUST-2001",
+      "pageTitle": "Maya Okafor · Northstar Support",
+      "target": {
+        "tagName": "button",
+        "role": "button",
+        "accessibleName": "Left earcup rattles at high volume",
+        "testId": "ticket-row-TCK-4001",
+        "nearbyText": "TCK-4001 · open · order ORD-3001",
+        "selector": "[data-testid=\"ticket-row-TCK-4001\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"ticket-row-TCK-4001\"]",
+            "score": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_008",
+      "index": 7,
+      "type": "app_observation",
+      "at": 6500,
+      "url": "http://localhost:5174/tickets/TCK-4001",
+      "pageTitle": "TCK-4001 · Northstar Support",
+      "observation": {
+        "name": "ticket.viewed",
+        "data": {
+          "ticketId": "TCK-4001",
+          "status": "open",
+          "orderId": "ORD-3001",
+          "customerId": "CUST-2001"
+        }
+      }
+    },
+    {
+      "id": "ev_009",
+      "index": 8,
+      "type": "click",
+      "at": 7700,
+      "url": "http://localhost:5174/tickets/TCK-4001",
+      "pageTitle": "TCK-4001 · Northstar Support",
+      "target": {
+        "tagName": "a",
+        "role": "link",
+        "accessibleName": "ORD-3001",
+        "testId": "order-link-ORD-3001",
+        "nearbyText": "Aurora headphones · $128.00 · delivered",
+        "selector": "[data-testid=\"order-link-ORD-3001\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"order-link-ORD-3001\"]",
+            "score": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_010",
+      "index": 9,
+      "type": "app_observation",
+      "at": 8000,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "observation": {
+        "name": "order.viewed",
+        "data": {
+          "orderId": "ORD-3001",
+          "customerId": "CUST-2001",
+          "total": 128,
+          "status": "delivered"
+        }
+      }
+    },
+    {
+      "id": "ev_011",
+      "index": 10,
+      "type": "click",
+      "at": 9200,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "target": {
+        "tagName": "button",
+        "role": "button",
+        "accessibleName": "Issue refund",
+        "testId": "open-refund-form",
+        "nearbyText": "Refunds of $50 or less can be issued without approval. Above $50 a manager approval is required.",
+        "selector": "[data-testid=\"open-refund-form\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"open-refund-form\"]",
+            "score": 100
+          },
+          {
+            "strategy": "role_name",
+            "value": "role=button[name=\"Issue refund\"]",
+            "score": 70
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_012",
+      "index": 11,
+      "type": "input",
+      "at": 10400,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "target": {
+        "tagName": "input",
+        "role": "spinbutton",
+        "accessibleName": "Refund amount",
+        "testId": "refund-amount",
+        "label": "Refund amount",
+        "inputType": "number",
+        "nearbyText": "Refunds of $50 or less can be issued without approval. Above $50 a manager approval is required.",
+        "selector": "[data-testid=\"refund-amount\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"refund-amount\"]",
+            "score": 100
+          },
+          {
+            "strategy": "label",
+            "value": "label=Refund amount",
+            "score": 80
+          }
+        ]
+      },
+      "value": "42.00"
+    },
+    {
+      "id": "ev_013",
+      "index": 12,
+      "type": "input",
+      "at": 11600,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "target": {
+        "tagName": "textarea",
+        "role": "textbox",
+        "accessibleName": "Reason",
+        "testId": "refund-reason",
+        "label": "Reason",
+        "selector": "[data-testid=\"refund-reason\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"refund-reason\"]",
+            "score": 100
+          }
+        ]
+      },
+      "value": "Partial refund for defective earcup"
+    },
+    {
+      "id": "ev_014",
+      "index": 13,
+      "type": "submit",
+      "at": 12800,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "target": {
+        "tagName": "form",
+        "role": "form",
+        "accessibleName": "Issue refund",
+        "testId": "refund-form",
+        "nearbyText": "Refunds of $50 or less can be issued without approval. Above $50 a manager approval is required.",
+        "selector": "[data-testid=\"refund-form\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"refund-form\"]",
+            "score": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_015",
+      "index": 14,
+      "type": "app_observation",
+      "at": 13200,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "observation": {
+        "name": "refund.created",
+        "data": {
+          "refundId": "REF-7001",
+          "orderId": "ORD-3001",
+          "customerId": "CUST-2001",
+          "ticketId": "TCK-4001",
+          "amount": 42,
+          "approvalId": null
+        }
+      }
+    },
+    {
+      "id": "ev_016",
+      "index": 15,
+      "type": "app_observation",
+      "at": 13350,
+      "url": "http://localhost:5174/orders/ORD-3001",
+      "pageTitle": "ORD-3001 · Northstar Support",
+      "observation": {
+        "name": "audit.appended",
+        "data": {
+          "action": "refund.issued",
+          "refundId": "REF-7001",
+          "orderId": "ORD-3001"
+        }
+      }
+    },
+    {
+      "id": "ev_017",
+      "index": 16,
+      "type": "click",
+      "at": 14550,
+      "url": "http://localhost:5174/tickets/TCK-4001",
+      "pageTitle": "TCK-4001 · Northstar Support",
+      "target": {
+        "tagName": "button",
+        "role": "button",
+        "accessibleName": "Resolve ticket",
+        "testId": "resolve-ticket",
+        "selector": "[data-testid=\"resolve-ticket\"]",
+        "selectorStrategy": "test_id",
+        "candidates": [
+          {
+            "strategy": "test_id",
+            "value": "[data-testid=\"resolve-ticket\"]",
+            "score": 100
+          }
+        ]
+      }
+    },
+    {
+      "id": "ev_018",
+      "index": 17,
+      "type": "app_observation",
+      "at": 14750,
+      "url": "http://localhost:5174/tickets/TCK-4001",
+      "pageTitle": "TCK-4001 · Northstar Support",
+      "observation": {
+        "name": "ticket.resolved",
+        "data": {
+          "ticketId": "TCK-4001"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "recorder": "rigorrun-chrome-extension",
+    "recorderVersion": "0.1.0",
+    "redaction": "rigorrun-redaction-v1",
+    "droppedSensitiveEvents": 0
+  }
+}
