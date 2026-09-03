@@ -11,6 +11,9 @@ const useSystemChromium = !process.env['CI'] && existsSync(SYSTEM_CHROMIUM);
 
 export default defineConfig({
   testDir: '.',
+  // The public suite runs against the deployed URL and has its own config, so
+  // the two never mix and each count means what it says.
+  testIgnore: /public\.spec\.ts/,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,

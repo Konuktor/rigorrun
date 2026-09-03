@@ -18,8 +18,7 @@ enabled = true
 [[d1_databases]]
 binding = "DB"
 database_name = "rigorrun"
-# Filled in by `wrangler d1 create rigorrun`.
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "197aef92-985a-41ec-a29a-87c318cb1345"
 
 [vars]
 RIGORRUN_ENV = "production"

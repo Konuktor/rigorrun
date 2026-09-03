@@ -29,7 +29,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed"
+    "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
+    "e2e:public": "playwright test --config e2e/playwright.public.config.ts",
+    "build:web:prod": "VITE_CRM_URL=https://rigorrun-crm.pages.dev pnpm -F @rigorrun/web build",
+    "deploy:web": "pnpm build:web:prod && wrangler pages deploy apps/web/dist --project-name rigorrun --branch main --commit-dirty=true",
+    "deploy:crm": "pnpm build:crm && wrangler pages deploy apps/demo-crm/dist --project-name rigorrun-crm --branch main --commit-dirty=true",
+    "deploy:worker": "pnpm -F @rigorrun/worker deploy",
+    "deploy:all": "pnpm deploy:crm && pnpm deploy:web && pnpm deploy:worker",
+    "assets": "node scripts/capture-assets.mjs"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260902.1",

@@ -7,6 +7,9 @@
 Turn a real human workflow into a private executable benchmark, then prove
 whether an AI agent can actually do the job.
 
+**[Try the live demo →](https://rigorrun.pages.dev)**
+&nbsp;·&nbsp; no account, no key, no install
+
 `Record → Compile → Stress-test → Verify → Gate`
 
 </div>
@@ -52,7 +55,21 @@ Four things follow from that, and they are the whole product:
 
 ---
 
-## Run the demo
+## Try it
+
+**In a browser, with nothing installed:** <https://rigorrun.pages.dev>
+
+The whole pipeline — compile, generate, run both agents, verify — executes in
+the page. The numbers you see come from executions that happen when you press
+the button.
+
+|                                      |                                                         |
+| ------------------------------------ | ------------------------------------------------------- |
+| Live demo                            | <https://rigorrun.pages.dev>                            |
+| Northstar Support (the recorded app) | <https://rigorrun-crm.pages.dev>                        |
+| Control-plane API                    | <https://rigorrun.takhiroverbol.workers.dev/api/health> |
+
+## Run it locally
 
 ```bash
 pnpm install

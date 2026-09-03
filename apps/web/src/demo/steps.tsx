@@ -12,7 +12,12 @@ import type {
 } from '@rigorrun/core';
 import { Button, Mono, Panel, Tag, fmtMs } from '../components/primitives.tsx';
 
-const CRM_URL = 'http://localhost:5174';
+/**
+ * Where the recorded application lives. Local by default; the deployed build
+ * points at the hosted copy of Northstar Support so a reviewer with no local
+ * setup can still open it.
+ */
+const CRM_URL = import.meta.env['VITE_CRM_URL'] ?? 'http://127.0.0.1:5174';
 
 /* ------------------------------------------------------------------ record */
 

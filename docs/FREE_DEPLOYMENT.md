@@ -3,6 +3,20 @@
 RigorRun is usable with nothing deployed at all. This page covers the optional
 control plane, and the deliberate limits on what it will accept.
 
+## The live deployment
+
+Running today, entirely on free Cloudflare infrastructure:
+
+| Component         | URL                                          | Service                 |
+| ----------------- | -------------------------------------------- | ----------------------- |
+| Dashboard         | <https://rigorrun.pages.dev>                 | Cloudflare Pages (free) |
+| Northstar Support | <https://rigorrun-crm.pages.dev>             | Cloudflare Pages (free) |
+| Control plane     | <https://rigorrun.takhiroverbol.workers.dev> | Workers Free + D1 Free  |
+
+The dashboard executes the benchmark in the browser, so the two Pages projects
+are static hosting with no server behind them. Neither depends on the Worker;
+the demo works with the API switched off.
+
 ## First: you probably do not need this
 
 | You want to…                                            | Deploy anything? |
