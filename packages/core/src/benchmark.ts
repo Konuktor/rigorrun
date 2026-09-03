@@ -7,9 +7,10 @@
  * the other is a type error, and a test asserts it at runtime as well.
  */
 import { z } from 'zod';
+import { BENCHMARK_SCHEMA_VERSION } from './versions.ts';
 import { AssertionSchema } from './assertion.ts';
 
-export const BENCHMARK_SCHEMA_VERSION = 1;
+export { BENCHMARK_SCHEMA_VERSION } from './versions.ts';
 
 export const CASE_CATEGORIES = [
   'happy_path',

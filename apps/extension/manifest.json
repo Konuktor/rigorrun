@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "RigorRun Recorder",
+  "version": "0.1.0",
+  "description": "Record a real workflow once. RigorRun turns it into a private executable benchmark.",
+  "permissions": ["storage", "scripting", "activeTab", "tabs"],
+  "host_permissions": ["http://localhost/*", "http://127.0.0.1/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "RigorRun Recorder"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "icons": { "128": "icon128.png" }
+}

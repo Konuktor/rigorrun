@@ -13,9 +13,10 @@
  * sync — use the `inferredRules()` accessor for the "needs review" bucket.
  */
 import { z } from 'zod';
+import { CONTRACT_SCHEMA_VERSION } from './versions.ts';
 import { AssertionSchema } from './assertion.ts';
 
-export const CONTRACT_SCHEMA_VERSION = 1;
+export { CONTRACT_SCHEMA_VERSION } from './versions.ts';
 
 export const RuleSourceSchema = z.enum(['observed', 'inferred', 'user_confirmed']);
 export type RuleSource = z.infer<typeof RuleSourceSchema>;

@@ -7,10 +7,11 @@
  * point of the product.
  */
 import { z } from 'zod';
+import { RUN_SCHEMA_VERSION } from './versions.ts';
 import { AssertionResultSchema, ObservedEventSchema } from './assertion.ts';
 import { CaseCategorySchema } from './benchmark.ts';
 
-export const RUN_SCHEMA_VERSION = 1;
+export { RUN_SCHEMA_VERSION } from './versions.ts';
 
 export const AgentStepSchema = z.object({
   index: z.number().int().nonnegative(),

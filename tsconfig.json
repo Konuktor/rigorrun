@@ -10,6 +10,7 @@
     "apps/*/src/**/*.ts",
     "apps/*/src/**/*.tsx",
     "apps/vite-env.d.ts",
+    "apps/extension/chrome.d.ts",
     "apps/*/test/**/*.ts",
     "e2e/**/*.ts",
     "scripts/**/*.ts",

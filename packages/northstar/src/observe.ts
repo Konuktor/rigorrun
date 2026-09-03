@@ -128,7 +128,13 @@ export function buildObservation(
   };
 }
 
-/** A compact slice of final state for the evidence view. */
+/**
+ * A compact slice of final state for the evidence view.
+ *
+ * Audit entries carry their details, because "write an audit event" is a
+ * required action and whoever reads the evidence needs to see what was actually
+ * written, not merely that a row exists.
+ */
 export function summariseState(state: NorthstarState): Record<string, unknown> {
   return {
     refunds: state.refunds.map((r) => ({
@@ -145,7 +151,18 @@ export function summariseState(state: NorthstarState): Record<string, unknown> {
     })),
     tickets: state.tickets.map((t) => ({ id: t.id, status: t.status })),
     auditEntries: state.audit.length,
+    audit: state.audit.slice(-5).map((entry) => ({
+      action: entry.action,
+      details: truncateDetails(entry.details, 400),
+    })),
   };
+}
+
+/** Keeps one oversized audit payload from dominating the stored evidence. */
+function truncateDetails(details: Record<string, unknown>, maxChars: number): unknown {
+  const serialised = JSON.stringify(details);
+  if (serialised.length <= maxChars) return details;
+  return { truncated: true, preview: `${serialised.slice(0, maxChars)}\u2026` };
 }
 
 function round2(value: number): number {

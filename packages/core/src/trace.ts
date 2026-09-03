@@ -8,8 +8,9 @@
  * understood and replayed without hoarding page content.
  */
 import { z } from 'zod';
+import { TRACE_SCHEMA_VERSION } from './versions.ts';
 
-export const TRACE_SCHEMA_VERSION = 1;
+export { TRACE_SCHEMA_VERSION } from './versions.ts';
 
 export const SELECTOR_STRATEGIES = [
   'test_id',

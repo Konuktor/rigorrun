@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>RigorRun Recorder</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <span class="mark">RR</span>
+      <div>
+        <div class="title">RigorRun Recorder</div>
+        <div class="tagline">Do the job once.</div>
+      </div>
+    </header>
+
+    <section class="status">
+      <span id="status-dot" class="dot" data-status="idle"></span>
+      <span id="status-text">Idle</span>
+      <span class="spacer"></span>
+      <span class="origin" id="origin">no page yet</span>
+    </section>
+
+    <section class="counts">
+      <div>
+        <div class="label">Events</div>
+        <div class="value" id="counter">0</div>
+      </div>
+      <div>
+        <div class="label">Redacted fields</div>
+        <div class="value" id="dropped">0</div>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button id="start" class="primary">Start recording</button>
+      <button id="pause" hidden>Pause</button>
+      <button id="stop">Stop</button>
+    </section>
+
+    <section class="actions">
+      <button id="export">Export trace</button>
+      <button id="send">Send to local RigorRun</button>
+    </section>
+
+    <section class="actions">
+      <button id="reset">Clear recording</button>
+    </section>
+
+    <section class="port">
+      <label for="port">Local runner port</label>
+      <input id="port" type="number" value="8787" min="1" max="65535" />
+    </section>
+
+    <p id="note" class="note">Open the app you want to record, then press Start.</p>
+
+    <footer>
+      Values from password, hidden, one-time-code and payment fields are never read. URLs with
+      credential-like parameters are stripped. Nothing is uploaded anywhere.
+    </footer>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

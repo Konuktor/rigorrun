@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174 --strictPort",
+    "dev": "vite --host 127.0.0.1 --port 5174 --strictPort",
     "build": "vite build",
-    "preview": "vite preview --port 5174 --strictPort"
+    "preview": "vite preview --host 127.0.0.1 --port 5174 --strictPort"
   },
   "dependencies": {
     "@rigorrun/core": "workspace:*",
