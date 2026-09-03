@@ -1,0 +1,27 @@
+# RigorRun control plane — Cloudflare Workers Free.
+#
+# This deployment must never require a paid plan. It uses only Workers and D1,
+# both of which have free allocations, and it stores nothing large: no traces,
+# no screenshots, no page content. See docs/COST_GUARDRAILS.md.
+
+name = "rigorrun"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# workers.dev is free. A custom domain is optional and is not configured here.
+workers_dev = true
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "rigorrun"
+# Filled in by `wrangler d1 create rigorrun`.
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[vars]
+RIGORRUN_ENV = "production"
+# Reports expire on their own so stored rows cannot grow without bound.
+REPORT_RETENTION_DAYS = "30"

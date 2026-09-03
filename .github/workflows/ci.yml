@@ -1,0 +1,90 @@
+# RigorRun CI.
+#
+# Everything here runs on the free GitHub-hosted runners with no external
+# service, no API key and no credential of any kind. The benchmark gate uses the
+# offline demo agents, which is the point: a reliability gate that needs a paid
+# API to run is a gate teams switch off.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit and integration tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  benchmark-gate:
+    # The gate a customer would run in their own pipeline, on the benchmark
+    # committed to this repository.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Gate the hardened agent (must pass)
+        run: pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent demo-robust --quiet
+
+      - name: Gate the baseline agent (must fail)
+        run: |
+          set +e
+          pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent demo-weak --quiet
+          code=$?
+          set -e
+          if [ "$code" -ne 1 ]; then
+            echo "Expected exit code 1 from the baseline agent, got $code"
+            exit 1
+          fi
+          echo "The baseline agent failed the gate, as it should."
