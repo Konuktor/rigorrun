@@ -1,0 +1,22 @@
+{
+  "name": "@rigorrun/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": { "rigorrun": "./dist/rigorrun.mjs" },
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@rigorrun/core": "workspace:*",
+    "@rigorrun/northstar": "workspace:*",
+    "@rigorrun/verifier": "workspace:*",
+    "@rigorrun/scoring": "workspace:*",
+    "@rigorrun/agents": "workspace:*",
+    "@rigorrun/runner": "workspace:*",
+    "@rigorrun/report": "workspace:*",
+    "@rigorrun/generator": "workspace:*",
+    "@rigorrun/compiler": "workspace:*",
+    "@rigorrun/providers": "workspace:*"
+  }
+}

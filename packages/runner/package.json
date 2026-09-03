@@ -1,0 +1,20 @@
+{
+  "name": "@rigorrun/runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@rigorrun/core": "workspace:*",
+    "@rigorrun/northstar": "workspace:*",
+    "@rigorrun/verifier": "workspace:*",
+    "@rigorrun/scoring": "workspace:*",
+    "@rigorrun/agents": "workspace:*",
+    "@rigorrun/compiler": "workspace:*",
+    "@rigorrun/generator": "workspace:*"
+  }
+}

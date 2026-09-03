@@ -1,0 +1,48 @@
+{
+  "name": "rigorrun",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "description": "Do the job once. Test every agent forever.",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "demo": "node scripts/demo.mjs",
+    "dev": "concurrently -n crm,web -c magenta,cyan \"pnpm -F @rigorrun/demo-crm dev\" \"pnpm -F @rigorrun/web dev\"",
+    "cli": "node --experimental-strip-types packages/cli/src/bin.ts",
+    "rigorrun": "node --experimental-strip-types packages/cli/src/bin.ts",
+    "build": "pnpm build:cli && pnpm build:crm && pnpm build:web && pnpm build:extension",
+    "build:cli": "pnpm -F @rigorrun/cli build",
+    "build:crm": "pnpm -F @rigorrun/demo-crm build",
+    "build:web": "pnpm -F @rigorrun/web build",
+    "build:extension": "pnpm -F @rigorrun/extension build",
+    "build:worker": "pnpm -F @rigorrun/worker build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.1",
+    "concurrently": "^10.0.5",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.13",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.69.0",
+    "vitest": "^4.1.11"
+  }
+}

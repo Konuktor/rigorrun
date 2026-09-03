@@ -1,0 +1,11 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+# Install must stay script-free and non-interactive so `pnpm install` works
+# identically on a clean clone and in CI. esbuild's postinstall only re-verifies
+# the platform binary pnpm already installed as an optional dependency.
+allowBuilds:
+  esbuild: false
+  workerd: true
+  '@tailwindcss/oxide': true

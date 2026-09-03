@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "jsx": "react-jsx",
+    "types": [],
+    "paths": {
+      "@rigorrun/core": ["./packages/core/src/index.ts"],
+      "@rigorrun/core/*": ["./packages/core/src/*"],
+      "@rigorrun/northstar": ["./packages/northstar/src/index.ts"],
+      "@rigorrun/northstar/*": ["./packages/northstar/src/*"],
+      "@rigorrun/verifier": ["./packages/verifier/src/index.ts"],
+      "@rigorrun/generator": ["./packages/generator/src/index.ts"],
+      "@rigorrun/scoring": ["./packages/scoring/src/index.ts"],
+      "@rigorrun/agents": ["./packages/agents/src/index.ts"],
+      "@rigorrun/providers": ["./packages/providers/src/index.ts"],
+      "@rigorrun/runner": ["./packages/runner/src/index.ts"],
+      "@rigorrun/report": ["./packages/report/src/index.ts"],
+      "@rigorrun/compiler": ["./packages/compiler/src/index.ts"]
+    }
+  }
+}
