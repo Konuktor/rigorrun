@@ -25,7 +25,9 @@ export function DemoPage() {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[190px_minmax(0,1fr)]">
-      <nav className="lg:sticky lg:top-20 lg:self-start">
+      {/* min-w-0 lets the horizontal step list scroll on narrow screens
+          instead of widening its grid track. */}
+      <nav className="min-w-0 lg:sticky lg:top-20 lg:self-start">
         <ol className="flex gap-2 overflow-x-auto lg:block lg:space-y-1">
           {STEPS.map((step, index) => {
             const active = state.step === step;

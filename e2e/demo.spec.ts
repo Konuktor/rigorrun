@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 /**
  * The golden acceptance path, driven through the real UI.
@@ -178,6 +178,12 @@ test.describe('the Northstar demo app', () => {
   });
 });
 
+async function horizontalOverflow(page: Page): Promise<number> {
+  return page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+}
+
 test.describe('responsive layout', () => {
   for (const viewport of [
     { name: 'mobile', width: 390, height: 844 },
@@ -186,10 +192,18 @@ test.describe('responsive layout', () => {
     test(`the landing page has no horizontal overflow on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto('/');
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      );
-      expect(overflow).toBeLessThanOrEqual(1);
+      expect(await horizontalOverflow(page)).toBeLessThanOrEqual(1);
+    });
+
+    test(`the results view has no horizontal overflow on ${viewport.name}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto('/#/demo');
+      await page.getByTestId('step-compile').click();
+      await page.getByTestId('step-generate').click();
+      await page.getByTestId('step-run').click();
+      await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 45_000 });
+      // Wide tables must scroll inside their own container, never widen the page.
+      expect(await horizontalOverflow(page)).toBeLessThanOrEqual(1);
     });
   }
 });

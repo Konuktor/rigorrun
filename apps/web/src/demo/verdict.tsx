@@ -49,8 +49,8 @@ export function VerdictStep({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-6">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-[240px] flex-1">
           <h1 className="text-[17px] font-semibold tracking-tight">Head to head</h1>
           <p className="mt-1.5 max-w-3xl text-[13px] leading-relaxed text-muted">
             Both agents ran the same {caseIds.length} cases from the same seeded state. Every
