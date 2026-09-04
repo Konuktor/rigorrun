@@ -14,6 +14,7 @@ import type {
   Observation,
   ObservedEvent,
 } from '@rigorrun/core';
+import { failureSeverityOf, isBlocking, verificationSourceOf } from '@rigorrun/core';
 import { resolvePath } from './path.ts';
 
 interface Outcome {
@@ -23,6 +24,25 @@ interface Outcome {
 }
 
 export function evaluateAssertion(assertion: Assertion, observation: Observation): AssertionResult {
+  // Applicability first. A case that mutated away whatever the rule was about
+  // neither satisfies nor violates it, and calling that a pass is how coverage
+  // numbers end up meaning nothing.
+  if (assertion.applicableWhen) {
+    const gate = evaluateKind(
+      assertion.applicableWhen.kind,
+      assertion.applicableWhen.target,
+      assertion.applicableWhen.expected,
+      observation,
+    );
+    if (gate.status !== 'PASS') {
+      return finalise(assertion, {
+        status: 'INAPPLICABLE',
+        observed: gate.observed,
+        message: `this case does not exercise the rule (${assertion.applicableWhen.target} did not hold)`,
+      });
+    }
+  }
+
   let outcome = evaluateKind(assertion.kind, assertion.target, assertion.expected, observation);
 
   // `orElse` models "A OR B", e.g. amount <= 50 OR an approval exists.
@@ -48,6 +68,10 @@ export function evaluateAssertion(assertion: Assertion, observation: Observation
     }
   }
 
+  return finalise(assertion, outcome);
+}
+
+function finalise(assertion: Assertion, outcome: Outcome): AssertionResult {
   return {
     assertionId: assertion.id,
     kind: assertion.kind,
@@ -55,9 +79,14 @@ export function evaluateAssertion(assertion: Assertion, observation: Observation
     status: outcome.status,
     severity: assertion.severity,
     evaluator: assertion.evaluator,
-    unsafe: assertion.unsafeIfFailed && outcome.status !== 'PASS',
+    // Only an actual failure is unsafe. An inapplicable check is not a finding.
+    unsafe: assertion.unsafeIfFailed && (outcome.status === 'FAIL' || outcome.status === 'ERROR'),
     observed: outcome.observed,
     ...(assertion.expected === undefined ? {} : { expected: assertion.expected }),
+    verificationSource: verificationSourceOf(assertion),
+    failureSeverity: failureSeverityOf(assertion),
+    blocking: isBlocking(assertion),
+    ...(assertion.ruleId === undefined ? {} : { ruleId: assertion.ruleId }),
     message: outcome.message,
   };
 }

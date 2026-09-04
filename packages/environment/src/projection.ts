@@ -72,6 +72,8 @@ export interface Projection {
     list: EnvEvent[];
     occurred: Record<string, boolean>;
     firstOrdinalOf: Record<string, number>;
+    /** `null` when the later action never happened, so the rule is moot. */
+    orderOk: Record<string, boolean | null>;
   };
   refs: Record<string, boolean>;
 }
@@ -189,16 +191,40 @@ export function buildProjection(
     const first = events.find((event) => event.type === type && event.ok);
     occurred[type] = first !== undefined;
     // -1 means "never happened", which orders before everything that did, so
-    // `a.before(b)` compiles to a plain numeric comparison.
+    // `a before b` stays a plain numeric comparison.
     firstOrdinalOf[type] = first?.ordinal ?? -1;
     scalarPaths.push(`derived.events.occurred.${type}`, `derived.events.firstOrdinalOf.${type}`);
+  }
+
+  // "Approve before you provision", "capture payment before you ship".
+  // Published as a boolean so an ordering rule needs no new assertion kind.
+  const orderOk: Record<string, boolean | null> = {};
+  for (const before of eventTypes) {
+    for (const after of eventTypes) {
+      if (before === after) continue;
+      const key = `${before}__before__${after}`;
+      const a = firstOrdinalOf[before] ?? -1;
+      const b = firstOrdinalOf[after] ?? -1;
+      // Neither happening is not a violation of an ordering rule; it is a case
+      // the rule does not apply to.
+      orderOk[key] = b < 0 ? null : a >= 0 && a < b;
+      scalarPaths.push(`derived.events.orderOk.${key}`);
+    }
   }
 
   const refs = buildReferences(schema, input, createdIds);
   for (const key of Object.keys(refs)) scalarPaths.push(`derived.refs.${key}`);
 
   return {
-    derived: { created, changed, deleted, all, count, events: { list: events, occurred, firstOrdinalOf }, refs },
+    derived: {
+      created,
+      changed,
+      deleted,
+      all,
+      count,
+      events: { list: events, occurred, firstOrdinalOf, orderOk },
+      refs,
+    },
     keys: {
       entities: focus.filter((name) => rowFields[name] !== undefined),
       rowFields,
@@ -221,6 +247,14 @@ function decorateRow(
 ): DecoratedRow {
   const decorated: DecoratedRow = {};
   for (const name of Object.keys(row).sort()) decorated[name] = row[name];
+
+  // The row's own fields as they were when work began. This is what makes
+  // "this status may not go straight from new to closed" answerable without
+  // the verifier knowing what a status is.
+  const seedRow = rowById(input.seed, entity.name, row[entity.idField]);
+  for (const field of hoistableFields(entity)) {
+    decorated[`seed__${field.name}`] = seedRow?.[field.name] ?? null;
+  }
 
   const slots: ReferenceSlot[] = ownReferenceSlots(schema, entity, row);
 
@@ -265,7 +299,75 @@ function decorateRow(
   }
 
   for (const [key, value] of agreementFlags(slots, decorated)) decorated[key] = value;
+  for (const [key, value] of comparisonPairs(schema, entity, decorated)) decorated[key] = value;
   return decorated;
+}
+
+/**
+ * Differences between two numbers measured in the same unit.
+ *
+ * "Return it within the loan period", "ship no more than you hold", "the
+ * invoice must match the purchase order" are all one field compared to
+ * another, and the filter language only compares a field to a constant.
+ * Publishing the difference as its own field turns every one of them into an
+ * ordinary numeric comparison, so neither the path language nor the verifier
+ * needs to learn anything new.
+ *
+ * Only unit-compatible pairs are emitted, which is what stops the generator
+ * proposing that a weight should be less than a currency total.
+ */
+function comparisonPairs(
+  schema: EnvironmentSchema,
+  entity: EntitySchema,
+  row: DecoratedRow,
+): [string, number | null][] {
+  const pairs: [string, number | null][] = [];
+  const slots = quantitySlots(schema, entity).sort((a, b) => a.path.localeCompare(b.path));
+
+  for (let i = 0; i < slots.length; i += 1) {
+    for (let j = i + 1; j < slots.length; j += 1) {
+      const left = slots[i];
+      const right = slots[j];
+      if (!left || !right || left.unit !== right.unit) continue;
+      const a = row[left.path];
+      const b = row[right.path];
+      const value =
+        typeof a === 'number' && typeof b === 'number' ? round6(a - b) : null;
+      pairs.push([`cmp__${left.path}__minus__${right.path}`, value]);
+    }
+  }
+  return pairs;
+}
+
+interface QuantitySlot {
+  path: string;
+  unit: string;
+}
+
+/** Numeric paths on a row: its own, and one hop out. */
+function quantitySlots(schema: EnvironmentSchema, entity: EntitySchema): QuantitySlot[] {
+  const slots: QuantitySlot[] = [];
+  const isQuantity = (field: FieldSchema): boolean =>
+    (field.role === 'quantity' || field.role === 'timestamp') && field.unit !== undefined;
+
+  for (const field of [...entity.fields].sort((a, b) => a.name.localeCompare(b.name))) {
+    if (isQuantity(field) && field.unit) slots.push({ path: field.name, unit: field.unit });
+  }
+  for (const relationship of relationshipsFrom(schema, entity.name)) {
+    if (relationship.via.kind !== 'fk' || relationship.cardinality !== 'one') continue;
+    const target = entityByName(schema, relationship.to);
+    if (!target) continue;
+    for (const field of [...target.fields].sort((a, b) => a.name.localeCompare(b.name))) {
+      if (isQuantity(field) && field.unit) {
+        slots.push({ path: `${relationship.name}__${field.name}`, unit: field.unit });
+      }
+    }
+  }
+  return slots;
+}
+
+function round6(value: number): number {
+  return Math.round(value * 1e6) / 1e6;
 }
 
 /**

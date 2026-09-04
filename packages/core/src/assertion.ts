@@ -42,6 +42,30 @@ export type Evaluator = z.infer<typeof EvaluatorSchema>;
 export const AssertionSeveritySchema = z.enum(['success', 'policy', 'invariant']);
 export type AssertionSeverity = z.infer<typeof AssertionSeveritySchema>;
 
+/**
+ * Where the answer came from, in descending order of confidence.
+ *
+ * `STATE` is the system of record after the agent finished. `EVENT` is a
+ * deterministic action log. `OUTPUT` is a deterministic check on what the
+ * agent produced. `HUMAN` is a person. `MODEL` is a model judge, which is the
+ * weakest and is rendered as such — a report must never mix a model's opinion
+ * in with authoritative state and let a reader assume they carry equal weight.
+ */
+export const VERIFICATION_SOURCES = ['STATE', 'EVENT', 'OUTPUT', 'HUMAN', 'MODEL'] as const;
+export const VerificationSourceSchema = z.enum(VERIFICATION_SOURCES);
+export type VerificationSource = z.infer<typeof VerificationSourceSchema>;
+
+/**
+ * How much a failure matters.
+ *
+ * A release gate can demand zero CRITICAL failures while tolerating a high
+ * overall success rate, because "got the format wrong" and "paid a stranger"
+ * are not the same event.
+ */
+export const FAILURE_SEVERITIES = ['INFO', 'MINOR', 'MAJOR', 'CRITICAL'] as const;
+export const FailureSeveritySchema = z.enum(FAILURE_SEVERITIES);
+export type FailureSeverity = z.infer<typeof FailureSeveritySchema>;
+
 export const AssertionSchema = z.object({
   id: z.string().min(1),
   kind: AssertionKindSchema,
@@ -72,10 +96,59 @@ export const AssertionSchema = z.object({
       expected: z.unknown().optional(),
     })
     .optional(),
+  /**
+   * A precondition for the check being meaningful at all.
+   *
+   * When it does not hold, the result is `INAPPLICABLE` rather than a pass.
+   * This matters most on exactly the cases that matter most: a mutation that
+   * removes a rule's antecedent leaves a check that is neither satisfied nor
+   * violated, and scoring it as a pass silently inflates every coverage number
+   * in the product.
+   */
+  applicableWhen: z
+    .object({
+      kind: AssertionKindSchema,
+      target: z.string().min(1),
+      expected: z.unknown().optional(),
+    })
+    .optional(),
+  /** Defaults to `STATE`: authoritative system state is the normal answer. */
+  verificationSource: VerificationSourceSchema.optional(),
+  failureSeverity: FailureSeveritySchema.optional(),
+  /**
+   * Whether failing this may block a release. Set false for checks generated
+   * from rules a person has not confirmed: those explore, they do not gate.
+   * Absent means blocking.
+   */
+  blocking: z.boolean().optional(),
+  /** The contract rule this was synthesised from, for the evidence chain. */
+  ruleId: z.string().optional(),
 });
 export type Assertion = z.infer<typeof AssertionSchema>;
 
-export const AssertionStatusSchema = z.enum(['PASS', 'FAIL', 'ERROR']);
+export function verificationSourceOf(assertion: Assertion): VerificationSource {
+  if (assertion.verificationSource) return assertion.verificationSource;
+  if (assertion.evaluator === 'model_judged') return 'MODEL';
+  if (assertion.evaluator === 'human_review') return 'HUMAN';
+  if (assertion.kind === 'event_occurred' || assertion.kind === 'event_not_occurred') return 'EVENT';
+  return 'STATE';
+}
+
+export function failureSeverityOf(assertion: Assertion): FailureSeverity {
+  if (assertion.failureSeverity) return assertion.failureSeverity;
+  // An unsafe action is, by definition, the thing that must never happen.
+  return assertion.unsafeIfFailed ? 'CRITICAL' : assertion.severity === 'success' ? 'MAJOR' : 'MAJOR';
+}
+
+export function isBlocking(assertion: Assertion): boolean {
+  return assertion.blocking !== false;
+}
+
+/**
+ * `INAPPLICABLE` is not a pass. It means the case does not exercise this rule
+ * — usually because a mutation removed whatever the rule was about.
+ */
+export const AssertionStatusSchema = z.enum(['PASS', 'FAIL', 'ERROR', 'INAPPLICABLE']);
 export type AssertionStatus = z.infer<typeof AssertionStatusSchema>;
 
 export const AssertionResultSchema = z.object({
@@ -88,6 +161,10 @@ export const AssertionResultSchema = z.object({
   unsafe: z.boolean().default(false),
   observed: z.unknown().optional(),
   expected: z.unknown().optional(),
+  verificationSource: VerificationSourceSchema.default('STATE'),
+  failureSeverity: FailureSeveritySchema.default('MAJOR'),
+  blocking: z.boolean().default(true),
+  ruleId: z.string().optional(),
   /** Short explanation shown verbatim in the evidence view. */
   message: z.string(),
 });

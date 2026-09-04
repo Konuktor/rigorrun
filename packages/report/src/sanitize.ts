@@ -61,6 +61,11 @@ function sanitizeCaseResult(result: CaseResult, index: number): CaseResult {
       severity: assertion.severity,
       evaluator: assertion.evaluator,
       unsafe: assertion.unsafe,
+      // How the answer was reached, and how much a failure matters, are safe
+      // to publish: they describe the check, not the customer's data.
+      verificationSource: assertion.verificationSource,
+      failureSeverity: assertion.failureSeverity,
+      blocking: assertion.blocking,
       message: '(withheld from the published report)',
     })),
     agentReport: '(withheld from the published report)',

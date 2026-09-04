@@ -6,7 +6,7 @@ import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import type {
   Benchmark,
   BenchmarkCase,
-  ContractRule,
+  LegacyContractRule,
   WorkflowContract,
   WorkflowTrace,
 } from '@rigorrun/core';
@@ -192,7 +192,7 @@ export function RecordStep({ trace, onCompile }: { trace: WorkflowTrace; onCompi
 
 interface RuleRow {
   kind: string;
-  rule: ContractRule;
+  rule: LegacyContractRule;
 }
 
 export function ContractStep({
@@ -314,7 +314,7 @@ function InferredRule({
   onDecide,
 }: {
   kind: string;
-  rule: ContractRule;
+  rule: LegacyContractRule;
   contract: WorkflowContract;
   rejected: boolean;
   confirmed: boolean;

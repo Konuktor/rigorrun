@@ -18,8 +18,8 @@
 import {
   CONTRACT_SCHEMA_VERSION,
   type Assertion,
-  type ContractRule,
-  type ObservedFact,
+  type LegacyContractRule,
+  type LegacyObservedFact,
   type TraceEvent,
   type UncertaintyItem,
   type WorkflowContract,
@@ -49,11 +49,11 @@ export interface CompileOptions {
 }
 
 interface Draft {
-  facts: ObservedFact[];
-  preconditions: ContractRule[];
-  requiredActions: ContractRule[];
-  forbiddenActions: ContractRule[];
-  invariants: ContractRule[];
+  facts: LegacyObservedFact[];
+  preconditions: LegacyContractRule[];
+  requiredActions: LegacyContractRule[];
+  forbiddenActions: LegacyContractRule[];
+  invariants: LegacyContractRule[];
   policyAssertions: Assertion[];
   successAssertions: Assertion[];
   uncertainty: UncertaintyItem[];
@@ -373,11 +373,11 @@ function addTemplateRule(
 function rule(
   id: string,
   text: string,
-  source: ContractRule['source'],
+  source: LegacyContractRule['source'],
   confidence: number,
   needsConfirmation: boolean,
   evidence: string[],
-): ContractRule {
+): LegacyContractRule {
   return { id, rule: text, source, confidence, needsConfirmation, evidence };
 }
 
@@ -446,7 +446,7 @@ export function approveContract(
   const confirmed = new Set(decisions.confirmedRuleIds);
   const rejected = new Set(decisions.rejectedRuleIds ?? []);
 
-  const applyTo = (rules: ContractRule[]): ContractRule[] =>
+  const applyTo = (rules: LegacyContractRule[]): LegacyContractRule[] =>
     rules
       .filter((r) => !rejected.has(r.id))
       .map((r) =>

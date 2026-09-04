@@ -5,8 +5,12 @@ export * from './logger.ts';
 export * from './redaction.ts';
 export * from './assertion.ts';
 export * from './trace.ts';
+export * from './canonicalTrace.ts';
+export * from './traceNormalize.ts';
+export * from './predicate.ts';
 export * from './selector.ts';
 export * from './contract.ts';
+export * from './environmentContract.ts';
 export * from './benchmark.ts';
 export * from './run.ts';
 
