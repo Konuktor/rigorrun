@@ -10,7 +10,9 @@
     "./*": "./src/*"
   },
   "dependencies": {
+    "@rigorrun/compiler": "workspace:*",
     "@rigorrun/core": "workspace:*",
-    "@rigorrun/environment": "workspace:*"
+    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/generator": "workspace:*"
   }
 }

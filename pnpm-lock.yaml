@@ -224,18 +224,27 @@ importers:
 
   packages/environments:
     dependencies:
+      '@rigorrun/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
+      '@rigorrun/generator':
+        specifier: workspace:*
+        version: link:../generator
 
   packages/generator:
     dependencies:
       '@rigorrun/agents':
         specifier: workspace:*
         version: link:../agents
+      '@rigorrun/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
@@ -245,6 +254,9 @@ importers:
       '@rigorrun/providers':
         specifier: workspace:*
         version: link:../providers
+      '@rigorrun/verifier':
+        specifier: workspace:*
+        version: link:../verifier
       zod:
         specifier: ^4.1.12
         version: 4.5.4

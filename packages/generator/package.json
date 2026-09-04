@@ -9,10 +9,12 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@rigorrun/agents": "workspace:*",
+    "@rigorrun/compiler": "workspace:*",
     "@rigorrun/core": "workspace:*",
-    "@rigorrun/providers": "workspace:*",
-    "zod": "^4.1.12",
     "@rigorrun/environment": "workspace:*",
-    "@rigorrun/agents": "workspace:*"
+    "@rigorrun/providers": "workspace:*",
+    "@rigorrun/verifier": "workspace:*",
+    "zod": "^4.1.12"
   }
 }
