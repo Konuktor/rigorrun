@@ -75,28 +75,43 @@ export function OrderPage({ orderId }: { orderId: string }) {
           </Field>
           <Field label="Placed">{order.placedAt.slice(0, 10)}</Field>
         </dl>
-        <table className="w-full border-t border-rule text-left">
-          <thead>
-            <tr className="text-[11px] uppercase tracking-wide text-ink-faint">
-              <th className="px-4 py-2 font-medium">Item</th>
-              <th className="px-4 py-2 font-medium">SKU</th>
-              <th className="px-4 py-2 text-right font-medium">Qty</th>
-              <th className="px-4 py-2 text-right font-medium">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items.map((item) => (
-              <tr key={item.sku} className="border-t border-rule/70">
-                <td className="px-4 py-2">{item.title}</td>
-                <td className="px-4 py-2">
-                  <Mono>{item.sku}</Mono>
-                </td>
-                <td className="px-4 py-2 text-right tabular-nums">{item.quantity}</td>
-                <td className="px-4 py-2 text-right tabular-nums">{money(item.unitPrice)}</td>
+        <div
+          className="overflow-x-auto border-t border-rule"
+          tabIndex={0}
+          role="region"
+          aria-label="Order line items, scrollable"
+        >
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-[11px] uppercase tracking-wide text-ink-faint">
+                <th scope="col" className="px-4 py-2 font-medium">
+                  Item
+                </th>
+                <th scope="col" className="hidden px-4 py-2 font-medium sm:table-cell">
+                  SKU
+                </th>
+                <th scope="col" className="px-4 py-2 text-right font-medium">
+                  Qty
+                </th>
+                <th scope="col" className="px-4 py-2 text-right font-medium">
+                  Price
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {order.items.map((item) => (
+                <tr key={item.sku} className="border-t border-rule/70">
+                  <td className="px-4 py-2">{item.title}</td>
+                  <td className="hidden px-4 py-2 sm:table-cell">
+                    <Mono>{item.sku}</Mono>
+                  </td>
+                  <td className="px-4 py-2 text-right tabular-nums">{item.quantity}</td>
+                  <td className="px-4 py-2 text-right tabular-nums">{money(item.unitPrice)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       <Card

@@ -1,144 +1,221 @@
-import { STEPS, useDemo, type Step } from './useDemo.ts';
-import { CompileStep, GenerateStep, RecordStep, RunStep } from './steps.tsx';
+/**
+ * The demo shell: step progress, the current step's screen, and the CLI
+ * equivalent of whatever the user is looking at.
+ */
+import { STEPS, STEP_META, reachedSteps, useDemo, type Step } from './useDemo.ts';
+import { BenchmarkStep, ContractStep, RecordStep, RunStep, StepHeader } from './steps.tsx';
 import { VerdictStep } from './verdict.tsx';
-import { Button, Panel, Tag } from '../components/primitives.tsx';
-
-const STEP_LABELS: Record<Step, string> = {
-  record: 'Record',
-  compile: 'Compile',
-  generate: 'Stress-test',
-  run: 'Verify',
-  verdict: 'Gate',
-};
-
-const CLI_EQUIVALENT: Record<Step, string> = {
-  record: 'rigorrun record',
-  compile: 'rigorrun compile trace.json -o contract.json',
-  generate: 'rigorrun generate contract.json -o benchmark.json',
-  run: 'rigorrun compare benchmark.json --agent demo-weak --agent demo-robust',
-  verdict: 'rigorrun gate benchmark.json --agent demo-robust --min-success 0.95',
-};
+import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 
 export function DemoPage() {
-  const { state, goto, compile, toggleRule, approveAndGenerate, run, reset } = useDemo();
+  const { state, setStep, compile, toggleRule, approveAndGenerate, run, reset } = useDemo();
   const reached = reachedSteps(state);
+  const currentIndex = STEPS.indexOf(state.step);
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[190px_minmax(0,1fr)]">
-      {/* min-w-0 lets the horizontal step list scroll on narrow screens
-          instead of widening its grid track. */}
-      <nav className="min-w-0 lg:sticky lg:top-20 lg:self-start">
-        <ol className="flex gap-2 overflow-x-auto lg:block lg:space-y-1">
-          {STEPS.map((step, index) => {
-            const active = state.step === step;
-            const available = reached.has(step);
-            return (
-              <li key={step}>
-                <button
-                  type="button"
-                  disabled={!available}
-                  onClick={() => goto(step)}
-                  data-testid={`nav-${step}`}
-                  className={`flex w-full items-center gap-2.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-left text-[13px] transition-colors ${
-                    active
-                      ? 'bg-panel-2 font-medium text-fg ring-1 ring-line'
-                      : available
-                        ? 'text-muted hover:text-fg'
-                        : 'cursor-not-allowed text-dim/60'
-                  }`}
-                >
-                  <span className="font-mono text-[11px] text-dim">{index + 1}</span>
-                  {STEP_LABELS[step]}
-                </button>
-              </li>
-            );
-          })}
-        </ol>
+    <div className="mx-auto w-full max-w-6xl px-5 py-6">
+      <StepProgress
+        current={state.step}
+        reached={reached}
+        onSelect={setStep}
+        disabled={state.running}
+      />
 
-        <div className="mt-4 hidden rounded-lg border border-line bg-panel p-3 lg:block">
-          <div className="text-[10.5px] uppercase tracking-[0.07em] text-dim">
-            Same thing, in CI
-          </div>
-          <code className="mt-1 block break-words font-mono text-[10.5px] leading-relaxed text-muted">
-            {CLI_EQUIVALENT[state.step]}
-          </code>
-        </div>
-
-        <div className="mt-3 hidden lg:block">
-          <Button variant="ghost" size="sm" onClick={reset} testId="reset-demo">
-            Start over
-          </Button>
-        </div>
-      </nav>
-
-      <div className="min-w-0">
-        {state.error ? (
-          <div className="mb-4 rounded-lg border border-fail/40 bg-fail/[0.06] px-4 py-3 text-[13px] text-fail">
-            {state.error}
-          </div>
-        ) : null}
-
-        {state.step === 'record' ? <RecordStep trace={state.trace} onCompile={compile} /> : null}
-
-        {state.step === 'compile' && state.draftContract ? (
-          <CompileStep
-            contract={state.draftContract}
-            rejected={state.rejected}
-            onToggle={toggleRule}
-            onApprove={() => void approveAndGenerate()}
-          />
-        ) : null}
-
-        {state.step === 'generate' && state.benchmark ? (
-          <GenerateStep benchmark={state.benchmark} onRun={() => void run()} />
-        ) : null}
-
-        {state.step === 'run' ? (
-          <RunStep
-            results={state.liveResults}
-            total={(state.benchmark?.cases.length ?? 0) * 2}
-            active={state.activeCase}
-            running={state.running}
-          />
-        ) : null}
-
-        {state.step === 'verdict' && state.result ? (
-          <VerdictStep
-            result={state.result}
-            contract={state.contract}
-            benchmark={state.benchmark}
-          />
-        ) : null}
-
-        {state.step === 'verdict' && !state.result ? (
-          <Panel title="Nothing has been run yet">
-            <div className="px-4 py-5">
-              <p className="text-[13px] text-muted">Run the benchmark to see a verdict.</p>
-              <div className="mt-3">
-                <Button onClick={() => goto('record')}>Back to the recording</Button>
-              </div>
+      <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_13rem]">
+        <div className="min-w-0">
+          {state.error ? (
+            <div
+              role="alert"
+              className="mb-4 flex flex-wrap items-center gap-3 rounded-panel border border-fail-line bg-fail-bg px-4 py-3"
+            >
+              <span className="min-w-[14rem] flex-1 text-secondary text-fail">{state.error}</span>
+              <Button size="sm" variant="secondary" onClick={reset} testId="error-reset">
+                Start over
+              </Button>
             </div>
-          </Panel>
-        ) : null}
+          ) : null}
 
-        <footer className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-[11.5px] text-dim">
-          <Tag>offline</Tag>
-          <span>
-            Executed in this browser with no backend, no API key and no network calls. The same
-            packages power the CLI and CI.
-          </span>
-        </footer>
+          {state.hydrating ? <Hydrating step={state.step} /> : <StepScreen />}
+        </div>
+
+        <aside className="lg:sticky lg:top-20 lg:self-start">
+          <div className="rounded-panel border border-line bg-surface p-3">
+            <div className="text-micro font-medium uppercase text-muted">The same thing, in CI</div>
+            <code className="mt-1.5 block break-words font-mono text-[11px] leading-relaxed text-secondary">
+              {STEP_META[state.step].cli}
+            </code>
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={reset}
+              testId="reset-demo"
+              disabled={state.running}
+            >
+              Start over
+            </Button>
+          </div>
+        </aside>
+      </div>
+
+      <footer className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-meta text-muted">
+        <Tag>Offline</Tag>
+        <span className="min-w-[16rem] flex-1">
+          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend, no
+          API key and no network calls — the same packages power the CLI and CI.
+        </span>
+      </footer>
+    </div>
+  );
+
+  function StepScreen() {
+    if (state.step === 'record') {
+      return <RecordStep trace={state.trace} onCompile={compile} />;
+    }
+
+    if (state.step === 'contract') {
+      if (!state.draftContract) return <Hydrating step="contract" />;
+      return (
+        <ContractStep
+          contract={state.draftContract}
+          rejected={state.rejected}
+          confirmed={state.confirmed}
+          onDecide={toggleRule}
+          onApprove={() => void approveAndGenerate()}
+        />
+      );
+    }
+
+    if (state.step === 'benchmark') {
+      if (!state.benchmark) return <Hydrating step="benchmark" />;
+      return (
+        <BenchmarkStep
+          benchmark={state.benchmark}
+          onRun={() => void run()}
+          running={state.running}
+        />
+      );
+    }
+
+    if (state.step === 'run') {
+      return <RunStep state={state} total={(state.benchmark?.cases.length ?? 0) * 2} />;
+    }
+
+    if (state.result) {
+      return (
+        <VerdictStep result={state.result} contract={state.contract} benchmark={state.benchmark} />
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <StepHeader
+          title="Nothing has been run yet"
+          lede="Run the benchmark to see a verdict. Every number on that screen comes from executions that happen when you press the button."
+        />
+        <Panel>
+          <div className="px-4 py-5">
+            <Button onClick={() => setStep('record')} testId="verdict-restart">
+              Back to the recording
+            </Button>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
+}
+
+function Hydrating({ step }: { step: Step }) {
+  return (
+    <div className="space-y-4" aria-live="polite">
+      <div className="flex items-center gap-2 text-secondary text-muted">
+        <Spinner />
+        Rebuilding the {STEP_META[step].label.toLowerCase()} from the recorded trace…
+      </div>
+      <div className="space-y-3" aria-hidden="true">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-20 animate-pulse rounded-panel border border-line bg-surface" />
+        ))}
       </div>
     </div>
   );
 }
 
-/** Steps a user may jump back to, based on what has actually been produced. */
-function reachedSteps(state: ReturnType<typeof useDemo>['state']): Set<Step> {
-  const reached = new Set<Step>(['record']);
-  if (state.draftContract) reached.add('compile');
-  if (state.benchmark) reached.add('generate');
-  if (state.liveResults.length > 0 || state.running) reached.add('run');
-  if (state.result) reached.add('verdict');
-  return reached;
+/**
+ * Progress, not a wizard: completed steps are marked, the current one is
+ * emphasised, and upcoming ones stay legible rather than being greyed into
+ * invisibility.
+ */
+function StepProgress({
+  current,
+  reached,
+  onSelect,
+  disabled,
+}: {
+  current: Step;
+  reached: Set<Step>;
+  onSelect: (step: Step) => void;
+  disabled: boolean;
+}) {
+  const currentIndex = STEPS.indexOf(current);
+
+  return (
+    <nav aria-label="Demo progress">
+      {/* Phones get the step name and position; the list below stays usable. */}
+      <div className="mb-2 flex items-center justify-between gap-3 sm:hidden">
+        <span className="text-section font-semibold">{STEP_META[current].label}</span>
+        <span className="text-meta text-muted">
+          Step {currentIndex + 1} of {STEPS.length}
+        </span>
+      </div>
+
+      <ol className="flex items-stretch gap-1 overflow-x-auto pb-1">
+        {STEPS.map((step, index) => {
+          const isCurrent = step === current;
+          const isDone = index < currentIndex && reached.has(step);
+          const available = reached.has(step);
+
+          return (
+            <li key={step} className="min-w-0 shrink-0 sm:flex-1">
+              <button
+                type="button"
+                disabled={!available || disabled}
+                onClick={() => onSelect(step)}
+                data-testid={`nav-${step}`}
+                aria-current={isCurrent ? 'step' : undefined}
+                className={`flex h-10 w-full items-center gap-2 rounded-control px-2.5 text-left text-meta transition-colors ${
+                  isCurrent
+                    ? 'bg-raised font-semibold text-fg ring-1 ring-line-strong'
+                    : available
+                      ? 'text-secondary hover:bg-raised hover:text-fg'
+                      : 'cursor-not-allowed text-disabled'
+                }`}
+              >
+                <span
+                  aria-hidden="true"
+                  className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] font-semibold ${
+                    isDone
+                      ? 'bg-pass-bg text-pass'
+                      : isCurrent
+                        ? 'bg-fg text-canvas'
+                        : 'border border-line text-muted'
+                  }`}
+                >
+                  {isDone ? '✓' : index + 1}
+                </span>
+                <span className="truncate">{STEP_META[step].label}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      <div className="mt-1 h-px w-full bg-line">
+        <div
+          className="h-px bg-info transition-[width] duration-300"
+          style={{ width: `${((currentIndex + 1) / STEPS.length) * 100}%` }}
+        />
+      </div>
+    </nav>
+  );
 }

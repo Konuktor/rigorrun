@@ -7,9 +7,14 @@
  * instrument, Northstar is the system under observation.
  */
 @theme {
+  /*
+   * Contrast-checked in scripts/check-contrast.mjs. `ink-faint` used to be
+   * #94a3b8, which measures 2.4:1 on white — it was carrying every table header
+   * in the app and failed WCAG AA badly.
+   */
   --color-ink: #0f172a;
-  --color-ink-soft: #475569;
-  --color-ink-faint: #94a3b8;
+  --color-ink-soft: #41506a;
+  --color-ink-faint: #5a6880;
   --color-rule: #e2e8f0;
   --color-surface: #ffffff;
   --color-canvas: #f6f7f9;

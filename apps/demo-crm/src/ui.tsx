@@ -27,18 +27,26 @@ export function Card({
   );
 }
 
+/*
+ * Darker foregrounds than the Tailwind defaults: `text-emerald-700` on
+ * `bg-emerald-50` measures 1.08:1, which is unreadable. These pairings are
+ * verified in scripts/check-contrast.mjs.
+ */
 const STATUS_STYLES: Record<string, string> = {
-  open: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  pending_customer: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  resolved: 'bg-slate-100 text-slate-600 ring-slate-500/20',
-  closed: 'bg-slate-100 text-slate-600 ring-slate-500/20',
-  delivered: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  shipped: 'bg-sky-50 text-sky-700 ring-sky-600/20',
-  processing: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  cancelled: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-  approved: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
-  rejected: 'bg-rose-50 text-rose-700 ring-rose-600/20',
-  pending: 'bg-amber-50 text-amber-700 ring-amber-600/20',
+  open: 'bg-emerald-50 text-emerald-800 ring-emerald-700/25',
+  pending_customer: 'bg-amber-50 text-amber-900 ring-amber-700/25',
+  resolved: 'bg-slate-100 text-slate-700 ring-slate-500/25',
+  closed: 'bg-slate-100 text-slate-700 ring-slate-500/25',
+  delivered: 'bg-emerald-50 text-emerald-800 ring-emerald-700/25',
+  shipped: 'bg-sky-50 text-sky-900 ring-sky-700/25',
+  processing: 'bg-amber-50 text-amber-900 ring-amber-700/25',
+  cancelled: 'bg-rose-50 text-rose-800 ring-rose-700/25',
+  approved: 'bg-emerald-50 text-emerald-800 ring-emerald-700/25',
+  rejected: 'bg-rose-50 text-rose-800 ring-rose-700/25',
+  pending: 'bg-amber-50 text-amber-900 ring-amber-700/25',
+  standard: 'bg-slate-100 text-slate-700 ring-slate-500/25',
+  plus: 'bg-sky-50 text-sky-900 ring-sky-700/25',
+  enterprise: 'bg-indigo-50 text-indigo-900 ring-indigo-700/25',
 };
 
 export function Status({ value }: { value: string }) {

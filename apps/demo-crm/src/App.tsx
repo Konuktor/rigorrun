@@ -23,12 +23,18 @@ export function App() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <div className="bg-amber-100 px-4 py-1.5 text-center text-[12px] text-amber-900">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-3 focus:py-2 focus:text-white"
+      >
+        Skip to content
+      </a>
+      <div className="bg-amber-100 px-4 py-1.5 text-center text-[12px] font-medium text-amber-900">
         Demo environment — every customer, order and refund below is synthetic.
       </div>
 
       <header className="border-b border-rule bg-surface">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-6 px-4 py-2.5">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-2.5">
           <Link to="/" className="flex items-center gap-2" testId="nav-home">
             <span className="grid h-6 w-6 place-items-center rounded-md bg-brand text-[12px] font-bold text-white">
               N
@@ -36,7 +42,7 @@ export function App() {
             <span className="text-[14px] font-semibold tracking-tight">Northstar Support</span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex flex-wrap items-center gap-1" aria-label="Primary">
             {NAV.map((item) => {
               const active = item.to === '/' ? path === '/' : path.startsWith(item.to);
               return (
@@ -67,7 +73,7 @@ export function App() {
         </div>
       </header>
 
-      <main className="flex-1 px-4 py-6">
+      <main id="main" className="flex-1 px-4 py-6">
         <Route path={path} />
       </main>
 

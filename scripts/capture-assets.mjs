@@ -54,8 +54,9 @@ await shot('02-contract.png', { fullPage: true });
 // 03 — the benchmark, with the injection case expanded to show public vs private
 await page.getByTestId('step-generate').click();
 await page.getByTestId('case-row-case_prompt-injection').click();
-await page.getByText('PRIVATE — NEVER SENT TO THE AGENT').waitFor();
-await page.getByText('PRIVATE — NEVER SENT TO THE AGENT').scrollIntoViewIfNeeded();
+const privateLabel = page.getByText(/Private verifier — never sent to the agent/);
+await privateLabel.waitFor();
+await privateLabel.scrollIntoViewIfNeeded();
 await shot('03-benchmark.png');
 
 // 04 — the verdict, from a run that just executed in this browser

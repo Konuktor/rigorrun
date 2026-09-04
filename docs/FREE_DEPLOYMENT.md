@@ -134,6 +134,22 @@ See [COST_GUARDRAILS.md](COST_GUARDRAILS.md) for the full table.
 requires you to own the domain; nothing in this repository assumes one, and
 none is purchased or configured.
 
+## Running the production API tests
+
+Workspace creation is rate limited to 10/hour per address, deliberately. A CI
+job that runs more often than that should reuse credentials rather than mint new
+ones:
+
+```bash
+QA_WORKSPACE_ID=ws_… QA_WORKSPACE_TOKEN=… \
+QA_WORKSPACE_ID_2=ws_… QA_WORKSPACE_TOKEN_2=… \
+  pnpm api:prod
+```
+
+Without them the suite creates two workspaces, and if the quota is exhausted it
+skips the credentialed tests with that reason rather than reporting a product
+failure.
+
 ## Troubleshooting
 
 | Symptom                                 | Cause                    | Fix                                                  |
