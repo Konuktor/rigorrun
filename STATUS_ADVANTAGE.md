@@ -49,3 +49,28 @@ acceptance suite for every AI agent — on *any* workflow, not one.
 | 16 | Raw trace stays local by default                   | ✅ `rigorrun privacy inspect` |
 | 17 | Existing RigorRun demo still works                 | ✅ refund is one of the five |
 | 18 | All release gates remain green                     | ✅ |
+
+## Round two — the three decisions
+
+| Decision | What was built |
+| --- | --- |
+| Deploy publicly, keep a rollback point | `rollback/pre-generalization` and `green/generalization-v1` tags; local gates before, production gates after |
+| Six-step journey as the primary path | Six screens, not five: reviewing what RigorRun learned and ruling on it are separate acts |
+| Schema-driven demo apps, themed per workflow | `apps/demo-ops` — one renderer, five products, no branch on which |
+
+### The renderer
+
+Everything that differs between the finance console, the CRM, the access
+register, the warehouse and the support desk is a declaration on the
+environment adapter:
+
+entity and navigation labels · which view suits a collection · which columns
+matter and how they align · what the sections on a record are · what each
+lifecycle value means · which actions belong on a page and what to call them ·
+layout · density · accent
+
+Two tests hold the claim. One scans every file in the renderer for an
+environment id, a workflow key, or a comparison against either. `pnpm domain`
+covers the renderer alongside the compiler. A third set checks the
+declarations themselves resolve — a column naming a field that does not exist
+renders a blank where a number should be, and nothing would otherwise complain.
