@@ -3,15 +3,22 @@
 Live implementation checklist, updated against executed commands rather than
 intent.
 
-**Gates (all green):** `pnpm lint` · `pnpm typecheck` · `pnpm test` ·
-`pnpm build` · `pnpm e2e`
+**One command:** `pnpm release:verify` (add `--prod` after deploying).
 
-```
-380 unit and integration tests   (17 files)
- 15 end-to-end tests             (local, incl. the real recorder extension)
- 27 public QA tests              (against the deployed URL, 3 viewports)
-lint clean · typecheck clean · all builds succeed
-```
+| Layer                         | Command           | Result                                         |
+| ----------------------------- | ----------------- | ---------------------------------------------- |
+| Design tokens                 | `pnpm contrast`   | 45/45 pairs meet WCAG contrast                 |
+| Lint                          | `pnpm lint`       | clean                                          |
+| Types                         | `pnpm typecheck`  | clean                                          |
+| Unit + integration            | `pnpm test`       | 380 passing                                    |
+| Build                         | `pnpm build`      | all apps, CLI and extension                    |
+| Local E2E                     | `pnpm e2e`        | 16 passing (incl. the real recorder extension) |
+| Accessibility                 | `pnpm a11y`       | 16 passing, zero WCAG A/AA violations          |
+| Visual regression             | `pnpm visual`     | 14 baselines, desktop and mobile               |
+| Cross-browser                 | `pnpm cross`      | 6 passing on Chromium and Firefox              |
+| Production smoke              | `pnpm smoke:prod` | 5 passing                                      |
+| Production API + system state | `pnpm api:prod`   | 10 tests                                       |
+| Production journeys           | `pnpm e2e:prod`   | 87 passing at 1440 / 820 / 390                 |
 
 ## Phase 0 — foundation ✅
 
@@ -110,6 +117,21 @@ lint clean · typecheck clean · all builds succeed
 - [x] Landing copy pass; `docs/ALTALAB_SUBMISSION.md`;
       `docs/ALTALAB_DEMO_60S.md`; screenshots in `docs/submission-assets/`
       captured from the live site
+
+## Phase 11 — product quality pass ✅
+
+- [x] Audit of the deployed product across nine viewports → `docs/UX_AUDIT.md`
+      (31 findings with severity, and how each was resolved)
+- [x] Semantic design tokens derived from measured contrast, enforced by
+      `scripts/check-contrast.mjs` in the release gate → `docs/DESIGN_SYSTEM.md`
+- [x] Seven-step type scale replacing 15–18 ad-hoc combinations per screen
+- [x] Accessible `Dialog`: role, accessible name, focus trap, focus return,
+      scroll lock, Escape
+- [x] Contract, verdict and evidence screens rebuilt around what they are for
+- [x] Zero horizontal overflow at 360 / 390 / 430 / 768 / 820 / 1024 / 1280 /
+      1440 / 1920
+- [x] Four explicit test layers plus `pnpm release:verify` as the gate
+- [x] Manual exploratory QA across five personas against production
 
 ## Known gaps
 

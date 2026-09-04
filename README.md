@@ -349,9 +349,25 @@ docs/                       product, architecture, security, privacy, cost
 ## Development
 
 ```bash
-pnpm verify   # lint + typecheck + test + build
-pnpm e2e      # Playwright, including the real recorder extension
+pnpm release:verify          # every local gate, in fail-fast order
+pnpm deploy:all
+pnpm release:verify --prod   # the above, plus production smoke and acceptance
 ```
+
+| Gate                            | Command           |
+| ------------------------------- | ----------------- |
+| Design token contrast           | `pnpm contrast`   |
+| Lint, types, unit, build        | `pnpm verify`     |
+| Local end-to-end                | `pnpm e2e`        |
+| Accessibility (WCAG A/AA)       | `pnpm a11y`       |
+| Visual regression               | `pnpm visual`     |
+| Cross-browser critical path     | `pnpm cross`      |
+| Production smoke                | `pnpm smoke:prod` |
+| Production API and system state | `pnpm api:prod`   |
+| Production journeys             | `pnpm e2e:prod`   |
+
+See [TESTING.md](docs/TESTING.md) for what each layer is for, and
+[DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) for the tokens.
 
 ---
 
