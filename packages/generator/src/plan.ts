@@ -20,6 +20,7 @@ import {
   rowById,
   type ActionDefinition,
   type CanonicalState,
+  type EntityRow,
   type EnvironmentAdapter,
 } from '@rigorrun/environment';
 
@@ -81,7 +82,8 @@ export async function runPlan(
     }
 
     const before = await adapter.getState();
-    const args = bindArgs(definition, contract, request, createdSoFar, idMap, before);
+    const subject = subjectRow(adapter, contract, request, before);
+    const args = bindArgs(definition, contract, request, createdSoFar, idMap, before, subject);
     if (!args) {
       return {
         ok: false,
@@ -141,6 +143,7 @@ function bindArgs(
   created: Record<string, string[]>,
   idMap: Map<string, string>,
   state: CanonicalState,
+  subject: EntityRow | undefined,
 ): Record<string, unknown> | null {
   const demonstrated = contract.demonstratedArgs[definition.name] ?? {};
   const args: Record<string, unknown> = {};
@@ -163,6 +166,17 @@ function bindArgs(
         args[param.name] = fresh;
         continue;
       }
+    } else {
+      // A parameter named after a field of the record being worked on takes
+      // that record's value. Without this, asking a manager to approve "the
+      // amount" would ask about the amount from the recording rather than the
+      // one in front of us, and every mutated case would fail for the wrong
+      // reason.
+      const onSubject = subject?.[param.name];
+      if (onSubject !== undefined && onSubject !== null) {
+        args[param.name] = onSubject;
+        continue;
+      }
     }
 
     const fallback = demonstrated[param.name];
@@ -181,6 +195,21 @@ function bindArgs(
   }
 
   return args;
+}
+
+/** The record the work is about, as it stands right now. */
+function subjectRow(
+  adapter: EnvironmentAdapter,
+  contract: EnvironmentContract,
+  request: Record<string, unknown>,
+  state: CanonicalState,
+): EntityRow | undefined {
+  const primary = adapter.getActions().find((action) => action.name === contract.primaryAction);
+  const param = primary?.params.find((candidate) => candidate.entityRef === contract.focusEntity);
+  if (!param) return undefined;
+  const value = request[param.name];
+  if (value === undefined || value === null) return undefined;
+  return rowById(state, contract.focusEntity, value);
 }
 
 /** Rewrites identifiers inside a demonstrated value. */

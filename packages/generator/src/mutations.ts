@@ -74,9 +74,16 @@ export function generateMutations(
   };
 
   const context: Context = { adapter, schema, contract, fixture, primary, rules };
+  const boundaryCases = boundaries(context);
+  // How the approver answers only matters on work that needs an approver. If
+  // the demonstrated amount was under the limit, the environment's other
+  // answers are asked of the world just above it instead, where they change
+  // the outcome.
+  const demanding = boundaryCases.find((mutation) => mutation.primitive === 'boundary_plus_one');
+
   const mutations = [
     base,
-    ...boundaries(context),
+    ...boundaryCases,
     ...fieldRelationBreaks(context),
     ...missingPrecondition(context),
     ...brokenAgreement(context),
@@ -85,7 +92,7 @@ export function generateMutations(
     ...invalidIdentifiers(context),
     ...malformedInputs(context),
     ...injections(context),
-    ...environmentResponses(context),
+    ...environmentResponses(context, demanding ?? base),
   ];
 
   // Deduplicate by id, keeping the first, and order deterministically.
@@ -126,8 +133,7 @@ function boundaries(context: Context): Mutation[] {
 
     const entity = entityByName(context.schema, rule.predicate.entity);
     const field = entity ? fieldByName(entity, condition.field) : undefined;
-    const param = paramNamed(context.primary, condition.field);
-    if (!field || !param || field.precision === undefined) continue;
+    if (!field || field.precision === undefined) continue;
 
     const limit = condition.value;
     const step = field.precision;
@@ -136,15 +142,17 @@ function boundaries(context: Context): Mutation[] {
       ['equal', limit],
       ['plus_one', round(limit + step)],
     ] as const) {
+      const applied = withFieldValue(context, condition.field, value);
+      if (!applied) continue;
       out.push({
         primitive: `boundary_${suffix}`,
         id: `boundary__${condition.field}__${value}`,
         label: `${condition.field} of ${value}, against a limit of ${limit}`,
         category: 'boundary',
         targetRuleIds: [rule.id],
-        state: context.fixture.state,
+        state: applied.state,
         config: context.fixture.config,
-        request: { ...context.fixture.request, [param.name]: value },
+        request: applied.request,
       });
     }
   }
@@ -161,15 +169,20 @@ function fieldRelationBreaks(context: Context): Mutation[] {
     const [left, right] = condition.field.slice('cmp__'.length).split('__minus__');
     if (!left || !right) continue;
 
-    const param = paramNamed(context.primary, left);
     const entity = entityByName(context.schema, rule.predicate.entity);
     const field = entity ? fieldByName(entity, left) : undefined;
-    if (!param || !field || field.precision === undefined) continue;
+    if (!field || field.precision === undefined) continue;
 
     const other = resolveRelatedNumber(context, right);
     if (other === null) continue;
     const bound = typeof condition.value === 'number' ? condition.value : 0;
     const value = round(other + bound + field.precision);
+
+    const param = paramNamed(context.primary, left);
+    const applied = param
+      ? { state: context.fixture.state, request: { ...context.fixture.request, [param.name]: value } }
+      : setFocusField(context, left, value);
+    if (!applied) continue;
 
     out.push({
       primitive: 'exceed_related_quantity',
@@ -177,9 +190,9 @@ function fieldRelationBreaks(context: Context): Mutation[] {
       label: `${left} pushed past ${right}`,
       category: 'policy_violation',
       targetRuleIds: [rule.id],
-      state: context.fixture.state,
+      state: applied.state,
       config: context.fixture.config,
-      request: { ...context.fixture.request, [param.name]: value },
+      request: applied.request,
     });
   }
   return out;
@@ -281,20 +294,29 @@ function brokenAgreement(context: Context): Mutation[] {
     const [left] = condition.field.slice('agrees__'.length).split('__vs__');
     if (!left) continue;
     const param = paramNamed(context.primary, left);
-    if (!param) continue;
 
     if (condition.value === true) {
-      const alternative = anotherRowId(context, param, String(context.fixture.request[param.name]));
+      const current = param
+        ? String(context.fixture.request[param.name])
+        : String(focusSeedRow(context)?.[left] ?? '');
+      const alternative = anotherRowId(context, left, param, current);
       if (alternative === null) continue;
+      const applied = param
+        ? {
+            state: context.fixture.state,
+            request: { ...context.fixture.request, [param.name]: alternative },
+          }
+        : setFocusField(context, left, alternative);
+      if (!applied) continue;
       out.push({
         primitive: 'replace_foreign_entity',
         id: `wrong_owner__${left}`,
-        label: `the request names a different ${param.entityRef ?? left}`,
+        label: `the record names a different ${param?.entityRef ?? left}`,
         category: 'policy_violation',
         targetRuleIds: [rule.id],
-        state: context.fixture.state,
+        state: applied.state,
         config: context.fixture.config,
-        request: { ...context.fixture.request, [param.name]: alternative },
+        request: applied.request,
       });
       continue;
     }
@@ -303,15 +325,19 @@ function brokenAgreement(context: Context): Mutation[] {
     const [, right] = condition.field.slice('agrees__'.length).split('__vs__');
     const other = right ? resolveRelatedString(context, right) : null;
     if (other === null) continue;
+    const applied = param
+      ? { state: context.fixture.state, request: { ...context.fixture.request, [param.name]: other } }
+      : setFocusField(context, left, other);
+    if (!applied) continue;
     out.push({
       primitive: 'set_same_actor',
       id: `same_actor__${left}`,
       label: `one person on both sides of ${left}`,
       category: 'policy_violation',
       targetRuleIds: [rule.id],
-      state: context.fixture.state,
+      state: applied.state,
       config: context.fixture.config,
-      request: { ...context.fixture.request, [param.name]: other },
+      request: applied.request,
     });
   }
   return out;
@@ -347,18 +373,39 @@ function duplicates(context: Context): Mutation[] {
 
   for (const rule of context.rules) {
     if (rule.template !== 'uniqueness' || rule.predicate.kind !== 'count_constraint') continue;
-    const field = rule.predicate.groupBy[0];
-    if (!field) continue;
-    const value = context.fixture.request[field];
-    if (value === undefined) continue;
+    const keys = rule.predicate.groupBy;
+    if (keys.length === 0) continue;
+
+    // Values for the fields that must be unique come from the request, or
+    // from the record the request points at when the job changes one rather
+    // than creating one.
+    const subject = focusRequestRow(context);
+    const values: Record<string, unknown> = {};
+    let resolved = true;
+    for (const key of keys) {
+      const value = context.fixture.request[key] ?? subject?.[key] ?? template[key];
+      if (value === undefined) resolved = false;
+      values[key] = value;
+    }
+    if (!resolved) continue;
 
     const state = cloneState(context.fixture.state);
-    const existing: EntityRow = { ...template, [entity.idField]: `${focus}-EXISTING`, [field]: value };
+    const existing: EntityRow = {
+      ...template,
+      ...values,
+      [entity.idField]: `${focus}-EXISTING`,
+    };
+    // Put the pre-existing record in whatever state the rule is filtered on,
+    // or the duplicate would not count.
+    for (const condition of rule.predicate.where) {
+      if (condition.op === 'eq') existing[condition.field] = condition.value;
+    }
+    const field = keys.join('_');
     // Clear links to records this world does not have, so the row is coherent.
     for (const relationship of relationshipsFrom(context.schema, focus)) {
       if (relationship.via.kind !== 'fk' || relationship.cardinality !== 'one') continue;
       const key = relationship.via.field;
-      if (key === field) continue;
+      if (keys.includes(key)) continue;
       const target = existing[key];
       if (target !== undefined && state.entities[relationship.to]?.[String(target)] === undefined) {
         existing[key] = null;
@@ -369,7 +416,7 @@ function duplicates(context: Context): Mutation[] {
     out.push({
       primitive: 'duplicate_entity',
       id: `duplicate__${field}`,
-      label: `the work has already been done for this ${field}`,
+      label: `the work has already been done for this ${keys.join(' and ')}`,
       category: 'duplicate_action',
       targetRuleIds: [rule.id],
       state,
@@ -550,7 +597,7 @@ function injections(context: Context): Mutation[] {
 }
 
 /** Every non-default answer the environment says it can give. */
-function environmentResponses(context: Context): Mutation[] {
+function environmentResponses(context: Context, base: Mutation): Mutation[] {
   const out: Mutation[] = [];
   for (const variable of context.adapter.describeCaseConfig()) {
     for (const value of variable.values) {
@@ -561,9 +608,9 @@ function environmentResponses(context: Context): Mutation[] {
         label: `${variable.description} — "${value}"`,
         category: categoryForResponse(value),
         targetRuleIds: [],
-        state: context.fixture.state,
-        config: { ...context.fixture.config, [variable.name]: value },
-        request: context.fixture.request,
+        state: base.state,
+        config: { ...base.config, [variable.name]: value },
+        request: base.request,
       });
     }
   }
@@ -579,14 +626,97 @@ function categoryForResponse(value: string): CaseCategory {
 // -------------------------------------------------------------------- helpers
 
 function focusEntityName(context: Context): string {
-  return context.contract.projectionFocus[0] ?? context.primary.mutates[0] ?? '';
+  return context.contract.focusEntity;
 }
 
+/** The record the work is about, as it stands before the work is done. */
 function focusSeedRow(context: Context): EntityRow | undefined {
-  return rowsOf(context.fixture.state, focusEntityName(context))[0];
+  return focusRequestRow(context) ?? rowsOf(context.fixture.state, focusEntityName(context))[0];
+}
+
+/**
+ * Sets a field either on the request or, when the job changes an existing
+ * record rather than creating one, on that record in the starting world.
+ *
+ * Without this, work that *approves* something rather than *creating*
+ * something gets no boundary cases at all: the amount is on the record, not in
+ * the request, so there is no parameter to vary.
+ */
+function withFieldValue(
+  context: Context,
+  field: string,
+  value: unknown,
+): { state: CanonicalState; request: Record<string, unknown> } | null {
+  const param = paramNamed(context.primary, field);
+  if (param) {
+    return {
+      state: context.fixture.state,
+      request: { ...context.fixture.request, [param.name]: value },
+    };
+  }
+
+  const focus = focusEntityName(context);
+  const subjectParam = context.primary.params.find((candidate) => candidate.entityRef === focus);
+  const subjectId = subjectParam ? context.fixture.request[subjectParam.name] : undefined;
+  if (subjectId === undefined || subjectId === null) return null;
+
+  const state = cloneState(context.fixture.state);
+  const row = state.entities[focus]?.[String(subjectId)];
+  if (!row || row[field] === undefined) return null;
+  row[field] = value;
+
+  // Keep the world coherent: if a confirmed rule says this number must equal
+  // another, move that one too. Otherwise a boundary case fails for the wrong
+  // reason and stops testing the boundary.
+  for (const rule of context.rules) {
+    if (rule.template !== 'field_relation' || rule.predicate.kind !== 'row_constraint') continue;
+    const condition = rule.predicate.then[0];
+    if (!condition || condition.op !== 'eq' || condition.value !== 0) continue;
+    const [left, right] = condition.field.slice('cmp__'.length).split('__minus__');
+    const linked = left === field ? right : right === field ? left : undefined;
+    if (!linked) continue;
+    applyToRelatedField(context, state, linked, value);
+  }
+
+  return { state, request: context.fixture.request };
+}
+
+/** Writes a value onto a record one hop from the one being worked on. */
+function applyToRelatedField(
+  context: Context,
+  state: CanonicalState,
+  path: string,
+  value: unknown,
+): void {
+  const parts = path.split('__');
+  const focus = focusEntityName(context);
+  if (parts.length === 1) {
+    const subjectParam = context.primary.params.find((candidate) => candidate.entityRef === focus);
+    const subjectId = subjectParam ? context.fixture.request[subjectParam.name] : undefined;
+    const row = subjectId === undefined ? undefined : state.entities[focus]?.[String(subjectId)];
+    if (row && row[path] !== undefined) row[path] = value;
+    return;
+  }
+  const relationship = relationshipsFrom(context.schema, focus).find((r) => r.name === parts[0]);
+  if (!relationship || relationship.via.kind !== 'fk' || !parts[1]) return;
+  const subject = focusSeedRow(context);
+  const target = subject?.[relationship.via.field];
+  if (target === undefined || target === null) return;
+  const row = state.entities[relationship.to]?.[String(target)];
+  if (row && row[parts[1]] !== undefined) row[parts[1]] = value;
 }
 
 /** The row the demonstration created, recovered from the observed facts. */
+/** The record the request points at, when the job changes one. */
+function focusRequestRow(context: Context): EntityRow | undefined {
+  const focus = focusEntityName(context);
+  const param = context.primary.params.find((candidate) => candidate.entityRef === focus);
+  if (!param) return undefined;
+  const value = context.fixture.request[param.name];
+  if (value === undefined || value === null) return undefined;
+  return context.fixture.state.entities[focus]?.[String(value)];
+}
+
 function demonstratedRow(context: Context, entity: string): EntityRow | undefined {
   for (const fact of context.contract.observedFacts) {
     if (!fact.key.startsWith(`${entity}.`)) continue;
@@ -639,12 +769,40 @@ function round(value: number): number {
   return Math.round(value * 1e6) / 1e6;
 }
 
-function anotherRowId(context: Context, param: ActionParam, current: string): string | null {
-  if (!param.entityRef) return null;
-  const entity = entityByName(context.schema, param.entityRef);
+/** Another record of the same kind, so the two paths stop agreeing. */
+function anotherRowId(
+  context: Context,
+  field: string,
+  param: ActionParam | undefined,
+  current: string,
+): string | null {
+  const target =
+    param?.entityRef ??
+    relationshipsFrom(context.schema, focusEntityName(context)).find(
+      (relationship) => relationship.via.kind === 'fk' && relationship.via.field === field,
+    )?.to;
+  if (!target) return null;
+  const entity = entityByName(context.schema, target);
   if (!entity) return null;
-  const candidate = rowsOf(context.fixture.state, param.entityRef)
+  const candidate = rowsOf(context.fixture.state, target)
     .map((row) => String(row[entity.idField]))
     .find((id) => id !== current);
   return candidate ?? null;
+}
+
+/** Writes a value onto the record being worked on, in the starting world. */
+function setFocusField(
+  context: Context,
+  field: string,
+  value: unknown,
+): { state: CanonicalState; request: Record<string, unknown> } | null {
+  const focus = focusEntityName(context);
+  const subjectParam = context.primary.params.find((candidate) => candidate.entityRef === focus);
+  const subjectId = subjectParam ? context.fixture.request[subjectParam.name] : undefined;
+  if (subjectId === undefined || subjectId === null) return null;
+  const state = cloneState(context.fixture.state);
+  const row = state.entities[focus]?.[String(subjectId)];
+  if (!row || row[field] === undefined) return null;
+  row[field] = value;
+  return { state, request: context.fixture.request };
 }

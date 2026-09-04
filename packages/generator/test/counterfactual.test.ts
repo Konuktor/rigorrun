@@ -129,9 +129,14 @@ describe('counterfactual generation', () => {
     expect(entry?.expected.blockingRuleId).toContain('path_agreement');
   });
 
-  it('expects a refusal when the approver says no', async () => {
+  it('asks the approver question on the world where the answer matters', async () => {
+    // The demonstrated claim was under the limit, so a refused permit would
+    // change nothing there. The case is therefore built on the world just
+    // above the limit, where the permit is actually required — and then a
+    // refusal is the correct outcome.
     const { cases } = await generated();
     const entry = cases.find((c) => c.testCase.seed.config['approver_response'] === 'deny');
+    expect(entry?.testCase.seed.request['amount']).toBe(50.01);
     expect(entry?.expected.shouldPerform).toBe(false);
   });
 

@@ -28,6 +28,8 @@
       "@rigorrun/core": ["./packages/core/src/index.ts"],
       "@rigorrun/environment": ["./packages/environment/src/index.ts"],
       "@rigorrun/environment/*": ["./packages/environment/src/*"],
+      "@rigorrun/environments": ["./packages/environments/src/index.ts"],
+      "@rigorrun/environments/*": ["./packages/environments/src/*"],
       "@rigorrun/core/*": ["./packages/core/src/*"],
       "@rigorrun/northstar": ["./packages/northstar/src/index.ts"],
       "@rigorrun/northstar/*": ["./packages/northstar/src/*"],

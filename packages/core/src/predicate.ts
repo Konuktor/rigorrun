@@ -67,13 +67,21 @@ export const RowConstraintSchema = z.object({
   then: z.array(ConditionSchema).min(1),
 });
 
-/** "At most / at least N rows, optionally per distinct value of a field." */
+/**
+ * "At most N rows sharing these field values, among rows matching `where`."
+ *
+ * The filter is what makes this usable on work that *changes* a record rather
+ * than creating one: "at most one invoice per vendor and number ends up
+ * approved" is a real policy, and counting every invoice regardless of state
+ * would fail an agent for duplicates that were already there.
+ */
 export const CountConstraintSchema = z.object({
   kind: z.literal('count_constraint'),
   entity: z.string().min(1),
   scope: RowScopeSchema,
   /** Fields whose combination must be unique, e.g. vendor + invoice number. */
   groupBy: z.array(z.string()).default([]),
+  where: z.array(ConditionSchema).default([]),
   max: z.number().int().nonnegative().optional(),
   min: z.number().int().nonnegative().optional(),
 });
@@ -158,7 +166,7 @@ export function pathsUsed(predicate: RulePredicate): string[] {
     case 'row_constraint':
       return [...predicate.when, ...predicate.then].map((condition) => condition.field);
     case 'count_constraint':
-      return predicate.groupBy;
+      return [...predicate.groupBy, ...predicate.where.map((condition) => condition.field)];
     case 'transition_allowed':
       return [predicate.field, `seed__${predicate.field}`];
     case 'reference_required':

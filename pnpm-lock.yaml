@@ -219,6 +219,15 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/environments:
+    dependencies:
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../environment
+
   packages/generator:
     dependencies:
       '@rigorrun/core':

@@ -84,7 +84,6 @@ describe('induction from a demonstration', () => {
       'field_populated',
       'field_relation',
       'path_agreement',
-      'relation_required',
       'side_effect',
       'target_state',
       'threshold_guard',
@@ -108,6 +107,16 @@ describe('induction from a demonstration', () => {
       entity: 'Claim',
       then: [{ field: 'agrees__accountId__vs__item__accountId', op: 'eq', value: true }],
     });
+  });
+
+  it('does not also demand the link a threshold rule already accounts for', async () => {
+    // The operator obtained a permit while filing a claim. That is evidence
+    // for "above the limit you need a permit", not for "you always need one" —
+    // and emitting both would fail every small claim for a reason the
+    // recording never showed.
+    const contract = await compile();
+    expect(contract.rules.filter((rule) => rule.template === 'relation_required')).toEqual([]);
+    expect(contract.rules.some((rule) => rule.template === 'threshold_guard')).toBe(true);
   });
 
   it('leads the uniqueness question with the counterexample that would break it', async () => {

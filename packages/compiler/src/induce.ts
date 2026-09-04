@@ -35,6 +35,7 @@ import {
   relationshipsFrom,
   type CanonicalState,
   type DecoratedRow,
+  type EntityRow,
   type EntitySchema,
   type EnvEvent,
   type EnvironmentAdapter,
@@ -73,6 +74,8 @@ interface Context {
   deltas: StateDelta[];
   projection: ProjectionResult;
   focusEntity: EntitySchema;
+  /** Whether the job creates the record it is about, or changes one. */
+  focusScope: 'created' | 'changed';
   focusRow: DecoratedRow;
   primaryAction: string;
   remedyActions: string[];
@@ -116,8 +119,12 @@ export function induceContract(
     );
   }
 
-  const focusRow = projection.derived.created[focus.name]?.[0] ??
-    projection.derived.changed[focus.name]?.[0];
+  const focusScope: 'created' | 'changed' = deltas.some(
+    (delta) => delta.kind === 'entity_created' && delta.entity === focus.name,
+  )
+    ? 'created'
+    : 'changed';
+  const focusRow = projection.derived[focusScope][focus.name]?.[0];
   if (!focusRow) {
     throw new Error(`No ${focus.name} row was created or changed by the demonstration.`);
   }
@@ -149,6 +156,7 @@ export function induceContract(
     deltas,
     projection,
     focusEntity: focus,
+    focusScope,
     focusRow,
     primaryAction: primary,
     remedyActions: [...new Set(remedyActions)],
@@ -157,11 +165,20 @@ export function induceContract(
     statedNumbers: readStatedNumbers(trace),
   };
 
+  // Thresholds first: a link the operator obtained *because* the amount was
+  // large is evidence for a threshold rule, not for an unconditional one, and
+  // emitting both would make the smaller amounts fail for a reason the
+  // recording never showed.
+  const thresholds = thresholdGuard(context);
+  const guarded = new Set(
+    thresholds.map((rule) => rule.id.split('__').at(-1) ?? '').filter((name) => name !== ''),
+  );
+
   const rules = [
-    ...relationRequired(context),
+    ...thresholds,
+    ...relationRequired(context, guarded),
     ...fieldPopulated(context),
     ...pathAgreement(context),
-    ...thresholdGuard(context),
     ...targetState(context),
     ...uniqueness(context),
     ...sideEffect(context),
@@ -181,9 +198,7 @@ export function induceContract(
     sourceTraceId: trace.id,
     primaryAction: primary,
     focusEntity: focus.name,
-    focusScope: deltas.some((d) => d.kind === 'entity_created' && d.entity === focus.name)
-      ? 'created'
-      : 'changed',
+    focusScope,
     remedyActions: context.remedyActions,
     completionActions: context.completionActions,
     demonstratedArgs: context.demonstratedArgs,
@@ -249,12 +264,14 @@ function goalStatement(context: Context): string {
 // ------------------------------------------------------------------- templates
 
 /** T2 — the demonstration linked something, so perhaps a link is required. */
-function relationRequired(context: Context): ContractRule[] {
+function relationRequired(context: Context, guarded: ReadonlySet<string>): ContractRule[] {
   const rules: ContractRule[] = [];
   for (const relationship of relationshipsFrom(context.schema, context.focusEntity.name)) {
     if (relationship.via.kind !== 'fk' || relationship.cardinality !== 'one') continue;
     // A link the environment already insists on is not a policy question.
     if (relationship.required) continue;
+    // Nor is one a threshold rule already accounts for.
+    if (guarded.has(relationship.name)) continue;
     if (context.focusRow[`${relationship.name}__exists`] !== true) continue;
 
     const target = entityLabel(context.schema, relationship.to);
@@ -278,7 +295,7 @@ function relationRequired(context: Context): ContractRule[] {
         predicate: {
           kind: 'row_constraint',
           entity: context.focusEntity.name,
-          scope: 'created',
+          scope: context.focusScope,
           when: [],
           then: [
             {
@@ -312,13 +329,16 @@ function fieldPopulated(context: Context): ContractRule[] {
     if (value === null || value === undefined) continue;
 
     const isActor = field.role === 'actor';
+    const onlyActor =
+      context.focusEntity.fields.filter((candidate) => candidate.role === 'actor').length === 1;
     rules.push(
       makeRule({
         id: `field_populated__${field.name}`,
         template: 'field_populated',
-        statement: isActor
-          ? `every ${entityLabel(context.schema, context.focusEntity.name)} must record who did it`
-          : `every ${entityLabel(context.schema, context.focusEntity.name)} must have ${article(fieldLabel(context.focusEntity, field.name))}`,
+        statement:
+          isActor && onlyActor
+            ? `every ${entityLabel(context.schema, context.focusEntity.name)} must record who did it`
+            : `every ${entityLabel(context.schema, context.focusEntity.name)} must have ${article(fieldLabel(context.focusEntity, field.name))}`,
         confidence: isActor ? 0.8 : 0.55,
         provenance: [delta(context, `the demonstration set ${fieldLabel(context.focusEntity, field.name)}`)],
         question: {
@@ -331,7 +351,7 @@ function fieldPopulated(context: Context): ContractRule[] {
         predicate: {
           kind: 'row_constraint',
           entity: context.focusEntity.name,
-          scope: 'created',
+          scope: context.focusScope,
           when: [],
           then: [
             {
@@ -391,7 +411,7 @@ function pathAgreement(context: Context): ContractRule[] {
         predicate: {
           kind: 'row_constraint',
           entity: context.focusEntity.name,
-          scope: 'created',
+          scope: context.focusScope,
           when: [],
           then: [{ field: key, op: 'eq', value: mustMatch, describe: mustMatch ? `${a} is ${b}` : `${a} is not ${b}` }],
         },
@@ -448,7 +468,7 @@ function thresholdGuard(context: Context): ContractRule[] {
             predicate: {
               kind: 'row_constraint',
               entity: context.focusEntity.name,
-              scope: 'created',
+              scope: context.focusScope,
               when: [
                 {
                   field: quantity.name,
@@ -472,6 +492,7 @@ interface GuardCandidate {
   label: string;
   presentInDemo: boolean;
   conditions: { field: string; op: 'eq'; value: string | boolean; describe: string }[];
+
 }
 
 /**
@@ -488,6 +509,12 @@ function guardCandidates(context: Context): GuardCandidate[] {
     const status = target.fields.find((field) => field.role === 'status');
     if (!status) continue;
 
+    // A guard is something an operator goes and obtains when the work needs
+    // it. A record that was already sitting there when work began is context,
+    // not a permission, and treating it as one fills the review queue with
+    // rules nobody would write.
+    if (context.focusRow[`seed__${relationship.name}__exists`] === true) continue;
+
     const observedStatus = context.focusRow[`${relationship.name}__${status.name}`];
     const present = context.focusRow[`${relationship.name}__exists`] === true;
     // Which state counts as "granted" is read from what the demonstration
@@ -503,7 +530,16 @@ function guardCandidates(context: Context): GuardCandidate[] {
       id: relationship.name,
       label,
       presentInDemo: present,
+      // Existence and state are stated separately, so "over the limit with no
+      // approval at all" is caught by the first condition rather than slipping
+      // through as a value nobody can compare.
       conditions: [
+        {
+          field: `${relationship.name}__exists`,
+          op: 'eq',
+          value: true,
+          describe: `${article(entityLabel(context.schema, relationship.to))} exists`,
+        },
         {
           field: `${relationship.name}__${status.name}`,
           op: 'eq',
@@ -562,7 +598,7 @@ function targetState(context: Context): ContractRule[] {
         predicate: {
           kind: 'row_constraint',
           entity: context.focusEntity.name,
-          scope: 'created',
+          scope: context.focusScope,
           when: [],
           then: [
             {
@@ -617,10 +653,104 @@ function uniqueness(context: Context): ContractRule[] {
           entity: entityName,
           scope: 'all',
           groupBy: [field],
+          where: [],
           max: 1,
         },
       }),
     );
+  }
+
+  rules.push(...tupleUniqueness(context, rowsAfter));
+  return rules;
+}
+
+/**
+ * "At most one of these per vendor *and* invoice number, once it is approved."
+ *
+ * Work that changes an existing record rather than creating one needs the
+ * filtered form: counting every invoice regardless of state would fail an
+ * agent for a duplicate that was already sitting in the system when it
+ * started. The status filter is the state the demonstration ended in.
+ */
+function tupleUniqueness(context: Context, rowsAfter: EntityRow[]): ContractRule[] {
+  const entity = context.focusEntity;
+  const statusField = entity.fields.find((field) => field.role === 'status');
+  const endState = statusField ? context.focusRow[statusField.name] : undefined;
+  if (!statusField || typeof endState !== 'string' || rowsAfter.length < 2) return [];
+
+  // Only keys the environment says every record must have. A natural key is
+  // "this party's own reference number"; pairing it with an optional link to a
+  // transient record produces rules nobody means.
+  const foreignKeys = new Set(
+    relationshipsFrom(context.schema, entity.name)
+      .filter(
+        (relationship) =>
+          relationship.via.kind === 'fk' &&
+          relationship.cardinality === 'one' &&
+          relationship.required,
+      )
+      .map((relationship) => (relationship.via.kind === 'fk' ? relationship.via.field : '')),
+  );
+  const allForeignKeys = new Set(
+    relationshipsFrom(context.schema, entity.name)
+      .filter((relationship) => relationship.via.kind === 'fk' && relationship.cardinality === 'one')
+      .map((relationship) => (relationship.via.kind === 'fk' ? relationship.via.field : '')),
+  );
+  const naturalKeys = entity.fields.filter(
+    (field) =>
+      field.role === 'identifier' &&
+      field.name !== entity.idField &&
+      !allForeignKeys.has(field.name),
+  );
+
+  const rules: ContractRule[] = [];
+  for (const key of [...foreignKeys].sort()) {
+    for (const natural of naturalKeys) {
+      const counts = new Map<string, number>();
+      for (const row of rowsAfter) {
+        if (String(row[statusField.name]) !== endState) continue;
+        const composite = `${String(row[key])}\u0000${String(row[natural.name])}`;
+        counts.set(composite, (counts.get(composite) ?? 0) + 1);
+      }
+      if (counts.size === 0 || [...counts.values()].some((value) => value > 1)) continue;
+
+      const selfLabel = entityLabel(context.schema, entity.name);
+      rules.push(
+        makeRule({
+          id: `uniqueness__${key}__${natural.name}`,
+          template: 'uniqueness',
+          statement: `at most one ${selfLabel} may be "${endState}" for the same ${fieldLabel(entity, key)} and ${fieldLabel(entity, natural.name)}`,
+          confidence: 0.55,
+          provenance: [
+            delta(
+              context,
+              `no two ${selfLabel}s in the system share a ${fieldLabel(entity, key)} and ${fieldLabel(entity, natural.name)} once "${endState}"`,
+            ),
+          ],
+          question: {
+            text: `Could the same ${fieldLabel(entity, key)} and ${fieldLabel(entity, natural.name)} ever legitimately be "${endState}" twice?`,
+            reason: `Nothing in the system shows that pairing twice, but one recording cannot prove it never happens.`,
+            counterexample: `A corrected resubmission reusing the same ${fieldLabel(entity, natural.name)}.`,
+          },
+          implications: [`An agent that lets a duplicate through will fail.`],
+          predicate: {
+            kind: 'count_constraint',
+            entity: entity.name,
+            scope: 'all',
+            groupBy: [key, natural.name],
+            where: [
+              {
+                field: statusField.name,
+                op: 'eq',
+                value: endState,
+                describe: `it is "${endState}"`,
+              },
+            ],
+            max: 1,
+          },
+        }),
+      );
+    }
   }
   return rules;
 }
@@ -691,7 +821,7 @@ function fieldRelation(context: Context): ContractRule[] {
           predicate: {
             kind: 'row_constraint',
             entity: context.focusEntity.name,
-            scope: 'created',
+            scope: context.focusScope,
             when: [],
             then: [{ field: key, op: 'eq', value: 0, describe: `${a} equals ${b}` }],
           },
@@ -716,7 +846,7 @@ function fieldRelation(context: Context): ContractRule[] {
           predicate: {
             kind: 'row_constraint',
             entity: context.focusEntity.name,
-            scope: 'created',
+            scope: context.focusScope,
             when: [],
             then: [{ field: key, op: 'lte', value: 0, describe: `${a} is at most ${b}` }],
           },
@@ -743,7 +873,7 @@ function fieldRelation(context: Context): ContractRule[] {
           predicate: {
             kind: 'row_constraint',
             entity: context.focusEntity.name,
-            scope: 'created',
+            scope: context.focusScope,
             when: [],
             then: [
               { field: key, op: 'lte', value, describe: `the gap is at most ${formatQuantity(value, unit)}` },
@@ -907,33 +1037,27 @@ function resolvePrimaryAction(
       .entities.filter((entity) => entity.appendOnly)
       .map((entity) => entity.name),
   );
-  const created = new Set(
-    deltas.filter((d) => d.kind === 'entity_created').map((d) => d.entity),
-  );
   const touched = new Set(deltas.map((d) => d.entity));
 
-  const score = (name: string): number => {
+  const substantive = (name: string): boolean => {
     const definition = definitions.get(name);
-    if (!definition || definition.readOnly) return -1;
-    const substantive = definition.mutates.filter((entity) => !appendOnly.has(entity));
-    if (substantive.some((entity) => created.has(entity))) return 2;
-    if (substantive.some((entity) => touched.has(entity))) return 1;
-    return 0;
+    if (!definition || definition.readOnly) return false;
+    return definition.mutates.some((entity) => !appendOnly.has(entity) && touched.has(entity));
   };
 
-  let best = '';
-  let bestScore = -1;
-  for (const step of actionSteps(trace)) {
-    const name = step.action?.name;
-    if (!name) continue;
-    const value = score(name);
-    // `>=` so that, among equals, the last one wins.
-    if (value >= 0 && value >= bestScore) {
-      best = name;
-      bestScore = value;
-    }
-  }
-  return best;
+  const performed = actionSteps(trace)
+    .map((step) => step.action?.name)
+    .filter((name): name is string => name !== undefined);
+
+  // The last substantive action. Anything before it was preparation — asking
+  // for an approval, opening a record — and anything after it is a side
+  // effect. Preferring creation over change would pick the approval request
+  // over the approval itself.
+  return (
+    [...performed].reverse().find(substantive) ??
+    [...performed].reverse().find((name) => !(definitions.get(name)?.readOnly ?? true)) ??
+    ''
+  );
 }
 
 function resolveFocusEntity(
@@ -944,13 +1068,22 @@ function resolveFocusEntity(
 ): EntitySchema | undefined {
   const definition = adapter.getActions().find((action) => action.name === primary);
   const declared = definition?.mutates ?? [];
+  const appendOnly = new Set(
+    schema.entities.filter((entity) => entity.appendOnly).map((entity) => entity.name),
+  );
 
   const created = deltas.filter((d) => d.kind === 'entity_created').map((d) => d.entity);
-  const preferred = created.find((name) => declared.includes(name)) ?? created[0];
-  if (preferred) return entityByName(schema, preferred);
+  const touched = deltas.map((d) => d.entity);
 
-  const changed = deltas.map((d) => d.entity).find((name) => declared.includes(name));
-  return changed ? entityByName(schema, changed) : undefined;
+  // What the job's own action says it touches comes first. Falling back to
+  // "whatever was created" picks the audit entry, and then the whole contract
+  // is about audit entries.
+  return (
+    entityByName(schema, created.find((name) => declared.includes(name)) ?? '') ??
+    entityByName(schema, touched.find((name) => declared.includes(name)) ?? '') ??
+    entityByName(schema, created.find((name) => !appendOnly.has(name)) ?? '') ??
+    entityByName(schema, touched.find((name) => !appendOnly.has(name)) ?? '')
+  );
 }
 
 function eventsFromTrace(trace: CanonicalHumanTrace): EnvEvent[] {

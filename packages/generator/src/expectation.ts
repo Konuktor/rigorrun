@@ -253,7 +253,15 @@ async function evaluate(
       .map((action) => action.name),
   });
 
-  const synthesis = synthesizeAssertions({ ...contract, rules: [...rules] }, keys, { bindings });
+  // A rule that counts "per vendor and invoice number" needs those values,
+  // and on work that changes a record they are on the record rather than in
+  // the request. Read them off the record the work was about.
+  const subject = derived[contract.focusScope][contract.focusEntity]?.[0];
+  const merged: Record<string, Literal> = { ...literalBindings(subject ?? {}), ...bindings };
+
+  const synthesis = synthesizeAssertions({ ...contract, rules: [...rules] }, keys, {
+    bindings: merged,
+  });
   const summary = verify(synthesis.assertions, { state: {}, derived, events: [] });
 
   const byRule = new Map<string, ContractRule>(rules.map((rule) => [rule.id, rule]));
@@ -269,7 +277,7 @@ async function evaluate(
   return {
     applicable: [...applicable].sort().map((id) => byRule.get(id)).filter(isRule),
     violated: [...violated].sort().map((id) => byRule.get(id)).filter(isRule),
-    bindings,
+    bindings: merged,
     problems: synthesis.problems,
     assertions: synthesis.assertions,
   };

@@ -156,7 +156,7 @@ function compileRule(
           : [negated];
 
         for (const group of groups) {
-          const clauses = [...whenClauses, ...group.map(clause)];
+          const clauses = [...whenClauses, ...group.map(clause), ...presenceGuard(condition)];
           if (clauses.some((c) => c === null)) return { error: unsafeValueMessage(group) };
           const target = `${collection}[${(clauses as string[]).join(' & ')}]`;
           const problem = validateProjectionPath(keys, target);
@@ -184,7 +184,7 @@ function compileRule(
     }
 
     case 'count_constraint': {
-      const { entity, scope, groupBy, max } = rule.predicate;
+      const { entity, scope, groupBy, where, max } = rule.predicate;
       if (max === undefined) return { error: 'a count rule with no maximum checks nothing' };
       const fields = keys.rowFields[entity];
       if (!fields) return { error: `the projection does not cover ${entity}` };
@@ -204,6 +204,14 @@ function compileRule(
         const rendered = literal(bound);
         if (rendered === null) return { error: unsafeValueMessage([]) };
         clauses.push(`${field}=${rendered}`);
+      }
+      for (const condition of where) {
+        if (!fields.includes(condition.field)) {
+          return { error: `"${condition.field}" is not a field the projection publishes for ${entity}` };
+        }
+        const rendered = clause(condition);
+        if (rendered === null) return { error: unsafeValueMessage([condition]) };
+        clauses.push(rendered);
       }
 
       const target =
@@ -305,6 +313,22 @@ function compileRule(
       return { assertions };
     }
   }
+}
+
+/**
+ * A projected value can be `null` because it is unknown, not because it is
+ * wrong: two records cannot agree when one of them is missing, and two numbers
+ * cannot be compared when one is absent. Without this, "the approver must not
+ * be the submitter" fails every case that has no approver at all — which is
+ * most of them — and the whole benchmark collapses into one refusal reason.
+ *
+ * Presence itself is a different question, and the rule that asks it (a
+ * required link, a required field) states so directly.
+ */
+function presenceGuard(condition: Condition): string[] {
+  if (condition.op === 'exists' || condition.op === 'not_exists') return [];
+  if (condition.field.endsWith('__exists')) return [];
+  return [`${condition.field}!=null`];
 }
 
 function describeViolation(rule: ContractRule, condition: Condition): string {
