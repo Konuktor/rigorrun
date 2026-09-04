@@ -60,7 +60,11 @@ export function App() {
               type="button"
               onClick={() => go('proof')}
               data-testid="nav-proof"
-              className={`text-meta ${route === 'proof' ? 'text-fg' : 'text-muted hover:text-fg'}`}
+              // A real hit area, not just a label: the release gate measures
+              // every control on the page and this one was 17px tall.
+              className={`inline-flex h-9 items-center rounded-control px-2 text-meta ${
+                route === 'proof' ? 'text-fg' : 'text-muted hover:text-fg'
+              }`}
             >
               Five workflows
             </button>
