@@ -72,10 +72,20 @@ export async function openDemo(page: Page): Promise<void> {
   await expect(page.getByRole('heading', { name: 'A person did the job once' })).toBeVisible();
 }
 
-export async function goToContract(page: Page): Promise<void> {
+/** Step 2: what RigorRun learned, read only. */
+export async function goToLearned(page: Page): Promise<void> {
   await page.getByTestId('step-compile').click();
   await expect(
     page.getByRole('heading', { name: /One recording does not reveal a policy/ }),
+  ).toBeVisible();
+}
+
+/** Step 3: the decision. Reviewing and deciding are separate screens. */
+export async function goToContract(page: Page): Promise<void> {
+  await goToLearned(page);
+  await page.getByTestId('step-confirm').click();
+  await expect(
+    page.getByRole('heading', { name: /Which of these are actually your policy/ }),
   ).toBeVisible();
 }
 

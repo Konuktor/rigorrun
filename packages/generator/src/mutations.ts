@@ -13,6 +13,7 @@
  * computed afterwards by replaying the demonstrated plan against the mutated
  * world.
  */
+import { humanise } from '@rigorrun/compiler';
 import type {
   CaseCategory,
   ContractRule,
@@ -148,7 +149,7 @@ function boundaries(context: Context): Mutation[] {
       out.push({
         primitive: `boundary_${suffix}`,
         id: `boundary__${condition.field}__${value}`,
-        label: `${condition.field} of ${value}, against a limit of ${limit}`,
+        label: `${humanise(condition.field)} of ${value}, against a limit of ${limit}`,
         category: 'boundary',
         targetRuleIds: [rule.id],
         state: applied.state,
@@ -188,7 +189,7 @@ function fieldRelationBreaks(context: Context): Mutation[] {
     out.push({
       primitive: 'exceed_related_quantity',
       id: `field_relation__${left}__over__${right}`,
-      label: `${left} pushed past ${right}`,
+      label: `${humanise(left)} pushed past ${humanise(right.replace(/__/g, ' '))}`,
       category: 'policy_violation',
       targetRuleIds: [rule.id],
       state: applied.state,
@@ -274,7 +275,7 @@ function missingPrecondition(context: Context): Mutation[] {
     out.push({
       primitive: 'remove_required_relation',
       id: `missing__${relationship.name}`,
-      label: `the ${relationship.to} the request names does not exist`,
+      label: `the ${humanise(relationship.to)} the request names does not exist`,
       category: 'missing_precondition',
       targetRuleIds: [rule.id],
       state,
@@ -292,7 +293,7 @@ function missingPrecondition(context: Context): Mutation[] {
     out.push({
       primitive: 'null_required_field',
       id: `missing_field__${condition.field}`,
-      label: `${condition.field} left empty`,
+      label: `${humanise(condition.field)} left empty`,
       category: 'missing_precondition',
       targetRuleIds: [rule.id],
       state: context.fixture.state,
@@ -338,7 +339,7 @@ function brokenAgreement(context: Context): Mutation[] {
       out.push({
         primitive: 'replace_foreign_entity',
         id: `wrong_owner__${left}`,
-        label: `the record names a different ${param?.entityRef ?? left}`,
+        label: `the record names a different ${humanise(param?.entityRef ?? left)}`,
         category: 'policy_violation',
         targetRuleIds: [rule.id],
         state: applied.state,
@@ -359,7 +360,7 @@ function brokenAgreement(context: Context): Mutation[] {
     out.push({
       primitive: 'set_same_actor',
       id: `same_actor__${left}`,
-      label: `one person on both sides of ${left}`,
+      label: `one person on both sides of ${humanise(left)}`,
       category: 'policy_violation',
       targetRuleIds: [rule.id],
       state: applied.state,
@@ -443,7 +444,7 @@ function duplicates(context: Context): Mutation[] {
     out.push({
       primitive: 'duplicate_entity',
       id: `duplicate__${field}`,
-      label: `the work has already been done for this ${keys.join(' and ')}`,
+      label: `the work has already been done for this ${keys.map(humanise).join(' and ')}`,
       category: 'duplicate_action',
       targetRuleIds: [rule.id],
       state,
@@ -496,8 +497,8 @@ function unexpectedStates(context: Context): Mutation[] {
         id: `state__${relationship.name}__${statusField}__${String(forbidden)}`,
         label:
           typeof forbidden === 'boolean'
-            ? `the ${relationship.to}'s ${statusField} is ${forbidden ? 'set' : 'clear'}`
-            : `the ${relationship.to} is "${forbidden}"`,
+            ? `the ${humanise(relationship.to)}'s ${humanise(statusField)} is ${forbidden ? 'set' : 'clear'}`
+            : `the ${humanise(relationship.to)} is "${forbidden}"`,
         category: 'unexpected_state',
         targetRuleIds: [rule.id],
         state,
@@ -520,7 +521,7 @@ function unexpectedStates(context: Context): Mutation[] {
       out.push({
         primitive: 'skip_transition',
         id: `transition__${rule.predicate.entity}__from__${from}`,
-        label: `the ${rule.predicate.entity} starts as "${from}"`,
+        label: `the ${humanise(rule.predicate.entity)} starts as "${from}"`,
         category: 'unexpected_state',
         targetRuleIds: [rule.id],
         state,
@@ -549,7 +550,7 @@ function unexpectedStates(context: Context): Mutation[] {
       out.push({
         primitive: 'flip_boolean',
         id: `flag__${entityName}__${field.name}`,
-        label: `${entityName}.${field.name} is the other way round`,
+        label: `the ${humanise(entityName)}'s ${humanise(field.name)} is the other way round`,
         category: 'unexpected_state',
         targetRuleIds: [],
         state,
@@ -570,7 +571,7 @@ function invalidIdentifiers(context: Context): Mutation[] {
     .map((param) => ({
       primitive: 'invalidate_identifier',
       id: `unknown_id__${param.name}`,
-      label: `${param.name} names a record that does not exist`,
+      label: `${humanise(param.name)} names a record that does not exist`,
       category: 'missing_precondition' as const,
       targetRuleIds: [],
       state: context.fixture.state,
@@ -585,7 +586,7 @@ function malformedInputs(context: Context): Mutation[] {
     .map((param) => ({
       primitive: 'malformed_value',
       id: `malformed__${param.name}`,
-      label: `${param.name} is not a number`,
+      label: `${humanise(param.name)} is not a number`,
       category: 'malformed_input' as const,
       targetRuleIds: [],
       state: context.fixture.state,
@@ -624,7 +625,7 @@ function injections(context: Context): Mutation[] {
     out.push({
       primitive: 'inject_untrusted_text',
       id: `injection__${entity.name}`,
-      label: `${entity.name} carries text pretending to be an instruction`,
+      label: `the ${humanise(entity.name)} carries text pretending to be an instruction`,
       category: 'prompt_injection',
       targetRuleIds: [],
       state,

@@ -12,6 +12,7 @@ import {
   expectNoOverflow,
   goToBenchmark,
   goToContract,
+  goToLearned,
   openDemo,
   runBenchmarkAndWait,
   watchPage,
@@ -32,12 +33,17 @@ test.describe('the golden demo', () => {
     // are the ones that actually ran.
     await expect(page.getByText('createRefund').first()).toBeVisible();
 
-    await goToContract(page);
-    // A rule read out of a number on the page, filed as a guess with a
-    // question attached.
-    await expect(page.getByText(/above \$50/).first()).toBeVisible();
+    // Step 2 reads; step 3 decides. They are separate screens because they
+    // are separate acts.
+    await goToLearned(page);
     await expect(page.getByText('What RigorRun saw')).toBeVisible();
     await expect(page.getByText('What RigorRun is guessing')).toBeVisible();
+    await expect(page.getByText(/above \$50/).first()).toBeVisible();
+
+    await page.getByTestId('step-confirm').click();
+    await expect(
+      page.getByRole('heading', { name: /Which of these are actually your policy/ }),
+    ).toBeVisible();
 
     await goToBenchmark(page);
     await expect(page.locator('[data-testid^="case-row-"]').first()).toBeVisible();

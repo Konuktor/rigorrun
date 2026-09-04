@@ -27,13 +27,23 @@ export function humanise(name: string): string {
     .toLowerCase();
 }
 
+/**
+ * Labels are declared for display, where title case is right. A rule reads as
+ * a sentence, where it is not: "the refund's Amount must equal the refund's
+ * manager approval Requested amount" is a label leaking into prose.
+ */
+function sentence(label: string): string {
+  // Left alone when it is an acronym or already lower case.
+  return label === label.toUpperCase() && label.length <= 4 ? label : label.toLowerCase();
+}
+
 export function entityLabel(schema: EnvironmentSchema, name: string): string {
-  return entityByName(schema, name)?.label ?? humanise(name);
+  return sentence(entityByName(schema, name)?.label ?? humanise(name));
 }
 
 export function fieldLabel(entity: EntitySchema | undefined, name: string): string {
   if (!entity) return humanise(name);
-  return fieldByName(entity, name)?.label ?? humanise(name);
+  return sentence(fieldByName(entity, name)?.label ?? humanise(name));
 }
 
 /**

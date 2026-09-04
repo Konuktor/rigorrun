@@ -205,35 +205,38 @@ function countChanges(trace: CanonicalHumanTrace): number {
 
 /* ---------------------------------------------------------------- contract */
 
-export function ContractStep({
+/**
+ * Step 2 — what RigorRun learned.
+ *
+ * Read only, on purpose. Reading what a machine inferred from watching you is
+ * a different act from deciding whether it is your policy, and putting Yes and
+ * No on this screen invites people to click through the second one while they
+ * are still doing the first.
+ */
+export function LearnedStep({
   contract,
-  rejected,
-  confirmed,
-  onDecide,
-  onApprove,
+  onContinue,
 }: {
   contract: EnvironmentContract;
-  rejected: Set<string>;
-  confirmed: Set<string>;
-  onDecide: (ruleId: string, decision: 'confirm' | 'reject') => void;
-  onApprove: () => void;
+  onContinue: () => void;
 }) {
   const facts = contract.observedFacts;
   const rules = contract.rules;
-  const enforced = rules.filter((rule) => !rejected.has(rule.id)).length;
+  const weakest = rules.filter((rule) =>
+    rule.provenance.some((node) => node.kind === 'ui_text'),
+  ).length;
 
   return (
     <div className="space-y-4">
       <StepHeader
         title="One recording does not reveal a policy"
-        lede="What changed is a fact. What it means is a guess. RigorRun keeps them apart, and nothing it guessed can fail an agent until you say yes to it."
+        lede="What changed is a fact. What it means is a guess. RigorRun keeps them apart, and shows you which is which before it asks you anything."
       />
 
       <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-panel border border-line bg-surface px-4 py-3">
-        <SummaryStat label="Observed" value={facts.length} tone="pass" />
-        <SummaryStat label="To confirm" value={rules.length} tone="warn" />
-        <SummaryStat label="Said no to" value={rejected.size} />
-        <SummaryStat label="Will be enforced" value={enforced} />
+        <SummaryStat label="Facts observed" value={facts.length} tone="pass" />
+        <SummaryStat label="Rules guessed" value={rules.length} tone="warn" />
+        <SummaryStat label="Read off a screen" value={weakest} />
         <div className="min-w-[14rem] flex-1 self-center text-meta text-muted">
           Goal: <span className="text-fg">{contract.goal}</span>
         </div>
@@ -260,8 +263,83 @@ export function ContractStep({
 
       <Panel
         title="What RigorRun is guessing"
-        subtitle={`${enforced} of ${rules.length} will be enforced. Say no to anything that is not your policy.`}
+        subtitle="Each one carries the evidence behind it. None of them can fail an agent yet."
       >
+        <ul>
+          {rules.map((rule) => (
+            <li
+              key={rule.id}
+              data-testid={`learned-${rule.id}`}
+              className="border-b border-line-soft px-4 py-3 last:border-0"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <p className="min-w-[15rem] flex-1 text-body text-fg">{rule.statement}</p>
+                <Confidence value={rule.confidence} />
+              </div>
+              <p className="mt-1.5 flex flex-wrap items-center gap-2">
+                {[...new Set(rule.provenance.map((node) => node.kind))].map((kind) => (
+                  <Tag key={kind} tone={kind === 'ui_text' ? 'warn' : 'neutral'}>
+                    {kind.replace(/_/g, ' ')}
+                  </Tag>
+                ))}
+                <span className="text-meta text-muted">
+                  {rule.provenance.find((node) => node.detail)?.detail}
+                </span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </Panel>
+
+      <NextBar
+        note="Nothing above is enforced. Next, you decide which of these are actually your policy."
+        button={
+          <Button onClick={onContinue} testId="step-confirm" size="lg">
+            Confirm the rules →
+          </Button>
+        }
+      />
+    </div>
+  );
+}
+
+/** Step 3 — the decision. Yes, No, and nothing else to learn first. */
+export function ContractStep({
+  contract,
+  rejected,
+  confirmed,
+  onDecide,
+  onApprove,
+}: {
+  contract: EnvironmentContract;
+  rejected: Set<string>;
+  confirmed: Set<string>;
+  onDecide: (ruleId: string, decision: 'confirm' | 'reject') => void;
+  onApprove: () => void;
+}) {
+  const rules = contract.rules;
+  const enforced = rules.filter((rule) => !rejected.has(rule.id)).length;
+  const answered = rules.filter(
+    (rule) => rejected.has(rule.id) || confirmed.has(rule.id),
+  ).length;
+
+  return (
+    <div className="space-y-4">
+      <StepHeader
+        title="Which of these are actually your policy?"
+        lede="Answer in your own terms. Say no to anything that is not a rule where you work — a rule you reject can never fail an agent, and RigorRun keeps it as a check on itself."
+      />
+
+      <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-panel border border-line bg-surface px-4 py-3">
+        <SummaryStat label="Answered" value={answered} tone="pass" />
+        <SummaryStat label="Said no to" value={rejected.size} />
+        <SummaryStat label="Will be enforced" value={enforced} tone="warn" />
+        <div className="min-w-[14rem] flex-1 self-center text-meta text-muted">
+          You can continue at any point. Anything you have not answered is treated as a yes.
+        </div>
+      </div>
+
+      <Panel title="Your rules" subtitle="Plain questions. No eval vocabulary, and no wrong answer.">
         <ul>
           {rules.map((rule) => (
             <InferredRule
@@ -279,11 +357,26 @@ export function ContractStep({
         note={`${enforced} rules will be enforced. ${rejected.size > 0 ? `${rejected.size} rule${rejected.size === 1 ? '' : 's'} you said no to will generate no checks.` : 'Say no to anything you disagree with before continuing.'}`}
         button={
           <Button onClick={onApprove} testId="step-generate" size="lg">
-            Confirm and stress-test the job →
+            Stress-test the job →
           </Button>
         }
       />
     </div>
+  );
+}
+
+function Confidence({ value }: { value: number }) {
+  const percent = Math.round(value * 100);
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="text-meta text-muted">Confidence</span>
+      <span aria-hidden="true" className="h-1 w-12 overflow-hidden rounded-pill bg-line">
+        <span className="block h-full rounded-pill bg-warn" style={{ width: `${percent}%` }} />
+      </span>
+      <span data-numeric className="text-meta font-medium text-warn">
+        {percent}%
+      </span>
+    </span>
   );
 }
 

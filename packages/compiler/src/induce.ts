@@ -473,7 +473,7 @@ function thresholdGuard(context: Context): ContractRule[] {
           makeRule({
             id: `threshold_guard__${quantity.path}__${stated.value}__${guard.id}`,
             template: 'threshold_guard',
-            statement: `when ${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}, ${guard.requirement}`,
+            statement: `when ${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}, it must ${guard.requirement}`,
             // A number scraped off a page is the weakest evidence in the
             // system. It gets a higher score only when the demonstration
             // actually crossed the threshold and took the guarded path.
@@ -488,7 +488,7 @@ function thresholdGuard(context: Context): ContractRule[] {
               ),
             ],
             question: {
-              text: `When ${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}, must ${guard.requirement}?`,
+              text: `When ${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}, must it ${guard.requirement}?`,
               reason: `RigorRun read "${stated.text.trim()}" in the interface. That is text on a page, not a policy source of truth, and one recording shows one amount.`,
             },
             implications: [
@@ -542,7 +542,7 @@ function quantityPaths(context: Context): QuantityPath[] {
 interface GuardCandidate {
   id: string;
   label: string;
-  /** Reads after "must", e.g. "carry an approval marked approved". */
+  /** A bare verb phrase: reads after "it must" and after "must it". */
   requirement: string;
   presentInDemo: boolean;
   conditions: { field: string; op: 'eq'; value: string | boolean; describe: string }[];
@@ -583,7 +583,7 @@ function guardCandidates(context: Context): GuardCandidate[] {
     guards.push({
       id: relationship.name,
       label,
-      requirement: `it carry ${label}`,
+      requirement: `carry ${label}`,
       presentInDemo: present,
       // Existence and state are stated separately, so "over the limit with no
       // approval at all" is caught by the first condition rather than slipping
@@ -629,7 +629,7 @@ function ownGuardCandidates(context: Context): GuardCandidate[] {
     guards.push({
       id: `own_${field.name}`,
       label,
-      requirement: `its ${fieldLabel(context.focusEntity, field.name)} be "${value}"`,
+      requirement: `have ${article(fieldLabel(context.focusEntity, field.name))} of "${value}"`,
       presentInDemo: true,
       conditions: [
         {
@@ -674,14 +674,14 @@ function conditionGuard(context: Context): ContractRule[] {
         makeRule({
           id: `condition_guard__${path}__${guard.id}`,
           template: 'condition_guard',
-          statement: `when ${described} is set, ${guard.requirement}`,
+          statement: `when ${described} is set, it must ${guard.requirement}`,
           confidence: 0.6,
           provenance: [
             delta(context, `${described} was set, and the operator obtained ${guard.label}`),
             schemaProvenance(path),
           ],
           question: {
-            text: `When ${described} is set, must ${guard.requirement}?`,
+            text: `When ${described} is set, must it ${guard.requirement}?`,
             reason: `The recording shows the two together once. Whether one requires the other was never demonstrated on its own.`,
           },
           implications: [`An agent that proceeds without ${guard.label} in that situation will fail.`],

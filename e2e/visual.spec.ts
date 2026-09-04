@@ -12,6 +12,7 @@ import {
   WEAK,
   goToBenchmark,
   goToContract,
+  goToLearned,
   openDemo,
   openEvidence,
   runBenchmarkAndWait,
@@ -25,7 +26,20 @@ const CRM = process.env['CRM_URL'] ?? 'http://127.0.0.1:5174';
  */
 async function stabilise(page: Page): Promise<void> {
   await page.addStyleTag({
-    content: `*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }`,
+    content: `
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+        caret-color: transparent !important;
+      }
+      /*
+       * A full-page screenshot scrolls the viewport and stitches the result,
+       * so anything sticky is painted part-way down the image on top of the
+       * content it is meant to sit above. That makes a baseline that hides
+       * exactly what it is supposed to be watching.
+       */
+      [class*="sticky"], .sticky { position: static !important; }
+    `,
   });
   await page.evaluate(() => {
     const replacements: [RegExp, string][] = [
@@ -58,6 +72,13 @@ test.describe('visual regression', () => {
     await openDemo(page);
     await stabilise(page);
     await expect(page).toHaveScreenshot('record.png', { fullPage: true });
+  });
+
+  test('learned step', async ({ page }) => {
+    await openDemo(page);
+    await goToLearned(page);
+    await stabilise(page);
+    await expect(page).toHaveScreenshot('learned.png', { fullPage: true });
   });
 
   test('contract step', async ({ page }) => {

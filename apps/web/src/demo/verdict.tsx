@@ -77,7 +77,7 @@ export function VerdictStep({
     <div className="space-y-4">
       <StepHeader
         title="Head to head"
-        lede={`Both agents ran the same ${caseIds.length} cases from the same seeded state. Every verdict below comes from inspecting the system after the agent finished.`}
+        lede={`${result.scores.length} implementations ran the same ${caseIds.length} cases from the same seeded state. Every verdict below comes from inspecting the system after the agent finished — never from what it said about itself.`}
       />
 
       {/* The result, before any table. */}
@@ -440,7 +440,14 @@ export function EvidenceDialog({
 }) {
   if (!result) return null;
 
-  const failures = result.assertions.filter((a) => a.status !== 'PASS');
+  // INAPPLICABLE is not a failure. A mutation that removed a rule's
+  // antecedent leaves a check that is neither satisfied nor violated, and
+  // showing it under a red "policy failure" banner tells a reader the agent
+  // broke a rule it was never tested against.
+  const failures = result.assertions.filter(
+    (a) => a.status === 'FAIL' || a.status === 'ERROR',
+  );
+  const inapplicable = result.assertions.filter((a) => a.status === 'INAPPLICABLE').length;
   const primary = failures.find((a) => a.severity === 'policy') ?? failures[0];
   const status = outcomeOf(result);
 
@@ -462,7 +469,11 @@ export function EvidenceDialog({
       testId="evidence-drawer"
     >
       <div className="space-y-4">
-        {primary ? <FailureHeadline assertion={primary} status={status} /> : <PassHeadline />}
+        {primary ? (
+          <FailureHeadline assertion={primary} status={status} />
+        ) : (
+          <PassHeadline inapplicable={inapplicable} />
+        )}
 
         <div className="grid gap-3 md:grid-cols-2">
           <Panel title="What the agent claimed">
@@ -673,15 +684,23 @@ function capitalise(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function PassHeadline() {
+function PassHeadline({ inapplicable }: { inapplicable: number }) {
   return (
     <section className="rounded-panel border border-pass-line bg-pass-bg px-4 py-3">
       <div className="flex items-center gap-2">
         <StatusMark status="pass" />
         <span className="text-micro font-semibold uppercase text-pass">All checks passed</span>
       </div>
-      <p className="mt-1.5 text-secondary text-secondary">
-        Every success and policy check was satisfied by the state the agent left behind.
+      <p className="mt-1.5 text-secondary">
+        Every check this case exercises was satisfied by the state the agent left behind.
+        {inapplicable > 0 ? (
+          <>
+            {' '}
+            {inapplicable} other check{inapplicable === 1 ? '' : 's'} did not apply here — this
+            case does not put {inapplicable === 1 ? 'it' : 'them'} to the test, which is not the
+            same as passing.
+          </>
+        ) : null}
       </p>
     </section>
   );

@@ -3,7 +3,14 @@
  * equivalent of whatever the user is looking at.
  */
 import { STEPS, STEP_META, reachedSteps, useDemo, type Step } from './useDemo.ts';
-import { BenchmarkStep, ContractStep, RecordStep, RunStep, StepHeader } from './steps.tsx';
+import {
+  BenchmarkStep,
+  ContractStep,
+  LearnedStep,
+  RecordStep,
+  RunStep,
+  StepHeader,
+} from './steps.tsx';
 import { VerdictStep } from './verdict.tsx';
 import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 
@@ -88,8 +95,18 @@ export function DemoPage() {
       );
     }
 
-    if (state.step === 'contract') {
-      if (!state.draftContract) return <Hydrating step="contract" />;
+    if (state.step === 'learned') {
+      if (!state.draftContract) return <Hydrating step="learned" />;
+      return (
+        <LearnedStep
+          contract={state.draftContract}
+          onContinue={() => setStep('confirm')}
+        />
+      );
+    }
+
+    if (state.step === 'confirm') {
+      if (!state.draftContract) return <Hydrating step="confirm" />;
       return (
         <ContractStep
           contract={state.draftContract}
@@ -191,7 +208,7 @@ function StepProgress({
           const available = reached.has(step);
 
           return (
-            <li key={step} className="min-w-0 shrink-0 sm:flex-1">
+            <li key={step} className="min-w-0 shrink-0 lg:flex-1">
               <button
                 type="button"
                 disabled={!available || disabled}
@@ -218,7 +235,7 @@ function StepProgress({
                 >
                   {isDone ? '✓' : index + 1}
                 </span>
-                <span className="truncate">{STEP_META[step].label}</span>
+                <span className="whitespace-nowrap lg:truncate">{STEP_META[step].label}</span>
               </button>
             </li>
           );

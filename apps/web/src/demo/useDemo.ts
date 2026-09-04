@@ -30,33 +30,48 @@ import {
 } from '@rigorrun/environments';
 import { induceContract } from '@rigorrun/compiler';
 
-export const STEPS = ['record', 'contract', 'benchmark', 'run', 'verdict'] as const;
+export const STEPS = [
+  'record',
+  'learned',
+  'confirm',
+  'benchmark',
+  'run',
+  'verdict',
+] as const;
 export type Step = (typeof STEPS)[number];
 
 /**
- * The six steps of the brief, mapped onto the five screens that carry them.
- * "Show us the job" and "review what we learned" share the contract screen,
- * because reviewing is what a person does the moment they see it.
+ * Six steps, six screens.
+ *
+ * Reviewing and confirming were one screen, and they are two acts: reading
+ * what a machine inferred is a different job from deciding whether it is your
+ * policy, and collapsing them invites people to click through the second one
+ * while still doing the first.
  */
 export const STEP_META: Record<Step, { label: string; heading: string; cli: string }> = {
-  record: { label: 'Show us the job', heading: 'Step 1 — show us the job', cli: 'rigorrun record' },
-  contract: {
-    label: 'Confirm the rules',
-    heading: 'Steps 2 and 3 — review what RigorRun learned, and confirm it',
+  record: { label: 'Show the job', heading: 'Step 1 — show us the job', cli: 'rigorrun record' },
+  learned: {
+    label: 'What we learned',
+    heading: 'Step 2 — review what RigorRun learned',
+    cli: 'rigorrun compile trace.json -o contract.json',
+  },
+  confirm: {
+    label: 'Confirm rules',
+    heading: 'Step 3 — confirm the rules',
     cli: 'rigorrun compile trace.json -o contract.json',
   },
   benchmark: {
-    label: 'Stress-test it',
+    label: 'Stress-test',
     heading: 'Step 4 — RigorRun stress-tests the job',
     cli: 'rigorrun generate contract.json -o benchmark.json',
   },
   run: {
-    label: 'Connect an agent',
+    label: 'Connect agent',
     heading: 'Step 5 — connect an agent',
     cli: 'rigorrun compare benchmark.json',
   },
   verdict: {
-    label: 'See if it passes',
+    label: 'Pass or fail',
     heading: 'Step 6 — see whether it passes',
     cli: 'rigorrun gate benchmark.json --agent reference',
   },
@@ -248,7 +263,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   const compile = useCallback(async () => {
     const current = stateRef.current;
     if (current.draftContract) {
-      setStep('contract');
+      setStep('learned');
       return;
     }
     setState((prev) => ({ ...prev, hydrating: true }));
@@ -260,7 +275,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         draftContract: buildContract(recorded),
         hydrating: false,
       }));
-      setStep('contract');
+      setStep('learned');
     } catch (error) {
       setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
     }
@@ -359,7 +374,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         const draft = buildContract(recorded);
         if (cancelled) return;
 
-        if (target === 'contract') {
+        if (target === 'learned' || target === 'confirm') {
           setState((prev) => ({ ...prev, trace: recorded, draftContract: draft, hydrating: false }));
           return;
         }
@@ -431,7 +446,10 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
 /** Steps the user may jump to, based on what has actually been produced. */
 export function reachedSteps(state: DemoState): Set<Step> {
   const reached = new Set<Step>(['record']);
-  if (state.draftContract) reached.add('contract');
+  if (state.draftContract) {
+    reached.add('learned');
+    reached.add('confirm');
+  }
   if (state.benchmark) reached.add('benchmark');
   if (state.liveResults.length > 0 || state.running || state.result) reached.add('run');
   if (state.result) reached.add('verdict');
