@@ -40,6 +40,7 @@ import {
   type EnvEvent,
   type EnvironmentAdapter,
   type EnvironmentSchema,
+  type FieldSchema,
   type ProjectionResult,
   type StateDelta,
 } from '@rigorrun/environment';
@@ -162,7 +163,7 @@ export function induceContract(
     remedyActions: [...new Set(remedyActions)],
     completionActions: [...new Set(completionActions)],
     demonstratedArgs,
-    statedNumbers: readStatedNumbers(trace),
+    statedNumbers: readStatedNumbers(trace, schema),
   };
 
   // Thresholds first: a link the operator obtained *because* the amount was
@@ -170,12 +171,16 @@ export function induceContract(
   // emitting both would make the smaller amounts fail for a reason the
   // recording never showed.
   const thresholds = thresholdGuard(context);
+  const conditions = conditionGuard(context);
   const guarded = new Set(
-    thresholds.map((rule) => rule.id.split('__').at(-1) ?? '').filter((name) => name !== ''),
+    [...thresholds, ...conditions]
+      .map((rule) => rule.id.split('__').at(-1) ?? '')
+      .filter((name) => name !== ''),
   );
 
   const rules = [
     ...thresholds,
+    ...conditions,
     ...relationRequired(context, guarded),
     ...fieldPopulated(context),
     ...pathAgreement(context),
@@ -424,26 +429,33 @@ function pathAgreement(context: Context): ContractRule[] {
 /** T1 — a number stated in the interface, and something that might guard it. */
 function thresholdGuard(context: Context): ContractRule[] {
   const rules: ContractRule[] = [];
-  const quantities = context.focusEntity.fields.filter(
-    (field) => field.role === 'quantity' && field.unit !== undefined,
-  );
+  const quantities = quantityPaths(context);
   if (quantities.length === 0 || context.statedNumbers.length === 0) return rules;
 
-  const guards = guardCandidates(context);
-  if (guards.length === 0) return rules;
+  const relationGuards = guardCandidates(context);
+  if (relationGuards.length === 0 && ownGuardCandidates(context).length === 0) return rules;
 
   for (const quantity of quantities) {
-    const observed = context.focusRow[quantity.name];
+    const observed = context.focusRow[quantity.path];
+    // A threshold on the record's own number decides whether the work may
+    // happen at all, so only an external permission can satisfy it. A
+    // threshold on a *related* record's number describes the record being
+    // worked on, so setting a field on it is a legitimate answer — that is
+    // how "500 employees or more makes it enterprise" gets expressed.
+    const guards = quantity.path.includes('__')
+      ? [...relationGuards, ...ownGuardCandidates(context)]
+      : relationGuards;
+
     for (const stated of context.statedNumbers) {
-      if (!unitMatchesText(quantity.unit, stated.text)) continue;
+      if (!unitMatchesText(quantity.field.unit, stated.text)) continue;
       for (const guard of guards) {
         const exercised =
           typeof observed === 'number' && observed > stated.value && guard.presentInDemo;
         rules.push(
           makeRule({
-            id: `threshold_guard__${quantity.name}__${stated.value}__${guard.id}`,
+            id: `threshold_guard__${quantity.path}__${stated.value}__${guard.id}`,
             template: 'threshold_guard',
-            statement: `${entityLabel(context.schema, context.focusEntity.name)}s above ${formatQuantity(stated.value, quantity.unit)} require ${guard.label}`,
+            statement: `when ${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}, ${guard.requirement}`,
             // A number scraped off a page is the weakest evidence in the
             // system. It gets a higher score only when the demonstration
             // actually crossed the threshold and took the guarded path.
@@ -453,16 +465,16 @@ function thresholdGuard(context: Context): ContractRule[] {
               delta(
                 context,
                 typeof observed === 'number'
-                  ? `the demonstrated ${fieldLabel(context.focusEntity, quantity.name)} was ${formatQuantity(observed, quantity.unit)}, ${guard.presentInDemo ? 'with' : 'without'} ${guard.label}`
+                  ? `the demonstrated value was ${formatQuantity(observed, quantity.field.unit)}, ${guard.presentInDemo ? 'with' : 'without'} ${guard.label}`
                   : 'the demonstration created the record',
               ),
             ],
             question: {
-              text: `Should ${article(entityLabel(context.schema, context.focusEntity.name))} above ${formatQuantity(stated.value, quantity.unit)} always require ${guard.label}?`,
+              text: `When ${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}, must ${guard.requirement}?`,
               reason: `RigorRun read "${stated.text.trim()}" in the interface. That is text on a page, not a policy source of truth, and one recording shows one amount.`,
             },
             implications: [
-              `Below ${formatQuantity(stated.value, quantity.unit)} an agent may proceed on its own.`,
+              `Below ${formatQuantity(stated.value, quantity.field.unit)} this does not apply.`,
               `Above it, an agent that proceeds without ${guard.label} will fail.`,
             ],
             predicate: {
@@ -471,10 +483,10 @@ function thresholdGuard(context: Context): ContractRule[] {
               scope: context.focusScope,
               when: [
                 {
-                  field: quantity.name,
+                  field: quantity.path,
                   op: 'gt',
                   value: stated.value,
-                  describe: `${fieldLabel(context.focusEntity, quantity.name)} is above ${formatQuantity(stated.value, quantity.unit)}`,
+                  describe: `${describePath(context.schema, context.focusEntity.name, quantity.path)} is above ${formatQuantity(stated.value, quantity.field.unit)}`,
                 },
               ],
               then: guard.conditions,
@@ -487,9 +499,33 @@ function thresholdGuard(context: Context): ContractRule[] {
   return rules;
 }
 
+interface QuantityPath {
+  path: string;
+  field: FieldSchema;
+}
+
+/** Numbers on the record being worked on, and on records it names. */
+function quantityPaths(context: Context): QuantityPath[] {
+  const out: QuantityPath[] = [];
+  for (const field of context.focusEntity.fields) {
+    if (field.role === 'quantity' && field.unit !== undefined) out.push({ path: field.name, field });
+  }
+  for (const relationship of relationshipsFrom(context.schema, context.focusEntity.name)) {
+    if (relationship.via.kind !== 'fk' || relationship.cardinality !== 'one') continue;
+    const target = entityByName(context.schema, relationship.to);
+    for (const field of target?.fields ?? []) {
+      if (field.role !== 'quantity' || field.unit === undefined) continue;
+      out.push({ path: `${relationship.name}__${field.name}`, field });
+    }
+  }
+  return out.sort((a, b) => a.path.localeCompare(b.path));
+}
+
 interface GuardCandidate {
   id: string;
   label: string;
+  /** Reads after "must", e.g. "carry an approval marked approved". */
+  requirement: string;
   presentInDemo: boolean;
   conditions: { field: string; op: 'eq'; value: string | boolean; describe: string }[];
 
@@ -529,6 +565,7 @@ function guardCandidates(context: Context): GuardCandidate[] {
     guards.push({
       id: relationship.name,
       label,
+      requirement: `it carry ${label}`,
       presentInDemo: present,
       // Existence and state are stated separately, so "over the limit with no
       // approval at all" is caught by the first condition rather than slipping
@@ -552,6 +589,116 @@ function guardCandidates(context: Context): GuardCandidate[] {
   return guards;
 }
 
+/**
+ * Values the work itself set on the record.
+ *
+ * Only ever offered as the consequent of a threshold on a *related* record's
+ * number — "the company has 500 staff, so this is an enterprise lead". A
+ * threshold on the record's own number is about permission, and setting a
+ * field on yourself is not a permission.
+ */
+function ownGuardCandidates(context: Context): GuardCandidate[] {
+  const guards: GuardCandidate[] = [];
+  for (const field of context.focusEntity.fields) {
+    if (field.type !== 'enum' || field.role === undefined) continue;
+    const value = context.focusRow[field.name];
+    if (typeof value !== 'string') continue;
+    // Skip the field the lifecycle rule already covers.
+    if (context.deltas.some((d) => d.kind === 'field_changed' && d.field === field.name && d.entity === context.focusEntity.name && field.name === lifecycleField(context))) {
+      continue;
+    }
+    const label = `${fieldLabel(context.focusEntity, field.name)} of "${value}"`;
+    guards.push({
+      id: `own_${field.name}`,
+      label,
+      requirement: `its ${fieldLabel(context.focusEntity, field.name)} be "${value}"`,
+      presentInDemo: true,
+      conditions: [
+        {
+          field: field.name,
+          op: 'eq',
+          value,
+          describe: label,
+        },
+      ],
+    });
+  }
+  return guards;
+}
+
+/** The enum a transition rule was induced for, if any. */
+function lifecycleField(context: Context): string | undefined {
+  for (const delta of context.deltas) {
+    if (delta.kind !== 'field_changed' || delta.entity !== context.focusEntity.name) continue;
+    const field = fieldByName(context.focusEntity, delta.field);
+    if (field?.role === 'status') return field.name;
+  }
+  return undefined;
+}
+
+/**
+ * A flag that was set when the operator obtained a permission.
+ *
+ * "Restricted region, so get a compliance review", "flagged for fraud, so get
+ * a manual check", "admin access, so get sign-off" are all this shape, and
+ * none of them is a number.
+ */
+function conditionGuard(context: Context): ContractRule[] {
+  const rules: ContractRule[] = [];
+  const guards = guardCandidates(context).filter((guard) => guard.presentInDemo);
+  if (guards.length === 0) return rules;
+
+  for (const [path, value] of flagPaths(context)) {
+    if (value !== true) continue;
+    const described = describePath(context.schema, context.focusEntity.name, path);
+    for (const guard of guards) {
+      rules.push(
+        makeRule({
+          id: `condition_guard__${path}__${guard.id}`,
+          template: 'condition_guard',
+          statement: `when ${described} is set, ${guard.requirement}`,
+          confidence: 0.6,
+          provenance: [
+            delta(context, `${described} was set, and the operator obtained ${guard.label}`),
+            schemaProvenance(path),
+          ],
+          question: {
+            text: `When ${described} is set, must ${guard.requirement}?`,
+            reason: `The recording shows the two together once. Whether one requires the other was never demonstrated on its own.`,
+          },
+          implications: [`An agent that proceeds without ${guard.label} in that situation will fail.`],
+          predicate: {
+            kind: 'row_constraint',
+            entity: context.focusEntity.name,
+            scope: context.focusScope,
+            when: [{ field: path, op: 'eq', value: true, describe: `${described} is set` }],
+            then: guard.conditions,
+          },
+        }),
+      );
+    }
+  }
+  return rules;
+}
+
+/** Boolean gates on the record and on records it names. */
+function flagPaths(context: Context): [string, unknown][] {
+  const out: [string, unknown][] = [];
+  for (const field of context.focusEntity.fields) {
+    if (field.role === 'flag') out.push([field.name, context.focusRow[field.name]]);
+  }
+  for (const relationship of relationshipsFrom(context.schema, context.focusEntity.name)) {
+    if (relationship.via.kind !== 'fk' || relationship.cardinality !== 'one') continue;
+    const target = entityByName(context.schema, relationship.to);
+    for (const field of target?.fields ?? []) {
+      if (field.role !== 'flag') continue;
+      const path = `${relationship.name}__${field.name}`;
+      out.push([path, context.focusRow[path]]);
+    }
+  }
+  return out.sort((a, b) => a[0].localeCompare(b[0]));
+}
+
 /** T5 — the related record was in a particular state when the work was done. */
 function targetState(context: Context): ContractRule[] {
   const rules: ContractRule[] = [];
@@ -564,6 +711,24 @@ function targetState(context: Context): ContractRule[] {
     // work, and turning it into a rule produces noise a reviewer has to wade
     // through.
     if (!target.mutable) continue;
+
+    // A gate that was down when the work was done is a rule of the same
+    // shape: "the order was not under a fraud hold" reads exactly like "the
+    // ticket was open". Two hops, because the gate is often on the party
+    // behind the record rather than on the record itself.
+    for (const gate of target.fields.filter((field) => field.role === 'flag')) {
+      const rule = flagStateRule(context, relationship.name, gate.name);
+      if (rule) rules.push(rule);
+    }
+    for (const second of relationshipsFrom(context.schema, relationship.to)) {
+      if (second.via.kind !== 'fk' || second.cardinality !== 'one') continue;
+      const deeper = entityByName(context.schema, second.to);
+      for (const gate of deeper?.fields.filter((field) => field.role === 'flag') ?? []) {
+        const rule = flagStateRule(context, `${relationship.name}__${second.name}`, gate.name);
+        if (rule) rules.push(rule);
+      }
+    }
+
     const status = target.fields.find((field) => field.role === 'status');
     if (!status) continue;
 
@@ -613,6 +778,38 @@ function targetState(context: Context): ContractRule[] {
     );
   }
   return rules;
+}
+
+/** "The order was not on hold when it shipped." */
+function flagStateRule(context: Context, relationPath: string, gate: string): ContractRule | null {
+  const seedKey = `seed__${relationPath}__${gate}`;
+  const liveKey = `${relationPath}__${gate}`;
+  const seedValue = context.focusRow[seedKey];
+  const useSeed = typeof seedValue === 'boolean';
+  const field = useSeed ? seedKey : liveKey;
+  const observed = useSeed ? seedValue : context.focusRow[liveKey];
+  if (typeof observed !== 'boolean') return null;
+
+  const path = describePath(context.schema, context.focusEntity.name, liveKey);
+  return makeRule({
+    id: `target_state__${relationPath}__${gate}`,
+    template: 'target_state',
+    statement: observed ? `${path} must be set` : `${path} must not be set`,
+    confidence: 0.5,
+    provenance: [delta(context, `${path} was ${observed ? 'set' : 'clear'} when the work was done`)],
+    question: {
+      text: observed ? `Must ${path} always be set?` : `Must ${path} always be clear?`,
+      reason: `The recorded case had it ${observed ? 'set' : 'clear'}. The other way round was never exercised.`,
+    },
+    implications: [`An agent that proceeds with it the other way round will fail.`],
+    predicate: {
+      kind: 'row_constraint',
+      entity: context.focusEntity.name,
+      scope: context.focusScope,
+      when: [],
+      then: [{ field, op: 'eq', value: observed, describe: `${path} is ${observed}` }],
+    },
+  });
 }
 
 /** T4 — only one was created. Perhaps only one is ever allowed. */
@@ -980,14 +1177,24 @@ interface StatedNumber {
  * everywhere it is used. A regular expression reading a number off a page is a
  * lead for a question, never a policy.
  */
-function readStatedNumbers(trace: CanonicalHumanTrace): StatedNumber[] {
+function readStatedNumbers(trace: CanonicalHumanTrace, schema: EnvironmentSchema): StatedNumber[] {
   const pattern =
-    /(?:\$|£|€)?\s?(\d[\d,]*(?:\.\d{1,2})?)\s*(?:days?|hours?|%|units?)?\s*(?:or less|or under|or fewer|or more|limit|maximum|max|minimum|min|threshold|and above|and over)\b/gi;
+    /(?:\$|£|€)?\s?(\d[\d,]*(?:\.\d{1,2})?)\s*(?:days?|hours?|%|units?|employees?|people|staff)?\s*(?:or less|or under|or fewer|or more|or above|limit|maximum|max|minimum|min|threshold|and above|and over)\b/gi;
   const qualifier = /(approv|authoris|authoriz|sign.?off|review|escalat|permit|manager|supervisor)/i;
+  // Or any value the environment itself declares. Grounding the check in the
+  // schema rather than in a list of English words is what keeps a sentence
+  // like "500 employees or more are enterprise" readable without teaching the
+  // compiler what "enterprise" means.
+  const declared = schema.entities
+    .flatMap((entity) => entity.fields.flatMap((field) => field.enumValues ?? []))
+    .filter((value) => value.length > 3);
 
   const found: StatedNumber[] = [];
-  for (const entry of surfaceText(trace)) {
-    if (!qualifier.test(entry.text)) continue;
+  for (const entry of sentences(trace)) {
+    const relevant =
+      qualifier.test(entry.text) ||
+      declared.some((value) => entry.text.toLowerCase().includes(value.toLowerCase()));
+    if (!relevant) continue;
     for (const match of entry.text.matchAll(pattern)) {
       const raw = match[1];
       if (!raw) continue;
@@ -1003,6 +1210,17 @@ function readStatedNumbers(trace: CanonicalHumanTrace): StatedNumber[] {
     seen.add(entry.value);
     return true;
   });
+}
+
+/** Surface text split into sentences, so two rules on one banner stay apart. */
+function sentences(trace: CanonicalHumanTrace): { text: string; stepId: string }[] {
+  return surfaceText(trace).flatMap((entry) =>
+    entry.text
+      .split(/(?<=[.!?])\s+/)
+      .map((text) => text.trim())
+      .filter((text) => text.length > 0)
+      .map((text) => ({ text, stepId: entry.stepId })),
+  );
 }
 
 function unitMatchesText(unit: string | undefined, text: string): boolean {

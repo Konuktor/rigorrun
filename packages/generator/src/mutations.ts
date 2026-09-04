@@ -34,6 +34,7 @@ import {
   type EnvironmentAdapter,
   type EnvironmentFixture,
   type EnvironmentSchema,
+  type RelationshipSchema,
 } from '@rigorrun/environment';
 
 export interface Mutation {
@@ -199,12 +200,38 @@ function fieldRelationBreaks(context: Context): Mutation[] {
 }
 
 /** Reads the value the other side of a comparison holds in the seed world. */
+function asLiteralArray(value: Literal | Literal[] | undefined): Literal[] {
+  if (value === undefined) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+/**
+ * Which record a rule about a related row is talking about — from the request
+ * where the job names it, otherwise from the record being worked on.
+ */
+function resolveReferencedId(context: Context, relationship: RelationshipSchema): unknown {
+  if (relationship.via.kind !== 'fk') return undefined;
+  const fromRequest = context.fixture.request[relationship.via.field];
+  if (fromRequest !== undefined && fromRequest !== null) return fromRequest;
+  const subject = focusSeedRow(context);
+  const onSubject = subject?.[relationship.via.field];
+  if (onSubject !== undefined && onSubject !== null) return onSubject;
+  const demonstrated =
+    context.contract.demonstratedArgs[context.contract.primaryAction]?.[relationship.via.field];
+  return demonstrated ?? undefined;
+}
+
 function resolveRelatedNumber(context: Context, path: string): number | null {
   const parts = path.split('__');
   const focus = focusEntityName(context);
   if (parts.length === 1) {
-    const row = focusSeedRow(context);
-    const value = row?.[path];
+    // On work that creates a record, the number is not on any row yet — it is
+    // in the request, or in what the operator typed.
+    const fromRequest = context.fixture.request[path];
+    if (typeof fromRequest === 'number') return fromRequest;
+    const demonstrated = context.contract.demonstratedArgs[context.contract.primaryAction]?.[path];
+    if (typeof demonstrated === 'number') return demonstrated;
+    const value = focusSeedRow(context)?.[path];
     return typeof value === 'number' ? value : null;
   }
   const relationship = relationshipsFrom(context.schema, focus).find((r) => r.name === parts[0]);
@@ -445,20 +472,32 @@ function unexpectedStates(context: Context): Mutation[] {
 
       const target = entityByName(context.schema, relationship.to);
       const status = target ? fieldByName(target, statusField) : undefined;
-      const allowed = new Set((condition.value as Literal[] | undefined)?.map(String) ?? []);
-      const forbidden = (status?.enumValues ?? []).find((value) => !allowed.has(value));
-      const referenced = context.fixture.request[relationship.via.field];
-      if (!forbidden || referenced === undefined) continue;
+
+      // The rule may be about a lifecycle value or about a gate being down.
+      // Either way the mutation is "put it in a position nobody demonstrated".
+      const forbidden: string | boolean | undefined =
+        typeof condition.value === 'boolean'
+          ? !condition.value
+          : (status?.enumValues ?? []).find(
+              (value) =>
+                !new Set(asLiteralArray(condition.value).map(String)).has(value),
+            );
+
+      const referenced = resolveReferencedId(context, relationship);
+      if (forbidden === undefined || referenced === undefined) continue;
 
       const state = cloneState(context.fixture.state);
       const row = state.entities[relationship.to]?.[String(referenced)];
-      if (!row) continue;
+      if (!row || row[statusField] === undefined) continue;
       row[statusField] = forbidden;
 
       out.push({
         primitive: 'set_terminal_state',
-        id: `state__${relationship.name}__${forbidden}`,
-        label: `the ${relationship.to} is "${forbidden}"`,
+        id: `state__${relationship.name}__${statusField}__${String(forbidden)}`,
+        label:
+          typeof forbidden === 'boolean'
+            ? `the ${relationship.to}'s ${statusField} is ${forbidden ? 'set' : 'clear'}`
+            : `the ${relationship.to} is "${forbidden}"`,
         category: 'unexpected_state',
         targetRuleIds: [rule.id],
         state,

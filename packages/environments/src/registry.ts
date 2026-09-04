@@ -7,10 +7,22 @@
  * `generator`, `verifier` or `runner` knows any of them exist.
  */
 import { registerEnvironment } from '@rigorrun/environment';
+import { refundEnvironment, refundDemonstration } from './refund.ts';
 import { invoiceEnvironment, invoiceDemonstration } from './invoice.ts';
+import { leadEnvironment, leadDemonstration } from './lead.ts';
+import { accessEnvironment, accessDemonstration } from './access.ts';
+import { fulfillmentEnvironment, fulfillmentDemonstration } from './fulfillment.ts';
 import type { WorkflowDefinition } from './pipeline.ts';
 
 export const WORKFLOWS: WorkflowDefinition[] = [
+  {
+    key: 'refund',
+    title: 'Refund processing',
+    discipline: 'Customer support',
+    registration: refundEnvironment,
+    fixtureId: 'standard',
+    demonstration: refundDemonstration,
+  },
   {
     key: 'invoice',
     title: 'Invoice approval',
@@ -18,6 +30,30 @@ export const WORKFLOWS: WorkflowDefinition[] = [
     registration: invoiceEnvironment,
     fixtureId: 'standard',
     demonstration: invoiceDemonstration,
+  },
+  {
+    key: 'lead',
+    title: 'Lead qualification',
+    discipline: 'Sales',
+    registration: leadEnvironment,
+    fixtureId: 'standard',
+    demonstration: leadDemonstration,
+  },
+  {
+    key: 'access',
+    title: 'Access provisioning',
+    discipline: 'IT',
+    registration: accessEnvironment,
+    fixtureId: 'standard',
+    demonstration: accessDemonstration,
+  },
+  {
+    key: 'fulfillment',
+    title: 'Order fulfilment',
+    discipline: 'Operations',
+    registration: fulfillmentEnvironment,
+    fixtureId: 'standard',
+    demonstration: fulfillmentDemonstration,
   },
 ];
 
@@ -33,4 +69,8 @@ export function workflowByKey(key: string): WorkflowDefinition {
   return found;
 }
 
+export { refundEnvironment } from './refund.ts';
 export { invoiceEnvironment } from './invoice.ts';
+export { leadEnvironment } from './lead.ts';
+export { accessEnvironment } from './access.ts';
+export { fulfillmentEnvironment } from './fulfillment.ts';

@@ -50,6 +50,7 @@ import { remedyPlans, runPlan } from './plan.ts';
  * every incomplete case look like a case the agent should have refused.
  */
 const GATING: Record<RuleTemplate, boolean> = {
+  condition_guard: true,
   path_agreement: true,
   target_state: true,
   transition_allowed: true,
@@ -78,6 +79,7 @@ const TIER: Record<RuleTemplate, number> = {
   field_relation: 3,
   uniqueness: 4,
   threshold_guard: 5,
+  condition_guard: 5,
   field_populated: 8,
   side_effect: 8,
   action_order: 8,
@@ -123,6 +125,9 @@ export async function computeExpected(
   // Tier zero: is the request even coherent? A request naming a record that
   // does not exist is refused before any policy question arises.
   for (const param of primary.params) {
+    // A detail the request simply does not mention is not missing — the
+    // operator's own recording supplies it. A detail the *case* removed is.
+    if (!Object.prototype.hasOwnProperty.call(seed.request, param.name)) continue;
     const value = seed.request[param.name];
     if (value === undefined || value === null) {
       if (param.required) {

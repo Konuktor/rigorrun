@@ -72,6 +72,7 @@ export type Provenance = z.infer<typeof ProvenanceSchema>;
 
 export const RULE_TEMPLATES = [
   'threshold_guard',
+  'condition_guard',
   'relation_required',
   'path_agreement',
   'uniqueness',

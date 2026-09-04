@@ -38,6 +38,7 @@ import { validateProjectionPath, type ProjectionKeySchema } from '@rigorrun/envi
  */
 const SEVERITY: Record<RuleTemplate, FailureSeverity> = {
   threshold_guard: 'CRITICAL',
+  condition_guard: 'CRITICAL',
   path_agreement: 'CRITICAL',
   target_state: 'CRITICAL',
   uniqueness: 'CRITICAL',
@@ -195,7 +196,10 @@ function compileRule(
           return { error: `"${field}" is not a field the projection publishes for ${entity}` };
         }
         const bound = options.bindings?.[field];
-        if (bound === undefined) {
+        // A null key is "no link", and every record without one shares it.
+        // Counting those together would fail an agent for records it never
+        // touched.
+        if (bound === undefined || bound === null) {
           return {
             error: `this rule counts per "${field}", which this case has no value for`,
             kind: 'needs_binding',

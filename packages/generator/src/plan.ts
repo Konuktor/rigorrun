@@ -83,7 +83,16 @@ export async function runPlan(
 
     const before = await adapter.getState();
     const subject = subjectRow(adapter, contract, request, before);
-    const args = bindArgs(definition, contract, request, createdSoFar, idMap, before, subject);
+    const args = bindArgs(
+      definition,
+      contract,
+      request,
+      createdSoFar,
+      idMap,
+      before,
+      subject,
+      name === contract.primaryAction,
+    );
     if (!args) {
       return {
         ok: false,
@@ -144,6 +153,7 @@ function bindArgs(
   idMap: Map<string, string>,
   state: CanonicalState,
   subject: EntityRow | undefined,
+  isPrimary: boolean,
 ): Record<string, unknown> | null {
   const demonstrated = contract.demonstratedArgs[definition.name] ?? {};
   const args: Record<string, unknown> = {};
@@ -166,12 +176,15 @@ function bindArgs(
         args[param.name] = fresh;
         continue;
       }
-    } else {
-      // A parameter named after a field of the record being worked on takes
-      // that record's value. Without this, asking a manager to approve "the
-      // amount" would ask about the amount from the recording rather than the
-      // one in front of us, and every mutated case would fail for the wrong
-      // reason.
+    } else if (!isPrimary) {
+      // A supporting action describes the record in front of you: asking a
+      // manager to approve "the amount" must mean *this* amount, not the one
+      // from the recording.
+      //
+      // The job's own parameters are the opposite. They are the operator's
+      // decision — the tier they judged a lead to be, the reason they gave —
+      // and reading those off the record would replay its current value back
+      // at it and change nothing.
       const onSubject = subject?.[param.name];
       if (onSubject !== undefined && onSubject !== null) {
         args[param.name] = onSubject;
