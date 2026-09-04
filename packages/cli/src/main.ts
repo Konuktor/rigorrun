@@ -12,6 +12,9 @@ import { COMMAND_HELP, HELP, VERSION } from './help.ts';
 import { errorLine, line } from './ui.ts';
 import {
   cmdAgents,
+  cmdEnvironments,
+  cmdInspectEnvironment,
+  cmdWorkflows,
   cmdCompile,
   cmdDemo,
   cmdDoctor,
@@ -50,6 +53,7 @@ async function dispatch(argv: string[]): Promise<number> {
       allowPositionals: true,
       options: {
         out: { type: 'string', short: 'o' },
+        workflow: { type: 'string', short: 'w' },
         agent: { type: 'string', multiple: true, default: [] },
         repeats: { type: 'string' },
         report: { type: 'string' },
@@ -89,6 +93,7 @@ async function dispatch(argv: string[]): Promise<number> {
 
   const flags: Flags = {
     out: values.out,
+    workflow: values.workflow,
     agent: values.agent ?? [],
     repeats: numberFlag(values.repeats, 'repeats'),
     report: values.report,
@@ -116,7 +121,7 @@ async function dispatch(argv: string[]): Promise<number> {
     case 'compare':
       return cmdRun(target, {
         ...flags,
-        agent: flags.agent.length > 0 ? flags.agent : ['demo-weak', 'demo-robust'],
+        agent: flags.agent.length > 0 ? flags.agent : ['naive', 'careful'],
       });
     case 'gate':
       return cmdGate(target, flags);
@@ -124,6 +129,12 @@ async function dispatch(argv: string[]): Promise<number> {
       return cmdReport(target, flags);
     case 'agents':
       return cmdAgents(flags);
+    case 'workflows':
+      return cmdWorkflows(flags);
+    case 'environments':
+      return cmdEnvironments(flags);
+    case 'inspect-environment':
+      return cmdInspectEnvironment(target, flags);
     case 'doctor':
       return cmdDoctor(flags);
     default:

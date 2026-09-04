@@ -27,11 +27,38 @@ export const CASE_CATEGORIES = [
 export const CaseCategorySchema = z.enum(CASE_CATEGORIES);
 export type CaseCategory = z.infer<typeof CaseCategorySchema>;
 
+/**
+ * The catalogue of what an agent may do.
+ *
+ * Public, and necessarily so: an agent that is not told the shape of the API
+ * cannot use it. Nothing here says what a correct answer looks like.
+ */
+export const ToolParamSchema = z.object({
+  name: z.string().min(1),
+  type: z.enum(['string', 'number', 'boolean', 'enum', 'timestamp']),
+  required: z.boolean().default(true),
+  enumValues: z.array(z.string()).optional(),
+  /** The kind of record this identifier refers to, when it is one. */
+  entityRef: z.string().optional(),
+  description: z.string().default(''),
+});
+export type ToolParam = z.infer<typeof ToolParamSchema>;
+
+export const ToolDescriptionSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().default(''),
+  params: z.array(ToolParamSchema).default([]),
+  readOnly: z.boolean().default(false),
+});
+export type ToolDescription = z.infer<typeof ToolDescriptionSchema>;
+
 /** The public half of a case: exactly what the agent receives. */
 export const AgentTaskSchema = z.object({
   instruction: z.string().min(1),
   inputs: z.record(z.string(), z.unknown()).default({}),
   allowedTools: z.array(z.string()).default([]),
+  /** Parameter schemas for those tools. */
+  tools: z.array(ToolDescriptionSchema).default([]),
   /** Policy text the agent is expected to follow. Public on purpose. */
   policyBrief: z.string().default(''),
 });
@@ -66,6 +93,17 @@ export const BenchmarkCaseSchema = z.object({
   task: AgentTaskSchema,
   /** PRIVATE. Never serialised into anything the agent can read. */
   checks: z.array(AssertionSchema).min(1),
+  /**
+   * PRIVATE. The steps a compliant operator would take, empty when the work
+   * should be refused.
+   *
+   * Kept with the benchmark so anyone can check later that every case is
+   * satisfiable — a case no correct actor can pass is a broken case. It is
+   * never shown to an agent; `publicCaseView` is the only path to agent input.
+   */
+  referencePlan: z
+    .array(z.object({ action: z.string(), args: z.record(z.string(), z.unknown()).default({}) }))
+    .default([]),
   maxSteps: z.number().int().positive().default(24),
   timeoutMs: z.number().int().positive().default(15_000),
 });
@@ -84,7 +122,8 @@ export const BenchmarkSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   description: z.string().default(''),
-  environment: z.string().default('northstar'),
+  /** Identifier of the environment adapter this benchmark runs against. */
+  environment: z.string().min(1),
   contractId: z.string(),
   contractHash: z.string(),
   generator: z.enum(['deterministic', 'llm_assisted']).default('deterministic'),

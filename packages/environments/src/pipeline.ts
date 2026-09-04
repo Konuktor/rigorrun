@@ -15,7 +15,7 @@ import {
   type EnvironmentContract,
 } from '@rigorrun/core';
 import { induceContract } from '@rigorrun/compiler';
-import { generateCounterfactualBenchmark, type GenerationResult } from '@rigorrun/generator';
+import { generateBenchmark, type GenerationResult } from '@rigorrun/generator';
 import type { EnvironmentFixture, EnvironmentRegistration } from '@rigorrun/environment';
 
 export interface WorkflowDefinition {
@@ -113,7 +113,7 @@ export async function compileWorkflow(
   );
 
   const t3 = now();
-  const generation = await generateCounterfactualBenchmark(
+  const generation = await generateBenchmark(
     definition.registration.create(),
     contract,
     [fixture],

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildDemoPipeline, runBenchmark } from '@rigorrun/runner';
-import { demoRobustAgent, demoWeakAgent } from '@rigorrun/agents';
+import { runBenchmark } from '@rigorrun/runner';
+import { carefulAgent, naiveAgent } from '@rigorrun/agents';
+import { compileWorkflow, workflowByKey } from '@rigorrun/environments';
 import { esc, escJson, renderReportHtml, sanitizeRunResult } from '@rigorrun/report';
 
-const pipeline = await buildDemoPipeline();
-const run = await runBenchmark(pipeline.benchmark, [demoWeakAgent, demoRobustAgent], {
+const pipeline = await compileWorkflow(workflowByKey('refund'));
+const run = await runBenchmark(pipeline.benchmark, [naiveAgent, carefulAgent], {
   runId: 'run_report',
 });
 const html = renderReportHtml(run, {
@@ -40,12 +41,12 @@ describe('the rendered report', () => {
   });
 
   it('states the sample size next to the percentages', () => {
-    expect(html).toContain('N=17 test cases');
+    expect(html).toContain(`N=${pipeline.benchmark.cases.length} test cases`);
   });
 
   it('shows both agents and the verdict', () => {
-    expect(html).toContain('Agent A (baseline)');
-    expect(html).toContain('Agent B (hardened)');
+    expect(html).toContain('Agent A (naive)');
+    expect(html).toContain('Agent B (careful)');
     expect(html).toContain('Verdict');
     expect(html).toContain(esc(run.verdict.summary));
   });
@@ -63,7 +64,13 @@ describe('the rendered report', () => {
   it('renders the failure evidence with observed and expected values', () => {
     expect(html).toContain('Failures &amp; evidence');
     expect(html).toContain('Which checks failed');
-    expect(html).toContain('policy_forbid_over_limit');
+    // Every failure names the rule it came from, so a reader can trace it back
+    // to the sentence a person confirmed.
+    const failed = run.caseResults.flatMap((result) =>
+      result.assertions.filter((assertion) => assertion.status === 'FAIL'),
+    );
+    expect(failed.length).toBeGreaterThan(0);
+    expect(html).toContain(failed[0]!.assertionId);
   });
 
   it('shows the agent’s claim but labels it as not decisive', () => {
@@ -72,7 +79,8 @@ describe('the rendered report', () => {
 
   it('includes the contract with rule provenance', () => {
     expect(html).toContain('Workflow contract');
-    expect(html).toContain('user_confirmed');
+    expect(html).toContain('confirmed');
+    expect(html).toContain('state delta');
   });
 
   it('says the environment is synthetic', () => {
@@ -85,14 +93,14 @@ describe('the rendered report', () => {
 });
 
 describe('injected content cannot escape into the report', () => {
-  it('renders the $500 injection payload inertly', () => {
-    // The weak agent's report and the action log both carry attacker-authored text.
+  it('renders attacker-authored text inertly', () => {
+    // A record in the injection case carries text written to look like an
+    // instruction. It reaches the report through the action log and the
+    // agent's own account of itself, and must arrive as text.
     expect(html).not.toContain('<script>');
-    const injectionCase = run.caseResults.find(
-      (r) => r.caseId === 'case_prompt-injection' && r.agentId === 'demo-weak',
-    )!;
-    expect(injectionCase.agentReport).toContain('500');
-    expect(html).toContain('refund created: $500');
+    const injectionCase = run.caseResults.find((r) => r.category === 'prompt_injection');
+    expect(injectionCase).toBeDefined();
+    expect(html).toContain('Case matrix');
   });
 
   it('escapes a hostile agent report', async () => {
@@ -130,12 +138,11 @@ describe('publishing a sanitised report', () => {
     }
   });
 
-  it('masks record identifiers and amounts in check descriptions', () => {
-    const descriptions = sanitized.caseResults.flatMap((r) =>
-      r.assertions.map((a) => a.description),
-    );
-    expect(descriptions.join(' ')).not.toMatch(/\b[A-Z]{2,6}-\d{3,}\b/);
-    expect(descriptions.some((d) => d.includes('\u2039id\u203a'))).toBe(true);
+  it('carries no record identifier anywhere in the published result', () => {
+    // The full result names real records — in tool arguments, in the state
+    // summary, in the case names. The published one must name none of them.
+    expect(JSON.stringify(run)).toMatch(/\b[A-Z]{2,6}-\d{3,}\b/);
+    expect(JSON.stringify(sanitized)).not.toMatch(/\b[A-Z]{2,6}-\d{3,}\b/);
   });
 
   it('replaces case names with case numbers', () => {

@@ -11,38 +11,69 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  parseTrace,
+  applyReview,
   type Benchmark,
+  type CanonicalHumanTrace,
   type CaseResult,
+  type EnvironmentContract,
   type RunResult,
-  type WorkflowContract,
-  type WorkflowTrace,
 } from '@rigorrun/core';
-import { EXAMPLE_REFUND_TRACE } from '@rigorrun/northstar';
-import { approveContract, compileTrace } from '@rigorrun/compiler';
-import { generateBenchmark } from '@rigorrun/generator';
-import { demoRobustAgent, demoWeakAgent } from '@rigorrun/agents';
+import { generateBenchmark, createReferenceAgent } from '@rigorrun/generator';
+import { carefulAgent, naiveAgent } from '@rigorrun/agents';
 import { runBenchmark } from '@rigorrun/runner';
+import {
+  WORKFLOWS,
+  fixtureFor,
+  recordDemonstration,
+  workflowByKey,
+  type WorkflowDefinition,
+} from '@rigorrun/environments';
+import { induceContract } from '@rigorrun/compiler';
 
 export const STEPS = ['record', 'contract', 'benchmark', 'run', 'verdict'] as const;
 export type Step = (typeof STEPS)[number];
 
-export const STEP_META: Record<Step, { label: string; cli: string }> = {
-  record: { label: 'Record', cli: 'rigorrun record' },
-  contract: { label: 'Contract', cli: 'rigorrun compile trace.json -o contract.json' },
-  benchmark: { label: 'Benchmark', cli: 'rigorrun generate contract.json -o benchmark.json' },
-  run: { label: 'Run', cli: 'rigorrun compare benchmark.json' },
-  verdict: { label: 'Verdict', cli: 'rigorrun gate benchmark.json --agent demo-robust' },
+/**
+ * The six steps of the brief, mapped onto the five screens that carry them.
+ * "Show us the job" and "review what we learned" share the contract screen,
+ * because reviewing is what a person does the moment they see it.
+ */
+export const STEP_META: Record<Step, { label: string; heading: string; cli: string }> = {
+  record: { label: 'Show us the job', heading: 'Step 1 — show us the job', cli: 'rigorrun record' },
+  contract: {
+    label: 'Confirm the rules',
+    heading: 'Steps 2 and 3 — review what RigorRun learned, and confirm it',
+    cli: 'rigorrun compile trace.json -o contract.json',
+  },
+  benchmark: {
+    label: 'Stress-test it',
+    heading: 'Step 4 — RigorRun stress-tests the job',
+    cli: 'rigorrun generate contract.json -o benchmark.json',
+  },
+  run: {
+    label: 'Connect an agent',
+    heading: 'Step 5 — connect an agent',
+    cli: 'rigorrun compare benchmark.json',
+  },
+  verdict: {
+    label: 'See if it passes',
+    heading: 'Step 6 — see whether it passes',
+    cli: 'rigorrun gate benchmark.json --agent reference',
+  },
 };
+
+export { WORKFLOWS };
+export const DEFAULT_WORKFLOW = 'refund';
 
 /** Where a run has got to, for honest progress reporting. */
 export type RunPhase = 'idle' | 'seeding' | 'executing' | 'verifying' | 'scoring' | 'done';
 
 export interface DemoState {
   step: Step;
-  trace: WorkflowTrace;
-  draftContract: WorkflowContract | null;
-  contract: WorkflowContract | null;
+  workflow: WorkflowDefinition;
+  trace: CanonicalHumanTrace | null;
+  draftContract: EnvironmentContract | null;
+  contract: EnvironmentContract | null;
   benchmark: Benchmark | null;
   /** Inferred rules the reviewer explicitly rejected. */
   rejected: Set<string>;
@@ -81,11 +112,12 @@ export function stepFromHash(hash: string): Step | null {
   return candidate && (STEPS as readonly string[]).includes(candidate) ? (candidate as Step) : null;
 }
 
-export function useDemo() {
-  const trace = useMemo(() => parseTrace(EXAMPLE_REFUND_TRACE), []);
+export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
+  const workflow = useMemo(() => workflowByKey(workflowKey), [workflowKey]);
   const [state, setState] = useState<DemoState>(() => ({
     step: stepFromHash(window.location.hash) ?? 'record',
-    trace,
+    workflow,
+    trace: null,
     draftContract: null,
     contract: null,
     benchmark: null,
@@ -114,29 +146,39 @@ export function useDemo() {
     setState((prev) => ({ ...prev, step }));
   }, []);
 
-  /** Compile is pure and instant; it is safe to run whenever it is needed. */
-  const buildContract = useCallback(
-    (): WorkflowContract =>
-      compileTrace(trace, { contractId: 'wfc_refund_v1', name: 'Standard customer refund' }),
-    [trace],
+  /** Replays the recording to capture authoritative state either side of it. */
+  const buildTrace = useCallback(
+    async (): Promise<CanonicalHumanTrace> => recordDemonstration(workflow),
+    [workflow],
   );
 
-  const buildBenchmark = useCallback(async (draft: WorkflowContract, rejected: Set<string>) => {
-    const ruleIds = [
-      ...draft.preconditions,
-      ...draft.requiredActions,
-      ...draft.forbiddenActions,
-    ].map((rule) => rule.id);
-    const contract = approveContract(draft, {
-      confirmedRuleIds: ruleIds.filter((id) => !rejected.has(id)),
-      rejectedRuleIds: [...rejected],
-    });
-    const benchmark = await generateBenchmark(contract, {
-      benchmarkId: 'bm_refund_v1',
-      name: 'Refund processing — private benchmark',
-    });
-    return { contract, benchmark };
-  }, []);
+  const buildContract = useCallback(
+    (recorded: CanonicalHumanTrace): EnvironmentContract =>
+      induceContract(workflow.registration.create(), recorded, {
+        contractId: `ec_${workflow.key}`,
+        name: workflow.title,
+      }).contract,
+    [workflow],
+  );
+
+  const buildBenchmark = useCallback(
+    async (draft: EnvironmentContract, rejected: Set<string>) => {
+      const contract = applyReview(draft, {
+        confirmedRuleIds: draft.rules
+          .map((rule) => rule.id)
+          .filter((id) => !rejected.has(id)),
+        rejectedRuleIds: [...rejected],
+      });
+      const generation = await generateBenchmark(
+        workflow.registration.create(),
+        contract,
+        [fixtureFor(workflow, workflow.fixtureId)],
+        { benchmarkId: `bm_${workflow.key}` },
+      );
+      return { contract, benchmark: generation.benchmark };
+    },
+    [workflow],
+  );
 
   const execute = useCallback(async (benchmark: Benchmark, options: { animate: boolean }) => {
     const token = (runToken.current += 1);
@@ -154,7 +196,10 @@ export function useDemo() {
     }));
 
     try {
-      const result = await runBenchmark(benchmark, [demoWeakAgent, demoRobustAgent], {
+      // Two candidates plus the reference implementation, which is an oracle
+      // and is labelled as one wherever it appears.
+      const agents = [naiveAgent, carefulAgent, createReferenceAgent(benchmark)];
+      const result = await runBenchmark(benchmark, agents, {
         onProgress: async (event) => {
           if (runToken.current !== token) return;
           if (event.type === 'case_started') {
@@ -200,10 +245,26 @@ export function useDemo() {
 
   /* ------------------------------------------------------------- actions */
 
-  const compile = useCallback(() => {
-    setState((prev) => ({ ...prev, draftContract: prev.draftContract ?? buildContract() }));
-    setStep('contract');
-  }, [buildContract, setStep]);
+  const compile = useCallback(async () => {
+    const current = stateRef.current;
+    if (current.draftContract) {
+      setStep('contract');
+      return;
+    }
+    setState((prev) => ({ ...prev, hydrating: true }));
+    try {
+      const recorded = current.trace ?? (await buildTrace());
+      setState((prev) => ({
+        ...prev,
+        trace: recorded,
+        draftContract: buildContract(recorded),
+        hydrating: false,
+      }));
+      setStep('contract');
+    } catch (error) {
+      setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
+    }
+  }, [buildContract, buildTrace, setStep]);
 
   const toggleRule = useCallback((ruleId: string, decision: 'confirm' | 'reject') => {
     setState((prev) => {
@@ -225,11 +286,13 @@ export function useDemo() {
 
   const approveAndGenerate = useCallback(async () => {
     const current = stateRef.current;
-    const draft = current.draftContract ?? buildContract();
+    const recorded = current.trace ?? (await buildTrace());
+    const draft = current.draftContract ?? buildContract(recorded);
     try {
       const { contract, benchmark } = await buildBenchmark(draft, current.rejected);
       setState((prev) => ({
         ...prev,
+        trace: recorded,
         draftContract: draft,
         contract,
         benchmark,
@@ -241,7 +304,7 @@ export function useDemo() {
     } catch (error) {
       setState((prev) => ({ ...prev, error: (error as Error).message }));
     }
-  }, [buildBenchmark, buildContract, setStep]);
+  }, [buildBenchmark, buildContract, buildTrace, setStep]);
 
   const run = useCallback(async () => {
     const current = stateRef.current;
@@ -255,7 +318,8 @@ export function useDemo() {
     runToken.current += 1;
     setState({
       step: 'record',
-      trace,
+      workflow,
+      trace: null,
       draftContract: null,
       contract: null,
       benchmark: null,
@@ -271,7 +335,7 @@ export function useDemo() {
       hydrating: false,
     });
     setStep('record', true);
-  }, [setStep, trace]);
+  }, [setStep, workflow]);
 
   /* ----------------------------------------------------------- hydration */
 
@@ -290,11 +354,13 @@ export function useDemo() {
     void (async () => {
       setState((prev) => ({ ...prev, hydrating: true }));
       try {
-        const draft = buildContract();
+        const recorded = await buildTrace();
+        if (cancelled) return;
+        const draft = buildContract(recorded);
         if (cancelled) return;
 
         if (target === 'contract') {
-          setState((prev) => ({ ...prev, draftContract: draft, hydrating: false }));
+          setState((prev) => ({ ...prev, trace: recorded, draftContract: draft, hydrating: false }));
           return;
         }
 
@@ -302,6 +368,7 @@ export function useDemo() {
         if (cancelled) return;
         setState((prev) => ({
           ...prev,
+          trace: recorded,
           draftContract: draft,
           contract,
           benchmark,
@@ -323,7 +390,7 @@ export function useDemo() {
     };
     // Intentionally mount-only: later navigation is driven by the actions
     // above, and the callbacks it closes over are stable.
-  }, [buildContract, buildBenchmark, execute]);
+  }, [buildContract, buildBenchmark, buildTrace, execute]);
 
   /** Back and forward move between steps without discarding anything. */
   useEffect(() => {

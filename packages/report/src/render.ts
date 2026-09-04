@@ -11,7 +11,7 @@ import type {
   Benchmark,
   CaseResult,
   RunResult,
-  WorkflowContract,
+  EnvironmentContract,
 } from '@rigorrun/core';
 import { pct } from '@rigorrun/scoring';
 import { esc, escJson } from './escape.ts';
@@ -19,7 +19,7 @@ import { REPORT_CSS } from './styles.ts';
 import { sanitizeRunResult, SANITIZATION_NOTES } from './sanitize.ts';
 
 export interface RenderOptions {
-  contract?: WorkflowContract;
+  contract?: EnvironmentContract;
   benchmark?: Benchmark;
   /** `published` strips private workflow content. */
   mode?: 'full' | 'published';
@@ -49,7 +49,7 @@ ${contractSection(options.contract)}
 ${metadata(data, options, generatedAt, mode)}
 <footer>
   RigorRun ${esc(data.rigorrunVersion)} · Do the job once. Test every agent forever.<br>
-  Northstar Support is a synthetic demo environment. All customers, orders and refunds in it are fabricated.
+  ${esc(data.environment)} is a synthetic demo environment. Every record in it is fabricated.
 </footer>
 </div></body></html>`;
 }
@@ -279,41 +279,44 @@ function describeAction(type: string, payload: Record<string, unknown>): string 
       .join(' ');
     return `${name}(${keys})`;
   }
-  if (type === 'refund.created') {
-    return `refund created: $${String(payload['amount'])} on ${String(payload['orderId'])} ticket=${String(payload['ticketId'])} approval=${String(payload['approvalId'])}`;
-  }
   return type;
 }
 
-function contractSection(contract?: WorkflowContract): string {
+function contractSection(contract?: EnvironmentContract): string {
   if (!contract) return '';
-  const ruleRows = [
-    ...contract.preconditions.map((r) => ['Precondition', r] as const),
-    ...contract.requiredActions.map((r) => ['Required', r] as const),
-    ...contract.forbiddenActions.map((r) => ['Forbidden', r] as const),
-  ]
+  const ruleRows = contract.rules
     .map(
-      ([kind, rule]) => `<tr>
-      <td>${esc(kind)}</td>
-      <td>${esc(rule.rule)}</td>
-      <td><span class="tag ${rule.source === 'user_confirmed' ? 'pass' : rule.source === 'observed' ? 'det' : ''}">${esc(rule.source)}</span></td>
+      (rule) => `<tr>
+      <td>${esc(rule.template.replace(/_/g, ' '))}</td>
+      <td>${esc(rule.statement)}</td>
+      <td><span class="tag ${
+        rule.status === 'confirmed' || rule.status === 'observed'
+          ? 'pass'
+          : rule.status === 'rejected'
+            ? ''
+            : 'det'
+      }">${esc(rule.status)}</span></td>
       <td class="num mono">${rule.confidence.toFixed(2)}</td>
+      <td class="dim">${esc(
+        [...new Set(rule.provenance.map((node) => node.kind.replace(/_/g, ' ')))].join(', '),
+      )}</td>
     </tr>`,
     )
     .join('');
 
+  const open = contract.rules.filter((rule) => rule.status === 'inferred').length;
   return `<h2>Workflow contract</h2>
 <div class="panel">
   <p class="muted">${esc(contract.goal)}</p>
   <table style="margin-top:10px">
-    <thead><tr><th>Kind</th><th>Rule</th><th>Source</th><th class="num">Confidence</th></tr></thead>
+    <thead><tr><th>Shape</th><th>Rule</th><th>Status</th><th class="num">Confidence</th><th>Evidence</th></tr></thead>
     <tbody>${ruleRows}</tbody>
   </table>
-  ${
-    contract.uncertainty.length > 0
-      ? `<p class="dim mono" style="margin-top:10px">${contract.uncertainty.length} open question(s) were raised at compile time; rules marked <em>user_confirmed</em> were reviewed and accepted by a person.</p>`
-      : ''
-  }
+  <p class="dim mono" style="margin-top:10px">${
+    open > 0
+      ? `${open} rule(s) are still inferred, and cannot fail an agent. Only observed facts and rules a person confirmed are enforced.`
+      : 'Every rule here was either observed directly or confirmed by a person.'
+  }</p>
 </div>`;
 }
 

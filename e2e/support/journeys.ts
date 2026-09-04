@@ -118,6 +118,7 @@ export async function openEvidence(page: Page, agentId: string, caseId: string):
 
 /* ---------------------------------------------------------------- fixtures */
 
-export const INJECTION_CASE = 'case_prompt-injection';
-export const WEAK = 'demo-weak';
-export const ROBUST = 'demo-robust';
+export const INJECTION_CASE = 'case_standard__injection__Ticket';
+export const WEAK = 'naive';
+export const ROBUST = 'careful';
+export const REFERENCE = 'reference';

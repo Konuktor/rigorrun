@@ -1,18 +1,17 @@
 /**
- * The execution engine: reset → seed → execute → observe → verify → score.
+ * Running a generated benchmark against an environment adapter.
  *
- * Two properties this file is responsible for:
+ * The five stages are unchanged — reset, seed, execute, observe, verify — and
+ * so are the two properties the runner is responsible for. What changed is
+ * that the environment is resolved by id from a registry instead of being
+ * imported, so this file has no idea what kind of business it is testing.
  *
- *  1. **Isolation.** Every case builds a brand-new engine from its scenario
- *     seed, so no case can inherit state from another. There is no shared
- *     mutable world anywhere in this path.
+ * Isolation: every case builds a fresh adapter from its own recorded starting
+ * world, so no case can inherit anything from another.
  *
- *  2. **Integrity.** The agent is handed `publicCaseView(testCase)` and nothing
- *     else. The assertions live in `testCase.checks`, which is read only after
- *     the agent has finished and only by the verifier.
- *
- * It is isomorphic: no Node built-ins, so the identical code runs in the CLI,
- * in CI and inside the dashboard in the browser.
+ * Integrity: the agent is handed `publicCaseView(testCase)` and a bounded tool
+ * channel. `testCase.checks` is read afterwards, by the verifier, and never
+ * travels through anything the agent can see.
  */
 import {
   RUN_SCHEMA_VERSION,
@@ -23,14 +22,18 @@ import {
   type Benchmark,
   type BenchmarkCase,
   type CaseResult,
+  type ObservedEvent,
   type RunResult,
 } from '@rigorrun/core';
-import { NorthstarEngine, buildObservation, summariseState } from '@rigorrun/northstar';
-import type { ToolResult } from '@rigorrun/northstar';
+import {
+  buildProjection,
+  createEnvironment,
+  type CanonicalState,
+  type EnvironmentAdapter,
+} from '@rigorrun/environment';
 import { verify } from '@rigorrun/verifier';
 import { decideVerdict, scoreAgent } from '@rigorrun/scoring';
-import type { AgentAdapter, AgentEnvironment } from '@rigorrun/agents';
-
+import type { AgentAdapter, AgentEnvironment, ToolResult } from '@rigorrun/agents';
 export type RunProgress =
   | { type: 'run_started'; runId: string; totalCases: number; agents: string[] }
   | { type: 'case_started'; runId: string; agentId: string; caseId: string; caseName: string }
@@ -76,7 +79,6 @@ export async function runBenchmark(
   });
 
   const caseResults: CaseResult[] = [];
-
   for (const agent of agents) {
     for (const testCase of benchmark.cases) {
       for (let attempt = 0; attempt < repeats; attempt += 1) {
@@ -87,7 +89,7 @@ export async function runBenchmark(
           caseId: testCase.id,
           caseName: testCase.name,
         });
-        const result = await executeCase(runId, testCase, agent, now);
+        const result = await executeCase(benchmark, runId, testCase, agent, now);
         caseResults.push(result);
         await options.onProgress?.({ type: 'case_finished', runId, result });
       }
@@ -120,24 +122,22 @@ export async function runBenchmark(
     resultHash: '',
     rigorrunVersion: options.version ?? '0.1.0',
   };
-
-  // Sealed last, over everything above it.
   result.resultHash = await hashValue({ ...result, resultHash: '' });
   await options.onProgress?.({ type: 'run_finished', runId, result });
   return result;
 }
 
 async function executeCase(
+  benchmark: Benchmark,
   runId: string,
   testCase: BenchmarkCase,
   agent: AgentAdapter,
   now: () => Date,
 ): Promise<CaseResult> {
-  // reset + seed: a fresh world built from the scenario, every single time.
-  const engine = NorthstarEngine.fromScenario(testCase.seed.scenarioId, {
-    mutations: testCase.seed.mutations,
-    actor: `agent.${agent.id}`,
-  });
+  const adapter = createEnvironment(benchmark.environment);
+  const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
+  await adapter.reset();
+  await adapter.seed(seedState, testCase.seed.config);
 
   const steps: AgentStep[] = [];
   let pendingNote: string | null = null;
@@ -146,26 +146,29 @@ async function executeCase(
   const env: AgentEnvironment = {
     async call(tool: string, args: Record<string, unknown> = {}): Promise<ToolResult> {
       if (stepBudget <= 0) {
-        return {
-          ok: false,
-          error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' },
-        };
+        return { ok: false, error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' } };
       }
       stepBudget -= 1;
-
-      const safeArgs = boundArgs(args);
-      const result = engine.call(tool, args);
+      const result = await adapter.executeAction(tool, args);
       steps.push({
         index: steps.length,
         at: Date.now(),
         tool,
-        args: safeArgs,
+        args: boundArgs(args),
         ok: result.ok,
-        ...(result.ok ? { result: result.data } : { error: result.error.code }),
+        ...(result.ok ? { result: result.data } : { error: result.error?.code ?? 'FAILED' }),
         ...(pendingNote ? { note: pendingNote } : {}),
       });
       pendingNote = null;
-      return result;
+      return result.ok
+        ? { ok: true, data: result.data }
+        : {
+            ok: false,
+            error: {
+              code: result.error?.code ?? 'FAILED',
+              message: result.error?.message ?? 'the action was refused',
+            },
+          };
     },
     stepsRemaining: () => stepBudget,
     note(text: string) {
@@ -177,11 +180,11 @@ async function executeCase(
   const startedMs = performanceNow();
 
   let report: string;
+  let errored = false;
+  let errorMessage: string | undefined;
   let usage: CaseResult['usage'];
   let costUsd: number | null = null;
   let costNote = 'cost unavailable';
-  let errored = false;
-  let errorMessage: string | undefined;
 
   try {
     const output = await withTimeout(
@@ -204,15 +207,23 @@ async function executeCase(
   const durationMs = Math.max(0, performanceNow() - startedMs);
   const finishedAt = now().toISOString();
 
-  // observe: read the world the agent actually left behind.
-  const observation = buildObservation(engine, {
-    scenarioId: testCase.seed.scenarioId,
-    agentReport: report,
+  // observe: authoritative state, projected the same way for every agent.
+  const finalState = await adapter.getState();
+  const events = await adapter.getEvents();
+  const { derived } = buildProjection(adapter.describeEntities(), {
+    seed: seedState,
+    final: finalState,
+    events,
+    focus: benchmark.projectionFocus,
+    knownEventTypes: mutatingActionNames(adapter),
   });
 
-  // verify: the private checks, evaluated against that world.
-  const summary = verify(testCase.checks, observation);
-  const finalState = engine.snapshot();
+  const summary = verify(testCase.checks, {
+    state: finalState,
+    derived,
+    events: [],
+    agentReport: report,
+  });
 
   return {
     runId,
@@ -225,7 +236,15 @@ async function executeCase(
     finishedAt,
     durationMs: round3(durationMs),
     steps,
-    actions: engine.events(),
+    actions: events.map(
+      (event): ObservedEvent => ({
+        type: event.type,
+        at: event.at,
+        payload: event.payload,
+        ok: event.ok,
+        ...(event.error ? { error: event.error } : {}),
+      }),
+    ),
     assertions: summary.results,
     taskSuccess: !errored && summary.taskSuccess,
     policyCompliant: summary.policyCompliant,
@@ -237,11 +256,27 @@ async function executeCase(
     costNote,
     agentReport: report,
     finalStateHash: await hashValue(finalState),
-    finalStateSummary: summariseState(finalState),
+    finalStateSummary: summariseCanonicalState(finalState),
   };
 }
 
-/** Caps how much of an agent's arguments are retained in evidence. */
+function mutatingActionNames(adapter: EnvironmentAdapter): string[] {
+  return adapter
+    .getActions()
+    .filter((action) => !action.readOnly)
+    .map((action) => action.name);
+}
+
+/** A compact slice of the world for the evidence view. */
+function summariseCanonicalState(state: CanonicalState): Record<string, unknown> {
+  const summary: Record<string, unknown> = {};
+  for (const name of Object.keys(state.entities).sort()) {
+    const rows = Object.values(state.entities[name] ?? {});
+    summary[name] = { count: rows.length, rows: rows.slice(0, 5) };
+  }
+  return summary;
+}
+
 function boundArgs(args: Record<string, unknown>): Record<string, unknown> {
   const serialised = JSON.stringify(args);
   if (serialised.length <= MAX_TOOL_ARG_BYTES) return args;

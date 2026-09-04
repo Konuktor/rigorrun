@@ -39,7 +39,7 @@ import {
   type CaseConfig,
   type EnvironmentAdapter,
 } from '@rigorrun/environment';
-import { remedyPlans, runPlan } from './plan.ts';
+import { remedyPlans, runPlan, type PlanStep } from './plan.ts';
 
 /**
  * Whether violating a rule means the work must not be done at all, or only
@@ -108,6 +108,12 @@ export interface ExpectedOutcome {
   bindings: Record<string, Literal>;
   /** Rules that produced no assertion for this case, and why. */
   problems: SynthesisProblem[];
+  /**
+   * The steps a compliant operator would take. Empty when the work should be
+   * refused. Recorded so the reference implementation can replay it — see
+   * `createReferenceAgent`, and note what that does and does not prove.
+   */
+  plan: PlanStep[];
 }
 
 export async function computeExpected(
@@ -164,6 +170,7 @@ export async function computeExpected(
       return {
         shouldPerform: true,
         requiredRemedies: remedies,
+        plan: run.steps,
         refusalReason: '',
         blockingRuleId: null,
         applicableRuleIds: evaluation.applicable.map((rule) => rule.id),
@@ -226,6 +233,7 @@ export async function computeExpected(
     conflict: false,
     bindings: evaluation.bindings,
     problems: evaluation.problems,
+    plan: [],
   };
 }
 
@@ -318,6 +326,7 @@ function refusal(reason: string, blockingRuleId: string | null): ExpectedOutcome
     conflict: false,
     bindings: {},
     problems: [],
+    plan: [],
   };
 }
 

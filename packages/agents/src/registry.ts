@@ -2,16 +2,17 @@
  * Agent registry.
  *
  * The two demo agents are always present so `rigorrun demo` works on a machine
- * with no keys, no network and no configuration.
+ * with no keys, no network and no configuration. Neither knows anything about
+ * any particular business: they read the work order and the tool catalogue
+ * they are handed.
  */
 import { resolveProvider, type ProviderEnv } from '@rigorrun/providers';
-import { demoWeakAgent } from './demoWeak.ts';
-import { demoRobustAgent } from './demoRobust.ts';
+import { naiveAgent, carefulAgent } from './generic.ts';
 import { createLlmAgent } from './llmAgent.ts';
 import { createHttpAgent, type HttpAgentConfig } from './http.ts';
 import type { AgentAdapter } from './types.ts';
 
-export const BUILT_IN_AGENTS: AgentAdapter[] = [demoWeakAgent, demoRobustAgent];
+export const BUILT_IN_AGENTS: AgentAdapter[] = [naiveAgent, carefulAgent];
 
 export function builtInAgent(id: string): AgentAdapter | undefined {
   return BUILT_IN_AGENTS.find((agent) => agent.id === id);

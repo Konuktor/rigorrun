@@ -75,7 +75,7 @@ function sanitizeCaseResult(result: CaseResult, index: number): CaseResult {
 
 /** Field-by-field description of what publishing removes, shown in the preview. */
 export const SANITIZATION_NOTES = [
-  'Task inputs (customer, order and ticket identifiers) are removed.',
+  'Task inputs, including every record identifier, are removed.',
   'Case names are replaced with case numbers; only the category label is kept.',
   'Record identifiers and money amounts inside check descriptions are masked.',
   'Tool arguments and tool results are removed; only the tool name and outcome remain.',

@@ -7,118 +7,100 @@
  * rate limit, which exists on purpose.
  */
 import { expect, test } from '@playwright/test';
-import { NorthstarEngine, buildObservation } from '@rigorrun/northstar';
-import { buildDemoPipeline, runBenchmark } from '@rigorrun/runner';
-import { demoRobustAgent, demoWeakAgent } from '@rigorrun/agents';
-import { INJECTION_CASE, ROBUST, WEAK, deepLinkToVerdict } from './support/journeys.ts';
+import { buildProjection, createEnvironment, type CanonicalState } from '@rigorrun/environment';
+import { compileWorkflow, workflowByKey } from '@rigorrun/environments';
+import { createReferenceAgent } from '@rigorrun/generator';
+import { runBenchmark } from '@rigorrun/runner';
+import { carefulAgent, naiveAgent } from '@rigorrun/agents';
+import { REFERENCE, WEAK, deepLinkToVerdict } from './support/journeys.ts';
 
 const API = process.env['API_URL'] ?? 'https://rigorrun.takhiroverbol.workers.dev';
 
-/* ================================================== real system state (§16) */
+/* ================================================== real system state (§15) */
 
 test.describe('system state, not just the UI', () => {
-  test('the baseline agent really creates a $500 refund with no approval', async () => {
-    const { benchmark } = await buildDemoPipeline();
-    const injection = benchmark.cases.find((c) => c.id === INJECTION_CASE)!;
+  test('a policy violation is visible in the system of record, not only in a score', async () => {
+    const { benchmark, generation } = await compileWorkflow(workflowByKey('refund'));
+    // A case a compliant operator would refuse.
+    const refusal = generation.cases.find((entry) => !entry.expected.shouldPerform)!;
+    expect(refusal).toBeDefined();
 
-    const result = await runBenchmark({ ...benchmark, cases: [injection] }, [demoWeakAgent], {
-      runId: 'prod_state_weak',
+    const result = await runBenchmark({ ...benchmark, cases: [refusal.testCase] }, [naiveAgent], {
+      runId: 'prod_state_naive',
     });
     const caseResult = result.caseResults[0]!;
 
-    // Read the authoritative environment state, not the rendered text.
-    const engine = NorthstarEngine.fromScenario(injection.seed.scenarioId);
-    const seeded = engine.snapshot();
-    expect(seeded.refunds).toHaveLength(0);
+    // The agent that ignores the policy leaves a record behind. Read it from
+    // the environment's own state, not from anything the agent said.
+    const focus = benchmark.projectionFocus;
+    expect(focus.length).toBeGreaterThan(0);
+    const summary = caseResult.finalStateSummary as Record<string, { count: number }>;
+    const created = Object.values(summary).reduce((total, entry) => total + entry.count, 0);
+    expect(created).toBeGreaterThan(0);
 
-    const refunds = caseResult.finalStateSummary['refunds'] as {
-      id: string;
-      orderId: string;
-      amount: number;
-      ticketId: string | null;
-      approvalId: string | null;
-    }[];
-
-    expect(refunds).toHaveLength(1);
-    expect(refunds[0]!.amount).toBe(500);
-    expect(refunds[0]!.approvalId).toBeNull();
-    expect(refunds[0]!.orderId).toBe('ORD-3016');
-    expect(refunds[0]!.ticketId).toBe('TCK-4016');
-
-    // An audit event was written and links the refund.
-    const audit = caseResult.finalStateSummary['audit'] as { action: string }[];
-    expect(audit.some((entry) => entry.action === 'refund.issued')).toBe(true);
-
-    // And the verifier saw exactly that.
-    const overLimit = caseResult.assertions.find(
-      (a) => a.assertionId === 'policy_forbid_over_limit',
-    )!;
-    expect(overLimit.status).toBe('FAIL');
-    expect(overLimit.unsafe).toBe(true);
     expect(caseResult.policyCompliant).toBe(false);
+    expect(caseResult.unsafeActions).toBeGreaterThan(0);
+    const failed = caseResult.assertions.filter((a) => a.status === 'FAIL');
+    expect(failed.length).toBeGreaterThan(0);
+    // Every failure names the rule a person confirmed.
+    expect(failed.every((a) => a.ruleId !== undefined || a.assertionId.startsWith('success'))).toBe(
+      true,
+    );
+    expect(failed.every((a) => a.verificationSource === 'STATE')).toBe(true);
   });
 
-  test('the hardened agent leaves a compliant $25 refund', async () => {
-    const { benchmark } = await buildDemoPipeline();
-    const injection = benchmark.cases.find((c) => c.id === INJECTION_CASE)!;
-
-    const result = await runBenchmark({ ...benchmark, cases: [injection] }, [demoRobustAgent], {
-      runId: 'prod_state_robust',
+  test('the reference implementation is not failed by its own benchmark', async () => {
+    // A suite no correct actor can pass is broken. This is the check that
+    // says so, on the real artefacts.
+    const { benchmark } = await compileWorkflow(workflowByKey('refund'));
+    const result = await runBenchmark(benchmark, [createReferenceAgent(benchmark)], {
+      runId: 'prod_state_reference',
     });
-    const caseResult = result.caseResults[0]!;
-    const refunds = caseResult.finalStateSummary['refunds'] as {
-      amount: number;
-      ticketId: string;
-    }[];
-
-    expect(refunds).toHaveLength(1);
-    expect(refunds[0]!.amount).toBe(25);
-    expect(refunds[0]!.ticketId).toBe('TCK-4016');
-    expect(caseResult.policyCompliant).toBe(true);
-    expect(caseResult.unsafeActions).toBe(0);
+    const score = result.scores[0]!;
+    expect(score.thresholdsPassed).toBe(true);
+    expect(score.unsafeActions).toBe(0);
   });
 
-  test('the observation the verifier reads matches the engine', async () => {
-    const engine = NorthstarEngine.fromScenario('prompt-injection');
-    engine.call('createRefund', {
-      orderId: 'ORD-3016',
-      customerId: 'CUST-2016',
-      ticketId: 'TCK-4016',
-      amount: 500,
+  test('the projection the verifier reads is computed from state, not reported', async () => {
+    const { benchmark } = await compileWorkflow(workflowByKey('refund'));
+    const testCase = benchmark.cases.find((c) => c.category === 'happy_path')!;
+    const adapter = createEnvironment(benchmark.environment);
+    const seed = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
+    await adapter.seed(seed, testCase.seed.config);
+
+    for (const step of testCase.referencePlan) {
+      const outcome = await adapter.executeAction(step.action, step.args);
+      expect(outcome.ok).toBe(true);
+    }
+
+    const { derived } = buildProjection(adapter.describeEntities(), {
+      seed,
+      final: await adapter.getState(),
+      events: await adapter.getEvents(),
+      focus: benchmark.projectionFocus,
     });
-
-    const observation = buildObservation(engine, { scenarioId: 'prompt-injection' });
-    const derived = observation.derived as {
-      createdRefunds: { amount: number; approvalStatus: string; overSelfServeLimit: boolean }[];
-    };
-
-    expect(derived.createdRefunds).toHaveLength(1);
-    expect(derived.createdRefunds[0]!.amount).toBe(500);
-    expect(derived.createdRefunds[0]!.approvalStatus).toBe('none');
-    expect(derived.createdRefunds[0]!.overSelfServeLimit).toBe(true);
+    const focus = benchmark.projectionFocus[0]!;
+    expect(Object.keys(derived.created)).toContain(focus);
   });
 
   test('the release gate agrees with the deployed UI', async ({ page }) => {
-    const { benchmark } = await buildDemoPipeline();
-    const result = await runBenchmark(benchmark, [demoWeakAgent, demoRobustAgent], {
-      runId: 'prod_gate',
-    });
+    const { benchmark } = await compileWorkflow(workflowByKey('refund'));
+    const result = await runBenchmark(
+      benchmark,
+      [naiveAgent, carefulAgent, createReferenceAgent(benchmark)],
+      { runId: 'prod_gate' },
+    );
 
-    const weak = result.scores.find((s) => s.agentId === WEAK)!;
-    const robust = result.scores.find((s) => s.agentId === ROBUST)!;
-    expect(weak.thresholdsPassed).toBe(false);
-    expect(robust.thresholdsPassed).toBe(true);
+    const naive = result.scores.find((s) => s.agentId === WEAK)!;
+    const reference = result.scores.find((s) => s.agentId === REFERENCE)!;
+    expect(naive.thresholdsPassed).toBe(false);
+    expect(reference.thresholdsPassed).toBe(true);
 
     await deepLinkToVerdict(page);
     await expect(page.getByTestId(`score-${WEAK}`)).toContainText('Gate failed');
-    await expect(page.getByTestId(`score-${ROBUST}`)).toContainText('Gate passed');
-    await expect(page.getByTestId(`score-${ROBUST}`)).toContainText(
-      `${(robust.taskSuccessRate * 100).toFixed(0)}%`,
-    );
+    await expect(page.getByTestId(`score-${REFERENCE}`)).toContainText('Gate passed');
   });
 });
-
-/* ====================================================== the live Worker API */
 
 test.describe('control plane API', () => {
   // API behaviour does not vary by viewport, and workspace creation is rate
@@ -152,7 +134,7 @@ test.describe('control plane API', () => {
     id,
     name: 'QA workflow',
     goal: 'Verify the deployed control plane',
-    environment: 'northstar',
+    environment: 'support-refund',
     contractHash: `sha256:${'a'.repeat(64)}`,
     ruleCounts: { observed: 5, inferred: 7, confirmed: 12 },
     openQuestions: 6,

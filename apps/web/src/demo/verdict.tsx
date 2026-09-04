@@ -12,7 +12,7 @@ import type {
   Benchmark,
   CaseResult,
   RunResult,
-  WorkflowContract,
+  EnvironmentContract,
 } from '@rigorrun/core';
 import { renderReportHtml, sanitizeRunResult } from '@rigorrun/report';
 import { Dialog } from '../components/Dialog.tsx';
@@ -45,7 +45,7 @@ export function VerdictStep({
   benchmark,
 }: {
   result: RunResult;
-  contract: WorkflowContract | null;
+  contract: EnvironmentContract | null;
   benchmark: Benchmark | null;
 }) {
   const [selected, setSelected] = useState<CaseResult | null>(null);

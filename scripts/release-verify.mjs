@@ -26,6 +26,7 @@ const red = (t) => `${ESC}[31m${t}${ESC}[0m`;
 const LOCAL = [
   ['contrast', 'node', ['scripts/check-contrast.mjs'], 'design tokens meet WCAG contrast'],
   ['lint', 'pnpm', ['lint'], 'eslint'],
+  ['domain', 'node', ['scripts/check-domain-leak.mjs'], 'no workflow leaked into generic code'],
   ['typecheck', 'pnpm', ['typecheck'], 'tsc --noEmit'],
   ['unit', 'pnpm', ['test'], 'unit and integration tests'],
   ['build', 'pnpm', ['build'], 'all apps and the CLI build'],

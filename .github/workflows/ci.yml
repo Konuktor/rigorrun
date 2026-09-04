@@ -36,6 +36,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Generic core stays generic
+        run: pnpm domain
+
       - name: Typecheck
         run: pnpm typecheck
 

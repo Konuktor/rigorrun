@@ -7,7 +7,7 @@ import {
   type EnvironmentContract,
 } from '@rigorrun/core';
 import { induceContract } from '@rigorrun/compiler';
-import { generateCounterfactualBenchmark, type GenerationResult } from '@rigorrun/generator';
+import { generateBenchmark, type GenerationResult } from '@rigorrun/generator';
 import { TEST_FIXTURE, testEnvironment } from '../../environment/test/support.ts';
 
 const BANNER = 'Claims of $50 or less need no approval. Above that, a permit is required.';
@@ -60,7 +60,7 @@ async function contract(): Promise<EnvironmentContract> {
 let cached: Promise<GenerationResult> | null = null;
 function generated(): Promise<GenerationResult> {
   cached ??= contract().then((approved) =>
-    generateCounterfactualBenchmark(testEnvironment.create(), approved, [TEST_FIXTURE], {
+    generateBenchmark(testEnvironment.create(), approved, [TEST_FIXTURE], {
       benchmarkId: 'bm_test',
       createdAt: '2026-01-20T09:10:00.000Z',
     }),

@@ -7,7 +7,16 @@
  * asserts at runtime that no verifier internals appear in it.
  */
 import type { AgentTask, TokenUsage } from '@rigorrun/core';
-import type { ToolResult } from '@rigorrun/northstar';
+
+/**
+ * What a tool call gives back.
+ *
+ * Defined here rather than imported from any environment: the agent boundary
+ * must not know which business system it is pointed at.
+ */
+export type ToolResult<T = unknown> =
+  | { ok: true; data: T }
+  | { ok: false; error: { code: string; message: string } };
 
 export interface AgentRunInput {
   caseId: string;

@@ -17,8 +17,8 @@ suite for every AI agent — on *any* workflow, not one.
 | 6  | Generic contract compiler (10 templates)      | ✅ |
 | 7  | Typed verifier synthesis + tri-state          | ✅ |
 | 8  | State-aware counterfactual generator          | ✅ |
-| 9  | Five demo environments + generic agents       | 🔵 environments done |
-| 10 | Hidden sixth-domain acceptance test           | ⬜ |
+| 9  | Five demo environments + generic agents       | ✅ |
+| 10 | Hidden sixth-domain acceptance test           | ✅ 10 tests, zero code changes |
 | 11 | Benchmark mutation testing                    | ⬜ |
 | 12 | Benchmark quality + time-to-benchmark         | ⬜ |
 | 13 | Browser execution lane                        | ⬜ |

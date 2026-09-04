@@ -67,6 +67,20 @@ export function fmtMs(ms: number): string {
   return `${(ms * 1000).toFixed(0)}us`;
 }
 
+/** How sure RigorRun is about a rule, at a glance. */
+export function ruleTag(status: string): string {
+  switch (status) {
+    case 'observed':
+      return c.green('[observed ]');
+    case 'confirmed':
+      return c.green('[confirmed]');
+    case 'rejected':
+      return c.grey('[rejected ]');
+    default:
+      return c.yellow('[inferred ]');
+  }
+}
+
 export function statusTag(ok: boolean): string {
   return ok ? c.green('PASS') : c.red('FAIL');
 }

@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@rigorrun/core": "workspace:*",
-    "@rigorrun/northstar": "workspace:*",
     "@rigorrun/verifier": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
     "@rigorrun/agents": "workspace:*",
     "@rigorrun/compiler": "workspace:*",
-    "@rigorrun/generator": "workspace:*"
+    "@rigorrun/generator": "workspace:*",
+    "@rigorrun/environment": "workspace:*"
   }
 }

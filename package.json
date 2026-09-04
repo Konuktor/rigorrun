@@ -28,7 +28,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "verify": "pnpm lint && pnpm typecheck && pnpm domain && pnpm test && pnpm build",
     "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
     "e2e:public": "playwright test --config e2e/playwright.public.config.ts",
     "build:web:prod": "VITE_CRM_URL=https://rigorrun-crm.pages.dev pnpm -F @rigorrun/web build",
@@ -47,7 +47,8 @@
     "release:verify:prod": "node scripts/release-verify.mjs --prod",
     "contrast": "node scripts/check-contrast.mjs",
     "api:prod": "playwright test --config e2e/playwright.api.config.ts",
-    "perf:prod": "playwright test --config e2e/playwright.perf.config.ts"
+    "perf:prod": "playwright test --config e2e/playwright.perf.config.ts",
+    "domain": "node scripts/check-domain-leak.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

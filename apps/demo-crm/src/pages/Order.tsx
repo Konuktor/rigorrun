@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { REFUND_POLICY } from '@rigorrun/northstar';
+import { REFUND_POLICY } from '../engine/index.ts';
 import { Link } from '../router.tsx';
 import { issueRefund, observe, requestApproval, useCrm } from '../store.ts';
 import { Card, Empty, Field, Mono, Status, money } from '../ui.tsx';

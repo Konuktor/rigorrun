@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@rigorrun/core": "workspace:*",
-    "@rigorrun/northstar": "workspace:*",
     "@rigorrun/providers": "workspace:*",
     "zod": "^4.1.12",
-    "@rigorrun/environment": "workspace:*"
+    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/agents": "workspace:*"
   }
 }

@@ -6,9 +6,9 @@ import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import type {
   Benchmark,
   BenchmarkCase,
-  LegacyContractRule,
-  WorkflowContract,
-  WorkflowTrace,
+  ContractRule,
+  EnvironmentContract,
+  CanonicalHumanTrace,
 } from '@rigorrun/core';
 import {
   Button,
@@ -92,83 +92,83 @@ function NextBar({ note, button }: { note: string; button: ReactNode }) {
 
 /* ------------------------------------------------------------------ record */
 
-export function RecordStep({ trace, onCompile }: { trace: WorkflowTrace; onCompile: () => void }) {
-  const observations = trace.events.filter((e) => e.type === 'app_observation');
-  const interactions = trace.events.length - observations.length;
+export function RecordStep({
+  trace,
+  environmentName,
+  onCompile,
+}: {
+  trace: CanonicalHumanTrace | null;
+  environmentName: string;
+  onCompile: () => void;
+}) {
+  if (!trace) {
+    return (
+      <div className="space-y-4">
+        <StepHeader
+          title="Show us the job"
+          lede="Recording the demonstration and reading the system either side of it."
+        />
+        <Panel title="Recording">
+          <p className="px-4 py-6 text-secondary">Replaying the demonstration…</p>
+        </Panel>
+      </div>
+    );
+  }
+
+  const actions = trace.steps.filter((step) => step.action !== undefined);
+  const changed = countChanges(trace);
 
   return (
     <div className="space-y-4">
       <StepHeader
         title="A person did the job once"
-        lede="This is what the recorder captured while a support agent processed a refund. It stores the meaning of each step — role, accessible name, stable selector — not the page."
+        lede={`This is what RigorRun captured while somebody worked in ${environmentName}: what they did, and what the system looked like before and after. It records the meaning of each step, not the page.`}
         action={
           <a
             href={CRM_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex h-9 items-center rounded-control border border-line px-3 text-secondary text-secondary hover:border-line-strong hover:text-fg"
+            className="inline-flex h-9 items-center rounded-control border border-line px-3 text-secondary hover:border-line-strong hover:text-fg"
           >
-            Open Northstar Support ↗
+            Open the demo app ↗
           </a>
         }
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Events" value={String(trace.events.length)} />
-        <Stat label="Interactions" value={String(interactions)} />
-        <Stat label="App signals" value={String(observations.length)} />
+        <Stat label="Steps" value={String(trace.steps.length)} />
+        <Stat label="Actions" value={String(actions.length)} />
+        <Stat label="Records changed" value={String(changed)} />
         <Stat label="Duration" value={`${(trace.durationMs / 1000).toFixed(1)}s`} />
       </div>
 
       <Panel
-        title="Recorded trace"
-        subtitle={<>{trace.app.origin} · no page HTML, no cookies, no credential values</>}
+        title="Recorded demonstration"
+        subtitle={<>{trace.environmentId} · no page HTML, no cookies, no credential values</>}
       >
         <div
           className="max-h-[26rem] overflow-y-auto"
           tabIndex={0}
           role="region"
-          aria-label="Recorded trace events, scrollable"
+          aria-label="Recorded steps, scrollable"
         >
           <ol>
-            {trace.events.map((event) => (
+            {trace.steps.map((step) => (
               <li
-                key={event.id}
+                key={step.id}
                 className="flex items-start gap-3 border-b border-line-soft px-4 py-2 last:border-0"
               >
                 <Mono className="w-11 shrink-0 pt-0.5 text-muted">
-                  {(event.at / 1000).toFixed(1)}s
+                  {(step.at / 1000).toFixed(1)}s
                 </Mono>
                 <div className="w-28 shrink-0">
-                  <Tag tone={event.type === 'app_observation' ? 'info' : 'neutral'}>
-                    {event.type}
-                  </Tag>
+                  <Tag tone={step.action ? 'info' : 'neutral'}>{step.kind}</Tag>
                 </div>
                 <div className="min-w-0 flex-1">
-                  {event.observation ? (
-                    <div className="min-w-0">
-                      <Mono className="text-fg">{event.observation.name}</Mono>
-                      <Truncated
-                        className="text-muted"
-                        value={JSON.stringify(event.observation.data)}
-                      />
-                    </div>
-                  ) : (
-                    <div className="min-w-0">
-                      <span className="text-secondary">
-                        {event.target?.accessibleName ?? new URL(event.url).pathname}
-                      </span>
-                      {event.value !== undefined ? (
-                        <Mono className="ml-2 text-info">&ldquo;{event.value}&rdquo;</Mono>
-                      ) : null}
-                      {event.target ? (
-                        <div className="mt-0.5 flex min-w-0 items-center gap-2">
-                          <Truncated className="text-muted" value={event.target.selector} />
-                          <Tag>{event.target.selectorStrategy}</Tag>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
+                  <Mono className="text-fg">{step.action?.name ?? step.kind}</Mono>
+                  {step.action ? (
+                    <Truncated className="text-muted" value={JSON.stringify(step.action.args)} />
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -177,10 +177,10 @@ export function RecordStep({ trace, onCompile }: { trace: WorkflowTrace; onCompi
       </Panel>
 
       <NextBar
-        note="Next: RigorRun turns this recording into an executable contract."
+        note="Next: RigorRun works out what it saw, and what it is only guessing."
         button={
           <Button onClick={onCompile} testId="step-compile" size="lg">
-            Compile contract →
+            Review what RigorRun learned →
           </Button>
         }
       />
@@ -188,12 +188,22 @@ export function RecordStep({ trace, onCompile }: { trace: WorkflowTrace; onCompi
   );
 }
 
-/* ---------------------------------------------------------------- contract */
-
-interface RuleRow {
-  kind: string;
-  rule: LegacyContractRule;
+/** Records that differ between the state before and the state after. */
+function countChanges(trace: CanonicalHumanTrace): number {
+  const before = trace.before?.entities ?? {};
+  const after = trace.after?.entities ?? {};
+  let changed = 0;
+  for (const entity of new Set([...Object.keys(before), ...Object.keys(after)])) {
+    const was = before[entity] ?? {};
+    const now = after[entity] ?? {};
+    for (const id of new Set([...Object.keys(was), ...Object.keys(now)])) {
+      if (JSON.stringify(was[id]) !== JSON.stringify(now[id])) changed += 1;
+    }
+  }
+  return changed;
 }
+
+/* ---------------------------------------------------------------- contract */
 
 export function ContractStep({
   contract,
@@ -202,69 +212,61 @@ export function ContractStep({
   onDecide,
   onApprove,
 }: {
-  contract: WorkflowContract;
+  contract: EnvironmentContract;
   rejected: Set<string>;
   confirmed: Set<string>;
   onDecide: (ruleId: string, decision: 'confirm' | 'reject') => void;
   onApprove: () => void;
 }) {
-  const all: RuleRow[] = [
-    ...contract.preconditions.map((rule) => ({ kind: 'Precondition', rule })),
-    ...contract.requiredActions.map((rule) => ({ kind: 'Required action', rule })),
-    ...contract.forbiddenActions.map((rule) => ({ kind: 'Forbidden action', rule })),
-  ];
-  const observed = all.filter((r) => r.rule.source === 'observed');
-  const inferred = all.filter((r) => r.rule.source === 'inferred');
-  const activeInferred = inferred.filter((r) => !rejected.has(r.rule.id));
-  const enforcedTotal = observed.length + activeInferred.length;
+  const facts = contract.observedFacts;
+  const rules = contract.rules;
+  const enforced = rules.filter((rule) => !rejected.has(rule.id)).length;
 
   return (
     <div className="space-y-4">
       <StepHeader
         title="One recording does not reveal a policy"
-        lede="RigorRun separates what it saw from what it inferred. Inferred rules are not enforced until a person confirms them — and rejecting one removes the check behind it."
+        lede="What changed is a fact. What it means is a guess. RigorRun keeps them apart, and nothing it guessed can fail an agent until you say yes to it."
       />
 
       <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-panel border border-line bg-surface px-4 py-3">
-        <SummaryStat label="Observed" value={observed.length} tone="pass" />
-        <SummaryStat label="Inferred" value={inferred.length} tone="warn" />
-        <SummaryStat label="Rejected" value={rejected.size} />
-        <SummaryStat label="Will be enforced" value={enforcedTotal} />
+        <SummaryStat label="Observed" value={facts.length} tone="pass" />
+        <SummaryStat label="To confirm" value={rules.length} tone="warn" />
+        <SummaryStat label="Said no to" value={rejected.size} />
+        <SummaryStat label="Will be enforced" value={enforced} />
         <div className="min-w-[14rem] flex-1 self-center text-meta text-muted">
           Goal: <span className="text-fg">{contract.goal}</span>
         </div>
       </div>
 
       <Panel
-        title="Observed"
-        subtitle="Taken directly from what the person did. Confidence 100%."
+        title="What RigorRun saw"
+        subtitle="Read straight out of the system, before and after. Not open to interpretation."
         labelledBy="observed-heading"
       >
         <ul>
-          {observed.map(({ kind, rule }) => (
+          {facts.map((fact) => (
             <li
-              key={rule.id}
+              key={fact.id}
               className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line-soft px-4 py-2.5 last:border-0"
             >
               <StatusMark status="pass" size="sm" />
-              <span className="min-w-[12rem] flex-1 text-secondary">{rule.rule}</span>
-              <Mono className="text-muted">{kind}</Mono>
+              <span className="min-w-[12rem] flex-1 text-secondary">{fact.statement}</span>
+              <Mono className="text-muted">observed</Mono>
             </li>
           ))}
         </ul>
       </Panel>
 
       <Panel
-        title="Inferred — needs confirmation"
-        subtitle={`Generalisations from a single recording, not observations. ${activeInferred.length} of ${inferred.length} will be enforced when you approve — reject any you disagree with.`}
+        title="What RigorRun is guessing"
+        subtitle={`${enforced} of ${rules.length} will be enforced. Say no to anything that is not your policy.`}
       >
         <ul>
-          {inferred.map(({ kind, rule }) => (
+          {rules.map((rule) => (
             <InferredRule
               key={rule.id}
-              kind={kind}
               rule={rule}
-              contract={contract}
               rejected={rejected.has(rule.id)}
               confirmed={confirmed.has(rule.id)}
               onDecide={onDecide}
@@ -274,10 +276,10 @@ export function ContractStep({
       </Panel>
 
       <NextBar
-        note={`${enforcedTotal} rules will be enforced. ${rejected.size > 0 ? `${rejected.size} rejected rule${rejected.size === 1 ? '' : 's'} will not generate checks.` : 'Reject any rule you disagree with before generating.'}`}
+        note={`${enforced} rules will be enforced. ${rejected.size > 0 ? `${rejected.size} rule${rejected.size === 1 ? '' : 's'} you said no to will generate no checks.` : 'Say no to anything you disagree with before continuing.'}`}
         button={
           <Button onClick={onApprove} testId="step-generate" size="lg">
-            Approve &amp; generate benchmark →
+            Confirm and stress-test the job →
           </Button>
         }
       />
@@ -305,23 +307,20 @@ function SummaryStat({
   );
 }
 
+/** One rule, phrased as a question with three answers and no eval vocabulary. */
 function InferredRule({
-  kind,
   rule,
-  contract,
   rejected,
   confirmed,
   onDecide,
 }: {
-  kind: string;
-  rule: LegacyContractRule;
-  contract: WorkflowContract;
+  rule: ContractRule;
   rejected: boolean;
   confirmed: boolean;
   onDecide: (ruleId: string, decision: 'confirm' | 'reject') => void;
 }) {
-  const question = contract.uncertainty.find((u) => u.relatedRuleIds.includes(rule.id));
   const confidence = Math.round(rule.confidence * 100);
+  const evidence = [...new Set(rule.provenance.map((node) => node.kind.replace(/_/g, ' ')))];
 
   return (
     <li
@@ -333,10 +332,11 @@ function InferredRule({
           <p
             className={`text-body font-medium ${rejected ? 'text-muted line-through' : 'text-fg'}`}
           >
-            {rule.rule}
+            {rule.question?.text ?? rule.statement}
           </p>
+          <p className="mt-1 text-meta text-secondary">{rule.statement}</p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            <Mono className="text-muted">{kind}</Mono>
+            <Mono className="text-muted">{evidence.join(', ')}</Mono>
             <span className="text-muted">·</span>
             <span className="inline-flex items-center gap-1.5">
               <span className="text-meta text-muted">Confidence</span>
@@ -355,19 +355,21 @@ function InferredRule({
 
         <div className="flex shrink-0 items-center gap-2">
           {rejected ? (
-            <Tag tone="neutral">Rejected</Tag>
+            <Tag tone="neutral">No</Tag>
           ) : confirmed ? (
-            <Tag tone="pass">Confirmed</Tag>
+            <Tag tone="pass">Yes</Tag>
           ) : (
-            <Tag tone="warn">Needs review</Tag>
+            <Tag tone="warn">Needs an answer</Tag>
           )}
         </div>
       </div>
 
-      {question ? (
+      {rule.question ? (
         <p className="mt-2 max-w-3xl text-meta text-secondary">
-          <span className="text-warn">RigorRun cannot answer this:</span> {question.question}
-          <span className="mt-0.5 block text-muted">{question.reason}</span>
+          <span className="text-warn">RigorRun cannot answer this:</span> {rule.question.reason}
+          {rule.question.counterexample ? (
+            <span className="mt-0.5 block text-muted">{rule.question.counterexample}</span>
+          ) : null}
         </p>
       ) : null}
 
@@ -378,7 +380,7 @@ function InferredRule({
           onClick={() => onDecide(rule.id, 'confirm')}
           testId={`rule-confirm-${rule.id}`}
         >
-          {confirmed ? 'Confirmed' : 'Confirm'}
+          {confirmed ? 'Yes' : 'Yes'}
         </Button>
         <Button
           size="sm"
@@ -386,12 +388,12 @@ function InferredRule({
           onClick={() => onDecide(rule.id, 'reject')}
           testId={`rule-toggle-${rule.id}`}
         >
-          {rejected ? 'Restore' : 'Reject'}
+          {rejected ? 'Undo' : 'No'}
         </Button>
         <span className="text-meta text-muted">
           {rejected
-            ? 'Not enforced — no check will be generated.'
-            : 'Enforced — a check will be generated for this rule.'}
+            ? 'Not your policy — no agent will be failed for it.'
+            : 'Part of your policy — an agent that breaks it will fail.'}
         </span>
       </div>
     </li>

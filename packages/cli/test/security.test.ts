@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { BenchmarkSchema, WorkflowTraceSchema } from '@rigorrun/core';
-import { buildDemoPipeline } from '@rigorrun/runner';
+import { BenchmarkSchema, CanonicalHumanTraceSchema } from '@rigorrun/core';
+import { compileWorkflow, workflowByKey } from '@rigorrun/environments';
 
 const repoRoot = resolve(import.meta.dirname, '..', '..', '..');
 
@@ -21,7 +21,8 @@ async function sourceFiles(dir: string): Promise<string[]> {
 describe('an imported benchmark cannot cause command execution', () => {
   const EXECUTION_PATH = [
     'packages/core/src',
-    'packages/northstar/src',
+    'packages/environment/src',
+    'packages/environments/src',
     'packages/verifier/src',
     'packages/generator/src',
     'packages/compiler/src',
@@ -57,7 +58,7 @@ describe('an imported benchmark cannot cause command execution', () => {
   });
 
   it('has no schema field in which a command or path could be smuggled', async () => {
-    const { benchmark, trace } = await buildDemoPipeline();
+    const { benchmark, trace } = await compileWorkflow(workflowByKey('refund'));
 
     // Anything not in the schema is dropped rather than carried through.
     const hostile = {
@@ -77,10 +78,10 @@ describe('an imported benchmark cannot cause command execution', () => {
     expect(serialised).not.toContain('curl evil.test');
     expect(serialised).not.toContain('payload.sh');
 
-    const hostileTrace = WorkflowTraceSchema.parse({
+    const hostileTrace = CanonicalHumanTraceSchema.parse({
       ...trace,
       command: 'shutdown now',
-      events: [{ ...trace.events[0]!, exec: 'whoami' }],
+      steps: [{ ...trace.steps[0]!, exec: 'whoami' }],
     });
     expect(JSON.stringify(hostileTrace)).not.toContain('shutdown now');
     expect(JSON.stringify(hostileTrace)).not.toContain('whoami');

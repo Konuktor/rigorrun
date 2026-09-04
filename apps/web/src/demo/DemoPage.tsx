@@ -79,7 +79,13 @@ export function DemoPage() {
 
   function StepScreen() {
     if (state.step === 'record') {
-      return <RecordStep trace={state.trace} onCompile={compile} />;
+      return (
+        <RecordStep
+          trace={state.trace}
+          environmentName={state.workflow.registration.name}
+          onCompile={() => void compile()}
+        />
+      );
     }
 
     if (state.step === 'contract') {

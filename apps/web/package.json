@@ -13,12 +13,13 @@
     "@rigorrun/compiler": "workspace:*",
     "@rigorrun/core": "workspace:*",
     "@rigorrun/generator": "workspace:*",
-    "@rigorrun/northstar": "workspace:*",
     "@rigorrun/report": "workspace:*",
     "@rigorrun/runner": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
     "@rigorrun/verifier": "workspace:*",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@rigorrun/environments": "workspace:*",
+    "@rigorrun/environment": "workspace:*"
   }
 }

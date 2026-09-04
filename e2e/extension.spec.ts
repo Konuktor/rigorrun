@@ -3,8 +3,8 @@ import { existsSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { parseTrace } from '@rigorrun/core';
-import { compileTrace } from '@rigorrun/compiler';
+import { fromWorkflowTrace, parseTrace, surfaceText } from '@rigorrun/core';
+
 
 /**
  * Smoke-tests the real unpacked extension in a real browser: record a human
@@ -118,11 +118,12 @@ test.describe('the recorder extension', () => {
     expect(JSON.stringify(trace)).not.toContain('<div');
     expect(JSON.stringify(trace)).not.toContain('</');
 
-    // And the whole point: it compiles into a contract.
-    const contract = compileTrace(trace);
-    expect(contract.goal).toMatch(/refund/i);
-    expect(contract.forbiddenActions.length).toBeGreaterThan(0);
-    expect(contract.uncertainty.length).toBeGreaterThan(0);
+    // And the whole point: it normalises into the trace the compiler reads,
+    // with the UI text a policy could be read out of still attached.
+    const canonical = fromWorkflowTrace(trace, { environmentId: 'support-refund' });
+    expect(canonical.source).toBe('browser_recorder');
+    expect(canonical.steps.length).toBe(trace.events.length);
+    expect(surfaceText(canonical).some((entry) => /\$50/.test(entry.text))).toBe(true);
 
     await page.close();
   });

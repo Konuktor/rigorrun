@@ -31,8 +31,6 @@
       "@rigorrun/environments": ["./packages/environments/src/index.ts"],
       "@rigorrun/environments/*": ["./packages/environments/src/*"],
       "@rigorrun/core/*": ["./packages/core/src/*"],
-      "@rigorrun/northstar": ["./packages/northstar/src/index.ts"],
-      "@rigorrun/northstar/*": ["./packages/northstar/src/*"],
       "@rigorrun/verifier": ["./packages/verifier/src/index.ts"],
       "@rigorrun/generator": ["./packages/generator/src/index.ts"],
       "@rigorrun/scoring": ["./packages/scoring/src/index.ts"],

@@ -1178,8 +1178,11 @@ interface StatedNumber {
  * lead for a question, never a policy.
  */
 function readStatedNumbers(trace: CanonicalHumanTrace, schema: EnvironmentSchema): StatedNumber[] {
+  // The unit word is whatever the sentence uses. Enumerating them would put a
+  // list of business nouns in the compiler, which is the one thing this file
+  // is not allowed to contain.
   const pattern =
-    /(?:\$|£|€)?\s?(\d[\d,]*(?:\.\d{1,2})?)\s*(?:days?|hours?|%|units?|employees?|people|staff)?\s*(?:or less|or under|or fewer|or more|or above|limit|maximum|max|minimum|min|threshold|and above|and over)\b/gi;
+    /(?:\$|£|€)?\s?(\d[\d,]*(?:\.\d{1,2})?)\s*(?:%|[A-Za-z]{1,14}\s+)?(?:or less|or under|or fewer|or more|or above|limit|maximum|max|minimum|min|threshold|and above|and over)\b/gi;
   const qualifier = /(approv|authoris|authoriz|sign.?off|review|escalat|permit|manager|supervisor)/i;
   // Or any value the environment itself declares. Grounding the check in the
   // schema rather than in a list of English words is what keeps a sentence

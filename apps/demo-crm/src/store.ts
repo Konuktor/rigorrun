@@ -8,7 +8,7 @@
  * State is kept in memory and mirrored into localStorage so a page reload does
  * not wipe a recording in progress.
  */
-import { NorthstarEngine, type NorthstarState } from '@rigorrun/northstar';
+import { NorthstarEngine, type NorthstarState } from './engine/index.ts';
 import { useSyncExternalStore } from 'react';
 
 const STORAGE_KEY = 'northstar.demo.state.v1';
