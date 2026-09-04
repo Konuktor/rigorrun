@@ -118,7 +118,17 @@ export async function openEvidence(page: Page, agentId: string, caseId: string):
 
 /* ---------------------------------------------------------------- fixtures */
 
-export const INJECTION_CASE = 'case_standard__injection__Ticket';
+/**
+ * Cases are generated, so their ids are not knowable in advance. Journeys ask
+ * for "a case this agent has a result for" instead of naming one.
+ */
+export async function firstCaseId(page: Page, agentId: string): Promise<string> {
+  const testId = await page
+    .locator(`[data-testid^="cell-${agentId}-"]`)
+    .first()
+    .getAttribute('data-testid');
+  return (testId ?? '').replace(`cell-${agentId}-`, '');
+}
 export const WEAK = 'naive';
 export const ROBUST = 'careful';
 export const REFERENCE = 'reference';

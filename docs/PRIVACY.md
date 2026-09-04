@@ -4,6 +4,17 @@ Privacy is not a feature bolted onto RigorRun; it is the reason the
 architecture looks the way it does. The recording of how your company works is
 the sensitive artefact, and the safest place for it is the machine that made it.
 
+## Check it rather than believing it
+
+```bash
+rigorrun privacy inspect .rigorrun/trace.json
+```
+
+Prints, field by field, what a real recording captured, how many fragments of
+interface text came with it, how many events the recorder refused to keep, and
+what would leave the machine. The answer to the last is nothing, and the
+command prints the list rather than asking you to take it on trust.
+
 ## The default
 
 **Nothing leaves your device.**

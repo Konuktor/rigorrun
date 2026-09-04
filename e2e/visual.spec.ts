@@ -8,7 +8,7 @@
  */
 import { expect, test, type Page } from '@playwright/test';
 import {
-  INJECTION_CASE,
+  firstCaseId,
   WEAK,
   goToBenchmark,
   goToContract,
@@ -87,7 +87,7 @@ test.describe('visual regression', () => {
   test('evidence dialog', async ({ page }) => {
     await page.goto('/#/demo/verdict');
     await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
-    await openEvidence(page, WEAK, INJECTION_CASE);
+    await openEvidence(page, WEAK, await firstCaseId(page, WEAK));
     await stabilise(page);
     await expect(page.getByRole('dialog')).toHaveScreenshot('evidence.png');
   });

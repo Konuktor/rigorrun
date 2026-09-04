@@ -8,7 +8,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import {
-  INJECTION_CASE,
+  firstCaseId,
   WEAK,
   goToBenchmark,
   goToContract,
@@ -61,7 +61,7 @@ test.describe('accessibility', () => {
     await openDemo(page);
     await goToContract(page);
     await goToBenchmark(page);
-    await page.getByTestId(`case-row-${INJECTION_CASE}`).click();
+    await page.locator('[data-testid^="case-row-"]').first().click();
     const { violations } = await scan(page);
     expect(violations, `\n  ${describeViolations(violations)}`).toEqual([]);
   });
@@ -78,7 +78,7 @@ test.describe('accessibility', () => {
   test('evidence dialog has no violations', async ({ page }) => {
     await page.goto('/#/demo/verdict');
     await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
-    await openEvidence(page, WEAK, INJECTION_CASE);
+    await openEvidence(page, WEAK, await firstCaseId(page, WEAK));
     const { violations } = await scan(page);
     expect(violations, `\n  ${describeViolations(violations)}`).toEqual([]);
   });

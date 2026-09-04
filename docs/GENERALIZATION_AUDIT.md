@@ -188,3 +188,33 @@ Three live defects were found while auditing and are fixed on the way through:
 2. `expected.ts:59` — two distinct policies collapsed into one predicate.
 3. `verifier` — unknown paths fail open, which is safe for hand-written
    assertions and unsafe for generated ones.
+
+---
+
+## Burn-down — final
+
+Every item above is resolved. Verified by `pnpm domain`, which fails the build
+if any of `refund`, `invoice`, `vendor`, `shipment`, `northstar`, `ticket`,
+`customer`, `purchase order`, `equipment`, `borrower`, `checkout`, `lead`,
+`employee` or `access grant` appears in the code (not the comments) of
+`core`, `environment`, `compiler`, `generator`, `verifier`, `scoring`,
+`runner`, `report`, `agents`, `providers` or `quality`.
+
+| Package | What happened |
+| --- | --- |
+| `compiler` | `compile.ts` and `templates.ts` deleted. Replaced by `induce.ts` (11 rule shapes from schema, delta and interface text) and `synthesize.ts` |
+| `generator` | `generate.ts`, `policy.ts`, `expected.ts`, `llm.ts` deleted. Replaced by mutation primitives, an expectation engine that replays the demonstrated plan, and a benchmark assembler |
+| `northstar` | Package deleted. Its refund workflow is now an ordinary adapter in `packages/environments`; the clickable CRM keeps its own data layer inside `apps/demo-crm` |
+| `runner` | Resolves an environment by id from a registry. `observe.ts` and the hand-written projection are gone |
+| `agents` | Both demo agents deleted and replaced by two that read the work order and the tool catalogue and know no business |
+| `core` | `contract.ts` deleted; `environmentContract.ts` carries the rule lifecycle, typed provenance and machine-checkable predicates |
+| `verifier` | `path.ts` untouched. `evaluate.ts` gained a tri-state verdict and compile-time path validation |
+| `report` | The one `if (type === 'refund.created')` branch removed |
+
+The three live defects found while auditing were fixed on the way through:
+
+1. Substring identifier matching — `REF-10` no longer counts as `REF-1`.
+2. Two distinct policies collapsed into one predicate — rules are now evaluated
+   independently and never merged.
+3. A verifier that failed open on unknown paths — the projection publishes its
+   key schema and the compiler hard-fails on anything else.
