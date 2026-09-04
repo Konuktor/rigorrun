@@ -46,7 +46,8 @@
     "release:verify": "node scripts/release-verify.mjs",
     "release:verify:prod": "node scripts/release-verify.mjs --prod",
     "contrast": "node scripts/check-contrast.mjs",
-    "api:prod": "playwright test --config e2e/playwright.api.config.ts"
+    "api:prod": "playwright test --config e2e/playwright.api.config.ts",
+    "perf:prod": "playwright test --config e2e/playwright.perf.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

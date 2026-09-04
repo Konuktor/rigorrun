@@ -339,6 +339,29 @@ No optimisation work is warranted. The one performance-adjacent defect is the
 artificial per-case delay in H8, which is a correctness issue rather than a
 speed one.
 
+## P1 — Layout shift on every deep link (found after the redesign)
+
+**SEVERITY** High · **SCREEN** every `#/demo/*` route, worst on the verdict
+
+**PROBLEM** The first paint of a deep-linked demo route has no step content
+yet, so the demo footer and the page footer are laid out near the top of the
+viewport. When the step renders they are pushed down. Measured cumulative
+layout shift: **0.107 at 1440px and 0.322 at 390px**, against a 0.1 budget.
+
+**WHY IT HURTS** This is the first thing a reviewer sees when they open a link
+someone sent them. The page visibly jumps under the cursor, which reads as
+cheap regardless of how good the content is — and on a phone it was three
+times worse, because the same displacement covers more of a small viewport.
+
+**FIX** The content column reserves down to the fold
+(`min-h-[calc(100vh-8.5rem)]`), so anything below it starts off-screen and
+nothing visible moves. Costs 21px on the one screen shorter than a viewport.
+Now zero on all six routes at both viewports, enforced by `pnpm perf:prod`.
+
+**HOW IT WAS FOUND** Not by looking. The landing page measured CLS 0, and the
+audit above recorded performance as "already good" on that basis. Writing an
+actual budget test that visits every route is what surfaced it.
+
 ## What this audit did not cover
 
 Firefox and WebKit were not exercised in this pass — Chromium only. Cross-browser

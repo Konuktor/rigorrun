@@ -132,6 +132,8 @@ intent.
       1440 / 1920
 - [x] Four explicit test layers plus `pnpm release:verify` as the gate
 - [x] Manual exploratory QA across five personas against production
+- [x] Core Web Vitals and layout-shift budgets as a real gate (`pnpm perf:prod`),
+      which found and fixed a 0.107 / 0.322 shift on every demo deep link
 - [x] Final gate green end to end: `pnpm release:verify --prod` — 12/12 stages,
       including 87 production journeys at three viewports and 10 live control
       plane / system state checks against the deployed Worker and D1

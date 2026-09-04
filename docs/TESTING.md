@@ -49,12 +49,21 @@ resulting refund record is read directly — amount, approval, ticket linkage,
 audit entry — rather than trusting rendered text. The deployed UI is then
 asserted to agree with it.
 
+**Performance budgets** (`pnpm perf:prod`) — Core Web Vitals against the
+deployed site, measured three times from a cold browser context with the median
+asserted, so one noisy sample can neither fail nor pass the gate. Budgets are
+Google's "good" thresholds (LCP 2.5s, FCP 1.8s, TTFB 800ms, CLS 0.1), plus a
+600 KB transfer budget for the landing page and an 8s budget for executing the
+whole benchmark in the browser. Cumulative layout shift is measured on **every**
+route at 1440 and 390 — a landing-only budget would have missed the one real
+regression this layer found.
+
 ## Layer D — release gate
 
 ```bash
 pnpm release:verify          # contrast, lint, types, unit, build, e2e, a11y, visual, cross
 pnpm deploy:all
-pnpm release:verify --prod   # the above, plus smoke, API/system state, production journeys
+pnpm release:verify --prod   # the above, plus smoke, API/system state, journeys, performance
 ```
 
 Exits non-zero if any gate fails, and prints a per-stage summary so a failure is
@@ -83,4 +92,7 @@ all three. **Safari compatibility is therefore unverified and is not claimed.**
 **Production workspace creation is rate limited** to 10/hour per address, by
 design. If the quota is exhausted, the credentialed API tests skip with that
 reason rather than reporting a product failure. Set `QA_WORKSPACE_ID` /
-`QA_WORKSPACE_TOKEN` (and the `_2` pair) to reuse credentials instead.
+`QA_WORKSPACE_TOKEN` (and the `_2` pair) to reuse credentials instead. The smoke
+test accepts either answer and checks both properly: a 201 must carry a
+well-formed workspace and token, and a 429 must carry the limiter's error and a
+positive `retryAfter`. A 500, a timeout or a malformed body still fails.

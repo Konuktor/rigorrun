@@ -22,7 +22,15 @@ export function DemoPage() {
       />
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_13rem]">
-        <div className="min-w-0">
+        {/*
+          Reserve the fold for the content column. On a deep link the first
+          paint has no step content yet, so both footers land near the top of
+          the viewport and are then pushed down — measured as a 0.107 layout
+          shift on desktop and 0.322 on a phone, over the 0.1 Core Web Vitals
+          budget. Reserving down to the fold keeps them off-screen until the
+          content arrives, and is a no-op once a real step is rendered.
+        */}
+        <div className="min-h-[calc(100vh-8.5rem)] min-w-0">
           {state.error ? (
             <div
               role="alert"
