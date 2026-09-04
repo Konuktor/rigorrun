@@ -33,7 +33,8 @@ const LOCAL = [
   ['e2e', 'pnpm', ['e2e'], 'local end-to-end journeys'],
   ['a11y', 'pnpm', ['a11y'], 'WCAG A/AA scans'],
   ['visual', 'pnpm', ['visual'], 'visual regression'],
-  ['cross', 'pnpm', ['cross'], 'critical path on chromium, firefox and webkit'],
+  ['cross', 'pnpm', ['cross'], 'critical path on chromium and firefox'],
+  ['proof', 'node', ['scripts/build-proof.mjs'], 'the evidence page regenerates from real runs'],
 ];
 
 /** Production gates, only meaningful after a deploy. */

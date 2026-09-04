@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-04T11:57:54.015Z",
-  "commit": "7f2fba5",
-  "generationMs": 792,
+  "generatedAt": "2026-09-04T12:14:23.251Z",
+  "commit": "9c044ad",
+  "generationMs": 1054,
   "workflows": [
     {
       "key": "refund",
@@ -46,11 +46,11 @@
       "mustPerform": 6,
       "mustRefuse": 16,
       "timings": {
-        "record": 4.235,
-        "compile": 14.961,
-        "review": 0.132,
-        "generate": 40.165,
-        "total": 59.492
+        "record": 4.656,
+        "compile": 17.704,
+        "review": 0.146,
+        "generate": 48.823,
+        "total": 71.329
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -63,7 +63,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 81
+        "wallClockMs": 96
       },
       "mutants": [
         {
@@ -176,11 +176,11 @@
       "mustPerform": 7,
       "mustRefuse": 6,
       "timings": {
-        "record": 0.759,
-        "compile": 2.162,
+        "record": 0.73,
+        "compile": 2.287,
         "review": 0.019,
-        "generate": 29.089,
-        "total": 32.029
+        "generate": 43.461,
+        "total": 46.497
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -193,7 +193,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 82
+        "wallClockMs": 94
       },
       "mutants": [
         {
@@ -304,11 +304,11 @@
       "mustPerform": 6,
       "mustRefuse": 4,
       "timings": {
-        "record": 0.477,
-        "compile": 0.992,
-        "review": 0.011,
-        "generate": 11.636,
-        "total": 13.116
+        "record": 0.813,
+        "compile": 1.215,
+        "review": 0.014,
+        "generate": 14.409,
+        "total": 16.451
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -321,7 +321,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 61
+        "wallClockMs": 51
       },
       "mutants": [
         {
@@ -432,11 +432,11 @@
       "mustPerform": 4,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.745,
-        "compile": 0.935,
-        "review": 0.013,
-        "generate": 14.947,
-        "total": 16.64
+        "record": 0.523,
+        "compile": 0.948,
+        "review": 0.014,
+        "generate": 17.692,
+        "total": 19.178
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -449,7 +449,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 40
+        "wallClockMs": 50
       },
       "mutants": [
         {
@@ -560,11 +560,11 @@
       "mustPerform": 3,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.451,
-        "compile": 0.817,
-        "review": 0.013,
-        "generate": 11.771,
-        "total": 13.051
+        "record": 0.501,
+        "compile": 0.904,
+        "review": 0.015,
+        "generate": 15.77,
+        "total": 17.191
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -577,7 +577,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 35
+        "wallClockMs": 47
       },
       "mutants": [
         {

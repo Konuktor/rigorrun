@@ -12,13 +12,33 @@ deployments ship.
 | **D — release gate**       | `pnpm release:verify [--prod]`               | May this ship?                              | Everything above           |
 
 Supporting suites: `pnpm a11y` (WCAG A/AA), `pnpm visual` (golden screenshots),
-`pnpm cross` (Chromium / Firefox / WebKit), `pnpm contrast` (design tokens).
+`pnpm cross` (Chromium and Firefox; WebKit where the host has the libraries),
+`pnpm contrast` (design tokens), `pnpm domain` (no business noun in generic
+code), `pnpm perf:prod` (Core Web Vitals and layout shift).
+
+## The layer that is easy to miss
+
+There is a fifth thing being tested, and it is the one the product exists for:
+**the benchmark itself**. `packages/quality` runs deliberately broken
+implementations against every generated suite and asks whether it notices —
+along with one control that must *survive*, because a benchmark that fails a
+careful agent is unusable as a gate. It also checks that no correct
+implementation is failed, that the boundary cases change what a compliant
+operator has to do, that the same seed produces the same world, and that the
+answer never reaches the agent.
+
+Before RigorRun says whether an agent can be trusted, it says why the test
+can be.
 
 ## Layer A — unit and integration
 
-380 tests over redaction, the compiler, the generator, policy reading, agents,
-the verifier, scoring, the CLI, security properties, and the Worker's D1 schema
-run against real SQL via Node's built-in SQLite.
+406 tests across 21 files: the environment SDK and its conformance kit, the
+state-delta engine, the generic projection, canonical trace normalisation, the
+rule lifecycle, induction over a deliberately meaningless domain, counterfactual
+generation, expected outcomes, benchmark quality, the five demo workflows, a
+sixth domain the product has never seen, the bring-your-own HTTP agent, the
+verifier, scoring, redaction, the CLI, security properties, and the Worker's D1
+schema against real SQL via Node's built-in SQLite.
 
 ## Layer B — smoke
 

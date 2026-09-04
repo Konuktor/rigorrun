@@ -65,7 +65,7 @@ test.describe('golden path', () => {
     await openDemo(page);
     await goToContract(page);
 
-    await expect(page.getByRole('heading', { name: 'Observed' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /What RigorRun saw/ })).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /What RigorRun is guessing/ }),
     ).toBeVisible();
@@ -83,11 +83,13 @@ test.describe('golden path', () => {
     await openDemo(page);
     await goToContract(page);
 
-    const rule = page.getByTestId('rule-forbid_over_limit');
-    await expect(rule).toContainText('Needs review');
-    await page.getByTestId('rule-confirm-forbid_over_limit').click();
-    await expect(rule).toContainText('Confirmed');
-    await expect(rule).toContainText('a check will be generated');
+    const confirm = page.locator('[data-testid^="rule-confirm-"]').first();
+    const ruleId = (await confirm.getAttribute('data-testid'))!.replace('rule-confirm-', '');
+    const rule = page.getByTestId(`rule-${ruleId}`);
+    await expect(rule).toContainText('Needs an answer');
+    await confirm.click();
+    await expect(rule).toContainText('Yes');
+    await expect(rule).toContainText('Part of your policy');
   });
 
   test('saying no to a rule removes its check from the benchmark', async ({ page }) => {
