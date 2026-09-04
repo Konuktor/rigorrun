@@ -18,11 +18,17 @@ whether an AI agent can actually do the job.
 
 ## What is RigorRun?
 
-RigorRun watches a person do a real task once, compiles that recording into an
-executable **workflow contract**, generates normal, edge and adversarial test
-cases from it, and runs AI agents against that private benchmark — verifying
-the outcome by **inspecting the system the agent changed**, never by trusting
-the agent's own claim of success.
+RigorRun watches a person do a real task once, reads the system before and
+after, works out what changed, asks a person to settle what it can only guess,
+and turns the answers into an executable benchmark — verifying the outcome by
+**inspecting the system the agent changed**, never by trusting the agent's own
+claim of success.
+
+The compiler does not know what business it is looking at. It sees records,
+fields, links, actions and state transitions. That is why the same pipeline
+handles a refund desk, an accounts-payable queue, a sales pipeline, an IT
+access register, a warehouse — and an equipment cage that exists only inside a
+test file and that no product code has ever seen.
 
 ## Why does it exist?
 
@@ -44,14 +50,17 @@ assertions:
      RigorRun:   human performs real work  →  RigorRun builds the test
 ```
 
-Four things follow from that, and they are the whole product:
+Five things follow from that, and they are the whole product:
 
-|                                      |                                                                                                                           |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| **The benchmark writes itself**      | One recorded execution becomes a contract, then a case suite. You do the job once.                                        |
-| **Verification is deterministic**    | A verdict comes from state and events. `refund.amount = 500, manager_approval = false` — not from an agent saying "done". |
-| **Everything is local-first**        | Traces and evidence stay on your machine. Publishing is an explicit, previewed, sanitising step.                          |
-| **Comparison is vendor-independent** | Any agent behind an HTTP endpoint or an OpenAI-compatible API runs against the same private cases.                        |
+|  |  |
+| --- | --- |
+| **The benchmark writes itself** | One recording becomes a contract, then a case suite. You do the job once. |
+| **One compiler, any job** | Five unrelated workflows, and a sixth the code has never seen. A build check fails if a business noun reaches generic code. |
+| **Verification is deterministic** | A verdict comes from the system of record after the agent finished, never from what it said about itself. |
+| **The test is graded before the agent is** | Injected defects, a control that must survive, replay stability, hidden-answer isolation. |
+| **Everything is local-first** | Recordings and evidence stay on your machine. Publishing is an explicit, previewed, sanitising step. |
+
+**[See it on five different jobs →](https://rigorrun.pages.dev/#/proof)**
 
 ---
 

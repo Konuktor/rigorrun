@@ -1,50 +1,51 @@
 # Demonstration-to-eval — build status
 
-Live checklist for the generalization build. Updated against executed commands,
-not intent. The audit this burns down is `docs/GENERALIZATION_AUDIT.md`.
+Updated against executed commands, not intent.
 
-**Thesis:** show RigorRun how the job is done once, get an executable acceptance
-suite for every AI agent — on *any* workflow, not one.
+**Thesis:** show RigorRun how the job is done once, get an executable
+acceptance suite for every AI agent — on *any* workflow, not one.
+
+**One command:** `pnpm verify` (lint · typecheck · domain leak · tests · build).
 
 | Phase | What | State |
 | ----- | ---- | ----- |
 | 0  | Generalization audit                          | ✅ `docs/GENERALIZATION_AUDIT.md` |
-| 1  | `@rigorrun/environment` adapter SDK           | ✅ 28 tests |
-| 2  | Generic derived projection                    | ✅ |
-| 3  | CanonicalHumanTrace + three producers         | ✅ |
+| 1  | `@rigorrun/environment` adapter SDK           | ✅ conformance kit included |
+| 2  | Generic derived projection                    | ✅ replaces every hand-written join |
+| 3  | CanonicalHumanTrace + three producers         | ✅ browser · action log · import |
 | 4  | Generic state-delta engine                    | ✅ |
-| 5  | Provenance + rule lifecycle                   | ✅ |
-| 6  | Generic contract compiler (10 templates)      | ✅ |
-| 7  | Typed verifier synthesis + tri-state          | ✅ |
-| 8  | State-aware counterfactual generator          | ✅ |
+| 5  | Provenance + rule lifecycle                   | ✅ observed/inferred/confirmed/rejected |
+| 6  | Generic contract compiler                     | ✅ 11 rule shapes, no vocabulary |
+| 7  | Typed verifier synthesis + tri-state          | ✅ paths validated, never fail-open |
+| 8  | State-aware counterfactual generator          | ✅ expectations computed, not written |
 | 9  | Five demo environments + generic agents       | ✅ |
-| 10 | Hidden sixth-domain acceptance test           | ✅ 10 tests, zero code changes |
-| 11 | Benchmark mutation testing                    | ✅ |
-| 12 | Benchmark quality + time-to-benchmark         | ✅ |
-| 13 | Browser execution lane                        | ⬜ |
-| 14 | BYO agent / BYO environment / privacy / CLI   | ⬜ |
-| 15 | Product UX, `/proof`, docs                    | ⬜ |
-| 16 | Anti-hardcoding gate, full green, deploy      | 🔵 gate done |
+| 10 | Hidden sixth-domain acceptance test           | ✅ zero product changes |
+| 11 | Benchmark mutation testing                    | ✅ defects and a control that must survive |
+| 12 | Benchmark quality + time-to-benchmark         | ✅ measured, not estimated |
+| 13 | Browser execution lane                        | ❌ **not built** |
+| 14 | BYO agent · BYO environment · privacy · CLI   | ✅ HTTP + scaffold + `privacy inspect` |
+| 15 | Product UX, `/proof`, docs                    | ✅ |
+| 16 | Anti-hardcoding gate, full green, deploy      | ✅ |
 
-## Success criteria (from the brief §34)
+## Success criteria (brief §34)
 
 | # | Criterion | State |
 | - | --------- | ----- |
-| 1  | Same generic compiler processes all five workflows | ⬜ |
-| 2  | No workflow-specific branching in generic core     | ⬜ |
-| 3  | Sixth hidden-domain test works with no code change | ⬜ |
-| 4  | Human trace generates observed facts               | ⬜ |
-| 5  | Inferences retain provenance                       | ⬜ |
-| 6  | User confirmation changes enforcement              | ⬜ |
-| 7  | Counterfactuals from schema/rules/state mutations  | ⬜ |
-| 8  | Typed deterministic verifiers synthesized          | ⬜ |
-| 9  | Benchmark catches intentionally broken mutants     | ⬜ |
-| 10 | Mutation kill rate calculated                      | ⬜ |
-| 11 | Replay stability measured                          | ⬜ |
-| 12 | Private verifier data cannot leak to the agent     | ⬜ |
-| 13 | Two workflows execute through real browser UI      | ⬜ |
-| 14 | External HTTP agent adapter works                  | ⬜ |
-| 15 | Environment SDK exists, example integration works  | ⬜ |
-| 16 | Raw trace stays local by default                   | ⬜ |
-| 17 | Existing RigorRun demo still works                 | ⬜ |
-| 18 | All release gates remain green                     | ⬜ |
+| 1  | Same generic compiler processes all five workflows | ✅ `workflows.test.ts`, no branch on workflow |
+| 2  | No workflow-specific branching in generic core     | ✅ `pnpm domain` |
+| 3  | Sixth hidden-domain test works with no code change | ✅ `unknownDomain.test.ts` |
+| 4  | Human trace generates observed facts               | ✅ from the state delta |
+| 5  | Inferences retain provenance                       | ✅ 8 typed kinds, weakest-first reporting |
+| 6  | User confirmation changes enforcement              | ✅ asserted by test |
+| 7  | Counterfactuals from schema/rules/state mutations  | ✅ 16 primitives |
+| 8  | Typed deterministic verifiers synthesized          | ✅ paths validated against a published schema |
+| 9  | Benchmark catches intentionally broken mutants     | ✅ 3–4 of 4, per workflow |
+| 10 | Mutation kill rate calculated                      | ✅ split by independence |
+| 11 | Replay stability measured                          | ✅ canonical state hashed |
+| 12 | Private verifier data cannot leak to the agent     | ✅ plus one identical brief per suite |
+| 13 | Two workflows execute through real browser UI      | ❌ **not built** |
+| 14 | External HTTP agent adapter works                  | ✅ protocol documented, SSRF-guarded |
+| 15 | Environment SDK exists, example integration works  | ✅ scaffold + conformance kit |
+| 16 | Raw trace stays local by default                   | ✅ `rigorrun privacy inspect` |
+| 17 | Existing RigorRun demo still works                 | ✅ refund is one of the five |
+| 18 | All release gates remain green                     | ✅ |
