@@ -228,10 +228,14 @@ export function provenanceStrength(contract: EnvironmentContract): {
   const counts = { strong: 0, moderate: 0, weak: 0 };
   for (const rule of contract.rules) {
     if (rule.status === 'rejected') continue;
-    const best = rule.provenance
+    // A rule is only as good as its weakest load-bearing evidence. A threshold
+    // whose *number* was read off a page is a weak rule however much else
+    // supports it, and reporting it as strong because something else in the
+    // list is strong would hide the one thing worth knowing.
+    const weakest = rule.provenance
       .map((node) => PROVENANCE_STRENGTH[node.kind])
-      .sort((a, b) => rank(b) - rank(a))[0];
-    if (best) counts[best] += 1;
+      .sort((a, b) => rank(a) - rank(b))[0];
+    if (weakest) counts[weakest] += 1;
   }
   return counts;
 }

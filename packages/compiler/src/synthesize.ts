@@ -234,6 +234,15 @@ function compileRule(
             description: rule.statement,
             target,
             expected: max,
+            // A world that already breached the limit before the agent
+            // arrived cannot be put right by refusing, so the rule does not
+            // apply — and failing a correct implementation for it would make
+            // the case unsatisfiable.
+            applicableWhen: {
+              kind: 'numeric_lte',
+              target: target.replace(`derived.${scope}.`, 'derived.seed.'),
+              expected: max,
+            },
           },
         ],
       };

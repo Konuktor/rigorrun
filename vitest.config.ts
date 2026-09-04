@@ -9,6 +9,7 @@ export default defineConfig({
       '@rigorrun/core': r('./packages/core/src/index.ts'),
       '@rigorrun/environment': r('./packages/environment/src/index.ts'),
       '@rigorrun/environments': r('./packages/environments/src/index.ts'),
+      '@rigorrun/quality': r('./packages/quality/src/index.ts'),
       '@rigorrun/verifier': r('./packages/verifier/src/index.ts'),
       '@rigorrun/generator': r('./packages/generator/src/index.ts'),
       '@rigorrun/scoring': r('./packages/scoring/src/index.ts'),

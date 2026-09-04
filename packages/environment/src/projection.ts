@@ -64,6 +64,8 @@ export interface EntityCounts {
 
 export interface Projection {
   created: Record<string, DecoratedRow[]>;
+  /** The world as it was before the agent touched it. */
+  seed: Record<string, DecoratedRow[]>;
   changed: Record<string, DecoratedRow[]>;
   deleted: Record<string, DecoratedRow[]>;
   all: Record<string, DecoratedRow[]>;
@@ -120,6 +122,7 @@ export function buildProjection(
   const events = [...(input.events ?? [])];
 
   const created: Record<string, DecoratedRow[]> = {};
+  const seedRows: Record<string, DecoratedRow[]> = {};
   const changed: Record<string, DecoratedRow[]> = {};
   const deleted: Record<string, DecoratedRow[]> = {};
   const all: Record<string, DecoratedRow[]> = {};
@@ -147,6 +150,11 @@ export function buildProjection(
       .map((row) => decorateRow(schema, entity, row, { ...input, final: input.seed }));
 
     all[entityName] = decorated;
+    // Decorated against the seed on both sides, so it describes the starting
+    // world rather than a mixture of before and after.
+    seedRows[entityName] = rowsOf(input.seed, entityName).map((row) =>
+      decorateRow(schema, entity, row, { ...input, final: input.seed }),
+    );
     created[entityName] = decorated.filter((row) =>
       (createdIds[entityName] ?? new Set()).has(String(row[entity.idField])),
     );
@@ -218,6 +226,7 @@ export function buildProjection(
   return {
     derived: {
       created,
+      seed: seedRows,
       changed,
       deleted,
       all,
@@ -602,7 +611,7 @@ export function validateProjectionPath(keys: ProjectionKeySchema, path: string):
   const section = parts[1];
   if (section === undefined) return `"${path}" names no projection section`;
 
-  if (['created', 'changed', 'deleted', 'all'].includes(section)) {
+  if (['created', 'changed', 'deleted', 'all', 'seed'].includes(section)) {
     const entity = parts[2];
     if (entity === undefined) return `"${path}" names no entity`;
     const fields = keys.rowFields[entity];

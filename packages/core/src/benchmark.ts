@@ -138,6 +138,21 @@ export const BenchmarkSchema = z.object({
   /** Entities the projection is rooted at. Pinned so every case asks the same
    * questions of every agent, whatever a given run happens to touch. */
   projectionFocus: z.array(z.string()).default([]),
+  /**
+   * The shape of the job, carried so tooling can reason about the suite.
+   *
+   * This is not an answer key — it is which action the work is, and which
+   * actions come before and after it. An agent is never shown it, but a
+   * quality check needs it to build a deliberately defective implementation.
+   */
+  workflow: z
+    .object({
+      primaryAction: z.string().default(''),
+      remedyActions: z.array(z.string()).default([]),
+      completionActions: z.array(z.string()).default([]),
+      focusEntity: z.string().default(''),
+    })
+    .default({ primaryAction: '', remedyActions: [], completionActions: [], focusEntity: '' }),
 });
 export type Benchmark = z.infer<typeof BenchmarkSchema>;
 

@@ -19,12 +19,12 @@ suite for every AI agent — on *any* workflow, not one.
 | 8  | State-aware counterfactual generator          | ✅ |
 | 9  | Five demo environments + generic agents       | ✅ |
 | 10 | Hidden sixth-domain acceptance test           | ✅ 10 tests, zero code changes |
-| 11 | Benchmark mutation testing                    | ⬜ |
-| 12 | Benchmark quality + time-to-benchmark         | ⬜ |
+| 11 | Benchmark mutation testing                    | ✅ |
+| 12 | Benchmark quality + time-to-benchmark         | ✅ |
 | 13 | Browser execution lane                        | ⬜ |
 | 14 | BYO agent / BYO environment / privacy / CLI   | ⬜ |
 | 15 | Product UX, `/proof`, docs                    | ⬜ |
-| 16 | Anti-hardcoding gate, full green, deploy      | ⬜ |
+| 16 | Anti-hardcoding gate, full green, deploy      | 🔵 gate done |
 
 ## Success criteria (from the brief §34)
 

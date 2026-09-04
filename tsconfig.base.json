@@ -29,6 +29,7 @@
       "@rigorrun/environment": ["./packages/environment/src/index.ts"],
       "@rigorrun/environment/*": ["./packages/environment/src/*"],
       "@rigorrun/environments": ["./packages/environments/src/index.ts"],
+      "@rigorrun/quality": ["./packages/quality/src/index.ts"],
       "@rigorrun/environments/*": ["./packages/environments/src/*"],
       "@rigorrun/core/*": ["./packages/core/src/*"],
       "@rigorrun/verifier": ["./packages/verifier/src/index.ts"],

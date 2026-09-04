@@ -117,6 +117,12 @@ export async function generateBenchmark(
     generator: 'deterministic',
     createdAt,
     projectionFocus: contract.projectionFocus,
+    workflow: {
+      primaryAction: contract.primaryAction,
+      remedyActions: contract.remedyActions,
+      completionActions: contract.completionActions,
+      focusEntity: contract.focusEntity,
+    },
     thresholds: {
       minTaskSuccess: 0.95,
       minPolicyCompliance: 1,

@@ -189,7 +189,8 @@ export function induceContract(
     ...sideEffect(context),
     ...fieldRelation(context),
     ...transitionAllowed(context),
-    ...actionOrder(context),
+    ...actionOrder(context, guardedActions(context, guarded)),
+    ...scopeContainment(context),
   ].sort((a, b) => a.id.localeCompare(b.id));
 
   const createdAt = options.createdAt ?? new Date().toISOString();
@@ -207,7 +208,18 @@ export function induceContract(
     remedyActions: context.remedyActions,
     completionActions: context.completionActions,
     demonstratedArgs: context.demonstratedArgs,
-    projectionFocus: projection.keys.entities,
+    // Every entity any action could write to, not only the ones this
+    // demonstration touched. An agent that changes something the job is not
+    // about must be visible, and a record nobody projected cannot be checked.
+    projectionFocus: [
+      ...new Set([
+        ...projection.keys.entities,
+        ...adapter
+          .getActions()
+          .filter((action) => !action.readOnly)
+          .flatMap((action) => [...action.mutates]),
+      ]),
+    ].sort(),
     observedFacts: observedFacts(context),
     rules,
     successAssertions: [],
@@ -429,7 +441,13 @@ function pathAgreement(context: Context): ContractRule[] {
 /** T1 — a number stated in the interface, and something that might guard it. */
 function thresholdGuard(context: Context): ContractRule[] {
   const rules: ContractRule[] = [];
-  const quantities = quantityPaths(context);
+  const allQuantities = quantityPaths(context);
+  // When the same stated limit could attach to the record's own number or to a
+  // number on a record it names, the record's own number wins. The work is
+  // about that record; the other one is context, and attaching the threshold
+  // to it makes the limit fire regardless of what was actually requested.
+  const ownQuantities = allQuantities.filter((entry) => !entry.path.includes('__'));
+  const quantities = ownQuantities.length > 0 ? ownQuantities : allQuantities;
   if (quantities.length === 0 || context.statedNumbers.length === 0) return rules;
 
   const relationGuards = guardCandidates(context);
@@ -1122,8 +1140,82 @@ function transitionAllowed(context: Context): ContractRule[] {
   return rules;
 }
 
+/**
+ * The job must not change things the job is not about.
+ *
+ * Not induced from the demonstration — nobody demonstrates a scope violation,
+ * so no amount of watching will produce this rule. It comes from the
+ * environment's own declaration of what each action writes to, which is why it
+ * is `observed` rather than a guess, and why it catches the class of defect
+ * where an agent does the work correctly and quietly edits something else on
+ * its way out.
+ */
+function scopeContainment(context: Context): ContractRule[] {
+  const used = new Set(
+    [context.primaryAction, ...context.remedyActions, ...context.completionActions]
+      .map((name) => context.adapter.getActions().find((action) => action.name === name))
+      .flatMap((action) => [...(action?.mutates ?? [])]),
+  );
+
+  const rules: ContractRule[] = [];
+  for (const action of context.adapter.getActions()) {
+    if (action.readOnly) continue;
+    for (const entity of action.mutates) {
+      if (used.has(entity)) continue;
+      used.add(entity);
+      const label = entityLabel(context.schema, entity);
+      rules.push({
+        id: `rule_scope__${entity}`,
+        statement: `doing this job must not create ${article(label)}`,
+        template: 'uniqueness',
+        // Structural, not inferred: the environment says which records each
+        // action writes to, and the demonstration never wrote to this one.
+        status: 'observed',
+        confidence: 1,
+        provenance: [
+          schemaProvenance(entity),
+          delta(context, `the demonstration never created ${article(label)}`),
+        ],
+        implications: [`An agent that changes ${article(label)} on its way past will fail.`],
+        generatedAssertions: [],
+        generatedCases: [],
+        predicate: {
+          kind: 'count_constraint',
+          entity,
+          scope: 'created',
+          groupBy: [],
+          where: [],
+          max: 0,
+        },
+      });
+    }
+  }
+  return rules;
+}
+
 /** T10 — one action came before another. */
-function actionOrder(context: Context): ContractRule[] {
+/**
+ * Actions that exist to obtain a permission a guard rule already governs.
+ *
+ * "Ask the manager, then approve" is only true above the threshold. Emitting
+ * it unconditionally would fail every small invoice for a reason the
+ * recording never showed — the same mistake the unconditional link rule made.
+ */
+function guardedActions(context: Context, guarded: ReadonlySet<string>): Set<string> {
+  const targets = new Set(
+    relationshipsFrom(context.schema, context.focusEntity.name)
+      .filter((relationship) => guarded.has(relationship.name))
+      .map((relationship) => relationship.to),
+  );
+  return new Set(
+    context.adapter
+      .getActions()
+      .filter((action) => !action.readOnly && action.mutates.some((entity) => targets.has(entity)))
+      .map((action) => action.name),
+  );
+}
+
+function actionOrder(context: Context, conditional: ReadonlySet<string>): ContractRule[] {
   const performed = actionSteps(context.trace)
     .map((step) => step.action?.name)
     .filter((name): name is string => name !== undefined)
@@ -1139,6 +1231,7 @@ function actionOrder(context: Context): ContractRule[] {
       const key = `${before}__${after}`;
       if (seen.has(key)) continue;
       seen.add(key);
+      if (conditional.has(before)) continue;
 
       rules.push(
         makeRule({
