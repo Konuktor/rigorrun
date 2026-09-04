@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Landing } from './pages/Landing.tsx';
+import { Proof } from './pages/Proof.tsx';
 import { DemoPage } from './demo/DemoPage.tsx';
 import { Button, Wordmark } from './components/primitives.tsx';
 
-type Route = 'home' | 'demo';
+type Route = 'home' | 'demo' | 'proof';
 
 function currentRoute(): Route {
-  return window.location.hash.startsWith('#/demo') ? 'demo' : 'home';
+  if (window.location.hash.startsWith('#/demo')) return 'demo';
+  if (window.location.hash.startsWith('#/proof')) return 'proof';
+  return 'home';
 }
 
 export function App() {
@@ -22,11 +25,13 @@ export function App() {
     document.title =
       route === 'demo'
         ? 'Live demo — RigorRun'
-        : 'RigorRun — Do the job once. Test every agent forever.';
+        : route === 'proof'
+          ? 'One compiler, five jobs — RigorRun'
+          : 'RigorRun — Do the job once. Test every agent forever.';
   }, [route]);
 
   const go = (next: Route) => {
-    window.location.hash = next === 'demo' ? '#/demo/record' : '#/';
+    window.location.hash = next === 'demo' ? '#/demo/record' : next === 'proof' ? '#/proof' : '#/';
     window.scrollTo({ top: 0 });
   };
 
@@ -50,10 +55,15 @@ export function App() {
           >
             <Wordmark />
           </button>
-          <nav className="flex items-center gap-4" aria-label="Primary">
-            <span className="hidden text-meta text-muted md:inline">
-              Do the job once. Test every agent forever.
-            </span>
+          <nav className="flex items-center gap-3" aria-label="Primary">
+            <button
+              type="button"
+              onClick={() => go('proof')}
+              data-testid="nav-proof"
+              className={`text-meta ${route === 'proof' ? 'text-fg' : 'text-muted hover:text-fg'}`}
+            >
+              Five workflows
+            </button>
             <Button
               variant={route === 'demo' ? 'secondary' : 'primary'}
               size="sm"
@@ -67,13 +77,19 @@ export function App() {
       </header>
 
       <main id="main" className="flex-1">
-        {route === 'demo' ? <DemoPage /> : <Landing onRunDemo={() => go('demo')} />}
+        {route === 'demo' ? (
+          <DemoPage />
+        ) : route === 'proof' ? (
+          <Proof />
+        ) : (
+          <Landing onRunDemo={() => go('demo')} onSeeProof={() => go('proof')} />
+        )}
       </main>
 
       <footer className="border-t border-line px-5 py-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-meta text-muted">
           <span>
-            RigorRun 0.1.0 — early MVP. Northstar Support is a synthetic demo environment.
+            RigorRun 0.1.0 — early MVP. Every demo environment is synthetic.
           </span>
           <span>Local-first. Nothing leaves this machine unless you publish it.</span>
         </div>

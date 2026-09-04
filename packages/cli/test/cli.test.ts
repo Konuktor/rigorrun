@@ -162,6 +162,51 @@ describe('gate exit codes are the CI contract', () => {
   });
 });
 
+describe('bringing your own environment and checking privacy', () => {
+  it('scaffolds an environment that is a working starting point, not a blank file', async () => {
+    const { code, out } = await cli('init-environment', 'acme-billing');
+    expect(code).toBe(0);
+    expect(out).toContain('environments/acme-billing');
+
+    for (const file of ['schema.ts', 'fixture.ts', 'environment.ts', 'README.md']) {
+      const written = await readFile(join(workDir, 'environments/acme-billing', file), 'utf8');
+      expect(written.length).toBeGreaterThan(200);
+    }
+    // The template must carry the two annotations everything else depends on.
+    const schema = await readFile(join(workDir, 'environments/acme-billing/schema.ts'), 'utf8');
+    expect(schema).toContain('precision');
+    expect(schema).toContain('untrusted');
+    const environment = await readFile(
+      join(workDir, 'environments/acme-billing/environment.ts'),
+      'utf8',
+    );
+    expect(environment).toContain("id: 'acme-billing'");
+    expect(environment).toContain("enforcement: 'none'");
+  });
+
+  it('rejects a directory name that is not one', async () => {
+    const { code, err } = await cli('init-environment', '../escape');
+    expect(code).toBe(2);
+    expect(err).toContain('not a usable directory name');
+  });
+
+  it('says what a recording captured and what would leave the machine', async () => {
+    const { code, out } = await cli('privacy', 'inspect', '.rigorrun/trace.json');
+    expect(code).toBe(0);
+    expect(out).toContain('Captured');
+    expect(out).toContain('Leaves this machine');
+    expect(out).toContain('nothing');
+    expect(out).toContain('Stays local');
+  });
+
+  it('refuses a file that is not a recording', async () => {
+    await writeFile(join(workDir, 'notatrace.json'), '{"hello":"world"}');
+    const { code, err } = await cli('privacy', 'inspect', 'notatrace.json');
+    expect(code).toBe(2);
+    expect(err).toContain('not a RigorRun trace');
+  });
+});
+
 describe('reports', () => {
   it('renders a full report and a sanitised one', async () => {
     await cli('run', 'benchmark.json', '--agent', 'naive', '--quiet');

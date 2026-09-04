@@ -36,7 +36,13 @@ const PIPELINE = [
   },
 ];
 
-export function Landing({ onRunDemo }: { onRunDemo: () => void }) {
+export function Landing({
+  onRunDemo,
+  onSeeProof,
+}: {
+  onRunDemo: () => void;
+  onSeeProof: () => void;
+}) {
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
       {/* ------------------------------------------------------------ hero */}
@@ -56,6 +62,14 @@ export function Landing({ onRunDemo }: { onRunDemo: () => void }) {
             <Button onClick={onRunDemo} testId="cta-run-demo" size="lg">
               Run the live demo
             </Button>
+            <button
+              type="button"
+              onClick={onSeeProof}
+              data-testid="cta-proof"
+              className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
+            >
+              One compiler, five jobs
+            </button>
             <a
               href="#how-it-works"
               data-testid="cta-sixty-seconds"

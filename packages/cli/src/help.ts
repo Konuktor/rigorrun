@@ -10,8 +10,15 @@ USAGE
   rigorrun <command> [options]
 
 COMMANDS
-  demo                     Run the full pipeline offline: trace -> contract ->
-                           benchmark -> Agent A vs Agent B -> report.
+  demo                     Run the full pipeline offline: recording -> contract
+                           -> benchmark -> agents -> verdict.
+  workflows                List the demo jobs this build ships with.
+  environments             List the environments RigorRun can point at.
+  inspect-environment <id> Show the records, links and actions an adapter
+                           publishes - everything the compiler gets to see.
+  init-environment <name>  Scaffold a working environment to edit.
+  privacy inspect <trace>  Say what a recording captured, and what would leave
+                           this machine.
   record                   Receive a workflow trace from the Chrome recorder on
                            a loopback-only port.
   compile <trace.json>     Compile a recorded trace into a workflow contract.
@@ -25,6 +32,7 @@ COMMANDS
 
 COMMON OPTIONS
   -o, --out <path>         Where to write the command's output.
+  -w, --workflow <key>     Which demo job to run. Default refund.
       --json               Print machine-readable JSON to stdout.
       --quiet              Suppress progress output.
   -h, --help               Show help. Add to any command for its own options.
