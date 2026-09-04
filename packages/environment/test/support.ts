@@ -92,7 +92,7 @@ export const TEST_SCHEMA: EnvironmentSchema = {
           unit: 'currency',
           precision: 0.01,
         },
-        { name: 'filedBy', type: 'string', nullable: false, role: 'actor' },
+        { name: 'filedBy', type: 'string', nullable: true, role: 'actor' },
       ],
     },
     {

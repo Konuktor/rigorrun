@@ -203,6 +203,9 @@ importers:
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../environment
 
   packages/core:
     dependencies:
@@ -221,6 +224,9 @@ importers:
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../environment
       '@rigorrun/northstar':
         specifier: workspace:*
         version: link:../northstar

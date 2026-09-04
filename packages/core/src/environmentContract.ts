@@ -143,6 +143,16 @@ export const EnvironmentContractSchema = z.object({
   primaryAction: z.string().min(1),
   /** Remedial actions the operator may take first, e.g. asking for approval. */
   remedyActions: z.array(z.string()).default([]),
+  /**
+   * Entities the projection is rooted at, fixed at compile time.
+   *
+   * This has to be pinned rather than recomputed per case. If the focus were
+   * derived from whatever a given run happened to touch, an agent that did
+   * nothing would produce a projection with no rows to check, every assertion
+   * would resolve to nothing, and the case would pass. The benchmark must ask
+   * the same questions of every agent.
+   */
+  projectionFocus: z.array(z.string()).default([]),
   observedFacts: z.array(ObservedFactSchema).default([]),
   rules: z.array(ContractRuleSchema).default([]),
   successAssertions: z.array(AssertionSchema).default([]),

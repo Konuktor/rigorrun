@@ -5,3 +5,6 @@ export {
   type TemplateParams,
   type PolicyTemplate,
 } from './templates.ts';
+export * from './language.ts';
+export * from './induce.ts';
+export * from './synthesize.ts';

@@ -12,6 +12,7 @@
     "@rigorrun/core": "workspace:*",
     "@rigorrun/northstar": "workspace:*",
     "@rigorrun/providers": "workspace:*",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "@rigorrun/environment": "workspace:*"
   }
 }

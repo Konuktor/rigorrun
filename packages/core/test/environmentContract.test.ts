@@ -41,6 +41,7 @@ const CONTRACT: EnvironmentContract = {
   environmentId: 'demo',
   primaryAction: 'fileClaim',
   remedyActions: [],
+  projectionFocus: ['Claim'],
   observedFacts: [],
   rules: [
     rule({ id: 'observed_one', status: 'observed', confidence: 1 }),
