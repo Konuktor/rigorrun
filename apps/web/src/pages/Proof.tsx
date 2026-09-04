@@ -10,6 +10,8 @@
 import { Mono, Panel, SectionLabel, Tag, pct } from '../components/primitives.tsx';
 import proof from '../proof.json';
 
+const OPS_URL = import.meta.env['VITE_OPS_URL'] ?? 'http://127.0.0.1:5175';
+
 interface WorkflowProof {
   key: string;
   title: string;
@@ -80,6 +82,21 @@ export function Proof() {
         <p className="mt-3 text-body text-secondary">
           Every number below was produced by running the real pipeline. Regenerate it with{' '}
           <Mono>node scripts/build-proof.mjs</Mono>.
+        </p>
+        <p className="mt-4">
+          <a
+            href={OPS_URL}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="open-systems"
+            className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
+          >
+            Open the four systems ↗
+          </a>
+          <span className="ml-3 text-meta text-muted">
+            A finance console, a CRM, an access register and a warehouse — one renderer, and a
+            build check that fails if it names any of them.
+          </span>
         </p>
       </header>
 

@@ -36,6 +36,10 @@ const GENERIC = [
   'packages/agents/src',
   'packages/providers/src',
   'packages/quality/src',
+  // The schema-driven renderer is held to the same standard as the compiler.
+  // Four products that look nothing alike, and one implementation with no idea
+  // which of them it is drawing.
+  'apps/demo-ops/src',
 ];
 
 /**

@@ -10,10 +10,10 @@
   },
   "scripts": {
     "demo": "node scripts/demo.mjs",
-    "dev": "concurrently -n crm,web -c magenta,cyan \"pnpm -F @rigorrun/demo-crm dev\" \"pnpm -F @rigorrun/web dev\"",
+    "dev": "concurrently -n crm,ops,web -c magenta,yellow,cyan \"pnpm -F @rigorrun/demo-crm dev\" \"pnpm -F @rigorrun/demo-ops dev\" \"pnpm -F @rigorrun/web dev\"",
     "cli": "tsx packages/cli/src/bin.ts",
     "rigorrun": "tsx packages/cli/src/bin.ts",
-    "build": "pnpm build:cli && pnpm build:crm && pnpm build:web && pnpm build:extension",
+    "build": "pnpm build:cli && pnpm build:crm && pnpm build:ops && pnpm build:web && pnpm build:extension",
     "build:cli": "pnpm -F @rigorrun/cli build",
     "build:crm": "pnpm -F @rigorrun/demo-crm build",
     "build:web": "pnpm -F @rigorrun/web build",
@@ -31,11 +31,11 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm domain && pnpm test && pnpm build",
     "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
     "e2e:public": "playwright test --config e2e/playwright.public.config.ts",
-    "build:web:prod": "VITE_CRM_URL=https://rigorrun-crm.pages.dev pnpm -F @rigorrun/web build",
+    "build:web:prod": "VITE_CRM_URL=https://rigorrun-crm.pages.dev VITE_OPS_URL=https://rigorrun-ops.pages.dev pnpm -F @rigorrun/web build",
     "deploy:web": "pnpm build:web:prod && wrangler pages deploy apps/web/dist --project-name rigorrun --branch main --commit-dirty=true",
     "deploy:crm": "pnpm build:crm && wrangler pages deploy apps/demo-crm/dist --project-name rigorrun-crm --branch main --commit-dirty=true",
     "deploy:worker": "pnpm -F @rigorrun/worker deploy",
-    "deploy:all": "pnpm deploy:crm && pnpm deploy:web && pnpm deploy:worker",
+    "deploy:all": "pnpm deploy:crm && pnpm deploy:ops && pnpm deploy:web && pnpm deploy:worker",
     "assets": "node scripts/capture-assets.mjs",
     "a11y": "playwright test --config e2e/playwright.a11y.config.ts",
     "smoke:prod": "playwright test --config e2e/playwright.smoke.config.ts",
@@ -48,7 +48,9 @@
     "contrast": "node scripts/check-contrast.mjs",
     "api:prod": "playwright test --config e2e/playwright.api.config.ts",
     "perf:prod": "playwright test --config e2e/playwright.perf.config.ts",
-    "domain": "node scripts/check-domain-leak.mjs"
+    "domain": "node scripts/check-domain-leak.mjs",
+    "build:ops": "pnpm -F @rigorrun/demo-ops build",
+    "deploy:ops": "pnpm build:ops && wrangler pages deploy apps/demo-ops/dist --project-name rigorrun-ops --branch main --commit-dirty=true"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

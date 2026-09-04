@@ -15,7 +15,9 @@ const pkg = (name: string) =>
 
 export const rigorrunAliases = {
   '@rigorrun/core': pkg('core'),
-  '@rigorrun/northstar': pkg('northstar'),
+  '@rigorrun/environment': pkg('environment'),
+  '@rigorrun/environments': pkg('environments'),
+  '@rigorrun/quality': pkg('quality'),
   '@rigorrun/verifier': pkg('verifier'),
   '@rigorrun/generator': pkg('generator'),
   '@rigorrun/scoring': pkg('scoring'),

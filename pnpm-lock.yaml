@@ -93,6 +93,24 @@ importers:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
 
+  apps/demo-ops:
+    dependencies:
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../../packages/environment
+      '@rigorrun/environments':
+        specifier: workspace:*
+        version: link:../../packages/environments
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
+
   apps/extension:
     dependencies:
       '@rigorrun/core':

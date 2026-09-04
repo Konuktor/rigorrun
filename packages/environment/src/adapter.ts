@@ -29,8 +29,61 @@ export interface ActionResult {
 }
 
 /**
- * How the schema-driven demo app should present this environment. Read only by
- * the UI; the compiler never sees it.
+ * How a record's lifecycle value should read to a person.
+ *
+ * Declared rather than inferred: nothing generic can know that "cleared" is
+ * good news and "refused" is not, and a renderer that guessed from the word
+ * would be a renderer with a vocabulary in it.
+ */
+export type StatusTone = 'positive' | 'progress' | 'warning' | 'danger' | 'neutral';
+
+/** How a collection of records is best looked at. */
+export type ViewKind = 'table' | 'board' | 'list';
+
+export interface ColumnHint {
+  /** A field of the entity, or a `relation__field` path one hop out. */
+  field: string;
+  label?: string;
+  width?: 'narrow' | 'normal' | 'wide';
+  align?: 'start' | 'end';
+  /** The column a person scans down to find the row they want. */
+  emphasis?: boolean;
+}
+
+export interface DetailSection {
+  title: string;
+  fields: readonly string[];
+  /** `facts` renders label/value pairs; `prose` renders long text. */
+  kind?: 'facts' | 'prose';
+}
+
+/**
+ * Everything the renderer needs to present one kind of record.
+ *
+ * All of it is data. The renderer reads these declarations and has no idea
+ * whether it is drawing an invoice queue or a warehouse.
+ */
+export interface EntityPresentation {
+  entity: string;
+  /** What a collection of them is called, e.g. "Invoices". */
+  plural: string;
+  view: ViewKind;
+  columns: readonly ColumnHint[];
+  /** Status field to group a board by. Ignored for other views. */
+  groupBy?: string;
+  sections: readonly DetailSection[];
+  /** Actions offered from a record's page, in the order they belong. */
+  actions?: readonly string[];
+  /** Field shown under the title on a record's page. */
+  subtitleField?: string;
+}
+
+/**
+ * How the schema-driven demo app should present this environment.
+ *
+ * Read only by the renderer; the compiler never sees any of it. It exists so
+ * that four genuinely different-looking pieces of business software can be one
+ * implementation — the differences are declarations, not branches.
  */
 export interface PresentationHints {
   label: string;
@@ -41,8 +94,26 @@ export interface PresentationHints {
   mark: string;
   /** Entity names to show in the primary navigation, in order. */
   navEntities: readonly string[];
+  /** What this software calls each of them in its nav. */
+  navLabels?: Readonly<Record<string, string>>;
+  /** Short button text per action. An action's description is a sentence,
+   * which is right for an agent's tool catalogue and wrong on a button. */
+  actionLabels?: Readonly<Record<string, string>>;
   /** Entity whose detail page carries the workflow's main action. */
   focusEntity: string;
+  layout?: 'sidebar' | 'topbar';
+  density?: 'comfortable' | 'compact';
+  /** What each lifecycle value means, so colour is declared not guessed. */
+  statusTones?: Readonly<Record<string, StatusTone>>;
+  entities?: readonly EntityPresentation[];
+}
+
+/** The presentation for one entity, or a reasonable default from the schema. */
+export function presentationFor(
+  hints: PresentationHints,
+  entity: string,
+): EntityPresentation | undefined {
+  return hints.entities?.find((candidate) => candidate.entity === entity);
 }
 
 export interface EnvironmentAdapter {

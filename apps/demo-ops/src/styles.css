@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+
+/*
+ * One stylesheet, four products.
+ *
+ * Everything that differs between the finance console, the CRM, the access
+ * register and the warehouse is a CSS custom property set from the adapter's
+ * declared accent, layout and density. There is no per-workflow rule in here,
+ * and there is none in the renderer either — that is the thing being
+ * demonstrated as much as anything on screen.
+ */
+:root {
+  --accent: #0f172a;
+  --accent-soft: #f1f5f9;
+  --row-pad-y: 0.55rem;
+  --row-pad-x: 0.75rem;
+}
+@theme {
+  /*
+   * Contrast-checked in scripts/check-contrast.mjs. `ink-faint` used to be
+   * #94a3b8, which measures 2.4:1 on white — it was carrying every table header
+   * in the app and failed WCAG AA badly.
+   */
+  --color-ink: #0f172a;
+  --color-ink-soft: #41506a;
+  --color-ink-faint: #5a6880;
+  --color-rule: #e2e8f0;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f7f9;
+  --color-brand: #1d4ed8;
+  --color-brand-soft: #eff4ff;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Set from the adapter's declared accent; never from a workflow name. */
+.themed {
+  --color-brand: var(--accent);
+  --color-brand-soft: var(--accent-soft);
+}
+
+.themed *:focus-visible {
+  outline-color: var(--accent);
+}
+
+/* Density is a declaration too: a finance console is dense, a CRM is not. */
+.density-compact {
+  --row-pad-y: 0.4rem;
+  --row-pad-x: 0.6rem;
+}
+
+.density-comfortable {
+  --row-pad-y: 0.7rem;
+  --row-pad-x: 0.9rem;
+}
+
+.cell {
+  padding: var(--row-pad-y) var(--row-pad-x);
+}
