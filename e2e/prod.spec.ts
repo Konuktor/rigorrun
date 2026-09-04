@@ -21,6 +21,7 @@ import {
   expectNoOverflow,
   goToBenchmark,
   goToContract,
+  goToLearned,
   openDemo,
   openEvidence,
   runBenchmarkAndWait,
@@ -62,16 +63,23 @@ test.describe('golden path', () => {
   });
 
   test('observed and inferred rules are visually and semantically distinct', async ({ page }) => {
+    // Step 2 shows the two apart and asks for nothing.
     await openDemo(page);
-    await goToContract(page);
+    await goToLearned(page);
 
     await expect(page.getByRole('heading', { name: /What RigorRun saw/ })).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /What RigorRun is guessing/ }),
     ).toBeVisible();
+    // Reading is not deciding: no answer can be given on this screen.
+    await expect(page.locator('[data-testid^="rule-confirm-"]')).toHaveCount(0);
+    await expect(page.getByText(/above \$50/).first()).toBeVisible();
+  });
 
-    // The rule read out of a number on the page, presented as a question with
-    // its confidence and the reason RigorRun cannot settle it.
+  test('step three asks the question, with its evidence and its confidence', async ({ page }) => {
+    await openDemo(page);
+    await goToContract(page);
+
     const limitRule = page.locator('[data-testid^="rule-rule_threshold_guard"]').first();
     await expect(limitRule).toContainText('$50');
     await expect(limitRule).toContainText('%');
@@ -266,7 +274,7 @@ test.describe('reports', () => {
 /* =============================================== routing and state safety */
 
 test.describe('routing', () => {
-  for (const step of ['record', 'contract', 'benchmark', 'verdict']) {
+  for (const step of ['record', 'learned', 'confirm', 'benchmark', 'verdict']) {
     test(`deep link to #/demo/${step} rebuilds that step`, async ({ page }) => {
       const watchers = watchPage(page);
       await page.goto(`/#/demo/${step}`);
@@ -284,7 +292,7 @@ test.describe('routing', () => {
 
     await page.goBack();
     await expect(
-      page.getByRole('heading', { name: /One recording does not reveal a policy/ }),
+      page.getByRole('heading', { name: /Which of these are actually your policy\?/ }),
     ).toBeVisible();
 
     await page.goForward();
