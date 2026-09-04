@@ -83,21 +83,21 @@ export function Proof() {
           Every number below was produced by running the real pipeline. Regenerate it with{' '}
           <Mono>node scripts/build-proof.mjs</Mono>.
         </p>
-        <p className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
           <a
             href={OPS_URL}
             target="_blank"
             rel="noreferrer"
             data-testid="open-systems"
-            className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
+            className="inline-flex h-10 shrink-0 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
           >
             Open the four systems ↗
           </a>
-          <span className="ml-3 text-meta text-muted">
+          <span className="min-w-[16rem] max-w-md flex-1 text-meta text-muted">
             A finance console, a CRM, an access register and a warehouse — one renderer, and a
             build check that fails if it names any of them.
           </span>
-        </p>
+        </div>
       </header>
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
