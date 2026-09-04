@@ -40,8 +40,12 @@ const CONTRACT: EnvironmentContract = {
   goal: 'Do the job',
   environmentId: 'demo',
   primaryAction: 'fileClaim',
+  focusEntity: 'Claim',
+  focusScope: 'created',
   remedyActions: [],
   projectionFocus: ['Claim'],
+  completionActions: [],
+  demonstratedArgs: {},
   observedFacts: [],
   rules: [
     rule({ id: 'observed_one', status: 'observed', confidence: 1 }),

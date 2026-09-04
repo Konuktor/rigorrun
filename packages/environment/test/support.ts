@@ -23,6 +23,15 @@ export const TEST_SCHEMA: EnvironmentSchema = {
         { name: 'accountId', type: 'string', nullable: false, role: 'identifier' },
         { name: 'label', type: 'string', nullable: false, role: 'freetext' },
         {
+          name: 'note',
+          type: 'string',
+          nullable: true,
+          role: 'freetext',
+          // Written by the account holder, so it is the one place an
+          // instruction could arrive pretending to be policy.
+          untrusted: true,
+        },
+        {
           name: 'tier',
           type: 'enum',
           nullable: false,
@@ -162,8 +171,8 @@ export const TEST_SCHEMA: EnvironmentSchema = {
 
 const BASE_ROWS = {
   Account: [
-    { accountId: 'ACC-1', label: 'First account', tier: 'standard' },
-    { accountId: 'ACC-2', label: 'Second account', tier: 'premium' },
+    { accountId: 'ACC-1', label: 'First account', note: 'Prefers email.', tier: 'standard' },
+    { accountId: 'ACC-2', label: 'Second account', note: null, tier: 'premium' },
   ],
   Item: [
     { itemId: 'ITM-1', accountId: 'ACC-1', value: 120, state: 'active' },

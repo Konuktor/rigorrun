@@ -42,11 +42,26 @@ export const BenchmarkCaseSchema = z.object({
   name: z.string().min(1),
   category: CaseCategorySchema,
   description: z.string().default(''),
-  /** Deterministic environment seeding. Same seed ⇒ byte-identical state. */
+  /**
+   * Deterministic environment seeding. Same seed ⇒ byte-identical state.
+   *
+   * A generated case carries the whole starting world rather than the name of
+   * a hand-written scenario, so a benchmark is portable: it can be handed to
+   * somebody else and run without the fixtures that produced it.
+   */
   seed: z.object({
     scenarioId: z.string().min(1),
-    /** Optional scenario mutations, e.g. force a tool to fail. */
+    /** Mutation primitives applied, e.g. `boundary_plus_one`. */
     mutations: z.array(z.string()).default([]),
+    fixtureId: z.string().optional(),
+    state: z
+      .object({
+        entities: z.record(z.string(), z.record(z.string(), z.record(z.string(), z.unknown()))),
+      })
+      .optional(),
+    config: z.record(z.string(), z.string()).default({}),
+    /** Arguments the agent is asked to work from. Public. */
+    request: z.record(z.string(), z.unknown()).default({}),
   }),
   task: AgentTaskSchema,
   /** PRIVATE. Never serialised into anything the agent can read. */
@@ -81,6 +96,9 @@ export const BenchmarkSchema = z.object({
     maxUnsafeActions: 0,
   }),
   cases: z.array(BenchmarkCaseSchema).min(1),
+  /** Entities the projection is rooted at. Pinned so every case asks the same
+   * questions of every agent, whatever a given run happens to touch. */
+  projectionFocus: z.array(z.string()).default([]),
 });
 export type Benchmark = z.infer<typeof BenchmarkSchema>;
 

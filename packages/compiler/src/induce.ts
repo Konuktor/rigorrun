@@ -76,6 +76,8 @@ interface Context {
   focusRow: DecoratedRow;
   primaryAction: string;
   remedyActions: string[];
+  completionActions: string[];
+  demonstratedArgs: Record<string, Record<string, unknown>>;
   statedNumbers: StatedNumber[];
 }
 
@@ -125,10 +127,18 @@ export function induceContract(
   // effect, not a way of unblocking the work.
   const performed = actionSteps(trace).map((step) => step.action?.name ?? '');
   const primaryIndex = performed.lastIndexOf(primary);
+  const isMutating = (name: string): boolean =>
+    !(adapter.getActions().find((a) => a.name === name)?.readOnly ?? true);
   const remedyActions = performed
     .slice(0, primaryIndex)
-    .filter((name) => name !== '' && name !== primary)
-    .filter((name) => !(adapter.getActions().find((a) => a.name === name)?.readOnly ?? true));
+    .filter((name) => name !== '' && name !== primary && isMutating(name));
+  const completionActions = performed
+    .slice(primaryIndex + 1)
+    .filter((name) => name !== '' && name !== primary && isMutating(name));
+  const demonstratedArgs: Record<string, Record<string, unknown>> = {};
+  for (const step of actionSteps(trace)) {
+    if (step.action) demonstratedArgs[step.action.name] = step.action.args;
+  }
 
   const context: Context = {
     schema,
@@ -142,6 +152,8 @@ export function induceContract(
     focusRow,
     primaryAction: primary,
     remedyActions: [...new Set(remedyActions)],
+    completionActions: [...new Set(completionActions)],
+    demonstratedArgs,
     statedNumbers: readStatedNumbers(trace),
   };
 
@@ -168,7 +180,13 @@ export function induceContract(
     environmentId: adapter.id,
     sourceTraceId: trace.id,
     primaryAction: primary,
+    focusEntity: focus.name,
+    focusScope: deltas.some((d) => d.kind === 'entity_created' && d.entity === focus.name)
+      ? 'created'
+      : 'changed',
     remedyActions: context.remedyActions,
+    completionActions: context.completionActions,
+    demonstratedArgs: context.demonstratedArgs,
     projectionFocus: projection.keys.entities,
     observedFacts: observedFacts(context),
     rules,
@@ -224,7 +242,8 @@ function factValue(delta: StateDelta): unknown {
 function goalStatement(context: Context): string {
   const definition = context.adapter.getActions().find((a) => a.name === context.primaryAction);
   const label = entityLabel(context.schema, context.focusEntity.name);
-  return definition?.description ?? `Complete ${article(label)} correctly`;
+  const described = definition?.description?.trim().replace(/\.+$/, '');
+  return described && described.length > 0 ? described : `Complete ${article(label)} correctly`;
 }
 
 // ------------------------------------------------------------------- templates
@@ -337,6 +356,10 @@ function pathAgreement(context: Context): ContractRule[] {
     if (!key.startsWith('agrees__') || typeof value !== 'boolean') continue;
     const [left, right] = key.slice('agrees__'.length).split('__vs__');
     if (!left || !right) continue;
+    // At least one side must be a field of the record being created. Two
+    // related records agreeing with each other is a fact about the world the
+    // operator walked through, not a rule about the work being done.
+    if (left.includes('__') && right.includes('__')) continue;
 
     const a = describePath(context.schema, context.focusEntity.name, left);
     const b = describePath(context.schema, context.focusEntity.name, right);
@@ -500,6 +523,11 @@ function targetState(context: Context): ContractRule[] {
     if (relationship.via.kind !== 'fk' || relationship.cardinality !== 'one') continue;
     const target = entityByName(context.schema, relationship.to);
     if (!target) continue;
+    // Only a record that can actually change has a state worth checking. A
+    // fixed classification is a property of the record, not a stage of the
+    // work, and turning it into a rule produces noise a reviewer has to wade
+    // through.
+    if (!target.mutable) continue;
     const status = target.fields.find((field) => field.role === 'status');
     if (!status) continue;
 

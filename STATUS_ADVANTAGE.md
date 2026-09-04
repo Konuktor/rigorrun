@@ -16,7 +16,7 @@ suite for every AI agent — on *any* workflow, not one.
 | 5  | Provenance + rule lifecycle                   | ✅ |
 | 6  | Generic contract compiler (10 templates)      | ✅ |
 | 7  | Typed verifier synthesis + tri-state          | ✅ |
-| 8  | State-aware counterfactual generator          | ⬜ |
+| 8  | State-aware counterfactual generator          | ✅ |
 | 9  | Five demo environments + generic agents       | ⬜ |
 | 10 | Hidden sixth-domain acceptance test           | ⬜ |
 | 11 | Benchmark mutation testing                    | ⬜ |

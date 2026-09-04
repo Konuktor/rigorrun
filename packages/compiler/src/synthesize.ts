@@ -57,12 +57,26 @@ export interface SynthesisOptions {
   bindings?: Record<string, Literal>;
 }
 
+/**
+ * Why a rule produced no assertion.
+ *
+ * `unsupported` is a defect — the rule references something the projection
+ * cannot answer, and that must be fixed. `needs_binding` is not: a rule that
+ * counts per permit simply does not apply to a case with no permit, and
+ * treating that as a defect would bury the real ones.
+ */
+export interface SynthesisProblem {
+  ruleId: string;
+  message: string;
+  kind: 'unsupported' | 'needs_binding';
+}
+
 export interface SynthesisResult {
   assertions: Assertion[];
   /** Assertion ids per rule, for the evidence chain. */
   byRule: Record<string, string[]>;
-  /** Rules that could not be compiled, and why. Never silently dropped. */
-  problems: { ruleId: string; message: string }[];
+  /** Rules that produced no assertion, and why. Never silently dropped. */
+  problems: SynthesisProblem[];
 }
 
 export function synthesizeAssertions(
@@ -72,14 +86,14 @@ export function synthesizeAssertions(
 ): SynthesisResult {
   const assertions: Assertion[] = [];
   const byRule: Record<string, string[]> = {};
-  const problems: { ruleId: string; message: string }[] = [];
+  const problems: SynthesisProblem[] = [];
 
   for (const rule of contract.rules) {
     if (rule.status === 'rejected' || rule.untestable) continue;
 
     const built = compileRule(rule, keys, options);
     if ('error' in built) {
-      problems.push({ ruleId: rule.id, message: built.error });
+      problems.push({ ruleId: rule.id, message: built.error, kind: built.kind ?? 'unsupported' });
       continue;
     }
     byRule[rule.id] = built.assertions.map((assertion) => assertion.id);
@@ -89,7 +103,9 @@ export function synthesizeAssertions(
   return { assertions, byRule, problems };
 }
 
-type Built = { assertions: Assertion[] } | { error: string };
+type Built =
+  | { assertions: Assertion[] }
+  | { error: string; kind?: SynthesisProblem['kind'] };
 
 function compileRule(
   rule: ContractRule,
@@ -181,7 +197,8 @@ function compileRule(
         const bound = options.bindings?.[field];
         if (bound === undefined) {
           return {
-            error: `this rule counts per "${field}", which needs a concrete value from the case`,
+            error: `this rule counts per "${field}", which this case has no value for`,
+            kind: 'needs_binding',
           };
         }
         const rendered = literal(bound);

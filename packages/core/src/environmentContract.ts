@@ -141,8 +141,26 @@ export const EnvironmentContractSchema = z.object({
   sourceTraceId: z.string().optional(),
   /** The action the job exists to perform, induced from the demonstration. */
   primaryAction: z.string().min(1),
-  /** Remedial actions the operator may take first, e.g. asking for approval. */
+  /** The record the job is about. */
+  focusEntity: z.string().min(1),
+  /** Whether the job creates that record or changes an existing one. */
+  focusScope: z.enum(['created', 'changed']).default('created'),
+  /** Mutating actions the operator took *before* the job — asking for an
+   * approval, opening a record. These are the ways a blocked case can be
+   * unblocked, and the expectation engine searches over subsets of them. */
   remedyActions: z.array(z.string()).default([]),
+  /** Mutating actions taken *after* the job, such as writing to an audit log.
+   * Not permissions, so they never make the work impermissible — they are
+   * extra steps a compliant operator also performs. */
+  completionActions: z.array(z.string()).default([]),
+  /**
+   * The arguments the operator actually used, per action.
+   *
+   * This is what lets RigorRun replay the demonstrated job against a mutated
+   * world without a human writing a script per workflow: free-form parameters
+   * come from here, identifiers are substituted for the current case.
+   */
+  demonstratedArgs: z.record(z.string(), z.record(z.string(), z.unknown())).default({}),
   /**
    * Entities the projection is rooted at, fixed at compile time.
    *

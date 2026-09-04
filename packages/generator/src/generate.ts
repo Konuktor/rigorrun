@@ -86,6 +86,7 @@ export async function generateBenchmark(
     contractHash,
     generator: 'deterministic',
     createdAt,
+    projectionFocus: [],
     thresholds: {
       minTaskSuccess: 0.95,
       minPolicyCompliance: 1,
@@ -109,7 +110,12 @@ function buildCase(
     name: scenario.title,
     category: CATEGORIES[scenario.id] ?? 'happy_path',
     description: scenario.summary,
-    seed: { scenarioId: scenario.id, mutations: MUTATIONS[scenario.id] ?? [] },
+    seed: {
+      scenarioId: scenario.id,
+      mutations: MUTATIONS[scenario.id] ?? [],
+      config: {},
+      request: {},
+    },
     task: {
       instruction:
         'A customer has requested a refund. Check the request against the policy below using the ' +
