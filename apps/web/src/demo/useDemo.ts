@@ -392,6 +392,29 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     // above, and the callbacks it closes over are stable.
   }, [buildContract, buildBenchmark, buildTrace, execute]);
 
+  /**
+   * The recording is replayed as soon as the page opens.
+   *
+   * It is genuinely executed — the demonstration runs against the environment
+   * adapter and the state either side of it is read back — so the first screen
+   * shows what was actually captured rather than a stored transcript.
+   */
+  useEffect(() => {
+    if (stateRef.current.trace) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const recorded = await buildTrace();
+        if (!cancelled) setState((prev) => (prev.trace ? prev : { ...prev, trace: recorded }));
+      } catch (error) {
+        if (!cancelled) setState((prev) => ({ ...prev, error: (error as Error).message }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [buildTrace]);
+
   /** Back and forward move between steps without discarding anything. */
   useEffect(() => {
     const onHashChange = () => {

@@ -29,6 +29,7 @@ import {
   type ProjectionKeySchema,
 } from '@rigorrun/environment';
 import { generateMutations, type Mutation } from './mutations.ts';
+import { findUntestableRules, markUntestable, type UntestableRule } from './enforcement.ts';
 import { computeExpected, type ExpectedOutcome } from './expectation.ts';
 
 export interface GenerateOptions {
@@ -54,6 +55,11 @@ export interface GenerationResult {
    */
   conflicts: { caseId: string; detail: string }[];
   problems: SynthesisProblem[];
+  /**
+   * Rules the environment enforces itself, so no agent can be caught breaking
+   * them. Reported rather than silently counted as passing checks.
+   */
+  untestable: UntestableRule[];
 }
 
 export async function generateBenchmark(
@@ -62,6 +68,17 @@ export async function generateBenchmark(
   fixtures: readonly EnvironmentFixture[],
   options: GenerateOptions = {},
 ): Promise<GenerationResult> {
+  // Before anything is generated: which of these rules can an agent actually
+  // be caught breaking? A rule the environment enforces itself produces a
+  // check nothing can fail.
+  const candidates = blockingRules(contract);
+  const untestable: UntestableRule[] = [];
+  for (const fixture of fixtures) {
+    const probes = generateMutations(adapter, contract, fixture, candidates);
+    untestable.push(...(await findUntestableRules(adapter, contract, probes, candidates)));
+  }
+  const checked = markUntestable(contract, untestable);
+  contract = checked;
   const rules = blockingRules(contract);
   const generated: GeneratedCase[] = [];
   const conflicts: { caseId: string; detail: string }[] = [];
@@ -133,7 +150,7 @@ export async function generateBenchmark(
     cases,
   };
 
-  return { benchmark, cases: generated, conflicts, problems };
+  return { benchmark, cases: generated, conflicts, problems, untestable };
 }
 
 /** The key schema this case's world produces, used to validate every path. */
