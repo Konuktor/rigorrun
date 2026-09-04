@@ -26,6 +26,8 @@
     "allowJs": false,
     "paths": {
       "@rigorrun/core": ["./packages/core/src/index.ts"],
+      "@rigorrun/environment": ["./packages/environment/src/index.ts"],
+      "@rigorrun/environment/*": ["./packages/environment/src/*"],
       "@rigorrun/core/*": ["./packages/core/src/*"],
       "@rigorrun/northstar": ["./packages/northstar/src/index.ts"],
       "@rigorrun/northstar/*": ["./packages/northstar/src/*"],

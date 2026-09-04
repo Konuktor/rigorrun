@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@rigorrun/core': r('./packages/core/src/index.ts'),
+      '@rigorrun/environment': r('./packages/environment/src/index.ts'),
       '@rigorrun/northstar': r('./packages/northstar/src/index.ts'),
       '@rigorrun/verifier': r('./packages/verifier/src/index.ts'),
       '@rigorrun/generator': r('./packages/generator/src/index.ts'),

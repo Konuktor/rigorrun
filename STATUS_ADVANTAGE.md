@@ -9,10 +9,10 @@ suite for every AI agent — on *any* workflow, not one.
 | Phase | What | State |
 | ----- | ---- | ----- |
 | 0  | Generalization audit                          | ✅ `docs/GENERALIZATION_AUDIT.md` |
-| 1  | `@rigorrun/environment` adapter SDK           | ⬜ |
-| 2  | Generic derived projection                    | ⬜ |
+| 1  | `@rigorrun/environment` adapter SDK           | ✅ 28 tests |
+| 2  | Generic derived projection                    | ✅ |
 | 3  | CanonicalHumanTrace + three producers         | ⬜ |
-| 4  | Generic state-delta engine                    | ⬜ |
+| 4  | Generic state-delta engine                    | ✅ |
 | 5  | Provenance + rule lifecycle                   | ⬜ |
 | 6  | Generic contract compiler (10 templates)      | ⬜ |
 | 7  | Typed verifier synthesis + tri-state          | ⬜ |
