@@ -75,6 +75,7 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
   const uiDir = findUi();
   const runner = new Runner({
     service,
+    version: VERSION,
     ...(uiDir ? { uiDir } : {}),
     ...(options.port === undefined ? {} : { port: options.port }),
   });

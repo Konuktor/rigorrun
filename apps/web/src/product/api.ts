@@ -188,11 +188,11 @@ const post = <T>(path: string, body?: unknown): Promise<T> =>
 
 export const api = {
   /** Whether this page is being served by a runner, and whether it may drive it. */
-  async runner(): Promise<{ runner: boolean; paired: boolean }> {
+  async runner(): Promise<{ runner: boolean; paired: boolean; version: string }> {
     try {
-      return await request<{ runner: boolean; paired: boolean }>('/api/runner');
+      return await request<{ runner: boolean; paired: boolean; version: string }>('/api/runner');
     } catch {
-      return { runner: false, paired: false };
+      return { runner: false, paired: false, version: '' };
     }
   },
 

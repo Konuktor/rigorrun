@@ -34,7 +34,11 @@ function currentRoute(): { route: Route; projectId?: string } {
 
 export function App() {
   const [location, setLocation] = useState(currentRoute);
-  const [runner, setRunner] = useState<{ runner: boolean; paired: boolean } | null>(null);
+  const [runner, setRunner] = useState<{
+    runner: boolean;
+    paired: boolean;
+    version: string;
+  } | null>(null);
 
   useEffect(() => {
     const onHashChange = () => setLocation(currentRoute());
@@ -146,7 +150,12 @@ export function App() {
 
       <footer className="border-t border-line px-5 py-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-meta text-muted">
-          <span>RigorRun 0.1.0 — early. See docs/PRODUCT_REALITY_AUDIT.md for what is and is not built.</span>
+          {/* The version the runner reports, not one typed in here. It ends up
+              in bug reports, so it has to be the one somebody is running. */}
+          <span>
+            RigorRun {local && runner?.version ? runner.version : 'alpha'} — early. See
+            docs/PRODUCT_REALITY_AUDIT.md for what is and is not built.
+          </span>
           <span>
             {local
               ? 'Your systems, credentials and recordings stay on this machine.'

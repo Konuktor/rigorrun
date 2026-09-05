@@ -40,6 +40,8 @@ const CONTENT_TYPES: Record<string, string> = {
 
 export interface RunnerOptions {
   service: Service;
+  /** What to tell the interface it is. Shown in the footer and in bug reports. */
+  version?: string;
   /** Built UI bundle. Omitted in tests, where only the API is under test. */
   uiDir?: string;
   port?: number;
@@ -103,7 +105,13 @@ export class Runner {
     app.get('/api/runner', (context) => {
       const bearer = context.req.header('authorization')?.replace(/^Bearer\s+/i, '');
       const cookie = cookieValue(context.req.header('cookie'), SESSION_COOKIE);
-      return context.json({ runner: true, paired: this.pairing.authorises(bearer ?? cookie) });
+      return context.json({
+        runner: true,
+        paired: this.pairing.authorises(bearer ?? cookie),
+        // So the footer reports the version somebody is actually running,
+        // rather than a number typed into a component months ago.
+        version: this.options.version ?? 'unknown',
+      });
     });
 
     app.use('/api/*', async (context, next) => {

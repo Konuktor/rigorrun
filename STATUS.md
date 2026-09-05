@@ -21,7 +21,7 @@ prints the exact command.
 
 | What | Command | Result |
 | ---- | ------- | ------ |
-| A stranger connects their own system and their own agent, in a browser, from nothing, and gets a verdict — then breaks the agent and is told which case regressed | `pnpm e2e:external` | passing |
+| A stranger connects their own system and their own agent, in a browser, from nothing, reloads the page halfway through and loses nothing, and gets a verdict | `pnpm e2e:external` | passing |
 
 That test starts the runner exactly as the quickstart says to, pairs through
 the URL it prints, and drives Chromium. The system it connects is
@@ -40,7 +40,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 13 packages checked against 19 business nouns |
-| Unit + integration | `pnpm test` | 638 passing across 42 files |
+| Unit + integration | `pnpm test` | 642 passing across 42 files |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
