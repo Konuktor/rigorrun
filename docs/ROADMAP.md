@@ -28,7 +28,16 @@ two packages that import nothing from RigorRun.
 - Capability-tiered environments: a verdict says whether the system was read
   back in full, in part, or not at all, and whether cases were isolated.
 - Run-to-run comparison that names the case that regressed.
-- A CLI gate with a usable exit-code contract.
+- A CLI gate with a usable exit-code contract, asserted at the end of the same
+  browser journey that sets a project up.
+- Credentials in the operating system's own store where there is one, and
+  RigorRun saying which one it actually got.
+- A store that survives the process being killed: atomic writes, a project that
+  says it is damaged rather than disappearing, a copy taken before any
+  migration, and servers a crash left running ended by the next start.
+- Projects that can leave the machine — `backup`, `restore`, `export-project`,
+  `import-project` — carrying credential *names* and never values, and inert
+  on arrival until somebody has read the command their connector would run.
 
 **The engine underneath**, unchanged and still true: one compiler over five
 bundled workflows and a sixth that exists only inside a test file, with a build
@@ -51,8 +60,15 @@ HTTP SDK.
 
 **No trace import, and no OpenTelemetry ingest.** Everybody starts from zero.
 
-**Nothing is published to npm.** `npx rigorrun` is what the docs will say; today
-it is a clone and `pnpm rigorrun`.
+**A system whose reads answer in prose cannot be verified.** RigorRun reads
+structure and never prose. It now says so when the reads are nominated, rather
+than at the end — but it is a real limit, and a large share of MCP servers in
+the wild are on the wrong side of it.
+
+**Not yet published to npm.** The package builds, packs, installs into a clean
+directory, runs, and completes the whole fresh-user journey from the tarball —
+`pnpm verify:package` says so and prints the publish command. Until somebody
+runs it, `npx rigorrun@alpha` is a promise the registry cannot keep.
 
 **No cloud sync, and the control plane is unused.** A real D1-backed service is
 deployed and tested and nothing in the product calls it. Either it becomes

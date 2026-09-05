@@ -158,19 +158,25 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
   // keypress does it. Not an HTTP endpoint: an unauthenticated one would let
   // any process on the machine pair itself, and an authenticated one would need
   // the credential the person has just lost.
-  const interactive = process.stdin.isTTY === true;
-  if (interactive) {
+  // Listened for whether or not this is a terminal. `rigorrun | tee run.log`
+  // is still somebody at a keyboard, and so is a runner started by a script
+  // that holds its stdin — refusing them a new link because `isTTY` is false
+  // would be an odd place to draw the line. The *hint* is only printed on a
+  // terminal, because that is where somebody can act on it.
+  if (process.stdin.isTTY === true) {
     line(c.grey('  Lost the tab? Press Enter here for a new link.'));
     line();
-    process.stdin.setEncoding('utf8');
-    process.stdin.resume();
-    process.stdin.on('data', (chunk: string) => {
-      if (!chunk.includes('\n') && !chunk.includes('\r')) return;
-      runner.pairing.reissue();
-      line(`  ${c.bold('Open')}  ${runner.pairedUrl}`);
-      line();
-    });
   }
+  process.stdin.setEncoding('utf8');
+  process.stdin.resume();
+  process.stdin.on('data', (chunk: string) => {
+    if (!chunk.includes('\n') && !chunk.includes('\r')) return;
+    runner.pairing.reissue();
+    line(`  ${c.bold('Open')}  ${runner.pairedUrl}`);
+    line();
+  });
+  // A closed stdin is not an error: it means nobody is going to ask.
+  process.stdin.on('error', () => undefined);
 
   // The runner holds child processes and open sockets to somebody's systems.
   // Ending it tidily is not politeness: an orphaned stdio server keeps running

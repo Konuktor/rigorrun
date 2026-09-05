@@ -20,7 +20,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { type ChildProcess } from 'node:child_process';
-import { repoRoot, startRunner, tsx } from './support/runner.ts';
+import { reissuePairing, repoRoot, startRunner, tsx } from './support/runner.ts';
 
 let home: string;
 let runner: ChildProcess;
@@ -38,8 +38,15 @@ async function restart(): Promise<void> {
   pairedUrl = started.match;
 }
 
-/** Gets a page paired with whichever runner is currently up. */
+/**
+ * Gets a page paired with whichever runner is currently up.
+ *
+ * A code is spent on first use, so every pairing needs its own. Asking the
+ * runner for one over its stdin is what a person does when they lose the tab,
+ * which makes this the only place that feature is exercised end to end.
+ */
 async function pair(page: Page): Promise<void> {
+  pairedUrl = await reissuePairing(runner);
   await page.goto(pairedUrl);
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
 }
@@ -83,9 +90,18 @@ test('work survives the runner being killed outright', async ({ page }) => {
 
   await expect(page.getByTestId('start-recording')).toBeVisible();
   await page.getByTestId('start-recording').click();
+
+  // A read, then a write. Reads are deliberately kept out of the trace — the
+  // contract comes from what changed — so the write is what has to come back.
   await page.getByTestId('tool-picker').selectOption('find_bookings');
   await page.getByTestId('run-tool').click();
   await expect(page.locator('ol li').filter({ hasText: 'find_bookings' }).last()).toBeVisible();
+
+  await page.getByTestId('tool-picker').selectOption('record_signoff');
+  await page.getByTestId('param-bookingId').fill('BKG-4001');
+  await page.getByTestId('param-approver').fill('Dana Whitlock');
+  await page.getByTestId('run-tool').click();
+  await expect(page.locator('ol li').filter({ hasText: 'record_signoff' }).last()).toBeVisible();
 
   // ------------------------------------------------------------ kill it
   await restart();
@@ -106,7 +122,12 @@ test('work survives the runner being killed outright', async ({ page }) => {
   await page.getByTestId('reconnect').click();
   await expect(page.getByTestId('resume-recording')).toBeVisible({ timeout: 60_000 });
   await page.getByTestId('resume-recording').click();
-  await expect(page.locator('ol li').filter({ hasText: 'find_bookings' }).last()).toBeVisible();
+
+  // The work that changed the system is still there, on a runner that was
+  // started after the one that recorded it had been killed.
+  await expect(page.locator('ol li').filter({ hasText: 'record_signoff' }).last()).toBeVisible();
+  // And it can be carried on, not merely looked at.
+  await expect(page.getByTestId('finish-recording')).toBeVisible();
 });
 
 test('a damaged project is reported, not silently dropped', async ({ page }) => {

@@ -68,3 +68,31 @@ export function startRunner(home: string): Promise<Started> {
     PAIRED_URL,
   );
 }
+
+/**
+ * Asks a running runner for a fresh pairing link.
+ *
+ * A pairing code is single-use on purpose, so a second browser context cannot
+ * reuse the first one's. The runner reissues on a newline at its terminal —
+ * being there is the same authority that read the first code off the screen —
+ * and its stdin is a pipe here, so a test can ask the same way a person does.
+ */
+export function reissuePairing(runner: ChildProcess, timeoutMs = 15_000): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let buffer = '';
+    const timer = setTimeout(() => {
+      runner.stdout?.off('data', onData);
+      reject(new Error(`no new pairing URL in time: ${buffer.slice(-400)}`));
+    }, timeoutMs);
+    const onData = (chunk: Buffer): void => {
+      buffer += chunk.toString();
+      const found = PAIRED_URL.exec(buffer);
+      if (!found) return;
+      clearTimeout(timer);
+      runner.stdout?.off('data', onData);
+      resolve(found[0]);
+    };
+    runner.stdout?.on('data', onData);
+    runner.stdin?.write('\n');
+  });
+}
