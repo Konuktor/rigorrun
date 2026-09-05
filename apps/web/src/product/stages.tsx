@@ -14,6 +14,7 @@ import { Button, Panel, SectionLabel, Tag } from '../components/primitives.tsx';
 import { Checkbox, Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
 import {
   api,
+  type AnnotationMismatchView,
   type CaseView,
   type ProjectView,
   type RuleView,
@@ -597,7 +598,11 @@ export function TeachJob({
   alreadyRecorded: { tool: string; ok: boolean }[];
   /** A demonstration is open on disk, whatever is or is not in it yet. */
   recordingOpen: boolean;
-  onFinished: (project: ProjectView, questions: SchemaQuestionView[]) => void;
+  onFinished: (
+    project: ProjectView,
+    questions: SchemaQuestionView[],
+    mismatches: AnnotationMismatchView[],
+  ) => void;
 }) {
   const [recording, setRecording] = useState(false);
   const [selected, setSelected] = useState(tools[0]?.name ?? '');
@@ -686,7 +691,7 @@ export function TeachJob({
     try {
       const result = await api.finishTeaching(project.id);
       setRecording(false);
-      onFinished(result.project, result.questions);
+      onFinished(result.project, result.questions, result.mismatches);
     } catch (error) {
       setProblem((error as Error).message);
     } finally {
@@ -851,10 +856,12 @@ export function TeachJob({
 export function ReviewLearned({
   project,
   questions,
+  mismatches,
   onAnswered,
 }: {
   project: ProjectView;
   questions: SchemaQuestionView[];
+  mismatches: AnnotationMismatchView[];
   onAnswered: (project: ProjectView) => void;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>(
@@ -910,6 +917,26 @@ export function ReviewLearned({
           wrong answer matters. Getting one wrong is not permanent: come back to this step any time.
         </p>
       </div>
+
+      {mismatches.length > 0 ? (
+        <section className="flex flex-col gap-2" data-testid="annotation-mismatches">
+          <SectionLabel>What your system said about itself, and did not do</SectionLabel>
+          {mismatches.map((mismatch) => (
+            <Panel key={mismatch.tool}>
+              <p className="text-body text-fg">
+                <span className="font-mono">{mismatch.tool}</span> — {mismatch.claimed}
+              </p>
+              <p className="mt-1 text-meta text-secondary">{mismatch.observed}</p>
+              <p className="mt-2 text-meta text-muted">
+                Nothing about your run changes: RigorRun already treats every tool you have not
+                vouched for as one that writes. This is worth knowing anyway — a system that
+                misdescribes one tool may misdescribe others, and you are about to trust what it
+                tells RigorRun about your agent.
+              </p>
+            </Panel>
+          ))}
+        </section>
+      ) : null}
 
       <div className="flex flex-wrap gap-4 text-meta text-muted">
         <span>

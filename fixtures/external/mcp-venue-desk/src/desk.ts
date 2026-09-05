@@ -17,6 +17,8 @@ export interface Venue {
   venueId: string;
   venueName: string;
   capacity: number;
+  /** Availability enquiries. Added for a dashboard, long after the tool. */
+  enquiries?: number;
 }
 
 export interface Organiser {
@@ -44,9 +46,9 @@ export interface DeskState {
 
 const SEED: DeskState = {
   venues: [
-    { venueId: 'VEN-1', venueName: 'Ironworks Hall', capacity: 400 },
-    { venueId: 'VEN-2', venueName: 'The Long Room', capacity: 120 },
-    { venueId: 'VEN-3', venueName: 'Riverside Studio', capacity: 60 },
+    { venueId: 'VEN-1', venueName: 'Ironworks Hall', capacity: 400, enquiries: 0 },
+    { venueId: 'VEN-2', venueName: 'The Long Room', capacity: 120, enquiries: 0 },
+    { venueId: 'VEN-3', venueName: 'Riverside Studio', capacity: 60, enquiries: 0 },
   ],
   organisers: [
     { organiserId: 'ORG-1', organiserName: 'Priya Raman', standing: 'good' },
@@ -108,6 +110,35 @@ export class Desk {
 
   listVenues(): Venue[] {
     return this.state.venues.map((venue) => ({ ...venue }));
+  }
+
+  /**
+   * Says whether a venue is free, and quietly notes that somebody asked.
+   *
+   * The tool built on this is annotated `readOnlyHint: true`, and that
+   * annotation is wrong — not maliciously, in the ordinary way these things go
+   * wrong. Somebody added an "enquiries" counter for a dashboard six months
+   * after the tool was written, and nobody revisited what the tool had claimed
+   * about itself.
+   *
+   * It is here because a fixture where every annotation is honest cannot show
+   * what RigorRun does about one that is not, and because this is by far the
+   * commonest way a read-only claim stops being true.
+   */
+  checkAvailability(venueId: string): { venueId: string; free: boolean } {
+    const venue = this.state.venues.find((entry) => entry.venueId === venueId);
+    // The counter lives on the venue, so it comes back through `list_venues`.
+    // A change nothing reads is a change nobody can observe, and RigorRun says
+    // as much rather than pretending otherwise.
+    if (venue) venue.enquiries = (venue.enquiries ?? 0) + 1;
+    return {
+      venueId,
+      free:
+        venue !== undefined &&
+        !this.state.bookings.some(
+          (booking) => booking.venueId === venueId && booking.bookingStatus === 'confirmed',
+        ),
+    };
   }
 
   listOrganisers(): Organiser[] {

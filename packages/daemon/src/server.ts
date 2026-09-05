@@ -269,6 +269,10 @@ export class Runner {
         project: summarise(finished.project),
         questions: finished.questions,
         schema: finished.schema,
+        // Claims this system made that its own behaviour contradicted. Shown
+        // beside what RigorRun learned, because it is the same kind of thing:
+        // something observed about the system rather than assumed about it.
+        mismatches: service.mismatches(context.req.param('id')),
       });
     });
 

@@ -102,7 +102,7 @@ describe('setup that survives a reload', () => {
     const restarted = serviceOver(home);
     const discovery = await restarted.discovery(projectId);
     expect(discovery?.serverName).toBe('venue-desk');
-    expect(discovery?.tools).toHaveLength(8);
+    expect(discovery?.tools).toHaveLength(9);
     // And it knows the session itself is gone.
     expect(restarted.isConnected(projectId)).toBe(false);
   }, 120_000);

@@ -19,6 +19,7 @@ import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 import { Problem } from './inputs.tsx';
 import {
   api,
+  type AnnotationMismatchView,
   type ActivationView,
   type CaseView,
   type DriftView,
@@ -50,6 +51,8 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
   const [connected, setConnected] = useState(false);
   const [drift, setDrift] = useState<DriftView | null>(null);
   const [questions, setQuestions] = useState<SchemaQuestionView[]>([]);
+  /** Claims this system made that its own behaviour contradicted. */
+  const [mismatches, setMismatches] = useState<AnnotationMismatchView[]>([]);
   const [cases, setCases] = useState<CaseView[]>([]);
   const [recording, setRecording] = useState<{ tool: string; ok: boolean }[]>([]);
   /**
@@ -222,10 +225,12 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
               tools={tools}
               alreadyRecorded={recording}
               recordingOpen={recordingOpen}
-              onFinished={(next, asked) => {
+              onFinished={(next, asked, contradicted) => {
                 setProject(next);
                 setQuestions(asked);
+                setMismatches(contradicted);
                 setRecording([]);
+                setRecordingOpen(false);
                 setStep('learned');
               }}
             />
@@ -242,6 +247,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
               <ReviewLearned
                 project={project}
                 questions={questions}
+                mismatches={mismatches}
                 onAnswered={(next) => {
                   setProject(next);
                   setStep('rules');

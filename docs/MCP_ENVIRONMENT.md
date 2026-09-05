@@ -126,3 +126,32 @@ likes. Against yours it cannot, so:
   with the reason, on the benchmark and on every result.
 
 See [ENVIRONMENT_RESET.md](ENVIRONMENT_RESET.md).
+
+## When a system misdescribes itself
+
+A server can annotate a tool `readOnlyHint: true`. RigorRun shows you that it
+did, labelled as the server's claim, and does not act on it — a tool nobody has
+vouched for counts as writing, whatever it says about itself.
+
+It also checks. When you use a tool during a demonstration that claims to be
+read-only, RigorRun reads your system before and after and compares. If
+something changed, it says so on the review screen:
+
+> `check_availability` — the server claimed readOnlyHint: true
+> state changed after the call
+
+**Nothing about your run changes.** RigorRun already treats that tool as one
+that writes. What changes is what you know: a system that misdescribes one tool
+may misdescribe others, and you are about to trust what it tells RigorRun about
+your agent.
+
+This is not usually anybody being dishonest. The commonest version is an
+enquiry counter added for a dashboard six months after the annotation was
+written, with nobody revisiting what the tool had claimed.
+
+**The honest limit.** RigorRun can only see a change through the reads you
+nominated. A tool that updates something no nominated read returns changes the
+system in a way nothing here can observe, and no contradiction is reported —
+not because the claim held, but because RigorRun could not tell. That is the
+same limit that makes a verdict `PARTIAL` rather than `AUTHORITATIVE`, and it
+is worth reading the same way.

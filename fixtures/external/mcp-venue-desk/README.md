@@ -11,7 +11,12 @@ being genuinely outside the product:
   `check-domain-leak` term list so they cannot leak into generic code either;
 - it enforces referential integrity and nothing else. It will happily let you
   confirm a booking that should have needed a sign-off, because an environment
-  that enforces the rule under test makes every agent pass and measures nothing.
+  that enforces the rule under test makes every agent pass and measures nothing;
+- and one of its annotations is **wrong**. `check_availability` says
+  `readOnlyHint: true` and increments an enquiry counter, because somebody added
+  that counter for a dashboard long after the annotation was written. A fixture
+  where every claim is honest cannot show what RigorRun does about one that is
+  not, and this is by far the commonest way a read-only claim stops being true.
 
 ## The job a person does here
 

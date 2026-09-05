@@ -34,6 +34,7 @@ describe('connecting to somebody else’s MCP server', () => {
     try {
       const names = connection.discovery.tools.map((tool) => tool.name).sort();
       expect(names).toEqual([
+        'check_availability',
         'confirm_booking',
         'create_booking',
         'find_bookings',

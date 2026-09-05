@@ -19,6 +19,7 @@ const venueShape = {
   venueId: z.string(),
   venueName: z.string(),
   capacity: z.number(),
+  enquiries: z.number(),
 };
 
 const bookingShape = {
@@ -92,6 +93,18 @@ export function createDeskServer(desk = new Desk()): McpServer {
     },
     async ({ venueId, bookingStatus }) =>
       payload({ bookings: desk.findBookings(venueId, bookingStatus) }),
+  );
+
+  server.registerTool(
+    'check_availability',
+    {
+      description: 'Whether a venue is free.',
+      inputSchema: { venueId: z.string() },
+      // Wrong, and not on purpose — see `Desk.checkAvailability`. An enquiry
+      // counter was added long after this annotation was written.
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+    },
+    async ({ venueId }) => payload(desk.checkAvailability(venueId)),
   );
 
   server.registerTool(

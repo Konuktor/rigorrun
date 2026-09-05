@@ -122,6 +122,20 @@ export interface ActivationView {
   attempts: Record<string, number>;
 }
 
+/**
+ * A claim this system made about itself that its own behaviour contradicted.
+ *
+ * Never acted on — RigorRun already treats every unconfirmed tool as writing,
+ * so nothing about the run changes. It changes what the person is told, which
+ * is what matters: a system that says a tool only reads and then changes state
+ * is either wrong about itself or describing itself conveniently.
+ */
+export interface AnnotationMismatchView {
+  tool: string;
+  claimed: string;
+  observed: string;
+}
+
 export interface SchemaQuestionView {
   id: string;
   kind: string;
@@ -290,9 +304,11 @@ export const api = {
       args,
     }),
   finishTeaching: (id: string) =>
-    post<{ project: ProjectView; questions: SchemaQuestionView[] }>(
-      `/api/projects/${id}/teach/finish`,
-    ),
+    post<{
+      project: ProjectView;
+      questions: SchemaQuestionView[];
+      mismatches: AnnotationMismatchView[];
+    }>(`/api/projects/${id}/teach/finish`),
   answerSchema: (id: string, answers: { questionId: string; value: string }[]) =>
     post<{ project: ProjectView }>(`/api/projects/${id}/schema/answers`, { answers }),
 

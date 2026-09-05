@@ -376,6 +376,11 @@ export class Service {
    * everything downstream — and it is customer data, so this is also the last
    * moment it is allowed to be anywhere but this machine.
    */
+  /** Claims this system made that its own behaviour contradicted. */
+  mismatches(projectId: string) {
+    return this.workspace.mismatchesFor(projectId);
+  }
+
   async finishTeaching(
     projectId: string,
   ): Promise<{ project: Project; questions: SchemaQuestion[]; schema: EnvironmentSchema }> {

@@ -24,7 +24,9 @@ import {
 } from '@rigorrun/mcp';
 import {
   SystemEnvironment,
+  detectMismatch,
   stateFromPayloads,
+  type AnnotationMismatch,
   type SystemConnection,
   type SystemEnvironmentConfig,
 } from '@rigorrun/connector';
@@ -64,6 +66,8 @@ export interface LiveProject {
   connection: SystemConnection;
   induced: InducedSchema | undefined;
   demonstration: Demonstration | undefined;
+  /** Claims this system made that its own behaviour contradicted. */
+  mismatches: AnnotationMismatch[];
 }
 
 export class Workspace {
@@ -157,7 +161,12 @@ export class Workspace {
     if (existing) return existing.connection;
     assertConnectorTrusted(project);
     const connection = await this.openConnection(project);
-    this.live.set(project.id, { connection, induced: undefined, demonstration: undefined });
+    this.live.set(project.id, {
+      connection,
+      induced: undefined,
+      demonstration: undefined,
+      mismatches: [],
+    });
     // Written down so that if this runner is killed outright, the next one can
     // find the server it left running and end it. See `orphans.ts`.
     if (connection.childPid !== null && project.connector?.kind === 'mcp') {
@@ -173,6 +182,11 @@ export class Workspace {
       ).catch(() => undefined);
     }
     return connection;
+  }
+
+  /** What this system claimed about itself that turned out not to hold. */
+  mismatchesFor(projectId: string): AnnotationMismatch[] {
+    return [...(this.live.get(projectId)?.mismatches ?? [])];
   }
 
   connectionFor(projectId: string): SystemConnection | undefined {
@@ -302,9 +316,35 @@ export class Workspace {
     const live = this.live.get(project.id);
     if (!live?.demonstration) throw new Error('Nothing is being recorded right now.');
 
+    // What the system looked like before this call, so a claim can be checked
+    // against what actually happened. Only read for tools the *system* says are
+    // read-only: everything else is expected to change things, so comparing
+    // would cost a round trip to learn nothing.
+    const claimsReadOnly =
+      live.connection.discovery.tools.find((entry) => entry.name === tool)?.hints.readOnly === true;
+    const before = claimsReadOnly ? await this.readPayloads(project) : undefined;
+
     const result = await live.connection.call(tool, args);
     if (result.structured !== undefined) {
       live.demonstration.observations.push({ tool, payload: result.structured });
+    }
+
+    if (before !== undefined) {
+      const after = await this.readPayloads(project);
+      const mismatch = detectMismatch(
+        tool,
+        { readOnly: true },
+        JSON.stringify(after) !== JSON.stringify(before),
+      );
+      // Recorded rather than acted on. RigorRun already treats every
+      // unconfirmed tool as writing, so this changes nothing about what it
+      // does — it changes what the person is told, which is the part that
+      // matters. A system that claims a tool only reads and then changes state
+      // is either wrong about its own implementation or misdescribing itself,
+      // and both are worth knowing before trusting a verdict from it.
+      if (mismatch && !live.mismatches.some((entry) => entry.tool === mismatch.tool)) {
+        live.mismatches.push(mismatch);
+      }
     }
 
     // Reads are watched but not written into the trace. The contract is

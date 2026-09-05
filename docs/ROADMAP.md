@@ -14,8 +14,11 @@ regressed. `e2e/external-user.spec.ts` does exactly that in a browser against
 two packages that import nothing from RigorRun.
 
 - A real MCP client, stdio and streamable HTTP, on SDK 1.30 / protocol
-  2025-11-25. Tool annotations are carried as the server's claims and never
-  acted on.
+  2025-11-25. Tool annotations are carried as the server's claims, never acted
+  on, and checked: a tool that says it only reads and then changes something a
+  nominated read can see is reported.
+- An OpenAPI connector, and an agent that is a command rather than a service.
+  Both arrive at the same engine as MCP does.
 - Record schemas induced from what a system hands back, using structure only —
   never field names — with everything structure cannot settle asked as a
   question carrying its evidence.

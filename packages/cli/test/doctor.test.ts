@@ -83,7 +83,7 @@ describe('doctor', () => {
     const { out } = await cli('doctor', '--home', home);
     expect(out).toContain('Reachable');
     expect(out).toContain('venue-desk');
-    expect(out).toMatch(/8 tools/);
+    expect(out).toMatch(/9 tools/);
   }, 120_000);
 
   it('names the credential a project needs and this machine does not have', async () => {

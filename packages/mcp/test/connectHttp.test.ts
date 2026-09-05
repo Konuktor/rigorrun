@@ -66,6 +66,7 @@ describe('connecting to somebody else’s MCP server over HTTP', () => {
     const connection = await McpConnection.open(DESK);
     try {
       expect(connection.discovery.tools.map((tool) => tool.name).sort()).toEqual([
+        'check_availability',
         'confirm_booking',
         'create_booking',
         'find_bookings',
