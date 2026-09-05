@@ -80,4 +80,19 @@ describe('fixtures/external', () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  it('gives the command-line agent fixture no RigorRun at all', async () => {
+    // The strongest form of the claim. An HTTP agent may use the SDK, because
+    // that is the ten lines the integration costs. A command-line agent does
+    // not even have that excuse: the protocol is a line of JSON in and a line
+    // of JSON out, so if this directory needs anything of ours, the protocol is
+    // more complicated than it is described as being.
+    const agentDir = join(externalDir, 'process-agent');
+    const offenders: string[] = [];
+    for (const file of await sourceFiles(agentDir)) {
+      const source = await readFile(file, 'utf8');
+      if (/@rigorrun\//.test(source)) offenders.push(file.slice(externalDir.length));
+    }
+    expect(offenders).toEqual([]);
+  });
 });

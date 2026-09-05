@@ -197,6 +197,16 @@ importers:
         specifier: ^4.21.1
         version: 4.23.13
 
+  fixtures/external/process-agent:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+    devDependencies:
+      tsx:
+        specifier: ^4.21.1
+        version: 4.23.13
+
   packages/agent-sdk:
     dependencies:
       '@hono/node-server':

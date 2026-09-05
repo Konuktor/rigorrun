@@ -13,7 +13,7 @@
  */
 import { ProjectStore, Service, storeRoot, nextSteps } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
-import { probeAgent } from '@rigorrun/daemon';
+import { describeAgent, probeAgent, probeProcessAgent } from '@rigorrun/daemon';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
 
@@ -139,11 +139,21 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
     });
 
     for (const agent of project.agents) {
-      const probe = await probeAgent({ endpoint: agent.endpoint });
+      // Probed for real, both kinds. `doctor` exists to answer "would a run
+      // work right now", and an agent that was answering yesterday is not an
+      // answer to that.
+      const probe =
+        agent.kind === 'process'
+          ? await probeProcessAgent({
+              command: agent.command,
+              args: agent.args,
+              ...(agent.cwd ? { cwd: agent.cwd } : {}),
+            })
+          : await probeAgent({ endpoint: agent.endpoint });
       own.push({
         what: `agent ${agent.name}`,
         ok: probe.ok,
-        detail: probe.ok ? `answering at ${agent.endpoint}` : probe.problem,
+        detail: probe.ok ? `answering — ${describeAgent(agent)}` : probe.problem,
       });
     }
     if (project.agents.length === 0) {

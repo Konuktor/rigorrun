@@ -257,6 +257,10 @@ export async function cmdImportProject(
       lastProbeAt: null,
       lastProbeOk: false,
       lastProbeProblem: '',
+      // And a command that arrived in a file is not a command anybody here has
+      // agreed to run. Cleared unconditionally, whatever the file claimed —
+      // the field is written by the person who typed it, and nobody typed this.
+      ...(agent.kind === 'process' ? { confirmedByOperatorAt: null } : {}),
     })),
     connectorTrust: { origin: 'imported', confirmedAt: null },
   };

@@ -55,9 +55,10 @@ resolution, and a reset that is an API operation rather than an MCP tool.
 tested. This remains the largest single gap for anybody whose system has no
 API.
 
-**No CLI agent adapter.** `AgentKind` has declared `'process'` for months with
-nothing behind it. An agent that is a local command has to be wrapped in the
-HTTP SDK.
+~~**No CLI agent adapter.**~~ Built. An agent that is a command reads one line
+of JSON and writes one back — `docs/CLI_AGENT.md`. It gets the same per-case
+MCP endpoint and produces the same evidence as one behind a URL, and a command
+can still only come from a person at this machine.
 
 **No Python SDK.**
 
@@ -146,9 +147,8 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
    stopping means somebody presses **Reconnect** before they can run. Holding
    the connection across a restart, or reopening it on demand, would remove the
    last step nobody asked for.
-5. **A CLI agent adapter.** `AgentKind` has declared `'process'` for months
-   with nothing behind it, and the place for it now exists — `exec.ts` is the
-   one file in the codebase that starts a process.
+5. **A Python agent SDK.** The protocol is a line of JSON each way, so this is
+   a small package rather than a port — but "small" is not "written".
 6. **Decide about the control plane.** It is deployed, tested, and called by
    nothing. Either it becomes opt-in sync for teams who want a shared history,
    or it should be deleted.

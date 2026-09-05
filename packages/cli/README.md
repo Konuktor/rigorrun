@@ -45,8 +45,9 @@ infrastructure, because there is no path by which they could.
 - **A way in to the system you want to test**: an MCP server, or an OpenAPI
   document and the address it is served from. Ideally staging or a scratch
   instance, with a way to reset it.
-- **An agent.** If it speaks MCP it works unchanged; RigorRun hands it a URL. If
-  not, about ten lines of the agent SDK.
+- **An agent.** If it speaks MCP it works unchanged; RigorRun hands it a URL —
+  whether your agent listens on an address or is a command RigorRun runs. If it
+  does not speak MCP, about ten lines of the agent SDK.
 
 ## Commands
 

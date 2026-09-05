@@ -58,14 +58,13 @@ export interface ProjectView {
   verifierReads: { tool: string; args: Record<string, unknown> }[];
   reset: { kind: 'tool' | 'none'; tool: string };
   schemaAnswers: { questionId: string; value: string }[];
-  agents: {
+  agents: ({
     id: string;
     name: string;
-    endpoint: string;
     lastProbeOk: boolean;
     lastProbeProblem: string;
     lastProbeAt: string | null;
-  }[];
+  } & ({ kind: 'http'; endpoint: string } | { kind: 'process'; command: string; args: string[] }))[];
   runs: {
     runId: string;
     agentName: string;
@@ -311,10 +310,15 @@ export const api = {
       `/api/projects/${id}/benchmark`,
     ),
 
-  addAgent: (id: string, name: string, endpoint: string) =>
+  addAgent: (
+    id: string,
+    input:
+      | { name: string; endpoint: string }
+      | { name: string; command: string; args: string[] },
+  ) =>
     post<{ project: ProjectView; agent: ProjectView['agents'][number] }>(
       `/api/projects/${id}/agents`,
-      { name, endpoint },
+      input,
     ),
   run: (id: string, agentId: string) =>
     post<{ run: RunView }>(`/api/projects/${id}/runs`, { agentId }),

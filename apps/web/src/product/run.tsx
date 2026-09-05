@@ -10,7 +10,7 @@
  */
 import { useState } from 'react';
 import { Button, Metric, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
-import { Field, Problem, TextInput } from './inputs.tsx';
+import { Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
 import {
   api,
   type ActivationView,
@@ -28,7 +28,10 @@ export function ConnectAgent({
   onConnected: (project: ProjectView) => void;
 }) {
   const [name, setName] = useState('');
+  const [kind, setKind] = useState<'http' | 'process'>('http');
   const [endpoint, setEndpoint] = useState('http://127.0.0.1:8900/');
+  const [command, setCommand] = useState('');
+  const [args, setArgs] = useState('');
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
@@ -36,7 +39,16 @@ export function ConnectAgent({
     setBusy(true);
     setProblem('');
     try {
-      const result = await api.addAgent(project.id, name.trim(), endpoint.trim());
+      const result = await api.addAgent(
+        project.id,
+        kind === 'process'
+          ? {
+              name: name.trim(),
+              command: command.trim(),
+              args: args.split('\n').map((line) => line.trim()).filter(Boolean),
+            }
+          : { name: name.trim(), endpoint: endpoint.trim() },
+      );
       if (!result.agent.lastProbeOk) {
         // Saved, because the endpoint is worth keeping while it is fixed, but
         // never presented as connected.
@@ -58,6 +70,20 @@ export function ConnectAgent({
             RigorRun gives your agent one task at a time, and a URL to work through. Your agent
             connects to that URL, works however it normally works, and says when it is done.
           </p>
+          <Field label="How does RigorRun reach it?">
+            {({ id }) => (
+              <Select
+                id={id}
+                value={kind}
+                onChange={(value) => setKind(value as 'http' | 'process')}
+                testId="agent-kind"
+                options={[
+                  { value: 'http', label: 'It listens on an address' },
+                  { value: 'process', label: 'It is a command on this machine' },
+                ]}
+              />
+            )}
+          </Field>
           <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
             <p className="text-meta font-medium text-secondary">What you need</p>
             <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
@@ -79,20 +105,52 @@ export function ConnectAgent({
               <TextInput id={id} value={name} onChange={setName} placeholder="Support agent" testId="agent-name" />
             )}
           </Field>
-          <Field
-            label="Where does it listen?"
-            hint="On this machine by default, because an agent under test usually holds credentials for the system it is being tested against."
-          >
-            {({ id, describedBy }) => (
-              <TextInput
-                id={id}
-                describedBy={describedBy}
-                value={endpoint}
-                onChange={setEndpoint}
-                testId="agent-endpoint"
-              />
-            )}
-          </Field>
+          {kind === 'http' ? (
+            <Field
+              label="Where does it listen?"
+              hint="On this machine by default, because an agent under test usually holds credentials for the system it is being tested against."
+            >
+              {({ id, describedBy }) => (
+                <TextInput
+                  id={id}
+                  describedBy={describedBy}
+                  value={endpoint}
+                  onChange={setEndpoint}
+                  testId="agent-endpoint"
+                />
+              )}
+            </Field>
+          ) : (
+            <>
+              <Field
+                label="Command"
+                hint="Just the program. RigorRun runs it directly rather than through a shell, so nothing here is interpreted as shell syntax — and only what you type here is ever run."
+              >
+                {({ id, describedBy }) => (
+                  <TextInput
+                    id={id}
+                    describedBy={describedBy}
+                    value={command}
+                    onChange={setCommand}
+                    placeholder="/usr/local/bin/my-agent"
+                    testId="agent-command"
+                  />
+                )}
+              </Field>
+              <Field label="Arguments" hint="One per line. RigorRun starts it once per case.">
+                {({ id, describedBy }) => (
+                  <TextArea
+                    id={id}
+                    describedBy={describedBy}
+                    value={args}
+                    onChange={setArgs}
+                    rows={2}
+                    testId="agent-args"
+                  />
+                )}
+              </Field>
+            </>
+          )}
           {problem ? <Problem>{problem}</Problem> : null}
           <div>
             <Button onClick={add} disabled={busy} testId="add-agent">
@@ -110,7 +168,11 @@ export function ConnectAgent({
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-body text-fg">{agent.name}</span>
-                  <span className="font-mono text-meta text-muted">{agent.endpoint}</span>
+                  <span className="font-mono text-meta text-muted">
+                    {agent.kind === 'http'
+                      ? agent.endpoint
+                      : [agent.command, ...agent.args].join(' ')}
+                  </span>
                 </div>
                 {agent.lastProbeOk ? (
                   <Tag tone="pass">answering</Tag>

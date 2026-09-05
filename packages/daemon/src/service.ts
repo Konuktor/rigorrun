@@ -32,9 +32,16 @@ import {
 } from '@rigorrun/environment';
 import type { AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
+import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
-import { newProject, type AgentConfig, type Connector, type Project } from './project.ts';
+import {
+  describeAgent,
+  newProject,
+  type AgentConfig,
+  type Connector,
+  type Project,
+} from './project.ts';
 import type { Listing, ProjectStore } from './store.ts';
 import { Workspace } from './workspace.ts';
 import { compareRuns, type RunComparison } from './compare.ts';
@@ -499,41 +506,78 @@ export class Service {
   // ------------------------------------------------------ step 6: run an agent
 
   /** Adds an agent, and refuses to call it connected until it answers. */
+  /**
+   * Connects an agent, whichever kind it is, and proves it answers.
+   *
+   * The probe is the whole point: an agent is not connected because somebody
+   * typed a URL or a path. Both kinds are asked to speak the protocol before
+   * anything is called connected, because a configuration that says CONNECTED
+   * on the strength of a well-formed string turns into a failed run half an
+   * hour later, blamed on the agent.
+   */
   async addAgent(
     projectId: string,
-    input: { name: string; endpoint: string; allowRemoteHosts?: boolean },
+    input:
+      | { name: string; endpoint: string; allowRemoteHosts?: boolean }
+      | { name: string; command: string; args?: string[]; cwd?: string },
   ): Promise<{ project: Project; agent: AgentConfig }> {
     const project = await this.store.read(projectId);
-    const probe = await probeAgent({
-      endpoint: input.endpoint,
-      ...(input.allowRemoteHosts === undefined ? {} : { allowRemoteHosts: input.allowRemoteHosts }),
-    });
+    const id = `a_${randomBytes(4).toString('hex')}`;
+    const now = this.now().toISOString();
 
-    const agent: AgentConfig = {
-      id: `a_${randomBytes(4).toString('hex')}`,
-      name: input.name || (probe.ok ? probe.name : 'Your agent') || 'Your agent',
-      kind: 'http',
-      endpoint: input.endpoint,
-      command: '',
-      args: [],
-      lastProbeAt: this.now().toISOString(),
-      lastProbeOk: probe.ok,
-      lastProbeProblem: probe.ok ? '' : probe.problem,
-    };
+    let agent: AgentConfig;
+    if ('command' in input) {
+      const probe = await probeProcessAgent({
+        command: input.command,
+        args: input.args ?? [],
+        ...(input.cwd ? { cwd: input.cwd } : {}),
+      });
+      agent = {
+        id,
+        name: input.name || (probe.ok ? probe.name : 'Your agent') || 'Your agent',
+        kind: 'process',
+        command: input.command,
+        args: input.args ?? [],
+        cwd: input.cwd ?? '',
+        // It was typed here, on this machine, by whoever is looking at the
+        // screen. An imported project's agents come back with this cleared.
+        confirmedByOperatorAt: now,
+        lastProbeAt: now,
+        lastProbeOk: probe.ok,
+        lastProbeProblem: probe.ok ? '' : probe.problem,
+      };
+    } else {
+      const probe = await probeAgent({
+        endpoint: input.endpoint,
+        ...(input.allowRemoteHosts === undefined
+          ? {}
+          : { allowRemoteHosts: input.allowRemoteHosts }),
+      });
+      agent = {
+        id,
+        name: input.name || (probe.ok ? probe.name : 'Your agent') || 'Your agent',
+        kind: 'http',
+        endpoint: input.endpoint,
+        lastProbeAt: now,
+        lastProbeOk: probe.ok,
+        lastProbeProblem: probe.ok ? '' : probe.problem,
+      };
+    }
 
+    const same = describeAgent(agent);
     const updated: Project = {
       ...project,
-      agents: [...project.agents.filter((entry) => entry.endpoint !== input.endpoint), agent],
+      agents: [...project.agents.filter((entry) => describeAgent(entry) !== same), agent],
       timings: {
         ...project.timings,
         agentConnectedAt:
-          probe.ok && !project.timings.agentConnectedAt
+          agent.lastProbeOk && !project.timings.agentConnectedAt
             ? this.now().toISOString()
             : project.timings.agentConnectedAt,
       },
     };
     await this.store.write(updated);
-    if (probe.ok) await this.activation.stage('agent_connected', projectId);
+    if (agent.lastProbeOk) await this.activation.stage('agent_connected', projectId);
     else await this.activation.attempt('agent_probe_failed', projectId);
     return { project: updated, agent };
   }
@@ -649,6 +693,23 @@ export class Service {
   }
 
   adapterFor(config: AgentConfig): AgentAdapter {
+    if (config.kind === 'process') {
+      if (config.confirmedByOperatorAt === null) {
+        throw new Error(
+          `${config.name} runs \`${config.command}\`, and nobody on this machine has confirmed ` +
+            'that. It came from an imported project rather than from you. Open it and say yes ' +
+            'before running it.',
+        );
+      }
+      return createProcessAgent({
+        id: config.id,
+        name: config.name,
+        command: config.command,
+        args: config.args,
+        ...(config.cwd ? { cwd: config.cwd } : {}),
+        proxy: this.options.proxy,
+      });
+    }
     return createHttpV2Agent({
       id: config.id,
       name: config.name,

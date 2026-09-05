@@ -38,7 +38,8 @@ import {
 
 export const AGENT_PROTOCOL_V2 = 'rigorrun/agent/2';
 
-const CompletionSchema = z.object({
+/** Reused verbatim by the process agent, so the two cannot drift. */
+export const CompletionSchema = z.object({
   status: z.enum(['completed', 'failed']),
   /** The agent's account of what it did. Displayed, never scored. */
   output: z.string().max(8000).default(''),
@@ -51,7 +52,7 @@ const CompletionSchema = z.object({
   costUsd: z.number().nullable().optional(),
 });
 
-const ProbeSchema = z.object({
+export const ProbeSchema = z.object({
   ok: z.literal(true),
   agent: z.object({ name: z.string().default(''), version: z.string().default('') }).optional(),
 });

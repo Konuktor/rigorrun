@@ -98,21 +98,64 @@ export const VerifierReadSchema = z.object({
   args: z.record(z.string(), z.unknown()).default({}),
 });
 
-export const AgentConfigSchema = z.object({
+/** What is known about an agent whether it is a URL or a command. */
+const agentCommon = {
   id: z.string(),
   name: z.string(),
-  kind: z.enum(['http', 'process']),
-  /** For http agents. */
-  endpoint: z.string().default(''),
-  /** For process agents. Only ever written here by a person. */
-  command: z.string().default(''),
-  args: z.array(z.string()).default([]),
   /** When the last successful handshake happened, and what it said. */
   lastProbeAt: z.string().nullable().default(null),
   lastProbeOk: z.boolean().default(false),
   lastProbeProblem: z.string().default(''),
+};
+
+export const HttpAgentSchema = z.object({
+  ...agentCommon,
+  kind: z.literal('http'),
+  endpoint: z.string(),
 });
+
+export const ProcessAgentSchema = z.object({
+  ...agentCommon,
+  kind: z.literal('process'),
+  /** The executable. Written here only by a person, at this machine. */
+  command: z.string(),
+  args: z.array(z.string()).default([]),
+  cwd: z.string().default(''),
+  /**
+   * When somebody looked at that command and said yes.
+   *
+   * Null on an imported project, always, whatever the file claimed — see
+   * `connectorTrust`. A command that arrived in a file is not a command
+   * anybody on this machine has agreed to run.
+   */
+  confirmedByOperatorAt: z.string().nullable().default(null),
+});
+
+/**
+ * An agent, as a tagged union.
+ *
+ * This was one flat object with `endpoint`, `command` and `args` on every
+ * agent, and the hole that left is worth spelling out: a `project.json` written
+ * by somebody else could set `command` on an agent marked `kind: 'http'`, and
+ * `parseProject` would carry it through intact. Nothing read it — but "nothing
+ * reads it" is a property of today's code, and the field was one forgotten
+ * branch away from being the way a command arrives from a file.
+ *
+ * Narrowing on `kind` makes it unrepresentable: an HTTP agent has no `command`
+ * to set, so a hostile file has nowhere to put one.
+ */
+export const AgentConfigSchema = z.discriminatedUnion('kind', [
+  HttpAgentSchema,
+  ProcessAgentSchema,
+]);
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
+export type HttpAgentConfig = z.infer<typeof HttpAgentSchema>;
+export type ProcessAgentConfigured = z.infer<typeof ProcessAgentSchema>;
+
+/** How to reach this agent, in one line. */
+export function describeAgent(agent: AgentConfig): string {
+  return agent.kind === 'http' ? agent.endpoint : `${agent.command} ${agent.args.join(' ')}`.trim();
+}
 
 export const RunSummarySchema = z.object({
   runId: z.string(),

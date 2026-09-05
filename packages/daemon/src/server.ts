@@ -308,11 +308,28 @@ export class Runner {
     // ------------------------------------------------------------- agents
 
     app.post('/api/projects/:id/agents', async (context) => {
-      const body = await context.req.json<{ name?: string; endpoint: string }>();
-      const added = await service.addAgent(context.req.param('id'), {
-        name: String(body.name ?? ''),
-        endpoint: String(body.endpoint ?? ''),
-      });
+      const body = await context.req.json<{
+        name?: string;
+        endpoint?: string;
+        command?: string;
+        args?: unknown;
+      }>();
+      const name = String(body.name ?? '');
+      // A command reaches `exec.ts` only from here and from the CLI, and both
+      // are a person at this machine. There is no third route, and no schema
+      // anywhere declares the provenance literal that lets one run.
+      const added = await service.addAgent(
+        context.req.param('id'),
+        typeof body.command === 'string' && body.command.length > 0
+          ? {
+              name,
+              command: body.command,
+              args: Array.isArray(body.args)
+                ? body.args.filter((entry): entry is string => typeof entry === 'string')
+                : [],
+            }
+          : { name, endpoint: String(body.endpoint ?? '') },
+      );
       return context.json({ project: summarise(added.project), agent: added.agent });
     });
 
