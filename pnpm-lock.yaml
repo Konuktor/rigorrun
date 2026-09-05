@@ -223,6 +223,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@rigorrun/agent-sdk':
+        specifier: workspace:*
+        version: link:../agent-sdk
       '@rigorrun/agents':
         specifier: workspace:*
         version: link:../agents
@@ -232,6 +235,9 @@ importers:
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
+      '@rigorrun/daemon':
+        specifier: workspace:*
+        version: link:../daemon
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
@@ -244,6 +250,9 @@ importers:
       '@rigorrun/providers':
         specifier: workspace:*
         version: link:../providers
+      '@rigorrun/proxy':
+        specifier: workspace:*
+        version: link:../proxy
       '@rigorrun/report':
         specifier: workspace:*
         version: link:../report

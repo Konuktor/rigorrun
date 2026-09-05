@@ -43,17 +43,24 @@ afterEach(() => {
 });
 
 describe('help and version', () => {
-  it('prints help and exits 2 when called with no command', async () => {
-    const { code, out } = await cli();
-    expect(code).toBe(2);
-    expect(out).toContain('Do the job once. Test every agent forever.');
-  });
+  it('starts the runner when called with no command', async () => {
+    // The bare command is not a help page. Everything a person wants to do
+    // first happens in the interface, and the interface only exists while the
+    // runner is running, so `rigorrun` starts it. `--once` prints the URL and
+    // stops, which is the only part a test can assert without hanging.
+    const { code, out } = await cli('--once', '--home', join(workDir, 'home'));
+    expect(code).toBe(0);
+    expect(out).toMatch(/http:\/\/127\.0\.0\.1:\d+\/\?code=[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}/);
+    expect(out).toContain('stay there');
+  }, 30_000);
 
-  it('exits 0 for --help', async () => {
+  it('exits 0 for --help, and leads with the product rather than the example', async () => {
     const { code, out } = await cli('--help');
     expect(code).toBe(0);
-    expect(out).toContain('COMMANDS');
+    expect(out).toContain('PROJECTS');
     expect(out).toContain('EXIT CODES');
+    // The bundled example is still documented, and is no longer the headline.
+    expect(out.indexOf('PROJECTS')).toBeLessThan(out.indexOf('THE BUNDLED EXAMPLE'));
   });
 
   it('documents per-command options', async () => {

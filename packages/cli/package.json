@@ -20,6 +20,9 @@
     "@rigorrun/compiler": "workspace:*",
     "@rigorrun/providers": "workspace:*",
     "@rigorrun/environments": "workspace:*",
-    "@rigorrun/environment": "workspace:*"
+    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/daemon": "workspace:*",
+    "@rigorrun/proxy": "workspace:*",
+    "@rigorrun/agent-sdk": "workspace:*"
   }
 }

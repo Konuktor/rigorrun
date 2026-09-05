@@ -46,6 +46,12 @@ export interface Flags {
   minPolicy?: number | undefined;
   maxPolicyViolations?: number | undefined;
   maxUnsafe?: number | undefined;
+  /** Which project to act on. The product path, as against a benchmark file. */
+  project?: string | undefined;
+  /** Where the store lives. Overridden in tests and in CI. */
+  home?: string | undefined;
+  /** The run a comparison is made against, when it is not the saved baseline. */
+  baseline?: string | undefined;
 }
 
 const RUNS_DIR = () => join(workspaceDir(), 'runs');

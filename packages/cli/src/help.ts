@@ -1,56 +1,68 @@
 export const VERSION = '0.1.0';
 
-export const HELP = `RigorRun ${VERSION} - Do the job once. Test every agent forever.
+export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
-Turns a recorded human workflow into a private executable benchmark, runs AI
-agents against it, and verifies the outcome by inspecting the system the agent
-changed - never by trusting the agent's own claim of success.
+Connect your system. Show RigorRun how one job is done. Connect your agent.
+RigorRun proves whether the agent can do the job safely - by reading the system
+the agent changed, never by trusting what it said about itself.
 
 USAGE
-  rigorrun <command> [options]
+  rigorrun                 Start the runner and open the interface. This is
+                           where you connect a system, teach a job and watch a
+                           run. Everything below is for scripts and CI.
 
-COMMANDS
-  demo                     Run the full pipeline offline: recording -> contract
-                           -> benchmark -> agents -> verdict.
-  workflows                List the demo jobs this build ships with.
-  environments             List the environments RigorRun can point at.
-  inspect-environment <id> Show the records, links and actions an adapter
-                           publishes - everything the compiler gets to see.
-  init-environment <name>  Scaffold a working environment to edit.
-  privacy inspect <trace>  Say what a recording captured, and what would leave
-                           this machine.
-  record                   Receive a workflow trace from the Chrome recorder on
-                           a loopback-only port.
-  compile <trace.json>     Compile a recorded trace into a workflow contract.
-  generate <contract.json> Generate a benchmark from a contract.
-  run <benchmark.json>     Run one or more agents against a benchmark.
-  compare <benchmark.json> Run several agents and print a head-to-head table.
-  gate <benchmark.json>    Run an agent and exit non-zero if it misses the bar.
+PROJECTS
+  projects                 List the projects on this machine.
+  run --project <id>       Run the project's suite against its agent.
+  gate --project <id>      Same, but exit non-zero if it misses the bar.
+  compare-runs --project <id> <runId>
+                           Say what changed since the baseline run.
+  secret list|set|remove   Credentials, which never leave this machine.
+
+DIAGNOSTICS
+  doctor                   Check this machine can do what RigorRun needs.
+
+THE BUNDLED EXAMPLE
+  These work on material that ships inside RigorRun. They are how you see the
+  shape of the thing without connecting anything; they are not the product.
+
+  demo                     Run the example pipeline offline, end to end.
+  workflows                List the example jobs.
+  environments             List the environments registered in this build.
+  inspect-environment <id> Show the records, links and actions an adapter has.
+  init-environment <name>  Scaffold an environment adapter to edit.
+
+THE FILE PIPELINE
+  Older, file-at-a-time commands. Kept because pipelines written against them
+  should not break.
+
+  record                   Receive a trace from the browser recorder.
+  compile <trace.json>     Trace to contract.
+  generate <contract.json> Contract to benchmark.
+  run <benchmark.json>     Run agents against a benchmark file.
+  gate <benchmark.json>    Run one agent and gate on the result.
   report <run.json|RUN_ID> Render a self-contained HTML report.
-  agents                   List the agents available in this environment.
-  doctor                   Show environment and provider status.
+  agents                   List the agents available here.
+  privacy inspect <trace>  Say what a recording captured.
 
 COMMON OPTIONS
-  -o, --out <path>         Where to write the command's output.
-  -w, --workflow <key>     Which demo job to run. Default refund.
-      --json               Print machine-readable JSON to stdout.
-      --quiet              Suppress progress output.
-  -h, --help               Show help. Add to any command for its own options.
+      --project <id>       Act on a project rather than a file.
+      --home <path>        Where projects live. Default ~/.rigorrun.
+      --port <n>           Port for the runner.
+  -o, --out <path>         Where to write output.
+      --json               Machine-readable output.
+      --quiet              Suppress progress.
+  -h, --help               Help. Add to any command for its own options.
   -v, --version            Print the version.
 
-RUN / COMPARE / GATE OPTIONS
-      --agent <id>         Agent to run. Repeat for several agents.
-      --repeats <n>        Attempts per case, enabling pass@k. Default 1.
-      --report <path>      Also write an HTML report.
+RUN / GATE OPTIONS
+      --agent <id>              Which agent. Defaults to the last connected.
+      --min-success <0..1>      Minimum task success. Default 0.95.
+      --min-policy <0..1>       Minimum policy compliance. Default 1.
+      --max-unsafe <n>          Default 0.
 
-GATE OPTIONS
-      --min-success <0..1>          Minimum task success rate. Default 0.95.
-      --min-policy <0..1>           Minimum policy compliance. Default 1.
-      --max-policy-violations <n>   Default 0.
-      --max-unsafe <n>              Default 0.
-
-REPORT OPTIONS
-      --published          Render the sanitised version intended for sharing.
+COMPARE OPTIONS
+      --baseline <runId>        Compare against this instead of the baseline.
 
 EXIT CODES
   0  success, or the gate passed
@@ -58,14 +70,17 @@ EXIT CODES
   2  configuration or runtime error
 
 EXAMPLES
-  rigorrun demo
-  rigorrun compile examples/refund-workflow/trace.json -o contract.json
-  rigorrun generate contract.json -o benchmark.json
-  rigorrun compare benchmark.json --agent demo-weak --agent demo-robust
-  rigorrun gate benchmark.json --agent demo-robust --min-success 0.95
-  rigorrun report .rigorrun/runs/run_abc123.json -o report.html
+  rigorrun                                     start here
+  rigorrun projects
+  rigorrun run --project p_1a2b3c
+  rigorrun gate --project p_1a2b3c --min-success 0.95
+  rigorrun compare-runs --project p_1a2b3c run_9f8e7d
 
-RigorRun runs entirely offline by default. No account, no API key, no cost.
+  rigorrun demo                                the bundled example
+  rigorrun gate examples/refund-workflow/benchmark.json --agent reference
+
+Your systems, your credentials and your recordings stay on this machine. There
+is no account, and nothing is uploaded unless you ask for it.
 `;
 
 export const COMMAND_HELP: Record<string, string> = {

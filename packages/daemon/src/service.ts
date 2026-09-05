@@ -218,6 +218,7 @@ export class Service {
     const trace = await this.store.readArtefact<CanonicalHumanTrace>(projectId, 'trace');
     if (!trace) throw new Error('There is no recorded job to compile yet.');
 
+    await this.workspace.connect(project);
     const schema = await this.schemaOf(project);
     const adapter = this.workspace.environment(project, schema);
     const draft = induceContract(adapter, trace, {
@@ -446,6 +447,10 @@ export class Service {
     project: Project,
     schema: EnvironmentSchema,
   ): Promise<{ fixture: EnvironmentFixture }> {
+    // A fresh process has nothing open. Connecting here rather than requiring
+    // callers to remember is what lets `rigorrun run --project` work cold, from
+    // a build server, with no interface ever having existed.
+    await this.workspace.connect(project);
     const build = () => this.workspace.environment(project, schema);
     const environment = build();
     await environment.reset();

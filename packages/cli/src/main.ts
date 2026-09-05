@@ -26,6 +26,14 @@ import {
 } from './commands.ts';
 import { cmdInitEnvironment, cmdPrivacyInspect } from './scaffold.ts';
 import { receiveTrace } from './record.ts';
+import { cmdServe } from './serve.ts';
+import {
+  cmdProjectCompare,
+  cmdProjectGate,
+  cmdProjectRun,
+  cmdProjects,
+  cmdSecret,
+} from './project.ts';
 
 /**
  * Parses arguments, dispatches, and turns every expected failure into an exit
@@ -62,6 +70,11 @@ async function dispatch(argv: string[]): Promise<number> {
         quiet: { type: 'boolean', default: false },
         published: { type: 'boolean', default: false },
         port: { type: 'string' },
+        project: { type: 'string' },
+        home: { type: 'string' },
+        baseline: { type: 'string' },
+        // Prints the URL and exits, so a script can check the runner comes up.
+        once: { type: 'boolean', default: false },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
@@ -83,12 +96,12 @@ async function dispatch(argv: string[]): Promise<number> {
     line(VERSION);
     return 0;
   }
-  if (!command || (values.help && !command)) {
+  if (values.help && !command) {
     line(HELP);
-    return command ? 0 : values.help ? 0 : 2;
+    return 0;
   }
   if (values.help) {
-    line(COMMAND_HELP[command] ?? HELP);
+    line((command ? COMMAND_HELP[command] : undefined) ?? HELP);
     return 0;
   }
 
@@ -102,6 +115,9 @@ async function dispatch(argv: string[]): Promise<number> {
     quiet: values.quiet ?? false,
     published: values.published ?? false,
     port: numberFlag(values.port, 'port'),
+    project: values.project,
+    home: values.home,
+    baseline: values.baseline,
     minSuccess: rateFlag(values['min-success'], 'min-success'),
     minPolicy: rateFlag(values['min-policy'], 'min-policy'),
     maxPolicyViolations: numberFlag(values['max-policy-violations'], 'max-policy-violations'),
@@ -109,6 +125,22 @@ async function dispatch(argv: string[]): Promise<number> {
   };
 
   switch (command) {
+    // The bare command starts the runner, because everything a person wants to
+    // do first happens in the interface and the interface only exists while it
+    // is running.
+    case undefined:
+    case 'serve':
+      return cmdServe({
+        ...(flags.port === undefined ? {} : { port: flags.port }),
+        ...(flags.home ? { home: flags.home } : {}),
+        ...(values.once ? { once: true } : {}),
+      });
+    case 'projects':
+      return cmdProjects(flags);
+    case 'secret':
+      return cmdSecret(target, parsed.positionals[2], flags);
+    case 'compare-runs':
+      return cmdProjectCompare(flags.project, target, flags);
     case 'demo':
       return cmdDemo(flags);
     case 'record':
@@ -118,14 +150,16 @@ async function dispatch(argv: string[]): Promise<number> {
     case 'generate':
       return cmdGenerate(target, flags);
     case 'run':
-      return cmdRun(target, flags);
+      // `--project` is the product path; a benchmark file is the older one,
+      // kept because CI written against it should not break.
+      return flags.project ? cmdProjectRun(flags.project, flags) : cmdRun(target, flags);
     case 'compare':
       return cmdRun(target, {
         ...flags,
         agent: flags.agent.length > 0 ? flags.agent : ['naive', 'careful'],
       });
     case 'gate':
-      return cmdGate(target, flags);
+      return flags.project ? cmdProjectGate(flags.project, flags) : cmdGate(target, flags);
     case 'report':
       return cmdReport(target, flags);
     case 'agents':
