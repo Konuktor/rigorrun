@@ -1,0 +1,126 @@
+{
+  "format": 1,
+  "generatedAt": "2026-02-01T09:12:34.000Z",
+  "rigorrun": {
+    "version": "0.1.0-alpha.1"
+  },
+  "machine": {
+    "os": "linux",
+    "osRelease": "6.19.14+kali-amd64",
+    "arch": "x64",
+    "node": "22.22.2"
+  },
+  "workspace": {
+    "format": null,
+    "ageDays": 0
+  },
+  "activation": {
+    "reached": "second_run_completed",
+    "reachedIndex": 9,
+    "stages": [
+      {
+        "stage": "installation_started",
+        "code": "A0",
+        "at": "2026-02-02T02:40:00Z"
+      },
+      {
+        "stage": "runner_started",
+        "code": "A1",
+        "at": "2026-02-02T02:41:30Z"
+      },
+      {
+        "stage": "project_created",
+        "code": "A2",
+        "at": "2026-02-02T02:43:00Z"
+      },
+      {
+        "stage": "environment_connected",
+        "code": "A3",
+        "at": "2026-02-02T02:44:30Z"
+      },
+      {
+        "stage": "workflow_recorded",
+        "code": "A4",
+        "at": "2026-02-02T02:46:00Z"
+      },
+      {
+        "stage": "contract_confirmed",
+        "code": "A5",
+        "at": "2026-02-02T02:47:30Z"
+      },
+      {
+        "stage": "benchmark_built",
+        "code": "A6",
+        "at": "2026-02-02T02:49:00Z"
+      },
+      {
+        "stage": "agent_connected",
+        "code": "A7",
+        "at": "2026-02-02T02:50:30Z"
+      },
+      {
+        "stage": "first_real_verdict",
+        "code": "A8",
+        "at": "2026-02-02T02:52:00Z"
+      },
+      {
+        "stage": "second_run_completed",
+        "code": "A9",
+        "at": "2026-02-02T02:53:30Z"
+      }
+    ],
+    "humanMsToFirstVerdict": 754000,
+    "attempts": {
+      "environment_connection_failed": 1,
+      "agent_probe_failed": 1
+    }
+  },
+  "projects": [
+    {
+      "id": "p_134d371bcab5",
+      "connector": "mcp:stdio",
+      "safety": "staging",
+      "usesCredentials": true,
+      "counts": {
+        "toolsDiscovered": 8,
+        "toolsMarkedReadOnly": 4,
+        "verifierReads": 3,
+        "schemaQuestions": 24,
+        "schemaQuestionsAnswered": 3,
+        "contractRules": 5,
+        "benchmarkCases": 5,
+        "notTestable": 5,
+        "agents": 3,
+        "agentsAnswering": 2,
+        "runs": 2
+      },
+      "stagesReached": [
+        "environment_configured",
+        "reads_nominated",
+        "workflow_recorded",
+        "contract_compiled",
+        "benchmark_built",
+        "agent_answering",
+        "ran"
+      ],
+      "hasReset": true,
+      "lastRun": {
+        "verification": "PARTIAL",
+        "isolation": "RESET",
+        "passed": false
+      }
+    }
+  ],
+  "problems": {
+    "environment_connection_failed": 1,
+    "agent_probe_failed": 1
+  },
+  "omitted": [
+    "credentials and secret values",
+    "tool arguments and tool results",
+    "record, field and tool names",
+    "project names and goals",
+    "commands, URLs, hostnames and file paths",
+    "recordings, contracts, benchmarks and run results"
+  ]
+}

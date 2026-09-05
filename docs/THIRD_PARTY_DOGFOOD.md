@@ -124,7 +124,7 @@ Give them this, and ask them to fill it in as they go.
 | Assistance | Which steps needed help, and what the help was. |
 | Words that meant nothing | Verbatim. |
 | Where they stopped | If they did not finish, exactly where and why. |
-| Their feedback bundle | `rigorrun feedback export` — machine, versions, stages, error classes, no data. |
+| Their feedback bundle | `rigorrun feedback export` — machine, versions, stages, error classes, no data. A real one is in [examples/feedback-bundle.json](examples/feedback-bundle.json); show it to them if they hesitate. |
 
 ## How to run the session
 

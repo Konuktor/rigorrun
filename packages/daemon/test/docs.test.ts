@@ -16,6 +16,7 @@ import { join } from 'node:path';
 import { AGENT_PROTOCOL_V2 } from '@rigorrun/agent-sdk';
 import { HELP } from '../../cli/src/help.ts';
 import { DEFAULT_ROOT } from '../src/store.ts';
+import { FEEDBACK_FORMAT } from '../src/feedback.ts';
 
 const docsDir = fileURLToPath(new URL('../../../docs/', import.meta.url));
 const read = (name: string): Promise<string> => readFile(join(docsDir, name), 'utf8');
@@ -152,6 +153,32 @@ describe('what the docs do not claim', () => {
     // ...and the one for somebody who has it. `pnpm rigorrun` alone would
     // leave them with a working API and no interface.
     expect(readme).toContain('pnpm install && pnpm start');
+  });
+});
+
+describe('the example bundle in the docs', () => {
+  it('is what the code actually produces, and leaks nothing', async () => {
+    // Somebody deciding whether to send us a file from a machine with
+    // production credentials on it should be able to read one first. That only
+    // helps if the committed copy is real.
+    const example = JSON.parse(await read('examples/feedback-bundle.json')) as {
+      format: number;
+      omitted: string[];
+      projects: { id: string; connector: string }[];
+      activation: { stages: { code: string }[] };
+    };
+    expect(example.format).toBe(FEEDBACK_FORMAT);
+    expect(example.omitted.length).toBeGreaterThan(4);
+    expect(example.projects[0]?.connector).toBe('mcp:stdio');
+    // The whole funnel, so it shows what a complete session looks like.
+    expect(example.activation.stages.map((stage) => stage.code)).toEqual([
+      'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9',
+    ]);
+
+    const text = await read('examples/feedback-bundle.json');
+    for (const forbidden of ['Northwind', 'Priya', 'DESK_TOKEN', 'venue-desk', '/home/']) {
+      expect(text, `${forbidden} is in the example bundle`).not.toContain(forbidden);
+    }
   });
 });
 

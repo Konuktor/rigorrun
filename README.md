@@ -81,6 +81,7 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [CI](docs/CI.md) | Exit codes and a working workflow. |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Every error message, and what to do. |
 | [Third-party dogfood](docs/THIRD_PARTY_DOGFOOD.md) | How we find out whether anybody else can use this. |
+| [An example feedback bundle](docs/examples/feedback-bundle.json) | Exactly what `rigorrun feedback export` sends, from a real session. |
 | [What is and is not built](docs/PRODUCT_REALITY_AUDIT.md) | The honest inventory. |
 | [Roadmap](docs/ROADMAP.md) | Including the gaps. |
 
