@@ -16,6 +16,7 @@ import {
   type ActivationView,
   type CaseResultView,
   type ComparisonView,
+  type ImportedTraceView,
   type ProjectView,
   type RunView,
 } from './api.ts';
@@ -45,7 +46,10 @@ export function ConnectAgent({
           ? {
               name: name.trim(),
               command: command.trim(),
-              args: args.split('\n').map((line) => line.trim()).filter(Boolean),
+              args: args
+                .split('\n')
+                .map((line) => line.trim())
+                .filter(Boolean),
             }
           : { name: name.trim(), endpoint: endpoint.trim() },
       );
@@ -87,9 +91,7 @@ export function ConnectAgent({
           <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
             <p className="text-meta font-medium text-secondary">What you need</p>
             <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
-              <li>
-                Your agent running and listening on an address — on this machine by default.
-              </li>
+              <li>Your agent running and listening on an address — on this machine by default.</li>
               <li>
                 It has to answer one small request saying it is there. If it already speaks MCP,
                 that plus about ten lines is the whole integration.
@@ -102,7 +104,13 @@ export function ConnectAgent({
           </div>
           <Field label="What is it called?">
             {({ id }) => (
-              <TextInput id={id} value={name} onChange={setName} placeholder="Support agent" testId="agent-name" />
+              <TextInput
+                id={id}
+                value={name}
+                onChange={setName}
+                placeholder="Support agent"
+                testId="agent-name"
+              />
             )}
           </Field>
           {kind === 'http' ? (
@@ -234,8 +242,8 @@ export function RunAndVerdict({
       {ready.length === 0 ? (
         <Panel>
           <p className="text-body text-secondary">
-            Your tests are ready and nothing is missing except an agent that answers. Go back a
-            step to connect one.
+            Your tests are ready and nothing is missing except an agent that answers. Go back a step
+            to connect one.
           </p>
         </Panel>
       ) : (
@@ -350,7 +358,10 @@ function Verdict({ run }: { run: RunView }) {
           </div>
 
           <div className="flex flex-wrap gap-8">
-            <Metric label="Task success" value={`${((score?.taskSuccessRate ?? 0) * 100).toFixed(1)}%`} />
+            <Metric
+              label="Task success"
+              value={`${((score?.taskSuccessRate ?? 0) * 100).toFixed(1)}%`}
+            />
             <Metric
               label="Policy compliance"
               value={`${((score?.policyComplianceRate ?? 0) * 100).toFixed(1)}%`}
@@ -562,26 +573,22 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
                 {entry.steps.map((step, index) => (
                   <li key={index} className="flex flex-wrap items-baseline gap-2 text-meta">
                     <span className={step.ok ? 'text-fg' : 'text-fail'}>{step.tool}</span>
-                    <span className="min-w-0 flex-1 truncate text-muted">
-                      {display(step.args)}
-                    </span>
+                    <span className="min-w-0 flex-1 truncate text-muted">{display(step.args)}</span>
                     {step.error ? <span className="text-fail">{step.error}</span> : null}
                   </li>
                 ))}
               </ol>
             )}
             {entry.stepsOmitted > 0 ? (
-              <p className="mt-1 text-meta text-muted">
-                and {entry.stepsOmitted} more, not shown.
-              </p>
+              <p className="mt-1 text-meta text-muted">and {entry.stepsOmitted} more, not shown.</p>
             ) : null}
           </Evidence>
 
           <Evidence label="What your system said afterwards">
             {Object.keys(entry.finalState).length === 0 ? (
               <p className="text-meta text-muted">
-                Nothing was read back. This verdict rests on what was seen to happen, not on
-                your system.
+                Nothing was read back. This verdict rests on what was seen to happen, not on your
+                system.
               </p>
             ) : (
               // Bounded on purpose. This is a whole slice of somebody's system,
@@ -642,4 +649,183 @@ function display(value: unknown): string {
   if (value === undefined) return '—';
   if (typeof value === 'string') return value;
   return JSON.stringify(value) ?? '—';
+}
+
+/**
+ * A failure that already happened, on its way to becoming a permanent case.
+ *
+ * Lives on the run screen rather than in a menu, because the moment somebody
+ * wants this is the moment they are looking at results and thinking about what
+ * their agent does in the wild.
+ *
+ * Reading and adding are two steps on screen for the same reason they are two
+ * requests: a trace is the agent's own record of what it sent, and nothing that
+ * has not been read by a person belongs in the thing that checks agents.
+ */
+export function AddAFailure({ project, onAdded }: { project: ProjectView; onAdded: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [text, setText] = useState('');
+  const [name, setName] = useState('');
+  const [reason, setReason] = useState('');
+  const [trace, setTrace] = useState<ImportedTraceView | null>(null);
+  const [added, setAdded] = useState<{
+    caseId: string;
+    shouldPerform: boolean;
+    cases: number;
+  } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState('');
+
+  async function review(): Promise<void> {
+    setBusy(true);
+    setProblem('');
+    try {
+      const result = await api.reviewTrace(project.id, text);
+      setTrace(result.trace);
+      if (!name) setName(result.trace.name);
+    } catch (error) {
+      setProblem((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function add(): Promise<void> {
+    setBusy(true);
+    setProblem('');
+    try {
+      // The situation, and only the situation: what the agent was working on
+      // when it went wrong. What should have happened comes from your rules.
+      const request = trace?.calls.at(-1)?.args ?? {};
+      const result = await api.addFailure(project.id, name.trim(), reason.trim(), request);
+      setAdded(result.added);
+      onAdded();
+    } catch (error) {
+      setProblem((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <div>
+        <Button variant="ghost" size="sm" onClick={() => setOpen(true)} testId="add-a-failure">
+          Something went wrong in production
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Panel>
+      <div className="flex max-w-3xl flex-col gap-4" data-testid="add-failure">
+        <div className="flex flex-col gap-1">
+          <SectionLabel>Add a failure to this suite</SectionLabel>
+          <p className="text-body text-secondary">
+            Paste an OpenTelemetry trace of what your agent did. RigorRun takes the situation from
+            it — what the agent was working on — and works out what should have happened from the
+            rules you confirmed. It does not take the trace&rsquo;s word for anything else.
+          </p>
+        </div>
+
+        {added === null ? (
+          <>
+            <Field
+              label="The trace"
+              hint="OTLP JSON. What a collector writes, or what your SDK sends."
+            >
+              {({ id, describedBy }) => (
+                <TextArea
+                  id={id}
+                  describedBy={describedBy}
+                  value={text}
+                  onChange={setText}
+                  testId="trace-json"
+                />
+              )}
+            </Field>
+
+            {trace ? (
+              <div className="flex flex-col gap-2" data-testid="trace-review">
+                <SectionLabel>What it says happened</SectionLabel>
+                <ol className="flex flex-col gap-1">
+                  {trace.calls.map((call, index) => (
+                    <li key={index} className="flex flex-wrap items-baseline gap-2 text-meta">
+                      <span className={call.ok ? 'text-fg' : 'text-fail'}>{call.tool}</span>
+                      <span className="min-w-0 flex-1 truncate text-muted">
+                        {JSON.stringify(call.args)}
+                      </span>
+                      <Tag tone="neutral">{call.recognisedBy}</Tag>
+                    </li>
+                  ))}
+                </ol>
+                {trace.failures.map((failure, index) => (
+                  <p key={index} className="text-meta text-fail">
+                    {failure.name}: {failure.message}
+                  </p>
+                ))}
+                {trace.unrecognised > 0 ? (
+                  <p className="text-meta text-muted">
+                    {trace.unrecognised} span(s) RigorRun did not recognise as tool calls. Said
+                    rather than hidden — if one of them is the call that matters, this is not the
+                    trace to build a case from.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+
+            {trace ? (
+              <>
+                <Field label="What should this case be called?">
+                  {({ id }) => (
+                    <TextInput id={id} value={name} onChange={setName} testId="failure-name" />
+                  )}
+                </Field>
+                <Field
+                  label="Why is it here?"
+                  hint="For whoever reads this suite in a year. Shown beside the case; never used to decide anything."
+                >
+                  {({ id }) => (
+                    <TextInput
+                      id={id}
+                      value={reason}
+                      onChange={setReason}
+                      placeholder="Reported by the duty manager on 14 March."
+                      testId="failure-reason"
+                    />
+                  )}
+                </Field>
+              </>
+            ) : null}
+
+            {problem ? <Problem>{problem}</Problem> : null}
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={review}
+                disabled={busy || text.trim().length === 0}
+                testId="review-trace"
+              >
+                {busy ? 'Reading…' : 'Read it'}
+              </Button>
+              {trace ? (
+                <Button onClick={add} disabled={busy} testId="add-failure-case">
+                  Add it to the suite
+                </Button>
+              ) : null}
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col gap-2" data-testid="failure-added">
+            <p className="text-body text-fg">Added. The suite now has {added.cases} cases.</p>
+            <p className="text-meta text-secondary">
+              Your rules say this work should have been{' '}
+              <strong className="text-fg">{added.shouldPerform ? 'done' : 'refused'}</strong> — and
+              that came from the rules, not from the trace. It runs on every run from now on.
+            </p>
+          </div>
+        )}
+      </div>
+    </Panel>
+  );
 }

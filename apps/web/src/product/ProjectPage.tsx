@@ -29,7 +29,7 @@ import {
   type ToolView,
 } from './api.ts';
 import { ConnectEnvironment, ReviewLearned, RuleOnRules, TeachJob, ToolCatalogue } from './stages.tsx';
-import { ConnectAgent, RunAndVerdict } from './run.tsx';
+import { AddAFailure, ConnectAgent, RunAndVerdict } from './run.tsx';
 
 const STEPS = [
   { id: 'connect', label: 'Connect your system' },
@@ -288,11 +288,15 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
       )}
 
       {current === 'run' ? (
-        <RunAndVerdict
-          project={project}
-          activation={activation}
-          onRan={() => void load()}
-        />
+        <>
+          <RunAndVerdict project={project} activation={activation} onRan={() => void load()} />
+          {/* Here rather than in a menu: the moment somebody wants this is the
+              moment they are looking at results and thinking about what their
+              agent does in the wild. */}
+          {project.runs.length > 0 ? (
+            <AddAFailure project={project} onAdded={() => void load()} />
+          ) : null}
+        </>
       ) : null}
 
       {current === 'agent' && project.agents.some((agent) => agent.lastProbeOk) ? (

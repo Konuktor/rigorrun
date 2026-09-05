@@ -148,7 +148,9 @@ Give them this, and ask them to fill it in as they go.
 
 23. Would you run this again after changing your agent?
 24. Would you put it in CI?
-25. What is the single thing that would most make you not bother?
+25. If something went wrong in production next month, would you come back and
+    add it to this suite? What would stop you?
+26. What is the single thing that would most make you not bother?
 
 ## What we record, per tester
 
@@ -174,7 +176,7 @@ the first is more common and easier to fix.
 **Do not defend anything.** The instinct to explain why something is that way is
 the instinct that keeps a product unusable. Write it down and move on.
 
-**Ask question 25 last and take it seriously.** "What would most make you not
+**Ask question 26 last and take it seriously.** "What would most make you not
 bother" is the only question that gets at the thing they are too polite to say.
 
 ## What counts as a pass

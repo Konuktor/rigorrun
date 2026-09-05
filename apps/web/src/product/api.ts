@@ -238,6 +238,18 @@ export interface QualityView {
   hiddenAnswerIsolated: boolean;
 }
 
+/** A trace of something that already happened, as RigorRun read it. */
+export interface ImportedTraceView {
+  traceId: string;
+  name: string;
+  durationMs: number;
+  calls: { tool: string; args: Record<string, unknown>; ok: boolean; error?: string; recognisedBy: string }[];
+  failures: { name: string; message: string }[];
+  /** Spans it did not understand. Reported rather than hidden. */
+  unrecognised: number;
+  model: string;
+}
+
 export interface ComparisonView {
   comparable: boolean;
   incomparableReason: string;
@@ -368,6 +380,12 @@ export const api = {
       input,
     ),
   checkSuite: (id: string) => post<{ quality: QualityView }>(`/api/projects/${id}/quality`),
+  reviewTrace: (id: string, trace: string) =>
+    post<{ trace: ImportedTraceView }>(`/api/projects/${id}/trace/review`, { trace }),
+  addFailure: (id: string, name: string, reason: string, request: Record<string, unknown>) =>
+    post<{
+      added: { caseId: string; shouldPerform: boolean; refusalReason: string; cases: number };
+    }>(`/api/projects/${id}/trace/add`, { name, reason, request }),
   run: (id: string, agentId: string) =>
     post<{ run: RunView }>(`/api/projects/${id}/runs`, { agentId }),
   compare: (id: string, runId: string) =>

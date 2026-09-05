@@ -41,8 +41,8 @@ public agent SDK. Screenshots of what the person saw are written to
 | Design tokens | `pnpm contrast` | 45/45 pairs meet WCAG contrast |
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
-| Generic core stays generic | `pnpm domain` | 22 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 726 passing across 56 files |
+| Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
+| Unit + integration | `pnpm test` | 742 passing across 59 files |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
@@ -68,14 +68,19 @@ Then they change the agent, run again, and are told which case regressed. And
 gate a build on it from the command line, against the project they set up in
 the browser.
 
+When something goes wrong in production later, an OpenTelemetry trace of it
+becomes a permanent case — with only the *situation* taken from the trace, and
+what should have happened worked out from the rules they confirmed.
+
 ## What it does not do
 
 In full in `docs/ROADMAP.md`. The load-bearing ones: nothing is published to
-npm, so every install command in this repository still 404s; there is no trace
-import, so everybody starts from zero and a production failure cannot become a
-regression case; setting a project up is interface-only; and a verdict from a
-real system is `PARTIAL` rather than `AUTHORITATIVE`, because RigorRun reads
-back what the nominated reads return and no more.
+npm, so every install command in this repository still 404s; the SDKs are all
+`private: true`, so the ten-line agent SDK cannot be installed by anybody;
+setting a project up is interface-only; MCP authorization is a static header
+with no OAuth flow; and a verdict from a real system is `PARTIAL` rather than
+`AUTHORITATIVE`, because RigorRun reads back what the nominated reads return
+and no more.
 
 A browser is weaker again. It cannot check its own work — a page saying "done"
 is a claim by the system that would have to be wrong for it not to be done — so

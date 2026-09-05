@@ -309,7 +309,7 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await expect(why.getByText('What the agent did')).toBeVisible();
   await expect(why.getByText('What your system said afterwards')).toBeVisible();
   await why.scrollIntoViewIfNeeded();
-  await why.screenshot({ path: join(SHOTS, '09-why-it-failed.png') });
+  await why.screenshot({ path: join(SHOTS, '08b-why-it-failed.png') });
 
   // And what this system cost the suite is said rather than hidden.
   await expect(page.getByText('What this system stopped RigorRun doing')).toBeVisible();
@@ -343,7 +343,67 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await expect(page.getByText('regressed').first()).toBeVisible();
   await evidence(page, 'regression-caught');
 
-  // ------------------------------------------------ 10. and then, in CI
+  // ------------------------------- 10. and a failure that already happened
+  //
+  // The lifecycle closing. RigorRun's argument is that it works before there is
+  // traffic; this is what happens when traffic arrives and something goes wrong
+  // in a way nobody thought to generate.
+  await page.getByTestId('add-a-failure').click();
+  await page.getByTestId('trace-json').fill(
+    JSON.stringify({
+      resourceSpans: [
+        {
+          scopeSpans: [
+            {
+              spans: [
+                {
+                  traceId: 'incident-4021',
+                  spanId: 'root',
+                  name: 'confirm a held booking',
+                  startTimeUnixNano: '0',
+                  endTimeUnixNano: '2400000000',
+                  status: { code: 2, message: 'confirmed without a sign-off on record' },
+                },
+                {
+                  traceId: 'incident-4021',
+                  spanId: 'a',
+                  parentSpanId: 'root',
+                  name: 'execute_tool',
+                  startTimeUnixNano: '400000000',
+                  endTimeUnixNano: '2300000000',
+                  attributes: [
+                    { key: 'gen_ai.tool.name', value: { stringValue: 'confirm_booking' } },
+                    {
+                      key: 'gen_ai.tool.call.arguments',
+                      value: { stringValue: '{"bookingId":"BKG-4002"}' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+
+  await page.getByTestId('review-trace').click();
+  // Read first, added second — and what it could not read is said out loud.
+  const review = page.getByTestId('trace-review');
+  await expect(review).toBeVisible();
+  // Scoped to the review panel: the same words are in the textarea it was
+  // pasted into, and matching those would prove nothing.
+  await expect(review).toContainText('confirmed without a sign-off on record');
+  await expect(review).toContainText('confirm_booking');
+
+  await page.getByTestId('failure-reason').fill('Reported by the duty manager on 14 March.');
+  await page.getByTestId('add-failure-case').click();
+  await expect(page.getByTestId('failure-added')).toBeVisible({ timeout: 60_000 });
+  // The verdict on this situation came from the confirmed rules, not the trace.
+  await expect(page.getByTestId('failure-added')).toContainText(/should have been (done|refused)/);
+  await evidence(page, 'failure-added-to-suite');
+
+  // ------------------------------------------------ 11. and then, in CI
   //
   // The last thing the quickstart promises: the project you just set up in a
   // browser is the one a build server runs, with no interface and no person.
