@@ -14,13 +14,17 @@
  * It publishes nothing. The last line tells you whether it would be safe to.
  */
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdtemp, readFile, readdir, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pkgDir = join(root, 'packages', 'cli');
+/** What actually gets packed: assembled by build.mjs, no workspace wiring. */
+const stageDir = join(pkgDir, 'package');
+/** A tarball bigger than this is a mistake somebody should have to justify. */
+const MAX_PACKED_KB = 600;
 
 const ESC = String.fromCharCode(27);
 const red = (t) => `${ESC}[31m${t}${ESC}[0m`;
@@ -51,7 +55,7 @@ check('the interface was built into the package', await exists(join(pkgDir, 'ui'
 
 console.log(bold('\nPacking'));
 const packOut = run('npm', ['pack', '--json', '--pack-destination', join(root, 'dist')], {
-  cwd: pkgDir,
+  cwd: stageDir,
 });
 // npm 10 answers with an array, npm 11 with an object keyed by package name.
 // Handling both is cheaper than pinning an npm.
@@ -68,6 +72,28 @@ check('ships the executable', names.includes('bin/rigorrun.mjs'));
 check('ships the interface', names.some((name) => name.startsWith('ui/')));
 check('ships a licence', names.includes('LICENSE'));
 check('ships the README npm will show', names.includes('README.md'));
+check(
+  `is under ${MAX_PACKED_KB}kB packed`,
+  packed.size / 1024 < MAX_PACKED_KB,
+  `${(packed.size / 1024).toFixed(0)}kB`,
+);
+
+// The seventeen `workspace:*` entries are build-time wiring. npm ignores a
+// package's devDependencies on install, so they never broke anything — but a
+// manifest naming packages that do not exist on npm is a manifest nobody can
+// audit.
+const stagedManifest = JSON.parse(await readFile(join(stageDir, 'package.json'), 'utf8'));
+check('names no package that is not on npm', stagedManifest.devDependencies === undefined);
+check(
+  'is tagged so a prerelease cannot land on `latest`',
+  stagedManifest.publishConfig?.tag === 'alpha',
+  stagedManifest.publishConfig?.tag ?? 'no publishConfig',
+);
+check(
+  'points at a repository that exists',
+  /github\.com\/Konuktor\/rigorrun/.test(stagedManifest.repository?.url ?? ''),
+  stagedManifest.repository?.url ?? 'none',
+);
 
 // -------------------------------------------------------------- 3. secret scan
 
@@ -146,6 +172,61 @@ check(
   oldNode.status === 2 && /Node 20\.11 or newer/.test(oldNode.err) && /nodejs\.org/.test(oldNode.err),
   oldNode.err.split('\n')[1] ?? '',
 );
+
+// ------------------------------------------------- 5b. what comes with it
+
+console.log(bold('\nThe dependency tree a stranger installs'));
+
+// `npm audit` in the clean directory rather than the workspace: what matters
+// is what somebody actually ends up with, not what our lockfile pins for
+// development. Advisories are reported rather than fatal — a high in a
+// transitive dependency with no patch available is a decision for a person,
+// and a gate that blocks on it is a gate that gets bypassed.
+const audit = spawnSync('npm', ['audit', '--omit=dev', '--json'], { cwd: clean });
+let advisories = { critical: 0, high: 0, moderate: 0, low: 0 };
+try {
+  advisories = JSON.parse(audit.out).metadata?.vulnerabilities ?? advisories;
+} catch {
+  /* npm audit needs a registry; offline is not a failure of the package. */
+}
+const serious = advisories.critical + advisories.high;
+check(
+  'no critical or high advisories in what it installs',
+  serious === 0,
+  `${advisories.critical} critical, ${advisories.high} high, ${advisories.moderate} moderate`,
+);
+if (serious > 0) notes.push(spawnSync('npm', ['audit', '--omit=dev'], { cwd: clean }).out);
+
+// Licences. Four runtime dependencies, so this is readable rather than a
+// report nobody opens. A copyleft licence arriving transitively into a tool
+// people embed in CI is the thing worth catching.
+const PERMISSIVE = /^(MIT|ISC|BSD-2-Clause|BSD-3-Clause|Apache-2\.0|0BSD|Unlicense|CC0-1\.0|BlueOak-1\.0\.0|Python-2\.0)$/;
+const licences = [];
+for (const dir of await readdir(join(clean, 'node_modules'), { withFileTypes: true }).catch(() => [])) {
+  if (!dir.isDirectory()) continue;
+  const inner = dir.name.startsWith('@')
+    ? (await readdir(join(clean, 'node_modules', dir.name)).catch(() => [])).map((n) => `${dir.name}/${n}`)
+    : [dir.name];
+  for (const name of inner) {
+    const manifest = await readFile(join(clean, 'node_modules', name, 'package.json'), 'utf8').catch(() => '');
+    if (!manifest) continue;
+    const declared = JSON.parse(manifest).license;
+    if (typeof declared === 'string' && !PERMISSIVE.test(declared)) {
+      licences.push(`${name}: ${declared}`);
+    }
+  }
+}
+check('every dependency is permissively licensed', licences.length === 0, licences.join('; '));
+
+// An SBOM, from npm's own command rather than a new dependency. Written beside
+// the tarball so a release has one without anybody remembering to make it.
+const sbom = spawnSync('npm', ['sbom', '--sbom-format', 'cyclonedx', '--omit=dev'], { cwd: clean });
+if (sbom.status === 0) {
+  await writeFile(join(root, 'dist', `${packed.filename}.cyclonedx.json`), sbom.out);
+  check('an SBOM was produced', true, `${packed.filename}.cyclonedx.json`);
+} else {
+  check('an SBOM was produced', false, 'npm sbom failed');
+}
 
 // ------------------------------------------------------- 6. the fresh-user run
 

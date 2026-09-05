@@ -1,0 +1,89 @@
+# Publishing `rigorrun`.
+#
+# Two things this deliberately does not do.
+#
+# It does not publish on a push to master. A release is a decision somebody
+# makes, so it is a tag, and the tag has to match the version in the manifest
+# or the job fails — a mismatch is how a release ends up pointing at the wrong
+# source.
+#
+# And it holds no npm token. Publishing uses npm's trusted publishing: GitHub
+# mints a short-lived OIDC token for this workflow, in this repository, and npm
+# accepts it because the package is configured to trust exactly that. Nothing
+# long-lived exists to be stolen from repository secrets, and every published
+# tarball carries a provenance attestation saying which commit and which
+# workflow produced it.
+#
+# Setting it up on the npm side, once: on npmjs.com, the package's Settings →
+# Trusted publisher → GitHub Actions, with this repository and `release.yml`.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Verify and stop without publishing'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  # What lets npm trust this workflow instead of a stored token.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: npm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+
+      # npm 11.5.1 is the first version that can use trusted publishing.
+      - run: npm install -g npm@latest
+
+      - name: The tag names the version that is about to be published
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          manifest=$(node -p "require('./packages/cli/package.json').version")
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$manifest" != "$tag" ]; then
+            echo "Tag $tag does not match the manifest version $manifest." >&2
+            exit 1
+          fi
+
+      # Everything that has to be true before this can go out: the tarball
+      # contains only what it should, carries no credentials, installs into a
+      # clean directory, runs, explains itself on an old Node, has no high
+      # advisories, is permissively licensed, and completes the whole
+      # fresh-user journey against the packaged artifact.
+      - name: The package a stranger would install
+        run: pnpm verify:package
+
+      - name: Publish
+        if: startsWith(github.ref, 'refs/tags/v') && inputs.dry-run != true
+        run: npm publish --provenance --access public --tag alpha
+        working-directory: packages/cli/package
+
+      - name: Keep the tarball and its SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: |
+            dist/*.tgz
+            dist/*.cyclonedx.json
+          retention-days: 90

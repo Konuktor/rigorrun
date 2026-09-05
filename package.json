@@ -53,7 +53,7 @@
     "build:ops": "pnpm -F @rigorrun/demo-ops build",
     "deploy:ops": "pnpm build:ops && wrangler pages deploy apps/demo-ops/dist --project-name rigorrun-ops --branch main --commit-dirty=true",
     "e2e:external": "playwright test --config e2e/playwright.external.config.ts",
-    "pack": "pnpm build:web && pnpm build:cli && cd packages/cli && npm pack --pack-destination ../../dist",
+    "pack": "pnpm build:web && pnpm build:cli && cd packages/cli/package && npm pack --pack-destination ../../../dist",
     "verify:package": "node scripts/verify-package.mjs"
   },
   "devDependencies": {

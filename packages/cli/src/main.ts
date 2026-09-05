@@ -146,9 +146,9 @@ async function dispatch(argv: string[]): Promise<number> {
     case 'feedback':
       if (target !== 'export') throw new CliError('Try `rigorrun feedback export`.');
       return cmdFeedbackExport(flags);
-    case 'secrets':
     // `secret` was the original spelling and still works: somebody's shell
     // history and somebody's CI script should not break over a plural.
+    case 'secrets':
     case 'secret':
       return cmdSecret(target, parsed.positionals[2], flags);
     case 'compare-runs':

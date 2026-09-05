@@ -80,6 +80,45 @@ jobs:
           path: dist/*.tgz
           retention-days: 7
 
+  # What a stranger's `npm install` pulls in, checked on every change rather
+  # than only at release. An advisory that lands on a Tuesday should not wait
+  # for somebody to decide to publish.
+  supply-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Reported, not fatal. A high in a transitive dependency with no patch
+      # available is a decision for a person, and a gate that blocks on it is a
+      # gate somebody switches off.
+      - name: Advisories
+        continue-on-error: true
+        run: pnpm audit --prod
+
+      - name: No credentials in the tree
+        run: pnpm vitest run packages/cli/test/security.test.ts
+
+  codeql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
