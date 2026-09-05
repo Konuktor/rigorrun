@@ -146,7 +146,7 @@ describe('what to do next', () => {
     project.connector = {
       kind: 'mcp', transport: 'stdio', command: 'node', args: [], url: '', secretNames: [],
     };
-    project.verifierReads = [{ tool: 'get_thing', args: {}, entity: 'Thing' }];
+    project.verifierReads = [{ tool: 'get_thing', args: {} }];
     project.timings.workflowRecordedAt = '2026-02-01T09:05:00.000Z';
     project.timings.benchmarkGeneratedAt = '2026-02-01T09:06:00.000Z';
     project.agents = [

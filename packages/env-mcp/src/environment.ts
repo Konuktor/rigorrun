@@ -25,12 +25,10 @@
  * left to quietly mean the wrong thing.
  */
 import {
-  emptyState,
   type ActionDefinition,
   type CanonicalState,
   type CaseConfig,
   type CaseConfigVariable,
-  type EntityRow,
   type EnvEvent,
   type EnvironmentAdapter,
   type EnvironmentCapabilities,
@@ -40,7 +38,7 @@ import {
 } from '@rigorrun/environment';
 import type { McpConnection } from '@rigorrun/mcp';
 import type { McpEnvironmentConfig } from './config.ts';
-import { rowsFromPayload } from './rows.ts';
+import { stateFromPayloads } from './rows.ts';
 
 export class McpEnvironment implements EnvironmentAdapter {
   readonly id: string;
@@ -159,22 +157,12 @@ export class McpEnvironment implements EnvironmentAdapter {
    * inventing a verdict.
    */
   async getState(): Promise<CanonicalState> {
-    const state = emptyState(this.schema);
+    const payloads: unknown[] = [];
     for (const read of this.config.verifierReads) {
-      const entity = this.schema.entities.find((candidate) => candidate.name === read.entity);
-      if (!entity) continue;
       const result = await this.connection.call(read.tool, read.args ?? {});
-      if (!result.ok || result.structured === undefined) continue;
-
-      const table = state.entities[entity.name] ?? {};
-      for (const row of rowsFromPayload(result.structured, entity)) {
-        const id = row[entity.idField];
-        if (id === undefined || id === null) continue;
-        table[String(id)] = row as EntityRow;
-      }
-      state.entities[entity.name] = table;
+      if (result.ok && result.structured !== undefined) payloads.push(result.structured);
     }
-    return state;
+    return stateFromPayloads(payloads, this.schema);
   }
 
   getEvents(): EnvEvent[] {

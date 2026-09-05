@@ -41,7 +41,6 @@ export type Connector = z.infer<typeof ConnectorSchema>;
 export const VerifierReadSchema = z.object({
   tool: z.string(),
   args: z.record(z.string(), z.unknown()).default({}),
-  entity: z.string(),
 });
 
 export const AgentConfigSchema = z.object({

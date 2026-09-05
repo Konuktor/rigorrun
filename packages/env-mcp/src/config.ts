@@ -27,8 +27,16 @@ export interface VerifierRead {
   tool: string;
   /** Fixed arguments, if the call needs any. */
   args?: Record<string, unknown>;
-  /** Which record type the rows in the answer belong to. */
-  entity: string;
+  /**
+   * Which record type the rows belong to, when somebody knows.
+   *
+   * Usually nobody does, and that is not a gap in the configuration screen —
+   * it is the order things happen in. Record types are worked out *from* what
+   * these reads return, so at the moment a person nominates them the names do
+   * not exist yet. Left unset, rows are matched to entities structurally, the
+   * same way the schema was induced in the first place.
+   */
+  entity?: string;
 }
 
 export type ResetStrategy =

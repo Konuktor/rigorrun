@@ -277,6 +277,9 @@ importers:
       '@hono/node-server':
         specifier: ^2.1.1
         version: 2.1.1(hono@4.13.7)
+      '@rigorrun/agent-sdk':
+        specifier: workspace:*
+        version: link:../agent-sdk
       '@rigorrun/agents':
         specifier: workspace:*
         version: link:../agents
