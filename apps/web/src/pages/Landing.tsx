@@ -140,7 +140,14 @@ export function Landing({
               </div>
               <div className="bg-surface px-4 py-3">
                 <SectionLabel>System state</SectionLabel>
-                <pre className="mt-1.5 max-h-44 overflow-auto font-mono text-[11px] leading-relaxed text-fail">
+                {/* Scrollable, so keyboard-focusable: somebody who cannot use
+                    a mouse still has to be able to read to the bottom of it. */}
+                <pre
+                  tabIndex={0}
+                  role="region"
+                  aria-label="System state when the check failed"
+                  className="mt-1.5 max-h-44 overflow-auto font-mono text-[11px] leading-relaxed text-fail"
+                >
                   {JSON.stringify(FAILURE.systemState, null, 1)}
                 </pre>
                 <p className="mt-2 text-meta text-muted">

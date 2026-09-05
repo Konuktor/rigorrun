@@ -591,7 +591,12 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
                 <summary className="cursor-pointer text-meta text-secondary">
                   {Object.keys(entry.finalState).join(', ')}
                 </summary>
-                <pre className="mt-2 max-h-80 overflow-auto rounded-control bg-canvas p-2 text-meta text-secondary">
+                <pre
+                  tabIndex={0}
+                  role="region"
+                  aria-label="What the system said after this case"
+                  className="mt-2 max-h-80 overflow-auto rounded-control bg-canvas p-2 text-meta text-secondary"
+                >
                   {JSON.stringify(entry.finalState, null, 2)}
                 </pre>
               </details>
