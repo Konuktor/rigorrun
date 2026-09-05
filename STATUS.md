@@ -42,7 +42,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 742 passing across 59 files |
+| Unit + integration | `pnpm test` | 744 passing across 60 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
@@ -58,7 +58,8 @@ trusting it they can have RigorRun break agents on purpose and report how many
 the suite caught.
 
 They point their own agent at it — any agent that speaks MCP works unchanged,
-whether it listens on an address or is a command RigorRun runs — and get **safe
+whether it listens on an address or is a command RigorRun runs, in TypeScript
+or Python or anything that can write a line of JSON — and get **safe
 to ship: yes, conditional or no**, read back from their own system. Every case
 can be asked what happened: which check failed and which tier of evidence
 decided it, what the agent called, what the system said afterwards, and

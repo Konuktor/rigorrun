@@ -39,8 +39,9 @@ against it and reads your system to find out what actually happened.
 npx rigorrun@alpha
 ```
 
-Open the URL it prints. Connect an MCP server or an OpenAPI document, do the
-job once, answer a few questions, connect your agent, run it. Nothing is uploaded; your systems,
+Open the URL it prints. Connect your system — an MCP server, an OpenAPI
+document, or a web application through a browser — do the job once, answer a
+few questions, connect your agent, run it. Nothing is uploaded; your systems,
 credentials and recordings stay on your machine, because the interface is
 served by the local process rather than from a website.
 
@@ -60,7 +61,8 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 |  |  |
 | --- | --- |
 | **The suite is derived, not authored** | One recording becomes a contract, then a case suite. You do the job once. |
-| **Your agent does not change** | If it speaks MCP, it is tested by being given a URL. If not, ten lines of SDK. |
+| **The suite is graded before your agent is** | RigorRun writes broken agents on purpose and reports how many the suite caught. |
+| **Your agent does not change** | If it speaks MCP, it is tested by being given a URL — listening on a port, or run as a command. If not, ten lines of SDK. |
 | **A verdict comes from your system** | Read back after your agent finished, never from what it said about itself. |
 | **It says what it could not do** | Verification strength, isolation, and every case it could not build, on every result. |
 | **Nothing guessed can fail you** | A rule RigorRun inferred does not gate anything until you confirm it. |
@@ -72,9 +74,14 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | --- | --- |
 | [Getting started](docs/GETTING_STARTED.md) | The ten minutes, in order. |
 | [Connecting an MCP server](docs/MCP_ENVIRONMENT.md) | Transports, credentials, annotations, what gets induced. |
+| [Connecting an HTTP API](docs/OPENAPI_ENVIRONMENT.md) | An OpenAPI document, and what will not be called during setup. |
+| [Testing a web application](docs/BROWSER_ENVIRONMENT.md) | A browser, and why one cannot check its own work. |
 | [Testing an MCP-capable agent](docs/MCP_PROXY.md) | The proxy, and what it does and does not grant. |
 | [Connecting your agent over HTTP](docs/HTTP_AGENT.md) | The protocol, and the probe. |
+| [An agent that is a command](docs/CLI_AGENT.md) | The same protocol, over stdin and stdout. |
 | [TypeScript agent SDK](docs/TYPESCRIPT_AGENT_SDK.md) | Ten lines. |
+| [Python agent SDK](docs/PYTHON_AGENT_SDK.md) | Standard library only. |
+| [A production failure as a case](docs/TRACE_IMPORT.md) | What is taken from a trace, and what is not. |
 | [Putting the system back](docs/ENVIRONMENT_RESET.md) | Reset, and what happens without one. |
 | [How a verdict is reached](docs/VERIFICATION.md) | Verification strength, inapplicable checks, comparison. |
 | [Security model](docs/SECURITY_MODEL.md) | Threats, what is done, and what is not defended. |
