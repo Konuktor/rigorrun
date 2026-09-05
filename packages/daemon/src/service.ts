@@ -22,15 +22,16 @@ import {
   type RunResult,
 } from '@rigorrun/core';
 import { induceContract } from '@rigorrun/compiler';
-import { generateBenchmark } from '@rigorrun/generator';
+import { createReferenceAgent, generateBenchmark } from '@rigorrun/generator';
 import { runBenchmark } from '@rigorrun/runner';
+import { assessBenchmark, type BenchmarkQuality } from '@rigorrun/quality';
 import {
   clearEnvironments,
   registerEnvironment,
   type EnvironmentFixture,
   type EnvironmentSchema,
 } from '@rigorrun/environment';
-import type { AgentAdapter } from '@rigorrun/agents';
+import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
@@ -585,6 +586,52 @@ export class Service {
     if (agent.lastProbeOk) await this.activation.stage('agent_connected', projectId);
     else await this.activation.attempt('agent_probe_failed', projectId);
     return { project: updated, agent };
+  }
+
+  /**
+   * Grades the suite before anybody grades an agent with it.
+   *
+   * §23 of what this product is for: a benchmark that cannot tell a good agent
+   * from a bad one produces a confident verdict about nothing, and finding that
+   * out from the verdict is finding it out too late. So RigorRun runs synthetic
+   * agents of its own — one that follows the confirmed rules, one that does
+   * not, and a set of specific defects — and reports how many the suite caught.
+   *
+   * Deliberately not automatic, and the reason is honesty about cost. This runs
+   * the whole suite several times against the *real* system, and most of those
+   * runs write to it. That is fine on something ephemeral and a serious thing
+   * to do to somebody's staging environment without asking, so the interface
+   * asks, and says what it is about to do.
+   */
+  async assessSuite(projectId: string): Promise<BenchmarkQuality> {
+    const project = await this.store.read(projectId);
+    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
+    const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
+    if (!benchmark || !contract) throw new Error('There is no suite to check yet.');
+    if (project.safety === 'production') {
+      throw new Error(
+        'Checking the suite runs it several times, and most of those runs write. RigorRun will ' +
+          'not do that against something marked production.',
+      );
+    }
+
+    const schema = await this.schemaOf(project);
+    await this.registerFor(project, schema);
+    this.workspace.allowWrites(projectId);
+
+    const quality = await assessBenchmark({
+      benchmark,
+      contract,
+      reference: createReferenceAgent(benchmark),
+      naive: naiveAgent,
+    });
+    await this.store.writeArtefact(projectId, 'quality', quality);
+    return quality;
+  }
+
+  /** The last assessment, if the suite has been checked. */
+  async quality(projectId: string): Promise<BenchmarkQuality | undefined> {
+    return this.store.readArtefact<BenchmarkQuality>(projectId, 'quality');
   }
 
   async runAgent(projectId: string, agentId: string): Promise<RunResult> {

@@ -360,6 +360,9 @@ importers:
       '@rigorrun/proxy':
         specifier: workspace:*
         version: link:../proxy
+      '@rigorrun/quality':
+        specifier: workspace:*
+        version: link:../quality
       '@rigorrun/runner':
         specifier: workspace:*
         version: link:../runner

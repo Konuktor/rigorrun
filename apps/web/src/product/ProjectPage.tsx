@@ -19,11 +19,12 @@ import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 import { Problem } from './inputs.tsx';
 import {
   api,
-  type AnnotationMismatchView,
   type ActivationView,
+  type AnnotationMismatchView,
   type CaseView,
   type DriftView,
   type ProjectView,
+  type QualityView,
   type SchemaQuestionView,
   type ToolView,
 } from './api.ts';
@@ -53,6 +54,8 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
   const [questions, setQuestions] = useState<SchemaQuestionView[]>([]);
   /** Claims this system made that its own behaviour contradicted. */
   const [mismatches, setMismatches] = useState<AnnotationMismatchView[]>([]);
+  /** What the suite is worth, once somebody has asked. */
+  const [quality, setQuality] = useState<QualityView | null>(null);
   const [cases, setCases] = useState<CaseView[]>([]);
   const [recording, setRecording] = useState<{ tool: string; ok: boolean }[]>([]);
   /**
@@ -82,6 +85,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
       if (result.benchmark) setCases(result.benchmark.cases);
       setRecording(result.recording.steps);
       setRecordingOpen(result.recording.inProgress);
+      setQuality(result.quality);
       return result.project;
     } catch (error) {
       setProblem((error as Error).message);
@@ -270,11 +274,12 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
           {current === 'agent' ? (
             <>
               {cases.length > 0 ? (
-                <Panel>
-                  <p className="text-body text-secondary" data-testid="suite-size">
-                    {cases.length} cases built from what you showed it.
-                  </p>
-                </Panel>
+                <SuiteQuality
+                  project={project}
+                  cases={cases.length}
+                  quality={quality}
+                  onChecked={setQuality}
+                />
               ) : null}
               <ConnectAgent project={project} onConnected={setProject} />
             </>
@@ -408,4 +413,104 @@ function reachedStep(project: ProjectView, hasQuestions: boolean): StepId {
   if (project.timings['benchmarkGeneratedAt'] === null) return hasQuestions ? 'learned' : 'rules';
   if (!project.agents.some((agent) => agent.lastProbeOk)) return 'agent';
   return 'run';
+}
+
+/**
+ * What the suite is worth, before anybody is graded with it.
+ *
+ * Offered rather than done. Checking runs the whole suite several times, and
+ * most of those runs write to the real system — fine against something
+ * ephemeral, and a serious thing to do to somebody's staging environment
+ * without asking. So the button says what it is about to do.
+ */
+function SuiteQuality({
+  project,
+  cases,
+  quality,
+  onChecked,
+}: {
+  project: ProjectView;
+  cases: number;
+  quality: QualityView | null;
+  onChecked: (quality: QualityView) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [problem, setProblem] = useState('');
+
+  async function check(): Promise<void> {
+    setBusy(true);
+    setProblem('');
+    try {
+      onChecked((await api.checkSuite(project.id)).quality);
+    } catch (error) {
+      setProblem((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const caught = quality ? Math.round(quality.mutantKillRate * 100) : 0;
+  const independent = quality ? Math.round(quality.independentKillRate * 100) : 0;
+
+  return (
+    <Panel>
+      <div className="flex flex-col gap-3">
+        <p className="text-body text-secondary" data-testid="suite-size">
+          {cases} cases built from what you showed it.
+        </p>
+
+        {quality === null ? (
+          <>
+            <p className="text-meta text-muted">
+              RigorRun can check this suite before you trust it, by writing agents that are
+              broken in specific ways and seeing how many it catches. That runs the suite
+              several times against your system, and most of those runs change things.
+            </p>
+            {problem ? <Problem>{problem}</Problem> : null}
+            <div>
+              <Button variant="ghost" onClick={check} disabled={busy} testId="check-suite">
+                {busy ? 'Checking the suite…' : 'Check the suite first'}
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col gap-2" data-testid="suite-quality">
+            <div className="flex flex-wrap items-center gap-3">
+              <Tag tone={caught === 100 ? 'pass' : caught >= 60 ? 'warn' : 'fail'}>
+                caught {caught}% of injected defects
+              </Tag>
+              <Tag tone={independent === 100 ? 'pass' : independent >= 60 ? 'warn' : 'fail'}>
+                {independent}% of the ones the rules never mention
+              </Tag>
+            </div>
+            <p className="text-meta text-muted">
+              The second number is the honest one. A defect derived from the rules being tested
+              can only re-measure the plumbing; one derived from your system is a real question
+              about whether this suite would notice.
+            </p>
+            <ul className="flex flex-col gap-1">
+              {quality.mutants.map((mutant) => (
+                <li key={mutant.id} className="flex flex-wrap items-center gap-2 text-meta">
+                  <span className={mutant.caught ? 'text-pass' : 'text-fail'}>
+                    {mutant.caught ? 'caught' : 'missed'}
+                  </span>
+                  <span className="text-secondary">{mutant.defect}</span>
+                  {mutant.expectation === 'must_survive' ? (
+                    <Tag tone="neutral">should not be caught</Tag>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+            {quality.nonDiscriminatingRules.length > 0 ? (
+              <p className="text-meta text-muted">
+                {quality.nonDiscriminatingRules.length} confirmed rule(s) never decided anything
+                here. Not a failure — RigorRun proposes more than it expects you to keep — but
+                they are costing you review time and catching nothing.
+              </p>
+            ) : null}
+          </div>
+        )}
+      </div>
+    </Panel>
+  );
 }

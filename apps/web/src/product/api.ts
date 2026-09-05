@@ -208,6 +208,27 @@ export interface CaseResultView {
   error: string;
 }
 
+/**
+ * What the suite is worth, measured before an agent is measured with it.
+ *
+ * A benchmark that cannot tell a good agent from a bad one produces a confident
+ * verdict about nothing.
+ */
+export interface QualityView {
+  cases: number;
+  /** Fraction of injected defects the suite caught. */
+  mutantKillRate: number;
+  /** The same, counting only defects the rules never mention. */
+  independentKillRate: number;
+  mutants: { id: string; defect: string; expectation: string; caught: boolean }[];
+  /** Rules no case exercises. A suite defect, not an agent one. */
+  deadRules: string[];
+  /** Rules applicable everywhere and violated nowhere. */
+  nonDiscriminatingRules: string[];
+  replayStable: boolean;
+  hiddenAnswerIsolated: boolean;
+}
+
 export interface ComparisonView {
   comparable: boolean;
   incomparableReason: string;
@@ -269,6 +290,7 @@ export const api = {
       environment: { connected: boolean; discovery: DiscoveryView | null };
       questions: SchemaQuestionView[];
       recording: { inProgress: boolean; steps: { tool: string; ok: boolean }[] };
+      quality: QualityView | null;
       activation: ActivationView;
     }>(`/api/projects/${id}`),
 
@@ -336,6 +358,7 @@ export const api = {
       `/api/projects/${id}/agents`,
       input,
     ),
+  checkSuite: (id: string) => post<{ quality: QualityView }>(`/api/projects/${id}/quality`),
   run: (id: string, agentId: string) =>
     post<{ run: RunView }>(`/api/projects/${id}/runs`, { agentId }),
   compare: (id: string, runId: string) =>

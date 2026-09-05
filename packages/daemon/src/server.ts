@@ -153,13 +153,15 @@ export class Runner {
 
     app.get('/api/projects/:id', async (context) => {
       const project = await service.readProject(context.req.param('id'));
-      const [contract, benchmark, discovery, induced, recorded, activation] = await Promise.all([
+      const [contract, benchmark, discovery, induced, recorded, activation, quality] =
+        await Promise.all([
         service.artefact<EnvironmentContract>(project.id, 'contract'),
         service.artefact<Benchmark>(project.id, 'benchmark'),
         service.discovery(project.id),
         service.artefact<{ questions: unknown[] }>(project.id, 'induced'),
         service.recordingState(project.id),
         service.activation.summary(project.id),
+        service.quality(project.id),
       ]);
       return context.json({
         project: summarise(project),
@@ -184,6 +186,7 @@ export class Runner {
         questions: induced?.questions ?? [],
         recording: recorded,
         activation,
+        quality: quality ?? null,
       });
     });
 
@@ -336,6 +339,10 @@ export class Runner {
       );
       return context.json({ project: summarise(added.project), agent: added.agent });
     });
+
+    app.post('/api/projects/:id/quality', async (context) =>
+      context.json({ quality: await service.assessSuite(context.req.param('id')) }),
+    );
 
     // --------------------------------------------------------------- runs
 

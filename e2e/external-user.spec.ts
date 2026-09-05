@@ -268,6 +268,13 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await page.getByTestId('generate').click();
 
   await expect(page.getByTestId('suite-size')).toContainText('cases built');
+
+  // Grade the suite before grading an agent with it. A benchmark that cannot
+  // tell a good agent from a bad one produces a confident verdict about
+  // nothing, and finding that out from the verdict is finding it out too late.
+  await page.getByTestId('check-suite').click();
+  await expect(page.getByTestId('suite-quality')).toBeVisible({ timeout: 180_000 });
+  await expect(page.getByText(/caught \d+% of injected defects/)).toBeVisible();
   await evidence(page, 'suite-built');
 
   // ----------------------------------------------- 7. connect their own agent

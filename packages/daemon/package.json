@@ -22,6 +22,7 @@
     "@rigorrun/generator": "workspace:*",
     "@rigorrun/mcp": "workspace:*",
     "@rigorrun/proxy": "workspace:*",
+    "@rigorrun/quality": "workspace:*",
     "@rigorrun/runner": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
     "hono": "^4.13.7",

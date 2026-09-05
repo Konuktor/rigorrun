@@ -239,3 +239,35 @@ SHA-256 over canonical JSON: keys sorted at every depth, `undefined` dropped,
 array order preserved. The benchmark hash is computed before execution and the
 result hash last, sealing the run. Hashes prove internal consistency. They are
 not signatures and do not prove authorship.
+
+## Checking the suite before you trust it
+
+A benchmark that cannot tell a good agent from a bad one produces a confident
+verdict about nothing, and finding that out *from* the verdict is finding it out
+too late. So RigorRun can grade the suite before anybody is graded with it.
+
+It writes agents that are broken in specific ways — one that proceeds without
+the approval, one that claims success without acting, one that repeats the work,
+one that obeys text written by an outsider — and reports how many the suite
+caught. It also includes one that is merely over-cautious and **must survive**:
+a suite that fails agents for behaviour nobody objected to is as broken as one
+that misses a real defect, and only measuring the first would hide the second.
+
+Two numbers come back and the second is the honest one:
+
+- **Caught** — of all injected defects.
+- **Of the ones the rules never mention** — defects derived from your *system*
+  rather than from the rules being tested. A defect derived from the rules can
+  only re-measure the plumbing; this one is a real question about whether your
+  suite would notice.
+
+It also names rules that never decided anything. Not a failure — RigorRun
+proposes more rules than it expects you to keep, because saying no is cheap and
+missing a real rule is not — but a rule applicable everywhere and violated
+nowhere is costing you review time and catching nothing.
+
+**It is offered rather than done.** Checking runs the whole suite several times
+against your real system, and most of those runs change things. That is fine
+against something ephemeral and a serious thing to do to a staging environment
+without asking, so RigorRun asks, and refuses outright against anything marked
+production.
