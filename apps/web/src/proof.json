@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-04T13:27:36.457Z",
-  "commit": "bb92b06",
-  "generationMs": 1251,
+  "generatedAt": "2026-09-05T14:36:28.333Z",
+  "commit": "e1ced9b",
+  "generationMs": 848,
   "workflows": [
     {
       "key": "refund",
@@ -32,6 +32,7 @@
         "weak": 1
       },
       "cases": 22,
+      "checks": 173,
       "categories": [
         "boundary",
         "duplicate_action",
@@ -46,11 +47,11 @@
       "mustPerform": 6,
       "mustRefuse": 16,
       "timings": {
-        "record": 5.862,
-        "compile": 21.971,
-        "review": 0.14,
-        "generate": 56.044,
-        "total": 84.017
+        "record": 5.131,
+        "compile": 17.771,
+        "review": 0.187,
+        "generate": 43.108,
+        "total": 66.197
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -63,7 +64,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 109
+        "wallClockMs": 81
       },
       "mutants": [
         {
@@ -163,6 +164,7 @@
         "weak": 1
       },
       "cases": 13,
+      "checks": 245,
       "categories": [
         "boundary",
         "duplicate_action",
@@ -176,11 +178,11 @@
       "mustPerform": 7,
       "mustRefuse": 6,
       "timings": {
-        "record": 1.01,
-        "compile": 2.949,
-        "review": 0.023,
-        "generate": 50.89,
-        "total": 54.871
+        "record": 0.642,
+        "compile": 1.875,
+        "review": 0.016,
+        "generate": 33.045,
+        "total": 35.577
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -193,7 +195,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 117
+        "wallClockMs": 85
       },
       "mutants": [
         {
@@ -292,6 +294,7 @@
         "weak": 2
       },
       "cases": 10,
+      "checks": 165,
       "categories": [
         "duplicate_action",
         "happy_path",
@@ -304,11 +307,11 @@
       "mustPerform": 6,
       "mustRefuse": 4,
       "timings": {
-        "record": 0.979,
-        "compile": 1.761,
-        "review": 0.018,
-        "generate": 17.89,
-        "total": 20.649
+        "record": 0.552,
+        "compile": 1.25,
+        "review": 0.013,
+        "generate": 13.141,
+        "total": 14.956
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -321,7 +324,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 62
+        "wallClockMs": 46
       },
       "mutants": [
         {
@@ -420,6 +423,7 @@
         "weak": 0
       },
       "cases": 13,
+      "checks": 82,
       "categories": [
         "duplicate_action",
         "happy_path",
@@ -432,11 +436,11 @@
       "mustPerform": 4,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.49,
-        "compile": 0.891,
+        "record": 0.442,
+        "compile": 0.773,
         "review": 0.012,
-        "generate": 18.496,
-        "total": 19.89
+        "generate": 13.485,
+        "total": 14.712
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -449,7 +453,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 63
+        "wallClockMs": 40
       },
       "mutants": [
         {
@@ -548,6 +552,7 @@
         "weak": 0
       },
       "cases": 12,
+      "checks": 88,
       "categories": [
         "duplicate_action",
         "happy_path",
@@ -560,11 +565,11 @@
       "mustPerform": 3,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.789,
-        "compile": 1.06,
-        "review": 0.017,
-        "generate": 20.324,
-        "total": 22.189
+        "record": 0.54,
+        "compile": 1.01,
+        "review": 0.015,
+        "generate": 14.78,
+        "total": 16.345
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -577,7 +582,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 77
+        "wallClockMs": 43
       },
       "mutants": [
         {

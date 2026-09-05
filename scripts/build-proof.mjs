@@ -56,6 +56,7 @@ for (const definition of WORKFLOWS) {
     templates: [...new Set(compiled.contract.rules.map((rule) => rule.template))].sort(),
     provenance: provenanceStrength(compiled.contract),
     cases: compiled.benchmark.cases.length,
+    checks: compiled.benchmark.cases.reduce((total, c) => total + c.checks.length, 0),
     categories: [...new Set(compiled.benchmark.cases.map((c) => c.category))].sort(),
     mustPerform: compiled.generation.cases.filter((c) => c.expected.shouldPerform).length,
     mustRefuse: compiled.generation.cases.filter((c) => !c.expected.shouldPerform).length,

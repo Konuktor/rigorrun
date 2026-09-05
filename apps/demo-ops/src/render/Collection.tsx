@@ -52,56 +52,78 @@ export function Collection({ schema, hints, presentation, state, environmentId }
   if (presentation.view === 'board' && presentation.groupBy) {
     const field = entity.fields.find((candidate) => candidate.name === presentation.groupBy);
     const columns = field?.enumValues ?? [];
+    // A board wider than the phone scrolls inside itself. Four stages at a
+    // readable width cannot fit 360px, and letting the page scroll sideways
+    // instead would break every other screen in the shell.
     return (
-      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(13rem, 1fr))` }}>
-        {columns.map((column) => {
-          const inColumn = rows.filter((row) => String(row[presentation.groupBy!]) === column);
-          return (
-            <section key={column} className="min-w-0">
-              <h3 className="mb-2 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-ink-faint">
-                {column.replace(/_/g, ' ')}
-                <span className="rounded-full bg-canvas px-1.5 tabular-nums">{inColumn.length}</span>
-              </h3>
-              <div className="space-y-2">
-                {inColumn.map((row) => (
-                  <a
-                    key={String(row[entity.idField])}
-                    href={hrefFor(environmentId, presentation.entity, String(row[entity.idField]))}
-                    data-testid={`card-${String(row[entity.idField])}`}
-                    className="block rounded-lg border border-rule bg-surface p-3 hover:border-brand"
-                  >
-                    <div className="truncate font-medium">
-                      {titleOf(schema, presentation.entity, row, emphasis, lookup)}
-                    </div>
-                    <dl className="mt-2 space-y-1">
-                      {presentation.columns
-                        .filter((column2) => !column2.emphasis)
-                        .map((column2) => {
-                          const { value, field: fieldSchema } = resolveValue(
-                            schema,
-                            presentation.entity,
-                            row,
-                            column2.field,
-                            lookup,
-                          );
-                          return (
-                            <div key={column2.field} className="flex items-center justify-between gap-2">
-                              <dt className="truncate text-[12px] text-ink-faint">
-                                {labelFor(schema, presentation.entity, column2.field, column2.label)}
-                              </dt>
-                              <dd className="shrink-0 text-[12.5px]">
-                                <Value value={value} field={fieldSchema} hints={hints} />
-                              </dd>
-                            </div>
-                          );
-                        })}
-                    </dl>
-                  </a>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+      <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
+        <div
+          className="grid gap-3"
+          style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(13rem, 1fr))` }}
+        >
+          {columns.map((column) => {
+            const inColumn = rows.filter((row) => String(row[presentation.groupBy!]) === column);
+            return (
+              <section key={column} className="min-w-0">
+                <h3 className="mb-2 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-ink-faint">
+                  {column.replace(/_/g, ' ')}
+                  <span className="rounded-full bg-canvas px-1.5 tabular-nums">
+                    {inColumn.length}
+                  </span>
+                </h3>
+                <div className="space-y-2">
+                  {inColumn.map((row) => (
+                    <a
+                      key={String(row[entity.idField])}
+                      href={hrefFor(
+                        environmentId,
+                        presentation.entity,
+                        String(row[entity.idField]),
+                      )}
+                      data-testid={`card-${String(row[entity.idField])}`}
+                      className="block rounded-lg border border-rule bg-surface p-3 hover:border-brand"
+                    >
+                      <div className="truncate font-medium">
+                        {titleOf(schema, presentation.entity, row, emphasis, lookup)}
+                      </div>
+                      <dl className="mt-2 space-y-1">
+                        {presentation.columns
+                          .filter((column2) => !column2.emphasis)
+                          .map((column2) => {
+                            const { value, field: fieldSchema } = resolveValue(
+                              schema,
+                              presentation.entity,
+                              row,
+                              column2.field,
+                              lookup,
+                            );
+                            return (
+                              <div
+                                key={column2.field}
+                                className="flex items-center justify-between gap-2"
+                              >
+                                <dt className="truncate text-[12px] text-ink-faint">
+                                  {labelFor(
+                                    schema,
+                                    presentation.entity,
+                                    column2.field,
+                                    column2.label,
+                                  )}
+                                </dt>
+                                <dd className="shrink-0 text-[12.5px]">
+                                  <Value value={value} field={fieldSchema} hints={hints} />
+                                </dd>
+                              </div>
+                            );
+                          })}
+                      </dl>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </div>
       </div>
     );
   }
@@ -130,9 +152,7 @@ export function Collection({ schema, hints, presentation, state, environmentId }
                       column.field,
                       lookup,
                     );
-                    return (
-                      <Value key={column.field} value={value} field={field} hints={hints} />
-                    );
+                    return <Value key={column.field} value={value} field={field} hints={hints} />;
                   })}
               </span>
             </a>

@@ -1,3 +1,9 @@
+> **Historical submission material.** Written against an earlier build. The
+> figures in it (17 cases, 10 categories, a hardened agent at 100%) no longer
+> match what the pipeline produces, and the agent ids it names have been
+> renamed. Kept as a record of what was claimed and when; do not read it as a
+> current statement of the product. See `docs/PRODUCT_REALITY_AUDIT.md`.
+
 # RigorRun
 
 **Do the job once. Test every agent forever.**

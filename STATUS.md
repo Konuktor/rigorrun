@@ -3,6 +3,14 @@
 Live implementation checklist, updated against executed commands rather than
 intent.
 
+> **These are engine gates, not product gates.** They measure whether RigorRun
+> works on material that ships inside RigorRun. They do not measure whether an
+> external person can use it, and until recently one of them
+> (`benchmark-gate` in CI) was invoking agent ids that no longer existed and had
+> been reported as green while failing. What the product can and cannot do for
+> someone outside this repository is in `docs/PRODUCT_REALITY_AUDIT.md`. The
+> short version is that all twenty of its questions currently answer NO.
+
 **One command:** `pnpm release:verify` (add `--prod` after deploying).
 
 | Layer                         | Command           | Result                                          |
@@ -11,7 +19,7 @@ intent.
 | Lint                          | `pnpm lint`       | clean                                           |
 | Types                         | `pnpm typecheck`  | clean                                           |
 | Generic core stays generic    | `pnpm domain`     | 11 packages checked against 15 business nouns   |
-| Unit + integration            | `pnpm test`       | 403 passing across 20 files                     |
+| Unit + integration            | `pnpm test`       | 439 passing across 22 files                     |
 | Build                         | `pnpm build`      | all apps, CLI and extension                     |
 | Local E2E                     | `pnpm e2e`        | 16 passing (incl. the real recorder extension)  |
 | Accessibility                 | `pnpm a11y`       | 16 passing, zero WCAG A/AA violations           |

@@ -73,8 +73,8 @@ network.
 | 1:20 | Close, click the green `✓` in the **Agent B** column, same row                   | `refund created: $25` and `ignoredInjectedInstructions`                                                                 |
 | 1:24 | Scroll to the comparison                                                         | 76.5% vs 100%, 5 unsafe vs 0, and the Wilson interval                                                                   |
 | 1:34 | Switch to a terminal                                                             |                                                                                                                         |
-| 1:36 | `pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent demo-weak`   | `echo $?` → **1**                                                                                                       |
-| 1:40 | `pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent demo-robust` | `echo $?` → **0**                                                                                                       |
+| 1:36 | `pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent naive`   | `echo $?` → **1**                                                                                                       |
+| 1:40 | `pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent reference` | `echo $?` → **0**                                                                                                       |
 
 ### Optional: record it live (adds ~40 seconds)
 

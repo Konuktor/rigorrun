@@ -79,12 +79,20 @@ function ensure(environmentId: string): Live | undefined {
   return entry;
 }
 
+/**
+ * Republish the world under a new identity.
+ *
+ * The entry is replaced rather than mutated, and that is load-bearing:
+ * `useSyncExternalStore` compares snapshots with `Object.is`, so a mutated
+ * entry is invisible to React. Mutating here left every action in every
+ * system reporting success over a screen that never changed.
+ */
 function publish(environmentId: string): void {
   const entry = live.get(environmentId);
   if (!entry) return;
-  entry.state = entry.adapter.getState() as CanonicalState;
-  entry.version = (revision += 1);
-  persist(environmentId, entry.state);
+  const state = entry.adapter.getState() as CanonicalState;
+  live.set(environmentId, { ...entry, state, version: (revision += 1) });
+  persist(environmentId, state);
   for (const listener of listeners) listener();
 }
 

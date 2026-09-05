@@ -7,27 +7,40 @@
  * a fake logo or a testimonial.
  */
 import { Button, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
+import proof from '../proof.json';
+
+/**
+ * The counts below are read out of the generated evidence, not typed here.
+ *
+ * They used to be literals, and they drifted: the page claimed 18 events, 17
+ * cases and 10 categories while the pipeline produced 7, 22 and 9 — under a
+ * sentence promising these were what the demo produces. A number a person
+ * maintains by hand next to a claim that it is machine-derived is a number
+ * that will be wrong. `pnpm release:verify` regenerates proof.json from a real
+ * run, so this drifts only if the evidence does.
+ */
+const DEMO = proof.workflows.find((workflow) => workflow.key === 'refund')!;
 
 const PIPELINE = [
   {
     step: 'Record',
     detail: 'A person does the job once, in their real application.',
-    artefact: '18 sanitised events',
+    artefact: `${DEMO.traceSteps} sanitised steps`,
   },
   {
     step: 'Compile',
     detail: 'The trace becomes an executable workflow contract.',
-    artefact: '5 observed · 7 inferred',
+    artefact: `${DEMO.observedFacts} observed \u00b7 ${DEMO.rulesProposed} proposed`,
   },
   {
     step: 'Stress-test',
     detail: 'Normal, edge and adversarial cases are generated.',
-    artefact: '17 cases · 10 categories',
+    artefact: `${DEMO.cases} cases \u00b7 ${DEMO.categories.length} categories`,
   },
   {
     step: 'Verify',
     detail: 'Outcomes are checked against the system that changed.',
-    artefact: '10 checks per case',
+    artefact: `${DEMO.checks} checks across the suite`,
   },
   {
     step: 'Gate',
@@ -210,7 +223,7 @@ ticket            TCK-4016`}
         <h2 className="text-title font-semibold">See it fail, then see it caught</h2>
         <p className="mx-auto mt-3 max-w-2xl text-body text-secondary">
           The demo runs a recorded refund workflow through the whole pipeline and puts two agents
-          against seventeen cases — including a prompt injection hidden inside customer data.
+          against {DEMO.cases} cases — including a prompt injection hidden inside customer data.
         </p>
         <div className="mt-6">
           <Button onClick={onRunDemo} testId="cta-run-demo-footer" size="lg">

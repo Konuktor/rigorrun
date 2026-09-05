@@ -42,6 +42,12 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
+      command: 'pnpm -F @rigorrun/demo-ops dev',
+      url: 'http://127.0.0.1:5175/',
+      reuseExistingServer: true,
+      timeout: 60_000,
+    },
+    {
       command: 'pnpm -F @rigorrun/web dev',
       url: 'http://127.0.0.1:5173/',
       reuseExistingServer: true,

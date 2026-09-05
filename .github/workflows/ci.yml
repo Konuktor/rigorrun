@@ -76,8 +76,14 @@ jobs:
           retention-days: 7
 
   benchmark-gate:
-    # The gate a customer would run in their own pipeline, on the benchmark
-    # committed to this repository.
+    # Proves two things about the committed benchmark, and deliberately not a
+    # third. That the suite is satisfiable at all: the reference implementation,
+    # which is handed the answer, passes. And that the suite discriminates: an
+    # agent that follows the work order without checking anything fails.
+    #
+    # It does NOT prove that a good agent passes. Both shipped demo agents
+    # currently fail this benchmark, and the gate says so rather than pretending
+    # otherwise. See docs/PRODUCT_REALITY_AUDIT.md.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -91,17 +97,17 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
-      - name: Gate the hardened agent (must pass)
-        run: pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent demo-robust --quiet
+      - name: The suite is satisfiable (reference must pass)
+        run: pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent reference --quiet
 
-      - name: Gate the baseline agent (must fail)
+      - name: The suite discriminates (naive agent must fail)
         run: |
           set +e
-          pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent demo-weak --quiet
+          pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent naive --quiet
           code=$?
           set -e
           if [ "$code" -ne 1 ]; then
-            echo "Expected exit code 1 from the baseline agent, got $code"
+            echo "Expected exit code 1 from the naive agent, got $code"
             exit 1
           fi
-          echo "The baseline agent failed the gate, as it should."
+          echo "The naive agent failed the gate, as it should."

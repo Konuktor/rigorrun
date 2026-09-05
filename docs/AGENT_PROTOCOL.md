@@ -5,7 +5,7 @@ cases, from the same seeded state, judged by the same deterministic checks.
 
 | Adapter                     | Use it for                                                             |
 | --------------------------- | ---------------------------------------------------------------------- |
-| `demo-weak` / `demo-robust` | The offline demo pair. No key, no network.                             |
+| `naive` / `careful`       | The offline demo pair. No key, no network. Both currently fail the bundled suite. |
 | HTTP                        | Your agent, wherever it runs, behind an endpoint.                      |
 | OpenAI-compatible           | Groq, Gemini, Ollama, vLLM, OpenRouter, anything speaking that shape.  |
 | In-process                  | An adapter written in TypeScript against the `AgentAdapter` interface. |

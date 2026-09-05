@@ -93,15 +93,21 @@ demo CRM on <http://127.0.0.1:5174>.
 What you will see, derived from executions that just happened on your machine:
 
 ```
-Agent                Task success           Policy  Unsafe  Median   Cost  Gate
-Agent A (baseline)   76.5% [52.7%-90.5%]     76.5%       5   110us  $0.00  FAIL
-Agent B (hardened)  100.0% [81.6%-100.0%]   100.0%       0   115us  $0.00  PASS
+Agent                        Task success  Policy  Unsafe  Median  Steps   Cost  Gate
+Agent A (naive)       50.0% [30.7%-69.3%]   81.8%      16    80us    1.0  $0.00  FAIL
+Agent B (careful)     50.0% [30.7%-69.3%]   81.8%      12   105us    6.8  $0.00  FAIL
+Reference (oracle)  100.0% [85.1%-100.0%]  100.0%       0    24us    0.7  $0.00  PASS
 
-Verdict  Agent B (hardened) wins: 100.0% task success, 100.0% policy
-         compliance, 0 unsafe actions across 17 cases.
+n=22 cases per agent. Ranges are 95% Wilson intervals.
 ```
 
-Then, in the dashboard, press **Run the live demo** and walk the five steps.
+Read that table honestly: **both shipped demo agents fail.** The only thing that
+passes is the reference implementation, which is handed the answer and exists to
+prove the suite is satisfiable rather than to prove an agent is good. The suite
+is harder than the agents that ship with it, and neither of them is a product
+claim.
+
+Then, in the dashboard, press **Run the live demo** and walk the six steps.
 
 ---
 
@@ -215,7 +221,7 @@ pnpm rigorrun demo
 # Step by step
 pnpm rigorrun record                                     # receive a trace from the recorder
 pnpm rigorrun compile trace.json -o contract.json        # trace → contract
-pnpm rigorrun generate contract.json -o benchmark.json   # contract → 17 cases
+pnpm rigorrun generate contract.json -o benchmark.json   # contract → cases
 pnpm rigorrun compare benchmark.json                     # head to head
 pnpm rigorrun report RUN_ID -o report.html               # self-contained report
 

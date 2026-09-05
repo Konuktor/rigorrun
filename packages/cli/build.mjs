@@ -18,7 +18,6 @@ await build({
   outfile: fileURLToPath(new URL('dist/rigorrun.mjs', import.meta.url)),
   alias: {
     '@rigorrun/core': alias('core'),
-    '@rigorrun/northstar': alias('northstar'),
     '@rigorrun/verifier': alias('verifier'),
     '@rigorrun/scoring': alias('scoring'),
     '@rigorrun/agents': alias('agents'),
@@ -27,6 +26,9 @@ await build({
     '@rigorrun/report': alias('report'),
     '@rigorrun/generator': alias('generator'),
     '@rigorrun/compiler': alias('compiler'),
+    '@rigorrun/environment': alias('environment'),
+    '@rigorrun/environments': alias('environments'),
+    '@rigorrun/quality': alias('quality'),
   },
   logLevel: 'warning',
 });
