@@ -87,3 +87,23 @@ The fix, where one exists, is to nominate a different read. If your system has
 no read that returns structure, the honest position is that RigorRun cannot
 verify against it, and it will keep saying so rather than quietly grading your
 agent on its own account of itself.
+
+## A browser is weaker again
+
+RigorRun can drive a web application, and a verdict from one says
+`OBSERVATIONAL`: it watched what your agent did and did not check what changed.
+
+That is not a limitation waiting to be lifted. A page saying "Refund issued" is
+a claim by the same system that would have to be wrong for the refund not to
+exist — the same category of evidence as the agent's own report, which RigorRun
+shows beside the verdict and never scores. Reading it back and calling it
+verification would be making exactly the mistake this product exists to prevent,
+one layer down.
+
+Attach an MCP server or an OpenAPI document for the same system and the
+arrangement becomes the one worth having: the clicking is watched in the page,
+and the verdict comes from records. Verification is then `PARTIAL`, as it would
+be for that connector alone.
+
+RigorRun will not let a browser be its own verifier even if you ask for it. See
+[BROWSER_ENVIRONMENT.md](BROWSER_ENVIRONMENT.md).

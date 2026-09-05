@@ -47,6 +47,15 @@ jobs:
       - name: Their work survives the runner being killed
         run: pnpm e2e:restart
 
+      # The browser lane needs a browser, and Playwright is an optional peer
+      # everywhere else on purpose. Installed here rather than depended on, so
+      # `npx rigorrun` stays a small download for everybody who never uses it.
+      - name: A browser environment, which needs a browser
+        run: |
+          pnpm add -w -D playwright-core
+          pnpm exec playwright install --with-deps chromium
+          pnpm vitest run packages/env-browser packages/daemon/test/browserProject.test.ts
+
       - name: Evidence
         if: always()
         uses: actions/upload-artifact@v4

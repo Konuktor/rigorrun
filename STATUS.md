@@ -41,8 +41,8 @@ public agent SDK. Screenshots of what the person saw are written to
 | Design tokens | `pnpm contrast` | 45/45 pairs meet WCAG contrast |
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
-| Generic core stays generic | `pnpm domain` | 21 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 714 passing across 54 files |
+| Generic core stays generic | `pnpm domain` | 22 directories, 19 business nouns and 2 currency shapes |
+| Unit + integration | `pnpm test` | 726 passing across 56 files |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
@@ -51,7 +51,7 @@ public agent SDK. Screenshots of what the person saw are written to
 ## What the product does now
 
 A person starts a local runner and connects their own system — an MCP server,
-or an HTTP API with an OpenAPI document. They do one job through that system's
+an HTTP API with an OpenAPI document, or a web application through a browser. They do one job through that system's
 own tools while RigorRun watches, correct the handful of things structure could
 not settle, rule on the rules it proposes, and get an executable suite. Before
 trusting it they can have RigorRun break agents on purpose and report how many
@@ -70,12 +70,17 @@ the browser.
 
 ## What it does not do
 
-In full in `docs/ROADMAP.md`. The load-bearing ones: there is no browser
-execution lane, so an agent that only works by clicking cannot be tested;
-nothing is published to npm, so every install command in this repository still
-404s; setting a project up is interface-only; and a verdict from a real system
-is `PARTIAL` rather than `AUTHORITATIVE`, because RigorRun reads back what the
-nominated reads return and no more.
+In full in `docs/ROADMAP.md`. The load-bearing ones: nothing is published to
+npm, so every install command in this repository still 404s; there is no trace
+import, so everybody starts from zero and a production failure cannot become a
+regression case; setting a project up is interface-only; and a verdict from a
+real system is `PARTIAL` rather than `AUTHORITATIVE`, because RigorRun reads
+back what the nominated reads return and no more.
+
+A browser is weaker again. It cannot check its own work — a page saying "done"
+is a claim by the system that would have to be wrong for it not to be done — so
+a verdict from one says `OBSERVATIONAL` unless something readable is attached
+to the same system.
 
 Two limits found by pointing it at systems nobody here wrote, both documented
 rather than worked around. A system whose reads answer in prose cannot be
