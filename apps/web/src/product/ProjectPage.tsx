@@ -52,6 +52,13 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
   const [questions, setQuestions] = useState<SchemaQuestionView[]>([]);
   const [cases, setCases] = useState<CaseView[]>([]);
   const [recording, setRecording] = useState<{ tool: string; ok: boolean }[]>([]);
+  /**
+   * Whether a recording is open, which is not the same as whether anything has
+   * been written into it. A recording whose steps so far are all reads still
+   * holds the before-state — captured by resetting somebody's system — and
+   * offering to start over would throw that away.
+   */
+  const [recordingOpen, setRecordingOpen] = useState(false);
   const [activation, setActivation] = useState<ActivationView | null>(null);
   const [reconnecting, setReconnecting] = useState(false);
 
@@ -71,6 +78,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
       if (result.questions.length > 0) setQuestions(result.questions);
       if (result.benchmark) setCases(result.benchmark.cases);
       setRecording(result.recording.steps);
+      setRecordingOpen(result.recording.inProgress);
       return result.project;
     } catch (error) {
       setProblem((error as Error).message);
@@ -213,6 +221,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
               project={project}
               tools={tools}
               alreadyRecorded={recording}
+              recordingOpen={recordingOpen}
               onFinished={(next, asked) => {
                 setProject(next);
                 setQuestions(asked);

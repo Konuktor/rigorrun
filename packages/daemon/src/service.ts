@@ -320,12 +320,37 @@ export class Service {
   }
 
   /** What has been recorded so far, so a resumed page can show the log. */
+  /**
+   * Whether a recording is open, and what has been done in it.
+   *
+   * These are two different questions and conflating them lost work. Reads are
+   * deliberately not written into the trace — the contract comes from what
+   * *changed*, and a read that changed nothing would become a step the agent is
+   * expected to reproduce. But a recording whose steps so far are all reads is
+   * still a recording: it holds the before-state, which cost a reset of
+   * somebody's system to capture.
+   *
+   * Reporting it as "nothing recorded" meant that after a crash the interface
+   * offered **Start recording**, which resets again and throws that away. So
+   * `inProgress` asks whether a demonstration is open, and `steps` asks what is
+   * in it, and the answer to the first is not derived from the second.
+   */
+  async recordingState(
+    projectId: string,
+  ): Promise<{ inProgress: boolean; steps: { tool: string; ok: boolean }[] }> {
+    const saved = await this.store.readArtefact<{
+      startedAt?: number;
+      entries: { action: string; ok?: boolean }[];
+    }>(projectId, 'demonstration');
+    return {
+      inProgress: saved !== undefined,
+      steps: (saved?.entries ?? []).map((entry) => ({ tool: entry.action, ok: entry.ok !== false })),
+    };
+  }
+
+  /** Just the steps. Kept for callers that only want the log. */
   async recordedSoFar(projectId: string): Promise<{ tool: string; ok: boolean }[]> {
-    const saved = await this.store.readArtefact<{ entries: { action: string; ok?: boolean }[] }>(
-      projectId,
-      'demonstration',
-    );
-    return (saved?.entries ?? []).map((entry) => ({ tool: entry.action, ok: entry.ok !== false }));
+    return (await this.recordingState(projectId)).steps;
   }
 
   async teachStep(

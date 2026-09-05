@@ -477,12 +477,15 @@ export function TeachJob({
   project,
   tools,
   alreadyRecorded,
+  recordingOpen,
   onFinished,
 }: {
   project: ProjectView;
   tools: ToolView[];
   /** Steps from a recording that was in progress when the page was reloaded. */
   alreadyRecorded: { tool: string; ok: boolean }[];
+  /** A demonstration is open on disk, whatever is or is not in it yet. */
+  recordingOpen: boolean;
   onFinished: (project: ProjectView, questions: SchemaQuestionView[]) => void;
 }) {
   const [recording, setRecording] = useState(false);
@@ -495,7 +498,7 @@ export function TeachJob({
   const [problem, setProblem] = useState('');
 
   const tool = tools.find((entry) => entry.name === selected);
-  const canResume = alreadyRecorded.length > 0 && !recording;
+  const canResume = recordingOpen && !recording;
 
   async function start(): Promise<void> {
     setBusy(true);
@@ -592,8 +595,10 @@ export function TeachJob({
               {canResume ? (
                 <div className="rounded-panel border border-info-line bg-info-bg px-3 py-2.5">
                   <p className="text-body text-fg">
-                    You were partway through recording this — {alreadyRecorded.length} step
-                    {alreadyRecorded.length === 1 ? '' : 's'} so far.
+                    You were partway through recording this
+                    {alreadyRecorded.length > 0
+                      ? ` — ${alreadyRecorded.length} step${alreadyRecorded.length === 1 ? '' : 's'} so far.`
+                      : '. Nothing has changed your system yet, and the starting point RigorRun took is still here.'}
                   </p>
                   <p className="mt-1 text-meta text-muted">
                     Carrying on keeps what you already did. Starting again resets your system and

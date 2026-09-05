@@ -158,7 +158,7 @@ export class Runner {
         service.artefact<Benchmark>(project.id, 'benchmark'),
         service.discovery(project.id),
         service.artefact<{ questions: unknown[] }>(project.id, 'induced'),
-        service.recordedSoFar(project.id),
+        service.recordingState(project.id),
         service.activation.summary(project.id),
       ]);
       return context.json({
@@ -182,7 +182,7 @@ export class Runner {
           discovery: discovery ?? null,
         },
         questions: induced?.questions ?? [],
-        recording: { inProgress: recorded.length > 0, steps: recorded },
+        recording: recorded,
         activation,
       });
     });

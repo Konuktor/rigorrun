@@ -292,3 +292,37 @@ describe('a completed project', () => {
     await service.workspace.close();
   }, 60_000);
 });
+
+describe('a recording that has only read so far is still a recording', () => {
+  /**
+   * The bug this exists for. Reads are deliberately kept out of the trace — the
+   * contract comes from what changed — so a recording in which somebody has
+   * only looked around had an empty `entries` array, and "no entries" was read
+   * as "no recording". After a restart the interface then offered to *start*
+   * one, which resets the system again and throws away the before-state the
+   * first reset paid for.
+   */
+  it('reports itself as in progress before anything has been written', async () => {
+    const service = serviceOver(home);
+    const project = await service.createProject({ name: 'Only looked', goal: 'A job.' });
+    await service.connectEnvironment(project.id, DESK, 'ephemeral');
+    await service.configureEnvironment(project.id, {
+      readOnlyTools: ['find_bookings'],
+      verifierReads: [{ tool: 'find_bookings' }],
+      reset: { kind: 'tool', tool: 'reset_desk' },
+    });
+    await service.startTeaching(project.id);
+    await service.teachStep(project.id, 'find_bookings', {});
+    await service.workspace.close();
+
+    // A restarted runner, reading only what is on disk.
+    const restarted = serviceOver(home);
+    const state = await restarted.recordingState(project.id);
+    // Nothing in the trace, because a read is not work an agent must reproduce.
+    expect(state.steps).toEqual([]);
+    // And yet: a recording is open, and the starting point is still here.
+    expect(state.inProgress).toBe(true);
+    expect(await restarted.resumeTeaching(project.id)).toBe(true);
+    await restarted.workspace.close();
+  }, 120_000);
+});
