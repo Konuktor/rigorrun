@@ -96,6 +96,17 @@ export class McpConnection {
     private readonly client: Client,
     readonly discovery: DiscoveryResult,
     readonly config: McpConfig,
+    /**
+     * The child this connection spawned, for a stdio connector.
+     *
+     * Exposed because a process is not only this connection's business. The
+     * runner writes it down so that if the runner is killed outright — no
+     * shutdown, no chance to close anything — the next one can find the server
+     * left behind and end it. An orphaned stdio server keeps running with the
+     * credentials it was handed, which is exactly the thing tidy shutdown
+     * exists to prevent and exactly the thing SIGKILL skips.
+     */
+    readonly childPid: number | null,
   ) {}
 
   static async open(config: McpConfig, options: ConnectOptions = {}): Promise<McpConnection> {
@@ -137,6 +148,7 @@ export class McpConnection {
         latencyMs,
       },
       config,
+      (transport as { pid?: number | null }).pid ?? null,
     );
   }
 

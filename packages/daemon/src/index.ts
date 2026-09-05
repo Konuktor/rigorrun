@@ -6,6 +6,7 @@ export * from './project.ts';
 export * from './secrets.ts';
 export * from './store.ts';
 export * from './exec.ts';
+export * from './orphans.ts';
 export * from './compare.ts';
 export * from './workspace.ts';
 export * from './httpAgent.ts';

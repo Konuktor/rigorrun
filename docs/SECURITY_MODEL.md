@@ -110,6 +110,24 @@ path passes it on stdin and does not have this problem. And RigorRun stores no
 key of its own — everything above rests on the OS protecting your login
 session.
 
+### A server left running by a crash
+
+RigorRun closes the servers it started when it is stopped. It cannot when it is
+*killed* — `kill -9`, an out-of-memory kill, a machine losing power — and a
+stdio MCP server does not exit when its parent does. Measured rather than
+assumed: four child processes before `kill -9`, four after.
+
+An orphaned server is one holding the credentials you gave it, with nothing
+watching it. So the runner writes down what it started, and the next runner ends
+anything a dead runner left behind, saying so as it does.
+
+It checks before it signals. A pid is reused, so the server's own arguments are
+written down beside the number and compared against what is running under it
+now; a pid that has been recycled is left alone, and so is one whose identity
+cannot be established. A lingering server is a smaller problem than a wrong
+`kill`, and a process belonging to another user counts as alive rather than
+absent — `EPERM` is not `ESRCH`.
+
 ## What is not defended
 
 Stated because a threat model that lists only wins is not one.

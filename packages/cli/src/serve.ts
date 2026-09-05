@@ -17,7 +17,9 @@ import {
   Runner,
   Service,
   WorkspaceTooNewError,
+  claimRunner,
   openWorkspace,
+  reapOrphans,
   runCommand,
   storeRoot,
 } from '@rigorrun/daemon';
@@ -85,6 +87,13 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
     throw error;
   }
 
+  // Before anything opens a connection: end servers a previous runner left
+  // running. `serve.ts` closes its children on SIGINT and SIGTERM, and SIGKILL
+  // skips all of that — measured, not assumed, and an orphaned stdio server
+  // keeps running with the credentials it was handed.
+  const reaped = await reapOrphans(home).catch(() => []);
+  await claimRunner(home).catch(() => undefined);
+
   const store = new ProjectStore(home);
   const activation = new ActivationLog(home);
   const proxy = new ProxyServer();
@@ -113,6 +122,16 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
   line(c.grey(`  Projects and credentials live in ${home}, and stay there.`));
   for (const applied of opened.applied) {
     line(c.grey(`  Upgraded your workspace: ${applied}`));
+  }
+  if (reaped.length > 0) {
+    // Said rather than done quietly. Somebody whose machine crashed should know
+    // that a server of theirs was still running, and that it is not any more.
+    line(
+      c.grey(
+        `  Ended ${reaped.length} server(s) a previous run left behind: ` +
+          `${reaped.map((entry) => entry.fingerprint.split(' ')[0]).join(', ')}`,
+      ),
+    );
   }
   if (!uiDir) {
     line(c.grey('  The interface is not built. Run `pnpm build:web`; the API works regardless.'));

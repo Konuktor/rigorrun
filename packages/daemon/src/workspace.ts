@@ -25,7 +25,9 @@ import {
 import { McpEnvironment, stateFromPayloads, type McpEnvironmentConfig } from '@rigorrun/env-mcp';
 import type { ActionLogEntry } from '@rigorrun/core';
 import type { CanonicalState, EnvironmentSchema } from '@rigorrun/environment';
+import { basename } from 'node:path';
 import type { Project } from './project.ts';
+import { forgetChild, noteChild } from './orphans.ts';
 import type { ProjectStore } from './store.ts';
 
 /**
@@ -112,6 +114,20 @@ export class Workspace {
     assertConnectorTrusted(project);
     const connection = await McpConnection.open(await this.configFor(project));
     this.live.set(project.id, { connection, induced: undefined, demonstration: undefined });
+    // Written down so that if this runner is killed outright, the next one can
+    // find the server it left running and end it. See `orphans.ts`.
+    if (connection.childPid !== null && project.connector) {
+      // The *arguments*, not the whole command line. A launcher resolves:
+      // `node_modules/.bin/tsx` shows up in /proc as
+      // `node .../tsx/dist/cli.mjs`, so matching on the executable never
+      // matches. The arguments survive verbatim, and they are the part that
+      // says which server this is.
+      await noteChild(
+        this.store.path,
+        connection.childPid,
+        project.connector.args.join(' ').trim() || basename(project.connector.command),
+      ).catch(() => undefined);
+    }
     return connection;
   }
 
@@ -123,7 +139,12 @@ export class Workspace {
     const live = this.live.get(projectId);
     if (!live) return;
     this.live.delete(projectId);
+    const pid = live.connection.childPid;
     await live.connection.close();
+    // Closed properly, so it is no longer something for a later runner to
+    // worry about. Leaving stale entries here would mean a future startup
+    // checking pids that have long since been recycled.
+    if (pid !== null) await forgetChild(this.store.path, pid).catch(() => undefined);
   }
 
   async close(): Promise<void> {
