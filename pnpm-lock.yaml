@@ -325,6 +325,27 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/proxy:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^2.1.1
+        version: 2.1.1(hono@4.13.7)
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      '@rigorrun/agents':
+        specifier: workspace:*
+        version: link:../agents
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      hono:
+        specifier: ^4.13.7
+        version: 4.13.7
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
+
   packages/quality:
     dependencies:
       '@rigorrun/agents':
@@ -1759,6 +1780,10 @@ packages:
     resolution: {integrity: sha512-O6+/eCYRkzzzy0rPWwKLiGBR1nFuUPZynnwjxN1MBA62NNqbT0wQEzQyK2gSO5yDIDB336sXQleAhOHrzlYyKw==}
     engines: {node: '>=16.9.0'}
 
+  hono@4.13.7:
+    resolution: {integrity: sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ==}
+    engines: {node: '>=16.9.0'}
+
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
@@ -2731,6 +2756,10 @@ snapshots:
     dependencies:
       hono: 4.13.5
 
+  '@hono/node-server@2.1.1(hono@4.13.7)':
+    dependencies:
+      hono: 4.13.7
+
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -3648,6 +3677,8 @@ snapshots:
       function-bind: 1.1.2
 
   hono@4.13.5: {}
+
+  hono@4.13.7: {}
 
   http-errors@2.0.1:
     dependencies:
