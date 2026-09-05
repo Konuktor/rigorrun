@@ -117,7 +117,7 @@ describe('what the docs do not claim', () => {
     // list shrinks — OPENAPI_ENVIRONMENT.md left this list the day the
     // connector landed, which is the only way an entry should ever leave it.
     const names = await readdir(docsDir);
-    for (const forbidden of ['BROWSER_ENVIRONMENT.md', 'PYTHON_AGENT_SDK.md']) {
+    for (const forbidden of ['PYTHON_AGENT_SDK.md']) {
       expect(names, `${forbidden} exists; does the feature?`).not.toContain(forbidden);
     }
   });
@@ -130,6 +130,7 @@ describe('what the docs do not claim', () => {
     expect(names).toContain('OPENAPI_ENVIRONMENT.md');
     expect(names).toContain('HTTP_AGENT.md');
     expect(names).toContain('CLI_AGENT.md');
+    expect(names).toContain('BROWSER_ENVIRONMENT.md');
   });
 
   it('says plainly that this is an alpha, and what that means', async () => {

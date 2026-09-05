@@ -40,6 +40,7 @@ const GENERIC = [
   'packages/mcp/src',
   'packages/env-mcp/src',
   'packages/env-openapi/src',
+  'packages/env-browser/src',
   'packages/proxy/src',
   'packages/daemon/src',
   'packages/agent-sdk/src',

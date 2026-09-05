@@ -75,6 +75,23 @@ export interface SystemConnection {
   call(name: string, args: Record<string, unknown>): Promise<CallResult>;
   close(): Promise<void>;
   /**
+   * Whether reading this system back is possible at all.
+   *
+   * `undefined` means yes, which is right for every connector that answers with
+   * records. A browser says `false` unless it has been given a verifier,
+   * because a page saying "Refund issued" is a claim by the same system that
+   * would have to be wrong for the refund not to exist. Reading it back and
+   * calling that verification is the exact mistake this product exists to stop
+   * people making about an agent's own report, and it does not become
+   * acceptable because the claim is rendered in a div.
+   *
+   * Everything downstream already degrades correctly on `stateRead: 'none'` —
+   * the verdict says OBSERVATIONAL and the limits say why. This is the flag
+   * that makes it say so.
+   */
+  readonly canReadState?: boolean;
+
+  /**
    * Ends setup, if this connector distinguishes it.
    *
    * There are two kinds of call RigorRun makes to somebody's system, and the

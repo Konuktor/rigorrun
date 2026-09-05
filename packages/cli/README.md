@@ -63,8 +63,9 @@ npx rigorrun feedback export              # a sanitised bundle for a bug report
 
 ## This is an alpha
 
-It connects to MCP servers and to HTTP APIs with an OpenAPI document. It cannot
-drive a browser, so an agent that only works by clicking cannot be tested yet.
+It connects to MCP servers, to HTTP APIs with an OpenAPI document, and to web
+applications through a browser — though a browser cannot verify itself, so a
+verdict from one is OBSERVATIONAL unless something readable is attached.
 Setting a project up needs the interface; running and gating it does not. It has
 been used successfully by the people who wrote it and is now looking for people
 who did not.

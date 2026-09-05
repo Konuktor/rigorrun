@@ -33,7 +33,22 @@ const webDist = join(root, 'apps', 'web', 'dist');
  * a module-not-found on somebody else's machine, which is the worst place to
  * find one. `packages/cli/test/package.test.ts` fails the build if they drift.
  */
-const EXTERNAL = ['@modelcontextprotocol/sdk', 'hono', '@hono/node-server', 'zod'];
+const EXTERNAL = [
+  '@modelcontextprotocol/sdk',
+  'hono',
+  '@hono/node-server',
+  'zod',
+  // Optional, and not in `dependencies` on purpose. `playwright-core` is about
+  // 300MB of browser binaries once its browsers are installed, and most
+  // projects never need one — a tool people try with `npx` in ten minutes
+  // cannot open with that download. External so esbuild leaves the dynamic
+  // import alone; absent from `dependencies` so nobody pays for it who is not
+  // using the browser lane. Missing, it produces a sentence rather than a
+  // module-not-found. `yaml` is the same arrangement for OpenAPI documents
+  // that are not JSON.
+  'playwright-core',
+  'yaml',
+];
 
 await rm(join(here, 'dist'), { recursive: true, force: true });
 await mkdir(join(here, 'dist'), { recursive: true });

@@ -52,6 +52,28 @@ export const OpenApiConnectorSchema = z.object({
   secretNames,
 });
 
+export const BrowserConnectorSchema = z.object({
+  kind: z.literal('browser'),
+  /** Where the job starts. Every navigation is checked against its origin. */
+  startUrl: z.string(),
+  browser: z.enum(['chromium', 'firefox', 'webkit']).default('chromium'),
+  headless: z.boolean().default(true),
+  /**
+   * Something that can be read for records, or nothing.
+   *
+   * Deliberately not a browser: a page saying "Refund issued" is a claim by the
+   * same system that would have to be wrong for the refund not to exist, so a
+   * page cannot verify itself. Without one of these, every verdict from this
+   * project says OBSERVATIONAL — RigorRun watched what the agent did and did
+   * not check what changed.
+   */
+  verifier: z
+    .discriminatedUnion('kind', [McpConnectorSchema, OpenApiConnectorSchema])
+    .nullable()
+    .default(null),
+  secretNames,
+});
+
 /**
  * How this project reaches the system under test.
  *
@@ -65,6 +87,7 @@ export const OpenApiConnectorSchema = z.object({
 export const ConnectorSchema = z.discriminatedUnion('kind', [
   McpConnectorSchema,
   OpenApiConnectorSchema,
+  BrowserConnectorSchema,
 ]);
 export type Connector = z.infer<typeof ConnectorSchema>;
 export type McpConnector = z.infer<typeof McpConnectorSchema>;
@@ -73,7 +96,9 @@ export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
 /** One line naming what a project connects to, for a list or a diagnostic. */
 export function describeConnector(connector: Connector | null): string {
   if (!connector) return 'not connected';
-  return connector.kind === 'mcp' ? `MCP · ${connector.transport}` : 'OpenAPI';
+  if (connector.kind === 'mcp') return `MCP · ${connector.transport}`;
+  if (connector.kind === 'openapi') return 'OpenAPI';
+  return connector.verifier ? 'Browser · verified' : 'Browser · observed only';
 }
 
 /**
@@ -85,6 +110,9 @@ export function describeConnector(connector: Connector | null): string {
  * nobody can act on.
  */
 export function describeConnectorAction(connector: Connector): string {
+  if (connector.kind === 'browser') {
+    return `open a browser at ${connector.startUrl}`;
+  }
   if (connector.kind === 'openapi') {
     return `send requests to ${connector.baseUrl || 'an address in the document'}`;
   }

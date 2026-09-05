@@ -31,10 +31,11 @@ import {
   type SystemEnvironmentConfig,
 } from '@rigorrun/connector';
 import { OpenApiConnection } from '@rigorrun/env-openapi';
+import { BrowserConnection } from '@rigorrun/env-browser';
 import type { ActionLogEntry } from '@rigorrun/core';
 import type { CanonicalState, EnvironmentSchema } from '@rigorrun/environment';
-import { basename } from 'node:path';
-import { describeConnectorAction, type Project } from './project.ts';
+import { basename, join } from 'node:path';
+import { describeConnectorAction, type Connector, type Project } from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
 import type { ProjectStore } from './store.ts';
 
@@ -139,8 +140,31 @@ export class Workspace {
     const connector = project.connector;
     if (!connector) throw new Error(`${project.name} has no system connected yet.`);
 
-    if (connector.kind === 'openapi') {
+    if (connector.kind === 'browser') {
       const secrets = await this.secretsFor(project);
+      // A verifier is opened first and handed over, so the browser owns closing
+      // it — one connection to close, whatever is behind it.
+      const verifier =
+        connector.verifier === null
+          ? undefined
+          : await this.openConnector(connector.verifier, secrets);
+      return BrowserConnection.open({
+        startUrl: connector.startUrl,
+        browser: connector.browser,
+        headless: connector.headless,
+        ...(verifier ? { verifier } : {}),
+        evidenceDir: join(this.store.path, 'projects', project.id, 'evidence'),
+      });
+    }
+    return this.openConnector(connector, await this.secretsFor(project));
+  }
+
+  /** One connector, already narrowed, with its credentials already fetched. */
+  private async openConnector(
+    connector: Exclude<Connector, { kind: 'browser' }>,
+    secrets: Record<string, string>,
+  ): Promise<SystemConnection> {
+    if (connector.kind === 'openapi') {
       return OpenApiConnection.open({
         spec: connector.spec,
         baseUrl: connector.baseUrl,
@@ -153,7 +177,16 @@ export class Workspace {
         ),
       });
     }
-    return McpConnection.open(await this.configFor(project));
+    const config: McpConfig =
+      connector.transport === 'stdio'
+        ? { transport: 'stdio', command: connector.command, args: connector.args, env: secrets }
+        : {
+            transport: 'http',
+            url: connector.url,
+            ...(Object.keys(secrets).length > 0 ? { headers: secrets } : {}),
+          };
+    if (config.transport === 'stdio') assertSafeCommand(config);
+    return McpConnection.open(config);
   }
 
   async connect(project: Project): Promise<SystemConnection> {

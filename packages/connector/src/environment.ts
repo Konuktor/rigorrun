@@ -70,7 +70,13 @@ export class SystemEnvironment implements EnvironmentAdapter {
     return {
       // The schema was worked out from what came back, not declared.
       discovery: 'tools-only',
-      stateRead: this.config.verifierReads.length > 0 ? 'designated-reads' : 'none',
+      // Two ways to end up with nothing to read: nobody nominated a read, or
+      // this connector cannot answer one — a browser, unless it has been given
+      // a verifier. Either way the verdict says OBSERVATIONAL and says why.
+      stateRead:
+        this.config.verifierReads.length > 0 && this.connection.canReadState !== false
+          ? 'designated-reads'
+          : 'none',
       // A real system does not let you install a world.
       seed: 'none',
       reset: this.config.reset.kind === 'tool' ? 'tool' : 'none',

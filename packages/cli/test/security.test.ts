@@ -23,6 +23,7 @@ describe('an imported benchmark cannot cause command execution', () => {
     'packages/core/src',
     'packages/connector/src',
     'packages/env-openapi/src',
+    'packages/env-browser/src',
     'packages/environment/src',
     'packages/environments/src',
     'packages/verifier/src',

@@ -16,6 +16,7 @@
     "@rigorrun/compiler": "workspace:*",
     "@rigorrun/connector": "workspace:*",
     "@rigorrun/core": "workspace:*",
+    "@rigorrun/env-browser": "workspace:*",
     "@rigorrun/env-mcp": "workspace:*",
     "@rigorrun/env-openapi": "workspace:*",
     "@rigorrun/environment": "workspace:*",

@@ -41,8 +41,8 @@ public agent SDK. Screenshots of what the person saw are written to
 | Design tokens | `pnpm contrast` | 45/45 pairs meet WCAG contrast |
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
-| Generic core stays generic | `pnpm domain` | 19 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 670 passing across 47 files |
+| Generic core stays generic | `pnpm domain` | 21 directories, 19 business nouns and 2 currency shapes |
+| Unit + integration | `pnpm test` | 714 passing across 54 files |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
@@ -50,22 +50,40 @@ public agent SDK. Screenshots of what the person saw are written to
 
 ## What the product does now
 
-A person starts a local runner, connects their own MCP server, does one job
-through that system's own tools while RigorRun watches, corrects the handful of
-things structure could not settle, rules on the rules it proposes, and gets an
-executable suite. They point their own agent at it — any agent that speaks MCP
-works unchanged — and get a pass or fail read back from their own system, with
-how it was reached beside it and every gap it could not cover named.
+A person starts a local runner and connects their own system — an MCP server,
+or an HTTP API with an OpenAPI document. They do one job through that system's
+own tools while RigorRun watches, correct the handful of things structure could
+not settle, rule on the rules it proposes, and get an executable suite. Before
+trusting it they can have RigorRun break agents on purpose and report how many
+the suite caught.
 
-Then they change the agent, run again, and are told which case regressed.
+They point their own agent at it — any agent that speaks MCP works unchanged,
+whether it listens on an address or is a command RigorRun runs — and get **safe
+to ship: yes, conditional or no**, read back from their own system. Every case
+can be asked what happened: which check failed and which tier of evidence
+decided it, what the agent called, what the system said afterwards, and
+separately, never scored, what the agent said it did.
+
+Then they change the agent, run again, and are told which case regressed. And
+gate a build on it from the command line, against the project they set up in
+the browser.
 
 ## What it does not do
 
-In full in `docs/ROADMAP.md`. The load-bearing ones: MCP is the only connector,
-there is no browser execution lane, nothing is published to npm, setting a
-project up is interface-only, and a verdict from a real system is `PARTIAL`
-rather than `AUTHORITATIVE` because RigorRun reads back what the nominated
-reads return and no more.
+In full in `docs/ROADMAP.md`. The load-bearing ones: there is no browser
+execution lane, so an agent that only works by clicking cannot be tested;
+nothing is published to npm, so every install command in this repository still
+404s; setting a project up is interface-only; and a verdict from a real system
+is `PARTIAL` rather than `AUTHORITATIVE`, because RigorRun reads back what the
+nominated reads return and no more.
+
+Two limits found by pointing it at systems nobody here wrote, both documented
+rather than worked around. A system whose reads answer in prose cannot be
+verified — RigorRun reads structure and never prose, and says so when the reads
+are nominated rather than after somebody has demonstrated a job. And a
+contradiction between what a system claims about a tool and what it does can
+only be seen through a nominated read: a change nothing reads is a change
+nobody can observe.
 
 `docs/PRODUCT_REALITY_AUDIT.md` answers twenty questions about what an external
 person can do, before and after this work.

@@ -54,9 +54,12 @@ the same code — `docs/OPENAPI_ENVIRONMENT.md`. What it does not have yet: an
 OAuth flow (a static header is the only authentication), remote `$ref`
 resolution, and a reset that is an API operation rather than an MCP tool.
 
-**No browser execution lane.** An agent that only works by clicking cannot be
-tested. This remains the largest single gap for anybody whose system has no
-API.
+~~**No browser execution lane.**~~ Built — `docs/BROWSER_ENVIRONMENT.md`. An
+agent that works by clicking can be watched doing it, and a browser cannot
+verify itself: without something readable attached, every verdict from one says
+`OBSERVATIONAL`, and the type will not let a browser be its own verifier. What
+is missing: a recorder for somebody's own browser, file upload, and stored
+logins.
 
 ~~**No CLI agent adapter.**~~ Built. An agent that is a command reads one line
 of JSON and writes one back — `docs/CLI_AGENT.md`. It gets the same per-case
@@ -139,9 +142,9 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 1. **Publish to npm.** `pnpm dlx rigorrun` is the single largest piece of
    friction between this and a stranger using it, and it is not a technical
    problem.
-2. **The browser execution lane.** Now the largest gap: an agent that only
-   works by clicking cannot be tested at all, and it is the hardest
-   verification story, because DOM text is not authoritative state.
+2. **Trace import.** Everybody still starts from zero, and a real production
+   failure ought to become a permanent regression case rather than a bug
+   report.
 3. **A headless setup path.** Running and gating a project works from CI;
    creating one does not. A `rigorrun project import` taking a description file
    would make a project reproducible from a repository.

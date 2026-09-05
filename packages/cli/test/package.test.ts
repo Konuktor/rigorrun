@@ -109,6 +109,25 @@ describe('what gets published', () => {
     expect(declared).toEqual(['@hono/node-server', '@modelcontextprotocol/sdk', 'hono', 'zod']);
   });
 
+  it('does not make anybody install a browser to try it', async () => {
+    // The other direction of the same rule. `playwright-core` and `yaml` are
+    // left external so their dynamic imports survive the bundle, and are
+    // deliberately *not* dependencies: one is 300MB of browser binaries once
+    // its browsers are installed, and the other is only needed by people who
+    // hand RigorRun a YAML document. Both produce a sentence when absent.
+    //
+    // This is the assertion that catches somebody "fixing" a module-not-found
+    // by adding it to `dependencies`, which would quietly make every `npx
+    // rigorrun` a large download.
+    const pkg = await manifest();
+    for (const optional of ['playwright-core', 'yaml']) {
+      expect(Object.keys(pkg.dependencies)).not.toContain(optional);
+    }
+    const build = await readFile(`${here}build.mjs`, 'utf8');
+    expect(build).toContain("'playwright-core'");
+    expect(build).toContain("'yaml'");
+  });
+
   it('names the Node it needs, in both places that matter', async () => {
     const pkg = await manifest();
     expect(pkg.engines.node).toBe('>=20.11');
@@ -163,6 +182,10 @@ describe('the README a stranger reads on npm', () => {
     // connector lands, which is the point of it: the README is the last place
     // anybody reads before installing, and a stale limitation there is a
     // person deciding not to bother for a reason that stopped being true.
-    expect(readme).toMatch(/cannot drive a browser/i);
+    // The specific limit, named. This assertion moves every time one is
+    // removed, which is the point of it: the README is the last thing anybody
+    // reads before installing, and a stale limitation there is somebody
+    // deciding not to bother for a reason that stopped being true.
+    expect(readme).toMatch(/a browser cannot verify itself/i);
   });
 });
