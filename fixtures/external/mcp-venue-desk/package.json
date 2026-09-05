@@ -1,0 +1,19 @@
+{
+  "name": "venue-desk-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A small MCP server standing in for a customer's own system. Imports nothing from RigorRun.",
+  "bin": { "venue-desk-mcp": "./src/stdio.ts" },
+  "scripts": {
+    "start": "tsx src/stdio.ts",
+    "start:http": "tsx src/http.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.1"
+  }
+}

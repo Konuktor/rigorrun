@@ -36,6 +36,7 @@ const GENERIC = [
   'packages/agents/src',
   'packages/providers/src',
   'packages/quality/src',
+  'packages/mcp/src',
   // The schema-driven renderer is held to the same standard as the compiler.
   // Four products that look nothing alike, and one implementation with no idea
   // which of them it is drawing.
@@ -64,6 +65,13 @@ const DOMAIN_TERMS = [
   'employee',
   'access grant',
   'accessgrant',
+  // The dogfood fixture's business. It exists precisely so that a domain no
+  // product code has ever seen can be connected from outside; if one of its
+  // nouns turns up in generic code, that stopped being true.
+  'venue',
+  'booking',
+  'organiser',
+  'deposit',
 ];
 
 const pattern = new RegExp(`\\b(${DOMAIN_TERMS.join('|')})s?\\b`, 'gi');

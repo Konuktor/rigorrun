@@ -1,6 +1,11 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+  # Stand-ins for a customer's own system and a customer's own agent.
+  # In the workspace so a clean clone can run the dogfood tests, and
+  # held to one rule by packages/mcp/test/external.test.ts: nothing in
+  # here may import anything from RigorRun.
+  - 'fixtures/external/*'
 
 # Install must stay script-free and non-interactive so `pnpm install` works
 # identically on a clean clone and in CI. esbuild's postinstall only re-verifies
