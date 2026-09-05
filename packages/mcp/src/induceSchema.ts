@@ -661,3 +661,110 @@ function reclassifyReferences(
 function article(word: string): string {
   return /^[aeiou]/i.test(word) ? 'an' : 'a';
 }
+
+// ------------------------------------------------------------------- answers
+
+/** One person's answer to one question. */
+export interface SchemaAnswer {
+  questionId: string;
+  /** The chosen value. For `untrusted`, "yes" or "no". */
+  value: string;
+}
+
+export interface AppliedSchema {
+  schema: EnvironmentSchema;
+  /** Questions still unanswered, in the order they were asked. */
+  outstanding: SchemaQuestion[];
+}
+
+/**
+ * Folds a person's answers back into the draft.
+ *
+ * Everything left unanswered stays as RigorRun guessed it, and stays *listed*.
+ * That is the same discipline the contract already follows — a rule nobody
+ * confirmed cannot fail an agent — applied one level down, to the schema those
+ * rules are written against. A confidently wrong `role` corrupts thresholds,
+ * boundary mutation and the projection at once, and does it silently, so the
+ * unanswered ones need to keep being visible rather than ageing into facts.
+ */
+export function applySchemaAnswers(
+  induced: InducedSchema,
+  answers: readonly SchemaAnswer[],
+): AppliedSchema {
+  const byId = new Map(answers.map((answer) => [answer.questionId, answer.value]));
+  const schema: EnvironmentSchema = structuredClone(induced.schema);
+
+  for (const question of induced.questions) {
+    const value = byId.get(question.id);
+    if (value === undefined) continue;
+
+    const entity = schema.entities.find((candidate) => candidate.name === question.entity);
+    if (!entity) continue;
+    const field = question.field
+      ? entity.fields.find((candidate) => candidate.name === question.field)
+      : undefined;
+
+    switch (question.kind) {
+      case 'entity_name': {
+        renameEntity(schema, entity.name, value);
+        break;
+      }
+      case 'id_field': {
+        if (entity.fields.some((candidate) => candidate.name === value)) entity.idField = value;
+        break;
+      }
+      case 'field_role': {
+        if (!field) break;
+        field.role = value as FieldRole;
+        // A role change can invalidate what the type implied. A quantity needs
+        // a unit and a precision to be mutable at a boundary at all, and a
+        // field promoted to one without them would silently generate cases that
+        // sit next to the boundary rather than on it.
+        if (field.role === 'quantity' || field.role === 'timestamp') {
+          field.unit ??= 'count';
+          field.precision ??= 1;
+        } else {
+          delete field.unit;
+          delete field.precision;
+        }
+        break;
+      }
+      case 'unit': {
+        if (!field) break;
+        field.unit = value as Unit;
+        break;
+      }
+      case 'untrusted': {
+        if (!field) break;
+        if (value === 'yes') field.untrusted = true;
+        else delete field.untrusted;
+        break;
+      }
+      case 'relationship': {
+        const relationship = schema.relationships.find(
+          (candidate) =>
+            candidate.from === question.entity &&
+            candidate.via.kind === 'fk' &&
+            candidate.via.field === question.field,
+        );
+        if (relationship) relationship.required = value === 'required';
+        break;
+      }
+    }
+  }
+
+  const outstanding = induced.questions.filter((question) => !byId.has(question.id));
+  return { schema, outstanding };
+}
+
+/** Renames an entity and everything that points at it. */
+function renameEntity(schema: EnvironmentSchema, from: string, to: string): void {
+  if (from === to || to.trim().length === 0) return;
+  for (const entity of schema.entities) {
+    if (entity.name === from) entity.name = to;
+  }
+  for (const relationship of schema.relationships) {
+    if (relationship.from === from) relationship.from = to;
+    if (relationship.to === from) relationship.to = to;
+  }
+}

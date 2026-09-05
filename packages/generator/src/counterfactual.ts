@@ -28,6 +28,7 @@ import {
   type EnvironmentFixture,
   type ProjectionKeySchema,
   capabilityLimits,
+  deepEqual,
 } from '@rigorrun/environment';
 import { generateMutations, type Mutation } from './mutations.ts';
 import { findUntestableRules, markUntestable, type UntestableRule } from './enforcement.ts';
@@ -85,8 +86,21 @@ export async function generateBenchmark(
   const conflicts: { caseId: string; detail: string }[] = [];
   const problems: SynthesisProblem[] = [];
 
+  // Where a world cannot be installed, a case that needs a different world
+  // cannot be built. Rather than generate it and watch it run against whatever
+  // happened to be there, it is dropped and named.
+  const canSeed = adapter.capabilities().seed !== 'none';
+  const uninstallable = new Map<string, string>();
+
   for (const fixture of fixtures) {
     for (const mutation of generateMutations(adapter, contract, fixture, rules)) {
+      if (!canSeed && changesTheWorld(mutation, fixture)) {
+        uninstallable.set(
+          mutation.primitive,
+          `"${mutation.label}" needs the system to start in a state RigorRun cannot put it in.`,
+        );
+        continue;
+      }
       const caseId = `case_${fixture.id}__${mutation.id}`;
       const expected = await computeExpected(adapter, contract, {
         state: mutation.state,
@@ -115,7 +129,13 @@ export async function generateBenchmark(
   }
 
   if (generated.length === 0) {
-    throw new Error('No cases were generated. The contract has no confirmed rules to mutate.');
+    throw new Error(
+      canSeed
+        ? 'No cases were generated. The contract has no confirmed rules to mutate.'
+        : 'No cases could be built. This environment cannot be seeded, so every case would ' +
+          'have needed a starting state RigorRun cannot install. Configure a reset that ' +
+          'produces a world these rules can be exercised against.',
+    );
   }
 
   const contractHash = await hashValue(contract);
@@ -128,6 +148,7 @@ export async function generateBenchmark(
   // difference decides whether this benchmark covers the job.
   const notTestable: { rule: string; reason: string }[] = [
     ...untestable.map((entry) => ({ rule: entry.statement, reason: entry.reason })),
+    ...[...uninstallable].map(([primitive, reason]) => ({ rule: primitive, reason })),
     ...capabilityGaps(adapter),
   ];
 
@@ -385,4 +406,16 @@ function capabilityGaps(adapter: EnvironmentAdapter): { rule: string; reason: st
       rule: limit.id,
       reason: limit.remedy ? `${limit.limit} ${limit.remedy}` : limit.limit,
     }));
+}
+
+/**
+ * Whether a mutation needs the world to be different, or only the request.
+ *
+ * The distinction decides what survives against a system RigorRun cannot seed.
+ * "Ask for one penny more than the limit" changes what is asked and works
+ * anywhere. "Remove the approval that already exists" changes the world, and
+ * against a live system there is no honest way to arrange it.
+ */
+function changesTheWorld(mutation: Mutation, fixture: EnvironmentFixture): boolean {
+  return !deepEqual(mutation.state, fixture.state);
 }

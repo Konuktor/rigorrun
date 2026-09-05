@@ -165,7 +165,15 @@ async function executeCase(
   const capabilities = adapter.capabilities();
   const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
   await adapter.reset();
-  await adapter.seed(seedState, testCase.seed.config);
+  // An environment that cannot be seeded is not asked to pretend. Its world
+  // comes from the reset, which is a weaker guarantee than an installed state
+  // and a sufficient one: the same starting position every time still isolates
+  // cases and still reproduces. Calling `seed()` anyway would be harmless here
+  // and dishonest in the artefact, because the case would claim a world it
+  // never had.
+  if (capabilities.seed !== 'none') {
+    await adapter.seed(seedState, testCase.seed.config);
+  }
 
   // On a system somebody marked production, a write is refused at the channel
   // rather than filtered out of the case list. The agent still gets to try, the
