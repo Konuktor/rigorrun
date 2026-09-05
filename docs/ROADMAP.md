@@ -58,9 +58,13 @@ it is a clone and `pnpm rigorrun`.
 deployed and tested and nothing in the product calls it. Either it becomes
 opt-in sync or it should be deleted.
 
-**Discovery and recordings live in memory.** Reloading the page mid-flow loses
-the open connection and an unfinished recording. The interface says so and
-offers the way back rather than looking broken, but it is a limitation.
+**A live connection does not survive the runner stopping.** Discovery and an
+unfinished recording do — they are files under `~/.rigorrun`, and a reload
+mid-recording resumes where you were, proved in a browser by
+`e2e/external-user.spec.ts`. What is gone when the runner stops is the child
+process behind a local MCP server. The project page says so and offers
+**Reconnect**, which also reports anything that changed about your tools while
+it was closed.
 
 **No multi-user anything.** The runner is one person's process on one machine.
 
@@ -118,9 +122,11 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 3. **A headless setup path.** Running and gating a project works from CI;
    creating one does not. A `rigorrun project import` taking a description file
    would make a project reproducible from a repository.
-4. **Persist discovery.** A page reload mid-flow loses the open connection and
-   an unfinished recording. The interface handles it honestly and a person
-   still repeats a step.
+4. **Reconnect without a round trip.** Discovery and recordings persist now, so
+   what is left is the child process behind a local MCP server: the runner
+   stopping means somebody presses **Reconnect** before they can run. Holding
+   the connection across a restart, or reopening it on demand, would remove the
+   last step nobody asked for.
 5. **The browser execution lane.** Still the largest gap for anybody whose
    system has no API at all, and still the hardest verification story: DOM text
    is not authoritative state.

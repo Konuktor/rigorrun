@@ -7,10 +7,13 @@ RigorRun proves whether the agent can do that job safely — by reading the
 system it changed, never by trusting what it says about itself.
 
 ```bash
-npx rigorrun
+npx rigorrun@alpha
 ```
 
 Open the URL it prints. That is the whole install.
+
+`@alpha` on purpose: the prerelease is not tagged `latest`, so nobody installs
+it by accident.
 
 ## What it does
 
@@ -47,7 +50,7 @@ infrastructure, because there is no path by which they could.
 ## Commands
 
 ```bash
-npx rigorrun                              # start the runner and open the interface
+npx rigorrun@alpha                        # start the runner and open the interface
 npx rigorrun doctor                       # check this machine and every project
 npx rigorrun projects                     # what is on this machine
 npx rigorrun run --project <id>           # run the suite
@@ -69,6 +72,6 @@ out where it broke.
 
 ## Documentation
 
-<https://github.com/rigorrun/rigorrun/tree/main/docs>
+<https://github.com/Konuktor/rigorrun/tree/master/docs>
 
 MIT licensed.

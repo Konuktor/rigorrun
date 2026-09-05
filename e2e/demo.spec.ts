@@ -9,6 +9,7 @@ import {
   REFERENCE,
   WEAK,
   expectClean,
+  expectNoOffOriginRequests,
   expectNoOverflow,
   goToBenchmark,
   goToContract,
@@ -60,6 +61,10 @@ test.describe('the golden demo', () => {
     await expect(page.getByText(/test cases per agent/)).toBeVisible();
 
     expectClean(watchers);
+    // README.md claims the demo talks to nobody. This is the assertion behind
+    // that sentence: the whole golden path, and not one request left the origin
+    // that served the page.
+    expectNoOffOriginRequests(watchers, page.url());
   });
 
   test('the verdict rests on system state, not on what the agent said', async ({ page }) => {

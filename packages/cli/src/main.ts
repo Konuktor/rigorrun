@@ -23,7 +23,7 @@ import {
   cmdRun,
   type Flags,
 } from './commands.ts';
-import { cmdInitEnvironment, cmdPrivacyInspect } from './scaffold.ts';
+import { cmdPrivacyInspect } from './scaffold.ts';
 import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
@@ -174,8 +174,6 @@ async function dispatch(argv: string[]): Promise<number> {
       return cmdEnvironments(flags);
     case 'inspect-environment':
       return cmdInspectEnvironment(target, flags);
-    case 'init-environment':
-      return cmdInitEnvironment(target);
     case 'privacy':
       return cmdPrivacyInspect(target, parsed.positionals[2], flags.json);
     case 'doctor':

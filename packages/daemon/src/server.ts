@@ -134,9 +134,13 @@ export class Runner {
 
     // ------------------------------------------------------------- projects
 
-    app.get('/api/projects', async (context) =>
-      context.json({ projects: (await service.listProjects()).map(summarise) }),
-    );
+    app.get('/api/projects', async (context) => {
+      const { projects, broken } = await service.listAllProjects();
+      // `broken` travels rather than being filtered out here: the interface has
+      // to be able to show somebody that their project is still on this machine
+      // and why it will not open, which it cannot do with a shorter list.
+      return context.json({ projects: projects.map(summarise), broken });
+    });
 
     app.post('/api/projects', async (context) => {
       const body = await context.req.json<{ name?: string; goal?: string }>();

@@ -13,12 +13,12 @@ const STEPS = [
   {
     title: 'Start the runner',
     body: 'It serves the interface and does the work. Nothing is uploaded.',
-    code: 'pnpm dlx rigorrun',
+    code: 'npx rigorrun@alpha',
   },
   {
     title: 'Open the link it prints',
-    body: 'It carries a one-time pairing code, so only the tab you opened can drive it.',
-    code: 'http://127.0.0.1:7777/?code=F7K2-M9PX',
+    body: 'It carries a one-time pairing code, so only the tab you opened can drive it. The port is different every time — use the one your terminal shows, not this one.',
+    code: 'http://127.0.0.1:41925/?code=RKBB-9E64',
   },
   {
     title: 'Connect your system',

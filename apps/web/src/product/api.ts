@@ -14,6 +14,19 @@ export interface NextStep {
   why: string;
 }
 
+/**
+ * A project directory that is there and will not open.
+ *
+ * Shown rather than filtered out: a project that vanishes from this list looks
+ * exactly like a project that was never saved, and the two need very different
+ * responses from the person looking at the screen.
+ */
+export interface BrokenProjectView {
+  id: string;
+  reason: 'unreadable' | 'not-json' | 'invalid' | 'too-new';
+  detail: string;
+}
+
 export interface ProjectView {
   id: string;
   name: string;
@@ -196,7 +209,7 @@ export const api = {
     }
   },
 
-  projects: () => request<{ projects: ProjectView[] }>('/api/projects'),
+  projects: () => request<{ projects: ProjectView[]; broken: BrokenProjectView[] }>('/api/projects'),
   createProject: (name: string, goal: string) =>
     post<{ project: ProjectView }>('/api/projects', { name, goal }),
   project: (id: string) =>

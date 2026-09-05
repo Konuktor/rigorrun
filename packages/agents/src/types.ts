@@ -51,22 +51,6 @@ export interface AgentAdapter {
   execute(input: AgentRunInput, env: AgentEnvironment): Promise<AgentRunOutput>;
 }
 
-/** Reads the self-serve limit out of the policy the agent was handed. */
-export function limitFromBrief(brief: string, fallback = 50): number {
-  const match =
-    /above \$(\d+(?:\.\d+)?)/i.exec(brief) ?? /\$(\d+(?:\.\d+)?)\s*or less/i.exec(brief);
-  return match?.[1] ? Number(match[1]) : fallback;
-}
-
-/** Strict money parse — free text never silently becomes an amount. */
-export function strictAmount(raw: unknown): number | null {
-  if (typeof raw === 'number') return Number.isFinite(raw) && raw > 0 ? raw : null;
-  if (typeof raw !== 'string') return null;
-  if (!/^\s*\d+(\.\d{1,2})?\s*$/.test(raw)) return null;
-  const value = Number(raw.trim());
-  return Number.isFinite(value) && value > 0 ? value : null;
-}
-
 export const NO_MODEL_COST = {
   costUsd: 0,
   costNote: 'no model calls — deterministic local agent',

@@ -32,15 +32,59 @@
  * arguments, which is customer data; publishing goes through the sanitiser or
  * not at all.
  */
-import { chmod, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { readFile, readdir, rm } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { parseProject, type Project } from './project.ts';
+import { OWNER_ONLY, writeJsonAtomic } from './atomic.ts';
 
 export const DEFAULT_ROOT = join(homedir(), '.rigorrun');
 
-/** Files only the owner may read. Credentials and customer data both qualify. */
-const OWNER_ONLY = 0o600;
+/**
+ * A project directory that exists and cannot be read.
+ *
+ * This type is the whole point of a change made after an audit: `list()` used
+ * to be `read(id).catch(() => undefined)`, so a truncated `project.json` made
+ * the project *disappear* — from `rigorrun projects`, and from the interface —
+ * with no message. For a product whose central claim is that your work is still
+ * there tomorrow, silently dropping the work is the worst available failure.
+ *
+ * So a project that cannot be read is still a project. It is listed, it says
+ * why, and it says what can be done about it.
+ */
+export interface BrokenProject {
+  id: string;
+  reason: 'unreadable' | 'not-json' | 'invalid' | 'too-new';
+  /** What a person can do. Never a stack trace. */
+  detail: string;
+}
+
+export interface Listing {
+  projects: Project[];
+  broken: BrokenProject[];
+}
+
+/**
+ * An artefact that is present and damaged.
+ *
+ * Distinct from absent, which is a normal state and stays `undefined`: before
+ * this, "you have not recorded a job yet" and "your recording is damaged" read
+ * identically to the person who had to decide what to do next.
+ */
+export class ArtefactCorruptError extends Error {
+  constructor(
+    readonly projectId: string,
+    readonly artefact: string,
+    cause: unknown,
+  ) {
+    super(
+      `${artefact}.json in project ${projectId} is damaged and cannot be read ` +
+        `(${(cause as Error).message}). The step that produced it has to be repeated; ` +
+        `nothing else in the project is affected.`,
+    );
+    this.name = 'ArtefactCorruptError';
+  }
+}
 
 export class ProjectStore {
   constructor(private readonly root: string = DEFAULT_ROOT) {}
@@ -56,20 +100,30 @@ export class ProjectStore {
     return join(this.root, 'projects', id);
   }
 
-  async list(): Promise<Project[]> {
+  /** Every project, readable or not. The interface and the CLI both use this. */
+  async listAll(): Promise<Listing> {
     const dir = join(this.root, 'projects');
     let entries: string[];
     try {
       entries = await readdir(dir);
     } catch {
-      return [];
+      return { projects: [], broken: [] };
     }
     const projects: Project[] = [];
+    const broken: BrokenProject[] = [];
     for (const id of entries.sort()) {
-      const project = await this.read(id).catch(() => undefined);
-      if (project) projects.push(project);
+      if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) continue;
+      try {
+        projects.push(await this.read(id));
+      } catch (error) {
+        broken.push({ id, ...classify(error) });
+      }
     }
-    return projects;
+    return { projects, broken };
+  }
+
+  async list(): Promise<Project[]> {
+    return (await this.listAll()).projects;
   }
 
   async read(id: string): Promise<Project> {
@@ -97,10 +151,18 @@ export class ProjectStore {
   }
 
   async readArtefact<T>(id: string, name: string): Promise<T | undefined> {
+    let raw: string;
     try {
-      return JSON.parse(await readFile(join(this.projectDir(id), safeName(name)), 'utf8')) as T;
+      raw = await readFile(join(this.projectDir(id), safeName(name)), 'utf8');
     } catch {
+      // Absent is a normal state — most artefacts do not exist until the step
+      // that writes them has been done. Only *damaged* is an error.
       return undefined;
+    }
+    try {
+      return JSON.parse(raw) as T;
+    } catch (error) {
+      throw new ArtefactCorruptError(id, safeName(name).replace(/\.json$/, ''), error);
     }
   }
 
@@ -116,11 +178,17 @@ export class ProjectStore {
   }
 
   async readRun<T>(id: string, runId: string): Promise<T | undefined> {
+    const path = join(this.projectDir(id), 'runs', safeName(runId));
+    let raw: string;
     try {
-      const path = join(this.projectDir(id), 'runs', safeName(runId));
-      return JSON.parse(await readFile(path, 'utf8')) as T;
+      raw = await readFile(path, 'utf8');
     } catch {
       return undefined;
+    }
+    try {
+      return JSON.parse(raw) as T;
+    } catch (error) {
+      throw new ArtefactCorruptError(id, `runs/${runId}`, error);
     }
   }
 
@@ -163,13 +231,39 @@ export class ProjectStore {
   }
 
   private async writeJson(path: string, value: unknown): Promise<void> {
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, `${JSON.stringify(value, null, 2)}\n`, { mode: OWNER_ONLY });
-    // Set explicitly as well as at creation: `writeFile` only applies the mode
-    // when it creates the file, so a file that already existed with looser
-    // permissions would keep them.
-    await chmod(path, OWNER_ONLY).catch(() => undefined);
+    await writeJsonAtomic(path, value, OWNER_ONLY);
   }
+}
+
+/** Turns a read failure into something a person can act on. */
+function classify(error: unknown): { reason: BrokenProject['reason']; detail: string } {
+  const message = (error as Error).message ?? String(error);
+  if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+    return {
+      reason: 'unreadable',
+      detail: 'The directory is there but project.json is not. Nothing can be recovered from it.',
+    };
+  }
+  if (error instanceof SyntaxError) {
+    return {
+      reason: 'not-json',
+      detail:
+        'project.json is not valid JSON — usually a write interrupted by a crash or a full disk. ' +
+        'If you have a backup under ~/.rigorrun/backups, restore it with `rigorrun restore`.',
+    };
+  }
+  if (/schemaVersion/.test(message)) {
+    return {
+      reason: 'too-new',
+      detail:
+        'This project was written by a newer RigorRun. Upgrade rather than letting an older ' +
+        'version rewrite it: `npm i -g rigorrun@latest`.',
+    };
+  }
+  return {
+    reason: 'invalid',
+    detail: `project.json is readable but not a project RigorRun understands (${message}).`,
+  };
 }
 
 /** Refuses anything that could climb out of the project directory. */

@@ -18,6 +18,8 @@ export interface PageWatchers {
   consoleErrors: string[];
   pageErrors: string[];
   failedRequests: string[];
+  /** Every http(s) URL the page asked for, in order, including the document. */
+  requests: string[];
 }
 
 /**
@@ -25,7 +27,17 @@ export interface PageWatchers {
  * noise is not filtered out because the product loads no third-party anything.
  */
 export function watchPage(page: Page): PageWatchers {
-  const watchers: PageWatchers = { consoleErrors: [], pageErrors: [], failedRequests: [] };
+  const watchers: PageWatchers = {
+    consoleErrors: [],
+    pageErrors: [],
+    failedRequests: [],
+    requests: [],
+  };
+
+  page.on('request', (request: Request) => {
+    const url = request.url();
+    if (url.startsWith('http://') || url.startsWith('https://')) watchers.requests.push(url);
+  });
 
   page.on('console', (message: ConsoleMessage) => {
     if (message.type() === 'error') watchers.consoleErrors.push(message.text());
@@ -52,6 +64,21 @@ export function expectClean(watchers: PageWatchers): void {
     watchers.failedRequests,
     `failed requests: ${watchers.failedRequests.join(' | ')}`,
   ).toEqual([]);
+}
+
+/**
+ * The claim in README.md that this exists to make true: the demo, the marketing
+ * pages and the local interface talk to the origin that served them and to
+ * nothing else. No analytics, no fonts, no CDN, no telemetry.
+ *
+ * Asserted on the URLs rather than on a count, because "zero requests" is not
+ * the property anybody actually wants — a page that loads its own stylesheet is
+ * fine. What matters is that nothing leaves for somebody else's server.
+ */
+export function expectNoOffOriginRequests(watchers: PageWatchers, pageUrl: string): void {
+  const own = new URL(pageUrl).origin;
+  const offOrigin = watchers.requests.filter((url) => new URL(url).origin !== own);
+  expect(offOrigin, `requests to another origin: ${offOrigin.join(' | ')}`).toEqual([]);
 }
 
 export async function horizontalOverflow(page: Page): Promise<number> {

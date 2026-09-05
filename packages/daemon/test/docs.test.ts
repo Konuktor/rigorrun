@@ -19,7 +19,28 @@ import { DEFAULT_ROOT } from '../src/store.ts';
 import { FEEDBACK_FORMAT } from '../src/feedback.ts';
 
 const docsDir = fileURLToPath(new URL('../../../docs/', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const read = (name: string): Promise<string> => readFile(join(docsDir, name), 'utf8');
+
+/**
+ * Every piece of markdown somebody could read, not just `docs/`.
+ *
+ * The removed-agent-id check below only walked `docs/` and so missed
+ * `examples/refund-workflow/README.md`, which recommended a deleted agent id
+ * for months. A check that covers one directory is a check that tells you where
+ * the next stale instruction will be.
+ */
+const SKIP = new Set(['node_modules', 'dist', '.git', 'test-results', '.wrangler', 'ui']);
+async function markdownFiles(dir: string): Promise<string[]> {
+  const out: string[] = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (SKIP.has(entry.name)) continue;
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await markdownFiles(full)));
+    else if (entry.name.endsWith('.md')) out.push(full);
+  }
+  return out;
+}
 
 /** Commands the docs tell people to run, and where they are claimed. */
 const DOCUMENTED_COMMANDS = [
@@ -56,10 +77,10 @@ describe('the commands the docs promise', () => {
     // bug, and a test that forbade naming a past mistake would be a test that
     // pushed the history out of the documentation.
     const invocation = /^\s*(?:\$ )?(?:pnpm )?rigorrun .*--agent (demo-weak|demo-robust)\b/m;
-    for (const name of await readdir(docsDir)) {
-      if (!name.endsWith('.md')) continue;
-      const found = invocation.exec(await read(name));
-      expect(found?.[0], `${name} tells somebody to run a removed agent id`).toBeUndefined();
+    for (const file of await markdownFiles(repoRoot)) {
+      const found = invocation.exec(await readFile(file, 'utf8'));
+      const where = file.slice(repoRoot.length);
+      expect(found?.[0], `${where} tells somebody to run a removed agent id`).toBeUndefined();
     }
   });
 });

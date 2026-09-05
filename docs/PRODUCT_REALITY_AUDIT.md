@@ -202,10 +202,12 @@ is not built.
 one of them also says it is a clone today. That is the single largest piece of
 friction between this and a stranger actually using it.
 
-**Discovery and recordings live in the runner's memory.** Reloading the page in
-the middle of connecting or recording loses them. The interface says so and
-offers the way back rather than looking broken, but a person who reloads at the
-wrong moment repeats a step.
+~~**Discovery and recordings live in the runner's memory.**~~ No longer true,
+and left struck through rather than deleted because this document's whole
+discipline is that it does not get quietly edited as things improve. Discovery
+and a half-finished recording are files under `~/.rigorrun`; a reload mid-flow
+resumes. The live connection to a local MCP server is still a child process and
+is still gone when the runner stops, which is what **Reconnect** is for.
 
 **The verdict a real system produces is `PARTIAL`, not `AUTHORITATIVE`.** That
 is correct rather than a shortcoming — RigorRun reads back what the nominated

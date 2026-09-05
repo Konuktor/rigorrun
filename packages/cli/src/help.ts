@@ -40,7 +40,6 @@ THE BUNDLED EXAMPLE
   workflows                List the example jobs.
   environments             List the environments registered in this build.
   inspect-environment <id> Show the records, links and actions an adapter has.
-  init-environment <name>  Scaffold an environment adapter to edit.
 
 THE FILE PIPELINE
   Older, file-at-a-time commands. Kept because pipelines written against them
@@ -97,7 +96,7 @@ export const COMMAND_HELP: Record<string, string> = {
   demo: `rigorrun demo - run the complete offline demo
 
 Compiles the bundled recorded refund workflow into a contract, generates the
-17-case benchmark, runs Agent A and Agent B against it, and prints the
+benchmark from it, runs Agent A and Agent B against it, and prints the
 head-to-head comparison. Writes artefacts to .rigorrun/.
 
 OPTIONS

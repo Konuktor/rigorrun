@@ -1,3 +1,9 @@
+> **Historical demo script.** Written against an earlier build. The figures in
+> it (seventeen cases, and the scores the two agents reached) no longer match
+> what the pipeline produces — it now generates twenty-two cases across nine
+> categories. Kept as a record of how the story was told; read the numbers off
+> the screen, not off this page. See `docs/PRODUCT_REALITY_AUDIT.md`.
+
 # The 90-second demo
 
 Two scripts. The first is what you say; the second is exactly what you click.

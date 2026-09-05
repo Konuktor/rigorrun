@@ -70,9 +70,9 @@ policy. It does not:
 - A person reviewing the contract confirms or rejects each one. Rejecting a rule
   removes the assertion behind it, which genuinely changes the generated cases.
 
-The same discipline runs through the metrics. Seventeen cases with no failures
-is reported as _100%, 95% CI 81.6%–100%, n=17_ — because the honest reading is
-"no failures observed yet", not "never fails". Cost is `null` and displayed as
+The same discipline runs through the metrics. A suite with no failures is
+reported with its Wilson interval and its `n` beside it — because the honest
+reading of a few dozen cases is "no failures observed yet", not "never fails". Cost is `null` and displayed as
 "cost unavailable" unless a real price is known.
 
 ## Who it is for
@@ -85,7 +85,7 @@ honest answer is a demo and some spot checks. Their reputation and their next
 contract depend on an answer they cannot currently produce.
 
 RigorRun turns handoff into an artefact: _here is the workflow we automated,
-here are the 17 cases we generated from it, here is the reliability report, and
+here are the cases we generated from it, here is the reliability report, and
 here is the gate that will fail your build if it regresses._
 
 Second wave: in-house platform and AI teams who need a release gate before an

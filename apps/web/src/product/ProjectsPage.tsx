@@ -9,10 +9,11 @@
 import { useEffect, useState } from 'react';
 import { Button, Panel, SectionLabel, Spinner } from '../components/primitives.tsx';
 import { Field, Problem, TextInput } from './inputs.tsx';
-import { api, type ProjectView } from './api.ts';
+import { api, type BrokenProjectView, type ProjectView } from './api.ts';
 
 export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
   const [projects, setProjects] = useState<ProjectView[] | null>(null);
+  const [broken, setBroken] = useState<BrokenProjectView[]>([]);
   const [name, setName] = useState('');
   const [goal, setGoal] = useState('');
   const [busy, setBusy] = useState(false);
@@ -21,7 +22,10 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
   useEffect(() => {
     api
       .projects()
-      .then((result) => setProjects(result.projects))
+      .then((result) => {
+        setProjects(result.projects);
+        setBroken(result.broken ?? []);
+      })
       .catch((error: Error) => {
         setProblem(error.message);
         setProjects([]);
@@ -69,6 +73,24 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
             {projects.map((project) => (
               <li key={project.id}>
                 <ProjectCard project={project} onOpen={() => onOpen(project.id)} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {broken.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          <SectionLabel>Could not be opened</SectionLabel>
+          <ul className="flex flex-col gap-3">
+            {broken.map((entry) => (
+              <li key={entry.id}>
+                <Panel>
+                  <div className="flex flex-col gap-1" data-testid={`broken-${entry.id}`}>
+                    <span className="text-body font-medium text-fail">{entry.id}</span>
+                    <span className="text-meta text-secondary">{entry.detail}</span>
+                  </div>
+                </Panel>
               </li>
             ))}
           </ul>

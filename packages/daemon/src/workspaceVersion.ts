@@ -14,8 +14,9 @@
  * error. Somebody who downgraded should be told to upgrade back, not have their
  * projects quietly rewritten by an older reader.
  */
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { cp, readFile, readdir, rm, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { sweepTemporaries, writeJsonAtomic } from './atomic.ts';
 
 /**
  * Bump this when the shape of anything under `~/.rigorrun` changes, and add a
@@ -29,7 +30,12 @@ export interface WorkspaceMeta {
   createdAt: string;
   /** Which RigorRun last wrote here. Only ever for diagnostics. */
   lastWrittenBy: string;
+  /** Where the copy taken before the last migration went, if there was one. */
+  lastBackup?: { path: string; fromVersion: number; at: string };
 }
+
+/** Copies kept before a migration. Enough to go back; not enough to hoard. */
+const KEEP_BACKUPS = 3;
 
 /** One step forward. Deliberately narrow: from exactly N to exactly N+1. */
 export interface Migration {
@@ -92,6 +98,15 @@ export async function openWorkspace(root: string, version: string): Promise<Open
   const existing = await readWorkspaceMeta(root);
   const now = new Date().toISOString();
 
+  // A crash mid-write leaves a temporary beside the file it was replacing.
+  // Harmless, invisible, and the only evidence that a write was interrupted —
+  // so it is cleared here, when nothing else is writing, rather than left to
+  // accumulate for a year and become a support conversation.
+  await sweepTemporaries(root);
+  for (const id of await projectIds(root)) {
+    await sweepTemporaries(join(root, 'projects', id));
+  }
+
   if (!existing) {
     // A directory with projects in it but no marker predates versioning, and
     // is by definition version 1 — there has never been another.
@@ -106,13 +121,31 @@ export async function openWorkspace(root: string, version: string): Promise<Open
 
   if (existing.version > WORKSPACE_VERSION) throw new WorkspaceTooNewError(existing.version);
 
-  const applied: string[] = [];
-  let current = existing.version;
-  for (const migration of MIGRATIONS.filter((entry) => entry.to > current).sort(
+  const pending = MIGRATIONS.filter((entry) => entry.to > existing.version).sort(
     (a, b) => a.to - b.to,
-  )) {
-    await migration.run(root);
-    current = migration.to;
+  );
+
+  // A copy before anything is rewritten. A migration is the one moment RigorRun
+  // touches every project somebody owns at once, and the cost of getting it
+  // wrong without a copy is all of their work rather than one step of it.
+  let backup: WorkspaceMeta['lastBackup'] = existing.lastBackup;
+  if (pending.length > 0) {
+    const path = join(root, 'backups', `v${existing.version}-${now.replace(/[:.]/g, '-')}`);
+    await backupWorkspace(root, path);
+    backup = { path, fromVersion: existing.version, at: now };
+    await pruneBackups(root);
+  }
+
+  const applied: string[] = [];
+  for (const migration of pending) {
+    try {
+      await migration.run(root);
+    } catch (error) {
+      // The meta is deliberately *not* rewritten. The workspace stays at its
+      // old version, so an older RigorRun can still read it, and the next
+      // attempt starts from the same place rather than from halfway.
+      throw new MigrationFailedError(migration, backup?.path, error);
+    }
     applied.push(migration.what);
   }
 
@@ -120,11 +153,61 @@ export async function openWorkspace(root: string, version: string): Promise<Open
     version: WORKSPACE_VERSION,
     createdAt: existing.createdAt,
     lastWrittenBy: version,
+    ...(backup ? { lastBackup: backup } : {}),
   };
   await write(root, meta);
   return { meta, created: false, applied };
 }
 
+export class MigrationFailedError extends Error {
+  constructor(
+    readonly migration: Migration,
+    readonly backup: string | undefined,
+    override readonly cause: unknown,
+  ) {
+    super(
+      `Migrating this workspace to format ${migration.to} failed: ` +
+        `${(cause as Error).message}\n` +
+        `Nothing was left half-migrated — the workspace is still at its previous ` +
+        `format and an older RigorRun can still read it.` +
+        (backup ? `\nA copy taken before the attempt is at ${backup}.` : ''),
+    );
+    this.name = 'MigrationFailedError';
+  }
+}
+
+/**
+ * Copies the parts of a workspace that are somebody's work.
+ *
+ * `secrets.json` is deliberately not among them. A backup is a file that gets
+ * copied to a laptop, attached to a support thread and forgotten in a home
+ * directory; credentials belong in exactly one place and this is not it.
+ */
+export async function backupWorkspace(root: string, destination: string): Promise<void> {
+  await mkdir(destination, { recursive: true });
+  await cp(join(root, 'projects'), join(destination, 'projects'), {
+    recursive: true,
+    force: true,
+  }).catch(() => undefined);
+  await cp(join(root, META_FILE), join(destination, META_FILE), { force: true }).catch(
+    () => undefined,
+  );
+}
+
+async function pruneBackups(root: string): Promise<void> {
+  const dir = join(root, 'backups');
+  const entries = (await readdir(dir).catch(() => [])).sort();
+  for (const stale of entries.slice(0, Math.max(0, entries.length - KEEP_BACKUPS))) {
+    await rm(join(dir, stale), { recursive: true, force: true });
+  }
+}
+
+async function projectIds(root: string): Promise<string[]> {
+  return (await readdir(join(root, 'projects')).catch(() => [])).filter((id) =>
+    /^[A-Za-z0-9_-]{1,64}$/.test(id),
+  );
+}
+
 async function write(root: string, meta: WorkspaceMeta): Promise<void> {
-  await writeFile(join(root, META_FILE), `${JSON.stringify(meta, null, 2)}\n`, { mode: 0o600 });
+  await writeJsonAtomic(join(root, META_FILE), meta, 0o600);
 }

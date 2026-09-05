@@ -31,13 +31,13 @@ async function withService<T>(home: string | undefined, run: (service: Service) 
 
 export async function cmdProjects(flags: Flags): Promise<number> {
   const store = new ProjectStore(storeRoot(flags.home));
-  const projects = await store.list();
+  const { projects, broken } = await store.listAll();
 
   if (flags.json) {
-    line(JSON.stringify(projects, null, 2));
-    return 0;
+    line(JSON.stringify({ projects, broken }, null, 2));
+    return broken.length > 0 ? 2 : 0;
   }
-  if (projects.length === 0) {
+  if (projects.length === 0 && broken.length === 0) {
     heading('No projects yet');
     line(c.grey('Run `rigorrun` and make one. Nothing here is set up from a template.'));
     return 0;
@@ -58,6 +58,19 @@ export async function cmdProjects(flags: Flags): Promise<number> {
       ];
     }),
   );
+
+  // Named rather than skipped. A project that cannot be read used to be a
+  // project that was not there, which is the same thing a person sees when
+  // their work was never saved — and the two need very different responses.
+  if (broken.length > 0) {
+    line();
+    heading(`${broken.length} project(s) could not be read`);
+    for (const entry of broken) {
+      line(`  ${c.red(entry.id)}  ${entry.reason}`);
+      line(c.grey(`    ${entry.detail}`));
+    }
+    return 2;
+  }
   return 0;
 }
 

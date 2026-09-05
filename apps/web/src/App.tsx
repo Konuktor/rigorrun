@@ -153,8 +153,18 @@ export function App() {
           {/* The version the runner reports, not one typed in here. It ends up
               in bug reports, so it has to be the one somebody is running. */}
           <span>
-            RigorRun {local && runner?.version ? runner.version : 'alpha'} — early. See
-            docs/PRODUCT_REALITY_AUDIT.md for what is and is not built.
+            {/* A path into the repository is useless to somebody who installed
+                from npm and has no repository. A link works from both. */}
+            RigorRun {local && runner?.version ? runner.version : 'alpha'} — early.{' '}
+            <a
+              className="underline hover:text-fg"
+              href="https://github.com/Konuktor/rigorrun/blob/master/docs/PRODUCT_REALITY_AUDIT.md"
+              target="_blank"
+              rel="noreferrer"
+            >
+              What is and is not built
+            </a>
+            .
           </span>
           <span>
             {local

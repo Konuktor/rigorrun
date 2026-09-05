@@ -26,7 +26,7 @@ booking may be confirmed.
 cd fixtures/external/mcp-venue-desk
 pnpm install
 pnpm start          # stdio, for a local connector
-pnpm start:http     # streamable HTTP on 127.0.0.1:7801
+PORT=8931 pnpm start:http   # streamable HTTP on 127.0.0.1:8931/mcp
 ```
 
 ## Tools

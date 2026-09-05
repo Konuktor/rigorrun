@@ -1,7 +1,7 @@
 /**
  * Statistics that refuse to overstate what a small sample can support.
  *
- * A benchmark of 17 cases is a small sample. Reporting "100% success" without
+ * A benchmark of a few dozen cases is a small sample. Reporting "100% success" without
  * an interval invites exactly the false confidence this product exists to
  * prevent, so every proportion is reported with a Wilson score interval and an
  * explicit `n`.

@@ -13,6 +13,7 @@
  * it does.
  */
 import { expect, test, type Page } from '@playwright/test';
+import { expectNoOffOriginRequests, watchPage } from './support/journeys.ts';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -127,6 +128,12 @@ async function ensureChecked(page: Page, testId: string, checked: boolean): Prom
 test('a stranger connects their own system and their own agent, and gets a verdict', async ({
   page,
 }) => {
+  // The interface is served by the local runner and talks to the local runner.
+  // Asserted at the end, because a product that quietly phoned home while
+  // somebody connected their production system would be the worst possible
+  // thing for this particular product to do.
+  const watchers = watchPage(page);
+
   // ---------------------------------------------------------------- pairing
   await page.goto(pairedUrl);
   await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
@@ -253,4 +260,6 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await expect(page.getByTestId('time-to-verdict')).toBeVisible();
 
   await evidence(page, 'verdict');
+
+  expectNoOffOriginRequests(watchers, pairedUrl);
 });

@@ -2,10 +2,12 @@
  * The store, and the promises it makes about where things stay.
  */
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, rm, stat, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, stat, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ProjectStore, newProject, nextSteps, timeToFirstVerdictMs } from '../src/index.ts';
+import { ArtefactCorruptError } from '../src/store.ts';
+import { sweepTemporaries, writeJsonAtomic } from '../src/atomic.ts';
 
 const roots: string[] = [];
 
@@ -170,5 +172,86 @@ describe('time to first verdict', () => {
     const project = newProject({ id: 'p', name: 'P', now: '2026-02-01T09:00:00.000Z' });
     project.timings.firstVerdictAt = '2026-02-01T09:08:30.000Z';
     expect(timeToFirstVerdictMs(project)).toBe(510_000);
+  });
+});
+
+
+/**
+ * The failure this whole section exists for.
+ *
+ * A truncated `project.json` used to make the project vanish from the list with
+ * no message, which for a product that promises your work is still there
+ * tomorrow is the worst available outcome: it looks exactly like the work never
+ * happened.
+ */
+describe('a damaged workspace says so instead of losing work', () => {
+  async function withProjects(): Promise<ProjectStore> {
+    const s = await store();
+    await s.write(newProject({ id: 'p_good', name: 'Fine', now: '2026-02-01T09:00:00.000Z' }));
+    await s.write(newProject({ id: 'p_bad', name: 'Damaged', now: '2026-02-01T09:00:00.000Z' }));
+    return s;
+  }
+
+  it('lists a project whose file was truncated, and says what happened', async () => {
+    const s = await withProjects();
+    await writeFile(join(s.path, 'projects', 'p_bad', 'project.json'), '{"id":"p_bad","na');
+
+    const listing = await s.listAll();
+    expect(listing.projects.map((p) => p.id)).toEqual(['p_good']);
+    expect(listing.broken).toHaveLength(1);
+    expect(listing.broken[0]!.id).toBe('p_bad');
+    expect(listing.broken[0]!.reason).toBe('not-json');
+    // A person has to be able to do something about it.
+    expect(listing.broken[0]!.detail).toMatch(/restore/i);
+  });
+
+  it('reports a project written by a newer RigorRun rather than rewriting it', async () => {
+    const s = await withProjects();
+    const path = join(s.path, 'projects', 'p_bad', 'project.json');
+    const project = JSON.parse(await readFile(path, 'utf8')) as Record<string, unknown>;
+    await writeFile(path, JSON.stringify({ ...project, schemaVersion: 99 }));
+
+    const listing = await s.listAll();
+    expect(listing.broken[0]).toMatchObject({ id: 'p_bad', reason: 'too-new' });
+    expect(listing.broken[0]!.detail).toContain('rigorrun@latest');
+  });
+
+  it('tells a damaged artefact apart from one that was never written', async () => {
+    const s = await withProjects();
+    // Never written: undefined, because that is a normal state.
+    expect(await s.readArtefact('p_good', 'benchmark')).toBeUndefined();
+
+    await s.writeArtefact('p_good', 'benchmark', { cases: [] });
+    await writeFile(join(s.path, 'projects', 'p_good', 'benchmark.json'), '{"cases": [');
+    await expect(s.readArtefact('p_good', 'benchmark')).rejects.toThrow(ArtefactCorruptError);
+  });
+});
+
+describe('a write that fails leaves the previous file intact', () => {
+  it('does not truncate the target when the value cannot be serialised', async () => {
+    const s = await store();
+    const project = newProject({ id: 'p1', name: 'Keep me', now: '2026-02-01T09:00:00.000Z' });
+    await s.write(project);
+
+    const cyclic: Record<string, unknown> = {};
+    cyclic['self'] = cyclic;
+    await expect(
+      writeJsonAtomic(join(s.path, 'projects', 'p1', 'project.json'), cyclic),
+    ).rejects.toThrow();
+
+    // The whole point: the old project is still readable.
+    expect(await s.read('p1')).toEqual(project);
+  });
+
+  it('leaves no temporary behind, and sweeps one a crash did leave', async () => {
+    const s = await store();
+    await s.write(newProject({ id: 'p1', name: 'x', now: '2026-02-01T09:00:00.000Z' }));
+    const dir = join(s.path, 'projects', 'p1');
+    expect((await readdir(dir)).filter((name) => name.includes('.tmp-'))).toEqual([]);
+
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, '.project.json.tmp-0123456789ab'), 'half a file');
+    expect(await sweepTemporaries(dir)).toBe(1);
+    expect((await readdir(dir)).filter((name) => name.includes('.tmp-'))).toEqual([]);
   });
 });

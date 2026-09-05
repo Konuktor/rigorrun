@@ -103,6 +103,58 @@ const DOMAIN_TERMS = [
 const pattern = new RegExp(`\\b(${DOMAIN_TERMS.join('|')})s?\\b`, 'gi');
 
 /**
+ * The second class of leak, which nouns cannot catch.
+ *
+ * `limitFromBrief` sat in `packages/agents/src/types.ts` for months, parsing
+ * `above $(\d+)` out of a policy brief with a fallback of 50 — refund-era
+ * currency logic in the generic agent boundary. The noun gate was silent on it
+ * because `$` and `50` are not nouns. A generic pipeline has no opinion about
+ * money, percentages or what a threshold is denominated in: a unit is something
+ * a person answers a question about, never something the compiler assumes.
+ */
+const SHAPE_PATTERNS = [
+  // `£€¥` have no other meaning in JavaScript. `$` does — template
+  // interpolation and a regex end-anchor — so it only counts when it is
+  // followed by a number or by a pattern that matches one, which is what
+  // `above $(\d+)` looked like.
+  // `$1`..`$9` are replacement backreferences, not money.
+  { what: 'a currency symbol', re: /[£€¥]|\$\s*\\?\(?\\?d|\$\s*(?![1-9]\b)\d/g },
+  { what: 'a hardcoded money word', re: /\b(usd|eur|gbp|dollars?|cents?)\b/gi },
+];
+
+/**
+ * Files that may carry a currency shape, with why. Same rule as `ALLOWED`:
+ * an exception a reviewer can see beats a directory quietly left off the list.
+ */
+const ALLOWED_SHAPES = new Map([
+  [
+    'packages/compiler/src/induce.ts',
+    'reads thresholds out of UI text, where the symbol is the only evidence of a ' +
+      'unit. Confined to the weakest provenance tier: everything it proposes ' +
+      'arrives as an unconfirmed question, never as a rule that can fail an agent.',
+  ],
+  [
+    'packages/report/src/render.ts',
+    "renders RigorRun's own model spend, which every provider bills in USD. Not " +
+      "the customer's money and not read from their system.",
+  ],
+  [
+    'packages/report/src/sanitize.ts',
+    'masks amounts before a report leaves the machine. Only recognises the ' +
+      'dollar form, which is a real limit of the mask rather than an assumption ' +
+      'about the business: an unmasked euro figure is a redaction gap, logged in ' +
+      'ROADMAP.md.',
+  ],
+  [
+    'apps/demo-ops/src/render/values.tsx',
+    "displays a field the schema declares only as `unit: 'currency'` — which " +
+      'currency is not something the schema carries. The renderer picks one to ' +
+      'draw with; nothing downstream depends on the choice, because a boundary ' +
+      "step comes from `precision`, not from the symbol.",
+  ],
+]);
+
+/**
  * Removes comments and leaves code.
  *
  * Not a parser — it does not need to be. It errs towards keeping text, so a
@@ -181,16 +233,25 @@ async function sourceFiles(dir) {
 const findings = [];
 for (const dir of GENERIC) {
   for (const file of await sourceFiles(join(root, dir))) {
-    if (ALLOWED.has(relative(root, file))) continue;
+    const where = relative(root, file);
     const code = stripComments(await readFile(file, 'utf8'));
     code.split('\n').forEach((line, index) => {
-      for (const match of line.matchAll(pattern)) {
-        findings.push({
-          file: relative(root, file),
-          line: index + 1,
-          term: match[0],
-          text: line.trim().slice(0, 110),
-        });
+      if (!ALLOWED.has(where)) {
+        for (const match of line.matchAll(pattern)) {
+          findings.push({ file: where, line: index + 1, term: match[0], text: line.trim().slice(0, 110) });
+        }
+      }
+      if (!ALLOWED_SHAPES.has(where)) {
+        for (const { what, re } of SHAPE_PATTERNS) {
+          for (const match of line.matchAll(re)) {
+            findings.push({
+              file: where,
+              line: index + 1,
+              term: `${match[0]} (${what})`,
+              text: line.trim().slice(0, 110),
+            });
+          }
+        }
       }
     });
   }
@@ -218,7 +279,8 @@ if (findings.length > 0) {
     green(`No domain terms in generic code.`) +
       dim(
         ` ${GENERIC.length} director(ies) checked against ${DOMAIN_TERMS.length} terms` +
-          `${ALLOWED.size > 0 ? `, ${ALLOWED.size} file(s) excepted` : ''}.`,
+          ` and ${SHAPE_PATTERNS.length} currency shapes` +
+          `, ${ALLOWED.size + ALLOWED_SHAPES.size} file(s) excepted.`,
       ),
   );
 }

@@ -13,7 +13,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rigorrun/rigorrun.git"
+    "url": "git+https://github.com/Konuktor/rigorrun.git"
   },
   "homepage": "https://rigorrun.pages.dev",
   "type": "module",
@@ -30,6 +30,10 @@
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "alpha"
+  },
   "scripts": {
     "build": "node build.mjs"
   },
@@ -57,5 +61,8 @@
     "@rigorrun/runner": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
     "@rigorrun/verifier": "workspace:*"
+  },
+  "bugs": {
+    "url": "https://github.com/Konuktor/rigorrun/issues"
   }
 }

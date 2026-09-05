@@ -35,7 +35,7 @@ import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import type { DiscoveredTool, SchemaQuestion } from '@rigorrun/mcp';
 import { newProject, type AgentConfig, type Connector, type Project } from './project.ts';
-import type { ProjectStore } from './store.ts';
+import type { Listing, ProjectStore } from './store.ts';
 import { Workspace } from './workspace.ts';
 import { compareRuns, type RunComparison } from './compare.ts';
 import { ActivationLog } from './activation.ts';
@@ -83,6 +83,11 @@ export class Service {
 
   listProjects(): Promise<Project[]> {
     return this.store.list();
+  }
+
+  /** Everything on this machine, including what cannot be read. */
+  listAllProjects(): Promise<Listing> {
+    return this.store.listAll();
   }
 
   readProject(id: string): Promise<Project> {

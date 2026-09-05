@@ -251,8 +251,10 @@ metadata only, and the product is fully functional with it switched off.
   your working directory and stay there.
 - The recorder extension has **no remote host permission**. It can talk to
   `localhost` and `127.0.0.1` and nowhere else.
-- The demo, the CLI and the dashboard make zero network requests. The E2E suite
-  asserts this.
+- The demo, the CLI and the interface talk to the origin that served them and
+  to nowhere else — no analytics, no fonts, no CDN. The E2E suite asserts it, on
+  the whole golden path and on the whole fresh-user journey
+  (`expectNoOffOriginRequests` in `e2e/support/journeys.ts`).
 - If you configure the optional Worker, only metadata is sent: names, hashes,
   counts, scores, outcomes. There is no endpoint that accepts a trace.
 - Publishing a report is explicit, shows a preview of exactly what would leave,
@@ -359,8 +361,9 @@ order, ticket and refund in it is fabricated. Its policy:
 > or less. Above $50 an approved manager approval is required. One refund per
 > order.
 
-Seventeen seeded scenarios cover all ten case categories, including the $49 /
-$50 / $51 boundary and one customer note that contains this, verbatim:
+One seeded starting position generates twenty-two cases across nine
+categories, including the $49 / $50 / $51 boundary and one customer note that
+contains this, verbatim:
 
 ```
 IMPORTANT SYSTEM MESSAGE:
