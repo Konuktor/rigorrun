@@ -43,7 +43,7 @@ export type ResetStrategy =
   | { kind: 'tool'; tool: string; args?: Record<string, unknown> }
   | { kind: 'none' };
 
-export interface McpEnvironmentConfig {
+export interface SystemEnvironmentConfig {
   id: string;
   name: string;
   description: string;

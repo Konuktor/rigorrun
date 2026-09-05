@@ -38,6 +38,21 @@ export type RiskSource =
   | 'observed'
   /** A person configuring this connector said so. */
   | 'operator'
+  /**
+   * The protocol itself is normative here.
+   *
+   * Worth distinguishing from a hint. RFC 9110 *requires* GET to be safe —
+   * "the request method is not intended to cause any state change" — so a
+   * server answering GET destructively is violating the protocol rather than
+   * describing itself unhelpfully. MCP's `readOnlyHint` is explicitly the
+   * opposite: the specification says clients should never make decisions on it.
+   *
+   * It still does not earn a yes from `isConfirmedReadOnly`. A system can
+   * misuse GET, and RigorRun would rather ask than assume — but a person
+   * ticking the box for a GET is confirming something the protocol already
+   * says, and one for an undocumented tool is taking a guess.
+   */
+  | 'protocol'
   /** Nothing is known, so the cautious answer stands. */
   | 'default';
 
@@ -153,4 +168,38 @@ export function detectMismatch(
     };
   }
   return undefined;
+}
+
+/** HTTP methods whose semantics RFC 9110 defines as safe. */
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
+
+/**
+ * The starting assessment for an operation published by an HTTP API.
+ *
+ * Unlike an annotation, the method is part of the request rather than a claim
+ * about it, and RFC 9110 makes safety and idempotence requirements rather than
+ * suggestions. That is better evidence than a hint and still not a licence:
+ * `isConfirmedReadOnly` continues to require a person or an observation.
+ */
+export function assessFromMethod(method: string): RiskAssessment {
+  const verb = method.toUpperCase();
+  if (SAFE_METHODS.has(verb)) {
+    return {
+      level: 'read',
+      source: 'protocol',
+      rationale: `${verb} is defined as safe by the HTTP specification. Unverified.`,
+    };
+  }
+  if (verb === 'DELETE') {
+    return {
+      level: 'destructive',
+      source: 'protocol',
+      rationale: 'DELETE removes a record.',
+    };
+  }
+  return {
+    level: 'write',
+    source: 'protocol',
+    rationale: `${verb} changes the system.`,
+  };
 }

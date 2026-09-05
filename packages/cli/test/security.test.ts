@@ -22,6 +22,7 @@ describe('an imported benchmark cannot cause command execution', () => {
   const EXECUTION_PATH = [
     'packages/core/src',
     'packages/connector/src',
+    'packages/env-openapi/src',
     'packages/environment/src',
     'packages/environments/src',
     'packages/verifier/src',

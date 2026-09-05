@@ -1,5 +1,13 @@
 /**
- * Somebody else's MCP server, as an environment RigorRun can grade against.
+ * Somebody else's system, as an environment RigorRun can grade against.
+ *
+ * This started as the MCP adapter and turned out never to have been one. It
+ * uses exactly two things from a connection — what operations exist, and how to
+ * call one — so an OpenAPI document, a custom adapter and an MCP server all
+ * arrive here as the same object. There is one adapter and several ways to
+ * reach a system, rather than an adapter per protocol, which is what keeps the
+ * compiler, the generator and the verifier from ever learning where a system
+ * came from.
  *
  * The three interesting methods are the ones that cannot be implemented
  * honestly, and what is done about each.
@@ -36,11 +44,11 @@ import {
   type PresentationHints,
   type StateSnapshot,
 } from '@rigorrun/environment';
-import type { McpConnection } from '@rigorrun/mcp';
-import type { McpEnvironmentConfig } from './config.ts';
-import { stateFromPayloads } from '@rigorrun/connector';
+import type { SystemConnection } from './types.ts';
+import type { SystemEnvironmentConfig } from './environmentConfig.ts';
+import { stateFromPayloads } from './rows.ts';
 
-export class McpEnvironment implements EnvironmentAdapter {
+export class SystemEnvironment implements EnvironmentAdapter {
   readonly id: string;
   readonly name: string;
   readonly description: string;
@@ -49,9 +57,9 @@ export class McpEnvironment implements EnvironmentAdapter {
   private clock = 0;
 
   constructor(
-    private readonly connection: McpConnection,
+    private readonly connection: SystemConnection,
     private readonly schema: EnvironmentSchema,
-    private readonly config: McpEnvironmentConfig,
+    private readonly config: SystemEnvironmentConfig,
   ) {
     this.id = config.id;
     this.name = config.name;

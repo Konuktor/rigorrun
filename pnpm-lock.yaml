@@ -372,6 +372,18 @@ importers:
         specifier: workspace:*
         version: link:../mcp
 
+  packages/env-openapi:
+    dependencies:
+      '@rigorrun/connector':
+        specifier: workspace:*
+        version: link:../connector
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../environment
+
   packages/environment:
     dependencies:
       '@rigorrun/core':
