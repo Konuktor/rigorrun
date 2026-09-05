@@ -36,6 +36,7 @@ const GENERIC = [
   'packages/agents/src',
   'packages/providers/src',
   'packages/quality/src',
+  'packages/connector/src',
   'packages/mcp/src',
   'packages/env-mcp/src',
   'packages/proxy/src',

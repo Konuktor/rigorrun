@@ -14,6 +14,7 @@ const pkg = (name: string) =>
   fileURLToPath(new URL(`./packages/${name}/src/index.ts`, import.meta.url));
 
 export const rigorrunAliases = {
+  '@rigorrun/connector': pkg('connector'),
   '@rigorrun/core': pkg('core'),
   '@rigorrun/environment': pkg('environment'),
   '@rigorrun/environments': pkg('environments'),

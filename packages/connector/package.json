@@ -1,5 +1,5 @@
 {
-  "name": "@rigorrun/env-mcp",
+  "name": "@rigorrun/connector",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,9 +10,7 @@
     "./*": "./src/*"
   },
   "dependencies": {
-    "@rigorrun/connector": "workspace:*",
     "@rigorrun/core": "workspace:*",
-    "@rigorrun/environment": "workspace:*",
-    "@rigorrun/mcp": "workspace:*"
+    "@rigorrun/environment": "workspace:*"
   }
 }

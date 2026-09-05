@@ -16,38 +16,19 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport, getDefaultEnvironment } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
-import type { ActionParam } from '@rigorrun/environment';
 import { assertSafeCommand, assertSafeMcpUrl, describeConfig, type McpConfig } from './config.ts';
-import { paramsFromInputSchema, type UnsupportedParam } from './jsonSchema.ts';
-import { assessFromHints, readServerHints, type RiskAssessment, type ServerHints } from './risk.ts';
+import {
+  assessFromHints,
+  paramsFromInputSchema,
+  readServerHints,
+  type CallResult,
+  type DiscoveredTool,
+  type DiscoveryResult,
+} from '@rigorrun/connector';
 
 export const CLIENT_INFO = { name: 'rigorrun', version: '0.1.0' } as const;
 
-/** One tool as RigorRun understands it, with the provenance of every opinion. */
-export interface DiscoveredTool {
-  name: string;
-  /** The server's own description. Shown to people; never parsed for meaning. */
-  description: string;
-  params: ActionParam[];
-  /** Arguments RigorRun could not express, with a reason for each. */
-  unsupported: UnsupportedParam[];
-  /** True when the input schema was too large or deep to read completely. */
-  schemaTruncated: boolean;
-  /** Present when the server publishes one. The best evidence for record shape. */
-  outputSchema?: unknown;
-  hints: ServerHints;
-  risk: RiskAssessment;
-}
-
-export interface DiscoveryResult {
-  serverName: string;
-  serverVersion: string;
-  /** The version both ends actually agreed on, which may not be the latest. */
-  protocolVersion: string;
-  tools: DiscoveredTool[];
-  /** Round-trip time of the initialize handshake, in milliseconds. */
-  latencyMs: number;
-}
+export type { DiscoveredTool, DiscoveryResult };
 
 export interface ConnectOptions {
   /** How long the handshake may take before RigorRun gives up. */
@@ -186,13 +167,8 @@ export class McpConnection {
   }
 }
 
-export interface McpCallResult {
-  ok: boolean;
-  content?: unknown;
-  structured?: unknown;
-  error?: { code: string; message: string };
-  durationMs: number;
-}
+/** Kept as a name because callers use it; the shape is the connector's. */
+export type McpCallResult = CallResult;
 
 async function discoverTools(client: Client, timeout: number): Promise<DiscoveredTool[]> {
   const listed = await client.listTools(undefined, { timeout });

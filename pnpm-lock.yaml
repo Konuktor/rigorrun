@@ -297,6 +297,15 @@ importers:
         specifier: workspace:*
         version: link:../environment
 
+  packages/connector:
+    dependencies:
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../environment
+
   packages/core:
     dependencies:
       zod:
@@ -350,6 +359,9 @@ importers:
 
   packages/env-mcp:
     dependencies:
+      '@rigorrun/connector':
+        specifier: workspace:*
+        version: link:../connector
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
@@ -410,6 +422,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.30.0
         version: 1.30.0(zod@4.5.4)
+      '@rigorrun/connector':
+        specifier: workspace:*
+        version: link:../connector
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core

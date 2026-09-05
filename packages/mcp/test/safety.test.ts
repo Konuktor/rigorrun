@@ -8,8 +8,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { assertSafeCommand, assertSafeMcpUrl } from '../src/config.ts';
-import { paramsFromInputSchema, SCHEMA_LIMITS } from '../src/jsonSchema.ts';
-import { detectMismatch, readServerHints } from '../src/risk.ts';
+import { paramsFromInputSchema, SCHEMA_LIMITS } from '@rigorrun/connector';
+import { detectMismatch, readServerHints } from '@rigorrun/connector';
 
 describe('remote connector URLs', () => {
   it('accepts an ordinary endpoint, including one on a private network', () => {

@@ -21,6 +21,7 @@ async function sourceFiles(dir: string): Promise<string[]> {
 describe('an imported benchmark cannot cause command execution', () => {
   const EXECUTION_PATH = [
     'packages/core/src',
+    'packages/connector/src',
     'packages/environment/src',
     'packages/environments/src',
     'packages/verifier/src',

@@ -38,7 +38,7 @@ import {
 } from '@rigorrun/environment';
 import type { McpConnection } from '@rigorrun/mcp';
 import type { McpEnvironmentConfig } from './config.ts';
-import { stateFromPayloads } from './rows.ts';
+import { stateFromPayloads } from '@rigorrun/connector';
 
 export class McpEnvironment implements EnvironmentAdapter {
   readonly id: string;
