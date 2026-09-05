@@ -1,5 +1,5 @@
 {
-  "name": "@rigorrun/proxy",
+  "name": "@rigorrun/agent-sdk",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,10 +10,7 @@
     "./*": "./src/*"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.30.0",
-    "@rigorrun/core": "workspace:*",
-    "zod": "^4.1.12",
-    "hono": "^4.13.7",
-    "@hono/node-server": "^2.1.1"
+    "@hono/node-server": "^2.1.1",
+    "hono": "^4.13.7"
   }
 }

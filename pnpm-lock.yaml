@@ -168,6 +168,19 @@ importers:
         specifier: ^4.1.12
         version: 4.5.4
 
+  fixtures/external/booking-agent:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      '@rigorrun/agent-sdk':
+        specifier: workspace:*
+        version: link:../../../packages/agent-sdk
+    devDependencies:
+      tsx:
+        specifier: ^4.21.1
+        version: 4.23.13
+
   fixtures/external/mcp-venue-desk:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -181,6 +194,15 @@ importers:
         specifier: ^4.21.1
         version: 4.23.13
 
+  packages/agent-sdk:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^2.1.1
+        version: 2.1.1(hono@4.13.7)
+      hono:
+        specifier: ^4.13.7
+        version: 4.13.7
+
   packages/agents:
     dependencies:
       '@rigorrun/core':
@@ -192,6 +214,9 @@ importers:
       '@rigorrun/providers':
         specifier: workspace:*
         version: link:../providers
+      '@rigorrun/proxy':
+        specifier: workspace:*
+        version: link:../proxy
       zod:
         specifier: ^4.1.12
         version: 4.5.4
@@ -249,15 +274,33 @@ importers:
 
   packages/env-mcp:
     dependencies:
+      '@rigorrun/agent-sdk':
+        specifier: workspace:*
+        version: link:../agent-sdk
+      '@rigorrun/agents':
+        specifier: workspace:*
+        version: link:../agents
+      '@rigorrun/compiler':
+        specifier: workspace:*
+        version: link:../compiler
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
+      '@rigorrun/generator':
+        specifier: workspace:*
+        version: link:../generator
       '@rigorrun/mcp':
         specifier: workspace:*
         version: link:../mcp
+      '@rigorrun/proxy':
+        specifier: workspace:*
+        version: link:../proxy
+      '@rigorrun/runner':
+        specifier: workspace:*
+        version: link:../runner
 
   packages/environment:
     dependencies:
@@ -333,9 +376,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.30.0
         version: 1.30.0(zod@4.5.4)
-      '@rigorrun/agents':
-        specifier: workspace:*
-        version: link:../agents
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
@@ -2752,10 +2792,6 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@hono/node-server@2.1.1(hono@4.13.5)':
-    dependencies:
-      hono: 4.13.5
-
   '@hono/node-server@2.1.1(hono@4.13.7)':
     dependencies:
       hono: 4.13.7
@@ -2908,7 +2944,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.30.0(zod@4.5.4)':
     dependencies:
-      '@hono/node-server': 2.1.1(hono@4.13.5)
+      '@hono/node-server': 2.1.1(hono@4.13.7)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -2918,7 +2954,7 @@ snapshots:
       eventsource-parser: 3.1.1
       express: 5.2.1
       express-rate-limit: 8.7.0(express@5.2.1)
-      hono: 4.13.5
+      hono: 4.13.7
       jose: 6.2.11
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1

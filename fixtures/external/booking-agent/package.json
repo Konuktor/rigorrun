@@ -1,0 +1,13 @@
+{
+  "name": "booking-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A customer's own agent. Uses the public RigorRun agent SDK and nothing else.",
+  "scripts": { "start": "tsx src/main.ts" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@rigorrun/agent-sdk": "workspace:*"
+  },
+  "devDependencies": { "tsx": "^4.21.1" }
+}

@@ -9,8 +9,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { AgentEnvironment, ToolResult } from '@rigorrun/agents';
 import type { ToolDescription } from '@rigorrun/core';
+import type { ProxyChannel, ToolResult } from '../src/index.ts';
 import { connect } from 'node:net';
 import { ProxyServer, createProxySession, type ProxyCall } from '../src/index.ts';
 
@@ -54,7 +54,7 @@ const TOOLS: ToolDescription[] = [
 ];
 
 /** Stands in for the runner's bounded channel. */
-function channel(budget = 5): { env: AgentEnvironment; seen: string[] } {
+function channel(budget = 5): { env: ProxyChannel; seen: string[] } {
   const seen: string[] = [];
   let remaining = budget;
   return {
@@ -72,7 +72,6 @@ function channel(budget = 5): { env: AgentEnvironment; seen: string[] } {
         return { ok: true, data: { thingId: args['thingId'], state: 'open' } };
       },
       stepsRemaining: () => remaining,
-      note: () => undefined,
     },
   };
 }

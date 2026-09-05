@@ -14,6 +14,9 @@ import { join } from 'node:path';
 
 const externalDir = fileURLToPath(new URL('../../../fixtures/external/', import.meta.url));
 
+/** The only RigorRun package a customer is ever expected to install. */
+const PUBLIC_SURFACE = new Set(['@rigorrun/agent-sdk']);
+
 async function sourceFiles(dir: string): Promise<string[]> {
   const found: string[] = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -31,13 +34,32 @@ describe('fixtures/external', () => {
     expect(files.length).toBeGreaterThan(0);
   });
 
-  it('imports nothing from RigorRun', async () => {
-    const offenders: string[] = [];
+  it('imports nothing from RigorRun except the one package customers are given', async () => {
+    // An agent is *supposed* to use the agent SDK — that is the ten lines the
+    // integration costs, and refusing it would make the fixture prove something
+    // no customer would do. Everything else is off limits, because reaching
+    // into a product package is how a fixture stops being somebody else's code
+    // and starts being ours wearing a different name.
+    const offenders: { file: string; imported: string }[] = [];
     for (const file of await sourceFiles(externalDir)) {
       const source = await readFile(file, 'utf8');
-      if (source.includes('@rigorrun/')) {
-        offenders.push(file.slice(externalDir.length));
+      for (const [, imported] of source.matchAll(/@rigorrun\/[a-z-]+/g).map((m) => [m[0], m[0]])) {
+        if (!PUBLIC_SURFACE.has(imported)) {
+          offenders.push({ file: file.slice(externalDir.length), imported });
+        }
       }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('gives the environment fixture no RigorRun at all', async () => {
+    // An environment needs no SDK. It is a system that already existed, and a
+    // system that already existed has never heard of us.
+    const deskDir = join(externalDir, 'mcp-venue-desk');
+    const offenders: string[] = [];
+    for (const file of await sourceFiles(deskDir)) {
+      const source = await readFile(file, 'utf8');
+      if (source.includes('@rigorrun/')) offenders.push(file.slice(deskDir.length));
     }
     expect(offenders).toEqual([]);
   });

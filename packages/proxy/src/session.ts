@@ -23,8 +23,25 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import type { AgentEnvironment } from '@rigorrun/agents';
 import type { ToolDescription } from '@rigorrun/core';
+
+/**
+ * The bounded channel a session speaks through.
+ *
+ * Declared here structurally rather than imported from `@rigorrun/agents`,
+ * which depends on this package: the adapter that drives an external agent has
+ * to be able to publish a session. `AgentEnvironment` satisfies this shape, so
+ * nothing at the call site changes — but the dependency points one way, and a
+ * cycle that would have had to be broken later never forms.
+ */
+export interface ProxyChannel {
+  call(tool: string, args?: Record<string, unknown>): Promise<ToolResult>;
+  stepsRemaining(): number;
+}
+
+export type ToolResult<T = unknown> =
+  | { ok: true; data: T }
+  | { ok: false; error: { code: string; message: string } };
 
 export const PROXY_INFO = { name: 'rigorrun-proxy', version: '0.1.0' } as const;
 
@@ -43,7 +60,7 @@ export interface ProxySessionOptions {
   /** Exactly the tools the case allows. Nothing else is advertised or callable. */
   tools: readonly ToolDescription[];
   /** The bounded channel. The only way this session can affect anything. */
-  environment: AgentEnvironment;
+  environment: ProxyChannel;
   /** Called after every call, so a UI can show activity as it happens. */
   onCall?: (call: ProxyCall) => void;
 }
