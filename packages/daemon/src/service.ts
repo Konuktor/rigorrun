@@ -30,7 +30,8 @@ import {
   type EnvironmentFixture,
   type EnvironmentSchema,
 } from '@rigorrun/environment';
-import { createHttpV2Agent, probeAgent, type AgentAdapter } from '@rigorrun/agents';
+import type { AgentAdapter } from '@rigorrun/agents';
+import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import type { DiscoveredTool, SchemaQuestion } from '@rigorrun/mcp';
 import { newProject, type AgentConfig, type Connector, type Project } from './project.ts';

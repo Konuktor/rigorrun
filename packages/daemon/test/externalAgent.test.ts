@@ -19,11 +19,11 @@ import { applyReview, fromActionLog, rulesAwaitingReview, type Benchmark } from 
 import { induceContract } from '@rigorrun/compiler';
 import { generateBenchmark } from '@rigorrun/generator';
 import { runBenchmark } from '@rigorrun/runner';
-import { createHttpV2Agent, probeAgent } from '@rigorrun/agents';
+import { createHttpV2Agent, probeAgent } from '../src/index.ts';
 import { ProxyServer } from '@rigorrun/proxy';
 import { defineAgent, serve } from '@rigorrun/agent-sdk';
 import { CARELESS, CAREFUL, runTask } from '../../../fixtures/external/booking-agent/src/agent.ts';
-import { McpEnvironment, type McpEnvironmentConfig } from '../src/index.ts';
+import { McpEnvironment, type McpEnvironmentConfig } from '@rigorrun/env-mcp';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 

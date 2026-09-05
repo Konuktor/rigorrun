@@ -39,7 +39,12 @@
       "@rigorrun/providers": ["./packages/providers/src/index.ts"],
       "@rigorrun/runner": ["./packages/runner/src/index.ts"],
       "@rigorrun/report": ["./packages/report/src/index.ts"],
-      "@rigorrun/compiler": ["./packages/compiler/src/index.ts"]
+      "@rigorrun/compiler": ["./packages/compiler/src/index.ts"],
+      "@rigorrun/mcp": ["./packages/mcp/src/index.ts"],
+      "@rigorrun/env-mcp": ["./packages/env-mcp/src/index.ts"],
+      "@rigorrun/proxy": ["./packages/proxy/src/index.ts"],
+      "@rigorrun/daemon": ["./packages/daemon/src/index.ts"],
+      "@rigorrun/agent-sdk": ["./packages/agent-sdk/src/index.ts"]
     }
   }
 }

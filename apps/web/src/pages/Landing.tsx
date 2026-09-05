@@ -50,9 +50,11 @@ const PIPELINE = [
 ];
 
 export function Landing({
+  onTestYourAgent,
   onRunDemo,
   onSeeProof,
 }: {
+  onTestYourAgent: () => void;
   onRunDemo: () => void;
   onSeeProof: () => void;
 }) {
@@ -61,20 +63,29 @@ export function Landing({
       {/* ------------------------------------------------------------ hero */}
       <section className="grid gap-10 pt-14 pb-14 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center lg:gap-12 lg:pt-20">
         <div>
-          <Tag>Early MVP · runs entirely in your browser</Tag>
+          <Tag>Early · your systems and credentials stay on your machine</Tag>
           <h1 className="mt-5 text-display font-semibold">
-            Do the job once.
+            Acceptance testing
             <br />
-            <span className="text-secondary">Test every agent forever.</span>
+            <span className="text-secondary">for tool-using AI agents.</span>
           </h1>
           <p className="mt-5 max-w-xl text-body text-secondary">
-            Turn real human workflows into private executable benchmarks. Test agents on the work
-            they will actually perform — then verify the system state they changed.
+            Connect your system. Show RigorRun how one job is done. Connect your agent. RigorRun
+            proves whether the agent can do that job safely — by reading the system it changed,
+            never by trusting what it says about itself.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Button onClick={onRunDemo} testId="cta-run-demo" size="lg">
-              Run the live demo
+            <Button onClick={onTestYourAgent} testId="cta-test-your-agent" size="lg">
+              Test your agent
             </Button>
+            <button
+              type="button"
+              onClick={onRunDemo}
+              data-testid="cta-run-demo"
+              className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
+            >
+              Try the demo
+            </button>
             <button
               type="button"
               onClick={onSeeProof}
@@ -83,16 +94,10 @@ export function Landing({
             >
               One compiler, five jobs
             </button>
-            <a
-              href="#how-it-works"
-              data-testid="cta-sixty-seconds"
-              className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
-            >
-              See how it works
-            </a>
           </div>
           <p className="mt-4 text-meta text-muted">
-            No account, no API key, no cost. The benchmark executes in this browser.
+            Testing your own agent runs on your machine. The demo below runs in this page and
+            touches nothing of yours.
           </p>
         </div>
 

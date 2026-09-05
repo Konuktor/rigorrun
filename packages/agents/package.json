@@ -12,7 +12,6 @@
     "@rigorrun/core": "workspace:*",
     "@rigorrun/providers": "workspace:*",
     "zod": "^4.1.12",
-    "@rigorrun/environment": "workspace:*",
-    "@rigorrun/proxy": "workspace:*"
+    "@rigorrun/environment": "workspace:*"
   }
 }

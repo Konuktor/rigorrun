@@ -50,7 +50,8 @@
     "perf:prod": "playwright test --config e2e/playwright.perf.config.ts",
     "domain": "node scripts/check-domain-leak.mjs",
     "build:ops": "pnpm -F @rigorrun/demo-ops build",
-    "deploy:ops": "pnpm build:ops && wrangler pages deploy apps/demo-ops/dist --project-name rigorrun-ops --branch main --commit-dirty=true"
+    "deploy:ops": "pnpm build:ops && wrangler pages deploy apps/demo-ops/dist --project-name rigorrun-ops --branch main --commit-dirty=true",
+    "e2e:external": "playwright test --config e2e/playwright.external.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

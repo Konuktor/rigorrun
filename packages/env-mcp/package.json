@@ -12,12 +12,6 @@
   "dependencies": {
     "@rigorrun/core": "workspace:*",
     "@rigorrun/environment": "workspace:*",
-    "@rigorrun/mcp": "workspace:*",
-    "@rigorrun/proxy": "workspace:*",
-    "@rigorrun/agents": "workspace:*",
-    "@rigorrun/agent-sdk": "workspace:*",
-    "@rigorrun/compiler": "workspace:*",
-    "@rigorrun/generator": "workspace:*",
-    "@rigorrun/runner": "workspace:*"
+    "@rigorrun/mcp": "workspace:*"
   }
 }

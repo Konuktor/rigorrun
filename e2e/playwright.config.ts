@@ -14,7 +14,7 @@ export default defineConfig({
   // The public suite runs against the deployed URL and has its own config, so
   // the two never mix and each count means what it says.
   // Each layer has its own config so every count means what it says.
-  testIgnore: /(public|prod|smoke|a11y|visual|critical|perf|api)\.spec\.ts/,
+  testIgnore: /(public|prod|smoke|a11y|visual|critical|perf|api|external-user)\.spec\.ts/,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,

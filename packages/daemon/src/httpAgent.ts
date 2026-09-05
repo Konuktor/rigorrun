@@ -1,6 +1,14 @@
 /**
  * An agent that owns its own loop.
  *
+ * This lives with the runner rather than with `@rigorrun/agents`, and the
+ * reason is worth recording. It publishes an MCP proxy session, so it pulls in
+ * a Node HTTP server — and `@rigorrun/agents` is imported by the browser
+ * bundle for the offline example. Putting it there shipped 190KB of
+ * `@hono/node-server` to the browser and produced a blank page, because that
+ * code references `global`. A package boundary is the only version of this
+ * rule a bundler can enforce.
+ *
  * The existing HTTP protocol makes RigorRun the driver: it posts the task and
  * the history so far, the agent replies with one tool call, and round it goes.
  * That is a fine shape for an agent written against it and the wrong shape for
@@ -20,8 +28,13 @@
  */
 import { z } from 'zod';
 import { createProxySession, type ProxyServer } from '@rigorrun/proxy';
-import type { AgentAdapter, AgentEnvironment, AgentRunInput, AgentRunOutput } from './types.ts';
-import { assertSafeAgentUrl } from './http.ts';
+import {
+  assertSafeAgentUrl,
+  type AgentAdapter,
+  type AgentEnvironment,
+  type AgentRunInput,
+  type AgentRunOutput,
+} from '@rigorrun/agents';
 
 export const AGENT_PROTOCOL_V2 = 'rigorrun/agent/2';
 

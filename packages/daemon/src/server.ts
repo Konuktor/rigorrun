@@ -87,6 +87,24 @@ export class Runner {
       return this.serveUi(context.req.path);
     });
 
+    /**
+     * The one endpoint that answers before pairing.
+     *
+     * The same bundle is served from the runner and from the public site, and
+     * it has to know which it is: on the runner it shows a person's projects,
+     * on the site it shows the landing page and the example. Asking is more
+     * honest than baking a flag in at build time, and it means one bundle
+     * rather than two that can drift apart.
+     *
+     * It says only that a runner is here and whether the caller is paired,
+     * which an unpaired caller can already tell by being refused.
+     */
+    app.get('/api/runner', (context) => {
+      const bearer = context.req.header('authorization')?.replace(/^Bearer\s+/i, '');
+      const cookie = cookieValue(context.req.header('cookie'), SESSION_COOKIE);
+      return context.json({ runner: true, paired: this.pairing.authorises(bearer ?? cookie) });
+    });
+
     app.use('/api/*', async (context, next) => {
       const bearer = context.req.header('authorization')?.replace(/^Bearer\s+/i, '');
       const cookie = cookieValue(context.req.header('cookie'), SESSION_COOKIE);
