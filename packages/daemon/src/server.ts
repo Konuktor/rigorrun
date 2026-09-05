@@ -340,6 +340,38 @@ export class Runner {
       return context.json({ project: summarise(added.project), agent: added.agent });
     });
 
+    /**
+     * Reads a trace. Adds nothing.
+     *
+     * Deliberately two requests. A trace is the agent's own record of what it
+     * sent, and turning that into a permanent case without anybody reading it
+     * would be adding the agent's account of itself to the thing that exists
+     * to check the agent's account of itself.
+     */
+    app.post('/api/projects/:id/trace/review', async (context) => {
+      const body = await context.req.json<{ trace?: unknown }>();
+      return context.json({ trace: service.reviewTrace(String(body.trace ?? '')) });
+    });
+
+    app.post('/api/projects/:id/trace/add', async (context) => {
+      const body = await context.req.json<{
+        name?: unknown;
+        reason?: unknown;
+        request?: unknown;
+      }>();
+      const request =
+        typeof body.request === 'object' && body.request !== null && !Array.isArray(body.request)
+          ? (body.request as Record<string, unknown>)
+          : {};
+      return context.json({
+        added: await service.addFailureToSuite(context.req.param('id'), {
+          name: String(body.name ?? 'a failure from production'),
+          reason: String(body.reason ?? ''),
+          request,
+        }),
+      });
+    });
+
     app.post('/api/projects/:id/quality', async (context) =>
       context.json({ quality: await service.assessSuite(context.req.param('id')) }),
     );

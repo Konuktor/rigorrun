@@ -26,6 +26,7 @@
     "@rigorrun/quality": "workspace:*",
     "@rigorrun/runner": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
+    "@rigorrun/trace-import": "workspace:*",
     "hono": "^4.13.7",
     "zod": "^4.1.12"
   }

@@ -372,6 +372,9 @@ importers:
       '@rigorrun/scoring':
         specifier: workspace:*
         version: link:../scoring
+      '@rigorrun/trace-import':
+        specifier: workspace:*
+        version: link:../trace-import
       hono:
         specifier: ^4.13.7
         version: 4.13.7
@@ -557,6 +560,12 @@ importers:
         version: link:../verifier
 
   packages/scoring:
+    dependencies:
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+
+  packages/trace-import:
     dependencies:
       '@rigorrun/core':
         specifier: workspace:*

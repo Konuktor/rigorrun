@@ -68,7 +68,13 @@ can still only come from a person at this machine.
 
 **No Python SDK.**
 
-**No trace import, and no OpenTelemetry ingest.** Everybody starts from zero.
+~~**No trace import, and no OpenTelemetry ingest.**~~ Built —
+`docs/TRACE_IMPORT.md`. An OpenTelemetry trace of a production failure becomes a
+permanent case, with only the *situation* taken from the trace and what should
+have happened computed from the confirmed rules. What is missing: importing
+RigorRun's own run artefacts, and any way to recover a starting state from
+telemetry — which is not an oversight, because telemetry describes what an agent
+did and never what the system held.
 
 **A system whose reads answer in prose cannot be verified.** RigorRun reads
 structure and never prose. It now says so when the reads are nominated, rather
@@ -142,9 +148,9 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 1. **Publish to npm.** `pnpm dlx rigorrun` is the single largest piece of
    friction between this and a stranger using it, and it is not a technical
    problem.
-2. **Trace import.** Everybody still starts from zero, and a real production
-   failure ought to become a permanent regression case rather than a bug
-   report.
+2. **Publishing the SDKs.** Every workspace package is `private: true`, so the
+   ten-line TypeScript agent SDK cannot be installed by anybody, and there is
+   no Python one.
 3. **A headless setup path.** Running and gating a project works from CI;
    creating one does not. A `rigorrun project import` taking a description file
    would make a project reproducible from a repository.

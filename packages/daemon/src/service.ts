@@ -22,9 +22,10 @@ import {
   type RunResult,
 } from '@rigorrun/core';
 import { induceContract } from '@rigorrun/compiler';
-import { createReferenceAgent, generateBenchmark } from '@rigorrun/generator';
+import { createReferenceAgent, generateBenchmark, replayFailure } from '@rigorrun/generator';
 import { runBenchmark } from '@rigorrun/runner';
 import { assessBenchmark, type BenchmarkQuality } from '@rigorrun/quality';
+import { importOtelTrace, type ImportedTrace } from '@rigorrun/trace-import';
 import {
   clearEnvironments,
   registerEnvironment,
@@ -647,6 +648,61 @@ export class Service {
   /** The last assessment, if the suite has been checked. */
   async quality(projectId: string): Promise<BenchmarkQuality | undefined> {
     return this.store.readArtefact<BenchmarkQuality>(projectId, 'quality');
+  }
+
+  /**
+   * Reads a trace of something that already went wrong.
+   *
+   * Reading only: nothing is added to the suite here. What comes back is what
+   * the trace said, for a person to look at — because a trace is the agent's
+   * own record of what it sent, and turning that into a permanent case without
+   * anybody reading it would be adding the agent's account of itself to the
+   * thing that exists to check the agent's account of itself.
+   */
+  reviewTrace(text: string): ImportedTrace {
+    return importOtelTrace(text);
+  }
+
+  /**
+   * Adds a failure to the suite, permanently.
+   *
+   * The situation comes from the incident. What *should* have happened is
+   * computed from the confirmed rules, by the same hypothetical completion
+   * every generated case uses — so a regression case is satisfiable by
+   * construction and cannot bake one incident's details in as the definition
+   * of correct.
+   */
+  async addFailureToSuite(
+    projectId: string,
+    failure: { name: string; reason: string; request: Record<string, unknown> },
+  ): Promise<{ caseId: string; shouldPerform: boolean; refusalReason: string; cases: number }> {
+    const project = await this.store.read(projectId);
+    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
+    const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
+    if (!benchmark || !contract) {
+      throw new Error('Build a suite first. A failure is added to a suite, not instead of one.');
+    }
+
+    const schema = await this.schemaOf(project);
+    await this.registerFor(project, schema);
+    // The same live adapter the generator was given. A regression case has to
+    // be built against the system as it is now, not against a snapshot of what
+    // it looked like when the suite was first made.
+    const adapter = this.workspace.environment(project, schema);
+
+    const caseId = `case_incident_${randomBytes(4).toString('hex')}`;
+    const replayed = await replayFailure(adapter, contract, { ...failure }, caseId);
+
+    await this.store.writeArtefact(projectId, 'benchmark', {
+      ...benchmark,
+      cases: [...benchmark.cases, replayed.testCase],
+    });
+    return {
+      caseId,
+      shouldPerform: replayed.shouldPerform,
+      refusalReason: replayed.refusalReason,
+      cases: benchmark.cases.length + 1,
+    };
   }
 
   async runAgent(projectId: string, agentId: string): Promise<RunResult> {

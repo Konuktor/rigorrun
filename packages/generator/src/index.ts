@@ -13,4 +13,5 @@ export {
   type GenerationResult,
 } from './counterfactual.ts';
 export { createReferenceAgent, REFERENCE_AGENT_ID } from './reference.ts';
+export { replayFailure, type FailureToReplay, type ReplayedFailure } from './regression.ts';
 export { findUntestableRules, markUntestable, type UntestableRule } from './enforcement.ts';
