@@ -553,6 +553,9 @@ export class Service {
 
     const schema = await this.schemaOf(project);
     await this.registerFor(project, schema);
+    // The agent is being graded on what it changes, so whatever the connector
+    // was refusing while this project was being set up, it stops refusing now.
+    this.workspace.allowWrites(projectId);
 
     let result;
     try {

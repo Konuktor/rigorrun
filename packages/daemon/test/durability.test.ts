@@ -279,7 +279,7 @@ describe('a completed project', () => {
     const projects = await service.listProjects();
     const durable = projects.find((project) => project.name === 'Durable');
     expect(durable).toBeDefined();
-    expect(durable?.connector?.transport).toBe('stdio');
+    expect(durable?.connector).toMatchObject({ kind: 'mcp', transport: 'stdio' });
     expect(durable?.verifierReads).toHaveLength(1);
     expect(durable?.reset).toMatchObject({ kind: 'tool', tool: 'reset_desk' });
 

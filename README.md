@@ -39,8 +39,8 @@ against it and reads your system to find out what actually happened.
 npx rigorrun@alpha
 ```
 
-Open the URL it prints. Connect an MCP server, do the job once, answer a few
-questions, connect your agent, run it. Nothing is uploaded; your systems,
+Open the URL it prints. Connect an MCP server or an OpenAPI document, do the
+job once, answer a few questions, connect your agent, run it. Nothing is uploaded; your systems,
 credentials and recordings stay on your machine, because the interface is
 served by the local process rather than from a website.
 

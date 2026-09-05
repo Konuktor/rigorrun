@@ -11,6 +11,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createServer, type Server } from 'node:http';
 import { SystemEnvironment, isConfirmedReadOnly, mayMutate } from '@rigorrun/connector';
+import type { EnvironmentSchema } from '@rigorrun/environment';
 import { OpenApiConnection, WriteRefusedDuringSetup, operationsFrom, loadDocument } from '../src/index.ts';
 
 /**
@@ -242,15 +243,29 @@ describe('talking to the API', () => {
 describe('as an environment', () => {
   it('is the same adapter an MCP connection gets', async () => {
     const connection = await OpenApiConnection.open({ spec: SPEC, baseUrl });
-    const schema = {
+    const schema: EnvironmentSchema = {
       entities: [
         {
           name: 'Plot',
           idField: 'plotRef',
+          mutable: true,
+          appendOnly: false,
           fields: [
-            { name: 'plotRef', type: 'id' as const },
-            { name: 'rods', type: 'quantity' as const, precision: 0.5 },
-            { name: 'standing', type: 'enum' as const, enumValues: ['good', 'lapsed'] },
+            { name: 'plotRef', type: 'string', nullable: false, role: 'identifier' },
+            {
+              name: 'rods',
+              type: 'number',
+              nullable: false,
+              role: 'quantity',
+              unit: 'count',
+              precision: 0.5,
+            },
+            {
+              name: 'standing',
+              type: 'enum',
+              nullable: false,
+              enumValues: ['good', 'lapsed'],
+            },
           ],
         },
       ],

@@ -92,7 +92,7 @@ describe('from nothing', () => {
     expect(connected.latencyMs).toBeGreaterThanOrEqual(0);
 
     // And the connection is only saved because it worked.
-    expect((await store.read(project.id)).connector?.command).toBe(DESK.command);
+    expect((await store.read(project.id)).connector).toMatchObject({ command: DESK.command });
     expect(project.timings.environmentConnectedAt).not.toBeNull();
   }, 60_000);
 

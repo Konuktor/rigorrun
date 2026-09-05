@@ -23,7 +23,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import type { Benchmark, EnvironmentContract, RunResult } from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
-import { nextSteps, timeToFirstVerdictMs, type Connector, type Project } from './project.ts';
+import { ConnectorSchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
 import type { Service } from './service.ts';
 
 const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -209,10 +209,21 @@ export class Runner {
     // ---------------------------------------------------------- environment
 
     app.post('/api/projects/:id/environment', async (context) => {
-      const body = await context.req.json<{ connector: Connector; safety?: Project['safety'] }>();
+      const body = await context.req.json<{ connector: unknown; safety?: Project['safety'] }>();
+      // Parsed rather than trusted. This is the one request that decides what
+      // RigorRun will run or open on this machine, and it arrives from a page —
+      // a page RigorRun serves, but the narrowing is what makes an `openapi`
+      // connector unable to carry a command at all.
+      const parsed = ConnectorSchema.safeParse(body.connector);
+      if (!parsed.success) {
+        return context.json(
+          { error: `That is not a connector RigorRun understands: ${parsed.error.issues[0]?.message ?? 'unknown shape'}` },
+          400,
+        );
+      }
       const connected = await service.connectEnvironment(
         context.req.param('id'),
-        body.connector,
+        parsed.data,
         body.safety ?? 'staging',
       );
       return context.json({
@@ -420,6 +431,12 @@ function publicTool(tool: DiscoveredTool) {
 function summarise(project: Project) {
   return {
     ...project,
+    // An OpenAPI document can be megabytes, and the page has no use for it —
+    // it is read by the runner when a connection opens. Sending it on every
+    // project load would put the whole thing across the wire to redraw a form.
+    ...(project.connector?.kind === 'openapi'
+      ? { connector: { ...project.connector, spec: '', specBytes: project.connector.spec.length } }
+      : {}),
     nextSteps: nextSteps(project),
     timeToFirstVerdictMs: timeToFirstVerdictMs(project),
   };

@@ -161,7 +161,13 @@ async function shapeOf(
 
   return {
     id: project.id,
-    connector: project.connector ? `mcp:${project.connector.transport}` : 'none',
+    // The kind, never the address. A feedback bundle says an OpenAPI
+    // connector was in use; it does not say whose API.
+    connector: project.connector
+      ? project.connector.kind === 'mcp'
+        ? `mcp:${project.connector.transport}`
+        : 'openapi'
+      : 'none',
     safety: project.safety,
     usesCredentials: secretsConfigured && (project.connector?.secretNames.length ?? 0) > 0,
     counts: {

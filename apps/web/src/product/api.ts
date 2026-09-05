@@ -32,13 +32,28 @@ export interface ProjectView {
   name: string;
   goal: string;
   safety: 'production' | 'staging' | 'local' | 'ephemeral';
-  connector: {
-    transport: 'stdio' | 'http';
-    command: string;
-    args: string[];
-    url: string;
-    secretNames: string[];
-  } | null;
+  connector:
+    | {
+        kind: 'mcp';
+        transport: 'stdio' | 'http';
+        command: string;
+        args: string[];
+        url: string;
+        secretNames: string[];
+      }
+    | {
+        kind: 'openapi';
+        /** Empty in a summary — the document lives on the runner. */
+        spec: string;
+        /** How big it is, so the form can say so without carrying it. */
+        specBytes?: number;
+        specUrl: string;
+        baseUrl: string;
+        /** Header name to secret name. Never a value. */
+        headers: Record<string, string>;
+        secretNames: string[];
+      }
+    | null;
   readOnlyTools: string[];
   verifierReads: { tool: string; args: Record<string, unknown> }[];
   reset: { kind: 'tool' | 'none'; tool: string };

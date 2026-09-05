@@ -111,19 +111,23 @@ describe('the paths the docs promise', () => {
 
 describe('what the docs do not claim', () => {
   it('does not document a connector that is not built', async () => {
-    // Writing OPENAPI_ENVIRONMENT.md, BROWSER_ENVIRONMENT.md, CLI_AGENT.md or
-    // PYTHON_AGENT_SDK.md before those exist would be the exact kind of
-    // breadth this product reset was called to remove. When one is built, its
-    // doc arrives with it and this list shrinks.
+    // Writing BROWSER_ENVIRONMENT.md, CLI_AGENT.md or PYTHON_AGENT_SDK.md
+    // before those exist would be the exact kind of breadth this product reset
+    // was called to remove. When one is built, its doc arrives with it and this
+    // list shrinks — OPENAPI_ENVIRONMENT.md left this list the day the
+    // connector landed, which is the only way an entry should ever leave it.
     const names = await readdir(docsDir);
-    for (const forbidden of [
-      'OPENAPI_ENVIRONMENT.md',
-      'BROWSER_ENVIRONMENT.md',
-      'CLI_AGENT.md',
-      'PYTHON_AGENT_SDK.md',
-    ]) {
+    for (const forbidden of ['BROWSER_ENVIRONMENT.md', 'CLI_AGENT.md', 'PYTHON_AGENT_SDK.md']) {
       expect(names, `${forbidden} exists; does the feature?`).not.toContain(forbidden);
     }
+  });
+
+  it('documents the connectors that are', async () => {
+    // The other direction, and it matters as much. A connector somebody cannot
+    // find out how to use is a connector that does not exist for them.
+    const names = await readdir(docsDir);
+    expect(names).toContain('MCP_ENVIRONMENT.md');
+    expect(names).toContain('OPENAPI_ENVIRONMENT.md');
   });
 
   it('says plainly that this is an alpha, and what that means', async () => {

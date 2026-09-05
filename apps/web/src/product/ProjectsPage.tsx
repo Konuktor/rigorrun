@@ -173,7 +173,13 @@ function ProjectCard({ project, onOpen }: { project: ProjectView; onOpen: () => 
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-meta">
           <Fact
             label="Environment"
-            value={project.connector ? `MCP · ${project.connector.transport}` : 'not connected'}
+            value={
+              project.connector === null
+                ? 'not connected'
+                : project.connector.kind === 'mcp'
+                  ? `MCP · ${project.connector.transport}`
+                  : 'OpenAPI'
+            }
           />
           <Fact
             label="Agent"

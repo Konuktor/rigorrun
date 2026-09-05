@@ -22,11 +22,17 @@ import {
   type PayloadObservation,
   type SchemaAnswer,
 } from '@rigorrun/mcp';
-import { McpEnvironment, stateFromPayloads, type McpEnvironmentConfig } from '@rigorrun/env-mcp';
+import {
+  SystemEnvironment,
+  stateFromPayloads,
+  type SystemConnection,
+  type SystemEnvironmentConfig,
+} from '@rigorrun/connector';
+import { OpenApiConnection } from '@rigorrun/env-openapi';
 import type { ActionLogEntry } from '@rigorrun/core';
 import type { CanonicalState, EnvironmentSchema } from '@rigorrun/environment';
 import { basename } from 'node:path';
-import type { Project } from './project.ts';
+import { describeConnectorAction, type Project } from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
 import type { ProjectStore } from './store.ts';
 
@@ -55,7 +61,7 @@ interface SavedDemonstration {
 }
 
 export interface LiveProject {
-  connection: McpConnection;
+  connection: SystemConnection;
   induced: InducedSchema | undefined;
   demonstration: Demonstration | undefined;
 }
@@ -73,7 +79,8 @@ export class Workspace {
    * a secret ever being in the object, and the only code holding one is the
    * code about to open a socket with it.
    */
-  async configFor(project: Project): Promise<McpConfig> {
+  /** The credentials a connector needs, fetched at the last possible moment. */
+  private async secretsFor(project: Project): Promise<Record<string, string>> {
     const connector = project.connector;
     if (!connector) throw new Error(`${project.name} has no system connected yet.`);
 
@@ -87,9 +94,18 @@ export class Workspace {
     if (missing.length > 0) {
       throw new Error(
         `This project needs ${missing.join(', ')}, which this machine does not have. ` +
-          `Set them with \`rigorrun secret set <name>\`.`,
+          `Set them with \`rigorrun secrets set <name>\`.`,
       );
     }
+    return secrets;
+  }
+
+  async configFor(project: Project): Promise<McpConfig> {
+    const connector = project.connector;
+    if (connector?.kind !== 'mcp') {
+      throw new Error(`${project.name} is not connected over MCP.`);
+    }
+    const secrets = await this.secretsFor(project);
 
     if (connector.transport === 'stdio') {
       const config: McpConfig = {
@@ -108,15 +124,43 @@ export class Workspace {
     };
   }
 
-  async connect(project: Project): Promise<McpConnection> {
+  /**
+   * Opens whichever kind of connector this project has.
+   *
+   * The only place in the daemon that knows there is more than one kind. Every
+   * caller downstream is handed a `SystemConnection` and never asks what is
+   * behind it, which is what stops a second connector becoming a second engine.
+   */
+  private async openConnection(project: Project): Promise<SystemConnection> {
+    const connector = project.connector;
+    if (!connector) throw new Error(`${project.name} has no system connected yet.`);
+
+    if (connector.kind === 'openapi') {
+      const secrets = await this.secretsFor(project);
+      return OpenApiConnection.open({
+        spec: connector.spec,
+        baseUrl: connector.baseUrl,
+        // The project stores a header name against a *secret* name; the value
+        // is substituted here and nowhere earlier.
+        headers: Object.fromEntries(
+          Object.entries(connector.headers)
+            .map(([header, secret]) => [header, secrets[secret]])
+            .filter((entry): entry is [string, string] => entry[1] !== undefined),
+        ),
+      });
+    }
+    return McpConnection.open(await this.configFor(project));
+  }
+
+  async connect(project: Project): Promise<SystemConnection> {
     const existing = this.live.get(project.id);
     if (existing) return existing.connection;
     assertConnectorTrusted(project);
-    const connection = await McpConnection.open(await this.configFor(project));
+    const connection = await this.openConnection(project);
     this.live.set(project.id, { connection, induced: undefined, demonstration: undefined });
     // Written down so that if this runner is killed outright, the next one can
     // find the server it left running and end it. See `orphans.ts`.
-    if (connection.childPid !== null && project.connector) {
+    if (connection.childPid !== null && project.connector?.kind === 'mcp') {
       // The *arguments*, not the whole command line. A launcher resolves:
       // `node_modules/.bin/tsx` shows up in /proc as
       // `node .../tsx/dist/cli.mjs`, so matching on the executable never
@@ -131,7 +175,7 @@ export class Workspace {
     return connection;
   }
 
-  connectionFor(projectId: string): McpConnection | undefined {
+  connectionFor(projectId: string): SystemConnection | undefined {
     return this.live.get(projectId)?.connection;
   }
 
@@ -157,10 +201,21 @@ export class Workspace {
    * Built fresh each time. The runner requires a new adapter per case, and a
    * shared one would let a case inherit the previous one's recorded events.
    */
-  environment(project: Project, schema: EnvironmentSchema): McpEnvironment {
+  environment(project: Project, schema: EnvironmentSchema): SystemEnvironment {
     const connection = this.connectionFor(project.id);
     if (!connection) throw new Error(`${project.name} is not connected.`);
-    return new McpEnvironment(connection, schema, environmentConfig(project));
+    return new SystemEnvironment(connection, schema, environmentConfig(project));
+  }
+
+  /**
+   * Lets writes through, because a run is about to happen.
+   *
+   * Called once when a benchmark starts. Everything before this — connecting,
+   * probing, sampling — is RigorRun asking questions of somebody's system, and
+   * a question should not change anything.
+   */
+  allowWrites(projectId: string): void {
+    this.live.get(projectId)?.connection.allowWrites?.();
   }
 
   // ------------------------------------------------------------ demonstrating
@@ -181,6 +236,10 @@ export class Workspace {
           'the job changed, and the contract is derived from exactly that.',
       );
     }
+
+    // The person is about to do the job. Whatever the connector was refusing
+    // during setup, they are asking for now.
+    live.connection.allowWrites?.();
 
     await this.environment(project, { entities: [], relationships: [] }).reset();
     const beforePayloads = await this.readPayloads(project);
@@ -215,6 +274,7 @@ export class Workspace {
    */
   async resumeDemonstration(project: Project): Promise<boolean> {
     const live = this.live.get(project.id);
+    live?.connection.allowWrites?.();
     if (!live || live.demonstration) return live !== undefined && live.demonstration !== undefined;
     const saved = await this.store.readArtefact<SavedDemonstration>(project.id, 'demonstration');
     if (!saved) return false;
@@ -327,7 +387,7 @@ export class Workspace {
   }
 }
 
-export function environmentConfig(project: Project): McpEnvironmentConfig {
+export function environmentConfig(project: Project): SystemEnvironmentConfig {
   return {
     id: project.id,
     name: project.name,
@@ -358,10 +418,7 @@ export function assertConnectorTrusted(project: Project): void {
   const trust = project.connectorTrust;
   if (trust.origin !== 'imported' || trust.confirmedAt !== null) return;
   const connector = project.connector;
-  const what =
-    connector?.transport === 'stdio'
-      ? `run \`${connector.command} ${connector.args.join(' ')}\``
-      : `open ${connector?.url ?? 'a URL'}`;
+  const what = connector ? describeConnectorAction(connector) : 'reach a system';
   throw new Error(
     `"${project.name}" was imported, so its connector came from a file rather than from you. ` +
       `Opening it would ${what} on this machine. Read that line and confirm it — in the ` +

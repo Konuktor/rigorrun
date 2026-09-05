@@ -10,7 +10,14 @@
  * Exit codes are the contract: 0 passed, 1 the agent failed, 2 something is
  * wrong with the setup. A CI job cannot tell those apart from prose.
  */
-import { ProjectStore, Service, compareRuns, storeRoot, timeToFirstVerdictMs } from '@rigorrun/daemon';
+import {
+  ProjectStore,
+  Service,
+  compareRuns,
+  describeConnector,
+  storeRoot,
+  timeToFirstVerdictMs,
+} from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
 import type { RunResult } from '@rigorrun/core';
 import { CliError } from './io.ts';
@@ -51,7 +58,7 @@ export async function cmdProjects(flags: Flags): Promise<number> {
       return [
         project.id,
         project.name,
-        project.connector ? `${project.connector.transport} · connected` : 'not connected',
+        describeConnector(project.connector),
         String(project.agents.length),
         String(project.runs.length),
         last ? `${(last.taskSuccessRate * 100).toFixed(1)}% ${last.thresholdsPassed ? 'PASS' : 'FAIL'}` : '—',

@@ -42,8 +42,9 @@ infrastructure, because there is no path by which they could.
 ## What you need
 
 - **Node 20.11 or newer.**
-- **An MCP server** for the system you want to test against — ideally a staging
-  or scratch one with a way to reset it.
+- **A way in to the system you want to test**: an MCP server, or an OpenAPI
+  document and the address it is served from. Ideally staging or a scratch
+  instance, with a way to reset it.
 - **An agent.** If it speaks MCP it works unchanged; RigorRun hands it a URL. If
   not, about ten lines of the agent SDK.
 
@@ -61,10 +62,11 @@ npx rigorrun feedback export              # a sanitised bundle for a bug report
 
 ## This is an alpha
 
-It connects to MCP servers and nothing else — no OpenAPI, no browser. Setting a
-project up needs the interface; running and gating it does not. It has been used
-successfully by the people who wrote it and is now looking for people who did
-not.
+It connects to MCP servers and to HTTP APIs with an OpenAPI document. It cannot
+drive a browser, so an agent that only works by clicking cannot be tested yet.
+Setting a project up needs the interface; running and gating it does not. It has
+been used successfully by the people who wrote it and is now looking for people
+who did not.
 
 If it goes wrong, `npx rigorrun feedback export` produces a bundle that contains
 no credentials, no tool arguments and no results — only what is needed to work

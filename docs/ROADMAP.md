@@ -45,8 +45,11 @@ check that fails if a business noun reaches generic code.
 
 ## What is honestly not built
 
-**No OpenAPI connector.** MCP is the only way to connect a system. A REST API
-has to be wrapped.
+~~**No OpenAPI connector.**~~ Built. An HTTP API with an OpenAPI 3 document is
+connected the same way an MCP server is, and everything after the connection is
+the same code — `docs/OPENAPI_ENVIRONMENT.md`. What it does not have yet: an
+OAuth flow (a static header is the only authentication), remote `$ref`
+resolution, and a reset that is an API operation rather than an MCP tool.
 
 **No browser execution lane.** An agent that only works by clicking cannot be
 tested. This remains the largest single gap for anybody whose system has no
@@ -132,9 +135,9 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 1. **Publish to npm.** `pnpm dlx rigorrun` is the single largest piece of
    friction between this and a stranger using it, and it is not a technical
    problem.
-2. **An OpenAPI connector.** MCP being the only path means anybody whose system
-   is a REST API has to write a server first. OpenAPI is also the easier
-   induction problem, because the schemas arrive declared rather than inferred.
+2. **The browser execution lane.** Now the largest gap: an agent that only
+   works by clicking cannot be tested at all, and it is the hardest
+   verification story, because DOM text is not authoritative state.
 3. **A headless setup path.** Running and gating a project works from CI;
    creating one does not. A `rigorrun project import` taking a description file
    would make a project reproducible from a repository.
@@ -143,9 +146,9 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
    stopping means somebody presses **Reconnect** before they can run. Holding
    the connection across a restart, or reopening it on demand, would remove the
    last step nobody asked for.
-5. **The browser execution lane.** Still the largest gap for anybody whose
-   system has no API at all, and still the hardest verification story: DOM text
-   is not authoritative state.
+5. **A CLI agent adapter.** `AgentKind` has declared `'process'` for months
+   with nothing behind it, and the place for it now exists — `exec.ts` is the
+   one file in the codebase that starts a process.
 6. **Decide about the control plane.** It is deployed, tested, and called by
    nothing. Either it becomes opt-in sync for teams who want a shared history,
    or it should be deleted.

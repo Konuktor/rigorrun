@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
+    "@rigorrun/agent-sdk": "workspace:*",
     "@rigorrun/agents": "workspace:*",
     "@rigorrun/compiler": "workspace:*",
+    "@rigorrun/connector": "workspace:*",
     "@rigorrun/core": "workspace:*",
     "@rigorrun/env-mcp": "workspace:*",
+    "@rigorrun/env-openapi": "workspace:*",
     "@rigorrun/environment": "workspace:*",
     "@rigorrun/generator": "workspace:*",
     "@rigorrun/mcp": "workspace:*",
@@ -22,7 +25,6 @@
     "@rigorrun/runner": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
     "hono": "^4.13.7",
-    "zod": "^4.1.12",
-    "@rigorrun/agent-sdk": "workspace:*"
+    "zod": "^4.1.12"
   }
 }

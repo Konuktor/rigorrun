@@ -154,8 +154,15 @@ describe('the README a stranger reads on npm', () => {
   });
 
   it('says it is an alpha, and what it does not do', async () => {
-    const readme = await readFile(`${here}README.md`, 'utf8');
+    // Whitespace collapsed first: a sentence that means the right thing but
+    // happens to wrap between two words is not a failing README, and a test
+    // that says otherwise is a test people learn to work around.
+    const readme = (await readFile(`${here}README.md`, 'utf8')).replace(/\s+/g, ' ');
     expect(readme).toMatch(/alpha/i);
-    expect(readme).toMatch(/no OpenAPI, no browser/i);
+    // The specific gap, named. This assertion has to move every time a
+    // connector lands, which is the point of it: the README is the last place
+    // anybody reads before installing, and a stale limitation there is a
+    // person deciding not to bother for a reason that stopped being true.
+    expect(readme).toMatch(/cannot drive a browser/i);
   });
 });

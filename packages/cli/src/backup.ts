@@ -17,7 +17,13 @@
  */
 import { cp, mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { ProjectStore, parseProject, storeRoot, type Project } from '@rigorrun/daemon';
+import {
+  ProjectStore,
+  describeConnectorAction,
+  parseProject,
+  storeRoot,
+  type Project,
+} from '@rigorrun/daemon';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
@@ -268,9 +274,7 @@ export async function cmdImportProject(
   const connector = imported.connector;
   if (connector) {
     line(c.grey('  Its connector, which came from this file rather than from you:'));
-    line(
-      `    ${connector.transport === 'stdio' ? `${connector.command} ${connector.args.join(' ')}` : connector.url}`,
-    );
+    line(`    ${describeConnectorAction(connector)}`);
     line();
     line(c.grey('  RigorRun will not open it until you have read that line and said yes,'));
     line(c.grey(`  in the interface or with \`rigorrun trust ${id}\`.`));
@@ -294,10 +298,8 @@ export async function cmdTrust(
   const connector = project.connector;
   if (!connector) throw new CliError(`${project.name} has no connector to trust.`);
 
-  heading(`${project.name} connects with`);
-  line(
-    `  ${connector.transport === 'stdio' ? `${connector.command} ${connector.args.join(' ')}` : connector.url}`,
-  );
+  heading(`Opening ${project.name} would`);
+  line(`  ${describeConnectorAction(connector)}`);
   line();
 
   if (!flags.yes) {

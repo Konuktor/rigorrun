@@ -85,7 +85,9 @@ describe('importing a project', () => {
     // A new id, so importing twice gives two projects rather than one silently
     // overwriting the other.
     expect(imported!.id).not.toBe('p_1');
-    expect(imported!.connector?.command).toBe('/usr/local/bin/desk-mcp');
+    expect(imported!.connector?.kind).toBe('mcp');
+    if (imported!.connector?.kind !== 'mcp') throw new Error('expected an MCP connector');
+    expect(imported!.connector.command).toBe('/usr/local/bin/desk-mcp');
     // Runs belong to the machine that produced them.
     expect(imported!.runs).toEqual([]);
     expect(imported!.connectorTrust).toEqual({ origin: 'imported', confirmedAt: null });

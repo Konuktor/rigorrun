@@ -18,8 +18,17 @@ import { z } from 'zod';
 
 export const PROJECT_SCHEMA_VERSION = 1;
 
-/** How this project reaches the system under test. */
-export const ConnectorSchema = z.object({
+/**
+ * Names of the credentials a connector needs.
+ *
+ * The *names* live in the project and the values live in the secret store.
+ * That way a project file can be read, copied or attached to a support request
+ * without carrying a credential, and RigorRun can still say exactly what is
+ * missing when it is.
+ */
+const secretNames = z.array(z.string()).default([]);
+
+export const McpConnectorSchema = z.object({
   kind: z.literal('mcp'),
   transport: z.enum(['stdio', 'http']),
   /** For stdio. The binary, never a shell string. */
@@ -27,16 +36,62 @@ export const ConnectorSchema = z.object({
   args: z.array(z.string()).default([]),
   /** For http. */
   url: z.string().default(''),
-  /**
-   * Names of the environment variables and headers this connector needs.
-   *
-   * The *names* live here and the values live in the secret store. That way a
-   * project file can be read, copied or supported without carrying a
-   * credential, and RigorRun can still say exactly what is missing when it is.
-   */
-  secretNames: z.array(z.string()).default([]),
+  secretNames,
 });
+
+export const OpenApiConnectorSchema = z.object({
+  kind: z.literal('openapi'),
+  /** The document itself, kept whole so a run does not depend on a URL. */
+  spec: z.string().max(8_000_000).default(''),
+  /** Where it was fetched from, for reconnecting and for saying so. */
+  specUrl: z.string().default(''),
+  /** Where the API actually is. Whatever `servers` claims is a suggestion. */
+  baseUrl: z.string().default(''),
+  /** Header name to secret name, so a token is never in the project. */
+  headers: z.record(z.string(), z.string()).default({}),
+  secretNames,
+});
+
+/**
+ * How this project reaches the system under test.
+ *
+ * A tagged union rather than one object with every field on it. The flat shape
+ * meant an OpenAPI connector still carried `command` and `args`, which is the
+ * same latent hole an agent config had: a field that should not exist on this
+ * kind of thing, present and parseable, one forgotten branch away from being
+ * used. Narrowing on `kind` makes that unrepresentable rather than merely
+ * unlikely.
+ */
+export const ConnectorSchema = z.discriminatedUnion('kind', [
+  McpConnectorSchema,
+  OpenApiConnectorSchema,
+]);
 export type Connector = z.infer<typeof ConnectorSchema>;
+export type McpConnector = z.infer<typeof McpConnectorSchema>;
+export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
+
+/** One line naming what a project connects to, for a list or a diagnostic. */
+export function describeConnector(connector: Connector | null): string {
+  if (!connector) return 'not connected';
+  return connector.kind === 'mcp' ? `MCP · ${connector.transport}` : 'OpenAPI';
+}
+
+/**
+ * What opening this connector would actually do, in one line.
+ *
+ * Shown before somebody trusts an imported project, so it has to be the whole
+ * truth: the command that will run, or the address that will be opened with
+ * their credentials attached. Anything vaguer is a confirmation dialogue
+ * nobody can act on.
+ */
+export function describeConnectorAction(connector: Connector): string {
+  if (connector.kind === 'openapi') {
+    return `send requests to ${connector.baseUrl || 'an address in the document'}`;
+  }
+  return connector.transport === 'stdio'
+    ? `run \`${[connector.command, ...connector.args].join(' ').trim()}\``
+    : `open ${connector.url}`;
+}
 
 export const VerifierReadSchema = z.object({
   tool: z.string(),

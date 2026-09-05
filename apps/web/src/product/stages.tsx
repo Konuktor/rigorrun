@@ -28,15 +28,26 @@ export function ConnectEnvironment({
   onConnected,
 }: {
   project: ProjectView;
-  onConnected: (project: ProjectView, tools: ToolView[], serverName: string, latencyMs: number) => void;
+  onConnected: (
+    project: ProjectView,
+    tools: ToolView[],
+    serverName: string,
+    latencyMs: number,
+  ) => void;
 }) {
-  const [transport, setTransport] = useState<'stdio' | 'http'>(
-    project.connector?.transport ?? 'stdio',
-  );
-  const [command, setCommand] = useState(project.connector?.command ?? '');
-  const [args, setArgs] = useState((project.connector?.args ?? []).join('\n'));
-  const [url, setUrl] = useState(project.connector?.url ?? '');
-  const [secretNames, setSecretNames] = useState((project.connector?.secretNames ?? []).join('\n'));
+  const saved = project.connector;
+  const mcp = saved?.kind === 'mcp' ? saved : undefined;
+  const openapi = saved?.kind === 'openapi' ? saved : undefined;
+
+  const [kind, setKind] = useState<'mcp' | 'openapi'>(saved?.kind ?? 'mcp');
+  const [transport, setTransport] = useState<'stdio' | 'http'>(mcp?.transport ?? 'stdio');
+  const [command, setCommand] = useState(mcp?.command ?? '');
+  const [args, setArgs] = useState((mcp?.args ?? []).join('\n'));
+  const [url, setUrl] = useState(mcp?.url ?? '');
+  const [spec, setSpec] = useState(openapi?.spec ?? '');
+  const [baseUrl, setBaseUrl] = useState(openapi?.baseUrl ?? '');
+  const [headerName, setHeaderName] = useState(Object.keys(openapi?.headers ?? {})[0] ?? '');
+  const [secretNames, setSecretNames] = useState((saved?.secretNames ?? []).join('\n'));
   const [safety, setSafety] = useState(project.safety);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
@@ -45,16 +56,34 @@ export function ConnectEnvironment({
     setBusy(true);
     setProblem('');
     try {
+      const names = secretNames
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
       const result = await api.connect(
         project.id,
-        {
-          kind: 'mcp',
-          transport,
-          command: command.trim(),
-          args: args.split('\n').map((line) => line.trim()).filter(Boolean),
-          url: url.trim(),
-          secretNames: secretNames.split('\n').map((line) => line.trim()).filter(Boolean),
-        },
+        kind === 'openapi'
+          ? {
+              kind: 'openapi',
+              spec,
+              specUrl: '',
+              baseUrl: baseUrl.trim(),
+              // A header name against a *secret* name. The value is fetched
+              // by the runner when it opens the connection and never here.
+              headers: headerName.trim() && names[0] ? { [headerName.trim()]: names[0] } : {},
+              secretNames: names,
+            }
+          : {
+              kind: 'mcp',
+              transport,
+              command: command.trim(),
+              args: args
+                .split('\n')
+                .map((line) => line.trim())
+                .filter(Boolean),
+              url: url.trim(),
+              secretNames: names,
+            },
         safety,
       );
       onConnected(result.project, result.tools, result.serverName, result.latencyMs);
@@ -69,16 +98,25 @@ export function ConnectEnvironment({
     <Panel>
       <div className="flex max-w-2xl flex-col gap-5">
         <p className="text-body text-secondary">
-          Point RigorRun at the system your agent works in. It looks at that system before and
-          after your agent runs, which is the only reason a result can be trusted.
+          Point RigorRun at the system your agent works in. It looks at that system before and after
+          your agent runs, which is the only reason a result can be trusted.
         </p>
         <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
           <p className="text-meta font-medium text-secondary">What you need</p>
           <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
             <li>
-              An <strong className="text-secondary">MCP server</strong> for that system — either a
-              command on this machine or a URL. If you already run one for Claude, Cursor or
-              anything else, that is the one.
+              {kind === 'mcp' ? (
+                <>
+                  An <strong className="text-secondary">MCP server</strong> for that system — either
+                  a command on this machine or a URL. If you already run one for Claude, Cursor or
+                  anything else, that is the one.
+                </>
+              ) : (
+                <>
+                  An <strong className="text-secondary">OpenAPI document</strong> for that system,
+                  and the address the API is actually served from.
+                </>
+              )}
             </li>
             <li>
               Somewhere it is <strong className="text-secondary">safe to change things</strong>.
@@ -88,74 +126,145 @@ export function ConnectEnvironment({
           </ul>
           <p className="mt-2 text-meta text-muted">
             Next: RigorRun connects, shows you everything that system can do, and asks you two
-            questions about it. Nothing is changed until you say so.
+            questions about it.{' '}
+            {kind === 'openapi'
+              ? 'It will not call anything that changes your system while you are setting this up, whatever the document offers.'
+              : 'Nothing is changed until you say so.'}
           </p>
         </div>
 
-        <Field label="Where is it?">
+        <Field label="How does RigorRun talk to it?">
           {({ id }) => (
             <Select
               id={id}
-              value={transport}
-              onChange={(value) => setTransport(value as 'stdio' | 'http')}
-              testId="transport"
+              value={kind}
+              onChange={(value) => setKind(value as 'mcp' | 'openapi')}
+              testId="connector-kind"
               options={[
-                { value: 'stdio', label: 'On this machine — a command RigorRun runs' },
-                { value: 'http', label: 'Somewhere else — an MCP server over HTTP' },
+                { value: 'mcp', label: 'MCP — a server that publishes tools' },
+                { value: 'openapi', label: 'OpenAPI — an HTTP API with a document' },
               ]}
             />
           )}
         </Field>
 
-        {transport === 'stdio' ? (
+        {kind === 'openapi' ? (
           <>
             <Field
-              label="Command"
-              hint="Just the program, with no arguments — for example npx. RigorRun runs it directly rather than through a shell, so nothing here is interpreted as shell syntax."
-            >
-              {({ id, describedBy }) => (
-                <TextInput
-                  id={id}
-                  describedBy={describedBy}
-                  value={command}
-                  onChange={setCommand}
-                  placeholder="npx"
-                  testId="command"
-                />
-              )}
-            </Field>
-            <Field
-              label="Arguments"
-              hint="One per line. Everything you would type after the command."
+              label="The OpenAPI document"
+              hint="Paste it, JSON or YAML. It is kept on this machine, so a run does not depend on the document still being where it was."
             >
               {({ id, describedBy }) => (
                 <TextArea
                   id={id}
                   describedBy={describedBy}
-                  value={args}
-                  onChange={setArgs}
-                  testId="args"
+                  value={spec}
+                  onChange={setSpec}
+                  testId="openapi-spec"
+                />
+              )}
+            </Field>
+            <Field
+              label="Where is the API?"
+              hint="The address requests actually go to. Whatever the document's `servers` says is a suggestion; this is what RigorRun uses."
+            >
+              {({ id, describedBy }) => (
+                <TextInput
+                  id={id}
+                  describedBy={describedBy}
+                  value={baseUrl}
+                  onChange={setBaseUrl}
+                  placeholder="https://staging.example.com/api"
+                  testId="openapi-base-url"
+                />
+              )}
+            </Field>
+            <Field
+              label="Which header carries your credential?"
+              hint="The header name only — for example Authorization. Its value comes from the first secret below, and stays on this machine."
+            >
+              {({ id, describedBy }) => (
+                <TextInput
+                  id={id}
+                  describedBy={describedBy}
+                  value={headerName}
+                  onChange={setHeaderName}
+                  placeholder="Authorization"
+                  testId="openapi-header"
                 />
               )}
             </Field>
           </>
-        ) : (
-          <Field
-            label="Server URL"
-            hint="A private address is fine — RigorRun runs on your machine, so anything this machine can reach, it can reach."
-          >
-            {({ id, describedBy }) => (
-              <TextInput
-                id={id}
-                describedBy={describedBy}
-                value={url}
-                onChange={setUrl}
-                placeholder="https://staging.example.com/mcp"
-                testId="url"
-              />
+        ) : null}
+
+        {kind === 'mcp' ? (
+          <>
+            <Field label="Where is it?">
+              {({ id }) => (
+                <Select
+                  id={id}
+                  value={transport}
+                  onChange={(value) => setTransport(value as 'stdio' | 'http')}
+                  testId="transport"
+                  options={[
+                    { value: 'stdio', label: 'On this machine — a command RigorRun runs' },
+                    { value: 'http', label: 'Somewhere else — an MCP server over HTTP' },
+                  ]}
+                />
+              )}
+            </Field>
+
+            {transport === 'stdio' ? (
+              <>
+                <Field
+                  label="Command"
+                  hint="Just the program, with no arguments — for example npx. RigorRun runs it directly rather than through a shell, so nothing here is interpreted as shell syntax."
+                >
+                  {({ id, describedBy }) => (
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={command}
+                      onChange={setCommand}
+                      placeholder="npx"
+                      testId="command"
+                    />
+                  )}
+                </Field>
+                <Field
+                  label="Arguments"
+                  hint="One per line. Everything you would type after the command."
+                >
+                  {({ id, describedBy }) => (
+                    <TextArea
+                      id={id}
+                      describedBy={describedBy}
+                      value={args}
+                      onChange={setArgs}
+                      testId="args"
+                    />
+                  )}
+                </Field>
+              </>
+            ) : (
+              <Field
+                label="Server URL"
+                hint="A private address is fine — RigorRun runs on your machine, so anything this machine can reach, it can reach."
+              >
+                {({ id, describedBy }) => (
+                  <TextInput
+                    id={id}
+                    describedBy={describedBy}
+                    value={url}
+                    onChange={setUrl}
+                    placeholder="https://staging.example.com/mcp"
+                    testId="url"
+                  />
+                )}
+              </Field>
             )}
-          </Field>
-        )}
+          </>
+        ) : null}
 
         <Field
           label="Credentials it needs"
@@ -312,16 +421,18 @@ export function ToolCatalogue({
         </p>
         <ul className="flex max-w-2xl list-disc flex-col gap-1 pl-5 text-body text-secondary">
           <li>
-            <strong className="font-medium text-fg">Which of these only look, never change
-            anything.</strong>{' '}
+            <strong className="font-medium text-fg">
+              Which of these only look, never change anything.
+            </strong>{' '}
             Your system can say so itself, and RigorRun shows you when it does — but it will not
             take a system&rsquo;s word about its own safety.
           </li>
           <li>
-            <strong className="font-medium text-fg">Which ones RigorRun should use to check what
-            actually happened.</strong>{' '}
-            After your agent finishes, RigorRun calls these to look at your system and find out
-            what really changed. That is the whole reason a result can be trusted.
+            <strong className="font-medium text-fg">
+              Which ones RigorRun should use to check what actually happened.
+            </strong>{' '}
+            After your agent finishes, RigorRun calls these to look at your system and find out what
+            really changed. That is the whole reason a result can be trusted.
           </li>
         </ul>
         <ul className="flex flex-col gap-2">
@@ -367,8 +478,8 @@ export function ToolCatalogue({
             >
               <p className="text-body text-fg">{readsProblem}</p>
               <p className="mt-3 text-meta text-secondary">
-                You can carry on. RigorRun will watch what your agent does and say
-                OBSERVATIONAL on every result, because it will not have looked at your system.
+                You can carry on. RigorRun will watch what your agent does and say OBSERVATIONAL on
+                every result, because it will not have looked at your system.
               </p>
               <div className="mt-3">
                 <Button
@@ -391,9 +502,9 @@ export function ToolCatalogue({
             </Button>
             {reads.size === 0 ? (
               <p className="mt-2 text-meta text-muted">
-                Tick at least one &ldquo;check with this&rdquo;. Without one, RigorRun can watch what
-                your agent does but cannot look at your system afterwards to see whether it worked —
-                and a result nobody checked is not worth having.
+                Tick at least one &ldquo;check with this&rdquo;. Without one, RigorRun can watch
+                what your agent does but cannot look at your system afterwards to see whether it
+                worked — and a result nobody checked is not worth having.
               </p>
             ) : null}
           </div>
@@ -557,7 +668,9 @@ export function TeachJob({
         {
           tool: tool.name,
           ok: result.ok,
-          detail: result.ok ? JSON.stringify(result.data).slice(0, 240) : (result.error ?? 'failed'),
+          detail: result.ok
+            ? JSON.stringify(result.data).slice(0, 240)
+            : (result.error ?? 'failed'),
         },
       ]);
     } catch (error) {
@@ -624,8 +737,8 @@ export function TeachJob({
                     {busy ? 'Starting…' : 'Start recording'}
                   </Button>
                   <p className="mt-2 text-meta text-muted">
-                    This puts your system back first, so the job starts where your tests will
-                    start. You can stop and pick this up again later.
+                    This puts your system back first, so the job starts where your tests will start.
+                    You can stop and pick this up again later.
                   </p>
                 </div>
               )}
@@ -633,7 +746,12 @@ export function TeachJob({
           ) : (
             <div className="flex items-center gap-3">
               <Tag tone="warn">recording</Tag>
-              <Button variant="secondary" onClick={finish} disabled={busy} testId="finish-recording">
+              <Button
+                variant="secondary"
+                onClick={finish}
+                disabled={busy}
+                testId="finish-recording"
+              >
                 {busy ? 'Working it out…' : 'I have finished the job'}
               </Button>
             </div>
@@ -668,7 +786,10 @@ export function TeachJob({
                       describedBy={describedBy}
                       value={values[`${tool.name}.${param.name}`] ?? ''}
                       onChange={(value) =>
-                        setValues((current) => ({ ...current, [`${tool.name}.${param.name}`]: value }))
+                        setValues((current) => ({
+                          ...current,
+                          [`${tool.name}.${param.name}`]: value,
+                        }))
                       }
                       testId={`param-${param.name}`}
                       options={[
@@ -682,7 +803,10 @@ export function TeachJob({
                       describedBy={describedBy}
                       value={values[`${tool.name}.${param.name}`] ?? ''}
                       onChange={(value) =>
-                        setValues((current) => ({ ...current, [`${tool.name}.${param.name}`]: value }))
+                        setValues((current) => ({
+                          ...current,
+                          [`${tool.name}.${param.name}`]: value,
+                        }))
                       }
                       type={param.type === 'number' ? 'number' : 'text'}
                       testId={`param-${param.name}`}
@@ -749,9 +873,7 @@ export function ReviewLearned({
    * they go where somebody will actually read them.
    */
   const rank = { weak: 0, moderate: 1, strong: 2 } as const;
-  const ordered = [...questions].sort(
-    (a, b) => rank[a.confidence] - rank[b.confidence],
-  );
+  const ordered = [...questions].sort((a, b) => rank[a.confidence] - rank[b.confidence]);
   const byConfidence = {
     weak: questions.filter((question) => question.confidence === 'weak'),
     moderate: questions.filter((question) => question.confidence === 'moderate'),
@@ -778,15 +900,14 @@ export function ReviewLearned({
     <div className="flex flex-col gap-5">
       <div className="flex max-w-2xl flex-col gap-3">
         <p className="text-body text-secondary">
-          RigorRun worked these out by looking at what your system handed back. It read the shape
-          of the data and never the names of things, which is what stops it only working on
-          businesses it has seen before — and means a few things it genuinely cannot know.
+          RigorRun worked these out by looking at what your system handed back. It read the shape of
+          the data and never the names of things, which is what stops it only working on businesses
+          it has seen before — and means a few things it genuinely cannot know.
         </p>
         <p className="text-body text-secondary">
-          Each question shows what it saw, so you can disagree with the evidence rather than with
-          a verdict. The ones it is least sure about are first, because those are the ones where a
-          wrong answer matters. Getting one wrong is not permanent: come back to this step any
-          time.
+          Each question shows what it saw, so you can disagree with the evidence rather than with a
+          verdict. The ones it is least sure about are first, because those are the ones where a
+          wrong answer matters. Getting one wrong is not permanent: come back to this step any time.
         </p>
       </div>
 
@@ -900,8 +1021,12 @@ export function RuleOnRules({
     try {
       await api.review(
         project.id,
-        Object.entries(decisions).filter(([, v]) => v === 'yes').map(([id]) => id),
-        Object.entries(decisions).filter(([, v]) => v === 'no').map(([id]) => id),
+        Object.entries(decisions)
+          .filter(([, v]) => v === 'yes')
+          .map(([id]) => id),
+        Object.entries(decisions)
+          .filter(([, v]) => v === 'no')
+          .map(([id]) => id),
       );
       const suite = await api.generate(project.id);
       onGenerated(suite.cases, suite.notTestable);
@@ -917,8 +1042,8 @@ export function RuleOnRules({
       <Panel>
         <div className="flex flex-col gap-3">
           <p className="max-w-2xl text-body text-secondary">
-            RigorRun will now turn what it watched into rules about how the job should be done.
-            None of them can fail your agent until you have said yes to it.
+            RigorRun will now turn what it watched into rules about how the job should be done. None
+            of them can fail your agent until you have said yes to it.
           </p>
           {problem ? <Problem>{problem}</Problem> : null}
           <div>
@@ -950,8 +1075,8 @@ export function RuleOnRules({
         <SectionLabel>What it thinks the rules are</SectionLabel>
         <p className="max-w-2xl text-body text-secondary">
           Guesses, every one. A rule you say no to cannot fail your agent, so saying no costs you
-          nothing — RigorRun deliberately proposes more than it expects you to keep, because
-          missing a real rule is far worse than proposing one you do not want.
+          nothing — RigorRun deliberately proposes more than it expects you to keep, because missing
+          a real rule is far worse than proposing one you do not want.
         </p>
         {rules.map((rule) => (
           <Panel key={rule.id}>

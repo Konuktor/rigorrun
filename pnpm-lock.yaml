@@ -326,12 +326,18 @@ importers:
       '@rigorrun/compiler':
         specifier: workspace:*
         version: link:../compiler
+      '@rigorrun/connector':
+        specifier: workspace:*
+        version: link:../connector
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
       '@rigorrun/env-mcp':
         specifier: workspace:*
         version: link:../env-mcp
+      '@rigorrun/env-openapi':
+        specifier: workspace:*
+        version: link:../env-openapi
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment

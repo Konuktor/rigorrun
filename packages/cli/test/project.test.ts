@@ -126,7 +126,9 @@ describe('projects from the command line', () => {
     const { code, out } = await cli('projects', '--home', home);
     expect(code).toBe(0);
     expect(out).toContain('Desk');
-    expect(out).toContain('connected');
+    // What it is connected *to*, not merely that it is. A list of projects
+    // across two connector kinds is unreadable if every row says "connected".
+    expect(out).toContain('MCP · stdio');
   }, 60_000);
 
   it('runs the suite and reports how the verdict was reached', async () => {

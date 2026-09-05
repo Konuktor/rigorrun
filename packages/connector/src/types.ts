@@ -74,4 +74,22 @@ export interface SystemConnection {
   readonly childPid: number | null;
   call(name: string, args: Record<string, unknown>): Promise<CallResult>;
   close(): Promise<void>;
+  /**
+   * Ends setup, if this connector distinguishes it.
+   *
+   * There are two kinds of call RigorRun makes to somebody's system, and the
+   * difference is who asked. While a project is being set up, the calls are
+   * RigorRun's own: probing the nominated reads, sampling them to work out what
+   * a record looks like. Nothing there is worth a write nobody requested, and a
+   * connector that can tell reads from writes should refuse one.
+   *
+   * A demonstration and a run are the other kind. A person doing the job, or an
+   * agent being graded on it, is *meant* to change things — that is the entire
+   * measurement. So the moment either begins, the guard comes off.
+   *
+   * Optional because MCP cannot tell the difference: which of its tools write
+   * is a person's decision, made before any of this, and the operator has
+   * already ticked the ones RigorRun may call freely.
+   */
+  allowWrites?(): void;
 }
