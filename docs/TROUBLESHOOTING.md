@@ -66,7 +66,7 @@ Projects carry the names of their credentials and never the values, so a project
 moved between machines needs its secrets set again:
 
 ```bash
-RIGORRUN_SECRET_VALUE=... rigorrun secret set DESK_TOKEN
+RIGORRUN_SECRET_VALUE=... rigorrun secrets set DESK_TOKEN
 ```
 
 **"Refusing to run a command containing shell metacharacters."**

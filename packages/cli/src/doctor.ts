@@ -44,13 +44,21 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
     checks.push({ what: 'project store', ok: false, detail: (error as Error).message });
   }
 
-  const secretNames = Object.keys(await store.secrets().catch(() => ({})));
+  const secretNames = await store.secretNames().catch(() => []);
+  const backend = await store.secretBackend().catch(() => undefined);
   checks.push({
     what: 'credentials',
     ok: 'unknown',
     // Names only. A diagnostics bundle that prints a secret is a diagnostics
     // bundle nobody can safely send anywhere.
     detail: secretNames.length > 0 ? secretNames.join(', ') : 'none stored',
+  });
+  checks.push({
+    what: 'credential store',
+    // Not a pass or a fail. A file at 0600 is a legitimate answer on a machine
+    // with no keyring; what would be wrong is not saying which one you got.
+    ok: 'unknown',
+    detail: backend ? `${backend.kind} — ${backend.detail}` : 'could not be determined',
   });
 
   // Binding a port is the first thing the runner does and the first thing a

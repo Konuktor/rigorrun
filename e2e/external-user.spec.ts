@@ -94,10 +94,12 @@ test.beforeAll(async () => {
   home = await mkdtemp(join(tmpdir(), 'rigorrun-e2e-'));
   await mkdir(SHOTS, { recursive: true });
 
-  // Exactly what the quickstart tells a person to run.
+  // Exactly what the quickstart tells a person to run, plus `--no-open`: the
+  // real thing opens a browser, and a CI runner opening one on top of the
+  // Chromium this test is driving helps nobody.
   const started = await startAndWait(
     PACKAGED ?? tsx,
-    PACKAGED ? [] : [join(root, 'packages', 'cli', 'src', 'bin.ts')],
+    [...(PACKAGED ? [] : [join(root, 'packages', 'cli', 'src', 'bin.ts')]), '--no-open'],
     { RIGORRUN_HOME: home, NO_COLOR: '1' },
     /http:\/\/127\.0\.0\.1:\d+\/\?code=[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}/,
   );

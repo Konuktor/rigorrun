@@ -24,7 +24,9 @@ PROJECTS
   gate --project <id>      Same, but exit non-zero if it misses the bar.
   compare-runs --project <id> <runId>
                            Say what changed since the baseline run.
-  secret list|set|remove   Credentials, which never leave this machine.
+  secrets list|set|remove  Credentials, which never leave this machine. Kept in
+                           your OS keychain where there is one; \`doctor\` says
+                           which store you actually got.
 
 DIAGNOSTICS
   doctor                   Check this machine can do what RigorRun needs.
@@ -58,6 +60,7 @@ COMMON OPTIONS
       --project <id>       Act on a project rather than a file.
       --home <path>        Where projects live. Default ~/.rigorrun.
       --port <n>           Port for the runner.
+      --no-open            Do not open a browser. For SSH, containers and CI.
   -o, --out <path>         Where to write output.
       --json               Machine-readable output.
       --quiet              Suppress progress.

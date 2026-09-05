@@ -9,11 +9,24 @@
  * Which one it is, it asks. Baking a flag in at build time would mean two
  * bundles that drift apart, and the answer is one unauthenticated request.
  */
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Landing } from './pages/Landing.tsx';
-import { Proof } from './pages/Proof.tsx';
 import { Quickstart } from './pages/Quickstart.tsx';
-import { DemoPage } from './demo/DemoPage.tsx';
+
+/**
+ * The demo runs the real compiler, generator, runner and verifier in the
+ * browser — that is what makes it evidence rather than a video. It is also
+ * most of the bundle, and until now every project page paid for it: somebody
+ * connecting their own system downloaded the whole engine and the entire
+ * bundled example in order to look at a form.
+ *
+ * So the two pages that are only ever reached deliberately are split out. The
+ * product path loads what the product path needs.
+ */
+const DemoPage = lazy(() =>
+  import('./demo/DemoPage.tsx').then((m) => ({ default: m.DemoPage })),
+);
+const Proof = lazy(() => import('./pages/Proof.tsx').then((m) => ({ default: m.Proof })));
 import { Button, Spinner, Wordmark } from './components/primitives.tsx';
 import { ProjectsPage } from './product/ProjectsPage.tsx';
 import { ProjectPage } from './product/ProjectPage.tsx';
@@ -130,9 +143,13 @@ export function App() {
             <Spinner /> Loading…
           </div>
         ) : route === 'demo' ? (
-          <DemoPage />
+          <Suspense fallback={<PageLoading />}>
+            <DemoPage />
+          </Suspense>
         ) : route === 'proof' ? (
-          <Proof />
+          <Suspense fallback={<PageLoading />}>
+            <Proof />
+          </Suspense>
         ) : route === 'quickstart' ? (
           <Quickstart />
         ) : route === 'projects' ? (
@@ -173,6 +190,15 @@ export function App() {
           </span>
         </div>
       </footer>
+    </div>
+  );
+}
+
+/** The same shape as the pre-pairing state, so a split does not read as a jump. */
+function PageLoading() {
+  return (
+    <div className="mx-auto flex max-w-6xl items-center gap-2 px-5 py-16 text-body text-muted">
+      <Spinner /> Loading…
     </div>
   );
 }

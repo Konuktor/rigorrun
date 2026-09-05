@@ -48,8 +48,8 @@ const DOCUMENTED_COMMANDS = [
   'rigorrun run --project',
   'rigorrun gate --project',
   'rigorrun compare-runs --project',
-  'rigorrun secret set',
-  'rigorrun secret list',
+  'rigorrun secrets set',
+  'rigorrun secrets list',
   'rigorrun doctor',
   'rigorrun feedback export',
 ];

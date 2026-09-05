@@ -83,18 +83,44 @@ instruction.
 
 ### Secrets leaking
 
-Credentials live in one owner-only file for the install. A project carries the
-*names* of the secrets it needs and never the values, so a project file can be
-read, copied or attached to a support request safely. There is no command that
-prints a secret back. Run results are owner-only too, because they contain real
-tool arguments.
+A project carries the *names* of the secrets it needs and never the values, so a
+project file can be read, copied or attached to a support request safely. There
+is no command that prints a secret back, and run results are owner-only too,
+because they contain real tool arguments.
+
+The values go to the operating system's own credential store when there is one:
+the macOS keychain, or the system keyring through libsecret on Linux. On Windows
+they are encrypted with DPAPI, readable only by the account that wrote them.
+Where none of those work — a headless box, a container, a machine with no
+keyring daemon — they fall back to a file only you can read.
+
+**RigorRun tells you which of those you got**, in `rigorrun doctor`, in
+`rigorrun secrets list`, and when you store one. That matters more than which
+store it is: file permissions stop another user on the machine, they do not stop
+a backup tool or a sync client, and somebody deciding whether to point this at
+staging should not have to guess which guarantee they have.
+
+Which store is chosen is decided by *using* it, not by the platform name — a
+value is written, read back and deleted before a backend is accepted, because
+`secret-tool` being installed does not mean a keyring is running.
+
+Two honest limits. On macOS the value is passed to `security` as an argument,
+so it is briefly visible in the process table on a shared machine; the Linux
+path passes it on stdin and does not have this problem. And RigorRun stores no
+key of its own — everything above rests on the OS protecting your login
+session.
 
 ## What is not defended
 
 Stated because a threat model that lists only wins is not one.
 
 - **A malicious command you configure yourself.** If you tell RigorRun to run
-  something, it runs it. There is no sandbox around the child process.
+  something, it runs it. There is no sandbox around the child process. What is
+  defended is where the command may come from: exactly one file in the codebase
+  starts a process, every caller has to declare in its own source whether the
+  command came from RigorRun or from you, and no schema anywhere can produce
+  that declaration — so a benchmark, a trace or a tool result cannot supply a
+  command however it is crafted. A test asserts all three.
 - **A hostile agent endpoint you point at.** RigorRun posts a task to it and
   reads a bounded reply; it does not defend against what that endpoint does
   with the proxy URL beyond the limits above.

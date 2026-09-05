@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { BenchmarkSchema, CanonicalHumanTraceSchema } from '@rigorrun/core';
 import { compileWorkflow, workflowByKey } from '@rigorrun/environments';
 
@@ -40,6 +40,54 @@ describe('an imported benchmark cannot cause command execution', () => {
         if (/from ['"]node:child_process['"]|require\(['"]child_process['"]\)|\bexecSync\b|\bspawnSync\b/.test(source)) {
           offenders.push(file);
         }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  /**
+   * The stronger form of the assertion above.
+   *
+   * "These ten directories are clean" is a statement about a list somebody has
+   * to remember to extend. This is a statement about the whole codebase: there
+   * is one place that starts a process, it is named here, and it refuses a
+   * shell. A new package that spawns fails this whether or not anybody thought
+   * to add it to a list.
+   */
+  it('starts a process from exactly one file in the whole codebase', async () => {
+    const spawners: string[] = [];
+    for (const file of await sourceFiles(join(repoRoot, 'packages'))) {
+      if (file.includes('/test/') || file.includes('/dist/')) continue;
+      const source = await readFile(file, 'utf8');
+      if (/from ['"]node:child_process['"]|require\(['"]child_process['"]\)/.test(source)) {
+        spawners.push(relative(repoRoot, file));
+      }
+    }
+    expect(spawners).toEqual(['packages/daemon/src/exec.ts']);
+
+    const exec = await readFile(join(repoRoot, 'packages/daemon/src/exec.ts'), 'utf8');
+    expect(exec).toMatch(/shell: false/);
+    expect(exec).not.toMatch(/\bexecSync\(|shell: true/);
+  });
+
+  /**
+   * The property everything else rests on.
+   *
+   * A command may be run only if its caller says, in TypeScript, where it came
+   * from. If any schema declared a `provenance` field, a crafted JSON file
+   * could assert its own trustworthiness — so no schema may, and this is the
+   * grep that keeps it that way.
+   */
+  it('has no schema in which a command’s provenance could be asserted', async () => {
+    const offenders: string[] = [];
+    for (const file of await sourceFiles(join(repoRoot, 'packages'))) {
+      if (file.includes('/test/')) continue;
+      const source = await readFile(file, 'utf8');
+      // A Zod field named `provenance` next to anything command-shaped. The
+      // contract compiler has its own unrelated `provenance` on rules, which is
+      // data about evidence and never reaches `exec.ts`.
+      if (/provenance:\s*z\./.test(source) && /command|exec|spawn/i.test(source)) {
+        offenders.push(relative(repoRoot, file));
       }
     }
     expect(offenders).toEqual([]);

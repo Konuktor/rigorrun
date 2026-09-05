@@ -18,6 +18,7 @@ import {
   Service,
   WorkspaceTooNewError,
   openWorkspace,
+  runCommand,
   storeRoot,
 } from '@rigorrun/daemon';
 import { c, errorLine, heading, line } from './ui.ts';
@@ -40,6 +41,31 @@ export interface ServeOptions {
   home?: string;
   /** Print the URL and exit, for tests and for scripts. */
   once?: boolean;
+  /** Open a browser. Default true; `--no-open` for a headless box or CI. */
+  open?: boolean;
+}
+
+/**
+ * Opens the pairing URL, and never makes a fuss about not being able to.
+ *
+ * There is no dependency for this: three platforms, one command each, and the
+ * printed URL is the fallback for every case they do not cover — a headless
+ * box, an SSH session, a container, a desktop with no handler registered. A
+ * failure here is not an error, because the person already has what they need
+ * on screen.
+ */
+async function openInBrowser(url: string): Promise<void> {
+  const command =
+    process.platform === 'darwin'
+      ? { command: 'open', args: [url] }
+      : process.platform === 'win32'
+        ? { command: 'cmd.exe', args: ['/c', 'start', '', url] }
+        : { command: 'xdg-open', args: [url] };
+  await runCommand({
+    ...command,
+    timeoutMs: 5_000,
+    provenance: 'rigorrun-internal',
+  }).catch(() => undefined);
 }
 
 export async function cmdServe(options: ServeOptions = {}): Promise<number> {
@@ -99,6 +125,32 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
     await proxy.stop();
     await service.workspace.close();
     return 0;
+  }
+
+  if (options.open !== false) await openInBrowser(runner.pairedUrl);
+
+  // Losing the tab used to cost a restart. The pairing code is single-use on
+  // purpose — the copy in a shell history has to be worthless — so a person who
+  // closes the window, or opens it in a browser that discards cookies, has no
+  // way back in.
+  //
+  // The authority to issue a new one is *being at this terminal*, which is
+  // exactly the authority that read the first code off the screen. So a
+  // keypress does it. Not an HTTP endpoint: an unauthenticated one would let
+  // any process on the machine pair itself, and an authenticated one would need
+  // the credential the person has just lost.
+  const interactive = process.stdin.isTTY === true;
+  if (interactive) {
+    line(c.grey('  Lost the tab? Press Enter here for a new link.'));
+    line();
+    process.stdin.setEncoding('utf8');
+    process.stdin.resume();
+    process.stdin.on('data', (chunk: string) => {
+      if (!chunk.includes('\n') && !chunk.includes('\r')) return;
+      runner.pairing.reissue();
+      line(`  ${c.bold('Open')}  ${runner.pairedUrl}`);
+      line();
+    });
   }
 
   // The runner holds child processes and open sockets to somebody's systems.

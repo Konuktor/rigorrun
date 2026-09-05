@@ -449,8 +449,18 @@ const NO_UI_PAGE = `<!doctype html><meta charset="utf-8"><title>RigorRun runner<
 <p>Run <code>pnpm build:web</code> and start the runner again. The API is
 answering either way, so <code>rigorrun run --project</code> works now.</p>`;
 
+// Deliberately not "run `rigorrun pair`" — for months this page named a command
+// that was never written, which is the worst thing a dead end can do: send
+// somebody to a second dead end. Issuing a new code needs the authority of
+// being at the terminal the runner is running in, which is exactly the
+// authority that read the first code off the screen, so that is what it asks
+// for.
 const EXPIRED_PAGE = `<!doctype html><meta charset="utf-8"><title>RigorRun</title>
 <body style="font:14px system-ui;margin:3rem;max-width:40rem">
 <h1>That pairing code has been used or has expired.</h1>
-<p>Codes are good once, for ten minutes. Run <code>rigorrun pair</code> in the
-terminal where the runner is running to get another.</p>`;
+<p>Codes are good once, for ten minutes, so that the copy left in your shell
+history is worthless.</p>
+<p>Press <b>Enter</b> in the terminal where the runner is running: it prints a
+new link. If that terminal is not interactive, stop the runner and start it
+again. Nothing you have set up is affected either way — your projects are on
+disk.</p>`;

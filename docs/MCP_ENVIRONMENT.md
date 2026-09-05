@@ -40,8 +40,8 @@ Only the *names* live in the project. The values live in one owner-only file
 for this install:
 
 ```bash
-RIGORRUN_SECRET_VALUE=... rigorrun secret set DESK_TOKEN
-rigorrun secret list      # names only
+RIGORRUN_SECRET_VALUE=... rigorrun secrets set DESK_TOKEN
+rigorrun secrets list      # names only
 ```
 
 There is deliberately no command that prints a value back. A project file can

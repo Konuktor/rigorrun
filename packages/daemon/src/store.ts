@@ -37,6 +37,7 @@ import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseProject, type Project } from './project.ts';
 import { OWNER_ONLY, writeJsonAtomic } from './atomic.ts';
+import { SecretStore, type SecretBackendInfo } from './secrets.ts';
 
 export const DEFAULT_ROOT = join(homedir(), '.rigorrun');
 
@@ -87,7 +88,11 @@ export class ArtefactCorruptError extends Error {
 }
 
 export class ProjectStore {
-  constructor(private readonly root: string = DEFAULT_ROOT) {}
+  private readonly secretStore: SecretStore;
+
+  constructor(private readonly root: string = DEFAULT_ROOT) {
+    this.secretStore = new SecretStore(root);
+  }
 
   get path(): string {
     return this.root;
@@ -197,37 +202,38 @@ export class ProjectStore {
   /**
    * Reads a credential.
    *
-   * Kept in one file for every project rather than beside each one, so there is
-   * a single thing to protect, a single thing to audit and a single thing to
-   * point at when somebody asks where their keys went.
+   * One store for every project rather than one beside each, so there is a
+   * single thing to protect, a single thing to audit and a single thing to
+   * point at when somebody asks where their keys went. Where that store
+   * actually is depends on the machine — see `secrets.ts`; ask
+   * `secretBackend()` rather than assuming, because the answer is the
+   * difference between "in your keychain" and "in a file", and a person
+   * deciding whether to run this against staging deserves to know which.
    */
   async secret(name: string): Promise<string | undefined> {
-    const all = await this.secrets();
-    return all[name];
+    return this.secretStore.get(name);
   }
 
+  /** Every name and value. For the two callers that have to scan them. */
   async secrets(): Promise<Record<string, string>> {
-    try {
-      const raw = await readFile(join(this.root, 'secrets.json'), 'utf8');
-      const parsed = JSON.parse(raw) as Record<string, unknown>;
-      return Object.fromEntries(
-        Object.entries(parsed).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
-      );
-    } catch {
-      return {};
-    }
+    return this.secretStore.all();
+  }
+
+  /** Just the names — readable even when the keychain is locked. */
+  async secretNames(): Promise<string[]> {
+    return this.secretStore.names();
+  }
+
+  async secretBackend(): Promise<SecretBackendInfo> {
+    return this.secretStore.backendInfo();
   }
 
   async setSecret(name: string, value: string): Promise<void> {
-    const all = await this.secrets();
-    all[name] = value;
-    await this.writeJson(join(this.root, 'secrets.json'), all);
+    await this.secretStore.set(name, value);
   }
 
   async deleteSecret(name: string): Promise<void> {
-    const all = await this.secrets();
-    delete all[name];
-    await this.writeJson(join(this.root, 'secrets.json'), all);
+    await this.secretStore.remove(name);
   }
 
   private async writeJson(path: string, value: unknown): Promise<void> {

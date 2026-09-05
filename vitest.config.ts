@@ -28,5 +28,12 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
     environment: 'node',
     reporters: ['default'],
+    env: {
+      // Never the real one. A test run must not write probe entries into the
+      // keychain of whoever is running it, and CI has no keyring daemon
+      // anyway. The keychain backends have their own test, which fakes the
+      // tools rather than using them.
+      RIGORRUN_SECRET_BACKEND: 'file',
+    },
   },
 });

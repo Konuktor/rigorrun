@@ -76,6 +76,10 @@ async function dispatch(argv: string[]): Promise<number> {
         baseline: { type: 'string' },
         // Prints the URL and exits, so a script can check the runner comes up.
         once: { type: 'boolean', default: false },
+        // Opening a browser is right on a laptop and wrong over SSH, in a
+        // container, and in CI. It is on by default because the laptop is the
+        // common case and the printed URL is the fallback either way.
+        'no-open': { type: 'boolean', default: false },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
@@ -135,12 +139,16 @@ async function dispatch(argv: string[]): Promise<number> {
         ...(flags.port === undefined ? {} : { port: flags.port }),
         ...(flags.home ? { home: flags.home } : {}),
         ...(values.once ? { once: true } : {}),
+        ...(values['no-open'] ? { open: false } : {}),
       });
     case 'projects':
       return cmdProjects(flags);
     case 'feedback':
       if (target !== 'export') throw new CliError('Try `rigorrun feedback export`.');
       return cmdFeedbackExport(flags);
+    case 'secrets':
+    // `secret` was the original spelling and still works: somebody's shell
+    // history and somebody's CI script should not break over a plural.
     case 'secret':
       return cmdSecret(target, parsed.positionals[2], flags);
     case 'compare-runs':

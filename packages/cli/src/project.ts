@@ -218,12 +218,16 @@ export async function cmdSecret(
   const store = new ProjectStore(storeRoot(flags.home));
 
   if (action === 'list') {
-    const names = Object.keys(await store.secrets()).sort();
+    // Names, never values, and read from the index rather than by opening the
+    // store — so this keeps working when the keychain is locked, which is
+    // exactly when somebody needs to see what they are missing.
+    const names = (await store.secretNames()).sort();
+    const backend = await store.secretBackend();
     heading('Secrets on this machine');
-    // Names only, and never values. There is no flag to print one: a secret
-    // that can be printed is a secret that ends up in a terminal recording.
     for (const entry of names) line(`  ${entry}`);
     if (names.length === 0) line(c.grey('  none'));
+    line();
+    line(c.grey(`Kept in ${backend.detail}`));
     return 0;
   }
 
@@ -236,7 +240,10 @@ export async function cmdSecret(
       );
     }
     await store.setSecret(name, value);
-    line(`Stored ${name} in ${store.path}/secrets.json (readable only by you).`);
+    const backend = await store.secretBackend();
+    // Says where, specifically. "Stored securely" is the kind of sentence that
+    // makes somebody trust a dotfile with a production token.
+    line(`Stored ${name} in ${backend.detail}`);
     return 0;
   }
 
@@ -247,7 +254,7 @@ export async function cmdSecret(
     return 0;
   }
 
-  throw new CliError('Try `rigorrun secret list|set|remove`.');
+  throw new CliError('Try `rigorrun secrets list|set|remove`.');
 }
 
 function printRun(result: RunResult, json: boolean): void {
