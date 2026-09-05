@@ -59,7 +59,12 @@ const RUNS_DIR = () => join(workspaceDir(), 'runs');
 
 export async function cmdDemo(flags: Flags): Promise<number> {
   const outDir = flags.out ?? '.rigorrun';
-  const key = flags.workflow ?? 'refund';
+  // The first registered example rather than a named one. A default that
+  // names a business is a default that has to be edited when the examples
+  // change, and this file is one of the two places a domain noun kept coming
+  // back in code that is not supposed to know any.
+  const key = flags.workflow ?? WORKFLOWS[0]?.key;
+  if (!key) throw new CliError('This build ships no example workflows.');
   const definition = workflowByKey(key);
   const pipeline = await compileWorkflow(definition);
   const { draft, contract, benchmark, trace, timings } = {

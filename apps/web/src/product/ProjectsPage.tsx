@@ -88,7 +88,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
                   describedBy={describedBy}
                   value={name}
                   onChange={setName}
-                  placeholder="Support agent"
+                  placeholder="My agent"
                   testId="project-name"
                   autoFocus
                 />
@@ -104,7 +104,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
                   describedBy={describedBy}
                   value={goal}
                   onChange={setGoal}
-                  placeholder="Confirm a held booking."
+                  placeholder="Approve one item of work end to end."
                   testId="project-goal"
                 />
               )}

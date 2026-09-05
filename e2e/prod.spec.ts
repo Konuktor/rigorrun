@@ -38,8 +38,7 @@ test.describe('golden path', () => {
     const watchers = watchPage(page);
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Do the job once.');
-    await expect(page.getByText(/verify the system state they changed/)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance testing');
     await expect(
       page.getByText(/Public benchmarks tell you which model wins a benchmark/),
     ).toBeVisible();
@@ -311,7 +310,7 @@ test.describe('routing', () => {
   test('an unknown hash falls back to the landing page without erroring', async ({ page }) => {
     const watchers = watchPage(page);
     await page.goto('/#/nonsense/route');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Do the job once.');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance testing');
     expectClean(watchers);
   });
 

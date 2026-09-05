@@ -37,11 +37,37 @@ const GENERIC = [
   'packages/providers/src',
   'packages/quality/src',
   'packages/mcp/src',
+  'packages/env-mcp/src',
+  'packages/proxy/src',
+  'packages/daemon/src',
+  'packages/agent-sdk/src',
+  // The CLI dispatches both the product and the bundled example, so its help
+  // text legitimately names the example's files. Its *code* must not: a
+  // `?? 'refund'` default lived here for months precisely because nothing was
+  // watching this directory.
+  'packages/cli/src',
+  // The product screens. Not the demo ones, which are under `demo/` and are
+  // supposed to know what they are showing.
+  'apps/web/src/product',
   // The schema-driven renderer is held to the same standard as the compiler.
   // Four products that look nothing alike, and one implementation with no idea
   // which of them it is drawing.
   'apps/demo-ops/src',
 ];
+
+/**
+ * Files inside a scanned directory that may name the bundled example, with why.
+ *
+ * An exception a reviewer can see beats a directory quietly left out of the
+ * list — which is how `packages/cli/src` came to hold a `?? 'refund'` default
+ * for months. Every entry here has to earn its line.
+ */
+const ALLOWED = new Map([
+  [
+    'packages/cli/src/help.ts',
+    'documents the bundled example, including the real path to its files',
+  ],
+]);
 
 /**
  * Words that name a business object rather than a structure.
@@ -155,6 +181,7 @@ async function sourceFiles(dir) {
 const findings = [];
 for (const dir of GENERIC) {
   for (const file of await sourceFiles(join(root, dir))) {
+    if (ALLOWED.has(relative(root, file))) continue;
     const code = stripComments(await readFile(file, 'utf8'));
     code.split('\n').forEach((line, index) => {
       for (const match of line.matchAll(pattern)) {
@@ -189,6 +216,9 @@ if (findings.length > 0) {
 } else {
   console.log(
     green(`No domain terms in generic code.`) +
-      dim(` ${GENERIC.length} package(s) checked against ${DOMAIN_TERMS.length} terms.`),
+      dim(
+        ` ${GENERIC.length} director(ies) checked against ${DOMAIN_TERMS.length} terms` +
+          `${ALLOWED.size > 0 ? `, ${ALLOWED.size} file(s) excepted` : ''}.`,
+      ),
   );
 }

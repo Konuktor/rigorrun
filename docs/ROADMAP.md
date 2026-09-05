@@ -106,3 +106,24 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 - A model that writes test cases.
 - Production observability. Different product, different buyer.
 - An agent framework.
+
+## Next, in the order it would matter
+
+1. **Publish to npm.** `pnpm dlx rigorrun` is the single largest piece of
+   friction between this and a stranger using it, and it is not a technical
+   problem.
+2. **An OpenAPI connector.** MCP being the only path means anybody whose system
+   is a REST API has to write a server first. OpenAPI is also the easier
+   induction problem, because the schemas arrive declared rather than inferred.
+3. **A headless setup path.** Running and gating a project works from CI;
+   creating one does not. A `rigorrun project import` taking a description file
+   would make a project reproducible from a repository.
+4. **Persist discovery.** A page reload mid-flow loses the open connection and
+   an unfinished recording. The interface handles it honestly and a person
+   still repeats a step.
+5. **The browser execution lane.** Still the largest gap for anybody whose
+   system has no API at all, and still the hardest verification story: DOM text
+   is not authoritative state.
+6. **Decide about the control plane.** It is deployed, tested, and called by
+   nothing. Either it becomes opt-in sync for teams who want a shared history,
+   or it should be deleted.

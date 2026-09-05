@@ -167,7 +167,7 @@ export function ConnectEnvironment({
               options={[
                 { value: 'ephemeral', label: 'Throwaway — made for testing, reset freely' },
                 { value: 'local', label: 'Local — my machine, nobody else affected' },
-                { value: 'staging', label: 'Staging — shared, but not real customers' },
+                { value: 'staging', label: 'Staging — shared, but not the live system' },
                 { value: 'production', label: 'Production — real, read-only please' },
               ]}
             />

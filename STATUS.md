@@ -1,68 +1,74 @@
 # RigorRun — build status
 
-Live implementation checklist, updated against executed commands rather than
-intent.
+Updated against executed commands, not intent.
 
-> **These are engine gates, not product gates.** They measure whether RigorRun
-> works on material that ships inside RigorRun. They do not measure whether an
-> external person can use it, and until recently one of them
-> (`benchmark-gate` in CI) was invoking agent ids that no longer existed and had
-> been reported as green while failing. What the product can and cannot do for
-> someone outside this repository is in `docs/PRODUCT_REALITY_AUDIT.md`. The
-> short version is that all twenty of its questions currently answer NO.
+There are two tiers here and the order matters. The **product gate** measures
+whether somebody who has never seen this source can use RigorRun. The
+**technical gates** measure whether RigorRun works on material that ships inside
+RigorRun. Both are worth having; only one of them is the point, and a release
+where only the second is green is not a release.
 
-**One command:** `pnpm release:verify` (add `--prod` after deploying).
+## Product gate
 
-| Layer                         | Command           | Result                                          |
-| ----------------------------- | ----------------- | ----------------------------------------------- |
-| Design tokens                 | `pnpm contrast`   | 45/45 pairs meet WCAG contrast                  |
-| Lint                          | `pnpm lint`       | clean                                           |
-| Types                         | `pnpm typecheck`  | clean                                           |
-| Generic core stays generic    | `pnpm domain`     | 11 packages checked against 15 business nouns   |
-| Unit + integration            | `pnpm test`       | 439 passing across 22 files                     |
-| Build                         | `pnpm build`      | all apps, CLI and extension                     |
-| Local E2E                     | `pnpm e2e`        | 16 passing (incl. the real recorder extension)  |
-| Accessibility                 | `pnpm a11y`       | 16 passing, zero WCAG A/AA violations           |
-| Visual regression             | `pnpm visual`     | 14 baselines, desktop and mobile                |
-| Cross-browser                 | `pnpm cross`      | 6 on Chromium and Firefox; WebKit needs host libs |
-| Production smoke              | `pnpm smoke:prod` | 5 passing                                       |
-| Production API + system state | `pnpm api:prod`   | 10 passing                                      |
+| What | Command | Result |
+| ---- | ------- | ------ |
+| A stranger connects their own system and their own agent, in a browser, from nothing, and gets a verdict — then breaks the agent and is told which case regressed | `pnpm e2e:external` | passing |
+
+That test starts the runner exactly as the quickstart says to, pairs through
+the URL it prints, and drives Chromium. The system it connects is
+`fixtures/external/mcp-venue-desk` — a separate package, spawned as a child
+process, reached over MCP, importing nothing from RigorRun. The agent is
+`fixtures/external/booking-agent` — a separate process that drives itself
+through the proxy with its own MCP client and touches RigorRun only through the
+public agent SDK. Screenshots of what the person saw are written to
+`docs/external-user-run/`.
+
+## Technical gates
+
+| Layer | Command | Result |
+| ----- | ------- | ------ |
+| Design tokens | `pnpm contrast` | 45/45 pairs meet WCAG contrast |
+| Lint | `pnpm lint` | clean |
+| Types | `pnpm typecheck` | clean |
+| Generic core stays generic | `pnpm domain` | 13 packages checked against 19 business nouns |
+| Unit + integration | `pnpm test` | 599 passing across 39 files |
+| Build | `pnpm build` | all apps, CLI and extension |
+| Local E2E | `pnpm e2e` | 23 passing |
+| Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
+| Production smoke | `pnpm smoke:prod` | 5 passing |
 
 ## What the product does now
 
-A person does a job once. RigorRun reads the system before and after, works out
-what changed, proposes what that might mean with a question attached to each
-guess, and turns the answers a person gives into an executable suite — then
-grades that suite before it grades any agent.
+A person starts a local runner, connects their own MCP server, does one job
+through that system's own tools while RigorRun watches, corrects the handful of
+things structure could not settle, rules on the rules it proposes, and gets an
+executable suite. They point their own agent at it — any agent that speaks MCP
+works unchanged — and get a pass or fail read back from their own system, with
+how it was reached beside it and every gap it could not cover named.
 
-The compiler does not know what business it is looking at. Five unrelated
-workflows and a sixth it has never seen run through it unchanged, and
-`pnpm domain` fails the build if a business noun reaches generic code.
+Then they change the agent, run again, and are told which case regressed.
 
-## Evidence
+## What it does not do
 
-| Claim | Where |
-| --- | --- |
-| One compiler, five jobs | `/proof`, generated by `node scripts/build-proof.mjs` |
-| Generalises past the five | `packages/environments/test/unknownDomain.test.ts` |
-| Only confirmed rules gate | `packages/core/test/environmentContract.test.ts` |
-| The benchmark is graded first | `packages/quality/test/quality.test.ts` |
-| Rules the environment enforces are dropped | `packages/generator/test/enforcement.test.ts` |
-| The audit this burned down | `docs/GENERALIZATION_AUDIT.md` |
-| Where it is genuinely behind | `docs/COMPETITIVE_ADVANTAGE.md`, `docs/ROADMAP.md` |
+In full in `docs/ROADMAP.md`. The load-bearing ones: MCP is the only connector,
+there is no browser execution lane, nothing is published to npm, setting a
+project up is interface-only, and a verdict from a real system is `PARTIAL`
+rather than `AUTHORITATIVE` because RigorRun reads back what the nominated
+reads return and no more.
+
+`docs/PRODUCT_REALITY_AUDIT.md` answers twenty questions about what an external
+person can do, before and after this work.
 
 ## Deployed
 
 | | |
 | --- | --- |
-| Dashboard and `/proof` | <https://rigorrun.pages.dev> |
-| Northstar Support (the clickable demo app) | <https://rigorrun-crm.pages.dev> |
-| Control plane (optional) | <https://rigorrun.takhiroverbol.workers.dev> |
+| Landing, quickstart, `/proof` and the bundled example | <https://rigorrun.pages.dev> |
+| Northstar Support (the example's app) | <https://rigorrun-crm.pages.dev> |
+| Four schema-driven systems | <https://rigorrun-ops.pages.dev> |
+| Control plane | <https://rigorrun.takhiroverbol.workers.dev> — deployed, tested, and called by nothing |
 
-## Known gaps
-
-Listed in full in `docs/ROADMAP.md`. The load-bearing ones: there is no
-browser-driven execution lane, every environment is synthetic, the reference
-implementation is an oracle, cross-demonstration recall is not measured, and
-roughly a quarter of confirmed rules turn out to decide anything on the
-generated cases.
+The product itself is not on any of these. It is served by the runner on the
+machine that has the systems, because a page on `https` cannot reach
+`http://127.0.0.1` and most of what people want tested is only reachable from
+there.

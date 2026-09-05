@@ -105,7 +105,7 @@ export async function receiveTrace(port: number, outPath?: string): Promise<numb
       line(`${c.grey('listening')}  http://127.0.0.1:${port}/trace  (loopback only)`);
       line();
       line('1. Load the RigorRun recorder from dist/rigorrun-extension in chrome://extensions');
-      line('2. Open the Northstar Support demo app and press Start recording');
+      line('2. Open the application you want to record and press Start recording');
       line('3. Do the job once, then press Stop and "Send to local RigorRun"');
       line();
       line(c.grey('Press Ctrl+C to stop waiting.'));
