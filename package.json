@@ -9,6 +9,7 @@
     "node": ">=20.11"
   },
   "scripts": {
+    "start": "pnpm build:web && pnpm rigorrun",
     "demo": "node scripts/demo.mjs",
     "dev": "concurrently -n crm,ops,web -c magenta,yellow,cyan \"pnpm -F @rigorrun/demo-crm dev\" \"pnpm -F @rigorrun/demo-ops dev\" \"pnpm -F @rigorrun/web dev\"",
     "cli": "tsx packages/cli/src/bin.ts",

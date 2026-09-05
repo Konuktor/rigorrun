@@ -107,6 +107,26 @@ describe('what the docs do not claim', () => {
     const started = await read('GETTING_STARTED.md');
     expect(started).toMatch(/Not published to npm yet/);
   });
+
+  it('tells a fresh clone a command that leaves it with an interface', async () => {
+    // A clean clone following the README used to get a runner that came up
+    // saying "the interface is not built". The API worked, which made it worse
+    // rather than better: the first thing a person saw was a dead end with a
+    // working service behind it.
+    const manifest = JSON.parse(
+      await readFile(fileURLToPath(new URL('../../../package.json', import.meta.url)), 'utf8'),
+    ) as { scripts: Record<string, string> };
+
+    expect(manifest.scripts['start'], 'the documented first command must exist').toBeTruthy();
+    expect(manifest.scripts['start']).toContain('build:web');
+    expect(manifest.scripts['start']).toContain('rigorrun');
+
+    const readme = await readFile(
+      fileURLToPath(new URL('../../../README.md', import.meta.url)),
+      'utf8',
+    );
+    expect(readme).toContain('pnpm install && pnpm start');
+  });
 });
 
 describe('every doc the getting-started page links to', () => {

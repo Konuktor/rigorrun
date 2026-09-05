@@ -39,7 +39,12 @@ Open it. The code is spent on first use, so the copy in your shell history is
 worthless, and a page you did not open cannot drive the runner.
 
 > Not published to npm yet. Until it is: clone this repository,
-> `pnpm install`, and run `pnpm rigorrun`.
+> `pnpm install`, and run `pnpm start`.
+>
+> `pnpm start` builds the interface and then starts the runner. `pnpm rigorrun`
+> alone starts the runner without building, which is what you want while
+> developing and is not what you want the first time — it comes up with a
+> working API and no interface, and says so.
 
 ## 2. Make a project
 

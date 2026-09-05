@@ -36,7 +36,7 @@ against it and reads your system to find out what actually happened.
 ## In ten minutes
 
 ```bash
-pnpm install && pnpm rigorrun
+pnpm install && pnpm start
 ```
 
 Open the URL it prints. Connect an MCP server, do the job once, answer a few
