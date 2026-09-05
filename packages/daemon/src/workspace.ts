@@ -303,6 +303,13 @@ export class Workspace {
   private async readPayloads(project: Project): Promise<unknown[]> {
     const live = this.live.get(project.id);
     if (!live) throw new Error(`${project.name} is not connected.`);
+    // A connector that cannot read the system back reads nothing, whatever its
+    // operations return. A browser's `read_page` answers with a page, and a
+    // page is structured enough to be mistaken for records — which would mean
+    // inducing entities out of a *rendering* of the state and then grading an
+    // agent against the system's own account of what it did. Empty is the
+    // honest answer, and everything downstream already says OBSERVATIONAL.
+    if (live.connection.canReadState === false) return [];
     const payloads: unknown[] = [];
     for (const read of project.verifierReads) {
       const result = await live.connection.call(read.tool, read.args);

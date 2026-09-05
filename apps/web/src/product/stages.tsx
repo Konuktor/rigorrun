@@ -40,7 +40,8 @@ export function ConnectEnvironment({
   const mcp = saved?.kind === 'mcp' ? saved : undefined;
   const openapi = saved?.kind === 'openapi' ? saved : undefined;
 
-  const [kind, setKind] = useState<'mcp' | 'openapi'>(saved?.kind ?? 'mcp');
+  const browser = saved?.kind === 'browser' ? saved : undefined;
+  const [kind, setKind] = useState<'mcp' | 'openapi' | 'browser'>(saved?.kind ?? 'mcp');
   const [transport, setTransport] = useState<'stdio' | 'http'>(mcp?.transport ?? 'stdio');
   const [command, setCommand] = useState(mcp?.command ?? '');
   const [args, setArgs] = useState((mcp?.args ?? []).join('\n'));
@@ -48,6 +49,7 @@ export function ConnectEnvironment({
   const [spec, setSpec] = useState(openapi?.spec ?? '');
   const [baseUrl, setBaseUrl] = useState(openapi?.baseUrl ?? '');
   const [headerName, setHeaderName] = useState(Object.keys(openapi?.headers ?? {})[0] ?? '');
+  const [startUrl, setStartUrl] = useState(browser?.startUrl ?? '');
   const [secretNames, setSecretNames] = useState((saved?.secretNames ?? []).join('\n'));
   const [safety, setSafety] = useState(project.safety);
   const [busy, setBusy] = useState(false);
@@ -63,28 +65,40 @@ export function ConnectEnvironment({
         .filter(Boolean);
       const result = await api.connect(
         project.id,
-        kind === 'openapi'
+        kind === 'browser'
           ? {
-              kind: 'openapi',
-              spec,
-              specUrl: '',
-              baseUrl: baseUrl.trim(),
-              // A header name against a *secret* name. The value is fetched
-              // by the runner when it opens the connection and never here.
-              headers: headerName.trim() && names[0] ? { [headerName.trim()]: names[0] } : {},
+              kind: 'browser' as const,
+              startUrl: startUrl.trim(),
+              browser: 'chromium' as const,
+              headless: true,
+              // Attaching one is a second step, deliberately: somebody should
+              // see OBSERVATIONAL on their first verdict and understand why
+              // before being offered the way out of it.
+              verifier: null,
               secretNames: names,
             }
-          : {
-              kind: 'mcp',
-              transport,
-              command: command.trim(),
-              args: args
-                .split('\n')
-                .map((line) => line.trim())
-                .filter(Boolean),
-              url: url.trim(),
-              secretNames: names,
-            },
+          : kind === 'openapi'
+            ? {
+                kind: 'openapi',
+                spec,
+                specUrl: '',
+                baseUrl: baseUrl.trim(),
+                // A header name against a *secret* name. The value is fetched
+                // by the runner when it opens the connection and never here.
+                headers: headerName.trim() && names[0] ? { [headerName.trim()]: names[0] } : {},
+                secretNames: names,
+              }
+            : {
+                kind: 'mcp',
+                transport,
+                command: command.trim(),
+                args: args
+                  .split('\n')
+                  .map((line) => line.trim())
+                  .filter(Boolean),
+                url: url.trim(),
+                secretNames: names,
+              },
         safety,
       );
       onConnected(result.project, result.tools, result.serverName, result.latencyMs);
@@ -139,15 +153,50 @@ export function ConnectEnvironment({
             <Select
               id={id}
               value={kind}
-              onChange={(value) => setKind(value as 'mcp' | 'openapi')}
+              onChange={(value) => setKind(value as 'mcp' | 'openapi' | 'browser')}
               testId="connector-kind"
               options={[
                 { value: 'mcp', label: 'MCP — a server that publishes tools' },
                 { value: 'openapi', label: 'OpenAPI — an HTTP API with a document' },
+                { value: 'browser', label: 'A browser — a web application, by clicking' },
               ]}
             />
           )}
         </Field>
+
+        {kind === 'browser' ? (
+          <>
+            <Field
+              label="Where does the job start?"
+              hint="The page a person would open first. RigorRun stays on this site — a page can link anywhere, and following one off-site would mean driving a browser to an address you never named."
+            >
+              {({ id, describedBy }) => (
+                <TextInput
+                  id={id}
+                  describedBy={describedBy}
+                  value={startUrl}
+                  onChange={setStartUrl}
+                  placeholder="https://staging.example.com/"
+                  testId="start-url"
+                />
+              )}
+            </Field>
+            <div className="rounded-panel border border-warn-line bg-warn-bg p-4">
+              <p className="text-body text-fg">A browser cannot check its own work.</p>
+              <p className="mt-2 text-meta text-secondary">
+                A page saying &ldquo;done&rdquo; is a claim by the same system that would have to be
+                wrong for it not to be done. RigorRun will watch your agent click, and every verdict
+                will say <span className="font-mono">OBSERVATIONAL</span> — it saw what happened and
+                did not check what changed.
+              </p>
+              <p className="mt-2 text-meta text-muted">
+                Once this is working you can attach an MCP server or an OpenAPI document for the
+                same system, and then the clicking is watched in the page while the verdict comes
+                from records. Most systems that look API-less have something that can be read.
+              </p>
+            </div>
+          </>
+        ) : null}
 
         {kind === 'openapi' ? (
           <>

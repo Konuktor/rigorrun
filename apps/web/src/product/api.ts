@@ -53,6 +53,15 @@ export interface ProjectView {
         headers: Record<string, string>;
         secretNames: string[];
       }
+    | {
+        kind: 'browser';
+        startUrl: string;
+        browser: 'chromium' | 'firefox' | 'webkit';
+        headless: boolean;
+        /** Never another browser: a page cannot verify itself. */
+        verifier: { kind: 'mcp' | 'openapi' } | null;
+        secretNames: string[];
+      }
     | null;
   readOnlyTools: string[];
   verifierReads: { tool: string; args: Record<string, unknown> }[];

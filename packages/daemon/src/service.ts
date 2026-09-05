@@ -275,6 +275,21 @@ export class Service {
     const connection = await this.workspace.connect(project).catch(() => undefined);
     if (!connection) return '';
 
+    // Asked before anything is called, because for a browser the answer does
+    // not depend on what the reads return. `read_page` answers with a page,
+    // and a page is structured enough to look like records — which is exactly
+    // how this goes wrong: RigorRun would induce entities out of a rendering of
+    // the state rather than the state, and grade an agent against the system's
+    // own account of what it did.
+    if (connection.canReadState === false) {
+      return (
+        'A browser cannot check its own work. RigorRun will watch your agent click, and every ' +
+        'verdict will say OBSERVATIONAL — it saw what happened and did not check what changed. ' +
+        'Attach an MCP server or an OpenAPI document for the same system and the clicking is ' +
+        'watched in the page while the verdict comes from records.'
+      );
+    }
+
     const observations: PayloadObservation[] = [];
     const failed: string[] = [];
     for (const read of project.verifierReads) {
