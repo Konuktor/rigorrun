@@ -43,7 +43,8 @@ describe('fixtures/external', () => {
     const offenders: { file: string; imported: string }[] = [];
     for (const file of await sourceFiles(externalDir)) {
       const source = await readFile(file, 'utf8');
-      for (const [, imported] of source.matchAll(/@rigorrun\/[a-z-]+/g).map((m) => [m[0], m[0]])) {
+      for (const match of [...source.matchAll(/@rigorrun\/[a-z-]+/g)]) {
+        const imported = match[0];
         if (!PUBLIC_SURFACE.has(imported)) {
           offenders.push({ file: file.slice(externalDir.length), imported });
         }

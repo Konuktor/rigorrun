@@ -1,0 +1,27 @@
+{
+  "name": "@rigorrun/daemon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@rigorrun/agents": "workspace:*",
+    "@rigorrun/compiler": "workspace:*",
+    "@rigorrun/core": "workspace:*",
+    "@rigorrun/env-mcp": "workspace:*",
+    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/generator": "workspace:*",
+    "@rigorrun/mcp": "workspace:*",
+    "@rigorrun/proxy": "workspace:*",
+    "@rigorrun/runner": "workspace:*",
+    "@rigorrun/scoring": "workspace:*",
+    "hono": "^4.13.7",
+    "zod": "^4.1.12"
+  }
+}
