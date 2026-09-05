@@ -48,7 +48,7 @@ ${failures(data, mode)}
 ${contractSection(options.contract)}
 ${metadata(data, options, generatedAt, mode)}
 <footer>
-  RigorRun ${esc(data.rigorrunVersion)} · Do the job once. Test every agent forever.<br>
+  RigorRun ${esc(data.rigorrunVersion)} · Acceptance testing for tool-using AI agents.<br>
   ${esc(data.environment)} is a synthetic demo environment. Every record in it is fabricated.
 </footer>
 </div></body></html>`;

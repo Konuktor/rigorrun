@@ -38,20 +38,26 @@ import { newProject, type AgentConfig, type Connector, type Project } from './pr
 import type { ProjectStore } from './store.ts';
 import { Workspace } from './workspace.ts';
 import { compareRuns, type RunComparison } from './compare.ts';
+import { ActivationLog } from './activation.ts';
+import { detectDrift, type Discovery, type DriftReport } from './drift.ts';
 
 export interface ServiceOptions {
   store: ProjectStore;
   proxy: ProxyServer;
   now?: () => Date;
+  /** Where the funnel is recorded. Defaults to the store's own directory. */
+  activation?: ActivationLog;
 }
 
 export class Service {
   readonly workspace: Workspace;
+  readonly activation: ActivationLog;
   private readonly now: () => Date;
 
   constructor(private readonly options: ServiceOptions) {
     this.workspace = new Workspace(options.store);
     this.now = options.now ?? (() => new Date());
+    this.activation = options.activation ?? new ActivationLog(options.store.path, this.now);
   }
 
   private get store(): ProjectStore {
@@ -70,6 +76,8 @@ export class Service {
       now: this.now().toISOString(),
     });
     await this.store.write(project);
+    // A2. The clock a person is actually measured against starts here.
+    await this.activation.stage('project_created', project.id);
     return project;
   }
 
@@ -99,13 +107,22 @@ export class Service {
     const attempted: Project = { ...project, connector, safety };
 
     await this.workspace.disconnect(projectId);
-    const connection = await this.workspace.connect(attempted);
+    let connection;
+    try {
+      connection = await this.workspace.connect(attempted);
+    } catch (error) {
+      // Counted, not described: the message carries a hostname or a command.
+      await this.activation.attempt('environment_connection_failed', projectId);
+      throw error;
+    }
 
     attempted.timings = {
       ...attempted.timings,
       environmentConnectedAt: attempted.timings.environmentConnectedAt ?? this.now().toISOString(),
     };
     await this.store.write(attempted);
+    await this.saveDiscovery(projectId, connection.discovery);
+    await this.activation.stage('environment_connected', projectId);
 
     return {
       project: attempted,
@@ -113,6 +130,85 @@ export class Service {
       latencyMs: connection.discovery.latencyMs,
       serverName: connection.discovery.serverName,
     };
+  }
+
+  /**
+   * Opens the connection again, and says what moved while it was closed.
+   *
+   * An MCP session does not survive a runner restart — a stdio connector is a
+   * child process, and it is gone. The project survives, the configuration
+   * survives, the credentials survive; the *session* has to be rebuilt, and
+   * pretending otherwise would mean discovering it at the worst moment.
+   *
+   * Reconnecting is also the only chance to notice that somebody else's system
+   * changed. A suite compiled against tools that have since been renamed is
+   * still runnable, and would produce a confident verdict about a system it no
+   * longer describes.
+   */
+  async reconnect(projectId: string): Promise<{
+    project: Project;
+    tools: DiscoveredTool[];
+    serverName: string;
+    latencyMs: number;
+    drift: DriftReport | null;
+  }> {
+    const project = await this.store.read(projectId);
+    if (!project.connector) throw new Error(`${project.name} has no system connected yet.`);
+
+    const previous = await this.store.readArtefact<Discovery>(projectId, 'discovery');
+    await this.workspace.disconnect(projectId);
+
+    let connection;
+    try {
+      connection = await this.workspace.connect(project);
+    } catch (error) {
+      await this.activation.attempt('environment_connection_failed', projectId);
+      throw error;
+    }
+    await this.activation.attempt('environment_reconnected', projectId);
+
+    const current = await this.saveDiscovery(projectId, connection.discovery);
+    return {
+      project,
+      tools: connection.discovery.tools,
+      serverName: connection.discovery.serverName,
+      latencyMs: connection.discovery.latencyMs,
+      // Nothing to compare against on a project connected before discovery was
+      // persisted. Silence is honest; an empty report would not be.
+      drift: previous ? detectDrift(previous, current) : null,
+    };
+  }
+
+  /** Whether this runner currently holds an open connection for a project. */
+  isConnected(projectId: string): boolean {
+    return this.workspace.connectionFor(projectId) !== undefined;
+  }
+
+  /** What the last successful connection found, for a page that just loaded. */
+  discovery(projectId: string): Promise<Discovery | undefined> {
+    return this.store.readArtefact<Discovery>(projectId, 'discovery');
+  }
+
+  private async saveDiscovery(
+    projectId: string,
+    found: {
+      serverName: string;
+      serverVersion: string;
+      protocolVersion: string;
+      latencyMs: number;
+      tools: DiscoveredTool[];
+    },
+  ): Promise<Discovery> {
+    const discovery: Discovery = {
+      serverName: found.serverName,
+      serverVersion: found.serverVersion,
+      protocolVersion: found.protocolVersion,
+      discoveredAt: this.now().toISOString(),
+      latencyMs: found.latencyMs,
+      tools: found.tools,
+    };
+    await this.store.writeArtefact(projectId, 'discovery', discovery);
+    return discovery;
   }
 
   /** Which tools only read, which one puts the world back, what to read after. */
@@ -143,7 +239,35 @@ export class Service {
   async startTeaching(projectId: string): Promise<void> {
     const project = await this.store.read(projectId);
     await this.workspace.connect(project);
+    // Starting over throws away a recording somebody may have been halfway
+    // through, so it is counted. A person restarting twice is a signal about
+    // the interface, not about them.
+    if (await this.store.readArtefact(projectId, 'demonstration')) {
+      await this.activation.attempt('recording_restarted', projectId);
+    }
     await this.workspace.startDemonstration(project);
+  }
+
+  /**
+   * Picks a half-finished recording back up after a reload.
+   *
+   * Returns false when there is nothing to resume, which the interface reads as
+   * "offer to start" rather than as a failure.
+   */
+  async resumeTeaching(projectId: string): Promise<boolean> {
+    const project = await this.store.read(projectId);
+    if (!(await this.store.readArtefact(projectId, 'demonstration'))) return false;
+    await this.workspace.connect(project);
+    return this.workspace.resumeDemonstration(project);
+  }
+
+  /** What has been recorded so far, so a resumed page can show the log. */
+  async recordedSoFar(projectId: string): Promise<{ tool: string; ok: boolean }[]> {
+    const saved = await this.store.readArtefact<{ entries: { action: string; ok?: boolean }[] }>(
+      projectId,
+      'demonstration',
+    );
+    return (saved?.entries ?? []).map((entry) => ({ tool: entry.action, ok: entry.ok !== false }));
   }
 
   async teachStep(
@@ -183,6 +307,10 @@ export class Service {
       after: finished.after,
     });
     await this.store.writeArtefact(projectId, 'trace', trace);
+    // Persisted so the review screen survives a reload. It is the one screen
+    // whose content cannot be recomputed without redoing the job.
+    await this.store.writeArtefact(projectId, 'induced', finished.induced);
+    await this.store.writeArtefact(projectId, 'schema', finished.schema);
 
     const updated: Project = {
       ...project,
@@ -192,6 +320,7 @@ export class Service {
       },
     };
     await this.store.write(updated);
+    await this.activation.stage('workflow_recorded', projectId);
     return { project: updated, questions: finished.induced.questions, schema: finished.schema };
   }
 
@@ -247,6 +376,9 @@ export class Service {
       rejectedRuleIds: decisions.rejectedRuleIds ?? [],
     });
     await this.store.writeArtefact(projectId, 'contract', reviewed);
+    if (rulesAwaitingReview(reviewed).length === 0) {
+      await this.activation.stage('contract_confirmed', projectId);
+    }
     return reviewed;
   }
 
@@ -277,6 +409,7 @@ export class Service {
       timings: { ...project.timings, benchmarkGeneratedAt: this.now().toISOString() },
     };
     await this.store.write(updated);
+    await this.activation.stage('benchmark_built', projectId);
     return benchmark;
   }
 
@@ -317,6 +450,8 @@ export class Service {
       },
     };
     await this.store.write(updated);
+    if (probe.ok) await this.activation.stage('agent_connected', projectId);
+    else await this.activation.attempt('agent_probe_failed', projectId);
     return { project: updated, agent };
   }
 
@@ -336,9 +471,15 @@ export class Service {
     const schema = await this.schemaOf(project);
     await this.registerFor(project, schema);
 
-    const result = await runBenchmark(benchmark, [this.adapterFor(config)], {
-      runId: `run_${randomBytes(6).toString('hex')}`,
-    });
+    let result;
+    try {
+      result = await runBenchmark(benchmark, [this.adapterFor(config)], {
+        runId: `run_${randomBytes(6).toString('hex')}`,
+      });
+    } catch (error) {
+      await this.activation.attempt('run_failed', projectId);
+      throw error;
+    }
     await this.store.writeRun(projectId, result.runId, result);
 
     const score = result.scores[0];
@@ -379,6 +520,13 @@ export class Service {
       baselineRunId: project.baselineRunId ?? result.runId,
     };
     await this.store.write(updated);
+
+    // A8 whichever way the verdict went — a failure is a result, and a person
+    // who got one has activated. A9 is the one that says they came back.
+    await this.activation.stage(
+      project.runs.length === 0 ? 'first_real_verdict' : 'second_run_completed',
+      projectId,
+    );
     return result;
   }
 

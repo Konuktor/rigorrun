@@ -7,6 +7,8 @@ export default tseslint.config(
   {
     ignores: [
       '**/dist/**',
+      // The interface, copied into the publishable package at build time.
+      'packages/cli/ui/**',
       '**/node_modules/**',
       '**/coverage/**',
       '**/.wrangler/**',

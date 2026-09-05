@@ -1,5 +1,5 @@
 {
-  "name": "rigorrun",
+  "name": "rigorrun-workspace",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,8 +14,8 @@
     "dev": "concurrently -n crm,ops,web -c magenta,yellow,cyan \"pnpm -F @rigorrun/demo-crm dev\" \"pnpm -F @rigorrun/demo-ops dev\" \"pnpm -F @rigorrun/web dev\"",
     "cli": "tsx packages/cli/src/bin.ts",
     "rigorrun": "tsx packages/cli/src/bin.ts",
-    "build": "pnpm build:cli && pnpm build:crm && pnpm build:ops && pnpm build:web && pnpm build:extension",
-    "build:cli": "pnpm -F @rigorrun/cli build",
+    "build": "pnpm build:crm && pnpm build:ops && pnpm build:web && pnpm build:extension && pnpm build:cli",
+    "build:cli": "pnpm -F rigorrun build",
     "build:crm": "pnpm -F @rigorrun/demo-crm build",
     "build:web": "pnpm -F @rigorrun/web build",
     "build:extension": "pnpm -F @rigorrun/extension build",
@@ -52,7 +52,9 @@
     "domain": "node scripts/check-domain-leak.mjs",
     "build:ops": "pnpm -F @rigorrun/demo-ops build",
     "deploy:ops": "pnpm build:ops && wrangler pages deploy apps/demo-ops/dist --project-name rigorrun-ops --branch main --commit-dirty=true",
-    "e2e:external": "playwright test --config e2e/playwright.external.config.ts"
+    "e2e:external": "playwright test --config e2e/playwright.external.config.ts",
+    "pack": "pnpm build:web && pnpm build:cli && cd packages/cli && npm pack --pack-destination ../../dist",
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

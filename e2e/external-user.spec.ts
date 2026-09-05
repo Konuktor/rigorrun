@@ -45,6 +45,18 @@ let agent: ChildProcess;
 let pairedUrl: string;
 const AGENT_PORT = 8912;
 
+/**
+ * What is under test: the sources, or the thing a stranger would install.
+ *
+ * `RIGORRUN_BIN` points at an installed executable — the tarball, unpacked into
+ * a clean directory by `scripts/verify-package.mjs`. Without it the test drives
+ * the sources through `tsx`, which is the fast loop while developing.
+ *
+ * The same spec covers both on purpose. A packaged artifact that passes a
+ * *different* test from the one the sources pass has not been tested.
+ */
+const PACKAGED = process.env['RIGORRUN_BIN'];
+
 /** Starts a process and waits for the line that says it is ready. */
 function startAndWait(
   command: string,
@@ -83,8 +95,8 @@ test.beforeAll(async () => {
 
   // Exactly what the quickstart tells a person to run.
   const started = await startAndWait(
-    tsx,
-    [join(root, 'packages', 'cli', 'src', 'bin.ts')],
+    PACKAGED ?? tsx,
+    PACKAGED ? [] : [join(root, 'packages', 'cli', 'src', 'bin.ts')],
     { RIGORRUN_HOME: home, NO_COLOR: '1' },
     /http:\/\/127\.0\.0\.1:\d+\/\?code=[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}/,
   );
@@ -184,11 +196,21 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await doStep('record_signoff', { bookingId: 'BKG-4001', approver: 'Dana Whitlock' });
   await doStep('confirm_booking', { bookingId: 'BKG-4001' });
 
+  // A reload in the middle of recording. This is the moment the previous
+  // version of the product lost twenty minutes of somebody's real work in a
+  // real system, so it is worth proving rather than assuming.
+  await page.reload();
+  await expect(page.getByTestId('resume-recording')).toBeVisible();
+  await page.getByTestId('resume-recording').click();
+  // What was already done is still there.
+  await expect(page.locator('ol li').filter({ hasText: 'confirm_booking' }).last()).toBeVisible();
+  await evidence(page, 'resumed-after-reload');
+
   await page.getByTestId('finish-recording').click();
   await evidence(page, 'job-demonstrated');
 
   // ------------------------------------------- 5. review what it worked out
-  await expect(page.getByText('worked these out from what your system handed back')).toBeVisible();
+  await expect(page.getByText(/worked these out by looking at/)).toBeVisible();
   // The question no data could have answered, asked with its reason.
   await expect(page.getByText('injection payloads').first()).toBeVisible();
 
@@ -225,5 +247,10 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // And what this system cost the suite is said rather than hidden.
   await expect(page.getByText('What this system stopped RigorRun doing')).toBeVisible();
+
+  // The activation metric, measured by the product rather than by us. Machine
+  // time is what a benchmark takes; this is what a person took.
+  await expect(page.getByTestId('time-to-verdict')).toBeVisible();
+
   await evidence(page, 'verdict');
 });

@@ -36,13 +36,22 @@ against it and reads your system to find out what actually happened.
 ## In ten minutes
 
 ```bash
-pnpm install && pnpm start
+npx rigorrun@alpha
 ```
 
 Open the URL it prints. Connect an MCP server, do the job once, answer a few
 questions, connect your agent, run it. Nothing is uploaded; your systems,
 credentials and recordings stay on your machine, because the interface is
 served by the local process rather than from a website.
+
+`@alpha` on purpose — the prerelease is not tagged `latest`, so nobody installs
+it by accident.
+
+Working from this repository instead:
+
+```bash
+pnpm install && pnpm start
+```
 
 See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 
@@ -71,6 +80,7 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [Security model](docs/SECURITY_MODEL.md) | Threats, what is done, and what is not defended. |
 | [CI](docs/CI.md) | Exit codes and a working workflow. |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Every error message, and what to do. |
+| [Third-party dogfood](docs/THIRD_PARTY_DOGFOOD.md) | How we find out whether anybody else can use this. |
 | [What is and is not built](docs/PRODUCT_REALITY_AUDIT.md) | The honest inventory. |
 | [Roadmap](docs/ROADMAP.md) | Including the gaps. |
 

@@ -29,6 +29,7 @@ const DOCUMENTED_COMMANDS = [
   'rigorrun secret set',
   'rigorrun secret list',
   'rigorrun doctor',
+  'rigorrun feedback export',
 ];
 
 describe('the commands the docs promise', () => {
@@ -103,12 +104,33 @@ describe('what the docs do not claim', () => {
     }
   });
 
-  it('says plainly that the runner is not published yet', async () => {
+  it('says plainly that this is an alpha, and what that means', async () => {
+    // It used to say "not published yet", which stopped being true. What has
+    // to stay true is that nobody thinks they are installing something
+    // finished.
     const started = await read('GETTING_STARTED.md');
-    expect(started).toMatch(/Not published to npm yet/);
+    expect(started).toMatch(/\*\*Alpha\.\*\*/);
+    expect(started).toMatch(/not tagged `latest`/);
   });
 
-  it('tells a fresh clone a command that leaves it with an interface', async () => {
+  it('tells a stranger to install the prerelease, not whatever is on latest', async () => {
+    // `npx rigorrun` would install `latest`, which this is deliberately not.
+    // Somebody following the docs must get the thing the docs describe.
+    const started = await read('GETTING_STARTED.md');
+    expect(started).toContain('npx rigorrun@alpha');
+
+    const protocol = await read('THIRD_PARTY_DOGFOOD.md');
+    expect(protocol).toContain('npx rigorrun@alpha');
+  });
+
+  it('promises the feedback bundle keeps a stranger’s data out of it', async () => {
+    // This is the promise on which somebody decides whether to send us a file
+    // from a machine with their production credentials on it.
+    const started = await read('GETTING_STARTED.md');
+    expect(started).toMatch(/no credentials, no\s+tool arguments, no results/);
+  });
+
+  it('offers both ways in, and both leave somebody with an interface', async () => {
     // A clean clone following the README used to get a runner that came up
     // saying "the interface is not built". The API worked, which made it worse
     // rather than better: the first thing a person saw was a dead end with a
@@ -125,6 +147,10 @@ describe('what the docs do not claim', () => {
       fileURLToPath(new URL('../../../README.md', import.meta.url)),
       'utf8',
     );
+    // The one anybody without this repository uses...
+    expect(readme).toContain('npx rigorrun@alpha');
+    // ...and the one for somebody who has it. `pnpm rigorrun` alone would
+    // leave them with a working API and no interface.
     expect(readme).toContain('pnpm install && pnpm start');
   });
 });

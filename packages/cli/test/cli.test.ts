@@ -72,7 +72,9 @@ describe('help and version', () => {
   it('prints the version', async () => {
     const { code, out } = await cli('--version');
     expect(code).toBe(0);
-    expect(out.trim()).toMatch(/^\d+\.\d+\.\d+$/);
+    // A prerelease tag is part of the version, and `--version` is what somebody
+    // pastes into a bug report — so it has to be the whole thing.
+    expect(out.trim()).toMatch(/^\d+\.\d+\.\d+(-[a-z]+\.\d+)?$/);
   });
 
   it('rejects an unknown command with exit 2', async () => {

@@ -55,7 +55,8 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
         <h1 className="text-title font-semibold">Projects</h1>
         <p className="max-w-2xl text-body text-secondary">
           A project is one job you want an agent to do, in one of your systems. Everything about it
-          — the connection, what it learned, your recordings — stays on this machine.
+          — the connection, what it learned, your recordings, your credentials — stays on this
+          machine. You can stop at any point and pick it up later.
         </p>
       </header>
 
@@ -96,7 +97,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
             </Field>
             <Field
               label="What is the job?"
-              hint="One sentence, the way you would explain it to a new colleague. This becomes the instruction your agent is given."
+              hint="One sentence, the way you would explain it to somebody new. Your agent is given exactly these words, so write them for a reader who knows nothing."
             >
               {({ id, describedBy }) => (
                 <TextInput

@@ -2,6 +2,22 @@
 
 Start with `rigorrun doctor`.
 
+## Installing it
+
+**`npx rigorrun` installs something other than what the docs describe.**
+Use `npx rigorrun@alpha`. The prerelease is deliberately not tagged `latest`, so
+a bare `npx rigorrun` gets whatever is on `latest` — which, until there is a
+stable release, is nothing.
+
+**"RigorRun needs Node 20.11 or newer."**
+It means it. Node 20 is the oldest release still getting security fixes.
+`nvm install 22 && nvm use 22`, or a package from nodejs.org.
+
+**The first run downloads a lot.**
+About 95 packages, once. RigorRun bundles its own code but leaves its
+dependencies — the MCP SDK and the HTTP server — as real dependencies, so `npm
+audit` works on them and they can be patched without waiting for us.
+
 ## The runner
 
 **"That pairing code has been used or has expired."**
@@ -11,6 +27,27 @@ history and possibly a screenshot. Restart the runner for a new one.
 **A page says the runner is not answering.**
 The runner has stopped, or you are looking at a tab from a previous run on a
 different port. Start it again and open the URL it prints.
+
+**The project page says RigorRun is not talking to my system.**
+Expected after a restart, and not a loss: the project, its settings and its
+credentials are all still there. A local MCP server is a child process, so the
+*session* went away with the runner. Press **Reconnect**. It will also tell you
+if anything about your system changed while it was closed.
+
+**I reloaded the page halfway through recording.**
+Nothing is lost. Recordings are written to disk after every step, so the
+teaching screen offers to carry on where you left off. Starting again is also
+safe — it resets your system first — but it throws the earlier steps away.
+
+**Everything I set up is gone.**
+Check `RIGORRUN_HOME`. Projects live in `~/.rigorrun` unless that variable
+points somewhere else, and a shell that sets it differently is looking at a
+different workspace.
+
+**"This workspace was written by a newer RigorRun."**
+You have downgraded. An older RigorRun refuses to touch a newer workspace
+rather than rewriting it and silently dropping fields it does not understand.
+Upgrade back: `npm i -g rigorrun@alpha`.
 
 **"forbidden host"**
 Something reached the runner with somebody else's domain in the `Host` header.

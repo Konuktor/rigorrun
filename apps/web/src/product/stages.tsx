@@ -69,9 +69,28 @@ export function ConnectEnvironment({
     <Panel>
       <div className="flex max-w-2xl flex-col gap-5">
         <p className="text-body text-secondary">
-          Point RigorRun at the system your agent will work in. It reads that system before and
-          after your agent runs, which is the only reason a verdict can mean anything.
+          Point RigorRun at the system your agent works in. It looks at that system before and
+          after your agent runs, which is the only reason a result can be trusted.
         </p>
+        <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
+          <p className="text-meta font-medium text-secondary">What you need</p>
+          <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
+            <li>
+              An <strong className="text-secondary">MCP server</strong> for that system — either a
+              command on this machine or a URL. If you already run one for Claude, Cursor or
+              anything else, that is the one.
+            </li>
+            <li>
+              Somewhere it is <strong className="text-secondary">safe to change things</strong>.
+              Staging or a scratch instance. RigorRun refuses to write to anything you mark
+              production.
+            </li>
+          </ul>
+          <p className="mt-2 text-meta text-muted">
+            Next: RigorRun connects, shows you everything that system can do, and asks you two
+            questions about it. Nothing is changed until you say so.
+          </p>
+        </div>
 
         <Field label="Where is it?">
           {({ id }) => (
@@ -92,7 +111,7 @@ export function ConnectEnvironment({
           <>
             <Field
               label="Command"
-              hint="The program itself, with no arguments. RigorRun runs it directly and never through a shell, so nothing here is interpreted."
+              hint="Just the program, with no arguments — for example npx. RigorRun runs it directly rather than through a shell, so nothing here is interpreted as shell syntax."
             >
               {({ id, describedBy }) => (
                 <TextInput
@@ -105,7 +124,10 @@ export function ConnectEnvironment({
                 />
               )}
             </Field>
-            <Field label="Arguments" hint="One per line.">
+            <Field
+              label="Arguments"
+              hint="One per line. Everything you would type after the command."
+            >
               {({ id, describedBy }) => (
                 <TextArea
                   id={id}
@@ -118,10 +140,14 @@ export function ConnectEnvironment({
             </Field>
           </>
         ) : (
-          <Field label="Server URL">
-            {({ id }) => (
+          <Field
+            label="Server URL"
+            hint="A private address is fine — RigorRun runs on your machine, so anything this machine can reach, it can reach."
+          >
+            {({ id, describedBy }) => (
               <TextInput
                 id={id}
+                describedBy={describedBy}
                 value={url}
                 onChange={setUrl}
                 placeholder="https://staging.example.com/mcp"
@@ -155,7 +181,7 @@ export function ConnectEnvironment({
 
         <Field
           label="What kind of system is this?"
-          hint="RigorRun will not run anything that writes against production."
+          hint="If you say production, RigorRun refuses every action that would change something — your agent still gets to try, and you see what it would have done."
         >
           {({ id, describedBy }) => (
             <Select
@@ -194,12 +220,14 @@ export function ToolCatalogue({
   serverName,
   latencyMs,
   onConfigured,
+  onStartOver,
 }: {
   project: ProjectView;
   tools: ToolView[];
   serverName: string;
   latencyMs: number;
   onConfigured: (project: ProjectView) => void;
+  onStartOver?: () => void;
 }) {
   const [readOnly, setReadOnly] = useState<Set<string>>(
     new Set(
@@ -245,23 +273,47 @@ export function ToolCatalogue({
   return (
     <div className="flex flex-col gap-5">
       <Panel>
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-          <span className="text-section font-semibold" data-testid="server-name">
-            {serverName}
-          </span>
-          <span className="text-meta text-muted">
-            {tools.length} tools · answered in {latencyMs}ms
-          </span>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
+            <span className="text-section font-semibold" data-testid="server-name">
+              {serverName}
+            </span>
+            <span className="text-meta text-muted">
+              {tools.length} things it can do · answered in {latencyMs}ms
+            </span>
+          </div>
+          {onStartOver ? (
+            <button
+              type="button"
+              onClick={onStartOver}
+              data-testid="change-system"
+              className="text-meta text-muted hover:text-fg"
+            >
+              Connect a different system
+            </button>
+          ) : null}
         </div>
       </Panel>
 
       <section className="flex flex-col gap-3">
         <SectionLabel>What this system can do</SectionLabel>
         <p className="max-w-2xl text-body text-secondary">
-          Two things need your judgement, because neither can be discovered. Which of these only
-          read — a server&rsquo;s own claim about that is a hint, not a guarantee — and which one
-          puts the system back afterwards.
+          Two things need you, because neither can be worked out from the outside.
         </p>
+        <ul className="flex max-w-2xl list-disc flex-col gap-1 pl-5 text-body text-secondary">
+          <li>
+            <strong className="font-medium text-fg">Which of these only look, never change
+            anything.</strong>{' '}
+            Your system can say so itself, and RigorRun shows you when it does — but it will not
+            take a system&rsquo;s word about its own safety.
+          </li>
+          <li>
+            <strong className="font-medium text-fg">Which ones RigorRun should use to check what
+            actually happened.</strong>{' '}
+            After your agent finishes, RigorRun calls these to look at your system and find out
+            what really changed. That is the whole reason a result can be trusted.
+          </li>
+        </ul>
         <ul className="flex flex-col gap-2">
           {tools.map((tool) => (
             <li key={tool.name}>
@@ -280,8 +332,8 @@ export function ToolCatalogue({
       <Panel>
         <div className="flex max-w-2xl flex-col gap-4">
           <Field
-            label="Which tool puts the system back?"
-            hint="Without one, cases cannot be isolated from each other and repeated mutation tests are switched off. RigorRun will still run; it will say so on every result."
+            label="Which one puts your system back the way it was?"
+            hint="RigorRun calls it before every test, so each one starts from the same place. Without it RigorRun still works — it just says on every result that the tests could affect each other."
           >
             {({ id, describedBy }) => (
               <Select
@@ -291,7 +343,7 @@ export function ToolCatalogue({
                 onChange={setReset}
                 testId="reset-tool"
                 options={[
-                  { value: '', label: 'There is no way to reset this system' },
+                  { value: '', label: 'There is no way to put this system back' },
                   ...tools.map((tool) => ({ value: tool.name, label: tool.name })),
                 ]}
               />
@@ -304,8 +356,9 @@ export function ToolCatalogue({
             </Button>
             {reads.size === 0 ? (
               <p className="mt-2 text-meta text-muted">
-                Choose at least one read. Without one RigorRun can watch your agent but cannot check
-                whether it worked.
+                Tick at least one &ldquo;check with this&rdquo;. Without one, RigorRun can watch what
+                your agent does but cannot look at your system afterwards to see whether it worked —
+                and a result nobody checked is not worth having.
               </p>
             ) : null}
           </div>
@@ -367,14 +420,14 @@ function ToolRow({
           <Checkbox
             checked={readOnly}
             onChange={onReadOnly}
-            label="Only reads"
+            label="Only looks"
             testId={`readonly-${tool.name}`}
           />
           <Checkbox
             checked={isRead}
             onChange={onRead}
             label="Check with this"
-            hint="Called after your agent finishes"
+            hint="Called afterwards, to see what changed"
             testId={`verifier-${tool.name}`}
           />
         </div>
@@ -388,20 +441,26 @@ function ToolRow({
 export function TeachJob({
   project,
   tools,
+  alreadyRecorded,
   onFinished,
 }: {
   project: ProjectView;
   tools: ToolView[];
+  /** Steps from a recording that was in progress when the page was reloaded. */
+  alreadyRecorded: { tool: string; ok: boolean }[];
   onFinished: (project: ProjectView, questions: SchemaQuestionView[]) => void;
 }) {
   const [recording, setRecording] = useState(false);
   const [selected, setSelected] = useState(tools[0]?.name ?? '');
   const [values, setValues] = useState<Record<string, string>>({});
-  const [log, setLog] = useState<{ tool: string; ok: boolean; detail: string }[]>([]);
+  const [log, setLog] = useState<{ tool: string; ok: boolean; detail: string }[]>(
+    alreadyRecorded.map((entry) => ({ ...entry, detail: 'recorded earlier' })),
+  );
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
   const tool = tools.find((entry) => entry.name === selected);
+  const canResume = alreadyRecorded.length > 0 && !recording;
 
   async function start(): Promise<void> {
     setBusy(true);
@@ -410,6 +469,31 @@ export function TeachJob({
       await api.startTeaching(project.id);
       setRecording(true);
       setLog([]);
+    } catch (error) {
+      setProblem((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /**
+   * Picks a half-finished recording back up.
+   *
+   * The alternative — losing it and starting again — means doing real work in a
+   * real system twice, which is the most expensive thing this product can ask
+   * of anybody.
+   */
+  async function resume(): Promise<void> {
+    setBusy(true);
+    setProblem('');
+    try {
+      const result = await api.resumeTeaching(project.id);
+      if (!result.resumed) {
+        setProblem('There was nothing left to pick up. Starting again is safe.');
+        return;
+      }
+      setRecording(true);
+      setLog(result.steps.map((entry) => ({ ...entry, detail: 'recorded earlier' })));
     } catch (error) {
       setProblem((error as Error).message);
     } finally {
@@ -469,13 +553,42 @@ export function TeachJob({
             job that leaves no trace cannot be learned.
           </p>
           {!recording ? (
-            <div>
-              <Button onClick={start} disabled={busy} testId="start-recording">
-                {busy ? 'Starting…' : 'Start recording'}
-              </Button>
-              <p className="mt-2 text-meta text-muted">
-                This resets the system first, so the job starts where your tests will start.
-              </p>
+            <div className="flex flex-col gap-3">
+              {canResume ? (
+                <div className="rounded-panel border border-info-line bg-info-bg px-3 py-2.5">
+                  <p className="text-body text-fg">
+                    You were partway through recording this — {alreadyRecorded.length} step
+                    {alreadyRecorded.length === 1 ? '' : 's'} so far.
+                  </p>
+                  <p className="mt-1 text-meta text-muted">
+                    Carrying on keeps what you already did. Starting again resets your system and
+                    throws it away.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button onClick={resume} disabled={busy} testId="resume-recording">
+                      {busy ? 'Picking it up…' : 'Carry on where I left off'}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={start}
+                      disabled={busy}
+                      testId="restart-recording"
+                    >
+                      Start again
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <Button onClick={start} disabled={busy} testId="start-recording">
+                    {busy ? 'Starting…' : 'Start recording'}
+                  </Button>
+                  <p className="mt-2 text-meta text-muted">
+                    This puts your system back first, so the job starts where your tests will
+                    start. You can stop and pick this up again later.
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-3">
@@ -604,11 +717,17 @@ export function ReviewLearned({
 
   return (
     <div className="flex flex-col gap-5">
-      <p className="max-w-2xl text-body text-secondary">
-        RigorRun worked these out from what your system handed back. It read the shape of the data
-        and nothing else — never the names — so some of it needs you. Each answer says what the
-        evidence was, so you can disagree with the evidence rather than with a verdict.
-      </p>
+      <div className="flex max-w-2xl flex-col gap-3">
+        <p className="text-body text-secondary">
+          RigorRun worked these out by looking at what your system handed back. It read the shape
+          of the data and never the names of things, which is what stops it only working on
+          businesses it has seen before — and means a few things it genuinely cannot know.
+        </p>
+        <p className="text-body text-secondary">
+          Each question shows what it saw, so you can disagree with the evidence rather than with
+          a verdict. Getting one wrong is not permanent: come back to this step any time.
+        </p>
+      </div>
 
       {questions.map((question) => (
         <Panel key={question.id}>
@@ -723,8 +842,8 @@ export function RuleOnRules({
       <Panel>
         <div className="flex flex-col gap-3">
           <p className="max-w-2xl text-body text-secondary">
-            RigorRun will now turn what it watched into rules. None of them will be enforced until
-            you say so.
+            RigorRun will now turn what it watched into rules about how the job should be done.
+            None of them can fail your agent until you have said yes to it.
           </p>
           {problem ? <Problem>{problem}</Problem> : null}
           <div>
@@ -755,8 +874,9 @@ export function RuleOnRules({
       <section className="flex flex-col gap-3">
         <SectionLabel>What it thinks the rules are</SectionLabel>
         <p className="max-w-2xl text-body text-secondary">
-          Guesses, every one. A rule you do not confirm cannot fail your agent — so saying no is
-          cheap, and RigorRun proposes more than it expects you to keep.
+          Guesses, every one. A rule you say no to cannot fail your agent, so saying no costs you
+          nothing — RigorRun deliberately proposes more than it expects you to keep, because
+          missing a real rule is far worse than proposing one you do not want.
         </p>
         {rules.map((rule) => (
           <Panel key={rule.id}>

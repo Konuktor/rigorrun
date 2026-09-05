@@ -1,3 +1,7 @@
+export * from './feedback.ts';
+export * from './drift.ts';
+export * from './activation.ts';
+export * from './workspaceVersion.ts';
 export * from './project.ts';
 export * from './store.ts';
 export * from './compare.ts';

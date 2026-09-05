@@ -27,6 +27,7 @@ import { cmdInitEnvironment, cmdPrivacyInspect } from './scaffold.ts';
 import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
+import { cmdFeedbackExport } from './feedback.ts';
 import {
   cmdProjectCompare,
   cmdProjectGate,
@@ -137,6 +138,9 @@ async function dispatch(argv: string[]): Promise<number> {
       });
     case 'projects':
       return cmdProjects(flags);
+    case 'feedback':
+      if (target !== 'export') throw new CliError('Try `rigorrun feedback export`.');
+      return cmdFeedbackExport(flags);
     case 'secret':
       return cmdSecret(target, parsed.positionals[2], flags);
     case 'compare-runs':

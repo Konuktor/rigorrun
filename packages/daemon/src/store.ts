@@ -6,13 +6,24 @@
  * rather than fields somebody has to remember to strip:
  *
  *     ~/.rigorrun/
+ *       workspace.json               the on-disk format version
+ *       activation.jsonl             stages reached and how long they took
  *       secrets.json                 0600, every credential, never synced
  *       projects/<id>/
  *         project.json               metadata, connector shape, run summaries
+ *         discovery.json             the tools this system published, last time
+ *         demonstration.json         a recording in progress, so a reload resumes
+ *         induced.json               the records worked out, and what was asked
+ *         schema.json                the confirmed records
  *         trace.json                 the recorded demonstration
  *         contract.json              the compiled contract
  *         benchmark.json             the generated suite, with its private checks
  *         runs/<runId>.json          full results, including tool arguments
+ *
+ * Everything but `project.json` and `runs/` is an *artefact*: written whole,
+ * read whole, and safe to delete at the cost of repeating one step. That is
+ * what makes a reload survivable — the interface reads them back rather than
+ * holding the only copy in a browser tab.
  *
  * Two of those are worth calling out. `benchmark.json` holds the assertions an
  * agent is judged against, so it is exactly the file that must never be served
@@ -91,6 +102,11 @@ export class ProjectStore {
     } catch {
       return undefined;
     }
+  }
+
+  /** Removes an artefact, for state that is finished rather than merely old. */
+  async deleteArtefact(id: string, name: string): Promise<void> {
+    await rm(join(this.projectDir(id), safeName(name)), { force: true });
   }
 
   async writeRun(id: string, runId: string, result: unknown): Promise<string> {

@@ -44,6 +44,14 @@ export interface Demonstration {
   observations: PayloadObservation[];
 }
 
+/** A recording as it survives a reload. The same fields, on disk. */
+interface SavedDemonstration {
+  startedAt: number;
+  beforePayloads: unknown[];
+  entries: ActionLogEntry[];
+  observations: PayloadObservation[];
+}
+
 export interface LiveProject {
   connection: McpConnection;
   induced: InducedSchema | undefined;
@@ -160,6 +168,7 @@ export class Workspace {
       entries: [],
       observations: beforePayloads.map((payload) => ({ tool: 'before', payload })),
     };
+    await this.saveDemonstration(project);
   }
 
   /** Calls every nominated read and keeps the answers exactly as they came. */
@@ -172,6 +181,34 @@ export class Workspace {
       if (result.ok && result.structured !== undefined) payloads.push(result.structured);
     }
     return payloads;
+  }
+
+  /**
+   * Restores a recording that was in progress when the page was reloaded.
+   *
+   * A demonstration is the most expensive thing in the product to redo — it is
+   * the part where a person is doing real work in a real system — and it was
+   * the one thing held only in a browser tab. It is now written to disk after
+   * every step, so a refresh, or a runner restart, costs nothing.
+   */
+  async resumeDemonstration(project: Project): Promise<boolean> {
+    const live = this.live.get(project.id);
+    if (!live || live.demonstration) return live !== undefined && live.demonstration !== undefined;
+    const saved = await this.store.readArtefact<SavedDemonstration>(project.id, 'demonstration');
+    if (!saved) return false;
+    live.demonstration = {
+      startedAt: saved.startedAt,
+      beforePayloads: saved.beforePayloads,
+      entries: saved.entries,
+      observations: saved.observations,
+    };
+    return true;
+  }
+
+  private async saveDemonstration(project: Project): Promise<void> {
+    const demonstration = this.live.get(project.id)?.demonstration;
+    if (!demonstration) return;
+    await this.store.writeArtefact(project.id, 'demonstration', demonstration);
   }
 
   /** One thing the person did, executed for real and written down. */
@@ -199,6 +236,10 @@ export class Workspace {
         ok: result.ok,
       });
     }
+
+    // Written after every step rather than at the end. The end is exactly the
+    // moment a person is least likely to reach if something goes wrong.
+    await this.saveDemonstration(project);
 
     return result.ok
       ? { ok: true, data: result.structured ?? result.content }
@@ -243,6 +284,9 @@ export class Workspace {
       schema,
     };
     live.demonstration = undefined;
+    // Finished, so the resumable copy is not merely stale but wrong: resuming
+    // it would append to a recording that has already been compiled.
+    await this.store.deleteArtefact(project.id, 'demonstration');
     return finished;
   }
 

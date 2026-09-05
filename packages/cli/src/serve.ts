@@ -11,8 +11,17 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { ProxyServer } from '@rigorrun/proxy';
-import { ProjectStore, Runner, Service, storeRoot } from '@rigorrun/daemon';
-import { c, heading, line } from './ui.ts';
+import {
+  ActivationLog,
+  ProjectStore,
+  Runner,
+  Service,
+  WorkspaceTooNewError,
+  openWorkspace,
+  storeRoot,
+} from '@rigorrun/daemon';
+import { c, errorLine, heading, line } from './ui.ts';
+import { VERSION } from './help.ts';
 
 /** Where the built interface lives, when it has been built. */
 function findUi(): string | undefined {
@@ -35,11 +44,34 @@ export interface ServeOptions {
 
 export async function cmdServe(options: ServeOptions = {}): Promise<number> {
   const home = storeRoot(options.home);
+
+  // Before anything reads a project. A workspace written by a newer RigorRun is
+  // refused rather than guessed at: the failure mode of guessing is somebody's
+  // twenty minutes of setup being silently rewritten by an older reader.
+  let opened;
+  try {
+    opened = await openWorkspace(home, VERSION);
+  } catch (error) {
+    if (error instanceof WorkspaceTooNewError) {
+      errorLine(error.message);
+      return 2;
+    }
+    throw error;
+  }
+
   const store = new ProjectStore(home);
+  const activation = new ActivationLog(home);
   const proxy = new ProxyServer();
   await proxy.start();
 
-  const service = new Service({ store, proxy });
+  const service = new Service({ store, proxy, activation });
+
+  // A0 is not observable: nothing runs at install time, and a package that
+  // wanted to would need a postinstall script, which is a thing to be
+  // suspicious of rather than to ship. The first runner start on a machine is
+  // the closest honest proxy, and it is recorded as such.
+  if (await activation.isNew()) await activation.stage('installation_started');
+  await activation.stage('runner_started');
   const uiDir = findUi();
   const runner = new Runner({
     service,
@@ -52,6 +84,9 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
   line(`  ${c.bold('Open')}  ${runner.pairedUrl}`);
   line();
   line(c.grey(`  Projects and credentials live in ${home}, and stay there.`));
+  for (const applied of opened.applied) {
+    line(c.grey(`  Upgraded your workspace: ${applied}`));
+  }
   if (!uiDir) {
     line(c.grey('  The interface is not built. Run `pnpm build:web`; the API works regardless.'));
   }

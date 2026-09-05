@@ -1,28 +1,61 @@
 {
-  "name": "@rigorrun/cli",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "bin": {
-    "rigorrun": "./dist/rigorrun.mjs"
+  "name": "rigorrun",
+  "version": "0.1.0-alpha.1",
+  "description": "Acceptance testing for tool-using AI agents. Connect your system, show it one job, connect your agent, get a trustworthy pass or fail.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "testing",
+    "evaluation",
+    "acceptance-testing"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rigorrun/rigorrun.git"
   },
+  "homepage": "https://rigorrun.pages.dev",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "rigorrun": "./bin/rigorrun.mjs"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "ui/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "node build.mjs"
   },
   "dependencies": {
-    "@rigorrun/core": "workspace:*",
-    "@rigorrun/verifier": "workspace:*",
-    "@rigorrun/scoring": "workspace:*",
+    "@hono/node-server": "^2.1.1",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "hono": "^4.13.7",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@rigorrun/agent-sdk": "workspace:*",
     "@rigorrun/agents": "workspace:*",
-    "@rigorrun/runner": "workspace:*",
-    "@rigorrun/report": "workspace:*",
-    "@rigorrun/generator": "workspace:*",
     "@rigorrun/compiler": "workspace:*",
-    "@rigorrun/providers": "workspace:*",
-    "@rigorrun/environments": "workspace:*",
-    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/core": "workspace:*",
     "@rigorrun/daemon": "workspace:*",
+    "@rigorrun/env-mcp": "workspace:*",
+    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/environments": "workspace:*",
+    "@rigorrun/generator": "workspace:*",
+    "@rigorrun/mcp": "workspace:*",
+    "@rigorrun/providers": "workspace:*",
     "@rigorrun/proxy": "workspace:*",
-    "@rigorrun/agent-sdk": "workspace:*"
+    "@rigorrun/quality": "workspace:*",
+    "@rigorrun/report": "workspace:*",
+    "@rigorrun/runner": "workspace:*",
+    "@rigorrun/scoring": "workspace:*",
+    "@rigorrun/verifier": "workspace:*"
   }
 }

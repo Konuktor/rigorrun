@@ -1,0 +1,74 @@
+# RigorRun
+
+**Acceptance testing for tool-using AI agents.**
+
+Connect your system. Show RigorRun how one job is done. Connect your agent.
+RigorRun proves whether the agent can do that job safely — by reading the
+system it changed, never by trusting what it says about itself.
+
+```bash
+npx rigorrun
+```
+
+Open the URL it prints. That is the whole install.
+
+## What it does
+
+You have an agent that calls tools. You need to know whether it can do a real
+job in your real system without doing something unsafe — and you need to know
+again next week, after somebody changes a prompt.
+
+RigorRun watches a person do that job once, reads the system before and after,
+works out what the rules must be, asks about what it can only guess, and turns
+the answers into an executable acceptance suite. Then it runs your agent against
+it and reads your system to find out what actually happened.
+
+```
+   most tools:   you write the tests   →  the tool runs them
+     RigorRun:   you do the job once   →  RigorRun writes the tests
+```
+
+## Why it runs locally
+
+Your MCP server, your internal API and your staging box are usually not
+reachable from the public internet, and a page served over `https` cannot fetch
+`http://127.0.0.1`. So RigorRun's interface is served by this process, on your
+machine. Your credentials, recordings and systems never touch anybody's
+infrastructure, because there is no path by which they could.
+
+## What you need
+
+- **Node 20.11 or newer.**
+- **An MCP server** for the system you want to test against — ideally a staging
+  or scratch one with a way to reset it.
+- **An agent.** If it speaks MCP it works unchanged; RigorRun hands it a URL. If
+  not, about ten lines of the agent SDK.
+
+## Commands
+
+```bash
+npx rigorrun                              # start the runner and open the interface
+npx rigorrun doctor                       # check this machine and every project
+npx rigorrun projects                     # what is on this machine
+npx rigorrun run --project <id>           # run the suite
+npx rigorrun gate --project <id>          # run it, and exit non-zero if it misses the bar
+npx rigorrun compare-runs --project <id> <runId>
+npx rigorrun feedback export              # a sanitised bundle for a bug report
+```
+
+## This is an alpha
+
+It connects to MCP servers and nothing else — no OpenAPI, no browser. Setting a
+project up needs the interface; running and gating it does not. It has been used
+successfully by the people who wrote it and is now looking for people who did
+not.
+
+If it goes wrong, `npx rigorrun feedback export` produces a bundle that contains
+no credentials, no tool arguments and no results — only what is needed to work
+out where it broke.
+
+## Documentation
+
+<https://github.com/rigorrun/rigorrun/tree/main/docs>
+
+MIT licensed.

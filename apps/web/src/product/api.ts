@@ -72,6 +72,29 @@ export interface ToolView {
   hasOutputSchema: boolean;
 }
 
+export interface DiscoveryView {
+  serverName: string;
+  serverVersion: string;
+  protocolVersion: string;
+  discoveredAt: string;
+  latencyMs: number;
+  tools: ToolView[];
+}
+
+export interface DriftView {
+  unchanged: boolean;
+  drifts: { kind: string; tool: string; detail: string; serious: boolean }[];
+  serious: { kind: string; tool: string; detail: string; serious: boolean }[];
+}
+
+export interface ActivationView {
+  reached: string | null;
+  reachedIndex: number;
+  stages: { stage: string; code: string; at: string }[];
+  humanMsToFirstVerdict: number | null;
+  attempts: Record<string, number>;
+}
+
 export interface SchemaQuestionView {
   id: string;
   kind: string;
@@ -181,7 +204,27 @@ export const api = {
       project: ProjectView;
       contract: { rules: RuleView[]; observedFacts: { statement: string }[] } | null;
       benchmark: { cases: CaseView[]; notTestable: { rule: string; reason: string }[] } | null;
+      // Everything a freshly loaded page needs in order to look like the page
+      // that was open before it.
+      environment: { connected: boolean; discovery: DiscoveryView | null };
+      questions: SchemaQuestionView[];
+      recording: { inProgress: boolean; steps: { tool: string; ok: boolean }[] };
+      activation: ActivationView;
     }>(`/api/projects/${id}`),
+
+  reconnect: (id: string) =>
+    post<{
+      project: ProjectView;
+      serverName: string;
+      latencyMs: number;
+      tools: ToolView[];
+      drift: DriftView | null;
+    }>(`/api/projects/${id}/environment/reconnect`),
+
+  resumeTeaching: (id: string) =>
+    post<{ resumed: boolean; steps: { tool: string; ok: boolean }[] }>(
+      `/api/projects/${id}/teach/resume`,
+    ),
 
   connect: (id: string, connector: unknown, safety: string) =>
     post<{ project: ProjectView; serverName: string; latencyMs: number; tools: ToolView[] }>(

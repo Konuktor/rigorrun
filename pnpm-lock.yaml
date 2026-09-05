@@ -220,6 +220,19 @@ importers:
 
   packages/cli:
     dependencies:
+      '@hono/node-server':
+        specifier: ^2.1.1
+        version: 2.1.1(hono@4.13.7)
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      hono:
+        specifier: ^4.13.7
+        version: 4.13.7
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
+    devDependencies:
       '@rigorrun/agent-sdk':
         specifier: workspace:*
         version: link:../agent-sdk
@@ -235,6 +248,9 @@ importers:
       '@rigorrun/daemon':
         specifier: workspace:*
         version: link:../daemon
+      '@rigorrun/env-mcp':
+        specifier: workspace:*
+        version: link:../env-mcp
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
@@ -244,12 +260,18 @@ importers:
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
+      '@rigorrun/mcp':
+        specifier: workspace:*
+        version: link:../mcp
       '@rigorrun/providers':
         specifier: workspace:*
         version: link:../providers
       '@rigorrun/proxy':
         specifier: workspace:*
         version: link:../proxy
+      '@rigorrun/quality':
+        specifier: workspace:*
+        version: link:../quality
       '@rigorrun/report':
         specifier: workspace:*
         version: link:../report

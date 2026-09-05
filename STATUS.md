@@ -8,6 +8,15 @@ whether somebody who has never seen this source can use RigorRun. The
 RigorRun. Both are worth having; only one of them is the point, and a release
 where only the second is green is not a release.
 
+## Installation gate
+
+| What | Command | Result |
+| ---- | ------- | ------ |
+| The published package builds, packs, contains only what it should, carries no credentials, installs into a clean directory, runs, explains itself on an old Node, and completes the fresh-user journey | `pnpm verify:package` | see below |
+
+It publishes nothing. Its last line says whether publishing would be safe, and
+prints the exact command.
+
 ## Product gate
 
 | What | Command | Result |
@@ -31,7 +40,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 13 packages checked against 19 business nouns |
-| Unit + integration | `pnpm test` | 599 passing across 39 files |
+| Unit + integration | `pnpm test` | 638 passing across 42 files |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |

@@ -50,6 +50,36 @@ jobs:
             test-results/
           retention-days: 7
 
+  # The package a stranger would install, checked before it can be published.
+  # Everything here has burned somebody somewhere: a tarball with sources in
+  # it, a bundle that crashes on its first dynamic require, a package that
+  # works in the monorepo and nowhere else.
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - name: The published package installs clean and works
+        run: pnpm verify:package
+
+      - name: The tarball
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rigorrun-tarball
+          path: dist/*.tgz
+          retention-days: 7
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15

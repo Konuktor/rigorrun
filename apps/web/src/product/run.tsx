@@ -11,7 +11,7 @@
 import { useState } from 'react';
 import { Button, Metric, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
 import { Field, Problem, TextInput } from './inputs.tsx';
-import { api, type ComparisonView, type ProjectView, type RunView } from './api.ts';
+import { api, type ActivationView, type ComparisonView, type ProjectView, type RunView } from './api.ts';
 
 export function ConnectAgent({
   project,
@@ -48,10 +48,25 @@ export function ConnectAgent({
       <Panel>
         <div className="flex max-w-2xl flex-col gap-4">
           <p className="text-body text-secondary">
-            RigorRun gives your agent one task at a time and an MCP endpoint scoped to that task.
-            Your agent connects to it, works however it normally works, and says when it is done.
-            Nothing about your agent has to change except knowing that URL.
+            RigorRun gives your agent one task at a time, and a URL to work through. Your agent
+            connects to that URL, works however it normally works, and says when it is done.
           </p>
+          <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
+            <p className="text-meta font-medium text-secondary">What you need</p>
+            <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
+              <li>
+                Your agent running and listening on an address — on this machine by default.
+              </li>
+              <li>
+                It has to answer one small request saying it is there. If it already speaks MCP,
+                that plus about ten lines is the whole integration.
+              </li>
+            </ul>
+            <p className="mt-2 text-meta text-muted">
+              Next: RigorRun sends a test request and waits. It will not call your agent connected
+              until it answers.
+            </p>
+          </div>
           <Field label="What is it called?">
             {({ id }) => (
               <TextInput id={id} value={name} onChange={setName} placeholder="Support agent" testId="agent-name" />
@@ -59,7 +74,7 @@ export function ConnectAgent({
           </Field>
           <Field
             label="Where does it listen?"
-            hint="On this machine by default. RigorRun posts each task here and waits."
+            hint="On this machine by default, because an agent under test usually holds credentials for the system it is being tested against."
           >
             {({ id, describedBy }) => (
               <TextInput
@@ -74,7 +89,7 @@ export function ConnectAgent({
           {problem ? <Problem>{problem}</Problem> : null}
           <div>
             <Button onClick={add} disabled={busy} testId="add-agent">
-              {busy ? 'Trying it…' : 'Test the connection'}
+              {busy ? 'Trying it…' : 'Check it answers'}
             </Button>
           </div>
         </div>
@@ -111,9 +126,11 @@ export function ConnectAgent({
 
 export function RunAndVerdict({
   project,
+  activation,
   onRan,
 }: {
   project: ProjectView;
+  activation: ActivationView | null;
   onRan: () => void;
 }) {
   const [run, setRun] = useState<RunView | null>(null);
@@ -148,7 +165,8 @@ export function RunAndVerdict({
       {ready.length === 0 ? (
         <Panel>
           <p className="text-body text-secondary">
-            Your suite is ready. Connect an agent that answers, and it can run.
+            Your tests are ready and nothing is missing except an agent that answers. Go back a
+            step to connect one.
           </p>
         </Panel>
       ) : (
@@ -170,6 +188,9 @@ export function RunAndVerdict({
 
       {problem ? <Problem>{problem}</Problem> : null}
       {run ? <Verdict run={run} /> : null}
+      {run && activation?.humanMsToFirstVerdict !== null && activation !== null ? (
+        <TimeToFirstVerdict activation={activation} />
+      ) : null}
       {comparison ? <Comparison comparison={comparison} /> : null}
     </div>
   );
@@ -293,4 +314,50 @@ function Comparison({ comparison }: { comparison: ComparisonView }) {
       </Panel>
     </section>
   );
+}
+
+/**
+ * How long this took a person.
+ *
+ * Not how long the run took — that number is small, flattering and useless.
+ * This is wall-clock time from making the project to holding a verdict, which
+ * includes reading, deciding, getting a connector wrong once, and going to make
+ * coffee. It is the only number that says whether this product is usable, and
+ * the only one nobody can improve by optimising a loop.
+ */
+function TimeToFirstVerdict({ activation }: { activation: ActivationView }) {
+  const ms = activation.humanMsToFirstVerdict;
+  if (ms === null) return null;
+
+  const retries = Object.values(activation.attempts).reduce((total, count) => total + count, 0);
+
+  return (
+    <Panel>
+      <div className="flex flex-wrap items-baseline justify-between gap-4">
+        <div>
+          <p className="text-meta text-muted">First real verdict</p>
+          <p className="mt-1 text-metric font-semibold text-fg" data-testid="time-to-verdict">
+            {formatElapsed(ms)}
+          </p>
+        </div>
+        <p className="max-w-md text-meta text-muted">
+          From creating this project to a pass or fail from your own agent against your own system.
+          {retries > 0
+            ? ` Including ${retries} thing${retries === 1 ? '' : 's'} that had to be tried twice.`
+            : ''}
+        </p>
+      </div>
+    </Panel>
+  );
+}
+
+/** "12m 34s". The same shape the CLI prints, so the two never disagree. */
+function formatElapsed(ms: number): string {
+  const total = Math.max(0, Math.round(ms / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
 }

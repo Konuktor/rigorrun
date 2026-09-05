@@ -1,4 +1,11 @@
-export const VERSION = '0.1.0';
+/**
+ * Kept in step with package.json by a test, not by discipline.
+ *
+ * It appears in `--version`, in every feedback bundle and in every run
+ * artefact, so a stale value here is a support conversation about the wrong
+ * release.
+ */
+export const VERSION = '0.1.0-alpha.1';
 
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
@@ -21,6 +28,9 @@ PROJECTS
 
 DIAGNOSTICS
   doctor                   Check this machine can do what RigorRun needs.
+  feedback export          A sanitised bundle for a bug report. No credentials,
+                           no tool arguments, no results, no names from your
+                           business. Use -o to write it to a file.
 
 THE BUNDLED EXAMPLE
   These work on material that ships inside RigorRun. They are how you see the

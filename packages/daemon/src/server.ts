@@ -21,6 +21,7 @@ import { Hono } from 'hono';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import type { Benchmark, EnvironmentContract, RunResult } from '@rigorrun/core';
+import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
 import { nextSteps, timeToFirstVerdictMs, type Connector, type Project } from './project.ts';
 import type { Service } from './service.ts';
@@ -140,9 +141,13 @@ export class Runner {
 
     app.get('/api/projects/:id', async (context) => {
       const project = await service.readProject(context.req.param('id'));
-      const [contract, benchmark] = await Promise.all([
+      const [contract, benchmark, discovery, induced, recorded, activation] = await Promise.all([
         service.artefact<EnvironmentContract>(project.id, 'contract'),
         service.artefact<Benchmark>(project.id, 'benchmark'),
+        service.discovery(project.id),
+        service.artefact<{ questions: unknown[] }>(project.id, 'induced'),
+        service.recordedSoFar(project.id),
+        service.activation.summary(project.id),
       ]);
       return context.json({
         project: summarise(project),
@@ -157,6 +162,35 @@ export class Runner {
               notTestable: benchmark.notTestable,
             }
           : null,
+        // Everything below is what makes a reload survivable: the page rebuilds
+        // itself from disk instead of from whatever the last tab happened to
+        // be holding.
+        environment: {
+          connected: service.isConnected(project.id),
+          discovery: discovery ?? null,
+        },
+        questions: induced?.questions ?? [],
+        recording: { inProgress: recorded.length > 0, steps: recorded },
+        activation,
+      });
+    });
+
+    app.post('/api/projects/:id/environment/reconnect', async (context) => {
+      const result = await service.reconnect(context.req.param('id'));
+      return context.json({
+        project: summarise(result.project),
+        serverName: result.serverName,
+        latencyMs: result.latencyMs,
+        tools: result.tools.map(publicTool),
+        drift: result.drift,
+      });
+    });
+
+    app.post('/api/projects/:id/teach/resume', async (context) => {
+      const resumed = await service.resumeTeaching(context.req.param('id'));
+      return context.json({
+        resumed,
+        steps: await service.recordedSoFar(context.req.param('id')),
       });
     });
 
@@ -173,15 +207,7 @@ export class Runner {
         project: summarise(connected.project),
         serverName: connected.serverName,
         latencyMs: connected.latencyMs,
-        tools: connected.tools.map((tool) => ({
-          name: tool.name,
-          description: tool.description,
-          params: tool.params,
-          unsupported: tool.unsupported,
-          hints: tool.hints,
-          risk: tool.risk,
-          hasOutputSchema: tool.outputSchema !== undefined,
-        })),
+        tools: connected.tools.map(publicTool),
       });
     });
 
@@ -358,6 +384,19 @@ function htmlResponse(body: string, status: number): Response {
 function hostIsLocal(host: string | undefined): boolean {
   if (!host) return false;
   return ALLOWED_HOSTS.has(host.replace(/:\d+$/, '').toLowerCase());
+}
+
+/** One tool, without the raw JSON Schema the interface has no use for. */
+function publicTool(tool: DiscoveredTool) {
+  return {
+    name: tool.name,
+    description: tool.description,
+    params: tool.params,
+    unsupported: tool.unsupported,
+    hints: tool.hints,
+    risk: tool.risk,
+    hasOutputSchema: tool.outputSchema !== undefined,
+  };
 }
 
 /** A project as the UI sees it: no secrets, plus what to do next. */

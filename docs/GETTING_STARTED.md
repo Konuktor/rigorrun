@@ -21,7 +21,7 @@ infrastructure, because there is no path by which they could.
 ## 1. Start the runner
 
 ```bash
-pnpm dlx rigorrun
+npx rigorrun@alpha
 ```
 
 It prints a URL carrying a one-time pairing code:
@@ -38,13 +38,13 @@ RigorRun
 Open it. The code is spent on first use, so the copy in your shell history is
 worthless, and a page you did not open cannot drive the runner.
 
-> Not published to npm yet. Until it is: clone this repository,
-> `pnpm install`, and run `pnpm start`.
+> **Alpha.** `@alpha` rather than bare `rigorrun` on purpose: the prerelease is
+> not tagged `latest`, so nobody installs it by accident.
 >
-> `pnpm start` builds the interface and then starts the runner. `pnpm rigorrun`
-> alone starts the runner without building, which is what you want while
-> developing and is not what you want the first time — it comes up with a
-> working API and no interface, and says so.
+> Working from a clone instead? `pnpm install && pnpm start`. `pnpm start`
+> builds the interface and then starts the runner; `pnpm rigorrun` alone skips
+> the build, which is what you want while developing and not what you want the
+> first time.
 
 ## 2. Make a project
 
@@ -138,6 +138,33 @@ rigorrun gate --project p_1a2b3c --min-success 0.95
 
 See [CI.md](CI.md).
 
+## Stopping and coming back
+
+Everything is on disk as you go. Closing the tab, reloading the page, or
+stopping the runner does not lose your project, your settings, your
+credentials, or a recording you were partway through — reopen it and carry on
+where you left off.
+
+The one thing that does not survive is the live connection to your system. A
+local MCP server is a child process, and it is gone when the runner stops. The
+project page says so and offers **Reconnect**, which opens the session again and
+tells you if anything about your system changed while it was closed — a tool
+renamed, an argument that is now required, a read-only claim reversed. Your
+suite would still run; whether it still means the same thing is a judgement
+about your tools, so RigorRun reports it rather than deciding for you.
+
 ## If something goes wrong
 
 [TROUBLESHOOTING.md](TROUBLESHOOTING.md), or `rigorrun doctor`.
+
+If you want to send it to us:
+
+```bash
+npx rigorrun feedback export -o rigorrun-feedback.json
+```
+
+That file contains your operating system, Node and RigorRun versions, how far
+you got, how long it took, what kind of connector you used, counts of tools and
+cases, and the *classes* of anything that failed. It contains no credentials, no
+tool arguments, no results, and no names from your business. Open it before you
+send it — it is small and readable on purpose.
