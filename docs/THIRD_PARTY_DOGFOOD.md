@@ -16,9 +16,12 @@ its argument names, its annotations or the shape of what it returns.
 are that run, kept as tests.
 
 **What worked.** Discovery, argument schemas, and risk classification, against a
-server nobody designed for. Not one of its fourteen tools publishes a
-`readOnlyHint`, so RigorRun treated every one of them as writing — which is the
-conservative default doing its job on what turns out to be the common case.
+server nobody designed for. It annotates carefully — `readOnly` on all eight of
+its reads, `destructive` on write, edit and move — and RigorRun refused to act
+on any of it: every tool counted as writing until a person said otherwise. A
+server that annotates well is indistinguishable, from the client side, from one
+that annotates conveniently, which is exactly what the specification says to
+assume.
 
 **What did not, and it matters.** Its reads answer in prose. `list_directory`
 returns `[FILE] q3-plan.md`, not a record. RigorRun reads structure and never

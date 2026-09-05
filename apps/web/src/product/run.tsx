@@ -11,7 +11,14 @@
 import { useState } from 'react';
 import { Button, Metric, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
 import { Field, Problem, TextInput } from './inputs.tsx';
-import { api, type ActivationView, type ComparisonView, type ProjectView, type RunView } from './api.ts';
+import {
+  api,
+  type ActivationView,
+  type CaseResultView,
+  type ComparisonView,
+  type ProjectView,
+  type RunView,
+} from './api.ts';
 
 export function ConnectAgent({
   project,
@@ -196,28 +203,88 @@ export function RunAndVerdict({
   );
 }
 
+/**
+ * The decision, and how much of it RigorRun can stand behind.
+ *
+ * `PASS` used to sit here with the verification strength as a tag beside it,
+ * which meant the most common real outcome — thresholds met, but only some of
+ * the system readable — looked exactly like the strongest one. Nothing forced
+ * anybody to read the caveat.
+ *
+ * So the caveat is the headline. `CONDITIONAL` is not a softer pass: it says
+ * the numbers are fine and RigorRun could not see enough to promise they mean
+ * what they look like.
+ */
+function safeToShip(run: RunView): {
+  answer: 'YES' | 'CONDITIONAL' | 'NO';
+  tone: 'pass' | 'warn' | 'fail';
+  because: string;
+} {
+  if (!(run.scores[0]?.thresholdsPassed ?? false)) {
+    return { answer: 'NO', tone: 'fail', because: 'This run missed the bar you set.' };
+  }
+  if (run.verification !== 'AUTHORITATIVE') {
+    return {
+      answer: 'CONDITIONAL',
+      tone: 'warn',
+      because:
+        run.verification === 'OBSERVATIONAL'
+          ? 'Every check passed, and none of them looked at your system — RigorRun watched what your agent did and could not read back what changed.'
+          : 'Every check passed against the parts of your system RigorRun can read. It cannot speak for the parts it was not given a read for.',
+    };
+  }
+  if (run.isolation === 'NONE') {
+    return {
+      answer: 'CONDITIONAL',
+      tone: 'warn',
+      because:
+        'Every check passed, but the cases could not be isolated from each other — without a way to put your system back, a later case starts wherever the previous one left it.',
+    };
+  }
+  return {
+    answer: 'YES',
+    tone: 'pass',
+    because: 'Every check passed, read back from your own system, with each case starting clean.',
+  };
+}
+
 function Verdict({ run }: { run: RunView }) {
   const score = run.scores[0];
-  const passed = score?.thresholdsPassed ?? false;
+  const shipping = safeToShip(run);
 
   return (
     <div className="flex flex-col gap-4">
       <Panel>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <span
-              className={`text-title font-semibold ${passed ? 'text-pass' : 'text-fail'}`}
-              data-testid="verdict"
-            >
-              {passed ? 'PASS' : 'FAIL'}
-            </span>
-            {/* How it was reached, next to what it says. Never one without the other. */}
-            <Tag tone={run.verification === 'AUTHORITATIVE' ? 'pass' : 'warn'}>
-              verified: {run.verification}
-            </Tag>
-            <Tag tone={run.isolation === 'RESET' ? 'pass' : 'warn'}>
-              isolation: {run.isolation}
-            </Tag>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <SectionLabel>Safe to ship?</SectionLabel>
+              <span
+                // Written out rather than interpolated: Tailwind generates the
+                // classes it can see in the source, and `text-${tone}` is not
+                // one it can see.
+                className={`text-title font-semibold ${
+                  shipping.tone === 'pass'
+                    ? 'text-pass'
+                    : shipping.tone === 'warn'
+                      ? 'text-warn'
+                      : 'text-fail'
+                }`}
+                data-testid="verdict"
+              >
+                {shipping.answer}
+              </span>
+              {/* How it was reached, next to what it says. Never one without the other. */}
+              <Tag tone={run.verification === 'AUTHORITATIVE' ? 'pass' : 'warn'}>
+                verified: {run.verification}
+              </Tag>
+              <Tag tone={run.isolation === 'RESET' ? 'pass' : 'warn'}>
+                isolation: {run.isolation}
+              </Tag>
+            </div>
+            <p className="max-w-3xl text-body text-secondary" data-testid="verdict-because">
+              {shipping.because}
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-8">
@@ -248,17 +315,8 @@ function Verdict({ run }: { run: RunView }) {
         <SectionLabel>Case by case</SectionLabel>
         <ul className="flex flex-col gap-1">
           {run.caseResults.map((entry) => (
-            <li
-              key={entry.caseId}
-              className="flex flex-wrap items-center gap-3 rounded-control bg-inset px-3 py-2"
-              data-testid={`case-${entry.caseId}`}
-            >
-              <StatusMark status={entry.taskSuccess && entry.policyCompliant ? 'pass' : 'fail'} />
-              <span className="min-w-0 flex-1 truncate text-body text-fg">{entry.caseName}</span>
-              <Tag tone="neutral">{entry.category}</Tag>
-              {entry.unsafeActions > 0 ? (
-                <Tag tone="fail">{entry.unsafeActions} unsafe</Tag>
-              ) : null}
+            <li key={entry.caseId}>
+              <CaseRow entry={entry} />
             </li>
           ))}
         </ul>
@@ -360,4 +418,161 @@ function formatElapsed(ms: number): string {
   if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
   if (minutes > 0) return `${minutes}m ${seconds}s`;
   return `${seconds}s`;
+}
+
+/**
+ * One case, and — when somebody asks — what actually happened in it.
+ *
+ * A red mark with a category beside it is not enough to act on. Every one of
+ * these was already recorded and none of it reached the screen, so the answer
+ * to "why did this fail?" was to read a JSON file, which is the point at which
+ * a person stops believing a tool and starts arguing with it.
+ *
+ * The order below is the order the questions get asked: what did the agent do,
+ * what did your system say afterwards, which check failed and how was it
+ * checked. The agent's own account comes last and is labelled, because an agent
+ * that says it did the work and did not is the exact failure this product
+ * exists to catch — its claim is evidence about the agent, never about the
+ * system.
+ */
+function CaseRow({ entry }: { entry: CaseResultView }) {
+  const [open, setOpen] = useState(false);
+  const passed = entry.taskSuccess && entry.policyCompliant;
+  const failedChecks = entry.checks.filter((check) => check.status === 'FAIL');
+
+  return (
+    <div className="rounded-control bg-inset">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full flex-wrap items-center gap-3 px-3 py-2 text-left"
+        data-testid={`case-${entry.caseId}`}
+        aria-expanded={open}
+      >
+        <StatusMark status={passed ? 'pass' : 'fail'} />
+        <span className="min-w-0 flex-1 truncate text-body text-fg">{entry.caseName}</span>
+        <Tag tone="neutral">{entry.category}</Tag>
+        {entry.unsafeActions > 0 ? <Tag tone="fail">{entry.unsafeActions} unsafe</Tag> : null}
+        <span className="text-meta text-muted">{open ? 'Hide' : 'What happened'}</span>
+      </button>
+
+      {open ? (
+        <div
+          className="flex flex-col gap-4 border-t border-line-soft px-3 py-3"
+          data-testid={`evidence-${entry.caseId}`}
+        >
+          {failedChecks.length > 0 ? (
+            <Evidence label="Which check failed, and how it was checked">
+              <ul className="flex flex-col gap-2">
+                {failedChecks.map((check, index) => (
+                  <li key={index} className="flex flex-col gap-1">
+                    <span className="text-body text-fg">{check.description}</span>
+                    {/* The path form underneath, because it names the exact
+                        thing that was looked at and somebody debugging their
+                        agent will want it — but it is not the sentence, and it
+                        is not what a person reads first. */}
+                    <span className="font-mono text-meta text-muted">{check.message}</span>
+                    <span className="flex flex-wrap items-center gap-2">
+                      {/* The tier that produced this verdict. Carried since the
+                          beginning and shown nowhere until now. */}
+                      <Tag tone={check.verificationSource === 'STATE' ? 'pass' : 'warn'}>
+                        {VERIFICATION_TIER[check.verificationSource]}
+                      </Tag>
+                      {check.unsafe ? <Tag tone="fail">unsafe</Tag> : null}
+                      {check.blocking ? null : <Tag tone="neutral">not blocking</Tag>}
+                    </span>
+                    {check.expected !== undefined ? (
+                      <span className="text-meta text-muted">
+                        expected {display(check.expected)} · saw {display(check.observed)}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </Evidence>
+          ) : null}
+
+          <Evidence label="What the agent did">
+            {entry.steps.length === 0 ? (
+              <p className="text-meta text-muted">It called nothing.</p>
+            ) : (
+              <ol className="flex flex-col gap-1">
+                {entry.steps.map((step, index) => (
+                  <li key={index} className="flex flex-wrap items-baseline gap-2 text-meta">
+                    <span className={step.ok ? 'text-fg' : 'text-fail'}>{step.tool}</span>
+                    <span className="min-w-0 flex-1 truncate text-muted">
+                      {display(step.args)}
+                    </span>
+                    {step.error ? <span className="text-fail">{step.error}</span> : null}
+                  </li>
+                ))}
+              </ol>
+            )}
+            {entry.stepsOmitted > 0 ? (
+              <p className="mt-1 text-meta text-muted">
+                and {entry.stepsOmitted} more, not shown.
+              </p>
+            ) : null}
+          </Evidence>
+
+          <Evidence label="What your system said afterwards">
+            {Object.keys(entry.finalState).length === 0 ? (
+              <p className="text-meta text-muted">
+                Nothing was read back. This verdict rests on what was seen to happen, not on
+                your system.
+              </p>
+            ) : (
+              // Bounded on purpose. This is a whole slice of somebody's system,
+              // and an unbounded dump pushes the part they came here to read —
+              // which check failed, and what the agent did — off the screen.
+              <details>
+                <summary className="cursor-pointer text-meta text-secondary">
+                  {Object.keys(entry.finalState).join(', ')}
+                </summary>
+                <pre className="mt-2 max-h-80 overflow-auto rounded-control bg-canvas p-2 text-meta text-secondary">
+                  {JSON.stringify(entry.finalState, null, 2)}
+                </pre>
+              </details>
+            )}
+          </Evidence>
+
+          {entry.agentReport ? (
+            <Evidence label="What the agent said it did — not scored">
+              <p className="text-meta text-secondary">{entry.agentReport}</p>
+            </Evidence>
+          ) : null}
+
+          {entry.error ? (
+            <Evidence label="It ended early">
+              <p className="text-meta text-fail">{entry.error}</p>
+            </Evidence>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** What each tier of evidence means, in words rather than an enum. */
+const VERIFICATION_TIER: Record<CaseResultView['checks'][number]['verificationSource'], string> = {
+  STATE: 'read from your system',
+  EVENT: 'from your system’s own log',
+  OUTPUT: 'from what the tool returned',
+  HUMAN: 'decided by a person',
+  MODEL: 'judged by a model',
+};
+
+function Evidence({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <SectionLabel>{label}</SectionLabel>
+      {children}
+    </div>
+  );
+}
+
+function display(value: unknown): string {
+  if (value === undefined) return '—';
+  if (typeof value === 'string') return value;
+  return JSON.stringify(value) ?? '—';
 }

@@ -150,15 +150,34 @@ export interface RunView {
     unsafeActions: number;
     thresholdsPassed: boolean;
   }[];
-  caseResults: {
-    caseId: string;
-    caseName: string;
-    category: string;
-    taskSuccess: boolean;
-    policyCompliant: boolean;
-    unsafeActions: number;
-    durationMs: number;
+  caseResults: CaseResultView[];
+}
+
+/** A case, and the evidence for what it says. */
+export interface CaseResultView {
+  caseId: string;
+  caseName: string;
+  category: string;
+  taskSuccess: boolean;
+  policyCompliant: boolean;
+  unsafeActions: number;
+  durationMs: number;
+  steps: { tool: string; args: Record<string, unknown>; ok: boolean; error: string }[];
+  stepsOmitted: number;
+  finalState: Record<string, unknown>;
+  checks: {
+    description: string;
+    status: 'PASS' | 'FAIL' | 'ERROR' | 'INAPPLICABLE';
+    message: string;
+    verificationSource: 'STATE' | 'EVENT' | 'OUTPUT' | 'HUMAN' | 'MODEL';
+    evaluator: string;
+    unsafe: boolean;
+    blocking: boolean;
+    expected?: unknown;
+    observed?: unknown;
   }[];
+  agentReport: string;
+  error: string;
 }
 
 export interface ComparisonView {

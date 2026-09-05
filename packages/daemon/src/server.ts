@@ -444,8 +444,61 @@ function publicRun(run: RunResult) {
       policyCompliant: entry.policyCompliant,
       unsafeActions: entry.unsafeActions,
       durationMs: entry.durationMs,
+
+      // Everything below is the evidence for the line above. It was all
+      // recorded already and none of it reached the screen, so a failure was a
+      // red mark with a category beside it and no way to find out what
+      // happened — which is the difference between a tool somebody acts on and
+      // a tool somebody argues with.
+      // What the agent did, in order, with what it passed. Truncated per step
+      // rather than as a whole, so a long run stays readable and the shape of
+      // what happened survives.
+      steps: entry.steps.slice(0, 60).map((step) => ({
+        tool: step.tool,
+        args: clip(step.args),
+        ok: step.ok,
+        error: step.error ?? '',
+      })),
+      stepsOmitted: Math.max(0, entry.steps.length - 60),
+      /** What the system said afterwards, which is what the verdict rests on. */
+      finalState: clip(entry.finalStateSummary),
+      checks: entry.assertions.map((assertion) => ({
+        description: assertion.description,
+        status: assertion.status,
+        message: assertion.message,
+        // The tier that produced this verdict. Carried since the beginning and
+        // rendered nowhere until now.
+        verificationSource: assertion.verificationSource,
+        evaluator: assertion.evaluator,
+        unsafe: assertion.unsafe,
+        blocking: assertion.blocking,
+        expected: clipValue(assertion.expected),
+        observed: clipValue(assertion.observed),
+      })),
+      /**
+       * The agent's own account of itself, kept apart from everything above and
+       * never scored. An agent that says it issued a refund and did not is the
+       * failure this product exists to catch, so its claim is evidence about
+       * the agent rather than evidence about the system.
+       */
+      agentReport: entry.agentReport.slice(0, 2_000),
+      error: entry.error ?? '',
     })),
   };
+}
+
+/** Keeps an evidence payload readable, and keeps a run response bounded. */
+function clip(value: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value).slice(0, 24)) out[key] = clipValue(entry);
+  return out;
+}
+
+function clipValue(value: unknown): unknown {
+  if (typeof value === 'string') return value.length > 400 ? `${value.slice(0, 400)}…` : value;
+  if (value === null || typeof value !== 'object') return value;
+  const text = JSON.stringify(value) ?? '';
+  return text.length > 800 ? `${text.slice(0, 800)}…` : value;
 }
 
 const NO_UI_PAGE = `<!doctype html><meta charset="utf-8"><title>RigorRun runner</title>

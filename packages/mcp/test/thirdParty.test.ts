@@ -15,9 +15,11 @@
  *
  *   - Discovery, risk classification and argument schemas all work against a
  *     server nobody here designed for.
- *   - Not one of its fourteen tools carries a `readOnlyHint`, so RigorRun
- *     treats every one of them as writing. That is the conservative default
- *     doing its job on the most common real-world case.
+ *   - It annotates carefully — `readOnly` on all eight reads, `destructive` on
+ *     write, edit and move — and RigorRun still refuses to act on any of it.
+ *     Every tool counts as writing until a person says otherwise, because a
+ *     server that annotates well is indistinguishable, from the client side,
+ *     from one that annotates conveniently.
  *   - **Its reads return prose, not records.** `list_directory` answers with
  *     "[FILE] a.md\n[FILE] b.md". There is nothing structured to induce, so
  *     RigorRun cannot verify against this system by reading it back.
@@ -85,23 +87,29 @@ describe('a public MCP server nobody here wrote', () => {
     }
   }, 60_000);
 
-  it('treats every unannotated tool as writing, which here is most of them', async () => {
+  it('will not act on this server’s annotations, correct though they are', async () => {
     const connection = await McpConnection.open(config);
     try {
-      // The common real-world case, and the reason the default is what it is:
-      // this server publishes no `readOnlyHint` on anything. `list_directory`
-      // obviously only reads, and RigorRun still will not assume it.
+      // This server annotates carefully — `readOnly: true` on all eight reads,
+      // `destructive: true` on write, edit and move. It is a good citizen, and
+      // the point of this test is that being a good citizen is not enough.
+      const read = connection.discovery.tools.find((tool) => tool.name === 'list_directory')!;
+      expect(read.hints.readOnly).toBe(true);
+      expect(read.risk).toMatchObject({ level: 'read', source: 'server-hint' });
+
+      // And yet: not one tool is *confirmed* read-only, because the only thing
+      // vouching for it is the server itself. The specification is blunt about
+      // why — "clients should never make tool use decisions based on
+      // ToolAnnotations received from untrusted servers" — and a server that
+      // annotates well is indistinguishable, from here, from one that annotates
+      // conveniently. A person has to say.
       for (const tool of connection.discovery.tools) {
-        expect(tool.hints.readOnlyHint).toBeUndefined();
         expect(isConfirmedReadOnly(tool.risk)).toBe(false);
         expect(mayMutate(tool.risk)).toBe(true);
       }
 
-      // What it *does* publish is a destructive hint on the tools that write,
-      // and RigorRun carries that as the server's claim rather than as fact.
       const write = connection.discovery.tools.find((tool) => tool.name === 'write_file')!;
-      expect(write.risk.level).toBe('destructive');
-      expect(write.risk.source).toBe('server-hint');
+      expect(write.risk).toMatchObject({ level: 'destructive', source: 'server-hint' });
     } finally {
       await connection.close();
     }

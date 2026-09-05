@@ -250,9 +250,26 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 180_000 });
 
+  // The decision, not a score. And CONDITIONAL rather than PASS, because
+  // RigorRun read back only what the nominated reads return — which is the
+  // common case against a real system and used to look identical to the
+  // strongest possible result.
+  await expect(page.getByTestId('verdict')).toHaveText(/YES|CONDITIONAL|NO/);
+  await expect(page.getByTestId('verdict-because')).not.toBeEmpty();
+
   // A verdict never appears without how it was reached beside it.
   await expect(page.getByText('verified: PARTIAL')).toBeVisible();
   await expect(page.getByText('isolation: RESET')).toBeVisible();
+
+  // And every case can be asked what happened. This is the difference between
+  // a result somebody acts on and a result somebody argues with.
+  await page.locator('[data-testid^="case-case_"]').first().click();
+  const why = page.locator('[data-testid^="evidence-case_"]').first();
+  await expect(why).toBeVisible();
+  await expect(why.getByText('What the agent did')).toBeVisible();
+  await expect(why.getByText('What your system said afterwards')).toBeVisible();
+  await why.scrollIntoViewIfNeeded();
+  await why.screenshot({ path: join(SHOTS, '09-why-it-failed.png') });
 
   // And what this system cost the suite is said rather than hidden.
   await expect(page.getByText('What this system stopped RigorRun doing')).toBeVisible();
