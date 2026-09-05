@@ -402,6 +402,16 @@ export class Service {
     return updated;
   }
 
+  /** A stored artefact, for callers that only want to display it. */
+  artefact<T>(projectId: string, name: string): Promise<T | undefined> {
+    return this.store.readArtefact<T>(projectId, name);
+  }
+
+  /** A stored run in full, including every step and assertion. */
+  run(projectId: string, runId: string): Promise<RunResult | undefined> {
+    return this.store.readRun<RunResult>(projectId, runId);
+  }
+
   adapterFor(config: AgentConfig): AgentAdapter {
     return createHttpV2Agent({
       id: config.id,
