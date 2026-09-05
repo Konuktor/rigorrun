@@ -5,3 +5,4 @@ pnpm-lock.yaml
 playwright-report
 test-results
 packages/cli/ui
+packages/cli/package/

@@ -115,6 +115,24 @@ export function induceContract(
 
   const focus = resolveFocusEntity(schema, adapter, deltas, primary);
   if (!focus) {
+    // Two very different causes, and telling somebody the wrong one costs them
+    // the afternoon. If the schema has no record types at all, the job almost
+    // certainly *did* change the system and RigorRun simply could not see it —
+    // the reads it was given hand back prose rather than records. Sending that
+    // person back to re-record their work would be sending them to fix
+    // something that is not broken.
+    if (schema.entities.length === 0) {
+      throw new Error(
+        `RigorRun watched "${primary}" run, but it cannot see any records in this system, so it has ` +
+          'nothing to compare before against after. The reads nominated for verification returned ' +
+          'text rather than structured records — a listing, a summary, a document — and RigorRun ' +
+          'reads structure, never prose, because guessing at the meaning of a sentence is how a ' +
+          'verdict stops being trustworthy.\n\n' +
+          'Nominate a read that returns structured output, if this system has one. If none of them ' +
+          'do, this system cannot be verified by reading it back, and RigorRun would rather say so ' +
+          'than grade an agent on what it claimed to have done.',
+      );
+    }
     throw new Error(
       `The recording performed "${primary}" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.`,
     );

@@ -33,7 +33,7 @@ import {
 import type { AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
-import type { DiscoveredTool, SchemaQuestion } from '@rigorrun/mcp';
+import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
 import { newProject, type AgentConfig, type Connector, type Project } from './project.ts';
 import type { Listing, ProjectStore } from './store.ts';
 import { Workspace } from './workspace.ts';
@@ -224,7 +224,7 @@ export class Service {
       verifierReads: { tool: string; args?: Record<string, unknown> }[];
       reset: { kind: 'tool' | 'none'; tool?: string };
     },
-  ): Promise<Project> {
+  ): Promise<{ project: Project; readsProblem: string }> {
     const project = await this.store.read(projectId);
     const updated: Project = {
       ...project,
@@ -236,7 +236,60 @@ export class Service {
       reset: { kind: input.reset.kind, tool: input.reset.tool ?? '' },
     };
     await this.store.write(updated);
-    return updated;
+    return { project: updated, readsProblem: await this.probeVerifierReads(updated) };
+  }
+
+  /**
+   * Calls the nominated reads and says whether records came back.
+   *
+   * This exists because of what a real third-party MCP server did. It published
+   * fourteen tools, connected cleanly, and every one of its reads returned
+   * prose — a directory listing, a file summary. RigorRun let the person
+   * nominate them, let them do the whole job, and only then said the recording
+   * had changed nothing. It had changed plenty; RigorRun simply could not see
+   * it. The person was sent to fix their recording, which was fine.
+   *
+   * So the reads are tried here, before anybody spends twenty minutes. They are
+   * read-only tools the operator has just vouched for, so calling them is safe
+   * — and if a system cannot be read back, that is a fact worth having at the
+   * start rather than at the end.
+   *
+   * Returns a sentence to show, or empty when there is nothing to say. Never
+   * throws: a read that fails right now is a reason to warn, not to refuse.
+   */
+  private async probeVerifierReads(project: Project): Promise<string> {
+    if (project.verifierReads.length === 0) {
+      return (
+        'No read has been nominated, so RigorRun will not be able to check what your agent ' +
+        'actually changed — only what it said it did. Every verdict will say OBSERVATIONAL.'
+      );
+    }
+    const connection = await this.workspace.connect(project).catch(() => undefined);
+    if (!connection) return '';
+
+    const observations: PayloadObservation[] = [];
+    const failed: string[] = [];
+    for (const read of project.verifierReads) {
+      const result = await connection.call(read.tool, read.args).catch(() => undefined);
+      if (!result?.ok) {
+        failed.push(read.tool);
+        continue;
+      }
+      observations.push({ tool: read.tool, payload: result.structured ?? result.content });
+    }
+    if (failed.length > 0) {
+      return `These reads did not answer: ${failed.join(', ')}. RigorRun will not be able to verify what they cover.`;
+    }
+    if (induceSchema(observations).schema.entities.length === 0) {
+      return (
+        'These reads answered, but none of them returned structured records — RigorRun got text ' +
+        'back, and it reads structure rather than prose because guessing at the meaning of a ' +
+        'sentence is how a verdict stops being trustworthy. Nominate a read that returns ' +
+        'structured output if this system has one. If none do, RigorRun can watch your agent ' +
+        'work here but cannot check the result.'
+      );
+    }
+    return '';
   }
 
   // ------------------------------------------------------- step 2: teach a job

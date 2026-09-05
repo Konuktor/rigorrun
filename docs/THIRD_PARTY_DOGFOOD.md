@@ -6,6 +6,38 @@ without noticing we are doing it.
 
 This document is the protocol for finding out whether anybody else can use it.
 
+## What the first clean-room run already found
+
+Before asking anybody, RigorRun was pointed at
+[`@modelcontextprotocol/server-filesystem`](https://www.npmjs.com/package/@modelcontextprotocol/server-filesystem)
+— unmodified, from npm, in a throwaway directory. Nobody here chose its tools,
+its argument names, its annotations or the shape of what it returns.
+`packages/mcp/test/thirdParty.test.ts` and `packages/daemon/test/thirdParty.test.ts`
+are that run, kept as tests.
+
+**What worked.** Discovery, argument schemas, and risk classification, against a
+server nobody designed for. Not one of its fourteen tools publishes a
+`readOnlyHint`, so RigorRun treated every one of them as writing — which is the
+conservative default doing its job on what turns out to be the common case.
+
+**What did not, and it matters.** Its reads answer in prose. `list_directory`
+returns `[FILE] q3-plan.md`, not a record. RigorRun reads structure and never
+prose, so there was nothing to compare before against after: **this system can
+be watched and cannot be verified.**
+
+That is a real limit and it is stated on the box. The bug was what RigorRun did
+about it. It connected happily, accepted the reads, let the whole job be
+demonstrated, and only then refused — with "the recording performed `write_file`
+but nothing in the system changed". The recording was fine. The person was sent
+to fix the wrong thing, at the latest possible moment.
+
+Now the reads are tried when they are nominated, and if they come back as text
+RigorRun says so before anybody does twenty minutes of work, says which of the
+two problems it is, and offers to continue anyway with every verdict marked
+`OBSERVATIONAL`. **Expect a tester to hit this.** A large share of MCP servers
+in the wild return text, and "I connected it and it says it cannot check my
+system" is a legitimate finding rather than a failure of the tester.
+
 ## The rule
 
 **A tester gets two things: an install command, and `docs/GETTING_STARTED.md`.**

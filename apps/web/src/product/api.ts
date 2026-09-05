@@ -245,7 +245,10 @@ export const api = {
       { connector, safety },
     ),
   configure: (id: string, config: unknown) =>
-    post<{ project: ProjectView }>(`/api/projects/${id}/environment/config`, config),
+    post<{ project: ProjectView; readsProblem: string }>(
+      `/api/projects/${id}/environment/config`,
+      config,
+    ),
 
   startTeaching: (id: string) => post<{ recording: boolean }>(`/api/projects/${id}/teach/start`),
   teachCall: (id: string, tool: string, args: Record<string, unknown>) =>

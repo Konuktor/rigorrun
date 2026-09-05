@@ -60,6 +60,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@cloudflare/workers-types": "^5.20260902.1",
     "@eslint/js": "^10.0.1",
+    "@modelcontextprotocol/server-filesystem": "2026.8.31",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/chrome": "^0.2.8",

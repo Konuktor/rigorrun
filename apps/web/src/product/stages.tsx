@@ -245,6 +245,8 @@ export function ToolCatalogue({
   const [reset, setReset] = useState(project.reset.tool);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
+  /** What the reads could not tell RigorRun. Not an error — a decision. */
+  const [readsProblem, setReadsProblem] = useState('');
 
   function toggle(set: Set<string>, name: string, apply: (next: Set<string>) => void): void {
     const next = new Set(set);
@@ -256,12 +258,20 @@ export function ToolCatalogue({
   async function save(): Promise<void> {
     setBusy(true);
     setProblem('');
+    setReadsProblem('');
     try {
       const result = await api.configure(project.id, {
         readOnlyTools: [...readOnly],
         verifierReads: [...reads].map((tool) => ({ tool })),
         reset: reset ? { kind: 'tool', tool: reset } : { kind: 'none' },
       });
+      // RigorRun tried the reads. If they cannot tell it what changed, the
+      // person hears it now rather than after doing the whole job — which is
+      // what happened against a real third-party server, and cost the run.
+      if (result.readsProblem) {
+        setReadsProblem(result.readsProblem);
+        return;
+      }
       onConfigured(result.project);
     } catch (error) {
       setProblem((error as Error).message);
@@ -350,6 +360,31 @@ export function ToolCatalogue({
             )}
           </Field>
           {problem ? <Problem>{problem}</Problem> : null}
+          {readsProblem ? (
+            <div
+              className="rounded-panel border border-warn-line bg-warn-bg p-4"
+              data-testid="reads-problem"
+            >
+              <p className="text-body text-fg">{readsProblem}</p>
+              <p className="mt-3 text-meta text-secondary">
+                You can carry on. RigorRun will watch what your agent does and say
+                OBSERVATIONAL on every result, because it will not have looked at your system.
+              </p>
+              <div className="mt-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setReadsProblem('');
+                    onConfigured(project);
+                  }}
+                  testId="continue-anyway"
+                >
+                  Continue anyway
+                </Button>
+              </div>
+            </div>
+          ) : null}
           <div>
             <Button onClick={save} disabled={busy || reads.size === 0} testId="save-environment">
               {busy ? 'Saving…' : 'Save and continue'}

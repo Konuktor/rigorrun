@@ -106,7 +106,7 @@ describe('from nothing', () => {
   });
 
   it('takes the operator’s word for what reads, and how to put things back', async () => {
-    project = await service.configureEnvironment(project.id, {
+    const configured = await service.configureEnvironment(project.id, {
       readOnlyTools: ['list_venues', 'list_organisers', 'find_bookings', 'get_booking'],
       // Only the tools. Which record type each returns is worked out from what
       // they return, because at this moment those types do not exist yet.
@@ -117,7 +117,10 @@ describe('from nothing', () => {
       ],
       reset: { kind: 'tool', tool: 'reset_desk' },
     });
+    project = configured.project;
     expect(project.verifierReads).toHaveLength(3);
+    // Nothing to warn about: these reads answer, and they answer with records.
+    expect(configured.readsProblem).toBe('');
   });
 });
 

@@ -65,3 +65,25 @@ Two judgements in there are worth knowing about:
 - **Two runs of different suites are not compared.** A different benchmark means
   a different question was asked, and the honest answer to "did this get worse"
   is then "that cannot be known from these two".
+
+## When a system cannot be read back at all
+
+RigorRun works out what changed by calling the reads you nominate and comparing
+what comes back. That requires the reads to return *records* — structured
+output with fields it can compare. A great many MCP servers answer in prose
+instead: a directory listing, a formatted summary, a document.
+
+RigorRun does not parse prose. Guessing at what a sentence means is exactly how
+a verdict stops being worth anything, and a confident PASS derived from a
+regular expression over English is worse than no verdict at all.
+
+So when you nominate your reads, RigorRun calls them and tells you what it got.
+If none of them return records, it says so there and then — before you spend
+twenty minutes demonstrating a job it will not be able to check — and offers to
+continue anyway. If you do, every result says `OBSERVATIONAL`: RigorRun saw
+what your agent did, and did not look at your system afterwards.
+
+The fix, where one exists, is to nominate a different read. If your system has
+no read that returns structure, the honest position is that RigorRun cannot
+verify against it, and it will keep saying so rather than quietly grading your
+agent on its own account of itself.

@@ -9,6 +9,8 @@ export default tseslint.config(
       '**/dist/**',
       // The interface, copied into the publishable package at build time.
       'packages/cli/ui/**',
+      // The staged package: build output, assembled for `npm pack`.
+      'packages/cli/package/**',
       '**/node_modules/**',
       '**/coverage/**',
       '**/.wrangler/**',
