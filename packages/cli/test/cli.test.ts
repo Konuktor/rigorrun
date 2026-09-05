@@ -285,12 +285,21 @@ describe('argument and input validation', () => {
 });
 
 describe('doctor and agents', () => {
-  it('reports that offline mode is always available', async () => {
-    const { code, out } = await cli('doctor');
+  it('checks this machine, and says there is nothing to check yet', async () => {
+    // `doctor` used to report which model providers were configured, which
+    // nobody was asking. It now answers the question people actually have:
+    // can this machine do the things RigorRun needs, and is my project's
+    // system reachable from here. With no projects, the honest answer is that
+    // there is nothing to look at.
+    //
+    // `--home` matters: a diagnostics command must never read the real store
+    // during a test run.
+    const { code, out } = await cli('doctor', '--home', join(workDir, 'doctor-home'));
     expect(code).toBe(0);
-    expect(out).toContain('offline');
-    expect(out).toContain('run fully offline');
-  });
+    expect(out).toContain('This machine');
+    expect(out).toContain('loopback port');
+    expect(out).toContain('No projects yet');
+  }, 30_000);
 
   it('lists both demo agents as machine-readable JSON', async () => {
     const { code, out } = await cli('agents', '--json');

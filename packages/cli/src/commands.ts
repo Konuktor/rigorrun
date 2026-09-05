@@ -4,7 +4,6 @@
  * Every command returns an exit code rather than calling `process.exit`, so
  * they stay testable and so `gate` can be trusted in CI.
  */
-import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   applyReview,
@@ -25,7 +24,7 @@ import { WORKFLOWS, compileWorkflow, workflowByKey } from '@rigorrun/environment
 import { availableAgents, resolveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { runBenchmark, type RunProgress } from '@rigorrun/runner';
 import { renderReportHtml, sanitizeRunResult } from '@rigorrun/report';
-import { envFromProcess, providerStatuses } from '@rigorrun/providers';
+import { envFromProcess } from '@rigorrun/providers';
 import { pct } from '@rigorrun/scoring';
 import { CliError, readJson, writeJson, writeText, workspaceDir } from './io.ts';
 import { c, fmtMs, heading, line, ruleTag, statusTag, table } from './ui.ts';
@@ -414,36 +413,6 @@ export function cmdAgents(flags: Flags): number {
   return 0;
 }
 
-export async function cmdDoctor(flags: Flags): Promise<number> {
-  const statuses = providerStatuses(envFromProcess(process.env));
-  const runCount = await countStoredRuns();
-
-  if (flags.json) {
-    line(
-      JSON.stringify(
-        { version: VERSION, node: process.version, providers: statuses, runCount },
-        null,
-        2,
-      ),
-    );
-    return 0;
-  }
-
-  heading(`RigorRun ${VERSION}`);
-  line(`${c.grey('node')}       ${process.version}`);
-  line(
-    `${c.grey('workspace')}  ${workspaceDir()} (${runCount} stored run${runCount === 1 ? '' : 's'})`,
-  );
-  heading('Model providers');
-  table(
-    ['Provider', 'Status', 'Detail'],
-    statuses.map((s) => [s.id, s.configured ? c.green('ready') : c.grey('not set'), s.detail]),
-  );
-  line();
-  line(c.grey('RigorRun needs none of these. The demo and both demo agents run fully offline.'));
-  return 0;
-}
-
 // ------------------------------------------------------------------- helpers
 
 async function executeRun(
@@ -556,14 +525,7 @@ function resolveAgentOrFail(id: string) {
   }
 }
 
-/** Missing directory simply means nothing has been run here yet. */
-async function countStoredRuns(): Promise<number> {
-  try {
-    return (await readdir(RUNS_DIR())).filter((f) => f.endsWith('.json')).length;
-  } catch {
-    return 0;
-  }
-}
+
 
 function firstIssue(error: unknown): string {
   const issues = (error as { issues?: { path?: (string | number)[]; message: string }[] }).issues;

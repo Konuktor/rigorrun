@@ -17,7 +17,6 @@ import {
   cmdWorkflows,
   cmdCompile,
   cmdDemo,
-  cmdDoctor,
   cmdGate,
   cmdGenerate,
   cmdReport,
@@ -27,6 +26,7 @@ import {
 import { cmdInitEnvironment, cmdPrivacyInspect } from './scaffold.ts';
 import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
+import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
 import {
   cmdProjectCompare,
   cmdProjectGate,
@@ -175,7 +175,7 @@ async function dispatch(argv: string[]): Promise<number> {
     case 'privacy':
       return cmdPrivacyInspect(target, parsed.positionals[2], flags.json);
     case 'doctor':
-      return cmdDoctor(flags);
+      return cmdDoctorProduct(flags);
     default:
       errorLine(`Unknown command "${command}".`);
       line('Run `rigorrun --help` to see the available commands.');

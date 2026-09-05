@@ -2,6 +2,16 @@
 
 What RigorRun can actually do for a person who has never seen this source.
 
+> **This document has two halves.** The audit below was written first, against
+> commit `e1ced9b`, and answered all twenty of its questions NO. The work that
+> followed was aimed squarely at it. [What changed](#what-changed) at the bottom
+> re-answers every question against the current build, and says which ones are
+> still NO.
+>
+> The original answers are left exactly as written. A product audit that gets
+> quietly edited as things improve is a product audit nobody can trust the next
+> time it says something uncomfortable.
+
 This document is written against the deployed build and the repository at
 commit `e1ced9b`, not against intent. Every claim carries a file, a line or a
 command whose output can be reproduced. Where the answer is NO, the current
@@ -138,3 +148,77 @@ twenty capabilities a new user needs is either absent or reachable only by
 editing this repository. Passing 439 internal tests is evidence that the engine
 works on material RigorRun already had; it is not evidence that the product is
 usable, and it should not be reported as such.
+
+
+---
+
+<a id="what-changed"></a>
+
+## What changed
+
+Re-answered against the current build. The evidence for every YES is a test
+that runs in CI, named beside it.
+
+| # | Question | Then | Now | Evidence |
+| - | -------- | ---- | --- | -------- |
+| 1 | Create a project? | NO | **YES** | `e2e/external-user.spec.ts` creates one in a browser |
+| 2 | Persist it? | NO | **YES** | `packages/daemon/test/store.test.ts` |
+| 3 | Connect their own MCP server? | NO | **YES** | `packages/mcp/test/connect.test.ts` — a real handshake with a separate package |
+| 4 | Local MCP server? | NO | **YES** | stdio transport; the fixture is spawned as a child process |
+| 5 | Remote MCP server? | NO | **YES** | streamable HTTP transport; `packages/mcp/test/safety.test.ts` covers the guards |
+| 6 | OpenAPI system? | NO | **NO** | Not built. Deferred on purpose; see `docs/ROADMAP.md` |
+| 7 | Browser application? | NO | **NO** | Not built. Still the largest gap for anybody with no API |
+| 8 | Connect their own agent? | NO | **YES** | `packages/daemon/test/externalAgent.test.ts` |
+| 9 | Invoke their own agent? | NO | **YES** | Same test; the agent is a separate process |
+| 10 | Evaluate an existing MCP agent without rewriting it? | NO | **YES** | `packages/proxy/test/proxy.test.ts` drives it with the SDK's own client |
+| 11 | Record their own workflow? | NO | **YES** | Through the MCP operator, in the browser |
+| 12 | Infer a contract from *their* workflow? | NO | **YES** | `packages/mcp/test/induce.test.ts`, including the renamed-fields test |
+| 13 | Generate cases against *their* system? | NO | **YES** | `packages/daemon/test/freshUser.test.ts` |
+| 14 | Reset *their* environment? | NO | **YES** | A nominated reset tool; without one it says `ISOLATION: NONE` |
+| 15 | Inspect *their* authoritative state? | NO | **YES** | Nominated verifier reads; labelled `PARTIAL` because it is |
+| 16 | Execute safely without touching production? | NO | **YES** | Safety modes; writes refused at the channel and recorded |
+| 17 | All of it from the UI? | NO | **YES** | `e2e/external-user.spec.ts`, with screenshots in `docs/external-user-run/` |
+| 18 | All of it from CLI/CI? | NO | **PARTLY** | Running and gating a project: yes. Connecting and teaching are interface-only |
+| 19 | Without editing RigorRun? | NO | **YES** | Both dogfood fixtures import nothing from RigorRun but the public agent SDK |
+| 20 | Value without Northstar? | NO | **YES** | Northstar is not on any product path |
+
+**Sixteen YES, two NO, one PARTLY, one that needs qualifying.**
+
+### The ones that are still NO
+
+**OpenAPI and browser connectors do not exist.** MCP is the only way to connect
+a system. That was a deliberate choice — depth on one path over breadth across
+four — but it means anybody whose system has no MCP server has to write one.
+
+**Connecting and teaching are interface-only.** `rigorrun run --project` and
+`rigorrun gate --project` work from a build server with no interface and no
+person. Setting a project *up* still needs the interface, because both steps are
+interactive by nature: you are looking at what came back. A headless setup path
+is not built.
+
+### The ones that need qualifying
+
+**Nothing is published to npm.** Every doc says `pnpm dlx rigorrun`, and every
+one of them also says it is a clone today. That is the single largest piece of
+friction between this and a stranger actually using it.
+
+**Discovery and recordings live in the runner's memory.** Reloading the page in
+the middle of connecting or recording loses them. The interface says so and
+offers the way back rather than looking broken, but a person who reloads at the
+wrong moment repeats a step.
+
+**The verdict a real system produces is `PARTIAL`, not `AUTHORITATIVE`.** That
+is correct rather than a shortcoming — RigorRun reads back what the nominated
+reads return and no more — but it means a verdict from a real system is a
+weaker claim than one from the bundled example, and that is stated on every
+result rather than smoothed over.
+
+**The control plane is still called by nothing.** It is deployed, tested, and
+unused by the product.
+
+### What the technical gates now measure, and what they do not
+
+`pnpm verify` still measures whether RigorRun works on material that ships
+inside RigorRun. The gate that measures whether a stranger can use it is
+`pnpm e2e:external`, and it runs as its own CI job. A release where only the
+first is green is not a release.

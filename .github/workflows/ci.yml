@@ -16,6 +16,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The gate that matters. Everything in `verify` measures whether RigorRun
+  # works on material that ships inside RigorRun; this measures whether a
+  # stranger can use it. If only the technical gates pass, the release is not
+  # green — see docs/PRODUCT_REALITY_AUDIT.md for why that distinction had to
+  # be made explicit.
+  product-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build:web
+
+      - name: A stranger connects their own system and their own agent
+        run: pnpm e2e:external
+
+      - name: Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: external-user-run
+          path: |
+            docs/external-user-run/
+            test-results/
+          retention-days: 7
+
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
