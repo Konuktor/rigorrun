@@ -699,6 +699,25 @@ export function ReviewLearned({
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
+  /**
+   * Least certain first.
+   *
+   * There are often twenty of these, and handing somebody twenty
+   * undifferentiated questions is the same as handing them none: they scroll to
+   * the bottom and press the button. The ones RigorRun is unsure about are the
+   * ones where a wrong answer quietly corrupts a threshold or a boundary, so
+   * they go where somebody will actually read them.
+   */
+  const rank = { weak: 0, moderate: 1, strong: 2 } as const;
+  const ordered = [...questions].sort(
+    (a, b) => rank[a.confidence] - rank[b.confidence],
+  );
+  const byConfidence = {
+    weak: questions.filter((question) => question.confidence === 'weak'),
+    moderate: questions.filter((question) => question.confidence === 'moderate'),
+    strong: questions.filter((question) => question.confidence === 'strong'),
+  };
+
   async function save(): Promise<void> {
     setBusy(true);
     setProblem('');
@@ -725,11 +744,27 @@ export function ReviewLearned({
         </p>
         <p className="text-body text-secondary">
           Each question shows what it saw, so you can disagree with the evidence rather than with
-          a verdict. Getting one wrong is not permanent: come back to this step any time.
+          a verdict. The ones it is least sure about are first, because those are the ones where a
+          wrong answer matters. Getting one wrong is not permanent: come back to this step any
+          time.
         </p>
       </div>
 
-      {questions.map((question) => (
+      <div className="flex flex-wrap gap-4 text-meta text-muted">
+        <span>
+          <strong className="text-fg">{byConfidence.weak.length}</strong> it is unsure about
+        </span>
+        <span>
+          <strong className="text-secondary">{byConfidence.moderate.length}</strong> it is fairly
+          sure about
+        </span>
+        <span>
+          <strong className="text-secondary">{byConfidence.strong.length}</strong> it is confident
+          about
+        </span>
+      </div>
+
+      {ordered.map((question) => (
         <Panel key={question.id}>
           <div className="flex max-w-2xl flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">

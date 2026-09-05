@@ -124,7 +124,9 @@ describe('what to do next', () => {
     const steps = nextSteps(project);
     expect(steps).toHaveLength(1);
     expect(steps[0]).toMatchObject({ id: 'connect_environment' });
-    expect(steps[0]!.why).toMatch(/nothing can be verified/);
+    // The *reason*, not just the instruction. A step with no reason is a step
+    // somebody skips.
+    expect(steps[0]!.why).toMatch(/no result could be trusted/);
   });
 
   it('walks through the rest once there is one', () => {

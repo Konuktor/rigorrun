@@ -157,37 +157,37 @@ export function nextSteps(project: Project): NextStep[] {
   if (!project.connector) {
     steps.push({
       id: 'connect_environment',
-      what: 'Connect the system your agent will work in.',
-      why: 'Without it there is nothing to read back, so nothing can be verified.',
+      what: 'Connect the system your agent works in.',
+      why: 'Without it there is nothing to look at afterwards, so no result could be trusted.',
     });
     return steps;
   }
   if (project.verifierReads.length === 0) {
     steps.push({
       id: 'nominate_reads',
-      what: 'Say which operations read the records you care about.',
-      why: 'These are the calls RigorRun makes after your agent finishes, to find out what actually happened.',
+      what: 'Say which of your tools RigorRun can use to check what happened.',
+      why: 'It calls them after your agent finishes, to look at your system rather than believe the agent.',
     });
   }
   if (project.timings.workflowRecordedAt === null) {
     steps.push({
       id: 'teach_a_job',
       what: 'Do the job once, so RigorRun can watch.',
-      why: 'The contract is derived from a real execution rather than written by hand.',
+      why: 'The rules come from something that really happened rather than from something somebody wrote down.',
     });
   }
   if (project.timings.benchmarkGeneratedAt === null) {
     steps.push({
       id: 'generate',
-      what: 'Review what RigorRun learned, then generate the suite.',
-      why: 'Nothing RigorRun merely inferred can fail an agent until you have confirmed it.',
+      what: 'Check what RigorRun worked out, then build the tests.',
+      why: 'Nothing it only guessed can fail your agent until you have said yes to it.',
     });
   }
   if (project.agents.length === 0) {
     steps.push({
       id: 'connect_agent',
       what: 'Connect the agent you want to test.',
-      why: 'Your benchmark is ready; it needs something to run against.',
+      why: 'Your tests are ready and nothing is missing except something to run them against.',
     });
   }
   return steps;

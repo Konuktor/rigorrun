@@ -140,7 +140,7 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await page.getByTestId('create-project').click();
 
   await expect(page.getByTestId('step-connect')).toBeVisible();
-  await expect(page.getByText('Connect the system your agent will work in.')).toBeVisible();
+  await expect(page.getByText('Connect the system your agent works in.')).toBeVisible();
 
   // ----------------------------------------------- 2. connect their own system
   await page.getByTestId('transport').selectOption('stdio');
