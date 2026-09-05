@@ -76,6 +76,42 @@ for (const definition of WORKFLOWS) {
       deadRules: quality.deadRules.length,
       wallClockMs: quality.wallClockMs,
     },
+    /**
+     * One real failing case, whole, from the run just executed.
+     *
+     * The landing page used to hardcode this — an amount, an order id and a
+     * null approval typed into JSX under a comment saying it was
+     * real. It *was* real, once, and nothing regenerated it. A fragment a
+     * person maintains by hand beside a claim that it is machine-derived is a
+     * fragment that goes stale and takes the claim with it.
+     */
+    failure: (() => {
+      const result = run.caseResults.find(
+        (entry) => entry.agentId === naiveAgent.id && !entry.policyCompliant,
+      );
+      if (!result) return null;
+      const failed = result.assertions.find((assertion) => assertion.status === 'FAIL');
+      if (!failed) return null;
+      return {
+        caseName: result.caseName,
+        check: failed.description,
+        // What the agent said about itself, which is never what decides this.
+        agentClaimed: result.agentReport,
+        // What the system said, which is — narrowed to the records the failed
+        // check actually names. Taking the first three keys showed customers
+        // on a check about refunds, which is a slice of the right state and
+        // the wrong evidence.
+        systemState: (() => {
+          const named = Object.keys(result.finalStateSummary).filter((entity) =>
+            failed.message.includes(entity) || failed.description.includes(entity),
+          );
+          const keys = named.length > 0 ? named : Object.keys(result.finalStateSummary).slice(0, 2);
+          return Object.fromEntries(keys.map((key) => [key, result.finalStateSummary[key]]));
+        })(),
+        expected: failed.message,
+        verificationSource: failed.verificationSource,
+      };
+    })(),
     mutants: quality.mutants.map((m) => ({
       id: m.id,
       defect: m.defect,

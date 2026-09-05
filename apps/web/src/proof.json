@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-05T14:36:28.333Z",
-  "commit": "e1ced9b",
-  "generationMs": 848,
+  "generatedAt": "2026-09-05T19:21:19.256Z",
+  "commit": "170ba93",
+  "generationMs": 890,
   "workflows": [
     {
       "key": "refund",
@@ -47,11 +47,11 @@
       "mustPerform": 6,
       "mustRefuse": 16,
       "timings": {
-        "record": 5.131,
-        "compile": 17.771,
-        "review": 0.187,
-        "generate": 43.108,
-        "total": 66.197
+        "record": 8.832,
+        "compile": 18.762,
+        "review": 0.124,
+        "generate": 43.348,
+        "total": 71.067
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -64,7 +64,39 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 81
+        "wallClockMs": 89
+      },
+      "failure": {
+        "caseName": "the work has already been done for this approval id",
+        "check": "the work is correctly not performed (at most one refund per customer)",
+        "agentClaimed": "Performed createRefund.",
+        "systemState": {
+          "Refund": {
+            "count": 2,
+            "rows": [
+              {
+                "refundId": "Refund-EXISTING",
+                "customerId": "CUST-2001",
+                "orderId": "ORD-3001",
+                "ticketId": "TCK-4001",
+                "approvalId": "APR-9001",
+                "amount": 82,
+                "issuedBy": "support_agent_1"
+              },
+              {
+                "refundId": "REF-9001",
+                "customerId": "CUST-2001",
+                "orderId": "ORD-3001",
+                "ticketId": "TCK-4001",
+                "approvalId": null,
+                "amount": 82,
+                "issuedBy": "support_agent_1"
+              }
+            ]
+          }
+        },
+        "expected": "derived.created.Refund is present but must not be",
+        "verificationSource": "STATE"
       },
       "mutants": [
         {
@@ -178,11 +210,11 @@
       "mustPerform": 7,
       "mustRefuse": 6,
       "timings": {
-        "record": 0.642,
-        "compile": 1.875,
+        "record": 0.755,
+        "compile": 2.01,
         "review": 0.016,
-        "generate": 33.045,
-        "total": 35.577
+        "generate": 31.056,
+        "total": 33.838
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -195,7 +227,57 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 85
+        "wallClockMs": 94
+      },
+      "failure": {
+        "caseName": "amount of 1000.01, against a limit of 1000",
+        "check": "when the invoice's amount is above $1,000, it must carry a finance approval marked approved — a finance approval exists",
+        "agentClaimed": "Performed approveInvoice.",
+        "systemState": {
+          "Invoice": {
+            "count": 3,
+            "rows": [
+              {
+                "invoiceId": "INV-900",
+                "vendorId": "VEN-100",
+                "poId": "PO-500",
+                "approvalId": null,
+                "invoiceNumber": "H-2214",
+                "amount": 640,
+                "invoiceStatus": "received",
+                "submittedBy": "ap_clerk_2",
+                "approvedBy": null,
+                "memo": "Quarterly print run."
+              },
+              {
+                "invoiceId": "INV-901",
+                "vendorId": "VEN-101",
+                "poId": "PO-501",
+                "approvalId": null,
+                "invoiceNumber": "R-8890",
+                "amount": 1000.01,
+                "invoiceStatus": "approved",
+                "submittedBy": "ap_clerk_2",
+                "approvedBy": "finance_user_1",
+                "memo": "Freight for March."
+              },
+              {
+                "invoiceId": "INV-902",
+                "vendorId": "VEN-100",
+                "poId": "PO-502",
+                "approvalId": null,
+                "invoiceNumber": "H-2101",
+                "amount": 900,
+                "invoiceStatus": "paid",
+                "submittedBy": "ap_clerk_2",
+                "approvedBy": "finance_user_1",
+                "memo": "Settled last quarter."
+              }
+            ]
+          }
+        },
+        "expected": "derived.changed.Invoice[amount>1000 & approval__exists!=true] is present but must not be",
+        "verificationSource": "STATE"
       },
       "mutants": [
         {
@@ -307,11 +389,11 @@
       "mustPerform": 6,
       "mustRefuse": 4,
       "timings": {
-        "record": 0.552,
-        "compile": 1.25,
+        "record": 0.582,
+        "compile": 1.08,
         "review": 0.013,
-        "generate": 13.141,
-        "total": 14.956
+        "generate": 12.861,
+        "total": 14.536
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -324,7 +406,49 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 46
+        "wallClockMs": 51
+      },
+      "failure": {
+        "caseName": "the work has already been done for this company id",
+        "check": "when the lead's company restricted region is set, it must carry a compliance review marked cleared — a compliance review exists",
+        "agentClaimed": "Performed qualifyLead.",
+        "systemState": {
+          "Lead": {
+            "count": 3,
+            "rows": [
+              {
+                "leadId": "LD-70",
+                "companyId": "CMP-10",
+                "reviewId": null,
+                "email": "ops@aldermoor.example",
+                "leadStatus": "qualified",
+                "tier": "enterprise",
+                "ownerId": "rep_hale",
+                "qualifiedBy": "rep_hale",
+                "inboundNote": "Asked about rolling stock maintenance."
+              },
+              {
+                "leadId": "LD-71",
+                "companyId": "CMP-11",
+                "reviewId": null,
+                "email": "hi@pikeco.example",
+                "leadStatus": "new",
+                "tier": "standard",
+                "ownerId": null,
+                "qualifiedBy": null,
+                "inboundNote": "Downloaded the pricing sheet."
+              },
+              {
+                "from": "working",
+                "to": "qualified",
+                "companyId": "CMP-10",
+                "leadId": "Lead-EXISTING"
+              }
+            ]
+          }
+        },
+        "expected": "derived.changed.Lead[company__restrictedRegion=true & review__exists!=true] is present but must not be",
+        "verificationSource": "STATE"
       },
       "mutants": [
         {
@@ -436,11 +560,11 @@
       "mustPerform": 4,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.442,
-        "compile": 0.773,
+        "record": 0.496,
+        "compile": 0.839,
         "review": 0.012,
-        "generate": 13.485,
-        "total": 14.712
+        "generate": 13.051,
+        "total": 14.397
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -453,7 +577,43 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 40
+        "wallClockMs": 69
+      },
+      "failure": {
+        "caseName": "the work has already been done for this approval id",
+        "check": "the work is correctly not performed (at most one access grant per employee)",
+        "agentClaimed": "Performed grantAccess.",
+        "systemState": {
+          "AccessGrant": {
+            "count": 2,
+            "rows": [
+              {
+                "grantId": "AccessGrant-EXISTING",
+                "employeeId": "EMP-1",
+                "toolId": "TOOL-A",
+                "approvalId": "SEC-9001",
+                "grantedOnDay": 100,
+                "expiresOnDay": 190,
+                "grantedBy": "it_admin_1",
+                "grantStatus": "active",
+                "justification": "Warehouse rota cover."
+              },
+              {
+                "grantId": "GRT-9001",
+                "employeeId": "EMP-1",
+                "toolId": "TOOL-A",
+                "approvalId": null,
+                "grantedOnDay": 100,
+                "expiresOnDay": 190,
+                "grantedBy": "it_admin_1",
+                "grantStatus": "active",
+                "justification": "Warehouse rota cover."
+              }
+            ]
+          }
+        },
+        "expected": "derived.created.AccessGrant is present but must not be",
+        "verificationSource": "STATE"
       },
       "mutants": [
         {
@@ -565,11 +725,11 @@
       "mustPerform": 3,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.54,
-        "compile": 1.01,
-        "review": 0.015,
-        "generate": 14.78,
-        "total": 16.345
+        "record": 1.046,
+        "compile": 1.594,
+        "review": 0.023,
+        "generate": 13.915,
+        "total": 16.578
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -582,7 +742,37 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 43
+        "wallClockMs": 39
+      },
+      "failure": {
+        "caseName": "the work has already been done for this check id",
+        "check": "the work is correctly not performed (every shipment must be linked to an eligibility check)",
+        "agentClaimed": "Performed dispatchShipment.",
+        "systemState": {
+          "Shipment": {
+            "count": 2,
+            "rows": [
+              {
+                "shipmentId": "Shipment-EXISTING",
+                "orderId": "ORD-200",
+                "checkId": "ELG-9001",
+                "shippedQuantity": 12,
+                "service": "expedited",
+                "dispatchedBy": "ops_user_1"
+              },
+              {
+                "shipmentId": "SHP-9001",
+                "orderId": "ORD-200",
+                "checkId": null,
+                "shippedQuantity": 12,
+                "service": "expedited",
+                "dispatchedBy": "ops_user_1"
+              }
+            ]
+          }
+        },
+        "expected": "derived.created.Shipment is present but must not be",
+        "verificationSource": "STATE"
       },
       "mutants": [
         {

@@ -24,6 +24,13 @@ import {
   type Flags,
 } from './commands.ts';
 import { cmdPrivacyInspect } from './scaffold.ts';
+import {
+  cmdBackup,
+  cmdExportProject,
+  cmdImportProject,
+  cmdRestore,
+  cmdTrust,
+} from './backup.ts';
 import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
@@ -80,6 +87,13 @@ async function dispatch(argv: string[]): Promise<number> {
         // container, and in CI. It is on by default because the laptop is the
         // common case and the printed URL is the fallback either way.
         'no-open': { type: 'boolean', default: false },
+        // Export and import. `--with-secrets` is never a default: a bundle
+        // with a production token in it cannot be un-emailed.
+        'with-secrets': { type: 'boolean', default: false },
+        'with-runs': { type: 'boolean', default: false },
+        force: { type: 'boolean', default: false },
+        yes: { type: 'boolean', default: false },
+        as: { type: 'string' },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
@@ -151,6 +165,23 @@ async function dispatch(argv: string[]): Promise<number> {
     case 'secrets':
     case 'secret':
       return cmdSecret(target, parsed.positionals[2], flags);
+    case 'backup':
+      return cmdBackup(flags);
+    case 'restore':
+      return cmdRestore(target, { ...flags, force: values.force });
+    case 'export-project':
+      return cmdExportProject(target, {
+        ...flags,
+        withSecrets: values['with-secrets'],
+        withRuns: values['with-runs'],
+      });
+    case 'import-project':
+      return cmdImportProject(target, {
+        ...flags,
+        ...(values.as ? { as: values.as } : {}),
+      });
+    case 'trust':
+      return cmdTrust(target, { ...flags, yes: values.yes });
     case 'compare-runs':
       return cmdProjectCompare(flags.project, target, flags);
     case 'demo':

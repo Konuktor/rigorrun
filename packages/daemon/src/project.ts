@@ -115,6 +115,25 @@ export const ProjectSchema = z.object({
   timings: TimingsSchema,
   /** The run a later run is compared against, once somebody sets one. */
   baselineRunId: z.string().nullable().default(null),
+  /**
+   * Where this project's connector came from, and whether anybody has looked.
+   *
+   * A connector says what command to run or what URL to open with your
+   * credentials. When you typed it, you already decided. When it arrived in a
+   * file somebody sent you, you have not — so an imported project will not
+   * connect until it is confirmed, and the confirmation screen shows the
+   * command in full.
+   *
+   * Defaulted rather than migrated: a project that predates this field was
+   * typed by whoever owns the machine it is on, which is exactly what `typed`
+   * means.
+   */
+  connectorTrust: z
+    .object({
+      origin: z.enum(['typed', 'imported']).default('typed'),
+      confirmedAt: z.string().nullable().default(null),
+    })
+    .default({ origin: 'typed', confirmedAt: null }),
 });
 export type Project = z.infer<typeof ProjectSchema>;
 

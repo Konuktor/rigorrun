@@ -54,7 +54,8 @@
     "deploy:ops": "pnpm build:ops && wrangler pages deploy apps/demo-ops/dist --project-name rigorrun-ops --branch main --commit-dirty=true",
     "e2e:external": "playwright test --config e2e/playwright.external.config.ts",
     "pack": "pnpm build:web && pnpm build:cli && cd packages/cli/package && npm pack --pack-destination ../../../dist",
-    "verify:package": "node scripts/verify-package.mjs"
+    "verify:package": "node scripts/verify-package.mjs",
+    "e2e:restart": "playwright test --config e2e/playwright.restart.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

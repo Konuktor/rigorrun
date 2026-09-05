@@ -31,6 +31,8 @@ const LOCAL = [
   ['unit', 'pnpm', ['test'], 'unit and integration tests'],
   ['build', 'pnpm', ['build'], 'all apps and the CLI build'],
   ['e2e', 'pnpm', ['e2e'], 'local end-to-end journeys'],
+  ['e2e:external', 'pnpm', ['e2e:external'], 'a stranger goes from nothing to a verdict'],
+  ['e2e:restart', 'pnpm', ['e2e:restart'], 'their work survives the runner being killed'],
   ['a11y', 'pnpm', ['a11y'], 'WCAG A/AA scans'],
   ['visual', 'pnpm', ['visual'], 'visual regression'],
   ['cross', 'pnpm', ['cross'], 'critical path on chromium and firefox'],

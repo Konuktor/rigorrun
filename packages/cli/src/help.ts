@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.1.0-alpha.1';
+export const VERSION = '0.1.0-alpha.2';
 
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
@@ -27,6 +27,15 @@ PROJECTS
   secrets list|set|remove  Credentials, which never leave this machine. Kept in
                            your OS keychain where there is one; \`doctor\` says
                            which store you actually got.
+
+MOVING WORK AROUND
+  backup                   Copy this whole workspace. Never your credentials.
+  restore <dir>            Put one back. Refuses to overwrite without --force.
+  export-project <id>      One project as a file. Add --with-secrets only if you
+                           are certain; the file then carries real credentials.
+  import-project <file>    Read one in, under a new id. Its connector is inert
+                           until you have read the command it would run.
+  trust <id>               Show that command, and with --yes, allow it.
 
 DIAGNOSTICS
   doctor                   Check this machine can do what RigorRun needs.

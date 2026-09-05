@@ -109,6 +109,7 @@ export class Workspace {
   async connect(project: Project): Promise<McpConnection> {
     const existing = this.live.get(project.id);
     if (existing) return existing.connection;
+    assertConnectorTrusted(project);
     const connection = await McpConnection.open(await this.configFor(project));
     this.live.set(project.id, { connection, induced: undefined, demonstration: undefined });
     return connection;
@@ -318,4 +319,31 @@ export function environmentConfig(project: Project): McpEnvironmentConfig {
     safety: project.safety,
     readOnlyTools: project.readOnlyTools,
   };
+}
+
+/**
+ * Refuses to open a connector nobody on this machine has looked at.
+ *
+ * A connector is a command to run, or a URL to open with your credentials. When
+ * you typed it, you decided. When it arrived inside a file somebody sent you,
+ * you have not — and `rigorrun import-project` is exactly the shape of thing
+ * that gets forwarded in a chat and run without reading.
+ *
+ * So an imported project is inert until somebody has seen the command in full
+ * and said yes. Not a warning: opening it *is* the harmful act, so the refusal
+ * has to come first.
+ */
+export function assertConnectorTrusted(project: Project): void {
+  const trust = project.connectorTrust;
+  if (trust.origin !== 'imported' || trust.confirmedAt !== null) return;
+  const connector = project.connector;
+  const what =
+    connector?.transport === 'stdio'
+      ? `run \`${connector.command} ${connector.args.join(' ')}\``
+      : `open ${connector?.url ?? 'a URL'}`;
+  throw new Error(
+    `"${project.name}" was imported, so its connector came from a file rather than from you. ` +
+      `Opening it would ${what} on this machine. Read that line and confirm it — in the ` +
+      `interface, or with \`rigorrun trust ${project.id}\` — and RigorRun will open it from then on.`,
+  );
 }

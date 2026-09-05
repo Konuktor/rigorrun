@@ -43,8 +43,11 @@ async function evidence(page: Page, name: string): Promise<void> {
 let home: string;
 let runner: ChildProcess;
 let agent: ChildProcess;
+/** The same agent with one boolean flipped. See the regression test below. */
+let brokenAgent: ChildProcess;
 let pairedUrl: string;
 const AGENT_PORT = 8912;
+const BROKEN_AGENT_PORT = 8913;
 
 /**
  * What is under test: the sources, or the thing a stranger would install.
@@ -113,13 +116,43 @@ test.beforeAll(async () => {
     /listening on http:\/\/127\.0\.0\.1:\d+/,
   );
   agent = agentStarted.child;
+
+  const brokenStarted = await startAndWait(
+    tsx,
+    [join(root, 'fixtures', 'external', 'booking-agent', 'src', 'main.ts')],
+    { PORT: String(BROKEN_AGENT_PORT), RIGORRUN_AGENT_BEHAVIOUR: 'careless' },
+    /listening on http:\/\/127\.0\.0\.1:\d+/,
+  );
+  brokenAgent = brokenStarted.child;
 });
 
 test.afterAll(async () => {
   runner?.kill('SIGTERM');
   agent?.kill('SIGTERM');
+  brokenAgent?.kill('SIGTERM');
   await rm(home, { recursive: true, force: true });
 });
+
+/**
+ * Runs the CLI against the same workspace, the way a build server would.
+ *
+ * Deliberately a separate process against the same `RIGORRUN_HOME` rather than
+ * an in-process call: what CI runs is an executable, and the exit code is the
+ * whole interface.
+ */
+async function runCli(args: string[]): Promise<{ code: number; out: string }> {
+  return new Promise((resolve) => {
+    const child = spawn(
+      PACKAGED ?? tsx,
+      [...(PACKAGED ? [] : [join(root, 'packages', 'cli', 'src', 'bin.ts')]), ...args],
+      { cwd: root, env: { ...process.env, RIGORRUN_HOME: home, NO_COLOR: '1' } },
+    );
+    let out = '';
+    child.stdout?.on('data', (chunk: Buffer) => (out += chunk.toString()));
+    child.stderr?.on('data', (chunk: Buffer) => (out += chunk.toString()));
+    child.on('close', (code) => resolve({ code: code ?? -1, out }));
+  });
+}
 
 /** Ticks a checkbox by its test id, tolerating one already ticked. */
 async function ensureChecked(page: Page, testId: string, checked: boolean): Promise<void> {
@@ -279,6 +312,51 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await expect(page.getByTestId('time-to-verdict')).toBeVisible();
 
   await evidence(page, 'verdict');
+
+  // --------------------------------------- 9. change the agent, and run again
+  //
+  // The reason to come back next week, and until now proved only in vitest —
+  // the committed verdict screenshot read "Nothing changed across 5 case(s)"
+  // because nothing had. This is the same agent with one boolean flipped, so
+  // the suite is identical and only the behaviour moved.
+  // Back to the agent step: the run screen has no agent form on it, and a
+  // person adding a second agent would click the same tab.
+  await page.getByTestId('step-agent').click();
+  await page.getByTestId('agent-name').fill('Booking agent (after a change)');
+  await page.getByTestId('agent-endpoint').fill(`http://127.0.0.1:${BROKEN_AGENT_PORT}/`);
+  await page.getByTestId('add-agent').click();
+  await expect(page.getByText('answering').last()).toBeVisible();
+
+  await page.getByTestId('to-run').click();
+  await page.getByRole('button', { name: /^Run Booking agent \(after a change\)$/ }).click();
+  await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 180_000 });
+
+  // Not "a number moved": the case that broke, by name.
+  await expect(page.getByTestId('comparison-headline')).toContainText(/regressed/);
+  await expect(page.getByText('regressed').first()).toBeVisible();
+  await evidence(page, 'regression-caught');
+
+  // ------------------------------------------------ 10. and then, in CI
+  //
+  // The last thing the quickstart promises: the project you just set up in a
+  // browser is the one a build server runs, with no interface and no person.
+  // Exactly the command `docs/CI.md` tells people to write, against the
+  // workspace this test has been filling in, asserting the exit-code contract
+  // a build server actually depends on.
+  const projectId = /#\/projects\/(p_[A-Za-z0-9_-]+)/.exec(page.url())?.[1];
+  expect(projectId, 'the URL should name the project').toBeTruthy();
+
+  const gate = await runCli(['gate', '--project', projectId!, '--min-success', '0.95']);
+  // 1, not 2: the agent missed the bar, and RigorRun could run the question.
+  // A build server cannot tell those apart from prose, which is why the codes
+  // are the contract.
+  expect(gate.code, gate.out).toBe(1);
+  expect(gate.out).toMatch(/task success/);
+  expect(gate.out).toMatch(/verification|isolation/);
+
+  const listed = await runCli(['projects']);
+  expect(listed.code).toBe(0);
+  expect(listed.out).toContain(projectId!);
 
   expectNoOffOriginRequests(watchers, pairedUrl);
 });

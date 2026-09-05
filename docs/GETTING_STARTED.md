@@ -24,7 +24,7 @@ infrastructure, because there is no path by which they could.
 npx rigorrun@alpha
 ```
 
-It prints a URL carrying a one-time pairing code:
+It opens your browser, and prints the URL it opened in case it could not:
 
 ```
 RigorRun
@@ -33,10 +33,16 @@ RigorRun
 
   Projects and credentials live in ~/.rigorrun, and stay there.
   Press Ctrl+C to stop.
+  Lost the tab? Press Enter here for a new link.
 ```
 
-Open it. The code is spent on first use, so the copy in your shell history is
-worthless, and a page you did not open cannot drive the runner.
+The code is spent on first use, so the copy in your shell history is worthless,
+and a page you did not open cannot drive the runner. If you lose the tab, press
+Enter in that terminal for a fresh link — being at the terminal is the same
+authority that read the first code off the screen.
+
+On a server, in a container, or over SSH, add `--no-open` and use the printed
+URL.
 
 > **Alpha.** `@alpha` rather than bare `rigorrun` on purpose: the prerelease is
 > not tagged `latest`, so nobody installs it by accident.
@@ -72,6 +78,13 @@ A tool nobody has vouched for counts as writing.
 makes *after* your agent finishes, to find out what actually happened. They are
 the entire reason a verdict can rest on your system rather than on your agent's
 account of itself. Pick at least one.
+
+RigorRun then calls the ones you picked, before you do anything else. If they
+answer in prose rather than in records — a directory listing, a formatted
+summary — it says so there and then, because it reads structure and never prose,
+and there is no point in you demonstrating a job it will not be able to check.
+You can continue anyway; every verdict will say `OBSERVATIONAL`. See
+[VERIFICATION.md](VERIFICATION.md).
 
 You will also be asked which tool puts the system back, and what kind of system
 this is. See [ENVIRONMENT_RESET.md](ENVIRONMENT_RESET.md) and
@@ -124,8 +137,18 @@ waits for an answer, and until it gets one it says so.
 
 ## 8. Run it
 
-You get a pass or fail, how it was reached, what this system stopped RigorRun
-doing, and the result of every case. See [VERIFICATION.md](VERIFICATION.md).
+The answer is **safe to ship? yes, conditional or no** — not a score. Conditional
+is not a softer yes: it means every check passed and RigorRun could not see
+enough to promise they mean what they look like, usually because the reads cover
+part of your system rather than all of it. Beside it: how the verdict was
+reached, what this system stopped RigorRun doing, and every case.
+
+Ask any case what happened and you get the check that failed and which tier of
+evidence decided it, what your agent actually called, what your system said
+afterwards, and — separately, and never scored — what your agent said it did.
+That last pairing is the point: an agent reporting success over a system that
+says otherwise is the failure this exists to catch. See
+[VERIFICATION.md](VERIFICATION.md).
 
 Change your agent, run it again, and RigorRun tells you which case regressed —
 not that a number moved. That is the part worth coming back for.
@@ -140,10 +163,16 @@ See [CI.md](CI.md).
 
 ## Stopping and coming back
 
-Everything is on disk as you go. Closing the tab, reloading the page, or
-stopping the runner does not lose your project, your settings, your
+Everything is on disk as you go, written in a way that survives the process
+being killed outright rather than asked politely. Closing the tab, reloading the
+page, or the runner crashing does not lose your project, your settings, your
 credentials, or a recording you were partway through — reopen it and carry on
-where you left off.
+where you left off. `e2e/restart.spec.ts` kills the runner with SIGKILL in the
+middle of a recording and picks it up again.
+
+If a file on disk is ever damaged anyway, the project stays in your list and
+says what happened. It does not disappear, because a project that vanishes looks
+exactly like a project that was never saved.
 
 The one thing that does not survive is the live connection to your system. A
 local MCP server is a child process, and it is gone when the runner stops. The

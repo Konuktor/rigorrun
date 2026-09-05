@@ -40,6 +40,13 @@ jobs:
       - name: A stranger connects their own system and their own agent
         run: pnpm e2e:external
 
+      # The other half of the same promise. The fresh-user suite reloads the
+      # page; this kills the process holding the state and starts it again,
+      # then damages a project file on purpose to check RigorRun says so rather
+      # than quietly forgetting somebody's afternoon.
+      - name: Their work survives the runner being killed
+        run: pnpm e2e:restart
+
       - name: Evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -165,6 +172,16 @@ jobs:
 
       - name: Visual regression
         run: pnpm visual
+
+      # The /proof page is generated from real runs. It was regenerated only by
+      # `release:verify`, which CI did not run, so it drifted behind HEAD while
+      # being presented as evidence. Regenerating here and failing on a diff
+      # means the page is either current or the build is red.
+      - name: The evidence page still matches what the pipeline produces
+        run: |
+          node scripts/build-proof.mjs
+          git diff --exit-code apps/web/src/proof.json \
+            || (echo "proof.json is stale — commit the regenerated file" && exit 1)
 
       - name: Cross-browser critical path
         run: pnpm cross

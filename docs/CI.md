@@ -16,6 +16,11 @@ no person.
 A build server cannot tell those apart from prose, so `2` never means "the agent
 was bad" — it means RigorRun could not run the question.
 
+This contract is asserted at the end of `e2e/external-user.spec.ts`: the same
+run that sets a project up in a browser then shells out to `rigorrun gate
+--project` against that workspace and checks the code. The snippet below is the
+command that test runs.
+
 ## Commands
 
 ```bash
