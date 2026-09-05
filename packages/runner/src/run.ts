@@ -27,7 +27,12 @@ import {
 } from '@rigorrun/core';
 import {
   buildProjection,
+  capabilityLimits,
   createEnvironment,
+  isolationLevel,
+  mayMutateAtAll,
+  mayRepeatMutatingCases,
+  verificationStrength,
   type CanonicalState,
   type EnvironmentAdapter,
 } from '@rigorrun/environment';
@@ -68,8 +73,26 @@ export async function runBenchmark(
 
   const runId = options.runId ?? prefixedId('run');
   const now = options.now ?? (() => new Date());
-  const repeats = Math.max(1, options.repeats ?? 1);
   const startedAt = now().toISOString();
+
+  // What this environment can do decides what this run is allowed to claim, so
+  // it is read once, before anything executes, and carried to the result.
+  const capabilities = createEnvironment(benchmark.environment).capabilities();
+  const limits = capabilityLimits(capabilities);
+
+  // Repeating a case that changes the world, without a way to put the world
+  // back, measures the wreckage of the previous attempt. Rather than let a
+  // caller ask for that, the request is clamped and the reason is recorded.
+  const requested = Math.max(1, options.repeats ?? 1);
+  const repeats = mayRepeatMutatingCases(capabilities) ? requested : 1;
+  if (repeats !== requested) {
+    limits.push({
+      id: 'repeats_clamped',
+      limit: `Asked for ${requested} attempts per case, ran 1: without a reset every attempt ` +
+        'after the first would start from the last one\u2019s leftovers.',
+      remedy: 'Configure a reset for this environment.',
+    });
+  }
 
   await options.onProgress?.({
     type: 'run_started',
@@ -119,6 +142,10 @@ export async function runBenchmark(
     caseResults,
     scores,
     verdict: decideVerdict(scores),
+    verification: verificationStrength(capabilities),
+    isolation: isolationLevel(capabilities),
+    limits,
+    notTestable: benchmark.notTestable ?? [],
     resultHash: '',
     rigorrunVersion: options.version ?? '0.1.0',
   };
@@ -135,9 +162,18 @@ async function executeCase(
   now: () => Date,
 ): Promise<CaseResult> {
   const adapter = createEnvironment(benchmark.environment);
+  const capabilities = adapter.capabilities();
   const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
   await adapter.reset();
   await adapter.seed(seedState, testCase.seed.config);
+
+  // On a system somebody marked production, a write is refused at the channel
+  // rather than filtered out of the case list. The agent still gets to try, the
+  // refusal is recorded as a step, and the evidence shows exactly what it would
+  // have done — which is more useful than a case that silently never ran.
+  const writeGuard = mayMutateAtAll(capabilities)
+    ? undefined
+    : new Set(mutatingActionNames(adapter));
 
   const steps: AgentStep[] = [];
   let pendingNote: string | null = null;
@@ -149,6 +185,26 @@ async function executeCase(
         return { ok: false, error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' } };
       }
       stepBudget -= 1;
+      if (writeGuard?.has(tool)) {
+        const refusal = {
+          ok: false as const,
+          error: {
+            code: 'WRITE_REFUSED',
+            message: `${tool} writes, and this environment is marked production.`,
+          },
+        };
+        steps.push({
+          index: steps.length,
+          at: Date.now(),
+          tool,
+          args: boundArgs(args),
+          ok: false,
+          error: refusal.error.code,
+          ...(pendingNote ? { note: pendingNote } : {}),
+        });
+        pendingNote = null;
+        return refusal;
+      }
       const result = await adapter.executeAction(tool, args);
       steps.push({
         index: steps.length,

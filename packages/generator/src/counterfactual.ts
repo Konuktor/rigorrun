@@ -27,6 +27,7 @@ import {
   type EnvironmentAdapter,
   type EnvironmentFixture,
   type ProjectionKeySchema,
+  capabilityLimits,
 } from '@rigorrun/environment';
 import { generateMutations, type Mutation } from './mutations.ts';
 import { findUntestableRules, markUntestable, type UntestableRule } from './enforcement.ts';
@@ -121,6 +122,15 @@ export async function generateBenchmark(
   const createdAt = options.createdAt ?? new Date().toISOString();
   const cases = generated.map((entry) => entry.testCase);
 
+  // Everything the suite does not cover, carried on the artefact rather than
+  // left in a return value the CLI prints once and forgets. A rule that
+  // produced no case looks exactly like a rule nothing can break, and the
+  // difference decides whether this benchmark covers the job.
+  const notTestable: { rule: string; reason: string }[] = [
+    ...untestable.map((entry) => ({ rule: entry.statement, reason: entry.reason })),
+    ...capabilityGaps(adapter),
+  ];
+
   const benchmark: Benchmark = {
     schemaVersion: BENCHMARK_SCHEMA_VERSION,
     id: options.benchmarkId ?? `bm_${contract.id}`,
@@ -133,6 +143,7 @@ export async function generateBenchmark(
     contractHash,
     generator: 'deterministic',
     createdAt,
+    notTestable,
     projectionFocus: contract.projectionFocus,
     workflow: {
       primaryAction: contract.primaryAction,
@@ -357,4 +368,21 @@ function workOrder(
 /** Drops `undefined`, which a case uses to mean "this detail was left out". */
 function serialisableRequest(request: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(request).filter(([, value]) => value !== undefined));
+}
+
+/**
+ * Coverage this environment cannot offer, whatever the contract says.
+ *
+ * Distinct from a rule the environment enforces: that is a rule nothing can
+ * break, and this is a rule RigorRun cannot watch being broken. Both leave a
+ * hole in the suite and both belong on the artefact, but conflating them would
+ * hide the one a person can actually do something about.
+ */
+function capabilityGaps(adapter: EnvironmentAdapter): { rule: string; reason: string }[] {
+  return capabilityLimits(adapter.capabilities())
+    .filter((limit) => limit.id !== 'production')
+    .map((limit) => ({
+      rule: limit.id,
+      reason: limit.remedy ? `${limit.limit} ${limit.remedy}` : limit.limit,
+    }));
 }

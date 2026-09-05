@@ -19,6 +19,7 @@ import type {
   EnvironmentSchema,
 } from './schema.ts';
 import type { CanonicalState, EnvEvent, StateSnapshot } from './state.ts';
+import type { EnvironmentCapabilities } from './capabilities.ts';
 
 export type MaybePromise<T> = T | Promise<T>;
 
@@ -120,6 +121,17 @@ export interface EnvironmentAdapter {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+
+  /**
+   * What this environment can actually do.
+   *
+   * Required, deliberately. Every method below was designed for an in-process
+   * fake and most real systems can satisfy only some of them; making the
+   * declaration mandatory means an adapter author has to decide, once, rather
+   * than leaving RigorRun to find out by getting a wrong answer. An adapter
+   * that genuinely can do everything says so by naming `FULL_CAPABILITIES`.
+   */
+  capabilities(): EnvironmentCapabilities;
 
   describeEntities(): EnvironmentSchema;
   getActions(): ActionDefinition[];

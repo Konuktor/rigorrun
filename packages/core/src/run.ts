@@ -100,6 +100,33 @@ export const AgentScoreSchema = z.object({
 });
 export type AgentScore = z.infer<typeof AgentScoreSchema>;
 
+/**
+ * How much the verdict below is worth, and why.
+ *
+ * These labels travel with every run for the same reason assertion results
+ * carry `DETERMINISTIC` / `MODEL-JUDGED` / `HUMAN-REVIEW`: a reader must never
+ * have to work out for themselves whether the machine actually checked. A run
+ * against a system RigorRun could not read back is not a worse number, it is a
+ * different kind of claim, and it is rendered as one.
+ *
+ * The strings match `@rigorrun/environment`'s capability model and are declared
+ * here rather than imported because core owns the artefact schema and depends
+ * on nothing. The runner maps one to the other in a single place.
+ */
+export const VERIFICATION_STRENGTHS = ['AUTHORITATIVE', 'PARTIAL', 'OBSERVATIONAL'] as const;
+export type VerificationStrengthLabel = (typeof VERIFICATION_STRENGTHS)[number];
+
+export const ISOLATION_LEVELS = ['RESET', 'NONE'] as const;
+export type IsolationLabel = (typeof ISOLATION_LEVELS)[number];
+
+/** Something RigorRun could not do here, and what would have let it. */
+export const RunLimitSchema = z.object({
+  id: z.string(),
+  limit: z.string(),
+  remedy: z.string().default(''),
+});
+export type RunLimit = z.infer<typeof RunLimitSchema>;
+
 export const RunResultSchema = z.object({
   schemaVersion: z.literal(RUN_SCHEMA_VERSION),
   runId: z.string(),
@@ -119,6 +146,20 @@ export const RunResultSchema = z.object({
     summary: z.string(),
     rationale: z.array(z.string()).default([]),
   }),
+  /**
+   * How the outcome was established.
+   *
+   * Defaulted so that runs recorded before this existed still parse; the
+   * default is the strong value only because every environment that could
+   * produce such a run was an in-process one that genuinely had it.
+   */
+  verification: z.enum(VERIFICATION_STRENGTHS).default('AUTHORITATIVE'),
+  /** Whether each case started from the same place as the last one. */
+  isolation: z.enum(ISOLATION_LEVELS).default('RESET'),
+  /** What this environment stopped RigorRun from doing, and how to lift it. */
+  limits: z.array(RunLimitSchema).default([]),
+  /** Cases the generator could not build here, with a reason for each. */
+  notTestable: z.array(z.object({ rule: z.string(), reason: z.string() })).default([]),
   /** Hash of this result, computed after the run is sealed. */
   resultHash: z.string().default(''),
   rigorrunVersion: z.string().default('0.1.0'),

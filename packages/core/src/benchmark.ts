@@ -137,6 +137,17 @@ export const BenchmarkSchema = z.object({
   cases: z.array(BenchmarkCaseSchema).min(1),
   /** Entities the projection is rooted at. Pinned so every case asks the same
    * questions of every agent, whatever a given run happens to touch. */
+  /**
+   * Rules the generator could not build a case for here, and why.
+   *
+   * Carried on the benchmark rather than discarded, because a suite that is
+   * smaller than the contract needs to say so. A rule that silently produced no
+   * case looks identical to a rule that is satisfied by everything, and the
+   * difference is the whole question of whether the benchmark covers the job.
+   */
+  notTestable: z
+    .array(z.object({ rule: z.string(), reason: z.string() }))
+    .default([]),
   projectionFocus: z.array(z.string()).default([]),
   /**
    * The shape of the job, carried so tooling can reason about the suite.

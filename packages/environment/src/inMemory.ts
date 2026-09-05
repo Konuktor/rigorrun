@@ -26,6 +26,7 @@ import type {
   EnvironmentFixture,
   PresentationHints,
 } from './adapter.ts';
+import { FULL_CAPABILITIES, type EnvironmentCapabilities } from './capabilities.ts';
 import type { EnvironmentRegistration } from './registry.ts';
 import {
   cloneState,
@@ -85,6 +86,19 @@ export class InMemoryEnvironment implements EnvironmentAdapter {
     this.name = definition.name;
     this.description = definition.description;
     this.state = emptyState(definition.schema);
+  }
+
+  /**
+   * Everything, because this world is a JavaScript object.
+   *
+   * Worth stating rather than assuming: this is the *most* capable an
+   * environment ever gets, and it is the one that exists only inside a test.
+   * Any real system will report less, and the gap between this line and what a
+   * customer's adapter returns is the honest measure of how much of RigorRun's
+   * confidence came from owning the world it was measuring.
+   */
+  capabilities(): EnvironmentCapabilities {
+    return FULL_CAPABILITIES;
   }
 
   describeEntities(): EnvironmentSchema {

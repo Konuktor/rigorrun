@@ -1,5 +1,6 @@
 export * from './schema.ts';
 export * from './state.ts';
+export * from './capabilities.ts';
 export * from './adapter.ts';
 export * from './registry.ts';
 export * from './inMemory.ts';
