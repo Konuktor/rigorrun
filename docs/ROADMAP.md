@@ -66,7 +66,10 @@ of JSON and writes one back — `docs/CLI_AGENT.md`. It gets the same per-case
 MCP endpoint and produces the same evidence as one behind a URL, and a command
 can still only come from a person at this machine.
 
-**No Python SDK.**
+~~**No Python SDK.**~~ Built — `docs/PYTHON_AGENT_SDK.md`. Standard library
+only, because an agent under test should not have to reconcile its dependencies
+with its test harness's. Not on PyPI: it is one file with no dependencies, so
+copying it is a reasonable install until there is a reason it is not.
 
 ~~**No trace import, and no OpenTelemetry ingest.**~~ Built —
 `docs/TRACE_IMPORT.md`. An OpenTelemetry trace of a production failure becomes a
@@ -149,8 +152,8 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
    friction between this and a stranger using it, and it is not a technical
    problem.
 2. **Publishing the SDKs.** Every workspace package is `private: true`, so the
-   ten-line TypeScript agent SDK cannot be installed by anybody, and there is
-   no Python one.
+   ten-line TypeScript agent SDK cannot be installed by anybody. The Python one
+   is a file to copy, which is fine and is not the same as a package.
 3. **A headless setup path.** Running and gating a project works from CI;
    creating one does not. A `rigorrun project import` taking a description file
    would make a project reproducible from a repository.

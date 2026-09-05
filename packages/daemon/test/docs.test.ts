@@ -117,7 +117,10 @@ describe('what the docs do not claim', () => {
     // list shrinks — OPENAPI_ENVIRONMENT.md left this list the day the
     // connector landed, which is the only way an entry should ever leave it.
     const names = await readdir(docsDir);
-    for (const forbidden of ['PYTHON_AGENT_SDK.md']) {
+    // Empty, and that is the honest state: every connector and every agent kind
+    // this list named has been built. It stays because the next unbuilt thing
+    // belongs in it before its documentation does.
+    for (const forbidden of [] as string[]) {
       expect(names, `${forbidden} exists; does the feature?`).not.toContain(forbidden);
     }
   });
@@ -132,6 +135,7 @@ describe('what the docs do not claim', () => {
     expect(names).toContain('CLI_AGENT.md');
     expect(names).toContain('BROWSER_ENVIRONMENT.md');
     expect(names).toContain('TRACE_IMPORT.md');
+    expect(names).toContain('PYTHON_AGENT_SDK.md');
   });
 
   it('says plainly that this is an alpha, and what that means', async () => {

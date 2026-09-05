@@ -76,7 +76,13 @@ async function speak(command: Command, request: string): Promise<Spoken> {
   let line: string | undefined;
   let timedOut = false;
 
+  // Resolved by whichever happens first: the agent answers, or the process
+  // ends without answering. Waiting for the exit either way cost the full
+  // timeout on every probe — ten seconds to find out an agent is there, on a
+  // screen where somebody is waiting to see whether they typed the path right.
+  let settle: (value: number | null) => void = () => undefined;
   const finished = new Promise<number | null>((resolve, reject) => {
+    settle = resolve;
     child.on('error', reject);
     child.on('close', (code) => resolve(code));
   });
@@ -91,7 +97,12 @@ async function speak(command: Command, request: string): Promise<Spoken> {
       return;
     }
     const end = buffered.indexOf('\n');
-    if (end >= 0) line = buffered.slice(0, end);
+    if (end >= 0) {
+      line = buffered.slice(0, end);
+      // The answer is in. Whatever the agent does with the rest of its life is
+      // not this case's business, and the `finally` below ends it.
+      settle(null);
+    }
   });
   child.stderr?.on('data', (chunk: Buffer) => {
     if (stderrBytes >= STDERR_KEEP) return;

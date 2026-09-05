@@ -1,0 +1,21 @@
+[project]
+name = "rigorrun"
+version = "0.1.0a2"
+description = "Put an existing Python agent under test with RigorRun."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+# Standard library only, on purpose: an agent under test should not have to
+# reconcile its dependencies with its test harness's.
+dependencies = []
+
+[project.urls]
+Homepage = "https://rigorrun.pages.dev"
+Repository = "https://github.com/Konuktor/rigorrun"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["rigorrun"]

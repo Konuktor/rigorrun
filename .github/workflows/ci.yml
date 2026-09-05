@@ -164,6 +164,10 @@ jobs:
       - name: Unit and integration tests
         run: pnpm test
 
+      # Standard library only, so there is nothing to install.
+      - name: The Python SDK speaks the protocol
+        run: python3 -m unittest discover -s sdk/python/tests
+
       - name: Build
         run: pnpm build
 
