@@ -12,10 +12,16 @@ where only the second is green is not a release.
 
 | What | Command | Result |
 | ---- | ------- | ------ |
-| The published package builds, packs, contains only what it should, carries no credentials, installs into a clean directory, runs, explains itself on an old Node, and completes the fresh-user journey | `pnpm verify:package` | see below |
+| A stranger installs it from the public registry | `npx rigorrun` | **0.1.0**, `latest` |
+| The package builds, packs, contains only what it should, carries no credentials, installs into a clean directory, runs, explains itself on an old Node, and completes the fresh-user journey | `pnpm verify:package` | see below |
 
-It publishes nothing. Its last line says whether publishing would be safe, and
-prints the exact command.
+`verify:package` publishes nothing. Its last line says whether publishing would
+be safe, and prints the exact command. `docs/RELEASING.md` is the rest of it.
+
+Published as **Early Access · v0.1** on the `latest` channel. Those are
+different claims: `latest` is the channel `npx rigorrun` installs from, and
+Early Access is how finished the product is. What is not built is marked one by
+one in `docs/V1_GAP_AUDIT.md`.
 
 ## Product gate
 
@@ -76,8 +82,7 @@ what should have happened worked out from the rules they confirmed.
 
 ## What it does not do
 
-In full in `docs/ROADMAP.md`. The load-bearing ones: nothing is published to
-npm, so every install command in this repository still 404s; the SDKs are all
+In full in `docs/ROADMAP.md`. The load-bearing ones: the SDKs are all
 `private: true`, so the ten-line agent SDK cannot be installed by anybody;
 setting a project up is interface-only; and a verdict from a real system is
 `PARTIAL` rather than `AUTHORITATIVE`, because RigorRun reads back what the

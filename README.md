@@ -428,6 +428,7 @@ docs/                       product, architecture, security, privacy, cost
 | [COST_GUARDRAILS.md](docs/COST_GUARDRAILS.md)   | Every service, limit and safeguard                     |
 | [ROADMAP.md](docs/ROADMAP.md)                   | What is honestly not built yet                         |
 | [V1_GAP_AUDIT.md](docs/V1_GAP_AUDIT.md)         | Every capability, marked, with how it was checked      |
+| [RELEASING.md](docs/RELEASING.md)               | The gates, publishing, and trusted publishing          |
 | [DRIVEN_AGENT.md](docs/DRIVEN_AGENT.md)         | Testing an agent RigorRun cannot start                  |
 | [ALTALAB.md](docs/ALTALAB.md)                   | Problem, ICP, wedge, moat, go-to-market                |
 

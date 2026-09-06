@@ -1,7 +1,8 @@
 # v1 gap audit
 
-Written against commit `7ef0750` on 6 September 2026, by walking the product
-rather than by reading its tests.
+Written against commit `7ef0750` on 6 September 2026 by walking the product
+rather than by reading its tests, and re-answered at `v0.1.0` against what the
+public registry serves.
 
 **A test passing is not evidence a capability exists.** A test proves that a
 path works when called the way the test calls it. Half the entries below were
@@ -22,41 +23,35 @@ is one you can run.
 
 ---
 
-## The one thing that is broken
+## The thing that was broken
 
-**Installing it. BROKEN.**
+**Installing it. Was BROKEN. Now WORKING.**
+
+For the whole of this project's life, every install instruction in it pointed
+at a package that did not exist. That is fixed:
 
 ```console
-$ npm view rigorrun
-npm error 404 Not Found - GET https://registry.npmjs.org/rigorrun
+$ npm view rigorrun version
+0.1.0
+$ npm view rigorrun dist-tags
+{ latest: '0.1.0' }
 ```
 
-`README.md`, `docs/GETTING_STARTED.md`, `docs/TROUBLESHOOTING.md`, the deployed
-quickstart page and `docs/THIRD_PARTY_DOGFOOD.md` — the text sent verbatim to
-external testers — all begin with `npx rigorrun`. Today that is the first thing
-a stranger types and the first thing that fails.
+Checked the way it matters — a clean `HOME`, a clean npm cache, a directory
+that is not this repository, nothing linked:
 
-Everything behind it is ready. `pnpm verify:package` builds the tarball, packs
-it, checks the manifest declares nothing from this monorepo, installs it into a
-clean directory, runs it, drives the whole fresh-user journey against the
-*packaged artifact*, audits the dependency tree and emits an SBOM:
-
-```
-  ok  has an interface to serve  otherwise the first thing a stranger sees is a dead end
-  ok  explains itself on a Node that is too old  RigorRun needs Node 20.11 or newer, and this is Node 22.22.2.
-  ok  no critical or high advisories in what it installs  0 critical, 0 high, 0 moderate
-  ok  every dependency is permissively licensed
-  ok  an SBOM was produced  rigorrun-0.1.0-alpha.2.tgz.cyclonedx.json
-  ok  a stranger can go from nothing to a verdict
+```console
+$ npx --yes rigorrun --version
+0.1.0
 ```
 
-The last line reads **READY TO PUBLISH** and prints the command. Publishing is
-a decision, not a build step, and it needs `npm login` on this machine. Until
-somebody runs it, this row stays BROKEN, and every install instruction in this
-repository is a promise the product does not keep.
+The cache that run created holds
+`https://registry.npmjs.org/rigorrun/-/rigorrun-0.1.0.tgz` with the same
+integrity hash the registry publishes, so that command genuinely fetched the
+public artifact rather than anything local.
 
-**The SDKs, for the same reason. BROKEN.** All seventeen workspace packages are
-`private: true`. `docs/TYPESCRIPT_AGENT_SDK.md` opens with an
+**The SDKs are still BROKEN, for the original reason.** All seventeen workspace
+packages remain `private: true`. `docs/TYPESCRIPT_AGENT_SDK.md` opens with an
 `npm i @rigorrun/agent-sdk` that resolves only inside this checkout. The Python
 SDK is standard-library only and can be vendored by copying one file, which is
 the only SDK anybody outside can use today.
@@ -67,8 +62,8 @@ the only SDK anybody outside can use today.
 
 | Capability | Mark | How it was checked |
 | --- | --- | --- |
-| One command starts a runner, which prints a URL and opens a browser | **WORKING** | Installed from the tarball into a clean directory and run; it prints a paired URL and serves an interface. A headless box gets the URL printed, which is the only fallback that works everywhere. |
-| Connect an MCP server on this machine (stdio) | **WORKING** | Against `@modelcontextprotocol/server-filesystem` and `server-memory` from npm, unmodified — software nobody here wrote. `docs/THIRD_PARTY_DOGFOOD.md`. |
+| One command starts a runner, which prints a URL and opens a browser | **WORKING** | `npx rigorrun` from the public registry, in a clean `HOME` and cache; it prints a paired URL and serves an interface. A headless box gets the URL printed, which is the only fallback that works everywhere. |
+| Connect an MCP server on this machine (stdio) | **WORKING** | Against `@modelcontextprotocol/server-filesystem` and `server-memory` from npm, unmodified — software nobody here wrote. `docs/THIRD_PARTY_DOGFOOD.md`. And, from the registry-installed package, against a lending desk written for the occasion in a business RigorRun has never seen: seven tools discovered, four rules learned from one demonstration, a verdict, and a regression caught. |
 | Connect a remote MCP server (streamable HTTP) | **WORKING** | Against a server in its own process over real HTTP. |
 | Sign in to an MCP server that requires OAuth | **WORKING** | Against an authorization server that issues metadata, registers dynamically, and checks the PKCE challenge, with the MCP server behind a gateway that answers 401 the way a resource server must. Tokens land in the credential store; a second connection opens no browser. |
 | Connect an HTTP API from an OpenAPI 3 document | **WORKING** | JSON natively, YAML when the optional dependency is present. No discovered write endpoint is ever called during setup. |
