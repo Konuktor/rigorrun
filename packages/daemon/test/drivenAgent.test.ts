@@ -230,6 +230,18 @@ describe('an agent RigorRun cannot start', () => {
     expect(run.verification).toBe('PARTIAL');
   }, 240_000);
 
+  it('bounds what a key-holder can post', async () => {
+    // These are the only endpoints reachable with a credential that is not the
+    // runner's own, so what arrives at them has a ceiling that has nothing to
+    // do with how large an OpenAPI document might be.
+    const response = await fetch(`${base}/api/drive/${agentId}/finished`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ caseId: 'c', status: 'completed', output: 'x'.repeat(200_000) }),
+    });
+    expect(response.status).toBe(413);
+  }, 30_000);
+
   it('refuses an answer to a case it is not waiting for', async () => {
     const response = await fetch(`${base}/api/drive/${agentId}/finished`, {
       method: 'POST',

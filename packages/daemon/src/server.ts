@@ -18,6 +18,8 @@
  */
 import { serve, type ServerType } from '@hono/node-server';
 import { Hono, type Context } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
+import { HTTPException } from 'hono/http-exception';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import type { Benchmark, EnvironmentContract, RunResult } from '@rigorrun/core';
@@ -145,6 +147,16 @@ export class Runner {
         },
         401,
       );
+
+    /**
+     * A ceiling on everything a key-holder can post.
+     *
+     * The rest of the API is behind the session, and the largest thing it
+     * takes is an OpenAPI document. These two are the only endpoints reachable
+     * with a credential that is not the runner's own, so they get a bound that
+     * has nothing to do with what a document might weigh.
+     */
+    app.use('/api/drive/*', bodyLimit({ maxSize: 64 * 1024 }));
 
     app.get('/api/drive/:agentId', async (context) => {
       const who = await driving(context);
@@ -500,7 +512,15 @@ export class Runner {
 
     // Anything that threw becomes a message a person can act on rather than a
     // stack trace, and never a 200 with an error inside it.
-    app.onError((error, context) => context.json({ error: error.message }, 400));
+    app.onError((error, context) => {
+      // A refusal that already knows its own status keeps it. Flattening
+      // everything to 400 turned "that is too large" into "that is malformed",
+      // which sends somebody looking in the wrong place.
+      if (error instanceof HTTPException) {
+        return context.json({ error: error.message || 'refused' }, error.status);
+      }
+      return context.json({ error: error.message }, 400);
+    });
 
     app.get('*', (context) => this.serveUi(context.req.path));
 
