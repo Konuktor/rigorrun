@@ -14,7 +14,7 @@
  * It publishes nothing. The last line tells you whether it would be safe to.
  */
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,6 +54,10 @@ check('the interface was built into the package', await exists(join(pkgDir, 'ui'
 // -------------------------------------------------------------------- 2. pack
 
 console.log(bold('\nPacking'));
+// Newer npm errors if the pack destination does not exist rather than creating
+// it, and `dist/` is absent in a fresh checkout (it is git-ignored). Make it
+// first so this works in CI as well as on a machine that has built before.
+await mkdir(join(root, 'dist'), { recursive: true });
 const packOut = run('npm', ['pack', '--json', '--pack-destination', join(root, 'dist')], {
   cwd: stageDir,
 });
