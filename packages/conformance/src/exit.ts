@@ -70,8 +70,18 @@ export function exitCodeFor(
 /** One line saying why, so the number never has to be looked up. */
 export function exitReason(code: ExitCode, record: VerificationRecord): string {
   switch (code) {
-    case 0:
-      return `${record.summary.toolsExercised} tool(s) exercised, no declaration contradicted.`;
+    case 0: {
+      // A non-blocking contradiction still happened, and a summary line saying
+      // "none" directly under a list of them is the kind of small dishonesty
+      // that makes a reader stop trusting the rest.
+      const minor = record.tools.flatMap((t) =>
+        t.conformance.filter((c) => c.verdict === 'CONTRADICTED'),
+      ).length;
+      return minor === 0
+        ? `${record.summary.toolsExercised} tool(s) exercised, no declaration contradicted.`
+        : `${record.summary.toolsExercised} tool(s) exercised. ${minor} declaration(s) ` +
+            'contradicted, none of them blocking; --strict would fail on these.';
+    }
     case 1: {
       const n = record.tools.flatMap((t) =>
         t.conformance.filter((c) => c.verdict === 'CONTRADICTED'),

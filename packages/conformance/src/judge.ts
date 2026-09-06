@@ -130,25 +130,36 @@ export function judge(hints: ServerHints, observed: ObservedBehavior): Conforman
   }
 
   if (hints.readOnly === false) {
-    // Not a security problem. It matters because a "write" that writes nothing
-    // produces cases with no observable outcome, which is a suite defect.
     const claim = 'readOnlyHint: false';
-    if (observed.mutatesState === 'no' && canConvict(observed.surfaces)) {
+    if (observed.mutatesState === 'yes') {
+      out.push(entry(claim, 'CONFORMS', 'INFO', false, 'the tool changed state, as declared', observed));
+    } else {
+      /*
+       * Deliberately not a contradiction.
+       *
+       * A tool declaring that it writes, where nothing we can read changed, is
+       * the one direction our strongest surface cannot settle: the filesystem
+       * enumeration is complete over durable state and blind to state a
+       * process holds in memory. A tool that flips an in-process flag has
+       * written exactly what it said it would, and calling that a
+       * contradiction asserts knowledge we do not have.
+       *
+       * Found the hard way, against a real server whose toggle tools do
+       * precisely this. It is worth noting that the failure was safe in the
+       * sense that it accused nobody of a permission problem -- but a
+       * verifier that manufactures findings in the harmless direction will
+       * manufacture them in the other one eventually.
+       */
       out.push(
         entry(
           claim,
-          'CONTRADICTED',
-          'MINOR',
+          'UNDETERMINED',
+          'INFO',
           false,
-          'the tool declares that it writes, and nothing RigorRun can read changed',
+          'the tool declares that it writes and nothing durable changed, which RigorRun ' +
+            'cannot separate from a write held only in the process’s memory',
           observed,
         ),
-      );
-    } else if (observed.mutatesState === 'yes') {
-      out.push(entry(claim, 'CONFORMS', 'INFO', false, 'the tool changed state, as declared', observed));
-    } else {
-      out.push(
-        entry(claim, 'UNDETERMINED', 'INFO', false, 'no state was readable either way', observed),
       );
     }
   }

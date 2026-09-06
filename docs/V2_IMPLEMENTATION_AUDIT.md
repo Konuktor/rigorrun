@@ -534,7 +534,29 @@ NEW SIDE EFFECT    : ['last-seen.json']
 That is the drift primitive working. Continuous watching is **not** built; it is behind
 Gate 2.
 
-### Four defects the harness found in itself
+### Across four real third-party servers
+
+Full table in [THIRD_PARTY_VERIFICATION.md](THIRD_PARTY_VERIFICATION.md).
+
+| | |
+|---|---|
+| Servers | 4, all published by `@modelcontextprotocol`, all pinned by registry digest |
+| Launched | 4 of 4 |
+| Tools discovered | 37 |
+| Tools exercised | 19 — **51%, and the other 18 are itemised with reasons** |
+| Isolation | `RESET` on all four, measured rather than declared |
+| Read-only posture | held on all four |
+| Blocking contradictions | none |
+
+`server-filesystem` is 2 of 14, because nine of its tools want a real path and
+the planner will not generate one. That is the shape of the honest answer: a
+general harness with no credentials verifies about half of a typical server's
+surface, and a fabricated 100% would be worth less.
+
+**This is not market validation and not a claim about the population.** Four
+servers from one publisher is the weakest possible sample.
+
+### Five defects the harness found in itself
 
 Recorded because a trust product that hides its own near-misses is not one.
 
@@ -551,6 +573,13 @@ Recorded because a trust product that hides its own near-misses is not one.
    dependency closure rather than their own bytes, so a server's identity did not change
    when its code did. That is the one promise the record makes, and it was broken. Now a
    content digest over the source.
+5. **A finding manufactured out of a limitation.** `server-everything` declares
+   `readOnlyHint: false` on two tools that change only in-process state, and the judge
+   called that a contradiction — "declares it writes, nothing changed". But the strongest
+   surface is explicitly blind to memory, so that is a question it cannot settle. It now
+   returns `UNDETERMINED`. The direction was harmless, in that nobody was accused of a
+   permission problem; a verifier that invents findings in the safe direction will
+   eventually invent one in the other.
 
 A fifth was found by Gate 1 rather than by a test: **`pnpm pack` runs pnpm's builtin, not
 the script of the same name**, so the gate was testing a stale tarball. Gate 1 failed,

@@ -59,11 +59,25 @@ describe('declaration versus behaviour', () => {
     expect(v?.verdict).toBe('UNDETERMINED');
   });
 
-  it('flags a declared write that writes nothing, but not as a security problem', () => {
+  /**
+   * The direction our strongest surface cannot settle.
+   *
+   * The filesystem enumeration is complete over durable state and blind to
+   * state a process holds in memory. A tool that declares it writes and flips
+   * an in-process flag has done exactly what it said; calling that a
+   * contradiction asserts knowledge we do not have. Found against a real
+   * server whose toggle tools do precisely this.
+   */
+  it('will not call a declared write a contradiction just because nothing durable changed', () => {
     const v = only(judge({ readOnly: false }, observed({ mutatesState: 'no' })), 'readOnlyHint: false');
-    expect(v?.verdict).toBe('CONTRADICTED');
-    expect(v?.severity).toBe('MINOR');
+    expect(v?.verdict).toBe('UNDETERMINED');
     expect(v?.permissionRelevant).toBe(false);
+    expect(v?.because).toMatch(/memory/);
+  });
+
+  it('still clears a declared write that visibly writes', () => {
+    const v = only(judge({ readOnly: false }, observed({ mutatesState: 'yes' })), 'readOnlyHint: false');
+    expect(v?.verdict).toBe('CONFORMS');
   });
 
   it('convicts a tool that declares it destroys nothing and deletes', () => {
