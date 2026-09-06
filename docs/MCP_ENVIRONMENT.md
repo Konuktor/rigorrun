@@ -34,6 +34,28 @@ Private addresses are allowed, because a staging system is usually on one.
 Non-HTTP schemes, credentials embedded in the URL, and the cloud metadata
 addresses are refused.
 
+### Signing in (OAuth)
+
+A hosted MCP server usually will not take a header you can paste. Choose
+**Sign in — the server asks for OAuth** and RigorRun does what the
+specification describes: the server answers the first request with a 401 naming
+where its protected-resource metadata lives, RigorRun discovers the
+authorization server, registers itself if the server supports dynamic
+registration, and opens your browser with PKCE. The redirect comes back to a
+loopback listener on this machine that exists for the length of that one
+sign-in and refuses anything but the state it issued.
+
+If there is no browser to open — a container, an SSH session, a headless box —
+the address is printed instead. Nothing is hosted: no server of ours is ever
+handed a code for your system.
+
+The tokens go into this machine's credential store beside every other
+credential, keyed by the server's URL, and are refreshed by the SDK when they
+expire. Nothing about the sign-in is written into the project, so a project
+file can still be copied without carrying one. To sign in again from scratch,
+delete the entries — `rigorrun secrets list` shows them under
+`oauth:<url>:tokens`.
+
 ## Credentials
 
 Only the *names* live in the project. The values live in one owner-only file

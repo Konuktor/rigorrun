@@ -1,4 +1,5 @@
 import { assertSafeSystemUrl } from '@rigorrun/connector';
+import type { LocalOAuthProvider } from './oauth.ts';
 
 /** The old name. Same function; the guard was never MCP-specific. */
 export const assertSafeMcpUrl = assertSafeSystemUrl;
@@ -38,6 +39,16 @@ export interface McpHttpConfig {
   url: string;
   /** Sent on every request. Held in the runner's secret store, never synced. */
   headers?: Record<string, string>;
+  /**
+   * Sign in, if the server asks.
+   *
+   * Absent means a static header is the only authentication, which covers a
+   * great many servers and none of the hosted ones. Present means RigorRun
+   * follows the specification's flow — a 401's `WWW-Authenticate`, the
+   * protected-resource metadata it points at, the authorization server that
+   * names, PKCE, and a browser — and keeps the tokens with the credentials.
+   */
+  auth?: LocalOAuthProvider;
 }
 
 export type McpConfig = McpStdioConfig | McpHttpConfig;

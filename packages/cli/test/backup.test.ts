@@ -25,6 +25,7 @@ async function workspace(): Promise<{ home: string; store: ProjectStore }> {
   project.connector = {
     kind: 'mcp',
     transport: 'stdio',
+    auth: 'header' as const,
     command: '/usr/local/bin/desk-mcp',
     args: ['--staging'],
     url: '',

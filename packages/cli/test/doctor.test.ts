@@ -63,6 +63,7 @@ beforeAll(async () => {
   project.connector = {
     kind: 'mcp',
     transport: 'stdio',
+    auth: 'header' as const,
     command: join(root, 'node_modules', '.bin', 'tsx'),
     args: [join(root, 'no', 'such', 'server.ts')],
     url: '',

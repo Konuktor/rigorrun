@@ -147,6 +147,7 @@ describe('the feedback bundle', () => {
     project.connector = {
       kind: 'mcp',
       transport: 'stdio',
+      auth: 'header' as const,
       command: '/home/someone/secret-tool',
       args: ['--token', 'hunter2'],
       url: 'https://internal.acme.example/mcp',

@@ -46,6 +46,7 @@ export function ConnectEnvironment({
   const [command, setCommand] = useState(mcp?.command ?? '');
   const [args, setArgs] = useState((mcp?.args ?? []).join('\n'));
   const [url, setUrl] = useState(mcp?.url ?? '');
+  const [auth, setAuth] = useState<'header' | 'oauth'>(mcp?.auth ?? 'header');
   const [spec, setSpec] = useState(openapi?.spec ?? '');
   const [baseUrl, setBaseUrl] = useState(openapi?.baseUrl ?? '');
   const [headerName, setHeaderName] = useState(Object.keys(openapi?.headers ?? {})[0] ?? '');
@@ -97,6 +98,7 @@ export function ConnectEnvironment({
                   .map((line) => line.trim())
                   .filter(Boolean),
                 url: url.trim(),
+                auth,
                 secretNames: names,
               },
         safety,
@@ -297,21 +299,41 @@ export function ConnectEnvironment({
                 </Field>
               </>
             ) : (
-              <Field
-                label="Server URL"
-                hint="A private address is fine — RigorRun runs on your machine, so anything this machine can reach, it can reach."
-              >
-                {({ id, describedBy }) => (
-                  <TextInput
-                    id={id}
-                    describedBy={describedBy}
-                    value={url}
-                    onChange={setUrl}
-                    placeholder="https://staging.example.com/mcp"
-                    testId="url"
-                  />
-                )}
-              </Field>
+              <>
+                <Field
+                  label="Server URL"
+                  hint="A private address is fine — RigorRun runs on your machine, so anything this machine can reach, it can reach."
+                >
+                  {({ id, describedBy }) => (
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={url}
+                      onChange={setUrl}
+                      placeholder="https://staging.example.com/mcp"
+                      testId="url"
+                    />
+                  )}
+                </Field>
+                <Field
+                  label="How does it know who you are?"
+                  hint="Signing in opens your browser once. The tokens go into this machine's credential store with everything else, and never into the project."
+                >
+                  {({ id, describedBy }) => (
+                    <Select
+                      id={id}
+                      describedBy={describedBy}
+                      value={auth}
+                      onChange={(value) => setAuth(value as 'header' | 'oauth')}
+                      testId="auth"
+                      options={[
+                        { value: 'header', label: 'A credential you already have' },
+                        { value: 'oauth', label: 'Sign in — the server asks for OAuth' },
+                      ]}
+                    />
+                  )}
+                </Field>
+              </>
             )}
           </>
         ) : null}

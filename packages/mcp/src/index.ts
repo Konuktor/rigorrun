@@ -31,4 +31,5 @@ export {
 
 export * from './config.ts';
 export * from './client.ts';
+export * from './oauth.ts';
 export * from './induceSchema.ts';

@@ -79,6 +79,14 @@ RigorRun's own run artefacts, and any way to recover a starting state from
 telemetry — which is not an oversight, because telemetry describes what an agent
 did and never what the system held.
 
+~~**No OAuth for MCP, only a static header.**~~ Built —
+`docs/MCP_ENVIRONMENT.md`. A hosted MCP server that answers a 401 with
+`WWW-Authenticate` is discovered, registered with, and signed in to in a
+browser with PKCE, and the tokens go into the credential store rather than the
+project. The redirect comes back to a loopback listener that lives for the
+length of one sign-in. What is missing: the same for the OpenAPI connector,
+which is still a static header.
+
 **A system whose reads answer in prose cannot be verified.** RigorRun reads
 structure and never prose. It now says so when the reads are nominated, rather
 than at the end — but it is a real limit, and a large share of MCP servers in

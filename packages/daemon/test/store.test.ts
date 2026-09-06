@@ -81,6 +81,7 @@ describe('secrets', () => {
     project.connector = {
       kind: 'mcp',
       transport: 'http',
+      auth: 'header' as const,
       command: '',
       args: [],
       url: 'https://desk.example.com/mcp',
@@ -136,6 +137,7 @@ describe('what to do next', () => {
     project.connector = {
       kind: 'mcp',
       transport: 'stdio',
+      auth: 'header' as const,
       command: 'node',
       args: ['server.js'],
       url: '',
@@ -149,6 +151,7 @@ describe('what to do next', () => {
     const project = newProject({ id: 'p', name: 'P', now: '2026-02-01T09:00:00.000Z' });
     project.connector = {
       kind: 'mcp', transport: 'stdio', command: 'node', args: [], url: '', secretNames: [],
+      auth: 'header' as const,
     };
     project.verifierReads = [{ tool: 'get_thing', args: {} }];
     project.timings.workflowRecordedAt = '2026-02-01T09:05:00.000Z';

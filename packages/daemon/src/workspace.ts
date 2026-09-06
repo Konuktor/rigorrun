@@ -13,6 +13,7 @@
  * that drift, and the one people use is always the one with the bug.
  */
 import {
+  LocalOAuthProvider,
   McpConnection,
   applySchemaAnswers,
   assertSafeCommand,
@@ -37,6 +38,7 @@ import type { CanonicalState, EnvironmentSchema } from '@rigorrun/environment';
 import { basename, join } from 'node:path';
 import { describeConnectorAction, type Connector, type Project } from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
+import { openInBrowser } from './openUrl.ts';
 import type { ProjectStore } from './store.ts';
 
 /**
@@ -184,6 +186,23 @@ export class Workspace {
             transport: 'http',
             url: connector.url,
             ...(Object.keys(secrets).length > 0 ? { headers: secrets } : {}),
+            // Tokens go where credentials go, keyed by the server's own URL so
+            // one machine can hold several. Nothing about the sign-in is
+            // written to the project.
+            ...(connector.auth === 'oauth'
+              ? {
+                  auth: new LocalOAuthProvider({
+                    serverKey: connector.url,
+                    store: this.store.credentials,
+                    open: openInBrowser,
+                    // Printed as well as opened. A headless box, an SSH
+                    // session or a container has no browser to open, and the
+                    // person still needs the address.
+                    onAuthorizationUrl: (url) =>
+                      process.stderr.write(`Sign in to ${connector.url}:\n  ${url}\n`),
+                  }),
+                }
+              : {}),
           };
     if (config.transport === 'stdio') assertSafeCommand(config);
     return McpConnection.open(config);

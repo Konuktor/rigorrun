@@ -39,6 +39,8 @@ export interface ProjectView {
         command: string;
         args: string[];
         url: string;
+        /** How an HTTP server is authenticated to. Ignored for stdio. */
+        auth: 'header' | 'oauth';
         secretNames: string[];
       }
     | {

@@ -79,10 +79,9 @@ what should have happened worked out from the rules they confirmed.
 In full in `docs/ROADMAP.md`. The load-bearing ones: nothing is published to
 npm, so every install command in this repository still 404s; the SDKs are all
 `private: true`, so the ten-line agent SDK cannot be installed by anybody;
-setting a project up is interface-only; MCP authorization is a static header
-with no OAuth flow; and a verdict from a real system is `PARTIAL` rather than
-`AUTHORITATIVE`, because RigorRun reads back what the nominated reads return
-and no more.
+setting a project up is interface-only; and a verdict from a real system is
+`PARTIAL` rather than `AUTHORITATIVE`, because RigorRun reads back what the
+nominated reads return and no more.
 
 A browser is weaker again. It cannot check its own work — a page saying "done"
 is a claim by the system that would have to be wrong for it not to be done — so

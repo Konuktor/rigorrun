@@ -18,9 +18,9 @@ import {
   Service,
   WorkspaceTooNewError,
   claimRunner,
+  openInBrowser,
   openWorkspace,
   reapOrphans,
-  runCommand,
   storeRoot,
 } from '@rigorrun/daemon';
 import { c, errorLine, heading, line } from './ui.ts';
@@ -45,29 +45,6 @@ export interface ServeOptions {
   once?: boolean;
   /** Open a browser. Default true; `--no-open` for a headless box or CI. */
   open?: boolean;
-}
-
-/**
- * Opens the pairing URL, and never makes a fuss about not being able to.
- *
- * There is no dependency for this: three platforms, one command each, and the
- * printed URL is the fallback for every case they do not cover — a headless
- * box, an SSH session, a container, a desktop with no handler registered. A
- * failure here is not an error, because the person already has what they need
- * on screen.
- */
-async function openInBrowser(url: string): Promise<void> {
-  const command =
-    process.platform === 'darwin'
-      ? { command: 'open', args: [url] }
-      : process.platform === 'win32'
-        ? { command: 'cmd.exe', args: ['/c', 'start', '', url] }
-        : { command: 'xdg-open', args: [url] };
-  await runCommand({
-    ...command,
-    timeoutMs: 5_000,
-    provenance: 'rigorrun-internal',
-  }).catch(() => undefined);
 }
 
 export async function cmdServe(options: ServeOptions = {}): Promise<number> {

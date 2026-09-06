@@ -15,8 +15,10 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport, getDefaultEnvironment } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import { assertSafeCommand, assertSafeMcpUrl, describeConfig, type McpConfig } from './config.ts';
+import type { LocalOAuthProvider } from './oauth.ts';
 import {
   assessFromHints,
   paramsFromInputSchema,
@@ -36,6 +38,11 @@ export interface ConnectOptions {
 }
 
 const DEFAULT_TIMEOUT_MS = 20_000;
+
+/** The sign-in for this config, if it has one. Only HTTP servers can. */
+function signInFor(config: McpConfig): LocalOAuthProvider | undefined {
+  return config.transport === 'http' ? config.auth : undefined;
+}
 
 function buildTransport(config: McpConfig): Transport {
   if (config.transport === 'stdio') {
@@ -60,6 +67,15 @@ function buildTransport(config: McpConfig): Transport {
   // SDK is not built with that flag; nothing about the runtime shape differs.
   return new StreamableHTTPClientTransport(url, {
     ...(config.headers ? { requestInit: { headers: config.headers } } : {}),
+    // The SDK does the protocol: it tries the token it has, refreshes an
+    // expired one, and only then asks the provider to send somebody to sign
+    // in. What RigorRun supplies is where the tokens live and how a person is
+    // asked — see `oauth.ts`.
+    // `LocalOAuthProvider` satisfies the SDK's `OAuthClientProvider`
+    // structurally. Cast rather than implemented, so that RigorRun's own
+    // provider does not import the SDK's types into everything that touches a
+    // connector config.
+    ...(config.auth ? { authProvider: config.auth as never } : {}),
   }) as unknown as Transport;
 }
 
@@ -91,17 +107,58 @@ export class McpConnection {
   ) {}
 
   static async open(config: McpConfig, options: ConnectOptions = {}): Promise<McpConnection> {
-    const client = new Client(CLIENT_INFO, { capabilities: {} });
-    const transport = buildTransport(config);
+    const auth = signInFor(config);
+    if (!auth) return await McpConnection.connect(config, options);
+    // The loopback listener has to be up before the first request, because the
+    // SDK reads the address to come back to the moment a 401 arrives — and it
+    // is torn down as soon as this connection is made or refused. A sign-in
+    // that nobody completes leaves nothing listening.
+    await auth.start();
+    try {
+      return await McpConnection.connect(config, options);
+    } finally {
+      await auth.close();
+    }
+  }
+
+  private static async connect(
+    config: McpConfig,
+    options: ConnectOptions,
+  ): Promise<McpConnection> {
+    let client = new Client(CLIENT_INFO, { capabilities: {} });
+    let transport = buildTransport(config);
     const startedAt = Date.now();
 
     try {
       await client.connect(transport, { timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS });
     } catch (error) {
-      throw new Error(
-        `Could not reach the MCP server at ${describeConfig(config)}: ${(error as Error).message}`,
-        { cause: error },
-      );
+      const auth = signInFor(config);
+      if (!auth || !(error instanceof UnauthorizedError)) {
+        throw new Error(
+          `Could not reach the MCP server at ${describeConfig(config)}: ${(error as Error).message}`,
+          { cause: error },
+        );
+      }
+      // The server wants somebody to sign in, and the SDK has already sent
+      // them. What is left is the code coming back to the loopback listener,
+      // and one more attempt with the token it buys. The exchange happens on
+      // the transport that saw the 401, because that is what knows which
+      // authorization server the server named.
+      const code = await auth.waitForCode();
+      await (transport as StreamableHTTPClientTransport).finishAuth(code);
+      await client.close().catch(() => undefined);
+      // A transport cannot be started twice, so the second attempt is a fresh
+      // one. It needs no discovery: the tokens are in the credential store.
+      client = new Client(CLIENT_INFO, { capabilities: {} });
+      transport = buildTransport(config);
+      try {
+        await client.connect(transport, { timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS });
+      } catch (again) {
+        throw new Error(
+          `Signed in to ${describeConfig(config)}, but the connection was still refused: ${(again as Error).message}`,
+          { cause: again },
+        );
+      }
     }
     const latencyMs = Date.now() - startedAt;
 

@@ -41,7 +41,8 @@ import {
   describeAgent,
   newProject,
   type AgentConfig,
-  type Connector,
+  ConnectorSchema,
+  type ConnectorInput,
   type Project,
 } from './project.ts';
 import type { Listing, ProjectStore } from './store.ts';
@@ -114,11 +115,13 @@ export class Service {
    */
   async connectEnvironment(
     projectId: string,
-    connector: Connector,
+    connector: ConnectorInput,
     safety: Project['safety'],
   ): Promise<{ project: Project; tools: DiscoveredTool[]; latencyMs: number; serverName: string }> {
     const project = await this.store.read(projectId);
-    const attempted: Project = { ...project, connector, safety };
+    // Parsed here rather than trusted: this is the boundary between what
+    // somebody typed and what the rest of the product may assume.
+    const attempted: Project = { ...project, connector: ConnectorSchema.parse(connector), safety };
 
     await this.workspace.disconnect(projectId);
     let connection;

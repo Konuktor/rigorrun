@@ -36,6 +36,16 @@ export const McpConnectorSchema = z.object({
   args: z.array(z.string()).default([]),
   /** For http. */
   url: z.string().default(''),
+  /**
+   * How an HTTP server is authenticated to.
+   *
+   * `header` is a static value from the credential store — what most servers
+   * behind a gateway want, and what a person can paste. `oauth` is the flow the
+   * specification describes: a 401 names an authorization server, somebody
+   * approves in a browser, and the tokens live with the other credentials.
+   * Ignored for stdio, which authenticates by environment.
+   */
+  auth: z.enum(['header', 'oauth']).default('header'),
   secretNames,
 });
 
@@ -90,13 +100,24 @@ export const ConnectorSchema = z.discriminatedUnion('kind', [
   BrowserConnectorSchema,
 ]);
 export type Connector = z.infer<typeof ConnectorSchema>;
+/**
+ * A connector as somebody writes one down, before defaults are filled in.
+ *
+ * What `connectEnvironment` takes, so that adding a field with a sensible
+ * default does not become a change every caller has to make.
+ */
+export type ConnectorInput = z.input<typeof ConnectorSchema>;
 export type McpConnector = z.infer<typeof McpConnectorSchema>;
 export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
 
 /** One line naming what a project connects to, for a list or a diagnostic. */
 export function describeConnector(connector: Connector | null): string {
   if (!connector) return 'not connected';
-  if (connector.kind === 'mcp') return `MCP · ${connector.transport}`;
+  if (connector.kind === 'mcp') {
+    return connector.transport === 'http' && connector.auth === 'oauth'
+      ? 'MCP · http · signed in'
+      : `MCP · ${connector.transport}`;
+  }
   if (connector.kind === 'openapi') return 'OpenAPI';
   return connector.verifier ? 'Browser · verified' : 'Browser · observed only';
 }
@@ -116,8 +137,13 @@ export function describeConnectorAction(connector: Connector): string {
   if (connector.kind === 'openapi') {
     return `send requests to ${connector.baseUrl || 'an address in the document'}`;
   }
-  return connector.transport === 'stdio'
-    ? `run \`${[connector.command, ...connector.args].join(' ').trim()}\``
+  if (connector.transport === 'stdio') {
+    return `run \`${[connector.command, ...connector.args].join(' ').trim()}\``;
+  }
+  // Somebody confirming an imported project should know it will send them to
+  // sign in, not merely that an address gets opened.
+  return connector.auth === 'oauth'
+    ? `open ${connector.url}, and sign in to it in a browser if it asks`
     : `open ${connector.url}`;
 }
 

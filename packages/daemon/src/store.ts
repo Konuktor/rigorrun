@@ -236,6 +236,17 @@ export class ProjectStore {
     await this.secretStore.remove(name);
   }
 
+  /**
+   * The credential store itself.
+   *
+   * For the one caller that keeps keys RigorRun did not ask a person for: an
+   * OAuth sign-in, whose tokens belong exactly where every other credential
+   * lives rather than in a file beside the project.
+   */
+  get credentials(): SecretStore {
+    return this.secretStore;
+  }
+
   private async writeJson(path: string, value: unknown): Promise<void> {
     await writeJsonAtomic(path, value, OWNER_ONLY);
   }
