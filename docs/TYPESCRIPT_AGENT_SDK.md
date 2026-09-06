@@ -1,5 +1,12 @@
 # TypeScript agent SDK
 
+> **Not yet published.** `@rigorrun/agent-sdk` is not on npm today, so the
+> `import` below resolves only inside this repository. You do **not** need it:
+> the agent protocol is plain HTTP with an MCP endpoint, and implementing it
+> directly is about ten lines — see [HTTP_AGENT.md](HTTP_AGENT.md). This page
+> describes the convenience wrapper as it will be, and documents the exact
+> request and response shapes you implement either way.
+
 One function and a server. Deliberately not a framework: the moment this offers
 a loop, a memory or a tool abstraction it is competing with the thing it exists
 to measure, and every opinion it takes narrows what can honestly be measured.

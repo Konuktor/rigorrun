@@ -4,7 +4,7 @@ Connect your system. Show RigorRun how one job is done. Connect your agent.
 RigorRun proves whether the agent can do that job safely — by reading the
 system it changed, never by trusting what it said about itself.
 
-This takes about ten minutes and runs on your machine.
+It starts with one command and runs on your machine.
 
 ## Why it runs locally
 
@@ -131,8 +131,10 @@ Then it builds the suite, and tells you what it could not cover here and why.
 Any agent that speaks MCP works as it is. RigorRun gives it one task at a time
 and an MCP endpoint scoped to that task; your agent connects, works however it
 normally works, and says when it is done. See [MCP_PROXY.md](MCP_PROXY.md) and
-[HTTP_AGENT.md](HTTP_AGENT.md); if you would rather use the SDK, see
-[TYPESCRIPT_AGENT_SDK.md](TYPESCRIPT_AGENT_SDK.md).
+[HTTP_AGENT.md](HTTP_AGENT.md) — the protocol is plain HTTP, with no package to
+install. A TypeScript convenience wrapper is sketched in
+[TYPESCRIPT_AGENT_SDK.md](TYPESCRIPT_AGENT_SDK.md); note it is not yet published
+to npm, so implement the HTTP protocol directly for now.
 
 An agent is not connected because you typed a URL. RigorRun sends a probe and
 waits for an answer, and until it gets one it says so.

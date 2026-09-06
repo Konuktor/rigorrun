@@ -224,10 +224,23 @@ export function Landing({
             An agent that reports success and an agent that achieved it are indistinguishable from
             the transcript. They are trivially distinguishable from the database.
           </p>
-          <p className="mt-4 text-meta text-muted">
-            A model judge can be added as a labelled second opinion. It never replaces a
-            deterministic check.
-          </p>
+          <div className="mt-4 border-t border-line-soft pt-3">
+            <div className="text-micro uppercase text-muted">How strongly each result was verified</div>
+            <ul className="mt-2 grid gap-1.5 text-meta text-secondary">
+              <li>
+                <span className="font-mono text-fg">AUTHORITATIVE</span> — direct, trusted state.
+              </li>
+              <li>
+                <span className="font-mono text-fg">PARTIAL</span> — verified through the reads your
+                system exposes. A normal connected MCP server is PARTIAL, and that is honest, not a
+                defect.
+              </li>
+              <li>
+                <span className="font-mono text-fg">OBSERVATIONAL</span> — actions observed, final
+                state not independently proven.
+              </li>
+            </ul>
+          </div>
         </Panel>
       </section>
 
@@ -239,11 +252,11 @@ export function Landing({
         />
         <Feature
           title="Deterministic verification"
-          body="Assertions read state and events, never the agent's own account. Confidence intervals are reported alongside every rate."
+          body="Assertions read state and events, never the agent's own account. Every verdict is labelled by how strongly it was verified — AUTHORITATIVE, PARTIAL or OBSERVATIONAL — and a verdict against a real system is PARTIAL by design. Confidence intervals are reported alongside every rate."
         />
         <Feature
           title="Vendor independent"
-          body="Any agent behind an HTTP endpoint or an OpenAI-compatible API runs against the same private cases, from the same seeded state."
+          body="Any agent behind an HTTP endpoint or an OpenAI-compatible API runs against the same private cases. Where your system can be reset, every agent starts from the same state; where it cannot, RigorRun runs what it safely can and reports isolation as NONE rather than pretending."
         />
       </section>
 

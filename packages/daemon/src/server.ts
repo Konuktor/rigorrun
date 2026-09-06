@@ -191,6 +191,38 @@ export class Runner {
     });
 
     app.use('/api/*', async (context, next) => {
+      // CSRF defence-in-depth for state-changing requests.
+      //
+      // `SameSite=Strict` already stops a cross-*site* page sending the session
+      // cookie, and the Host allowlist above stops DNS rebinding. But SameSite
+      // treats every `127.0.0.1:<port>` as the same site, so a hostile page on
+      // another local port is same-site and would carry the cookie. So a mutating
+      // request a browser reports as anything but same-origin is refused here.
+      //
+      // `Sec-Fetch-Site` is trusted when present (every current browser sends
+      // it); older browsers fall back to an `Origin` that must match this
+      // runner's own host. A non-browser caller — CI, a bearer-key client —
+      // sends neither header and is unaffected, which is correct: CSRF is a
+      // browser-only concern.
+      const method = context.req.method.toUpperCase();
+      if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+        const site = context.req.header('sec-fetch-site');
+        const origin = context.req.header('origin');
+        const crossOrigin = site
+          ? site !== 'same-origin' && site !== 'none'
+          : origin !== undefined && !originMatchesHost(origin, context.req.header('host'));
+        if (crossOrigin) {
+          return context.json(
+            {
+              error: 'cross-origin request refused',
+              detail:
+                'A state-changing request must come from the runner’s own page. This one looks ' +
+                'cross-origin, so it was refused even though it carried a session.',
+            },
+            403,
+          );
+        }
+      }
       const bearer = context.req.header('authorization')?.replace(/^Bearer\s+/i, '');
       const cookie = cookieValue(context.req.header('cookie'), SESSION_COOKIE);
       if (!this.pairing.authorises(bearer ?? cookie)) {
@@ -582,6 +614,23 @@ function htmlResponse(body: string, status: number): Response {
 function hostIsLocal(host: string | undefined): boolean {
   if (!host) return false;
   return ALLOWED_HOSTS.has(host.replace(/:\d+$/, '').toLowerCase());
+}
+
+/**
+ * Whether an `Origin` names this very runner.
+ *
+ * A same-origin fetch always sends an `Origin` whose authority (host and port)
+ * equals the `Host` the server sees. A page on another local port sends a
+ * different authority, so this returns false for it — which is the whole point.
+ * Used only as the fallback for browsers too old to send `Sec-Fetch-Site`.
+ */
+function originMatchesHost(origin: string, host: string | undefined): boolean {
+  if (!host) return false;
+  try {
+    return new URL(origin).host.toLowerCase() === host.toLowerCase();
+  } catch {
+    return false;
+  }
 }
 
 /** One tool, without the raw JSON Schema the interface has no use for. */

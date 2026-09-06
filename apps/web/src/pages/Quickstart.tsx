@@ -47,7 +47,7 @@ const STEPS = [
   },
   {
     title: 'Run it, and read the verdict',
-    body: 'Safe to ship, yes or no, with how strongly each answer could be verified.',
+    body: 'Safe to ship — yes, conditional or no — with how strongly each answer could be verified (AUTHORITATIVE, PARTIAL or OBSERVATIONAL). A verdict against a real system read through nominated tools is PARTIAL, and says so.',
     code: null,
   },
   {
@@ -60,7 +60,7 @@ const STEPS = [
 export function Quickstart() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
-      <Tag>About ten minutes · Early Access · v0.1</Tag>
+      <Tag>Start with one command · Early Access · v0.1</Tag>
       <h1 className="mt-4 text-title font-semibold">Testing your own agent</h1>
       <p className="mt-4 text-body text-secondary">
         This part runs on your machine, and that is not a preference. Your MCP server, your
@@ -98,8 +98,10 @@ export function Quickstart() {
             Point RigorRun at something you are willing to have changed — a staging system, a
             scratch instance, anything with a way to put it back. It will ask which kind of system
             it is, and it refuses to run anything that writes against production. A system with no
-            reset still works; RigorRun simply says on every result that its cases were not
-            isolated from each other.
+            reset still works, but you get fewer cases: repeated mutating cases are switched off,
+            isolation is reported as NONE, and verification is PARTIAL. The richest suite comes from
+            an environment RigorRun can read back and reset. It tells you what it could not test
+            rather than pretending.
           </p>
         </Panel>
       </section>

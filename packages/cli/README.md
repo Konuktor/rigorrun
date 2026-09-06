@@ -32,6 +32,30 @@ it and reads your system to find out what actually happened.
      RigorRun:   you do the job once   →  RigorRun writes the tests
 ```
 
+## How strongly was it verified?
+
+RigorRun tells you how strongly each result was verified, on every result:
+
+- **AUTHORITATIVE** — checked against direct, trusted state.
+- **PARTIAL** — verified through the reads your system exposes. A normal
+  connected MCP server, whose state RigorRun reads back through the tools you
+  nominated, is **PARTIAL** — the common, honest case, not a defect.
+- **OBSERVATIONAL** — actions were observed but the final state could not be
+  independently proven (e.g. a browser with nothing readable attached).
+
+`AUTHORITATIVE` is claimed only where RigorRun genuinely has authoritative state
+access. Against your own system the honest label is usually `PARTIAL`, and it is
+shown on the same line as the verdict.
+
+## What it can build depends on your system
+
+RigorRun generates every case it can safely and reproducibly verify, and tells
+you what it could not test. A system it can **seed and reset** yields the
+richest suite (boundary and adversarial cases, repeated destructive checks). A
+system without a reset still works, but produces fewer cases, disables repeated
+mutating cases, reports isolation `NONE`, and verifies `PARTIAL`. Best results:
+a staging or scratch environment with read-back and a reset.
+
 ## Why it runs locally
 
 Your MCP server, your internal API and your staging box are usually not
@@ -48,7 +72,9 @@ infrastructure, because there is no path by which they could.
   instance, with a way to reset it.
 - **An agent.** If it speaks MCP it works unchanged; RigorRun hands it a URL —
   whether your agent listens on an address or is a command RigorRun runs. If it
-  does not speak MCP, about ten lines of the agent SDK.
+  does not speak MCP, about ten lines of plain HTTP — there is no package to
+  install; the protocol is documented at
+  [docs/HTTP_AGENT.md](https://github.com/Konuktor/rigorrun/blob/master/docs/HTTP_AGENT.md).
 
 ## Commands
 
@@ -71,7 +97,7 @@ Setting a project up needs the interface; running and gating it does not. It has
 been used successfully by the people who wrote it and is now looking for people
 who did not.
 
-Every capability is marked WORKING, PARTIAL or MISSING in
+Every capability is marked WORKING, PARTIAL, DEMO-ONLY, BROKEN or MISSING in
 [the v1 gap audit](https://github.com/Konuktor/rigorrun/blob/master/docs/V1_GAP_AUDIT.md),
 with how each one was checked. Read it before you rely on this for anything
 that matters.

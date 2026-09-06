@@ -33,7 +33,7 @@ against it and reads your system to find out what actually happened.
      RigorRun:   you do the job once   →  RigorRun writes the tests
 ```
 
-## In ten minutes
+## Start with one command
 
 ```bash
 npx rigorrun
@@ -44,6 +44,20 @@ document, or a web application through a browser — do the job once, answer a
 few questions, connect your agent, run it. Nothing is uploaded; your systems,
 credentials and recordings stay on your machine, because the interface is
 served by the local process rather than from a website.
+
+Setting a project up (connecting a system and teaching a job) is done in that
+interface; running, gating and comparing are also available from the command
+line, which is the half CI needs.
+
+**What you get depends on what your system can do.** RigorRun generates every
+case it can safely and reproducibly verify, and tells you what it could not
+test. A system it can seed and reset yields the richest suite — boundary and
+adversarial cases, and repeated destructive checks. A system without a reset
+still works, but produces fewer cases, disables repeated mutating cases, reports
+isolation as `NONE`, and verifies `PARTIAL`. Best results come from a staging or
+scratch environment with read-back and a reset (or seed). The bundled example is
+rich because its environment supports both; your own system may not, and
+RigorRun says so rather than pretending otherwise.
 
 **Early Access · v0.1.** It does what this page says and it is young: the
 limits are written down in [docs/V1_GAP_AUDIT.md](docs/V1_GAP_AUDIT.md), marked
@@ -63,7 +77,7 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | --- | --- |
 | **The suite is derived, not authored** | One recording becomes a contract, then a case suite. You do the job once. |
 | **The suite is graded before your agent is** | RigorRun writes broken agents on purpose and reports how many the suite caught. |
-| **Your agent does not change** | If it speaks MCP, it is tested by being given a URL — listening on a port, or run as a command. If not, ten lines of SDK. |
+| **Your agent does not change** | If it speaks MCP, it is tested by being given a URL — listening on a port, or run as a command. If not, a small HTTP handler — about ten lines of plain HTTP, no package to install. See [docs/HTTP_AGENT.md](docs/HTTP_AGENT.md). |
 | **A verdict comes from your system** | Read back after your agent finished, never from what it said about itself. |
 | **It says what it could not do** | Verification strength, isolation, and every case it could not build, on every result. |
 | **Nothing guessed can fail you** | A rule RigorRun inferred does not gate anything until you confirm it. |
@@ -73,7 +87,7 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 
 | | |
 | --- | --- |
-| [Getting started](docs/GETTING_STARTED.md) | The ten minutes, in order. |
+| [Getting started](docs/GETTING_STARTED.md) | The setup, in order. |
 | [Connecting an MCP server](docs/MCP_ENVIRONMENT.md) | Transports, credentials, annotations, what gets induced. |
 | [Connecting an HTTP API](docs/OPENAPI_ENVIRONMENT.md) | An OpenAPI document, and what will not be called during setup. |
 | [Testing a web application](docs/BROWSER_ENVIRONMENT.md) | A browser, and why one cannot check its own work. |
@@ -195,12 +209,28 @@ projection joining refunds to their orders, tickets and approvals. The agent's
 own report travels alongside so a human can compare the claim with reality —
 and nothing scores it.
 
-Checks are labelled by how the verdict was reached, and the three are rendered
-differently everywhere on purpose:
+### How strongly was it verified?
 
-`DETERMINISTIC` · `MODEL-JUDGED` · `HUMAN-REVIEW`
+RigorRun tells you how strongly each result was verified, on every result, and
+never claims more than it can prove:
 
-A model judge can be added as a second opinion. It never silently replaces a
+- **AUTHORITATIVE** — checked against direct, trusted state.
+- **PARTIAL** — verified through the reads the system actually exposes. A normal
+  connected MCP server, whose state RigorRun reads back through the tools you
+  nominated, is **PARTIAL** — and that is the common, honest case, not a defect.
+- **OBSERVATIONAL** — the agent's actions were observed but the final state
+  could not be independently proven (for example a browser with nothing readable
+  attached).
+
+`AUTHORITATIVE` is reserved for an environment RigorRun can read in full — today
+that is the bundled in-process example. Against your own system the honest label
+is `PARTIAL`, and RigorRun says so on the same line as the verdict rather than
+letting you assume more. See [docs/VERIFICATION.md](docs/VERIFICATION.md).
+
+Every check also carries how its verdict was reached. Today RigorRun emits
+`DETERMINISTIC` checks (read from state and events). `MODEL-JUDGED` and
+`HUMAN-REVIEW` are designed into the format but are **not emitted yet**; a model
+judge, when added, is a labelled second opinion and never replaces a
 deterministic assertion.
 
 ---
@@ -249,7 +279,10 @@ flowchart TB
 ```
 
 The expensive parts run locally. The cloud control plane is optional, stores
-metadata only, and the product is fully functional with it switched off.
+metadata only, and the product is fully functional with it switched off — which
+is how it ships today: **the current CLI and interface do not call it.** It is
+deployable code, not a capability you need, and it is off unless you stand it up
+yourself.
 
 ---
 
@@ -311,28 +344,29 @@ A broken config can never be mistaken for a failing agent.
 
 ## Connect your own agent
 
-RigorRun drives the loop; your agent stays stateless. It receives the task and
-the history so far, and replies with either the next tool call or a final
-report.
+Your agent owns its own loop. RigorRun hands it the task once, with an MCP
+endpoint scoped to that case; the agent connects, does the work through that
+endpoint, and says when it is done. Everything it did came through the proxy, so
+the evidence is identical to an in-process run.
 
 ```jsonc
 // RigorRun → your endpoint
 {
-  "protocol": "rigorrun/agent/1",
+  "protocol": "rigorrun/agent/2",
   "caseId": "case_prompt-injection",
-  "task": { "instruction": "...", "inputs": { ... }, "policyBrief": "...", "allowedTools": [...] },
-  "history": [{ "tool": "getOrder", "args": { ... }, "result": { ... } }],
-  "stepsRemaining": 19
+  "task": { "instruction": "...", "inputs": { ... }, "policyBrief": "..." },
+  "environment": { "mcpUrl": "http://127.0.0.1:PORT/mcp/…", "expiresAt": "…" },
+  "maxSteps": 20
 }
 
-// your endpoint → RigorRun
-{ "action": { "tool": "createRefund", "args": { "orderId": "ORD-3016", "amount": 25 } } }
-// ...or, when finished:
-{ "done": true, "report": "Refunded $25.00 against ticket TCK-4016." }
+// your endpoint → RigorRun, when finished
+{ "status": "completed", "output": "Refunded $25.00 against ticket TCK-4016." }
 ```
 
-Your agent never receives the assertions it is judged against. See
-[docs/AGENT_PROTOCOL.md](docs/AGENT_PROTOCOL.md).
+The agent's `output` is recorded and shown, and never scored. Your agent never
+receives the assertions it is judged against. See
+[docs/AGENT_PROTOCOL.md](docs/AGENT_PROTOCOL.md) and
+[docs/HTTP_AGENT.md](docs/HTTP_AGENT.md).
 
 Model-backed agents work too — set `GROQ_API_KEY`, `GEMINI_API_KEY` or an
 `OPENAI_COMPATIBLE_BASE_URL`. RigorRun needs none of them; run
