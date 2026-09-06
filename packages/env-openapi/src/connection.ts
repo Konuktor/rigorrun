@@ -29,6 +29,7 @@ import {
   type SystemConnection,
 } from '@rigorrun/connector';
 import { loadDocument, type OpenApiDocument } from './document.ts';
+import { ClientCredentials, type ClientCredentialsConfig } from './oauth.ts';
 import { operationsFrom, type OpenApiOperation } from './operations.ts';
 
 export interface OpenApiConfig {
@@ -38,6 +39,13 @@ export interface OpenApiConfig {
   baseUrl: string;
   /** Sent on every request. Held in the runner's secret store, never synced. */
   headers?: Record<string, string>;
+  /**
+   * A client id and secret to exchange for a token, if this API wants one.
+   *
+   * The values, not their names: the runner resolves those before it opens a
+   * connection, and this file never learns what a secret store is.
+   */
+  oauth?: ClientCredentialsConfig;
   timeoutMs?: number;
 }
 
@@ -64,6 +72,7 @@ export class OpenApiConnection implements SystemConnection {
   readonly childPid = null;
 
   private mode: ConnectionMode = 'setup';
+  private readonly signIn: ClientCredentials | undefined;
 
   private constructor(
     readonly document: OpenApiDocument,
@@ -72,6 +81,7 @@ export class OpenApiConnection implements SystemConnection {
     private readonly base: URL,
     latencyMs: number,
   ) {
+    this.signIn = config.oauth ? new ClientCredentials(config.oauth) : undefined;
     this.discovery = {
       serverName: document.info?.title ?? 'an HTTP API',
       serverVersion: document.info?.version ?? 'unknown',
@@ -119,19 +129,32 @@ export class OpenApiConnection implements SystemConnection {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs ?? DEFAULT_TIMEOUT_MS);
     try {
-      const response = await fetch(url, {
-        method: operation.method,
-        headers: {
-          accept: 'application/json',
-          ...(body === undefined ? {} : { 'content-type': 'application/json' }),
-          ...this.config.headers,
-          ...this.headersFrom(operation, args),
-        },
-        ...(body === undefined ? {} : { body }),
-        // A redirect is a request to somewhere the operator did not configure.
-        redirect: 'error',
-        signal: controller.signal,
-      });
+      const send = async (): Promise<Response> =>
+        fetch(url, {
+          method: operation.method,
+          headers: {
+            accept: 'application/json',
+            ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+            ...(this.signIn ? { authorization: await this.signIn.header() } : {}),
+            // The operator's own headers last, so a header they configured
+            // deliberately wins over one RigorRun worked out.
+            ...this.config.headers,
+            ...this.headersFrom(operation, args),
+          },
+          ...(body === undefined ? {} : { body }),
+          // A redirect is a request to somewhere the operator did not configure.
+          redirect: 'error',
+          signal: controller.signal,
+        });
+
+      let response = await send();
+      if (response.status === 401 && this.signIn) {
+        // The token was refused. That is what a server says when it has been
+        // revoked or the clock disagreed, and one exchange is cheaper than
+        // making somebody work out why their run failed at case seven.
+        this.signIn.invalidate();
+        response = await send();
+      }
 
       const text = (await response.text()).slice(0, MAX_RESPONSE_BYTES);
       const durationMs = Date.now() - startedAt;

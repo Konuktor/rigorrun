@@ -9,7 +9,7 @@
  * fact — a guess arrives as a question with the observation that prompted it,
  * so a person can disagree with the evidence rather than with an assertion.
  */
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Panel, SectionLabel, Tag } from '../components/primitives.tsx';
 import { Checkbox, Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
 import {
@@ -23,6 +23,34 @@ import {
 } from './api.ts';
 
 // ------------------------------------------------------------------ step one
+
+/**
+ * The token endpoint a document declares, if it declares one.
+ *
+ * A dozen lines rather than an import: the connector that knows how to read
+ * one of these lives in the runner, and pulling it into a browser bundle to
+ * read four fields would drag the whole HTTP client along with it. Only JSON —
+ * a YAML document is parsed on the runner, and somebody handing one over types
+ * the address instead.
+ */
+function declaredTokenUrl(spec: string): string {
+  try {
+    const parsed = JSON.parse(spec) as {
+      components?: { securitySchemes?: Record<string, unknown> };
+    };
+    for (const value of Object.values(parsed.components?.securitySchemes ?? {})) {
+      const scheme = value as {
+        type?: string;
+        flows?: { clientCredentials?: { tokenUrl?: string } };
+      };
+      const url = scheme?.type === 'oauth2' ? scheme.flows?.clientCredentials?.tokenUrl : undefined;
+      if (typeof url === 'string' && url.length > 0) return url;
+    }
+  } catch {
+    // Not JSON, or not a document yet. Neither is a problem worth saying.
+  }
+  return '';
+}
 
 export function ConnectEnvironment({
   project,
@@ -50,6 +78,26 @@ export function ConnectEnvironment({
   const [spec, setSpec] = useState(openapi?.spec ?? '');
   const [baseUrl, setBaseUrl] = useState(openapi?.baseUrl ?? '');
   const [headerName, setHeaderName] = useState(Object.keys(openapi?.headers ?? {})[0] ?? '');
+  const [apiAuth, setApiAuth] = useState<'header' | 'client_credentials'>(
+    openapi?.oauth ? 'client_credentials' : 'header',
+  );
+  const [tokenUrl, setTokenUrl] = useState(openapi?.oauth?.tokenUrl ?? '');
+  const [tokenUrlTouched, setTokenUrlTouched] = useState(openapi?.oauth !== null);
+  const [clientIdSecret, setClientIdSecret] = useState(openapi?.oauth?.clientIdSecret ?? '');
+  const [clientSecretSecret, setClientSecretSecret] = useState(
+    openapi?.oauth?.clientSecretSecret ?? '',
+  );
+  const [scope, setScope] = useState(openapi?.oauth?.scope ?? '');
+
+  // What the document says about signing in, if it says anything. Read here
+  // rather than asked for: `securitySchemes` already declares the token
+  // endpoint, and a field copied out of a PDF is a field to get wrong. Only
+  // `clientCredentials` — every other flow ends in a browser, and an API whose
+  // only flow is a browser is one to say no to rather than half-attempt.
+  const declared = useMemo(() => declaredTokenUrl(spec), [spec]);
+  useEffect(() => {
+    if (declared && !tokenUrlTouched) setTokenUrl(declared);
+  }, [declared, tokenUrlTouched]);
   const [startUrl, setStartUrl] = useState(browser?.startUrl ?? '');
   const [secretNames, setSecretNames] = useState((saved?.secretNames ?? []).join('\n'));
   const [safety, setSafety] = useState(project.safety);
@@ -84,6 +132,17 @@ export function ConnectEnvironment({
                 spec,
                 specUrl: '',
                 baseUrl: baseUrl.trim(),
+                // Names, never values. The runner resolves them when it opens
+                // the connection and not one moment earlier.
+                oauth:
+                  apiAuth === 'client_credentials'
+                    ? {
+                        tokenUrl: tokenUrl.trim(),
+                        clientIdSecret: clientIdSecret.trim(),
+                        clientSecretSecret: clientSecretSecret.trim(),
+                        scope: scope.trim(),
+                      }
+                    : null,
                 // A header name against a *secret* name. The value is fetched
                 // by the runner when it opens the connection and never here.
                 headers: headerName.trim() && names[0] ? { [headerName.trim()]: names[0] } : {},
@@ -232,20 +291,104 @@ export function ConnectEnvironment({
               )}
             </Field>
             <Field
-              label="Which header carries your credential?"
-              hint="The header name only — for example Authorization. Its value comes from the first secret below, and stays on this machine."
+              label="How does it know who you are?"
+              hint={
+                declared
+                  ? 'This document says it grants client credentials, so that is filled in below.'
+                  : 'A header is right for most APIs. Client credentials is what an enterprise API hands a service account.'
+              }
             >
               {({ id, describedBy }) => (
-                <TextInput
+                <Select
                   id={id}
                   describedBy={describedBy}
-                  value={headerName}
-                  onChange={setHeaderName}
-                  placeholder="Authorization"
-                  testId="openapi-header"
+                  value={apiAuth}
+                  onChange={(value) => setApiAuth(value as 'header' | 'client_credentials')}
+                  testId="openapi-auth"
+                  options={[
+                    { value: 'header', label: 'A credential you already have' },
+                    { value: 'client_credentials', label: 'A client id and secret, exchanged for a token' },
+                  ]}
                 />
               )}
             </Field>
+            {apiAuth === 'header' ? (
+              <Field
+                label="Which header carries your credential?"
+                hint="The header name only — for example Authorization. Its value comes from the first secret below, and stays on this machine."
+              >
+                {({ id, describedBy }) => (
+                  <TextInput
+                    id={id}
+                    describedBy={describedBy}
+                    value={headerName}
+                    onChange={setHeaderName}
+                    placeholder="Authorization"
+                    testId="openapi-header"
+                  />
+                )}
+              </Field>
+            ) : (
+              <>
+                <Field
+                  label="Where is the token endpoint?"
+                  hint="Read from the document when it declares one. RigorRun posts the client id and secret here and gets a token back."
+                >
+                  {({ id, describedBy }) => (
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={tokenUrl}
+                      onChange={(value) => {
+                        setTokenUrlTouched(true);
+                        setTokenUrl(value);
+                      }}
+                      placeholder="https://login.example.com/oauth/token"
+                      testId="openapi-token-url"
+                    />
+                  )}
+                </Field>
+                <Field
+                  label="Which credential holds the client id?"
+                  hint="A name, as below. Set its value with rigorrun secrets set."
+                >
+                  {({ id, describedBy }) => (
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={clientIdSecret}
+                      onChange={setClientIdSecret}
+                      placeholder="REGISTRY_CLIENT_ID"
+                      testId="openapi-client-id"
+                    />
+                  )}
+                </Field>
+                <Field label="And the client secret?">
+                  {({ id, describedBy }) => (
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={clientSecretSecret}
+                      onChange={setClientSecretSecret}
+                      placeholder="REGISTRY_CLIENT_SECRET"
+                      testId="openapi-client-secret"
+                    />
+                  )}
+                </Field>
+                <Field label="Scope" hint="Optional, space separated. Leave it empty unless the API asks for one.">
+                  {({ id, describedBy }) => (
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={scope}
+                      onChange={setScope}
+                      placeholder="plots:read"
+                      testId="openapi-scope"
+                    />
+                  )}
+                </Field>
+              </>
+            )}
           </>
         ) : null}
 

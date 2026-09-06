@@ -57,10 +57,31 @@ a secret. The value comes from this machine's credential store when the
 connection opens, and is never in the project file. See
 [SECURITY_MODEL.md](SECURITY_MODEL.md).
 
+### A client id and a secret
+
+An enterprise API usually will not take a header you can paste. Choose **A
+client id and secret, exchanged for a token** and RigorRun posts them to the
+token endpoint, keeps the token for as long as the server said it is good for,
+and replaces it when the API says it is not.
+
+The token endpoint is read out of the document — `securitySchemes` already
+declares it, and a field copied from a PDF is a field to get wrong. Only
+`clientCredentials`: every other OAuth flow ends in a browser, and an API whose
+only flow is a browser is one RigorRun should say it cannot sign in to rather
+than half-attempt. (An MCP server that wants a browser sign-in *is* supported —
+see [MCP_ENVIRONMENT.md](MCP_ENVIRONMENT.md).)
+
+The client id and secret are secret *names*, like everything else here. The
+credentials go in the request header rather than the body, so they are not in
+whatever the token endpoint logs, and a token is never written to disk — it
+lives in the runner for as long as it is valid and dies with it.
+
 ## What is not built yet
 
-- **No OAuth flow.** A static header is the only authentication. If your API
-  needs a token refreshed, refresh it and set the secret again.
+- **No browser sign-in.** `clientCredentials` is the only OAuth flow, because
+  it is the only one that completes without a person. If your API's only flow
+  is `authorizationCode`, get a token however you normally would and set it as
+  a header credential.
 - **No `$ref` to another document.** Local references are followed; remote ones
   resolve to nothing, because fetching whatever a document points at is a
   request RigorRun would be making to an address you never typed.

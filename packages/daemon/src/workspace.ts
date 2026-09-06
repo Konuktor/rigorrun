@@ -167,9 +167,31 @@ export class Workspace {
     secrets: Record<string, string>,
   ): Promise<SystemConnection> {
     if (connector.kind === 'openapi') {
+      // The names become values here and nowhere earlier, and a name with no
+      // value is refused rather than sent as an empty credential.
+      const oauth = connector.oauth;
+      const clientId = oauth ? secrets[oauth.clientIdSecret] : undefined;
+      const clientSecret = oauth ? secrets[oauth.clientSecretSecret] : undefined;
+      if (oauth && (clientId === undefined || clientSecret === undefined)) {
+        throw new Error(
+          `This API signs in with a client id and secret, and ${
+            clientId === undefined ? oauth.clientIdSecret : oauth.clientSecretSecret
+          } is not in this machine's credential store. Set it with \`rigorrun secrets set\`.`,
+        );
+      }
       return OpenApiConnection.open({
         spec: connector.spec,
         baseUrl: connector.baseUrl,
+        ...(oauth && clientId !== undefined && clientSecret !== undefined
+          ? {
+              oauth: {
+                tokenUrl: oauth.tokenUrl,
+                clientId,
+                clientSecret,
+                ...(oauth.scope ? { scope: oauth.scope } : {}),
+              },
+            }
+          : {}),
         // The project stores a header name against a *secret* name; the value
         // is substituted here and nowhere earlier.
         headers: Object.fromEntries(

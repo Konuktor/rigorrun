@@ -136,7 +136,7 @@ the only SDK anybody outside can use today.
 | More than one person | **MISSING** | The runner is one person's process on one machine. |
 | Cloud sync | **MISSING** | A control plane is deployed and called by nothing. It is code, not a capability, and it should be opt-in sync or deleted. |
 | Induction proposes only rules worth confirming | **PARTIAL** | It over-produces: roughly a quarter of proposed rules get discarded during review. Reviewing is the point, and this is still more work than it should be. |
-| OAuth for the OpenAPI connector | **MISSING** | A static header is the only authentication there. MCP has the full flow; OpenAPI does not. |
+| OAuth for the OpenAPI connector | **PARTIAL** | `client_credentials` works: the token endpoint is read out of the document, the token is exchanged once and replaced when the API refuses it. A flow that ends in a browser is not built there, because it is the flow an API under test almost never uses. |
 
 ---
 

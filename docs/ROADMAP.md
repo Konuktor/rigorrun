@@ -51,8 +51,9 @@ check that fails if a business noun reaches generic code.
 ~~**No OpenAPI connector.**~~ Built. An HTTP API with an OpenAPI 3 document is
 connected the same way an MCP server is, and everything after the connection is
 the same code — `docs/OPENAPI_ENVIRONMENT.md`. What it does not have yet: an
-OAuth flow (a static header is the only authentication), remote `$ref`
-resolution, and a reset that is an API operation rather than an MCP tool.
+a browser sign-in — `client_credentials` works, and the flows that end in a
+person do not — remote `$ref` resolution, and a reset that is an API operation
+rather than an MCP tool.
 
 ~~**No browser execution lane.**~~ Built — `docs/BROWSER_ENVIRONMENT.md`. An
 agent that works by clicking can be watched doing it, and a browser cannot
@@ -92,8 +93,9 @@ running process, so a runner that restarts mid-run has nothing waiting.
 `WWW-Authenticate` is discovered, registered with, and signed in to in a
 browser with PKCE, and the tokens go into the credential store rather than the
 project. The redirect comes back to a loopback listener that lives for the
-length of one sign-in. What is missing: the same for the OpenAPI connector,
-which is still a static header.
+length of one sign-in. An OpenAPI connector signs in too, with the one flow
+that needs no person: a client id and secret exchanged for a token, with the
+endpoint read out of the document.
 
 **A system whose reads answer in prose cannot be verified.** RigorRun reads
 structure and never prose. It now says so when the reads are nominated, rather

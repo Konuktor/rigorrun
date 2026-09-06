@@ -53,6 +53,13 @@ export interface ProjectView {
         baseUrl: string;
         /** Header name to secret name. Never a value. */
         headers: Record<string, string>;
+        /** Secret names for a client id and secret, or nothing. Never values. */
+        oauth: {
+          tokenUrl: string;
+          clientIdSecret: string;
+          clientSecretSecret: string;
+          scope: string;
+        } | null;
         secretNames: string[];
       }
     | {

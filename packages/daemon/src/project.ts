@@ -59,6 +59,26 @@ export const OpenApiConnectorSchema = z.object({
   baseUrl: z.string().default(''),
   /** Header name to secret name, so a token is never in the project. */
   headers: z.record(z.string(), z.string()).default({}),
+  /**
+   * A client id and secret to exchange for a token, when the API wants one.
+   *
+   * Secret *names*, like everything else here. The token URL is read out of
+   * the document's `securitySchemes` rather than typed, because the document
+   * already declares it and a field copied from a PDF is a field to get wrong.
+   *
+   * Only `client_credentials`. The other OAuth flows all end in a browser, and
+   * an API whose only flow is a browser is one RigorRun should say it cannot
+   * sign in to rather than half-attempt.
+   */
+  oauth: z
+    .object({
+      tokenUrl: z.string(),
+      clientIdSecret: z.string(),
+      clientSecretSecret: z.string(),
+      scope: z.string().default(''),
+    })
+    .nullable()
+    .default(null),
   secretNames,
 });
 
