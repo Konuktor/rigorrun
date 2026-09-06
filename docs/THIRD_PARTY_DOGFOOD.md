@@ -109,7 +109,7 @@ Exactly this, and nothing else:
 > break, and an agent that works against it.
 >
 > ```
-> npx rigorrun@alpha
+> npx rigorrun
 > ```
 >
 > Documentation: <link to docs/GETTING_STARTED.md>

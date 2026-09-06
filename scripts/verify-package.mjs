@@ -84,10 +84,15 @@ check(
 // audit.
 const stagedManifest = JSON.parse(await readFile(join(stageDir, 'package.json'), 'utf8'));
 check('names no package that is not on npm', stagedManifest.devDependencies === undefined);
+// The accident this prevents is a prerelease landing on `latest`, where a bare
+// `npx rigorrun` would pick it up. Either the version is a release and the tag
+// is `latest`, or it is a prerelease and the tag is not.
+const prerelease = /-/.test(stagedManifest.version ?? '');
+const publishTag = stagedManifest.publishConfig?.tag ?? 'no publishConfig';
 check(
-  'is tagged so a prerelease cannot land on `latest`',
-  stagedManifest.publishConfig?.tag === 'alpha',
-  stagedManifest.publishConfig?.tag ?? 'no publishConfig',
+  'publishes on a channel that matches the version',
+  prerelease ? publishTag !== 'latest' : publishTag === 'latest',
+  `${stagedManifest.version} → ${publishTag}`,
 );
 check(
   'points at a repository that exists',
@@ -255,10 +260,10 @@ console.log(green(bold('READY TO PUBLISH')));
 console.log(dim(`  ${tarball}`));
 console.log();
 console.log('  Publishing is a decision, not a build step. When you want to:');
-console.log(bold(`    npm publish ${tarball} --access public --tag alpha`));
+console.log(bold(`    npm publish ${tarball} --access public --tag ${publishTag}`));
 console.log();
-console.log(dim('  --tag alpha keeps it off `latest`, so `npm i rigorrun` does not'));
-console.log(dim('  install a prerelease by accident.'));
+console.log(dim(`  ${stagedManifest.version} goes to \`${publishTag}\`, which is what`));
+console.log(dim(`  \`npx rigorrun\` ${publishTag === 'latest' ? 'installs' : 'does not install'}.`));
 
 // ------------------------------------------------------------------- helpers
 

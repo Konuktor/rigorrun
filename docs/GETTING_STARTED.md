@@ -21,7 +21,7 @@ infrastructure, because there is no path by which they could.
 ## 1. Start the runner
 
 ```bash
-npx rigorrun@alpha
+npx rigorrun
 ```
 
 It opens your browser, and prints the URL it opened in case it could not:
@@ -44,8 +44,10 @@ authority that read the first code off the screen.
 On a server, in a container, or over SSH, add `--no-open` and use the printed
 URL.
 
-> **Alpha.** `@alpha` rather than bare `rigorrun` on purpose: the prerelease is
-> not tagged `latest`, so nobody installs it by accident.
+> **Early Access · v0.1.** It does what this page says and it is young. Every
+> capability is marked WORKING, PARTIAL or MISSING in
+> [V1_GAP_AUDIT.md](V1_GAP_AUDIT.md), with how each one was checked — read that
+> before relying on it for something that matters.
 >
 > Working from a clone instead? `pnpm install && pnpm start`. `pnpm start`
 > builds the interface and then starts the runner; `pnpm rigorrun` alone skips

@@ -5,9 +5,9 @@ Start with `rigorrun doctor`.
 ## Installing it
 
 **`npx rigorrun` installs something other than what the docs describe.**
-Use `npx rigorrun@alpha`. The prerelease is deliberately not tagged `latest`, so
-a bare `npx rigorrun` gets whatever is on `latest` — which, until there is a
-stable release, is nothing.
+Check what you got with `npx rigorrun --version`. npm caches aggressively;
+`npx --yes rigorrun@latest` re-resolves, and `npm cache clean --force` is the
+blunt version.
 
 **"RigorRun needs Node 20.11 or newer."**
 It means it. Node 20 is the oldest release still getting security fixes.
@@ -47,7 +47,7 @@ different workspace.
 **"This workspace was written by a newer RigorRun."**
 You have downgraded. An older RigorRun refuses to touch a newer workspace
 rather than rewriting it and silently dropping fields it does not understand.
-Upgrade back: `npm i -g rigorrun@alpha`.
+Upgrade back: `npm i -g rigorrun@latest`.
 
 **"forbidden host"**
 Something reached the runner with somebody else's domain in the `Host` header.

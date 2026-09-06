@@ -14,7 +14,7 @@ test.describe('production smoke', () => {
   test('the landing page serves and renders', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance testing');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance tests');
     // The primary action is testing your own agent; the demo is secondary and
     // still has to be there, because the site is what somebody sees before
     // they are willing to run anything locally.

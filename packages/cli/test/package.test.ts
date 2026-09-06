@@ -25,6 +25,10 @@ async function manifest(): Promise<{
   devDependencies: Record<string, string>;
   description: string;
   license: string;
+  publishConfig: { access: string; tag: string };
+  repository: { url: string };
+  homepage: string;
+  bugs: { url: string };
 }> {
   return JSON.parse(await readFile(`${here}package.json`, 'utf8')) as never;
 }
@@ -62,11 +66,16 @@ describe('what gets published', () => {
     expect(help).toContain(`export const VERSION = '${pkg.version}'`);
   });
 
-  it('is a prerelease, and says so in its version', async () => {
+  it('publishes on a channel that matches its version', async () => {
     const pkg = await manifest();
-    // Nobody should install this by typing `npm i rigorrun` and expecting
-    // something finished. A prerelease tag is not the default `latest`.
-    expect(pkg.version).toMatch(/-(alpha|beta|rc)\.\d+$/);
+    expect(pkg.version).toMatch(/^\d+\.\d+\.\d+(-[a-z]+\.\d+)?$/);
+    // The accident worth preventing is a prerelease landing on `latest`, where
+    // a bare `npx rigorrun` picks it up and somebody installs something
+    // unfinished without asking for it. Either the version is a release and
+    // the tag is `latest`, or it is a prerelease and the tag is not.
+    const prerelease = pkg.version.includes('-');
+    if (prerelease) expect(pkg.publishConfig.tag).not.toBe('latest');
+    else expect(pkg.publishConfig.tag).toBe('latest');
   });
 
   it('ships only what running it needs', async () => {
@@ -172,16 +181,16 @@ describe('the README a stranger reads on npm', () => {
     expect(readme).not.toContain('git clone');
   });
 
-  it('says it is an alpha, and what it does not do', async () => {
+  it('says how finished this is, and what it does not do', async () => {
     // Whitespace collapsed first: a sentence that means the right thing but
     // happens to wrap between two words is not a failing README, and a test
     // that says otherwise is a test people learn to work around.
     const readme = (await readFile(`${here}README.md`, 'utf8')).replace(/\s+/g, ' ');
-    expect(readme).toMatch(/alpha/i);
-    // The specific gap, named. This assertion has to move every time a
-    // connector lands, which is the point of it: the README is the last place
-    // anybody reads before installing, and a stale limitation there is a
-    // person deciding not to bother for a reason that stopped being true.
+    // Published on `latest`, so the version number no longer carries the
+    // warning. The words have to.
+    expect(readme).toMatch(/early access/i);
+    // And a way to the whole list rather than the one limit this test names.
+    expect(readme).toContain('V1_GAP_AUDIT.md');
     // The specific limit, named. This assertion moves every time one is
     // removed, which is the point of it: the README is the last thing anybody
     // reads before installing, and a stale limitation there is somebody

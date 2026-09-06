@@ -102,10 +102,12 @@ structure and never prose. It now says so when the reads are nominated, rather
 than at the end — but it is a real limit, and a large share of MCP servers in
 the wild are on the wrong side of it.
 
-**Not yet published to npm.** The package builds, packs, installs into a clean
-directory, runs, and completes the whole fresh-user journey from the tarball —
-`pnpm verify:package` says so and prints the publish command. Until somebody
-runs it, `npx rigorrun@alpha` is a promise the registry cannot keep.
+~~**Not yet published to npm.**~~ Published. `npx rigorrun` installs
+`rigorrun@0.1.0` from the public registry, and the fresh-user journey has been
+walked against what the registry serves rather than against a local tarball.
+The SDKs are still `private: true`, so `@rigorrun/agent-sdk` cannot be
+installed by anybody — the Python SDK is one standard-library file and can be
+copied.
 
 **No cloud sync, and the control plane is unused.** A real D1-backed service is
 deployed and tested and nothing in the product calls it. Either it becomes

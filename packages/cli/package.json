@@ -1,6 +1,6 @@
 {
   "name": "rigorrun",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0",
   "description": "Acceptance testing for tool-using AI agents. Connect your system, show it one job, connect your agent, get a trustworthy pass or fail.",
   "keywords": [
     "mcp",
@@ -32,7 +32,7 @@
   ],
   "publishConfig": {
     "access": "public",
-    "tag": "alpha"
+    "tag": "latest"
   },
   "scripts": {
     "build": "node build.mjs"

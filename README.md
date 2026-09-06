@@ -36,7 +36,7 @@ against it and reads your system to find out what actually happened.
 ## In ten minutes
 
 ```bash
-npx rigorrun@alpha
+npx rigorrun
 ```
 
 Open the URL it prints. Connect your system — an MCP server, an OpenAPI
@@ -45,8 +45,9 @@ few questions, connect your agent, run it. Nothing is uploaded; your systems,
 credentials and recordings stay on your machine, because the interface is
 served by the local process rather than from a website.
 
-`@alpha` on purpose — the prerelease is not tagged `latest`, so nobody installs
-it by accident.
+**Early Access · v0.1.** It does what this page says and it is young: the
+limits are written down in [docs/V1_GAP_AUDIT.md](docs/V1_GAP_AUDIT.md), marked
+one by one, rather than left for you to find.
 
 Working from this repository instead:
 

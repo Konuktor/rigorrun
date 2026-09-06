@@ -75,7 +75,7 @@ export function App() {
           : route === 'projects' || route === 'project'
             ? 'Projects — RigorRun'
             : route === 'quickstart'
-              ? 'Test your agent — RigorRun'
+              ? 'Get started — RigorRun'
               : 'RigorRun — Acceptance testing for tool-using AI agents';
   }, [route]);
 
@@ -129,7 +129,7 @@ export function App() {
                   onClick={() => go(route === 'demo' ? '#/' : '#/demo/record')}
                   testId="nav-demo"
                 >
-                  {route === 'demo' ? 'Overview' : 'Try the demo'}
+                  {route === 'demo' ? 'Overview' : 'Try the example'}
                 </Button>
               </>
             )}
@@ -172,10 +172,10 @@ export function App() {
           <span>
             {/* A path into the repository is useless to somebody who installed
                 from npm and has no repository. A link works from both. */}
-            RigorRun {local && runner?.version ? runner.version : 'alpha'} — early.{' '}
+            RigorRun {local && runner?.version ? `v${runner.version}` : 'v0.1'} — Early Access.{' '}
             <a
               className="underline hover:text-fg"
-              href="https://github.com/Konuktor/rigorrun/blob/master/docs/PRODUCT_REALITY_AUDIT.md"
+              href="https://github.com/Konuktor/rigorrun/blob/master/docs/V1_GAP_AUDIT.md"
               target="_blank"
               rel="noreferrer"
             >

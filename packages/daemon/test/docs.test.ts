@@ -139,23 +139,26 @@ describe('what the docs do not claim', () => {
     expect(names).toContain('DRIVEN_AGENT.md');
   });
 
-  it('says plainly that this is an alpha, and what that means', async () => {
-    // It used to say "not published yet", which stopped being true. What has
-    // to stay true is that nobody thinks they are installing something
-    // finished.
+  it('says plainly how finished this is, and where the limits are written down', async () => {
+    // It said "not published yet", then "alpha, deliberately off latest", and
+    // both stopped being true. What has to stay true is that nobody thinks
+    // they are installing something finished — and that the limits are one
+    // click away rather than something they discover themselves.
     const started = await read('GETTING_STARTED.md');
-    expect(started).toMatch(/\*\*Alpha\.\*\*/);
-    expect(started).toMatch(/not tagged `latest`/);
+    expect(started).toMatch(/Early Access/);
+    expect(started).toContain('V1_GAP_AUDIT.md');
   });
 
-  it('tells a stranger to install the prerelease, not whatever is on latest', async () => {
-    // `npx rigorrun` would install `latest`, which this is deliberately not.
-    // Somebody following the docs must get the thing the docs describe.
+  it('gives a stranger the command that installs the released version', async () => {
+    // Published to `latest`, so the bare command is the right one. A doc that
+    // still said `@alpha` would send somebody to a tag nothing is on.
     const started = await read('GETTING_STARTED.md');
-    expect(started).toContain('npx rigorrun@alpha');
+    expect(started).toContain('npx rigorrun\n');
+    expect(started).not.toContain('rigorrun@alpha');
 
     const protocol = await read('THIRD_PARTY_DOGFOOD.md');
-    expect(protocol).toContain('npx rigorrun@alpha');
+    expect(protocol).toContain('npx rigorrun');
+    expect(protocol).not.toContain('rigorrun@alpha');
   });
 
   it('promises the feedback bundle keeps a stranger’s data out of it', async () => {
@@ -183,7 +186,8 @@ describe('what the docs do not claim', () => {
       'utf8',
     );
     // The one anybody without this repository uses...
-    expect(readme).toContain('npx rigorrun@alpha');
+    expect(readme).toContain('npx rigorrun\n');
+    expect(readme).not.toContain('rigorrun@alpha');
     // ...and the one for somebody who has it. `pnpm rigorrun` alone would
     // leave them with a working API and no interface.
     expect(readme).toContain('pnpm install && pnpm start');

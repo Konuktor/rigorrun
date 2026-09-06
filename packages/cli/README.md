@@ -7,13 +7,14 @@ RigorRun proves whether the agent can do that job safely — by reading the
 system it changed, never by trusting what it says about itself.
 
 ```bash
-npx rigorrun@alpha
+npx rigorrun
 ```
 
 Open the URL it prints. That is the whole install.
 
-`@alpha` on purpose: the prerelease is not tagged `latest`, so nobody installs
-it by accident.
+**Early Access · v0.1.** It does what this page says and it is young. The
+limits are written down and marked one by one, rather than left for you to
+find: [the v1 gap audit](https://github.com/Konuktor/rigorrun/blob/master/docs/V1_GAP_AUDIT.md).
 
 ## What it does
 
@@ -52,7 +53,7 @@ infrastructure, because there is no path by which they could.
 ## Commands
 
 ```bash
-npx rigorrun@alpha                        # start the runner and open the interface
+npx rigorrun                              # start the runner and open the interface
 npx rigorrun doctor                       # check this machine and every project
 npx rigorrun projects                     # what is on this machine
 npx rigorrun run --project <id>           # run the suite
@@ -61,7 +62,7 @@ npx rigorrun compare-runs --project <id> <runId>
 npx rigorrun feedback export              # a sanitised bundle for a bug report
 ```
 
-## This is an alpha
+## This is early access
 
 It connects to MCP servers, to HTTP APIs with an OpenAPI document, and to web
 applications through a browser — though a browser cannot verify itself, so a
@@ -69,6 +70,11 @@ verdict from one is OBSERVATIONAL unless something readable is attached.
 Setting a project up needs the interface; running and gating it does not. It has
 been used successfully by the people who wrote it and is now looking for people
 who did not.
+
+Every capability is marked WORKING, PARTIAL or MISSING in
+[the v1 gap audit](https://github.com/Konuktor/rigorrun/blob/master/docs/V1_GAP_AUDIT.md),
+with how each one was checked. Read it before you rely on this for anything
+that matters.
 
 If it goes wrong, `npx rigorrun feedback export` produces a bundle that contains
 no credentials, no tool arguments and no results — only what is needed to work

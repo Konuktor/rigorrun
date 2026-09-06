@@ -26,7 +26,7 @@ test.describe('the golden demo', () => {
     const watchers = watchPage(page);
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance testing');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance tests');
     // The primary action is now testing your own agent; the demo is the way out
     // for somebody who is not ready to connect anything.
     await expect(page.getByTestId('cta-test-your-agent')).toBeVisible();

@@ -220,7 +220,11 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   // --------------------------------------------------- 4. do the job once
   await expect(page.getByTestId('start-recording')).toBeVisible();
   await page.getByTestId('start-recording').click();
-  await expect(page.getByText('recording')).toBeVisible();
+  // Exactly the badge, not any text containing the word. The footer says
+  // "your recordings stay on this machine", which matched this too and made
+  // the assertion resolve to two elements — a test that fails on a sentence
+  // somebody wrote in the footer is a test nobody trusts.
+  await expect(page.getByText('recording', { exact: true })).toBeVisible();
 
   const doStep = async (tool: string, params: Record<string, string>): Promise<void> => {
     await page.getByTestId('tool-picker').selectOption(tool);

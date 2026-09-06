@@ -13,7 +13,7 @@ const STEPS = [
   {
     title: 'Start the runner',
     body: 'It serves the interface and does the work. Nothing is uploaded.',
-    code: 'npx rigorrun@alpha',
+    code: 'npx rigorrun',
   },
   {
     title: 'Open the link it prints',
@@ -21,8 +21,13 @@ const STEPS = [
     code: 'http://127.0.0.1:41925/?code=RKBB-9E64',
   },
   {
+    title: 'Make a project',
+    body: 'One job you want an agent to do, in one of your systems.',
+    code: null,
+  },
+  {
     title: 'Connect your system',
-    body: 'An MCP server, local or remote. RigorRun discovers what it can do and asks you which of those only read.',
+    body: 'An MCP server, an HTTP API with an OpenAPI document, or a web application through a browser. RigorRun discovers what it can do and asks you which of those only read.',
     code: null,
   },
   {
@@ -37,15 +42,25 @@ const STEPS = [
   },
   {
     title: 'Point it at your agent',
-    body: 'Any agent that speaks MCP works as-is. Ten lines if you use the SDK instead.',
+    body: 'Any agent that speaks MCP works as-is — an address, a command, or one that asks RigorRun for work because it cannot be started from here.',
     code: null,
+  },
+  {
+    title: 'Run it, and read the verdict',
+    body: 'Safe to ship, yes or no, with how strongly each answer could be verified.',
+    code: null,
+  },
+  {
+    title: 'Run it again after a change',
+    body: 'The same suite says which cases regressed, and the same gate fails a build.',
+    code: 'npx rigorrun gate --project <id>',
   },
 ];
 
 export function Quickstart() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
-      <Tag>About ten minutes</Tag>
+      <Tag>About ten minutes · Early Access · v0.1</Tag>
       <h1 className="mt-4 text-title font-semibold">Testing your own agent</h1>
       <p className="mt-4 text-body text-secondary">
         This part runs on your machine, and that is not a preference. Your MCP server, your

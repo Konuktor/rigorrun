@@ -73,26 +73,27 @@ export function Landing({
       {/* ------------------------------------------------------------ hero */}
       <section className="grid gap-10 pt-14 pb-14 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center lg:gap-12 lg:pt-20">
         <div>
-          <Tag>Early · your systems and credentials stay on your machine</Tag>
+          <Tag>Your systems and credentials stay on your machine</Tag>
           <h1 className="mt-5 text-display font-semibold">
-            Acceptance testing
+            Acceptance tests
             <br />
-            <span className="text-secondary">for tool-using AI agents.</span>
+            <span className="text-secondary">for AI agents.</span>
           </h1>
           <p className="mt-5 max-w-xl text-body text-secondary">
-            Connect your system. Show RigorRun how one job is done. Connect your agent. RigorRun
-            proves whether the agent can do that job safely — by reading the system it changed,
-            never by trusting what it says about itself.
+            Connect the tools your agent can use. Show RigorRun the job once. Know if the agent is
+            safe to ship — from reading the system it changed, never from what it says about
+            itself.
           </p>
           {/* The command, on the page, rather than one click away. It is the
               whole install, and a person who has to navigate to find it is a
               person deciding whether to bother. */}
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <CopyCommand command="npx rigorrun@alpha" />
+            <CopyCommand command="npx rigorrun" />
+            <span className="text-meta text-muted">Early Access · v0.1</span>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Button onClick={onTestYourAgent} testId="cta-test-your-agent" size="lg">
-              Test your agent
+              Get started
             </Button>
             <button
               type="button"
@@ -100,7 +101,7 @@ export function Landing({
               data-testid="cta-run-demo"
               className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
             >
-              Try the demo
+              Try the example
             </button>
             <button
               type="button"
@@ -112,8 +113,8 @@ export function Landing({
             </button>
           </div>
           <p className="mt-4 text-meta text-muted">
-            Testing your own agent runs on your machine. The demo below runs in this page and
-            touches nothing of yours.
+            Testing your own agent runs on your machine. The example runs in this page and touches
+            nothing of yours.
           </p>
         </div>
 

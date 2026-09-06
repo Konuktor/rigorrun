@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.1.0-alpha.2';
+export const VERSION = '0.1.0';
 
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 

@@ -23,7 +23,7 @@ test.describe('critical path', () => {
     const watchers = watchPage(page);
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance testing');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance tests');
 
     await openDemo(page);
     await goToContract(page);
