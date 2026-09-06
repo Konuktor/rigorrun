@@ -304,16 +304,29 @@ export class Service {
     if (failed.length > 0) {
       return `These reads did not answer: ${failed.join(', ')}. RigorRun will not be able to verify what they cover.`;
     }
-    if (induceSchema(observations).schema.entities.length === 0) {
+    if (induceSchema(observations).schema.entities.length !== 0) return '';
+
+    // Nothing was induced, and there are two very different reasons for that.
+    // A system that answers in prose can never be verified. A system that is
+    // simply *empty* has told RigorRun nothing yet, and will tell it plenty
+    // the moment somebody demonstrates a job — reporting that as a problem
+    // would be sending people to fix something that is not broken, which is
+    // the mistake this whole probe exists to stop making.
+    if (payloadsAreEmpty(observations.map((entry) => entry.payload))) {
       return (
-        'These reads answered, but none of them returned structured records — RigorRun got text ' +
-        'back, and it reads structure rather than prose because guessing at the meaning of a ' +
-        'sentence is how a verdict stops being trustworthy. Nominate a read that returns ' +
-        'structured output if this system has one. If none do, RigorRun can watch your agent ' +
-        'work here but cannot check the result.'
+        'These reads answered, and there is nothing in this system yet, so RigorRun cannot tell ' +
+        'what its records look like. That is fine — it will work them out from what your ' +
+        'demonstration produces. Nothing to do here.'
       );
     }
-    return '';
+
+    return (
+      'These reads answered, but none of them returned structured records — RigorRun got text ' +
+      'back, and it reads structure rather than prose because guessing at the meaning of a ' +
+      'sentence is how a verdict stops being trustworthy. Nominate a read that returns ' +
+      'structured output if this system has one. If none do, RigorRun can watch your agent ' +
+      'work here but cannot check the result.'
+    );
   }
 
   // ------------------------------------------------------- step 2: teach a job
@@ -912,4 +925,42 @@ function firstActionArgs(trace: CanonicalHumanTrace | undefined): Record<string,
   const combined: Record<string, unknown> = {};
   for (const step of actions) Object.assign(combined, step.action?.args ?? {});
   return combined;
+}
+
+/**
+ * Whether these payloads are empty rather than unstructured.
+ *
+ * The distinction the read probe rests on. `{"entities":[],"relations":[]}` is
+ * a system with nothing in it; `{"content":"[FILE] a.md"}` is a system that
+ * answers in prose. Both induce no records, and only one of them is a problem.
+ *
+ * Empty means: every container is empty, and there is no free text pretending
+ * to be data. A single scalar somewhere — a count, a status — does not make a
+ * payload prose, but a string long enough to be a rendering does.
+ */
+function payloadsAreEmpty(payloads: readonly unknown[]): boolean {
+  let sawContainer = false;
+  let sawContent = false;
+
+  const walk = (value: unknown, depth: number): void => {
+    if (depth > 6 || value === null || value === undefined) return;
+    if (Array.isArray(value)) {
+      sawContainer = true;
+      if (value.length > 0) sawContent = true;
+      for (const entry of value.slice(0, 50)) walk(entry, depth + 1);
+      return;
+    }
+    if (typeof value === 'object') {
+      sawContainer = true;
+      const entries = Object.entries(value as Record<string, unknown>);
+      for (const [, entry] of entries.slice(0, 50)) walk(entry, depth + 1);
+      return;
+    }
+    // A long string is a rendering of something rather than a field of it.
+    if (typeof value === 'string' && value.trim().length > 0) sawContent = true;
+    if (typeof value === 'number' || typeof value === 'boolean') sawContent = true;
+  };
+
+  for (const payload of payloads) walk(payload, 0);
+  return sawContainer && !sawContent;
 }

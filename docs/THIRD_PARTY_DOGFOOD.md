@@ -41,6 +41,31 @@ two problems it is, and offers to continue anyway with every verdict marked
 in the wild return text, and "I connected it and it says it cannot check my
 system" is a legitimate finding rather than a failure of the tester.
 
+## And the whole journey, against a second public server
+
+`@modelcontextprotocol/server-memory` answers its reads in records —
+`{"entities":[…],"relations":[…]}` — so the rest of the loop could be run
+against it, and was. `packages/daemon/test/publicServerJourney.test.ts`
+connects to it unmodified from npm, teaches it a job, and gets a verdict.
+
+What RigorRun induced from it, from structure alone and never from the names of
+its fields:
+
+    Entitie(name, entityType, observations)   Relation(from, to, relationType)
+
+Two record types out of a knowledge graph, which is not one of the six bundled
+workflows nor the dogfood fixture's business. Then a contract, a suite, an agent
+run, and a verdict reading `verified: PARTIAL` and `isolation: NONE` — because
+that server publishes no way to put itself back, and pretending otherwise would
+be worth less than saying so.
+
+Writing that test found one more thing, and it is the same class as the first.
+An **empty** system and a system that answers in **prose** both induce no
+records, and RigorRun reported them identically — so connecting a fresh server
+with nothing in it yet produced a warning about an unfixable problem. It now
+tells them apart: nothing in this system yet is "fine, it will work them out
+from your demonstration", and that is not the same finding at all.
+
 ## The rule
 
 **A tester gets two things: an install command, and `docs/GETTING_STARTED.md`.**

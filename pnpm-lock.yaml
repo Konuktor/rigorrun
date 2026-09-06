@@ -20,6 +20,9 @@ importers:
       '@modelcontextprotocol/server-filesystem':
         specifier: 2026.8.31
         version: 2026.8.31(zod@4.5.4)
+      '@modelcontextprotocol/server-memory':
+        specifier: 2026.8.31
+        version: 2026.8.31(zod@4.5.4)
       '@playwright/test':
         specifier: ^1.62.1
         version: 1.62.1
@@ -1207,6 +1210,10 @@ packages:
 
   '@modelcontextprotocol/server-filesystem@2026.8.31':
     resolution: {integrity: sha512-kKaFkyAh6oipvc9+EAbJ552JafnMnOq5nzmzWkp1jJdBhTAAGpmIpWihUG1+rfNhmEFM98gUZDdCHCDD4v6a7Q==}
+    hasBin: true
+
+  '@modelcontextprotocol/server-memory@2026.8.31':
+    resolution: {integrity: sha512-ljj/3S4aGjxdNSQWw6gucKKGnTLdBPWxzapyY/MT2tOVyZwvxChvevXSLPwx59nKJAlVpUVW+cOlnVRXRwiqMQ==}
     hasBin: true
 
   '@oxc-project/types@0.148.0':
@@ -3125,6 +3132,14 @@ snapshots:
       diff: 8.0.4
       glob: 13.0.6
       minimatch: 10.2.6
+    transitivePeerDependencies:
+      - '@cfworker/json-schema'
+      - supports-color
+      - zod
+
+  '@modelcontextprotocol/server-memory@2026.8.31(zod@4.5.4)':
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.30.0(zod@4.5.4)
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - supports-color

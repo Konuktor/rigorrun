@@ -24,6 +24,7 @@ prints the exact command.
 | A stranger connects their own system and their own agent, in a browser, from nothing, reloads the page halfway through, gets a verdict, asks a failing case what happened, changes the agent, is told which case regressed, and gates it from the command line | `pnpm e2e:external` | passing |
 | Their work survives the runner being killed with SIGKILL, and a damaged file is reported rather than silently dropped | `pnpm e2e:restart` | passing |
 | RigorRun connects to a public MCP server nobody here wrote, and says out loud what it cannot verify about it | `pnpm test` (`*/test/thirdParty.test.ts`) | passing |
+| And goes all the way to a verdict against a second one, whose reads answer in records | `pnpm test` (`publicServerJourney.test.ts`) | passing |
 
 That test starts the runner exactly as the quickstart says to, pairs through
 the URL it prints, and drives Chromium. The system it connects is
@@ -42,7 +43,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 744 passing across 60 files, plus 8 in Python |
+| Unit + integration | `pnpm test` | 749 passing across 61 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
