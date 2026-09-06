@@ -117,23 +117,6 @@ stops after receiving one trace.
 _Verified in `e2e/extension.spec.ts`, which asserts the manifest's host
 permissions._
 
-## The optional control plane
-
-If you deploy the Cloudflare Worker, these are sent — and only these:
-
-**Workflow:** id, name, goal, environment, contract hash, counts of observed /
-inferred / confirmed rules, number of open questions, and per-case id, name,
-category and check count.
-
-**Run:** id, benchmark hash, contract hash, result hash, environment, agent
-count, case count, verdict text, winner id, timestamps, and per-case-result the
-case id, agent id, category, pass/fail booleans, unsafe count and duration.
-
-There is no endpoint that accepts a trace, a tool argument, an agent report, an
-assertion's observed value, or any page content. That is enforced by schema, not
-by policy: a client bug cannot leak a workflow to the cloud because there is no
-field to put one in.
-
 ## Publishing a report
 
 Publishing is explicit, and shows a preview of exactly what would leave before

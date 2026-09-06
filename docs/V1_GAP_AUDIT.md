@@ -129,7 +129,7 @@ the only SDK anybody outside can use today.
 | Set a project up from the command line | **MISSING** | Connecting and teaching are interface-only. Running, gating and comparing are not — which is the half CI needs. |
 | More than one demonstration per contract | **MISSING** | Rules come from a single recording. |
 | More than one person | **MISSING** | The runner is one person's process on one machine. |
-| Cloud sync | **MISSING** | A control plane is deployed and called by nothing. It is code, not a capability, and it should be opt-in sync or deleted. |
+| Cloud sync | **MISSING, and now deliberately so** | The control plane was deployed and called by nothing, so it was deleted rather than shipped. There is no cloud sync and no hosted component. Recoverable from git history. |
 | Induction proposes only rules worth confirming | **PARTIAL** | It over-produces: roughly a quarter of proposed rules get discarded during review. Reviewing is the point, and this is still more work than it should be. |
 | OAuth for the OpenAPI connector | **PARTIAL** | `client_credentials` works: the token endpoint is read out of the document, the token is exchanged once and replaced when the API refuses it. A flow that ends in a browser is not built there, because it is the flow an API under test almost never uses. |
 

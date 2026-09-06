@@ -12,7 +12,7 @@ where only the second is green is not a release.
 
 | What | Command | Result |
 | ---- | ------- | ------ |
-| A stranger installs it from the public registry | `npx rigorrun` | **0.1.0**, `latest` |
+| A stranger installs it from the public registry | `npx rigorrun` | **0.1.1**, `latest` |
 | The package builds, packs, contains only what it should, carries no credentials, installs into a clean directory, runs, explains itself on an old Node, and completes the fresh-user journey | `pnpm verify:package` | see below |
 
 `verify:package` publishes nothing. Its last line says whether publishing would
@@ -49,7 +49,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 778 passing across 64 files, plus 8 in Python |
+| Unit + integration | `pnpm test` | 762 passing across 64 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 25 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
@@ -113,9 +113,12 @@ questions about what an external person could do before and after that work.
 | Landing, quickstart, `/proof` and the bundled example | <https://rigorrun.pages.dev> |
 | Northstar Support (the example's app) | <https://rigorrun-crm.pages.dev> |
 | Four schema-driven systems | <https://rigorrun-ops.pages.dev> |
-| Control plane | <https://rigorrun.takhiroverbol.workers.dev> — deployed, tested, and called by nothing |
 
 The product itself is not on any of these. It is served by the runner on the
 machine that has the systems, because a page on `https` cannot reach
 `http://127.0.0.1` and most of what people want tested is only reachable from
 there.
+
+There is no hosted component. A cloud control plane existed as code, was
+deployed, and was called by nothing; it was removed rather than shipped as a
+capability nobody had. It is recoverable from git history.

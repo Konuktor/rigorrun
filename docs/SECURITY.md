@@ -149,7 +149,7 @@ _Tests:_ `apps/worker/test/api.test.ts`, run against real SQL.
 **Threat.** Dependency compromise.
 
 **Mitigation.** Runtime dependencies are deliberately few — `zod` everywhere,
-`hono` in the Worker, `react` in the apps. Install runs no package scripts
+`hono` in the runner, `react` in the apps. Install runs no package scripts
 (`allowBuilds` is explicit in `pnpm-workspace.yaml`), so `pnpm install` cannot
 execute third-party code. The lockfile is committed and CI installs with
 `--frozen-lockfile`.
@@ -158,12 +158,10 @@ execute third-party code. The lockfile is committed and CI installs with
 
 Stated plainly rather than implied:
 
-- **No multi-tenant authorisation model.** Guest workspaces are bearer-token
-  scoped. There are no users, roles or audit trails in the control plane.
+- **No multi-user model.** RigorRun runs as one person on one machine. There
+  are no users, roles or audit trails, and nothing is shared between machines.
 - **No signing of published reports.** Hashes prove internal consistency, not
   authorship. Anyone who can produce a report can produce its hashes.
-- **The rate limiter is fixed-window and D1-backed.** It stops accidental abuse;
-  it is not a defence against a determined attacker.
 - **The recorder trusts the page's DOM.** A hostile page could present
   misleading accessible names. The recorder is meant to be run on applications
   the operator already trusts.

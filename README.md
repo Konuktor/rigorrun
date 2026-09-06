@@ -155,7 +155,6 @@ the button.
 | ------------------------------------ | ------------------------------------------------------- |
 | Live demo                            | <https://rigorrun.pages.dev>                            |
 | Northstar Support (the recorded app) | <https://rigorrun-crm.pages.dev>                        |
-| Control-plane API                    | <https://rigorrun.takhiroverbol.workers.dev/api/health> |
 
 ## Run it locally
 
@@ -260,11 +259,6 @@ flowchart TB
         llm["Groq · Gemini · any<br/>OpenAI-compatible API"]
     end
 
-    subgraph cloud["Cloudflare Workers Free — optional"]
-        api["Hono API"]
-        d1[("D1<br/>metadata only")]
-    end
-
     rec -->|trace.json| cli
     crm -.records.-> rec
     cli --> comp --> gen --> run
@@ -272,17 +266,11 @@ flowchart TB
     run --> ver --> score --> rep
     core -.- comp & gen & run & ver & rep
     run <-->|tool calls| demo & http & llm
-    cli -. "sanitised metadata only" .-> api --> d1
-
-    classDef cloudNode stroke-dasharray: 4 3;
-    class api,d1,cloud cloudNode;
 ```
 
-The expensive parts run locally. The cloud control plane is optional, stores
-metadata only, and the product is fully functional with it switched off — which
-is how it ships today: **the current CLI and interface do not call it.** It is
-deployable code, not a capability you need, and it is off unless you stand it up
-yourself.
+Everything runs locally. There is no server component: no account, no hosted
+API, no database. The demo, the CLI, the benchmark and CI need no service at
+all, which is why nothing here can generate a bill.
 
 ---
 
@@ -376,18 +364,12 @@ Model-backed agents work too — set `GROQ_API_KEY`, `GEMINI_API_KEY` or an
 
 ## Deploy for $0
 
-The MVP is designed so that **no part of it can generate a bill.** The demo,
-the CLI, the benchmark and CI need no service at all. The optional control
-plane runs on Cloudflare Workers Free with D1 Free:
+RigorRun is designed so that **no part of it can generate a bill.** The demo,
+the CLI, the benchmark and CI need no service at all, and there is no hosted
+component to pay for. The only Cloudflare use is Pages, which serves the static
+landing page and the two demo apps.
 
-```bash
-pnpm exec wrangler login
-pnpm exec wrangler d1 create rigorrun          # copy database_id into apps/worker/wrangler.toml
-pnpm -F @rigorrun/worker db:remote
-pnpm -F @rigorrun/worker deploy
-```
-
-Never enable Workers Paid; nothing here needs it. See
+See
 [docs/FREE_DEPLOYMENT.md](docs/FREE_DEPLOYMENT.md) and
 [docs/COST_GUARDRAILS.md](docs/COST_GUARDRAILS.md), which lists every service,
 its free limit, what happens when the limit is reached, and whether it can bill
@@ -434,7 +416,7 @@ packages/
   verifier/    14 assertion kinds over a filtered path language
   scoring/     rates · Wilson intervals · pass@k · thresholds
   agents/      demo pair · HTTP · OpenAI-compatible adapters
-  providers/   offline · Groq · Gemini · Workers AI · any OpenAI-compatible
+  providers/   offline · Groq · Gemini · any OpenAI-compatible
   runner/      reset → seed → execute → observe → verify → score
   report/      self-contained HTML report + publish sanitiser
   cli/         the `rigorrun` binary
@@ -442,7 +424,6 @@ apps/
   web/         landing page + dashboard
   demo-crm/    Northstar Support
   extension/   Chrome MV3 recorder
-  worker/      optional Hono + D1 control plane
 examples/refund-workflow/   a real trace, contract and benchmark
 docs/                       product, architecture, security, privacy, cost
 ```
@@ -483,7 +464,6 @@ pnpm release:verify --prod   # the above, plus production smoke and acceptance
 | Visual regression               | `pnpm visual`     |
 | Cross-browser critical path     | `pnpm cross`      |
 | Production smoke                | `pnpm smoke:prod` |
-| Production API and system state | `pnpm api:prod`   |
 | Production journeys             | `pnpm e2e:prod`   |
 
 See [TESTING.md](docs/TESTING.md) for what each layer is for, and

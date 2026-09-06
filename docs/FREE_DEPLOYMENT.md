@@ -1,160 +1,74 @@
 # Deploying for $0
 
-RigorRun is usable with nothing deployed at all. This page covers the optional
-control plane, and the deliberate limits on what it will accept.
+RigorRun has **no hosted component**. There is nothing to deploy in order to use
+it, no account to create, and no service that can send you a bill.
 
-## The live deployment
+This page exists because there used to be more here, and because the static
+demo sites are worth documenting.
 
-Running today, entirely on free Cloudflare infrastructure:
+## First: you almost certainly do not need this
 
-| Component         | URL                                          | Service                 |
-| ----------------- | -------------------------------------------- | ----------------------- |
-| Dashboard         | <https://rigorrun.pages.dev>                 | Cloudflare Pages (free) |
-| Northstar Support | <https://rigorrun-crm.pages.dev>             | Cloudflare Pages (free) |
-| Control plane     | <https://rigorrun.takhiroverbol.workers.dev> | Workers Free + D1 Free  |
-
-The dashboard executes the benchmark in the browser, so the two Pages projects
-are static hosting with no server behind them. Neither depends on the Worker;
-the demo works with the API switched off.
-
-## First: you probably do not need this
-
-| You want to…                                            | Deploy anything? |
-| ------------------------------------------------------- | ---------------- |
-| Run the demo                                            | No               |
-| Benchmark your own agent                                | No               |
-| Gate a build in CI                                      | No               |
-| Export and email a report                               | No               |
-| Keep a shared index of workflows and runs across a team | Yes              |
-| Share a sanitised report by link                        | Yes              |
-
-## What gets deployed
-
-A single Cloudflare Worker (Hono) with a D1 database, holding **metadata only**:
-names, hashes, counts, scores, outcomes. There is no endpoint that accepts a
-trace, a tool argument, an agent report or any page content — enforced by
-schema, not by policy.
-
-## Deploy it
+The product runs on your machine:
 
 ```bash
-# 1. Authenticate (opens a browser; free account is enough)
-pnpm exec wrangler login
-
-# 2. Create the database — D1 Free, no card required
-pnpm exec wrangler d1 create rigorrun
-#    Copy the printed database_id into apps/worker/wrangler.toml
-
-# 3. Apply migrations
-pnpm -F @rigorrun/worker db:remote
-
-# 4. Deploy
-pnpm -F @rigorrun/worker deploy
+npx rigorrun
 ```
 
-You get `https://rigorrun.<your-subdomain>.workers.dev`. Check it:
+That is the whole installation. It serves its own interface on `127.0.0.1`,
+stores everything under `~/.rigorrun`, and talks to nothing on the internet
+except the systems and agents you point it at. A page served over `https`
+cannot reach `http://127.0.0.1`, which is the reason the product is local
+rather than hosted — not a limitation being worked around.
+
+## What was here before
+
+A Cloudflare Worker plus a D1 database, described as an "optional control
+plane". It was deployed, it was tested, and **nothing in the product ever
+called it.** It was code, not a capability.
+
+It was deleted rather than kept as an option, because a documented capability
+that nothing uses is the same defect RigorRun exists to find in other people's
+systems. It remains in git history if it is ever wanted.
+
+There is no cloud sync, no shared history, no hosted runs, and no account
+system. If those arrive, they will arrive as something somebody asked for.
+
+## Static hosting for the demo sites
+
+The landing page and the two demo apps build to static files and can go on any
+free static host — Cloudflare Pages, GitHub Pages, Netlify:
 
 ```bash
-curl https://rigorrun.<your-subdomain>.workers.dev/api/health
+pnpm build:web    # apps/web/dist    — landing page and the in-browser demo
+pnpm build:crm    # apps/demo-crm/dist — Northstar Support, the recorded app
+pnpm build:ops    # apps/demo-ops/dist — four schema-driven systems
 ```
 
-**Never accept a prompt to enable Workers Paid.** Nothing here needs it.
+The in-browser demo executes its benchmark in the browser, so a static host is
+genuinely enough — there is no server behind it.
 
-## Run it locally first
+Currently deployed:
 
-No Cloudflare account required — this runs the real Workers runtime with a real
-local D1:
+| | |
+| --- | --- |
+| Landing, quickstart and the bundled example | <https://rigorrun.pages.dev> |
+| Northstar Support | <https://rigorrun-crm.pages.dev> |
+| Four schema-driven systems | <https://rigorrun-ops.pages.dev> |
 
-```bash
-pnpm -F @rigorrun/worker db:local
-pnpm -F @rigorrun/worker dev          # http://127.0.0.1:8787
-
-curl -X POST http://127.0.0.1:8787/api/workspaces
-```
-
-## Using it
-
-```bash
-# Create a guest workspace — the token is shown exactly once
-curl -X POST https://<your-worker>/api/workspaces
-
-export RIGORRUN_API_URL=https://<your-worker>
-export RIGORRUN_WORKSPACE=ws_…
-export RIGORRUN_TOKEN=…
-```
-
-Only the token's SHA-256 is stored server-side, so a database leak does not
-yield usable credentials.
-
-## API
-
-| Method   | Path                    | Auth   | Purpose                                   |
-| -------- | ----------------------- | ------ | ----------------------------------------- |
-| `GET`    | `/api/health`           | —      | Liveness and what the service stores      |
-| `POST`   | `/api/workspaces`       | —      | Create a guest workspace (10/hour per IP) |
-| `POST`   | `/api/workflows`        | Bearer | Upsert workflow metadata + case index     |
-| `GET`    | `/api/workflows/:id`    | Bearer | Read it back                              |
-| `DELETE` | `/api/workflows/:id`    | Bearer | Delete it and its cases                   |
-| `POST`   | `/api/runs`             | Bearer | Register a run                            |
-| `POST`   | `/api/runs/:id/results` | Bearer | Attach per-case outcomes                  |
-| `GET`    | `/api/runs/:id`         | Bearer | Run plus per-agent aggregates             |
-| `POST`   | `/api/publish`          | Bearer | Publish a sanitised report                |
-| `GET`    | `/api/reports/:id`      | —      | Read a published report                   |
-
-Auth is `Authorization: Bearer <token>` plus `X-RigorRun-Workspace: <id>`.
-
-## Static hosting for the apps (optional)
-
-Both apps build to static files and can go on any free static host — Cloudflare
-Pages, GitHub Pages, Netlify:
-
-```bash
-pnpm build:web    # apps/web/dist
-pnpm build:crm    # apps/demo-crm/dist
-```
-
-The dashboard executes the benchmark in the browser, so a static host is
-genuinely enough — there is no server to run.
-
-## Keeping it free
-
-| Guardrail             | How                                                        |
-| --------------------- | ---------------------------------------------------------- |
-| No paid binding       | `wrangler.toml` declares only Workers + D1                 |
-| No unbounded storage  | Metadata only; published reports expire after 30 days      |
-| No table scans        | Every filtered column is indexed; D1 Free meters rows read |
-| No oversized payloads | Requests are capped at 256 KB before parsing               |
-| No abuse              | Fixed-window rate limits per IP and per workspace          |
-
-See [COST_GUARDRAILS.md](COST_GUARDRAILS.md) for the full table.
+Deploy them with `pnpm deploy:web`, `pnpm deploy:crm`, `pnpm deploy:ops`, or all
+three with `pnpm deploy:all`. Cloudflare Pages Free serves static assets with no
+request limit and no card, and none of these three has a server component that
+could cost anything.
 
 ## Custom domain
 
-`workers.dev` is free and sufficient. A custom domain (`rigorrun.xyz`, say)
-requires you to own the domain; nothing in this repository assumes one, and
-none is purchased or configured.
+Not required and not configured. `pages.dev` is free and sufficient; nothing in
+this repository assumes a domain, and none is purchased.
 
-## Running the production API tests
+## Keeping it free
 
-Workspace creation is rate limited to 10/hour per address, deliberately. A CI
-job that runs more often than that should reuse credentials rather than mint new
-ones:
+There is one guardrail and it is structural: **nothing here runs on metered
+compute.** Static assets on Pages, and a CLI on your own machine.
 
-```bash
-QA_WORKSPACE_ID=ws_… QA_WORKSPACE_TOKEN=… \
-QA_WORKSPACE_ID_2=ws_… QA_WORKSPACE_TOKEN_2=… \
-  pnpm api:prod
-```
-
-Without them the suite creates two workspaces, and if the quota is exhausted it
-skips the credentialed tests with that reason rather than reporting a product
-failure.
-
-## Troubleshooting
-
-| Symptom                                 | Cause                    | Fix                                                  |
-| --------------------------------------- | ------------------------ | ---------------------------------------------------- |
-| `Not logged in… could not be refreshed` | Expired OAuth session    | `pnpm exec wrangler login`                           |
-| `D1_ERROR: no such table`               | Migrations not applied   | `pnpm -F @rigorrun/worker db:remote`                 |
-| `database_id` placeholder error         | Step 2 not completed     | Paste the real id into `wrangler.toml`               |
-| 401 on every call                       | Missing workspace header | Send both `Authorization` and `X-RigorRun-Workspace` |
+See [COST_GUARDRAILS.md](COST_GUARDRAILS.md) for every remaining service —
+which is now the optional model providers, GitHub Actions, and npm.

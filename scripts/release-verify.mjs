@@ -42,7 +42,6 @@ const LOCAL = [
 /** Production gates, only meaningful after a deploy. */
 const PROD = [
   ['smoke:prod', 'pnpm', ['smoke:prod'], 'production smoke'],
-  ['api:prod', 'pnpm', ['api:prod'], 'production API and real system state'],
   ['e2e:prod', 'pnpm', ['e2e:prod'], 'production journeys at 1440 / 820 / 390'],
   ['perf:prod', 'pnpm', ['perf:prod'], 'Core Web Vitals and layout-shift budgets'],
 ];
