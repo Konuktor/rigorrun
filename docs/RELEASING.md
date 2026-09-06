@@ -49,31 +49,45 @@ a provenance attestation naming the commit and workflow that produced it.
 The workflow is tag-triggered (`v*`), refuses to run if the tag and the manifest
 version disagree, and runs `pnpm verify:package` before it publishes anything.
 
-### The one manual step, on npm's side
+### The one account-side step — done
 
-This cannot be done from a repository — it is an account action, and it has to
-happen once, after the package exists:
+The trusted publisher is an account action, done once after the package existed.
+It is **configured** for `rigorrun`:
 
-1. Sign in at <https://www.npmjs.com> as the package owner.
-2. Go to the package: **npmjs.com/package/rigorrun** → **Settings**.
-3. Under **Trusted publisher**, choose **GitHub Actions** and fill in:
-   - Organization or user: `Konuktor`
-   - Repository: `rigorrun`
-   - Workflow filename: `release.yml`
-   - Environment: `npm`
-4. Save.
+| | |
+| --- | --- |
+| Provider | GitHub Actions |
+| Organization or user | `Konuktor` |
+| Repository | `rigorrun` |
+| Workflow filename | `release.yml` |
+| Environment | `npm` |
+| Permissions | publish, stage publish |
 
-Until that is saved, the workflow will fail at the publish step with a 404 or a
-401 from the registry — it has no other credential to fall back on, which is
-the intended design.
+It was set from the CLI (npm ≥ 12), which is the fastest way and needs the
+account's second factor:
+
+```bash
+npm trust github rigorrun --repo Konuktor/rigorrun --file release.yml \
+  --env npm --allow-publish -y
+npm trust list rigorrun          # confirm the relationship
+```
+
+The web path is equivalent: **npmjs.com/package/rigorrun → Settings → Trusted
+publisher → GitHub Actions**, with the same values.
+
+There is no npm write token anywhere — not in repository secrets, not in the
+`npm` environment (which holds zero secrets), nowhere. Publishing has no
+credential to fall back on but the short-lived OIDC token GitHub mints for this
+workflow, which is the intended design: a stolen repository secret cannot
+publish because there is none.
 
 ### Then, for the next release
 
 ```bash
-# bump packages/cli/package.json and packages/cli/src/help.ts together
+# bump packages/cli/package.json and packages/cli/src/help.ts together (to vX.Y.Z)
 pnpm release:verify && pnpm verify:package
 git commit -am "…" && git push
-git tag -a v0.1.1 -m "…" && git push origin v0.1.1
+git tag -a vX.Y.Z -m "…" && git push origin vX.Y.Z
 ```
 
 The tag starts the workflow. Watch it rather than assuming: npm versions are
