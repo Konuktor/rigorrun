@@ -11,6 +11,7 @@ export default defineConfig({
       '@rigorrun/env-browser': r('./packages/env-browser/src/index.ts'),
       '@rigorrun/trace-import': r('./packages/trace-import/src/index.ts'),
       '@rigorrun/core': r('./packages/core/src/index.ts'),
+      '@rigorrun/exec': r('./packages/exec/src/index.ts'),
       '@rigorrun/environment': r('./packages/environment/src/index.ts'),
       '@rigorrun/environments': r('./packages/environments/src/index.ts'),
       '@rigorrun/quality': r('./packages/quality/src/index.ts'),

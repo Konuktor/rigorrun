@@ -342,6 +342,9 @@ importers:
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
+      '@rigorrun/exec':
+        specifier: workspace:*
+        version: link:../exec
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
@@ -432,6 +435,8 @@ importers:
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
+
+  packages/exec: {}
 
   packages/generator:
     dependencies:

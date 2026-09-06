@@ -47,11 +47,28 @@ export type AssertionSeverity = z.infer<typeof AssertionSeveritySchema>;
  *
  * `STATE` is the system of record after the agent finished. `EVENT` is a
  * deterministic action log. `OUTPUT` is a deterministic check on what the
- * agent produced. `HUMAN` is a person. `MODEL` is a model judge, which is the
- * weakest and is rendered as such — a report must never mix a model's opinion
- * in with authoritative state and let a reader assume they carry equal weight.
+ * agent produced. `HUMAN` is a person. `MODEL` is a model judge, which is
+ * rendered as such — a report must never mix a model's opinion in with
+ * authoritative state and let a reader assume they carry equal weight.
+ *
+ * `DECLARED` is weaker than all of them, and is last for that reason. It is
+ * the system under test describing itself: a tool's name, its description, an
+ * annotation like `readOnlyHint`. MCP's own specification tells clients not to
+ * act on these when the server is untrusted, so a `DECLARED` source is never
+ * evidence of anything — it is the claim we go and check. Naming it is what
+ * lets a record say "the server said this, and here is what it did instead"
+ * without quietly promoting the server's word to a finding.
+ *
+ * Nothing with a `DECLARED` source may ever block, and there is a test for it.
  */
-export const VERIFICATION_SOURCES = ['STATE', 'EVENT', 'OUTPUT', 'HUMAN', 'MODEL'] as const;
+export const VERIFICATION_SOURCES = [
+  'STATE',
+  'EVENT',
+  'OUTPUT',
+  'HUMAN',
+  'MODEL',
+  'DECLARED',
+] as const;
 export const VerificationSourceSchema = z.enum(VERIFICATION_SOURCES);
 export type VerificationSource = z.infer<typeof VerificationSourceSchema>;
 
@@ -200,3 +217,15 @@ export const ObservationSchema = z.object({
   agentReport: z.string().optional(),
 });
 export type Observation = z.infer<typeof ObservationSchema>;
+
+/**
+ * The sources a failure may be gated on.
+ *
+ * Everything except `DECLARED`. A declaration is the system under test
+ * describing itself, so allowing it to block would let a server decide its own
+ * verdict by asserting one. The exclusion is here, in one function, rather
+ * than spread across the callers that would each have to remember it.
+ */
+export function blockingVerificationSources(): readonly VerificationSource[] {
+  return VERIFICATION_SOURCES.filter((source) => source !== 'DECLARED');
+}

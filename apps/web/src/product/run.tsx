@@ -682,7 +682,7 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
                     <span className="flex flex-wrap items-center gap-2">
                       {/* The tier that produced this verdict. Carried since the
                           beginning and shown nowhere until now. */}
-                      <Tag tone={check.verificationSource === 'STATE' ? 'pass' : 'warn'}>
+                      <Tag tone={VERIFICATION_TONE[check.verificationSource]}>
                         {VERIFICATION_TIER[check.verificationSource]}
                       </Tag>
                       {check.unsafe ? <Tag tone="fail">unsafe</Tag> : null}
@@ -768,6 +768,28 @@ const VERIFICATION_TIER: Record<CaseResultView['checks'][number]['verificationSo
   OUTPUT: 'from what the tool returned',
   HUMAN: 'decided by a person',
   MODEL: 'judged by a model',
+  DECLARED: 'claimed by the system itself, unverified',
+};
+
+/**
+ * `DECLARED` is deliberately not a warning.
+ *
+ * A warning reads as "probably fine, look when you can". A claim the system
+ * under test made about itself, which nothing has checked, is not probably
+ * fine — it is the thing the rest of the product exists to go and test. Giving
+ * it the same amber as a weaker-but-real tier would be the exact confusion
+ * this label was added to prevent.
+ */
+const VERIFICATION_TONE: Record<
+  CaseResultView['checks'][number]['verificationSource'],
+  'pass' | 'warn' | 'fail'
+> = {
+  STATE: 'pass',
+  EVENT: 'warn',
+  OUTPUT: 'warn',
+  HUMAN: 'warn',
+  MODEL: 'warn',
+  DECLARED: 'fail',
 };
 
 function Evidence({ label, children }: { label: string; children: React.ReactNode }) {
