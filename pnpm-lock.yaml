@@ -295,6 +295,15 @@ importers:
         specifier: workspace:*
         version: link:../environment
 
+  packages/conformance:
+    dependencies:
+      '@rigorrun/connector':
+        specifier: workspace:*
+        version: link:../connector
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/connector:
     dependencies:
       '@rigorrun/core':
