@@ -150,6 +150,59 @@ describe('a project whose system is an HTTP API', () => {
     expect(write.risk).toMatchObject({ level: 'write', source: 'protocol' });
   }, 60_000);
 
+  it('knows a client id is a credential without being told twice', async () => {
+    // The bug this pins: naming a client id in the sign-in and not repeating it
+    // in the credentials list produced "REGISTRY_CLIENT_ID is not in this
+    // machine's credential store" while it was sitting in the store. The names
+    // a connector needs are derived from the connector, not typed alongside it.
+    const other = await service.createProject({ name: 'Signed in', goal: 'Assign a plot.' });
+    await store.setSecret('REGISTRY_CLIENT_ID', 'a-client');
+    await store.setSecret('REGISTRY_CLIENT_SECRET', 'a-secret');
+
+    const connected = await service.connectEnvironment(
+      other.id,
+      {
+        kind: 'openapi',
+        spec: SPEC,
+        specUrl: '',
+        baseUrl,
+        headers: {},
+        oauth: {
+          tokenUrl: `${baseUrl}/oauth/token`,
+          clientIdSecret: 'REGISTRY_CLIENT_ID',
+          clientSecretSecret: 'REGISTRY_CLIENT_SECRET',
+          scope: '',
+        },
+        secretNames: [],
+      },
+      'staging',
+    );
+    expect(connected.serverName).toBe('Allotment registry');
+
+    // And one that is genuinely absent still says so, naming it.
+    const third = await service.createProject({ name: 'Not signed in', goal: 'Assign a plot.' });
+    await expect(
+      service.connectEnvironment(
+        third.id,
+        {
+          kind: 'openapi',
+          spec: SPEC,
+          specUrl: '',
+          baseUrl,
+          headers: {},
+          oauth: {
+            tokenUrl: `${baseUrl}/oauth/token`,
+            clientIdSecret: 'REGISTRY_CLIENT_ID',
+            clientSecretSecret: 'A_NAME_NOBODY_SET',
+            scope: '',
+          },
+          secretNames: [],
+        },
+        'staging',
+      ),
+    ).rejects.toThrow(/A_NAME_NOBODY_SET/);
+  }, 60_000);
+
   it('survives a restart, because the document is kept rather than fetched', async () => {
     // A spec behind a URL that has since moved would make an old project
     // unopenable. It is stored, so reconnecting needs nothing but the disk.

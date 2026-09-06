@@ -36,7 +36,12 @@ import { BrowserConnection } from '@rigorrun/env-browser';
 import type { ActionLogEntry } from '@rigorrun/core';
 import type { CanonicalState, EnvironmentSchema } from '@rigorrun/environment';
 import { basename, join } from 'node:path';
-import { describeConnectorAction, type Connector, type Project } from './project.ts';
+import {
+  describeConnectorAction,
+  secretNamesOf,
+  type Connector,
+  type Project,
+} from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
 import { openInBrowser } from './openUrl.ts';
 import type { ProjectStore } from './store.ts';
@@ -93,7 +98,7 @@ export class Workspace {
 
     const secrets: Record<string, string> = {};
     const missing: string[] = [];
-    for (const name of connector.secretNames) {
+    for (const name of secretNamesOf(connector)) {
       const value = await this.store.secret(name);
       if (value === undefined) missing.push(name);
       else secrets[name] = value;
@@ -167,8 +172,10 @@ export class Workspace {
     secrets: Record<string, string>,
   ): Promise<SystemConnection> {
     if (connector.kind === 'openapi') {
-      // The names become values here and nowhere earlier, and a name with no
-      // value is refused rather than sent as an empty credential.
+      // The names become values here and nowhere earlier. `secretsFor` has
+      // already refused a connector whose credentials are missing — including
+      // these, because `secretNamesOf` derives them — so this is narrowing
+      // rather than checking. It still says something true if it ever fires.
       const oauth = connector.oauth;
       const clientId = oauth ? secrets[oauth.clientIdSecret] : undefined;
       const clientSecret = oauth ? secrets[oauth.clientSecretSecret] : undefined;

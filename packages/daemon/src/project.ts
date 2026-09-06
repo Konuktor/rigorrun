@@ -130,6 +130,24 @@ export type ConnectorInput = z.input<typeof ConnectorSchema>;
 export type McpConnector = z.infer<typeof McpConnectorSchema>;
 export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
 
+/**
+ * Every credential name this connector needs.
+ *
+ * Derived rather than typed twice. A client id named in one place and expected
+ * to be repeated in a list is a person setting up a project correctly and
+ * being told their credential is missing when it is sitting right there.
+ */
+export function secretNamesOf(connector: Connector): string[] {
+  const names = [...connector.secretNames];
+  if (connector.kind === 'openapi' && connector.oauth) {
+    names.push(connector.oauth.clientIdSecret, connector.oauth.clientSecretSecret);
+  }
+  if (connector.kind === 'browser' && connector.verifier) {
+    names.push(...secretNamesOf(connector.verifier));
+  }
+  return [...new Set(names.filter((name) => name.length > 0))];
+}
+
 /** One line naming what a project connects to, for a list or a diagnostic. */
 export function describeConnector(connector: Connector | null): string {
   if (!connector) return 'not connected';

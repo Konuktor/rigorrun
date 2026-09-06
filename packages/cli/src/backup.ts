@@ -21,6 +21,7 @@ import {
   ProjectStore,
   describeConnectorAction,
   parseProject,
+  secretNamesOf,
   storeRoot,
   type Project,
 } from '@rigorrun/daemon';
@@ -167,7 +168,13 @@ export async function cmdExportProject(
     }
   }
 
-  const secretNames = project.connector?.secretNames ?? [];
+  // Every name the connector needs, including ones it derives — a client id
+  // for a token exchange is as much a credential as a header value.
+  //
+  // Deliberately not every name on the machine: an external agent's key and an
+  // OAuth token live in the same store and belong to this machine, not to a
+  // file somebody forwards.
+  const secretNames = project.connector ? secretNamesOf(project.connector) : [];
   const bundle: Bundle = {
     bundleVersion: BUNDLE_VERSION,
     exportedAt: new Date().toISOString(),

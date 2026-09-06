@@ -69,6 +69,71 @@ describe('exporting a project', () => {
     expect(bundle.containsSecrets).toBe(true);
     expect(bundle.secrets.DESK_TOKEN).toBe('sk-not-a-real-token');
   });
+
+  it('leaves behind the credentials that belong to this machine', async () => {
+    const { home, store } = await workspace();
+    // Two credentials that live in the same store and are nobody else's
+    // business: the key an agent RigorRun cannot start uses to ask for work,
+    // and a token from an OAuth sign-in. Neither is a connector's credential,
+    // and a bundle gets forwarded.
+    const project = await store.read('p_1');
+    await store.setSecret('agent:a_1:key', 'a-key-nobody-else-should-hold');
+    await store.setSecret('oauth:https://desk.example/mcp:tokens', '{"access_token":"tok-abc"}');
+    await store.write({
+      ...project,
+      agents: [
+        {
+          id: 'a_1',
+          name: 'Ours',
+          kind: 'external',
+          keyName: 'agent:a_1:key',
+          lastProbeAt: null,
+          lastProbeOk: true,
+          lastProbeProblem: '',
+        },
+      ],
+    });
+
+    const out = join(home, 'everything.json');
+    expect(await cmdExportProject('p_1', flags(home, { out, withSecrets: true }))).toBe(0);
+    const bundle = await readFile(out, 'utf8');
+
+    expect(bundle).not.toContain('a-key-nobody-else-should-hold');
+    expect(bundle).not.toContain('tok-abc');
+    // The name travels, because the project refers to it. Only the name.
+    expect(bundle).toContain('agent:a_1:key');
+  });
+
+  it('carries the names a connector needs without being told them twice', async () => {
+    const { home, store } = await workspace();
+    const project = await store.read('p_1');
+    await store.setSecret('REGISTRY_CLIENT_ID', 'a-client');
+    await store.setSecret('REGISTRY_CLIENT_SECRET', 'a-secret');
+    await store.write({
+      ...project,
+      connector: {
+        kind: 'openapi',
+        spec: '{"openapi":"3.0.3","paths":{}}',
+        specUrl: '',
+        baseUrl: 'https://registry.example/api',
+        headers: {},
+        oauth: {
+          tokenUrl: 'https://registry.example/oauth/token',
+          clientIdSecret: 'REGISTRY_CLIENT_ID',
+          clientSecretSecret: 'REGISTRY_CLIENT_SECRET',
+          scope: '',
+        },
+        // Deliberately empty: a client id named in the sign-in should not have
+        // to be repeated here for RigorRun to know it is needed.
+        secretNames: [],
+      },
+    });
+
+    const out = join(home, 'oauth.json');
+    expect(await cmdExportProject('p_1', flags(home, { out }))).toBe(0);
+    const bundle = JSON.parse(await readFile(out, 'utf8')) as { secretNames: string[] };
+    expect(bundle.secretNames.sort()).toEqual(['REGISTRY_CLIENT_ID', 'REGISTRY_CLIENT_SECRET']);
+  });
 });
 
 describe('importing a project', () => {
