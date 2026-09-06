@@ -43,7 +43,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 749 passing across 61 files, plus 8 in Python |
+| Unit + integration | `pnpm test` | 757 passing across 62 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 23 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
@@ -96,8 +96,10 @@ contradiction between what a system claims about a tool and what it does can
 only be seen through a nominated read: a change nothing reads is a change
 nobody can observe.
 
-`docs/PRODUCT_REALITY_AUDIT.md` answers twenty questions about what an external
-person can do, before and after this work.
+`docs/V1_GAP_AUDIT.md` marks every capability WORKING, PARTIAL, DEMO-ONLY,
+BROKEN or MISSING, checked by walking the product rather than by reading its
+tests. `docs/PRODUCT_REALITY_AUDIT.md` is the earlier one, answering twenty
+questions about what an external person could do before and after that work.
 
 ## Deployed
 

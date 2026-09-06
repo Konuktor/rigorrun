@@ -89,7 +89,8 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Every error message, and what to do. |
 | [Third-party dogfood](docs/THIRD_PARTY_DOGFOOD.md) | How we find out whether anybody else can use this. |
 | [An example feedback bundle](docs/examples/feedback-bundle.json) | Exactly what `rigorrun feedback export` sends, from a real session. |
-| [What is and is not built](docs/PRODUCT_REALITY_AUDIT.md) | The honest inventory. |
+| [v1 gap audit](docs/V1_GAP_AUDIT.md) | Every capability marked WORKING, PARTIAL, DEMO-ONLY, BROKEN or MISSING, checked by doing it. |
+| [What is and is not built](docs/PRODUCT_REALITY_AUDIT.md) | The earlier inventory, left as written. |
 | [Roadmap](docs/ROADMAP.md) | Including the gaps. |
 
 ## Why does it exist?
@@ -424,6 +425,7 @@ docs/                       product, architecture, security, privacy, cost
 | [FREE_DEPLOYMENT.md](docs/FREE_DEPLOYMENT.md)   | Deploying on free tiers                                |
 | [COST_GUARDRAILS.md](docs/COST_GUARDRAILS.md)   | Every service, limit and safeguard                     |
 | [ROADMAP.md](docs/ROADMAP.md)                   | What is honestly not built yet                         |
+| [V1_GAP_AUDIT.md](docs/V1_GAP_AUDIT.md)         | Every capability, marked, with how it was checked      |
 | [ALTALAB.md](docs/ALTALAB.md)                   | Problem, ICP, wedge, moat, go-to-market                |
 
 ## Development
