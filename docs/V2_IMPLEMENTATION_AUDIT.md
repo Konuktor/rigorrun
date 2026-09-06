@@ -28,14 +28,14 @@ capability the code does not have, this file records **MISSING**.
 
 | Req | Title | Mark | Phase |
 |---|---|---|---|
-| F1 | Container harness | **MISSING** | 2 — building now |
-| F2 | Tool exercise and behavioral contract | **MISSING** | 2 — building now |
-| F3 | Annotation conformance | **PARTIAL** | 2 — building now |
+| F1 | Container harness | **WORKING** for npm and directory references | 2 — done |
+| F2 | Tool exercise and behavioral contract | **WORKING** | 2 — done |
+| F3 | Annotation conformance | **WORKING** | 2 — done |
 | F4 | Drift detection | **PARTIAL** | **BLOCKED BY GATE 2** |
-| F5 | Evidence record | **PARTIAL** | 3 (record shape built now) |
+| F5 | Evidence record | **PARTIAL** — shape done, unsigned | 3 for the signature |
 | F6 | Machine-readable tool policy | **MISSING** | **BLOCKED — needs integration partner** |
 | F7 | Harbor export | **MISSING** | 2, after the record model is stable |
-| F8 | Headless project lifecycle | **PARTIAL** | 1 — satisfied by `verify` |
+| F8 | Headless project lifecycle | **WORKING** for the v2 path | 1 — satisfied by `verify`, proven at Gate 1 |
 | F9 | SDK distribution | **ALREADY RESOLVED** | 1 — verify only |
 | F10 | Multi-source induction | **MISSING** | 3 |
 | F11 | Agent-under-test mode | **WORKING** | shipped |
@@ -48,7 +48,7 @@ capability the code does not have, this file records **MISSING**.
 | B3 | **PARTIAL** — unchanged, correctly described |
 | B4 | **PARTIAL** — unchanged, correctly described |
 | B5 | **PARTIAL by design** — structural, disclosed, accepted |
-| B6 | **CONFIRMED DEAD — but the PRD's description is factually wrong** |
+| B6 | **REMOVED** from product code. The deployment is still live and needs authorization to tear down. |
 
 **Zero external users. Zero npm downloads reported. Nothing in this file is tier-1
 evidence.**
@@ -472,3 +472,99 @@ self-description is a product defect. These are corrected on this branch.
   empty and every mark above is tier 2 or below.
 - **BUYER VALIDATION: UNCONFIRMED.** See [GATE0_EVIDENCE.md](GATE0_EVIDENCE.md).
 - **HUMAN TTFRV: UNMEASURED.** See [TTFRV_PROTOCOL.md](TTFRV_PROTOCOL.md).
+
+
+---
+
+## Addendum — what was measured, 6 September 2026
+
+Written after the vertical slice ran, so that the marks above are backed by a result
+rather than by an intention.
+
+### Against a real third-party server
+
+`rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31`
+
+| | |
+|---|---|
+| Digest | `sha512-ljj/3S4aGjxdNSQWw6gucKKGnTLdBPWxzapyY/MT2tOVyZwvxChve…` from the registry, checked against the downloaded bytes before anything unpacked |
+| Server | `memory-server` 0.6.3 |
+| Tools discovered | 9 |
+| Tools exercised | 5 |
+| Conformance | 13 CONFORMS · 0 CONTRADICTED · 0 UNDETERMINED |
+| Untested | 4 — three declared destructive and believed, one discovered to need a fixture by trying it |
+| Verification strength | `PARTIAL` — complete over durable state, blind to process memory |
+| Isolation | `RESET`, **measured**: two independent resets produced identical state digests |
+| Read-only posture | held; the container layer stayed empty |
+| Egress | none |
+| Exit | 0 |
+
+### Against a server that lies
+
+`rigorrun verify dir:fixtures/external/mcp-attested-lookup` — a fixture whose
+`lookup_user` is annotated `readOnlyHint: true` and appends to an audit file.
+
+```
+lookup_user  readOnlyHint: true    CONTRADICTED   permission-relevant
+             wrote /work/target/audit.log
+lookup_user  idempotentHint: true  CONTRADICTED
+list_users   all three claims      CONFORMS
+```
+
+Exit 1. The truthful tool in the same server comes back clean, which is what
+distinguishes a verifier from something that flags everything.
+
+**The argument for the whole container harness, as a measurement:** `audit.log` is
+invisible to `list_users`. A verifier reading state only through the server's own tools
+would have seen nothing and reported the server as conforming.
+
+### Two records, diffed
+
+Version B of the same fixture — same tool name, same schema, same annotations, same
+description — adds one write.
+
+```
+declared identical : True
+description same   : True
+A wrote            : ['audit.log']
+B wrote            : ['audit.log', 'last-seen.json']
+NEW SIDE EFFECT    : ['last-seen.json']
+```
+
+That is the drift primitive working. Continuous watching is **not** built; it is behind
+Gate 2.
+
+### Four defects the harness found in itself
+
+Recorded because a trust product that hides its own near-misses is not one.
+
+1. **`cp -a` needs `CAP_CHOWN`**, which is dropped, so the entrypoint died before the
+   server started. Now `cp -R`, with the tree pre-owned by the unprivileged user.
+2. **A false accusation.** `add_observations` was reported as contradicting
+   `readOnlyHint: false` when it had simply refused generated arguments and changed
+   nothing. Now an errored call with an empty delta is `NEEDS_FIXTURE` — discovered by
+   attempting, not guessed.
+3. **Untested tools inflated the undetermined count**, so declining to touch three
+   destructive tools made a clean run look inconclusive. A tool that was never called now
+   produces no verdicts at all; it appears only in `untested`.
+4. **Two different fixtures had the same digest.** `dir:` targets were identified by their
+   dependency closure rather than their own bytes, so a server's identity did not change
+   when its code did. That is the one promise the record makes, and it was broken. Now a
+   content digest over the source.
+
+A fifth was found by Gate 1 rather than by a test: **`pnpm pack` runs pnpm's builtin, not
+the script of the same name**, so the gate was testing a stale tarball. Gate 1 failed,
+correctly, and the script now uses `pnpm run pack`.
+
+### Gate 1
+
+`pnpm gate1` — packaged tarball, a directory that had never seen RigorRun, a `HOME` that
+did not exist, no browser reachable. Eight checks green. Machine runtime 12.5s.
+
+**HUMAN TTFRV: UNMEASURED.** No onboarding-time claim follows from the number above.
+
+### Tests
+
+841 across 73 files, all passing. 66 of them are new: exec 5, record 9, conformance 29,
+sandbox 26 (posture, references and surfaces, all without a container runtime), and 10
+adversarial tests that need one and skip cleanly without it.

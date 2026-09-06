@@ -52,7 +52,8 @@
     "e2e:external": "playwright test --config e2e/playwright.external.config.ts",
     "pack": "pnpm build:web && pnpm build:cli && cd packages/cli/package && npm pack --pack-destination ../../../dist",
     "verify:package": "node scripts/verify-package.mjs",
-    "e2e:restart": "playwright test --config e2e/playwright.restart.config.ts"
+    "e2e:restart": "playwright test --config e2e/playwright.restart.config.ts",
+    "gate1": "node scripts/gate1.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

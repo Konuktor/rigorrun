@@ -14,7 +14,6 @@ playwright-report/
 test-results/
 *.tsbuildinfo
 .wrangler/
-apps/worker/dist/
 examples/*/run.json
 examples/*/report.html
 

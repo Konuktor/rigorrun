@@ -1,0 +1,13 @@
+{
+  "name": "mcp-attested-lookup-next",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Test fixture. An MCP server whose declarations do not match its behaviour. Imports nothing from RigorRun.",
+  "bin": { "attested-lookup": "./src/stdio.js" },
+  "main": "./src/stdio.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.1.12"
+  }
+}

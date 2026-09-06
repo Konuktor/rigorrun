@@ -11,7 +11,8 @@
 
 ## CURRENT PHASE
 
-**Phase 1 (unconditional blockers) complete; Phase 2 vertical slice in progress.**
+**Phase 1 complete. Phase 2 vertical slice complete and proven on real
+third-party servers. Stopped there deliberately.**
 
 Phase 0 (falsification) is done and written up. Phase 2 is limited to the smallest real
 F1 → F2 → F3 slice plus 3–5 real third-party servers. F4 and F6 are not being built.
@@ -23,7 +24,7 @@ F1 → F2 → F3 slice plus 3–5 real third-party servers. F4 and F6 are not be
 | Gate | Status | Basis |
 |---|---|---|
 | **Gate 0** — falsification | `GATE_0_NOT_DISPROVEN_BUT_BUYER_UNVALIDATED` | Check 1 positive from primary Microsoft documentation. Check 3a/3b positive. Checks 2 and 3c UNKNOWN, outreach written and unsent. Gate 0 fails only if 1 **and** 3 are both negative; 1 is positive, so it has not failed. See [GATE0_EVIDENCE.md](docs/GATE0_EVIDENCE.md). |
-| **Gate 1** — clean machine → record, one command, no browser | **IN PROGRESS** | Requires the `verify` command to exist. Proof must come from a packaged artifact in a fresh `HOME`, not from unit tests. |
+| **Gate 1** — clean machine → record, one command, no browser | **PASSED** | `pnpm gate1`. Builds the tarball, installs it into a directory that has never seen RigorRun with a `HOME` that did not exist, and runs `rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31` with no browser reachable. Eight checks, all green. Machine runtime 12.5s; **human TTFRV remains UNMEASURED and no onboarding claim follows from this.** |
 | **Gate 2** — inbound from operators within 30 days of the registry report | **NOT STARTED** | Requires F12 and a published report. Blocks F4. |
 | **Gate 3** — three independent orgs watching at day 30 | **NOT STARTED** | Blocks the paid tier, multi-user, billing, hosted console, hiring. |
 | **Gate 4** — three organizations paying | **NOT STARTED** | — |
@@ -49,13 +50,33 @@ registry scan, stars, traffic and downloads do not count and are not counted.
   list. No response invented.
 - **TTFRV protocol.** Manual stopwatch, with machine runtime recorded separately and
   explicitly barred from onboarding claims.
+- **B6 removed.** The deployed-but-uncalled control plane is gone from the product,
+  with the import-graph proof in the commit. The deployment itself is still up and needs
+  authorization to tear down.
+- **F9 confirmed.** `npx rigorrun` installs 0.1.1 from the public registry into a clean
+  directory with a fresh `HOME`, runs, and `doctor` exits 0. `@rigorrun/agent-sdk` 404s,
+  exactly as the documentation says. Decision: no SDK will be published — the v2 path
+  needs none.
+- **F1 container harness.** npm and directory references, digest pinned and verified
+  before anything unpacks, host-side staging with lifecycle scripts disabled, an image
+  with no `RUN` instruction, and a hardened container with no network, no mounts and no
+  environment. Reset is measured rather than declared.
+- **F2 exercise engine.** Schema-derived arguments with five safety classes and a fixed
+  value table rather than a fuzzer.
+- **F3 conformance.** Three-valued verdicts across `readOnlyHint`, `destructiveHint` and
+  `idempotentHint`, with `permissionRelevant` on the two that drive automatic
+  permissioning.
+- **`rigorrun.record/1`.** Canonically serialized, re-hashable from the file on disk.
+- **`rigorrun verify` and exit code 3.** No browser, no agent, no project.
+- **Gate 1 proven from a packaged artifact**, not from unit tests.
 
 ---
 
 ## IN PROGRESS
 
-Phase 2 vertical slice — F1 container harness, F2 exercise engine, F3 conformance, and the
-`rigorrun.record/1` evidence record.
+Nothing. The session stops at the end of the vertical slice, as planned. The next
+increment is more third-party servers, gradually, per F12 — 5 → 20 → 100 → 300+ — fixing
+systemic harness defects before each increase.
 
 ---
 
@@ -74,19 +95,15 @@ Phase 2 vertical slice — F1 container harness, F2 exercise engine, F3 conforma
 
 ## NEXT
 
-1. Extract the process-spawn chokepoint so a container check can reach it without a
-   dependency cycle, keeping the "exactly one file spawns" invariant intact.
-2. `rigorrun.record/1` schema in core, canonically serialized with the existing
-   `canonicalJson`.
-3. Widen `IsolationLevel` with `PARTIAL` and `VERIFICATION_SOURCES` with `DECLARED`, with
-   backward-compatibility assertions for records already on disk.
-4. Conformance engine — argument planner, judge, exit codes — testable with no container
-   runtime present.
-5. Adversarial fixtures A and B.
-6. Container harness — resolve, fetch, verify digest, stage, build, run hardened.
-7. `rigorrun verify` + exit code 3 + `doctor` container checks.
-8. Gate 1 clean-room proof from the packaged tarball.
-9. 3–5 real third-party servers.
+1. Widen to 20 third-party servers and measure launch rate, discovery rate, exercise
+   coverage and the share that is fully verifiable. Publish the honest denominator.
+2. Send the Gate 0 outreach. Checks 2 and 3c cannot be answered any other way, and
+   until one is answered the buyer remains unvalidated.
+3. Measure human TTFRV with a real subject who has not seen this repository.
+4. `rigorrun diff <a> <b>` as a first-class command. The record comparison already
+   works — the adversarial fixture pair is diffed in a test — but there is no command.
+5. Server-provided read tools as a corroborating surface, which is written and specified
+   but not yet wired into an exercise run.
 
 ---
 
@@ -98,7 +115,10 @@ Phase 2 vertical slice — F1 container harness, F2 exercise engine, F3 conforma
 | F1–F12 / B1–B6 marks | [docs/V2_IMPLEMENTATION_AUDIT.md](docs/V2_IMPLEMENTATION_AUDIT.md) |
 | No SDK is published, and no doc claims one is | `npm view @rigorrun/sdk` → 404; `docs/TYPESCRIPT_AGENT_SDK.md:3-8` |
 | The control plane is dead in-product | Import graph in the audit, B6 section |
-| v1 still works | `pnpm test`, `pnpm e2e:external`, `pnpm e2e:restart`, `pnpm verify:package` |
+| v1 still works | `pnpm test` — 831 tests across 72 files, all passing |
+| Gate 1 | `pnpm gate1` — eight checks from a packaged artifact in a fresh HOME |
+| The harness catches a lying server | `packages/sandbox/test/adversarial.test.ts`, and `rigorrun verify dir:fixtures/external/mcp-attested-lookup` exits 1 |
+| The container posture is what is claimed | `packages/sandbox/test/posture.test.ts`, asserted from the argv with no runtime needed |
 
 ---
 

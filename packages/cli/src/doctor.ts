@@ -13,6 +13,7 @@
  */
 import { ProjectStore, Service, storeRoot, nextSteps } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
+import { inspectRuntime } from '@rigorrun/sandbox';
 import { describeAgent, probeAgent, probeProcessAgent } from '@rigorrun/daemon';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
@@ -59,6 +60,19 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
     // with no keyring; what would be wrong is not saying which one you got.
     ok: 'unknown',
     detail: backend ? `${backend.kind} — ${backend.detail}` : 'could not be determined',
+  });
+
+  // `verify` cannot run without a container runtime, and finding that out
+  // after a package has been downloaded is worse than finding it out here.
+  // Not a failure: the v1 flow needs no container at all, so a machine without
+  // one is fine for most of the product and only closes off `verify`.
+  const runtime = await inspectRuntime();
+  checks.push({
+    what: 'container runtime',
+    ok: runtime.available ? true : 'unknown',
+    detail: runtime.available
+      ? `docker ${runtime.version}${runtime.rootless ? ' (rootless)' : ' — daemon runs as root, so an escape reaches this host'}`
+      : `none — \`rigorrun verify\` needs one. ${runtime.detail}`,
   });
 
   // Binding a port is the first thing the runner does and the first thing a

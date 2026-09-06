@@ -45,6 +45,9 @@ const GENERIC = [
   'packages/proxy/src',
   'packages/daemon/src',
   'packages/agent-sdk/src',
+  'packages/exec/src',
+  'packages/conformance/src',
+  'packages/sandbox/src',
   // The CLI dispatches both the product and the bundled example, so its help
   // text legitimately names the example's files. Its *code* must not: a
   // `?? 'refund'` default lived here for months precisely because nothing was

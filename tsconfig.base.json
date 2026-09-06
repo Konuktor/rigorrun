@@ -28,6 +28,7 @@
       "@rigorrun/core": ["./packages/core/src/index.ts"],
       "@rigorrun/exec": ["./packages/exec/src/index.ts"],
       "@rigorrun/conformance": ["./packages/conformance/src/index.ts"],
+      "@rigorrun/sandbox": ["./packages/sandbox/src/index.ts"],
       "@rigorrun/environment": ["./packages/environment/src/index.ts"],
       "@rigorrun/environment/*": ["./packages/environment/src/*"],
       "@rigorrun/environments": ["./packages/environments/src/index.ts"],

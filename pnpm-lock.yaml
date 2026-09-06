@@ -172,6 +172,24 @@ importers:
         specifier: ^4.21.1
         version: 4.23.13
 
+  fixtures/external/mcp-attested-lookup:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
+
+  fixtures/external/mcp-attested-lookup-next:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
+
   fixtures/external/mcp-venue-desk:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -243,6 +261,9 @@ importers:
       '@rigorrun/compiler':
         specifier: workspace:*
         version: link:../compiler
+      '@rigorrun/conformance':
+        specifier: workspace:*
+        version: link:../conformance
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
@@ -258,6 +279,9 @@ importers:
       '@rigorrun/environments':
         specifier: workspace:*
         version: link:../environments
+      '@rigorrun/exec':
+        specifier: workspace:*
+        version: link:../exec
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
@@ -279,6 +303,9 @@ importers:
       '@rigorrun/runner':
         specifier: workspace:*
         version: link:../runner
+      '@rigorrun/sandbox':
+        specifier: workspace:*
+        version: link:../sandbox
       '@rigorrun/scoring':
         specifier: workspace:*
         version: link:../scoring
@@ -560,6 +587,21 @@ importers:
       '@rigorrun/verifier':
         specifier: workspace:*
         version: link:../verifier
+
+  packages/sandbox:
+    dependencies:
+      '@rigorrun/conformance':
+        specifier: workspace:*
+        version: link:../conformance
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rigorrun/exec':
+        specifier: workspace:*
+        version: link:../exec
+      '@rigorrun/mcp':
+        specifier: workspace:*
+        version: link:../mcp
 
   packages/scoring:
     dependencies:

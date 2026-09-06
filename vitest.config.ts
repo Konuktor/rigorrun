@@ -13,6 +13,7 @@ export default defineConfig({
       '@rigorrun/core': r('./packages/core/src/index.ts'),
       '@rigorrun/exec': r('./packages/exec/src/index.ts'),
       '@rigorrun/conformance': r('./packages/conformance/src/index.ts'),
+      '@rigorrun/sandbox': r('./packages/sandbox/src/index.ts'),
       '@rigorrun/environment': r('./packages/environment/src/index.ts'),
       '@rigorrun/environments': r('./packages/environments/src/index.ts'),
       '@rigorrun/quality': r('./packages/quality/src/index.ts'),

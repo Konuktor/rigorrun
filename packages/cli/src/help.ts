@@ -18,6 +18,15 @@ USAGE
                            where you connect a system, teach a job and watch a
                            run. Everything below is for scripts and CI.
 
+VERIFY A SERVER
+  verify <server-ref>      Run an MCP server's tools in a container RigorRun
+                           controls, and report what each one actually does
+                           against what the server says it does. Needs no
+                           project, no agent and no browser.
+
+                             rigorrun verify npm:<package>@<version>
+                             rigorrun verify dir:<path>
+
 PROJECTS
   projects                 List the projects on this machine.
   run --project <id>       Run the project's suite against its agent.
@@ -85,10 +94,19 @@ RUN / GATE OPTIONS
 COMPARE OPTIONS
       --baseline <runId>        Compare against this instead of the baseline.
 
+VERIFY OPTIONS
+      --max-undetermined <n>    Undetermined findings tolerated. Default 0.
+      --min-exercised <n>       Tools that must have been exercised. Default 1.
+      --strict                  Treat minor contradictions as failures too.
+  -o, --out <file>              Where to write the record.
+      --json                    Print the record and nothing else.
+
 EXIT CODES
   0  success, or the gate passed
-  1  the benchmark failed, or the gate was not met
+  1  the benchmark failed, the gate was not met, or a declaration was
+     contradicted by what the server was observed to do
   2  configuration or runtime error
+  3  verify only: it ran, but established too little to be worth much
 
 EXAMPLES
   rigorrun                                     start here
@@ -96,6 +114,8 @@ EXAMPLES
   rigorrun run --project p_1a2b3c
   rigorrun gate --project p_1a2b3c --min-success 0.95
   rigorrun compare-runs --project p_1a2b3c run_9f8e7d
+
+  rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
 
   rigorrun demo                                the bundled example
   rigorrun gate examples/refund-workflow/benchmark.json --agent reference
@@ -105,6 +125,40 @@ is no account, and nothing is uploaded unless you ask for it.
 `;
 
 export const COMMAND_HELP: Record<string, string> = {
+  verify: `rigorrun verify <server-ref> - find out what a server's tools do
+
+Fetches the server, pins it to the exact bytes the registry published, runs it
+in a container with no network and no access to this machine, calls each tool
+with arguments derived from its own schema, and reads the container's
+filesystem before and after to see what actually changed.
+
+Then it compares that against what the server declared. A tool annotated
+readOnlyHint: true that writes is reported CONTRADICTED, because that
+annotation decides whether an agent may call it without asking.
+
+Nothing it could not establish is reported as a fact. A tool it could not
+exercise safely is listed, with the reason.
+
+REFERENCES
+  npm:<package>@<version>   A published server. Pinned by the registry's digest.
+  dir:<path>                A server on this machine.
+
+OPTIONS
+      --max-undetermined <n>  Undetermined findings tolerated. Default 0.
+      --min-exercised <n>     Tools that must have been exercised. Default 1.
+      --strict                Treat minor contradictions as failures too.
+  -o, --out <file>            Where to write the record.
+      --json                  Print the record to stdout and nothing else.
+
+EXIT CODES
+  0  nothing contradicted
+  1  a declaration was contradicted
+  2  the verification could not be run at all
+  3  it ran, but established too little to be worth much
+
+REQUIRES
+  A container runtime. Run \`rigorrun doctor\` to see whether you have one.`,
+
   demo: `rigorrun demo - run the complete offline demo
 
 Compiles the bundled recorded refund workflow into a contract, generates the

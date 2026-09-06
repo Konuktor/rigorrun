@@ -238,6 +238,7 @@ async function discoverTools(client: Client, timeout: number): Promise<Discovere
       params: converted.params,
       unsupported: converted.unsupported,
       schemaTruncated: converted.truncated,
+      ...(tool.inputSchema ? { inputSchema: tool.inputSchema } : {}),
       ...(tool.outputSchema ? { outputSchema: tool.outputSchema } : {}),
       hints,
       risk: assessFromHints(hints),
