@@ -69,6 +69,11 @@ registry scan, stars, traffic and downloads do not count and are not counted.
 - **`rigorrun.record/1`.** Canonically serialized, re-hashable from the file on disk.
 - **`rigorrun verify` and exit code 3.** No browser, no agent, no project.
 - **Gate 1 proven from a packaged artifact**, not from unit tests.
+- **Four real third-party servers verified.** 37 tools discovered, 19 exercised, 18 named
+  as untested with reasons. All four launched, all four reset cleanly, all four held the
+  read-only posture. See [THIRD_PARTY_VERIFICATION.md](docs/THIRD_PARTY_VERIFICATION.md).
+- **A threat model**, written before F1 was called done, that leads with what the
+  container does *not* do.
 
 ---
 
@@ -131,9 +136,17 @@ systemic harness defects before each increase.
 - **A server's own read tools are the weakest surface** and may corroborate a
   `CONTRADICTED` verdict but never produce one — the server that might be lying is the one
   answering the read.
-- **Not every server is verifiable.** Servers needing credentials, live external APIs, or
-  state we cannot seed are reported `UNDETERMINED` and listed in a mandatory `untested`
-  array. The honest denominator is published rather than hidden.
+- **About half of a typical server's surface is reachable.** Measured: 19 of 37 tools
+  across four real servers. `server-filesystem` is 2 of 14, because nine of its tools want
+  a real path and the planner will not generate one. The remainder is itemised with
+  reasons in every record's mandatory `untested` array rather than rounded away.
+- **The four servers tested are one publisher's.** No `readOnlyHint: true` or
+  `destructiveHint: false` was contradicted by any of them, and that is a fact about four
+  well-maintained servers, not about the 18,000 in the registry.
+- **Only npm and directory references work.** An OCI image, a git ref and a remote
+  endpoint are refused rather than half-supported.
+- **A server's own read tools are specified as a corroborating surface but are not yet
+  wired into a run.** Today every observation comes from the container's filesystem.
 - **Records are hashed, not signed.** No HMAC, Ed25519, sigstore or attestation exists yet;
   F5's signature is later work, and the record shape is designed so it is an addition
   rather than a reshape.
