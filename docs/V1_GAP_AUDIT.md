@@ -120,7 +120,7 @@ the only SDK anybody outside can use today.
 | A command on this machine | **WORKING** | One line of JSON in, one out. Only a command a person typed at this machine can run — never one from a benchmark file, tool output, remote config or an imported trace. |
 | A TypeScript SDK | **PARTIAL** | Ten lines, real, and not installable — see the broken row at the top. |
 | A Python SDK | **WORKING** | Standard library only; an agent exception becomes a failed case, not a transport error. |
-| An agent RigorRun does not launch, pulling cases and pushing results | **MISSING** | Not built. An agent that cannot be started by a URL or a command cannot be benchmarked today. |
+| An agent RigorRun does not launch, pulling cases and pushing results | **WORKING** | A driver holding that agent's key asks for work, does it through the MCP endpoint it is handed, and posts a result. Driven end to end against the booking agent, over HTTP, with the key proven not to authorise anything else. `docs/DRIVEN_AGENT.md`. |
 
 ---
 

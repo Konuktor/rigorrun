@@ -79,6 +79,14 @@ RigorRun's own run artefacts, and any way to recover a starting state from
 telemetry — which is not an oversight, because telemetry describes what an agent
 did and never what the system held.
 
+~~**No way to test an agent RigorRun cannot start.**~~ Built —
+`docs/DRIVEN_AGENT.md`. An agent behind a login, in a notebook, or on
+infrastructure that will not take an inbound request now works: RigorRun
+prepares the world, publishes one case, and waits for whoever is driving to do
+it. Everything after that — the proxy, the step budget, the evidence, the
+verdict — is the same code. What is missing: the waiting slot lives in the
+running process, so a runner that restarts mid-run has nothing waiting.
+
 ~~**No OAuth for MCP, only a static header.**~~ Built —
 `docs/MCP_ENVIRONMENT.md`. A hosted MCP server that answers a 401 with
 `WWW-Authenticate` is discovered, registered with, and signed in to in a

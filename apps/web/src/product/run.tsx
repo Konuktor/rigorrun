@@ -8,7 +8,7 @@
  * could be read back from is a different claim from a pass against one that
  * could, and only one of them is worth acting on.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Metric, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
 import { Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
 import {
@@ -19,6 +19,7 @@ import {
   type ImportedTraceView,
   type ProjectView,
   type RunView,
+  type WaitingView,
 } from './api.ts';
 
 export function ConnectAgent({
@@ -29,7 +30,10 @@ export function ConnectAgent({
   onConnected: (project: ProjectView) => void;
 }) {
   const [name, setName] = useState('');
-  const [kind, setKind] = useState<'http' | 'process'>('http');
+  const [kind, setKind] = useState<'http' | 'process' | 'external'>('http');
+  /** Shown once, when the agent is made. There is no way to read it back. */
+  const [key, setKey] = useState('');
+  const [keyFor, setKeyFor] = useState('');
   const [endpoint, setEndpoint] = useState('http://127.0.0.1:8900/');
   const [command, setCommand] = useState('');
   const [args, setArgs] = useState('');
@@ -42,20 +46,27 @@ export function ConnectAgent({
     try {
       const result = await api.addAgent(
         project.id,
-        kind === 'process'
-          ? {
-              name: name.trim(),
-              command: command.trim(),
-              args: args
-                .split('\n')
-                .map((line) => line.trim())
-                .filter(Boolean),
-            }
-          : { name: name.trim(), endpoint: endpoint.trim() },
+        kind === 'external'
+          ? { name: name.trim(), driven: true }
+          : kind === 'process'
+            ? {
+                name: name.trim(),
+                command: command.trim(),
+                args: args
+                  .split('\n')
+                  .map((line) => line.trim())
+                  .filter(Boolean),
+              }
+            : { name: name.trim(), endpoint: endpoint.trim() },
       );
-      if (!result.agent.lastProbeOk) {
+      if (result.key) {
+        setKey(result.key);
+        setKeyFor(result.agent.id);
+      }
+      else if (!result.agent.lastProbeOk) {
         // Saved, because the endpoint is worth keeping while it is fixed, but
-        // never presented as connected.
+        // never presented as connected. A driven agent is a different case:
+        // there is nothing to probe, so not answering yet is not a problem.
         setProblem(result.agent.lastProbeProblem);
       }
       onConnected(result.project);
@@ -79,28 +90,53 @@ export function ConnectAgent({
               <Select
                 id={id}
                 value={kind}
-                onChange={(value) => setKind(value as 'http' | 'process')}
+                onChange={(value) => setKind(value as 'http' | 'process' | 'external')}
                 testId="agent-kind"
                 options={[
                   { value: 'http', label: 'It listens on an address' },
                   { value: 'process', label: 'It is a command on this machine' },
+                  { value: 'external', label: 'RigorRun cannot start it — I will drive it' },
                 ]}
               />
             )}
           </Field>
           <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
             <p className="text-meta font-medium text-secondary">What you need</p>
-            <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
-              <li>Your agent running and listening on an address — on this machine by default.</li>
-              <li>
-                It has to answer one small request saying it is there. If it already speaks MCP,
-                that plus about ten lines is the whole integration.
-              </li>
-            </ul>
-            <p className="mt-2 text-meta text-muted">
-              Next: RigorRun sends a test request and waits. It will not call your agent connected
-              until it answers.
-            </p>
+            {kind === 'external' ? (
+              <>
+                <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
+                  <li>
+                    Something that can ask RigorRun for work — a loop of about twenty lines, in
+                    whatever language your agent is already in.
+                  </li>
+                  <li>
+                    It asks what to do, works through the address it is handed, and says when it is
+                    finished. RigorRun never calls it, so it can live behind a login, in a
+                    notebook, or anywhere that will not take a request from this machine.
+                  </li>
+                </ul>
+                <p className="mt-2 text-meta text-muted">
+                  Next: RigorRun gives you a key. It is shown once, and it is what your loop uses
+                  to ask for work.
+                </p>
+              </>
+            ) : (
+              <>
+                <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
+                  <li>
+                    Your agent running and listening on an address — on this machine by default.
+                  </li>
+                  <li>
+                    It has to answer one small request saying it is there. If it already speaks
+                    MCP, that plus about ten lines is the whole integration.
+                  </li>
+                </ul>
+                <p className="mt-2 text-meta text-muted">
+                  Next: RigorRun sends a test request and waits. It will not call your agent
+                  connected until it answers.
+                </p>
+              </>
+            )}
           </div>
           <Field label="What is it called?">
             {({ id }) => (
@@ -113,7 +149,7 @@ export function ConnectAgent({
               />
             )}
           </Field>
-          {kind === 'http' ? (
+          {kind === 'external' ? null : kind === 'http' ? (
             <Field
               label="Where does it listen?"
               hint="On this machine by default, because an agent under test usually holds credentials for the system it is being tested against."
@@ -160,9 +196,14 @@ export function ConnectAgent({
             </>
           )}
           {problem ? <Problem>{problem}</Problem> : null}
+          {key ? <TheKey value={key} agentId={keyFor} /> : null}
           <div>
             <Button onClick={add} disabled={busy} testId="add-agent">
-              {busy ? 'Trying it…' : 'Check it answers'}
+              {busy
+                ? 'Trying it…'
+                : kind === 'external'
+                  ? 'Make a key'
+                  : 'Check it answers'}
             </Button>
           </div>
         </div>
@@ -179,11 +220,22 @@ export function ConnectAgent({
                   <span className="font-mono text-meta text-muted">
                     {agent.kind === 'http'
                       ? agent.endpoint
-                      : [agent.command, ...agent.args].join(' ')}
+                      : agent.kind === 'external'
+                        ? 'driven by you'
+                        : [agent.command, ...agent.args].join(' ')}
                   </span>
                 </div>
                 {agent.lastProbeOk ? (
-                  <Tag tone="pass">answering</Tag>
+                  <Tag tone="pass">{agent.kind === 'external' ? 'checked in' : 'answering'}</Tag>
+                ) : agent.kind === 'external' ? (
+                  <div className="flex flex-col items-end gap-1">
+                    {/* Not a failure. Nothing has gone wrong until a run starts
+                        and nobody comes. */}
+                    <Tag tone="warn">waiting for it to check in</Tag>
+                    <span className="max-w-md text-right text-meta text-muted">
+                      Start your loop; it becomes connected the first time it asks for work.
+                    </span>
+                  </div>
                 ) : (
                   <div className="flex flex-col items-end gap-1">
                     <Tag tone="fail">not answering</Tag>
@@ -201,6 +253,82 @@ export function ConnectAgent({
   );
 }
 
+/**
+ * What the person's own agent is being asked to do, while it does it.
+ *
+ * A run against an agent RigorRun cannot start looks identical to a hung run
+ * unless somebody can see which case is open and how far along it is. This is
+ * the difference between "it is stuck" and "it is on case nine of twelve".
+ */
+function Waiting({ projectId, agentId }: { projectId: string; agentId: string }) {
+  const [waiting, setWaiting] = useState<WaitingView | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    const tick = async (): Promise<void> => {
+      const answer = await api.waiting(projectId, agentId).catch(() => null);
+      if (live && answer) setWaiting(answer.waiting);
+    };
+    void tick();
+    const timer = setInterval(() => void tick(), 1000);
+    return () => {
+      live = false;
+      clearInterval(timer);
+    };
+  }, [projectId, agentId]);
+
+  return (
+    <Panel>
+      <div className="flex flex-col gap-1" data-testid="waiting-for-agent" aria-live="polite">
+        <p className="text-body text-fg">
+          {waiting
+            ? `Waiting for your agent — case ${waiting.index} of ${waiting.total}.`
+            : 'Waiting for your agent.'}
+        </p>
+        <p className="text-meta text-muted">
+          {waiting
+            ? waiting.task.instruction
+            : 'Your loop should be asking RigorRun for work. Nothing is wrong yet.'}
+        </p>
+      </div>
+    </Panel>
+  );
+}
+
+/**
+ * The key, shown once.
+ *
+ * There is deliberately no way to read it back — the same rule every other
+ * credential in RigorRun follows, and the reason a project file can be copied
+ * without carrying anything. If it is lost, make another agent.
+ */
+function TheKey({ value, agentId }: { value: string; agentId: string }) {
+  return (
+    <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
+      <p className="text-meta font-medium text-secondary">Your agent&rsquo;s key</p>
+      <p
+        className="mt-1 break-all font-mono text-meta text-fg"
+        data-testid="agent-key"
+        tabIndex={0}
+        role="region"
+        aria-label="Your agent's key"
+      >
+        {value}
+      </p>
+      <p className="mt-2 text-meta text-muted">
+        Copy it now. It is not stored anywhere you can read it back, and it is not in the project
+        file. It lets your agent ask for work and say it is finished, and nothing else.
+      </p>
+      <p className="mt-2 text-meta text-muted">
+        Your loop asks{' '}
+        <code className="font-mono text-fg">GET /api/drive/{agentId}</code> for work and posts to{' '}
+        <code className="font-mono text-fg">/api/drive/{agentId}/finished</code> when it is done,
+        both with that key as a bearer header.
+      </p>
+    </div>
+  );
+}
+
 export function RunAndVerdict({
   project,
   activation,
@@ -214,10 +342,14 @@ export function RunAndVerdict({
   const [comparison, setComparison] = useState<ComparisonView | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
+  /** Which agent is being run, so a driven one can be watched while it works. */
+  const [running, setRunning] = useState<string>('');
 
   const ready = project.agents.filter((agent) => agent.lastProbeOk);
+  const driven = ready.find((agent) => agent.id === running && agent.kind === 'external');
 
   async function go(agentId: string): Promise<void> {
+    setRunning(agentId);
     setBusy(true);
     setProblem('');
     setComparison(null);
@@ -234,11 +366,13 @@ export function RunAndVerdict({
       setProblem((error as Error).message);
     } finally {
       setBusy(false);
+      setRunning('');
     }
   }
 
   return (
     <div className="flex flex-col gap-5">
+      {driven && busy ? <Waiting projectId={project.id} agentId={driven.id} /> : null}
       {ready.length === 0 ? (
         <Panel>
           <p className="text-body text-secondary">

@@ -75,7 +75,12 @@ export interface ProjectView {
     lastProbeOk: boolean;
     lastProbeProblem: string;
     lastProbeAt: string | null;
-  } & ({ kind: 'http'; endpoint: string } | { kind: 'process'; command: string; args: string[] }))[];
+  } & (
+    | { kind: 'http'; endpoint: string }
+    | { kind: 'process'; command: string; args: string[] }
+    // An agent RigorRun cannot start. It holds a key and comes to ask for work.
+    | { kind: 'external'; keyName: string }
+  ))[];
   runs: {
     runId: string;
     agentName: string;
@@ -290,6 +295,17 @@ const post = <T>(path: string, body?: unknown): Promise<T> =>
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
 
+/** One case, as its driver sees it. */
+export interface WaitingView {
+  caseId: string;
+  index: number;
+  total: number;
+  task: { instruction: string; inputs: Record<string, unknown>; policyBrief: string };
+  mcpUrl: string;
+  expiresAt: string;
+  maxSteps: number;
+}
+
 export const api = {
   /** Whether this page is being served by a runner, and whether it may drive it. */
   async runner(): Promise<{ runner: boolean; paired: boolean; version: string }> {
@@ -375,9 +391,11 @@ export const api = {
     id: string,
     input:
       | { name: string; endpoint: string }
-      | { name: string; command: string; args: string[] },
+      | { name: string; command: string; args: string[] }
+      | { name: string; driven: true },
   ) =>
-    post<{ project: ProjectView; agent: ProjectView['agents'][number] }>(
+    // `key` comes back only for a driven agent, only on this one response.
+    post<{ project: ProjectView; agent: ProjectView['agents'][number]; key?: string }>(
       `/api/projects/${id}/agents`,
       input,
     ),
@@ -390,6 +408,11 @@ export const api = {
     }>(`/api/projects/${id}/trace/add`, { name, reason, request }),
   run: (id: string, agentId: string) =>
     post<{ run: RunView }>(`/api/projects/${id}/runs`, { agentId }),
+  /** What an agent RigorRun cannot start is being asked to do right now. */
+  waiting: (id: string, agentId: string) =>
+    request<{ waiting: WaitingView | null; checkedIn: boolean }>(
+      `/api/projects/${id}/agents/${agentId}/waiting`,
+    ),
   compare: (id: string, runId: string) =>
     request<{ comparison: ComparisonView }>(`/api/projects/${id}/compare/${runId}`),
   setBaseline: (id: string, runId: string) =>

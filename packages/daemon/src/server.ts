@@ -17,7 +17,7 @@
  * has to have been invited.
  */
 import { serve, type ServerType } from '@hono/node-server';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import type { Benchmark, EnvironmentContract, RunResult } from '@rigorrun/core';
@@ -112,6 +112,70 @@ export class Runner {
         // rather than a number typed into a component months ago.
         version: this.options.version ?? 'unknown',
       });
+    });
+
+    /**
+     * The two endpoints an agent RigorRun cannot start uses.
+     *
+     * Registered before the pairing middleware, deliberately and visibly:
+     * these are the one part of the API that is not driven by the browser the
+     * person paired, so they carry their own credential — a key belonging to
+     * one agent on one project. It does not drive the runner. Everything else
+     * under `/api` still needs the session.
+     *
+     * A wrong key, a key for another agent, and an agent that does not exist
+     * all get the same 401 with the same body, because telling them apart is
+     * telling somebody which of their guesses was closer.
+     */
+    const driving = async (
+      context: Context,
+    ): Promise<{ projectId: string; agentId: string } | null> => {
+      const key = context.req.header('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+      const agentId = context.req.param('agentId') ?? '';
+      const found = await service.driverFor(agentId, key);
+      return found ? { projectId: found.project.id, agentId } : null;
+    };
+    const notDriving = (context: Context): Response =>
+      context.json(
+        {
+          error: 'not your agent',
+          detail:
+            'Pass this agent’s key as a bearer header. It is shown once, when the agent is ' +
+            'added, and never again.',
+        },
+        401,
+      );
+
+    app.get('/api/drive/:agentId', async (context) => {
+      const who = await driving(context);
+      if (!who) return notDriving(context);
+      // Asking for work is what proves a driver exists, so it is also the
+      // probe. Nothing else can observe an agent RigorRun cannot call.
+      await service.noteDriverCheckIn(who.projectId, who.agentId);
+      return context.json({ waiting: service.driver.current(who.agentId) });
+    });
+
+    app.post('/api/drive/:agentId/finished', async (context) => {
+      const who = await driving(context);
+      if (!who) return notDriving(context);
+      const body = await context.req.json<{ caseId?: string; status?: string; output?: string }>();
+      const accepted = service.driver.finish(who.agentId, body.caseId ?? '', {
+        status: body.status === 'failed' ? 'failed' : 'completed',
+        // Bounded, because it goes into a run artefact and comes back out on a
+        // screen. An agent's account of itself is not a place to put a file.
+        output: String(body.output ?? '').slice(0, 8000),
+      });
+      return accepted
+        ? context.json({ accepted: true })
+        : context.json(
+            {
+              accepted: false,
+              detail:
+                'That is not the case RigorRun is waiting for. Ask for work again — it may ' +
+                'have timed out, or another copy of your agent may have answered it.',
+            },
+            409,
+          );
     });
 
     app.use('/api/*', async (context, next) => {
@@ -320,8 +384,19 @@ export class Runner {
         endpoint?: string;
         command?: string;
         args?: unknown;
+        driven?: boolean;
       }>();
       const name = String(body.name ?? '');
+      if (body.driven === true) {
+        const added = await service.addAgent(context.req.param('id'), { name, driven: true });
+        // The key travels in this one response and is never readable again.
+        // Whoever is looking at the screen has to copy it now.
+        return context.json({
+          project: summarise(added.project),
+          agent: added.agent,
+          key: added.key,
+        });
+      }
       // A command reaches `exec.ts` only from here and from the CLI, and both
       // are a person at this machine. There is no third route, and no schema
       // anywhere declares the provenance literal that lets one run.
@@ -338,6 +413,21 @@ export class Runner {
           : { name, endpoint: String(body.endpoint ?? '') },
       );
       return context.json({ project: summarise(added.project), agent: added.agent });
+    });
+
+    /**
+     * What an agent RigorRun cannot start is being asked to do right now.
+     *
+     * The interface's view of the same thing the driver sees, so somebody
+     * watching a run knows whether it is stuck on their agent or on RigorRun.
+     * Behind the session like everything else here: it is the person's own
+     * project, not the agent's key.
+     */
+    app.get('/api/projects/:id/agents/:agentId/waiting', (context) => {
+      return context.json({
+        waiting: service.driver.current(context.req.param('agentId')),
+        checkedIn: service.driver.hasCheckedIn(context.req.param('agentId')),
+      });
     });
 
     /**

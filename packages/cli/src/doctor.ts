@@ -142,6 +142,18 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
       // Probed for real, both kinds. `doctor` exists to answer "would a run
       // work right now", and an agent that was answering yesterday is not an
       // answer to that.
+      if (agent.kind === 'external') {
+        // Nothing to probe from here. This agent is driven by whoever holds
+        // its key, and only the running runner can see one arrive.
+        own.push({
+          what: `agent ${agent.name}`,
+          ok: agent.lastProbeOk,
+          detail: agent.lastProbeOk
+            ? 'driven by you — it has asked this runner for work'
+            : 'driven by you — it has not asked for work yet',
+        });
+        continue;
+      }
       const probe =
         agent.kind === 'process'
           ? await probeProcessAgent({

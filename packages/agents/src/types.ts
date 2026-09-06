@@ -41,7 +41,12 @@ export interface AgentRunOutput {
   costNote: string;
 }
 
-export type AgentKind = 'demo' | 'http' | 'llm' | 'process';
+/**
+ * `external` is an agent RigorRun cannot start — see `drivenAgent.ts` in the
+ * daemon. It is a kind rather than a flag on `http` because nothing about it
+ * is a URL: there is no endpoint to probe and nothing to call.
+ */
+export type AgentKind = 'demo' | 'http' | 'llm' | 'process' | 'external';
 
 export interface AgentAdapter {
   id: string;

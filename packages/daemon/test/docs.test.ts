@@ -136,6 +136,7 @@ describe('what the docs do not claim', () => {
     expect(names).toContain('BROWSER_ENVIRONMENT.md');
     expect(names).toContain('TRACE_IMPORT.md');
     expect(names).toContain('PYTHON_AGENT_SDK.md');
+    expect(names).toContain('DRIVEN_AGENT.md');
   });
 
   it('says plainly that this is an alpha, and what that means', async () => {

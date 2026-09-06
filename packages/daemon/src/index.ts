@@ -12,6 +12,7 @@ export * from './compare.ts';
 export * from './workspace.ts';
 export * from './httpAgent.ts';
 export * from './processAgent.ts';
+export * from './drivenAgent.ts';
 export * from './service.ts';
 export * from './pairing.ts';
 export * from './server.ts';

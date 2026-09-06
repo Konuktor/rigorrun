@@ -34,6 +34,7 @@ import {
 } from '@rigorrun/environment';
 import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
+import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
@@ -62,6 +63,14 @@ export interface ServiceOptions {
 export class Service {
   readonly workspace: Workspace;
   readonly activation: ActivationLog;
+  /**
+   * The waiting slot for agents RigorRun cannot start.
+   *
+   * On the service rather than in a project, because it describes what is
+   * happening right now: a runner that restarts has nothing waiting, which is
+   * the truth about the case it died in the middle of.
+   */
+  readonly driver = new ExternalDriver();
   private readonly now: () => Date;
 
   constructor(private readonly options: ServiceOptions) {
@@ -557,14 +566,32 @@ export class Service {
     projectId: string,
     input:
       | { name: string; endpoint: string; allowRemoteHosts?: boolean }
-      | { name: string; command: string; args?: string[]; cwd?: string },
-  ): Promise<{ project: Project; agent: AgentConfig }> {
+      | { name: string; command: string; args?: string[]; cwd?: string }
+      | { name: string; driven: true },
+  ): Promise<{ project: Project; agent: AgentConfig; key?: string }> {
     const project = await this.store.read(projectId);
     const id = `a_${randomBytes(4).toString('hex')}`;
     const now = this.now().toISOString();
 
     let agent: AgentConfig;
-    if ('command' in input) {
+    let key: string | undefined;
+    if ('driven' in input) {
+      // There is nothing to probe: RigorRun cannot call this agent, which is
+      // why it exists. It becomes connected when its driver asks for work,
+      // which is the only evidence available that it is real.
+      key = newAgentKey();
+      const keyName = `agent:${id}:key`;
+      await this.store.setSecret(keyName, key);
+      agent = {
+        id,
+        name: input.name || 'Your agent',
+        kind: 'external',
+        keyName,
+        lastProbeAt: null,
+        lastProbeOk: false,
+        lastProbeProblem: 'It has not asked RigorRun for work yet.',
+      };
+    } else if ('command' in input) {
       const probe = await probeProcessAgent({
         command: input.command,
         args: input.args ?? [],
@@ -616,8 +643,10 @@ export class Service {
     };
     await this.store.write(updated);
     if (agent.lastProbeOk) await this.activation.stage('agent_connected', projectId);
-    else await this.activation.attempt('agent_probe_failed', projectId);
-    return { project: updated, agent };
+    else if (agent.kind !== 'external') await this.activation.attempt('agent_probe_failed', projectId);
+    // The key is returned here and never again. It is in the credential store,
+    // and there is deliberately no command or endpoint that prints one back.
+    return { project: updated, agent, ...(key === undefined ? {} : { key }) };
   }
 
   /**
@@ -742,9 +771,11 @@ export class Service {
 
     let result;
     try {
-      result = await runBenchmark(benchmark, [this.adapterFor(config)], {
-        runId: `run_${randomBytes(6).toString('hex')}`,
-      });
+      result = await runBenchmark(
+        benchmark,
+        [this.adapterFor(config, { total: benchmark.cases.length })],
+        { runId: `run_${randomBytes(6).toString('hex')}` },
+      );
     } catch (error) {
       await this.activation.attempt('run_failed', projectId);
       throw error;
@@ -831,7 +862,70 @@ export class Service {
     return this.store.readRun<RunResult>(projectId, runId);
   }
 
-  adapterFor(config: AgentConfig): AgentAdapter {
+  // ------------------------------------------- agents RigorRun cannot start
+
+  /**
+   * Finds the agent this key belongs to, or nothing.
+   *
+   * A key names its own agent, so a wrong key is indistinguishable from a
+   * wrong agent id: both get the same nothing. The comparison is
+   * constant-time, and the stored key is read from the credential store rather
+   * than the project, which never holds one.
+   */
+  async driverFor(agentId: string, key: string): Promise<{ project: Project; agent: AgentConfig } | null> {
+    if (!key) return null;
+    const { projects } = await this.listAllProjects();
+    for (const project of projects) {
+      const agent = project.agents.find((entry) => entry.id === agentId);
+      if (!agent || agent.kind !== 'external') continue;
+      const expected = await this.store.secret(agent.keyName);
+      if (expected === undefined || !keyMatches(key, expected)) return null;
+      return { project, agent };
+    }
+    return null;
+  }
+
+  /**
+   * Records that a driver exists, which is the only probe available here.
+   *
+   * An agent RigorRun cannot call cannot be asked whether it is there. What
+   * can be observed is a driver holding the right key asking for work, so that
+   * is what marks it connected — and not one second earlier, because an agent
+   * that is CONNECTED on the strength of somebody having typed a name is the
+   * thing this refuses to be.
+   */
+  async noteDriverCheckIn(projectId: string, agentId: string): Promise<void> {
+    this.driver.noteCheckIn(agentId);
+    const project = await this.store.read(projectId);
+    const agent = project.agents.find((entry) => entry.id === agentId);
+    if (!agent || agent.kind !== 'external' || agent.lastProbeOk) return;
+    const now = this.now().toISOString();
+    await this.store.write({
+      ...project,
+      agents: project.agents.map((entry) =>
+        entry.id === agentId
+          ? { ...entry, lastProbeAt: now, lastProbeOk: true, lastProbeProblem: '' }
+          : entry,
+      ),
+      timings: {
+        ...project.timings,
+        agentConnectedAt: project.timings.agentConnectedAt ?? now,
+      },
+    });
+    await this.activation.stage('agent_connected', projectId);
+  }
+
+  adapterFor(config: AgentConfig, options: { total?: number } = {}): AgentAdapter {
+    if (config.kind === 'external') {
+      // Nothing is called. The adapter publishes the case and waits for
+      // whoever holds this agent's key to come and do it.
+      return this.driver.adapter({
+        id: config.id,
+        name: config.name,
+        proxy: this.options.proxy,
+        total: options.total ?? 0,
+      });
+    }
     if (config.kind === 'process') {
       if (config.confirmedByOperatorAt === null) {
         throw new Error(

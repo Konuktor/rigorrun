@@ -43,9 +43,9 @@ public agent SDK. Screenshots of what the person saw are written to
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
 | Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 757 passing across 62 files, plus 8 in Python |
+| Unit + integration | `pnpm test` | 765 passing across 63 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
-| Local E2E | `pnpm e2e` | 23 passing |
+| Local E2E | `pnpm e2e` | 25 passing |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
 | Production smoke | `pnpm smoke:prod` | 5 passing |
 

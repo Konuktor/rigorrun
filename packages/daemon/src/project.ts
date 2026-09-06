@@ -198,9 +198,24 @@ export const ProcessAgentSchema = z.object({
  * Narrowing on `kind` makes it unrepresentable: an HTTP agent has no `command`
  * to set, so a hostile file has nowhere to put one.
  */
+export const ExternalAgentSchema = z.object({
+  ...agentCommon,
+  kind: z.literal('external'),
+  /**
+   * The name of the credential holding this agent's key.
+   *
+   * The name, not the key. An external agent is the one kind whose
+   * configuration would otherwise carry something worth stealing, and a project
+   * file that cannot be copied safely would undo the arrangement the rest of
+   * this file is built on.
+   */
+  keyName: z.string(),
+});
+
 export const AgentConfigSchema = z.discriminatedUnion('kind', [
   HttpAgentSchema,
   ProcessAgentSchema,
+  ExternalAgentSchema,
 ]);
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 export type HttpAgentConfig = z.infer<typeof HttpAgentSchema>;
@@ -208,7 +223,11 @@ export type ProcessAgentConfigured = z.infer<typeof ProcessAgentSchema>;
 
 /** How to reach this agent, in one line. */
 export function describeAgent(agent: AgentConfig): string {
-  return agent.kind === 'http' ? agent.endpoint : `${agent.command} ${agent.args.join(' ')}`.trim();
+  if (agent.kind === 'http') return agent.endpoint;
+  // Not reached: RigorRun does not reach this one, which is the whole point of
+  // it. The id is what distinguishes two of them on the same project.
+  if (agent.kind === 'external') return `driven by you (${agent.id})`;
+  return `${agent.command} ${agent.args.join(' ')}`.trim();
 }
 
 export const RunSummarySchema = z.object({
