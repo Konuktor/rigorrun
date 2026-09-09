@@ -303,7 +303,13 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // A verdict never appears without how it was reached beside it.
   await expect(page.getByText('verified: PARTIAL')).toBeVisible();
-  await expect(page.getByText('isolation: RESET')).toBeVisible();
+  // DECLARED, not RESET. The desk nominated a reset tool and nothing has run
+  // it twice and compared, so isolation here is believed rather than observed.
+  // This said RESET for the whole of 0.1, which claimed a check nobody ran.
+  await expect(page.getByText('isolation: DECLARED')).toBeVisible();
+  await expect(page.getByTestId('isolation-declared')).toContainText(
+    'believed to have started clean rather than observed to have',
+  );
 
   // And every case can be asked what happened. This is the difference between
   // a result somebody acts on and a result somebody argues with.
