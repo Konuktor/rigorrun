@@ -174,9 +174,7 @@ export function App() {
 
       <main id="main" className="flex-1">
         {runner === null ? (
-          <div className="mx-auto flex max-w-6xl items-center gap-2 px-5 py-16 text-body text-muted">
-            <Spinner /> Loading…
-          </div>
+          <PageLoading />
         ) : route === 'demo' ? (
           <Suspense fallback={<PageLoading />}>
             <DemoPage />
@@ -204,6 +202,14 @@ export function App() {
         )}
       </main>
 
+      {/* Not rendered until there is content to sit under.
+          While the runner probe was in flight the page was a spinner and this
+          footer, which put it in the middle of a phone's viewport; when the
+          real content arrived the footer moved off the bottom of the screen.
+          That single movement was a CLS of 0.17 against a budget of 0.1 — the
+          whole of the mobile score. Appearing in its final position moves
+          nothing. */}
+      {runner === null ? null : (
       <footer className="border-t border-line px-5 py-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-meta text-muted">
           {/* The version the runner reports, not one typed in here. It ends up
@@ -214,7 +220,7 @@ export function App() {
             RigorRun {local && runner?.version ? `v${runner.version}` : `v${RIGORRUN_VERSION}`} —
             Early Access.{' '}
             <a
-              className="underline hover:text-fg"
+              className="inline-flex min-h-[24px] items-center underline hover:text-fg"
               href={`${REPO_URL}/blob/master/docs/V1_GAP_AUDIT.md`}
               target="_blank"
               rel="noreferrer"
@@ -225,7 +231,7 @@ export function App() {
             {/* The nav folds Docs away on a narrow screen, so the footer keeps
                 a route to both from every viewport. */}
             <a
-              className="underline hover:text-fg"
+              className="inline-flex min-h-[24px] items-center underline hover:text-fg"
               href={`${REPO_URL}/tree/master/docs`}
               target="_blank"
               rel="noreferrer"
@@ -234,7 +240,7 @@ export function App() {
             </a>
             {' · '}
             <a
-              className="underline hover:text-fg"
+              className="inline-flex min-h-[24px] items-center underline hover:text-fg"
               href={REPO_URL}
               target="_blank"
               rel="noreferrer"
@@ -249,14 +255,23 @@ export function App() {
           </span>
         </div>
       </footer>
+      )}
     </div>
   );
 }
 
 /** The same shape as the pre-pairing state, so a split does not read as a jump. */
+/**
+ * A loading state that reserves the viewport.
+ *
+ * Without the min-height this is a short page, so the footer renders in the
+ * middle of a phone's screen and then moves off the bottom when the real
+ * content arrives. That one movement was the whole of the mobile CLS score.
+ * A shift below the fold is not a shift anybody sees, and does not count.
+ */
 function PageLoading() {
   return (
-    <div className="mx-auto flex max-w-6xl items-center gap-2 px-5 py-16 text-body text-muted">
+    <div className="mx-auto flex min-h-[100dvh] max-w-6xl items-start gap-2 px-5 py-16 text-body text-muted">
       <Spinner /> Loading…
     </div>
   );

@@ -12,8 +12,9 @@
 
     <!--
       One canonical origin. The site is also reachable at rigorrun.pages.dev,
-      which 301s here, and the canonical tag is what tells a crawler which of the
-      two to keep once it has followed the redirect.
+      which serves byte-identical content and does NOT redirect — both hostnames
+      are attached to the same Pages project. So this tag is not a hint on top of
+      a 301; it is the only thing telling a crawler which of the two to keep.
     -->
     <link rel="canonical" href="https://rigorrun.xyz/" />
 

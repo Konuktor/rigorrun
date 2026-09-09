@@ -21,6 +21,20 @@ Everything below was checked against the live account, not against memory.
 Plus DNS for the `rigorrun.xyz` zone, which is required because Pages can only
 attach an apex domain that is a Cloudflare zone. The registrar is Gen.xyz.
 
+Two consequences of that arrangement, both measured on 10 September 2026:
+
+- **`rigorrun.pages.dev` does not redirect to the apex.** Both hostnames are on
+  the same Pages project and serve byte-identical bytes. The
+  `<link rel="canonical">` in `index.html` is the only thing resolving the
+  duplicate origin. A redirect rule would be better and does not exist.
+- **The zone serves Cloudflare's managed robots.txt, not ours.**
+  `apps/web/public/robots.txt` is deployed and is reachable at
+  `rigorrun.pages.dev/robots.txt`, but `rigorrun.xyz/robots.txt` returns
+  Cloudflare's Content Signals Policy file instead. That file allows all
+  crawlers and blocks a list of AI training crawlers, which is a reasonable
+  default — but it is Cloudflare's, and anything written in ours has no effect
+  on the canonical origin.
+
 All three are static asset hosting on the free plan. There is no metered compute
 anywhere in the product.
 
