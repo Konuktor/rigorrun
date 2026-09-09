@@ -111,7 +111,7 @@ export async function cmdServe(options: ServeOptions = {}): Promise<number> {
     );
   }
   if (!uiDir) {
-    line(c.grey('  The interface is not built. Run `pnpm build:web`; the API works regardless.'));
+    line(c.grey('  The interface is not built. Run `pnpm build:app`; the API works regardless.'));
   }
   line(c.grey('  Press Ctrl+C to stop.'));
   line();

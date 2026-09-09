@@ -35,7 +35,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm build:web
+      - run: pnpm build:app
 
       - name: A stranger connects their own system and their own agent
         run: pnpm e2e:external

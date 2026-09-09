@@ -22,9 +22,8 @@ test.describe('critical path', () => {
   test('the whole pipeline runs and reaches a verdict', async ({ page }) => {
     const watchers = watchPage(page);
 
-    await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance tests');
-
+    // The landing page is a separate static build now; `e2e/site.spec.ts`
+    // covers it against the real deployment. This is the pipeline.
     await openDemo(page);
     await goToContract(page);
     // The rule read out of a number on the page, still a guess at this point.

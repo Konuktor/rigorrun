@@ -12,11 +12,12 @@
  * end-to-end tests, so this adds no new native toolchain.
  */
 import { chromium } from '@playwright/test';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
+const logo = join(root, 'packages', 'design', 'logo');
 const out = join(root, 'apps', 'site', 'public');
 
 const ACCENT = '#2A41DE';
@@ -56,6 +57,15 @@ async function main() {
     await page.close();
     console.log(`  ${file}`);
   };
+
+  /*
+   * The vector favicon is the one modern browsers actually use, and it was the
+   * one asset not emitted here — the pages referenced /favicon.svg and got a
+   * 404, which the production route check caught. Copied rather than rendered:
+   * it is already the source.
+   */
+  await copyFile(join(logo, 'favicon.svg'), join(out, 'favicon.svg'));
+  console.log('  favicon.svg');
 
   console.log('icons');
   for (const size of [16, 32, 180, 192, 512]) {

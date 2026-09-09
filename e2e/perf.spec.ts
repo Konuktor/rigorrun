@@ -12,12 +12,6 @@
  * re-running.
  */
 import { expect, test, type Browser, type TestInfo } from '@playwright/test';
-import {
-  goToBenchmark,
-  goToContract,
-  openDemo,
-  runBenchmarkAndWait,
-} from './support/journeys';
 
 /** Google's "good" thresholds, plus two budgets specific to this product. */
 const BUDGET = {
@@ -110,72 +104,58 @@ test.describe('performance budgets', () => {
   const desktopOnly = (testInfo: TestInfo) =>
     test.skip(testInfo.project.name !== 'desktop', 'measured on desktop only');
 
-  test('the landing page meets Core Web Vitals budgets', async ({ browser }, testInfo) => {
+  test('the home page meets Core Web Vitals budgets', async ({ browser }, testInfo) => {
     desktopOnly(testInfo);
     const runs: Vitals[] = [];
     for (let i = 0; i < SAMPLES; i += 1) runs.push(await measure(browser, '/'));
 
     for (const key of ['lcp', 'fcp', 'ttfb', 'cls', 'transfer'] as const) {
       const samples = runs.map((run) => run[key]);
-      await report(testInfo, `landing ${key}`, samples, BUDGET[key]);
+      await report(testInfo, `home ${key}`, samples, BUDGET[key]);
       expect(median(samples), `${key} samples ${samples.join(', ')}`).toBeLessThanOrEqual(
         BUDGET[key],
       );
     }
   });
 
-  test('the verdict screen meets Core Web Vitals budgets', async ({ browser }, testInfo) => {
+  test('the evidence page meets Core Web Vitals budgets', async ({ browser }, testInfo) => {
     desktopOnly(testInfo);
-    // The heaviest route: tables, matrix and metrics rendered at once.
+    /*
+     * The heaviest document the site serves: four server records, each with a
+     * metric grid and a list of everything that was not exercised.
+     *
+     * This measured `/#/demo/verdict`, which a static host resolves by
+     * ignoring the fragment — so it loaded the home page, passed, and reported
+     * a budget for a screen that is not on this origin at all.
+     */
     const runs: Vitals[] = [];
-    for (let i = 0; i < SAMPLES; i += 1) runs.push(await measure(browser, '/#/demo/verdict'));
+    for (let i = 0; i < SAMPLES; i += 1) runs.push(await measure(browser, '/evidence'));
 
-    for (const key of ['lcp', 'fcp', 'cls'] as const) {
+    for (const key of ['lcp', 'fcp', 'cls', 'transfer'] as const) {
       const samples = runs.map((run) => run[key]);
-      await report(testInfo, `verdict ${key}`, samples, BUDGET[key]);
+      await report(testInfo, `evidence ${key}`, samples, BUDGET[key]);
       expect(median(samples), `${key} samples ${samples.join(', ')}`).toBeLessThanOrEqual(
         BUDGET[key],
       );
     }
-  });
-
-  test('running the whole benchmark in the browser stays within budget', async ({
-    browser,
-  }, testInfo) => {
-    desktopOnly(testInfo);
-    const samples: number[] = [];
-    for (let i = 0; i < SAMPLES; i += 1) {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-      // Walk to the benchmark first: the budget is on executing the run, not
-      // on how long a person spends reading the two screens before it.
-      await openDemo(page);
-      await goToContract(page);
-      await goToBenchmark(page);
-      const started = Date.now();
-      await runBenchmarkAndWait(page);
-      samples.push(Date.now() - started);
-      await context.close();
-    }
-    await report(testInfo, 'run to verdict', samples, BUDGET.runToVerdict);
-    expect(median(samples), `samples ${samples.join(', ')}`).toBeLessThanOrEqual(
-      BUDGET.runToVerdict,
-    );
   });
 
   /*
-   * Every route, not just the landing page. The verdict deep link shipped a
-   * 0.107 shift on desktop and 0.322 on a phone that a landing-only budget
-   * would never have seen: the first paint had no step content, both footers
-   * landed above the fold, and the rendered step then pushed them down.
+   * Every route, not just the home page. This used to walk six `#/demo/...`
+   * hash routes, which a static host ignores — so five of the six loaded the
+   * home page again and reported a pass for a page that was never opened. The
+   * demo moved into the package with the rest of the product; these are the
+   * documents the site actually serves.
    */
   for (const route of [
     '/',
-    '/#/demo/record',
-    '/#/demo/contract',
-    '/#/demo/benchmark',
-    '/#/demo/run',
-    '/#/demo/verdict',
+    '/how-it-works',
+    '/evidence',
+    '/verify',
+    '/security',
+    '/what-is-built',
+    '/start',
+    '/company',
   ]) {
     test(`${route} hydrates without a layout shift`, async ({ browser }) => {
       const context = await browser.newContext();

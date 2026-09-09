@@ -39,7 +39,9 @@ The landing page and the two demo apps build to static files and can go on any
 free static host — Cloudflare Pages, GitHub Pages, Netlify:
 
 ```bash
-pnpm build:web    # apps/web/dist    — landing page and the in-browser demo
+pnpm build:site   # apps/site/dist   — the public website
+pnpm build:app    # apps/app/dist    — the interface the runner serves
+pnpm build:docs   # apps/docs/dist   — docs.rigorrun.xyz
 pnpm build:crm    # apps/demo-crm/dist — Northstar Support, the recorded app
 pnpm build:ops    # apps/demo-ops/dist — four schema-driven systems
 ```

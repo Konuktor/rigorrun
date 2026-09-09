@@ -155,6 +155,35 @@ test.describe('golden path', () => {
 
 /* ========================================== the injection case, both ways */
 
+/*
+ * The runtime budget for the whole pipeline.
+ *
+ * This lived in the production performance suite, which measured it over the
+ * public site. The demo ships inside the package now and is not deployed, so
+ * the budget is asserted where the thing it measures actually runs. Two
+ * samples, median compared, because one sample is noise.
+ */
+test.describe('budget', () => {
+  test('running the whole benchmark in the browser stays within budget', async ({ browser }) => {
+    const samples: number[] = [];
+    for (let i = 0; i < 2; i += 1) {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      // Walk to the benchmark first: the budget is on executing the run, not
+      // on how long a person spends reading the two screens before it.
+      await openDemo(page);
+      await goToContract(page);
+      await goToBenchmark(page);
+      const started = Date.now();
+      await runBenchmarkAndWait(page);
+      samples.push(Date.now() - started);
+      await context.close();
+    }
+    const median = samples.sort((a, b) => a - b)[Math.floor(samples.length / 2)]!;
+    expect(median, `samples ${samples.join(', ')}`).toBeLessThanOrEqual(20_000);
+  });
+});
+
 test.describe('the evidence', () => {
   test('a failure is explained by state, and the agent is not consulted', async ({ page }) => {
     await deepLinkToVerdict(page);
