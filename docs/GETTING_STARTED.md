@@ -44,7 +44,7 @@ authority that read the first code off the screen.
 On a server, in a container, or over SSH, add `--no-open` and use the printed
 URL.
 
-> **Early Access · v0.1.** It does what this page says and it is young. Every
+> **Early Access · v0.2.** It does what this page says and it is young. Every
 > capability is marked WORKING, PARTIAL or MISSING in
 > [V1_GAP_AUDIT.md](V1_GAP_AUDIT.md), with how each one was checked — read that
 > before relying on it for something that matters.
@@ -53,6 +53,19 @@ URL.
 > builds the interface and then starts the runner; `pnpm rigorrun` alone skips
 > the build, which is what you want while developing and not what you want the
 > first time.
+
+## Or: skip all of this and verify a server
+
+If what you want to know is whether an MCP server's tools do what it says they
+do, none of the rest of this page is needed:
+
+```bash
+rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
+```
+
+No project, no browser, no agent. It needs Docker, because it runs the server in
+a container with no network and no access to your machine. See
+[VERIFY_SERVER.md](VERIFY_SERVER.md).
 
 ## 2. Make a project
 
@@ -88,7 +101,9 @@ and there is no point in you demonstrating a job it will not be able to check.
 You can continue anyway; every verdict will say `OBSERVATIONAL`. See
 [VERIFICATION.md](VERIFICATION.md).
 
-You will also be asked which tool puts the system back, and what kind of system
+You will also be asked which tool puts the system back. RigorRun will report
+isolation as `DECLARED` rather than `RESET` for it: it takes your word that the
+tool resets, and has not run it twice and compared. And what kind of system
 this is. See [ENVIRONMENT_RESET.md](ENVIRONMENT_RESET.md) and
 [SECURITY_MODEL.md](SECURITY_MODEL.md).
 

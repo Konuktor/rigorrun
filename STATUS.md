@@ -12,13 +12,14 @@ where only the second is green is not a release.
 
 | What | Command | Result |
 | ---- | ------- | ------ |
-| A stranger installs it from the public registry | `npx rigorrun` | **0.1.1**, `latest` |
+| A stranger installs it from the public registry | `npx rigorrun` | **0.2.0**, `latest` |
+| A clean machine reaches a verification record with one command and no browser | `pnpm gate1` | eight checks green, 14.9s machine runtime |
 | The package builds, packs, contains only what it should, carries no credentials, installs into a clean directory, runs, explains itself on an old Node, and completes the fresh-user journey | `pnpm verify:package` | see below |
 
 `verify:package` publishes nothing. Its last line says whether publishing would
 be safe, and prints the exact command. `docs/RELEASING.md` is the rest of it.
 
-Published as **Early Access · v0.1** on the `latest` channel. Those are
+Published as **Early Access · v0.2** on the `latest` channel. Those are
 different claims: `latest` is the channel `npx rigorrun` installs from, and
 Early Access is how finished the product is. What is not built is marked one by
 one in `docs/V1_GAP_AUDIT.md`.
@@ -31,6 +32,7 @@ one in `docs/V1_GAP_AUDIT.md`.
 | Their work survives the runner being killed with SIGKILL, and a damaged file is reported rather than silently dropped | `pnpm e2e:restart` | passing |
 | RigorRun connects to a public MCP server nobody here wrote, and says out loud what it cannot verify about it | `pnpm test` (`*/test/thirdParty.test.ts`) | passing |
 | And goes all the way to a verdict against a second one, whose reads answer in records | `pnpm test` (`publicServerJourney.test.ts`) | passing |
+| One command tells you whether a published server's tools do what it declares | `node scripts/build-evidence.mjs` | four servers, 19 of 37 tools exercised |
 
 That test starts the runner exactly as the quickstart says to, pairs through
 the URL it prints, and drives Chromium. The system it connects is
@@ -48,14 +50,29 @@ public agent SDK. Screenshots of what the person saw are written to
 | Design tokens | `pnpm contrast` | 45/45 pairs meet WCAG contrast |
 | Lint | `pnpm lint` | clean |
 | Types | `pnpm typecheck` | clean |
-| Generic core stays generic | `pnpm domain` | 23 directories, 19 business nouns and 2 currency shapes |
-| Unit + integration | `pnpm test` | 762 passing across 64 files, plus 8 in Python |
+| Generic core stays generic | `pnpm domain` | 26 directories, 19 business nouns and 2 currency shapes |
+| Unit + integration | `pnpm test` | 846 passing across 73 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 25 passing |
+| Visual regression | `pnpm visual` | 24 passing |
+| Cross-browser | `pnpm cross` | 6 passing (WebKit skipped: host lacks its system libraries) |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
 | Production smoke | `pnpm smoke:prod` | 5 passing |
 
 ## What the product does now
+
+Two things, and the second one needs nothing set up.
+
+**`rigorrun verify npm:<package>@<version>`** answers "do this server's tools do
+what it says they do?" It pins the server to the bytes the registry published,
+runs it in a container with no network and no access to the machine, calls each
+tool with arguments derived from its own schema, and reads the filesystem before
+and after. Isolation is measured by starting two containers and comparing, not
+read off a flag. Needs Docker. Run against four published
+`@modelcontextprotocol` servers: 37 tools discovered, 19 exercised, 18 named
+with reasons. `docs/THIRD_PARTY_VERIFICATION.md`.
+
+And the longer path:
 
 A person starts a local runner and connects their own system — an MCP server,
 an HTTP API with an OpenAPI document, or a web application through a browser. They do one job through that system's
@@ -106,6 +123,20 @@ BROKEN or MISSING, checked by walking the product rather than by reading its
 tests. `docs/PRODUCT_REALITY_AUDIT.md` is the earlier one, answering twenty
 questions about what an external person could do before and after that work.
 
+## Two things that were true and are not any more
+
+`rigorrun run <benchmark>` with no `--agent` ran the reference implementation —
+which is handed the answer — and exited 0, and `--help` recommended gating a
+build on it. A documented gate that could not fail.
+
+`isolation: RESET` was printed beside every verdict whenever a reset was
+configured. `RESET` means the cases were observed to start from the same state,
+and nothing had ever checked. It now says `DECLARED` where the reset is a tool
+somebody nominated, and `RESET` only where the reset is RigorRun's own.
+
+Both, and four more, are in `docs/PRODUCT_REALITY_AUDIT.md` with the command
+that found them.
+
 ## Deployed
 
 | | |
@@ -119,6 +150,11 @@ machine that has the systems, because a page on `https` cannot reach
 `http://127.0.0.1` and most of what people want tested is only reachable from
 there.
 
-There is no hosted component. A cloud control plane existed as code, was
-deployed, and was called by nothing; it was removed rather than shipped as a
-capability nobody had. It is recoverable from git history.
+The product has no hosted component, and nothing it ships calls one — the
+published bundle contains four external hostnames and none of them is ours.
+
+A cloud control plane existed as code, was deployed, was called by nothing, and
+was removed from the product rather than shipped as a capability nobody had.
+**The deployment is still up**, publicly reachable, with its source deleted. It
+is an orphan rather than a leak, and it should still go.
+`docs/CLOUDFLARE_READINESS.md` has the evidence and the teardown commands.

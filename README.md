@@ -9,7 +9,7 @@ RigorRun proves whether the agent can do the job safely — by reading the syste
 it changed, never by trusting what it says about itself.
 
 **[Get started →](docs/GETTING_STARTED.md)**
-&nbsp;·&nbsp; runs on your machine &nbsp;·&nbsp; **[Try the demo →](https://rigorrun.xyz)**
+&nbsp;·&nbsp; runs on your machine &nbsp;·&nbsp; **[Evidence →](https://rigorrun.xyz/#/evidence)**
 
 `Connect → Teach → Review → Build → Run → Compare`
 
@@ -54,12 +54,14 @@ case it can safely and reproducibly verify, and tells you what it could not
 test. A system it can seed and reset yields the richest suite — boundary and
 adversarial cases, and repeated destructive checks. A system without a reset
 still works, but produces fewer cases, disables repeated mutating cases, reports
-isolation as `NONE`, and verifies `PARTIAL`. Best results come from a staging or
+isolation as `NONE`, and verifies `PARTIAL`. Where you nominate a reset tool and
+nothing has run it twice and compared, isolation is `DECLARED` — believed rather
+than observed. Best results come from a staging or
 scratch environment with read-back and a reset (or seed). The bundled example is
 rich because its environment supports both; your own system may not, and
 RigorRun says so rather than pretending otherwise.
 
-**Early Access · v0.1.** It does what this page says and it is young: the
+**Early Access · v0.2.** It does what this page says and it is young: the
 limits are written down in [docs/V1_GAP_AUDIT.md](docs/V1_GAP_AUDIT.md), marked
 one by one, rather than left for you to find.
 
@@ -70,6 +72,33 @@ pnpm install && pnpm start
 ```
 
 See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
+
+## Or start with a server you already use
+
+An MCP server can annotate a tool `readOnlyHint: true`. Nothing checks that.
+
+```bash
+rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
+```
+
+No project, no browser, no agent, nothing to configure first. It resolves the
+reference against the registry, refuses to continue unless the bytes it
+downloaded hash to the sha512 the registry published, installs with lifecycle
+scripts disabled, builds an image with no `RUN` instruction, and runs the server
+with no network, no mounts, no capabilities and no environment. Then it calls
+each tool with arguments derived from its own schema and reads the container's
+filesystem before and after to find out what actually changed.
+
+Exit `0` verified · `1` a declaration was contradicted · `2` it could not run ·
+`3` it ran and established too little to be worth much.
+
+**Needs Docker.** Only `npm:` and `dir:` references, and only stdio servers — an
+OCI image, a git ref and a remote endpoint are refused rather than
+half-supported.
+
+Run against four published servers we did not write, it exercised **19 of 37
+tools**. The rest are named with reasons in every record rather than rounded
+away. <https://rigorrun.xyz/#/evidence>, or `docs/VERIFY_SERVER.md`.
 
 ## What is different?
 
@@ -95,7 +124,8 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [Connecting your agent over HTTP](docs/HTTP_AGENT.md) | The protocol, and the probe. |
 | [An agent that is a command](docs/CLI_AGENT.md) | The same protocol, over stdin and stdout. |
 | [An agent RigorRun cannot start](docs/DRIVEN_AGENT.md) | It asks for work instead. For an agent behind a login, in a notebook, or anywhere that will not take a request. |
-| [TypeScript agent SDK](docs/TYPESCRIPT_AGENT_SDK.md) | Ten lines. |
+| [Verifying a server](docs/VERIFY_SERVER.md) | `rigorrun verify`, the container, and what it cannot see. |
+| [TypeScript agent SDK](docs/TYPESCRIPT_AGENT_SDK.md) | Ten lines, and **not published to npm** — implement the HTTP protocol directly. |
 | [Python agent SDK](docs/PYTHON_AGENT_SDK.md) | Standard library only. |
 | [A production failure as a case](docs/TRACE_IMPORT.md) | What is taken from a trace, and what is not. |
 | [Putting the system back](docs/ENVIRONMENT_RESET.md) | Reset, and what happens without one. |
@@ -106,7 +136,9 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [Third-party dogfood](docs/THIRD_PARTY_DOGFOOD.md) | How we find out whether anybody else can use this. |
 | [An example feedback bundle](docs/examples/feedback-bundle.json) | Exactly what `rigorrun feedback export` sends, from a real session. |
 | [v1 gap audit](docs/V1_GAP_AUDIT.md) | Every capability marked WORKING, PARTIAL, DEMO-ONLY, BROKEN or MISSING, checked by doing it. |
-| [What is and is not built](docs/PRODUCT_REALITY_AUDIT.md) | The earlier inventory, left as written. |
+| [Product reality audit](docs/PRODUCT_REALITY_AUDIT.md) | Every public claim, checked by running something. What was untrue, and what still is not done. |
+| [Product decisions](docs/PRODUCT_DECISIONS.md) | What was decided about the product, and why. |
+| [Cloudflare readiness](docs/CLOUDFLARE_READINESS.md) | What Cloudflare powers, what it does not, and what is still deployed. |
 | [Roadmap](docs/ROADMAP.md) | Including the gaps. |
 
 ## Why does it exist?

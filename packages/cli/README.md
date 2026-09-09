@@ -12,9 +12,30 @@ npx rigorrun
 
 Open the URL it prints. That is the whole install.
 
-**Early Access · v0.1.** It does what this page says and it is young. The
+**Early Access · v0.2.** It does what this page says and it is young. The
 limits are written down and marked one by one, rather than left for you to
 find: [the v1 gap audit](https://github.com/Konuktor/rigorrun/blob/master/docs/V1_GAP_AUDIT.md).
+
+## Or start with a server you already use
+
+An MCP server can annotate a tool `readOnlyHint: true`. Nothing checks that.
+
+```bash
+npx rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
+```
+
+No project, no browser, no agent, nothing to configure first. It pins the server
+to the exact bytes the registry published, runs it in a container with no
+network and no access to your machine, calls each tool with arguments derived
+from its own schema, and reads the filesystem before and after to see what
+actually changed — then compares that against what the server declared.
+
+Exit `0` verified · `1` a declaration was contradicted · `2` it could not run ·
+`3` it ran and established too little to be worth much.
+
+**Needs Docker.** Only `npm:` and `dir:` references, and only stdio servers.
+Against four published servers nobody here wrote, it exercised **19 of 37
+tools**; the rest are named with reasons in every record it writes.
 
 ## What it does
 
@@ -80,6 +101,7 @@ infrastructure, because there is no path by which they could.
 
 ```bash
 npx rigorrun                              # start the runner and open the interface
+npx rigorrun verify <server-ref>          # what does this server's tools actually do?
 npx rigorrun doctor                       # check this machine and every project
 npx rigorrun projects                     # what is on this machine
 npx rigorrun run --project <id>           # run the suite
