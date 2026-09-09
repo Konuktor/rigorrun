@@ -43,6 +43,18 @@ through the proxy with its own MCP client and touches RigorRun only through the
 public agent SDK. Screenshots of what the person saw are written to
 `docs/external-user-run/`.
 
+## Continuous integration
+
+CI had never run. `on: push: branches: [main]` in a repository whose default
+branch is `master`, and no pull requests, so not one job in it had ever
+executed. Pointing it at `master` turned it red immediately — `pnpm test`
+includes the browser suites, which assert they are genuinely driving a browser
+rather than skipping, and the step that installs Playwright sat below them.
+
+Both fixed. All six jobs — `verify`, `product-acceptance`, `benchmark-gate`,
+`codeql`, `supply-chain`, `package` — are green on `master` as of
+10 September 2026.
+
 ## Technical gates
 
 | Layer | Command | Result |
