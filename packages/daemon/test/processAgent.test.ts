@@ -120,7 +120,9 @@ describe('connecting an agent that is a command', () => {
     // Same evidence path: everything it did came through the proxy, so the
     // verdict rests on reading the desk rather than on what it said.
     expect(result.verification).toBe('PARTIAL');
-    expect(result.isolation).toBe('RESET');
+    // The desk nominates a reset tool and nothing has called it twice to
+    // check, so the honest answer is that it was declared, not measured.
+    expect(result.isolation).toBe('DECLARED');
     const tools = result.caseResults.flatMap((entry) => entry.steps.map((step) => step.tool));
     expect(tools).toContain('confirm_booking');
   }, 240_000);

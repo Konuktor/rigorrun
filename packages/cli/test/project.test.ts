@@ -134,7 +134,7 @@ describe('projects from the command line', () => {
   it('runs the suite and reports how the verdict was reached', async () => {
     const { out } = await cli('run', '--project', projectId, '--home', home);
     expect(out).toContain('PARTIAL');
-    expect(out).toContain('RESET');
+    expect(out).toContain('DECLARED');
     // The limits travel with the result rather than being left in a log.
     expect(out).toMatch(/limit/);
   }, 180_000);

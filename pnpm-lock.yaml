@@ -11,9 +11,6 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.62.1)
-      '@cloudflare/workers-types':
-        specifier: ^5.20260902.1
-        version: 5.20260902.1
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.9.1(jiti@2.7.0))
@@ -162,18 +159,6 @@ importers:
         specifier: ^19.2.0
         version: 19.2.8(react@19.2.8)
 
-  apps/worker:
-    dependencies:
-      '@rigorrun/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      hono:
-        specifier: ^4.10.4
-        version: 4.13.5
-      zod:
-        specifier: ^4.1.12
-        version: 4.5.4
-
   fixtures/external/booking-agent:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -186,6 +171,24 @@ importers:
       tsx:
         specifier: ^4.21.1
         version: 4.23.13
+
+  fixtures/external/mcp-attested-lookup:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
+
+  fixtures/external/mcp-attested-lookup-next:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
 
   fixtures/external/mcp-venue-desk:
     dependencies:
@@ -258,6 +261,9 @@ importers:
       '@rigorrun/compiler':
         specifier: workspace:*
         version: link:../compiler
+      '@rigorrun/conformance':
+        specifier: workspace:*
+        version: link:../conformance
       '@rigorrun/core':
         specifier: workspace:*
         version: link:../core
@@ -273,6 +279,9 @@ importers:
       '@rigorrun/environments':
         specifier: workspace:*
         version: link:../environments
+      '@rigorrun/exec':
+        specifier: workspace:*
+        version: link:../exec
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
@@ -294,6 +303,9 @@ importers:
       '@rigorrun/runner':
         specifier: workspace:*
         version: link:../runner
+      '@rigorrun/sandbox':
+        specifier: workspace:*
+        version: link:../sandbox
       '@rigorrun/scoring':
         specifier: workspace:*
         version: link:../scoring
@@ -309,6 +321,15 @@ importers:
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
+
+  packages/conformance:
+    dependencies:
+      '@rigorrun/connector':
+        specifier: workspace:*
+        version: link:../connector
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/connector:
     dependencies:
@@ -357,6 +378,9 @@ importers:
       '@rigorrun/environment':
         specifier: workspace:*
         version: link:../environment
+      '@rigorrun/exec':
+        specifier: workspace:*
+        version: link:../exec
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
@@ -447,6 +471,8 @@ importers:
       '@rigorrun/generator':
         specifier: workspace:*
         version: link:../generator
+
+  packages/exec: {}
 
   packages/generator:
     dependencies:
@@ -561,6 +587,21 @@ importers:
       '@rigorrun/verifier':
         specifier: workspace:*
         version: link:../verifier
+
+  packages/sandbox:
+    dependencies:
+      '@rigorrun/conformance':
+        specifier: workspace:*
+        version: link:../conformance
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rigorrun/exec':
+        specifier: workspace:*
+        version: link:../exec
+      '@rigorrun/mcp':
+        specifier: workspace:*
+        version: link:../mcp
 
   packages/scoring:
     dependencies:
@@ -1966,10 +2007,6 @@ packages:
     resolution: {integrity: sha512-T2UbfbBEF32wiepXIsMlTW9+dDYC6wMh/t/vYA4tuOMKqWz/n3vr1NFSxQiyP+zk2mXsoMA/i/7qV6LKut1t1A==}
     engines: {node: '>= 0.4'}
 
-  hono@4.13.5:
-    resolution: {integrity: sha512-O6+/eCYRkzzzy0rPWwKLiGBR1nFuUPZynnwjxN1MBA62NNqbT0wQEzQyK2gSO5yDIDB336sXQleAhOHrzlYyKw==}
-    engines: {node: '>=16.9.0'}
-
   hono@4.13.7:
     resolution: {integrity: sha512-c8/gF9ac8Y78/agExVocyLevgR+JlpNB444Py0FSX8pJoPdYUfUzRcXtYEYGwt6l19qIlVZPN5Mfsw9jFShmQQ==}
     engines: {node: '>=16.9.0'}
@@ -2753,7 +2790,8 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260831.1':
     optional: true
 
-  '@cloudflare/workers-types@5.20260902.1': {}
+  '@cloudflare/workers-types@5.20260902.1':
+    optional: true
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -3900,8 +3938,6 @@ snapshots:
   hasown@2.0.4:
     dependencies:
       function-bind: 1.1.2
-
-  hono@4.13.5: {}
 
   hono@4.13.7: {}
 

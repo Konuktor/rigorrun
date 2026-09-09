@@ -1,6 +1,6 @@
 {
   "name": "rigorrun",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Acceptance testing for tool-using AI agents. Connect your system, show it one job, connect your agent, get a trustworthy pass or fail.",
   "keywords": [
     "mcp",
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/Konuktor/rigorrun.git"
   },
-  "homepage": "https://rigorrun.pages.dev",
+  "homepage": "https://rigorrun.xyz",
   "type": "module",
   "engines": {
     "node": ">=20.11"
@@ -47,11 +47,13 @@
     "@rigorrun/agent-sdk": "workspace:*",
     "@rigorrun/agents": "workspace:*",
     "@rigorrun/compiler": "workspace:*",
+    "@rigorrun/conformance": "workspace:*",
     "@rigorrun/core": "workspace:*",
     "@rigorrun/daemon": "workspace:*",
     "@rigorrun/env-mcp": "workspace:*",
     "@rigorrun/environment": "workspace:*",
     "@rigorrun/environments": "workspace:*",
+    "@rigorrun/exec": "workspace:*",
     "@rigorrun/generator": "workspace:*",
     "@rigorrun/mcp": "workspace:*",
     "@rigorrun/providers": "workspace:*",
@@ -59,6 +61,7 @@
     "@rigorrun/quality": "workspace:*",
     "@rigorrun/report": "workspace:*",
     "@rigorrun/runner": "workspace:*",
+    "@rigorrun/sandbox": "workspace:*",
     "@rigorrun/scoring": "workspace:*",
     "@rigorrun/verifier": "workspace:*"
   },

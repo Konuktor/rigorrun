@@ -44,6 +44,24 @@ export async function sha256(input: string): Promise<string> {
   return toHex(digest);
 }
 
+/**
+ * SHA-512 of arbitrary bytes, base64 encoded.
+ *
+ * npm publishes `dist.integrity` as a Subresource Integrity string — the
+ * literal text `sha512-` followed by base64 of the digest of the tarball's
+ * bytes. This produces the same string so a downloaded artifact can be checked
+ * against what the registry said it would be, byte for byte, before anything
+ * unpacks it.
+ */
+export async function sha512Base64(bytes: Uint8Array): Promise<string> {
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  const digest = await globalThis.crypto.subtle.digest('SHA-512', buffer);
+  let binary = '';
+  for (const byte of new Uint8Array(digest)) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
 /** SHA-256 of a value's canonical JSON form, prefixed `sha256:`. */
 export async function hashValue(value: unknown): Promise<string> {
   return `sha256:${await sha256(canonicalJson(value))}`;

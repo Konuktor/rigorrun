@@ -195,12 +195,18 @@ export function Button({
   const base =
     'inline-flex items-center justify-center gap-2 rounded-control font-medium ' +
     'transition-colors disabled:cursor-not-allowed disabled:opacity-50';
+  // `text-secondary` is ambiguous: styles.css defines both `--text-secondary`
+  // (13px) and `--color-secondary` (#b4bdcb), so Tailwind generates a
+  // `text-secondary` utility for each and the colour won. Every default-size
+  // primary button therefore rendered #b4bdcb on #e9ecf1 — 1.6:1, well under
+  // the 4.5:1 this project gates on. Asking for the length explicitly keeps
+  // the design token as the source and cannot be read as a colour.
   const sizing =
     size === 'sm'
       ? 'h-8 px-2.5 text-meta'
       : size === 'lg'
         ? 'h-10 px-4 text-body'
-        : 'h-9 px-3.5 text-secondary';
+        : 'h-9 px-3.5 text-[length:var(--text-secondary)]';
   const variants = {
     primary: 'bg-fg text-canvas hover:bg-white',
     secondary: 'border border-line bg-raised text-fg hover:border-line-strong',

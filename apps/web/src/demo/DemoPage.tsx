@@ -77,8 +77,9 @@ export function DemoPage() {
       <footer className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-meta text-muted">
         <Tag>Offline</Tag>
         <span className="min-w-[16rem] flex-1">
-          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend, no
-          API key and no network calls — the same packages power the CLI and CI.
+          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend and
+          no API key — the same packages power the CLI and CI. The application, its customers and
+          its orders are invented.
         </span>
       </footer>
     </div>
@@ -130,7 +131,12 @@ export function DemoPage() {
     }
 
     if (state.step === 'run') {
-      return <RunStep state={state} total={(state.benchmark?.cases.length ?? 0) * 2} />;
+      return (
+        <RunStep
+          state={state}
+          total={(state.benchmark?.cases.length ?? 0) * (state.agentCount || 1)}
+        />
+      );
     }
 
     if (state.result) {

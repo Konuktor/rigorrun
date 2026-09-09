@@ -30,6 +30,16 @@ export interface DiscoveredTool {
   unsupported: UnsupportedParam[];
   /** True when the input schema was too large or deep to read completely. */
   schemaTruncated: boolean;
+  /**
+   * The input schema exactly as the server published it.
+   *
+   * `params` is RigorRun's reading of it, which is lossy on purpose — the
+   * connector vocabulary has no way to express an array of objects, so those
+   * arrive in `unsupported`. Anything that needs to build a real argument for
+   * such a tool has to see the original, so it is kept rather than discarded.
+   * It is untrusted data and is never executed, only walked.
+   */
+  inputSchema?: unknown;
   /** Present when the system publishes one. The best evidence for record shape. */
   outputSchema?: unknown;
   hints: ServerHints;

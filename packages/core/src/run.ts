@@ -116,7 +116,7 @@ export type AgentScore = z.infer<typeof AgentScoreSchema>;
 export const VERIFICATION_STRENGTHS = ['AUTHORITATIVE', 'PARTIAL', 'OBSERVATIONAL'] as const;
 export type VerificationStrengthLabel = (typeof VERIFICATION_STRENGTHS)[number];
 
-export const ISOLATION_LEVELS = ['RESET', 'NONE'] as const;
+export const ISOLATION_LEVELS = ['RESET', 'PARTIAL', 'DECLARED', 'NONE'] as const;
 export type IsolationLabel = (typeof ISOLATION_LEVELS)[number];
 
 /** Something RigorRun could not do here, and what would have let it. */

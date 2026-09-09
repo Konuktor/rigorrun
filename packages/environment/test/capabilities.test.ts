@@ -51,9 +51,22 @@ describe('what a verdict is worth', () => {
 });
 
 describe('isolation between cases', () => {
-  it('is real when the world can be put back', () => {
+  it('is real when the reset is ours to perform', () => {
+    // A snapshot of a JavaScript object is something this code does.
     expect(isolationLevel(FULL_CAPABILITIES)).toBe('RESET');
-    expect(isolationLevel(REALISTIC)).toBe('RESET');
+  });
+
+  it('is only DECLARED when the reset is somebody else\'s promise', () => {
+    // A nominated tool has never been called twice and compared. Reporting
+    // that as RESET claimed a measurement nobody took.
+    expect(isolationLevel(REALISTIC)).toBe('DECLARED');
+    expect(isolationLevel(REALISTIC)).not.toBe('RESET');
+  });
+
+  it('upgrades to a measurement when a caller supplies one', () => {
+    expect(isolationLevel(REALISTIC, { stable: true, pathsStable: true })).toBe('RESET');
+    expect(isolationLevel(REALISTIC, { stable: false, pathsStable: true })).toBe('PARTIAL');
+    expect(isolationLevel(REALISTIC, { stable: false, pathsStable: false })).toBe('NONE');
   });
 
   it('is absent without a reset, and repetition is refused', () => {

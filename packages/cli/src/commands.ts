@@ -51,6 +51,13 @@ export interface Flags {
   home?: string | undefined;
   /** The run a comparison is made against, when it is not the saved baseline. */
   baseline?: string | undefined;
+  /**
+   * Let the reference implementation through `gate`. It is handed the answer,
+   * so a gate on it passes by construction and measures nothing about an
+   * agent. Checking that a suite is satisfiable at all is the one honest use,
+   * and it has to be asked for by name.
+   */
+  allowReference: boolean;
 }
 
 const RUNS_DIR = () => join(workspaceDir(), 'runs');
@@ -111,7 +118,12 @@ export async function cmdDemo(flags: Flags): Promise<number> {
   await writeJson(join(RUNS_DIR(), `${result.runId}.json`), result);
   await writeText(
     join(outDir, 'report.html'),
-    renderReportHtml(result, { contract, benchmark, generatedAt: result.finishedAt }),
+    renderReportHtml(result, {
+      contract,
+      benchmark,
+      generatedAt: result.finishedAt,
+      syntheticEnvironment: isBundledEnvironment(result.environment),
+    }),
   );
 
   // `--quiet` drops the narration, never the result. A demo whose verdict you
@@ -293,7 +305,17 @@ export async function cmdGenerate(contractPath: string | undefined, flags: Flags
 
 export async function cmdRun(benchmarkPath: string | undefined, flags: Flags): Promise<number> {
   const benchmark = await loadBenchmark(benchmarkPath);
-  const agents = agentsFor(benchmark, flags, [createReferenceAgent(benchmark)]);
+  // No default agent. This used to fall back to the reference implementation,
+  // which is given the answer — so `rigorrun run benchmark.json` printed a
+  // perfect score and exited 0 without an agent being involved at all.
+  if (flags.agent.length === 0) {
+    throw new CliError(
+      'run needs at least one --agent.\n' +
+        '  --agent naive --agent careful   the two bundled examples\n' +
+        `  --agent ${REFERENCE_AGENT_ID}              checks the suite is satisfiable, not that an agent is good`,
+    );
+  }
+  const agents = agentsFor(benchmark, flags, []);
 
   const result = await executeRun(benchmark, agents, flags);
   await writeJson(join('.rigorrun', 'runs', `${result.runId}.json`), result);
@@ -307,7 +329,13 @@ export async function cmdRun(benchmarkPath: string | undefined, flags: Flags): P
   }
 
   if (flags.report) {
-    const written = await writeText(flags.report, renderReportHtml(result, { benchmark }));
+    const written = await writeText(
+      flags.report,
+      renderReportHtml(result, {
+        benchmark,
+        syntheticEnvironment: isBundledEnvironment(result.environment),
+      }),
+    );
     if (!flags.json) line(`${c.grey('report')}  ${written}`);
   }
 
@@ -320,6 +348,19 @@ export async function cmdGate(benchmarkPath: string | undefined, flags: Flags): 
   const benchmark = await loadBenchmark(benchmarkPath);
   if (flags.agent.length !== 1) {
     throw new CliError('gate needs exactly one --agent.');
+  }
+  // A gate exists to be able to fail. The reference implementation replays the
+  // plan the expectation engine derived, so it cannot fail, and a build gated
+  // on it is a build with no gate. Allowed only when somebody says that is
+  // what they meant.
+  if (flags.agent[0] === REFERENCE_AGENT_ID && !flags.allowReference) {
+    throw new CliError(
+      `gate refuses --agent ${REFERENCE_AGENT_ID}: it is handed the answer, so the gate passes by\n` +
+        'construction and tells you nothing about an agent.\n\n' +
+        `  rigorrun run <benchmark> --agent ${REFERENCE_AGENT_ID}     is the suite satisfiable?\n` +
+        `  rigorrun gate <benchmark> --agent ${REFERENCE_AGENT_ID} --allow-reference\n` +
+        '                                              same question, as a gate',
+    );
   }
   const agent = agentsFor(benchmark, flags, [])[0]!;
 
@@ -367,7 +408,13 @@ export async function cmdGate(benchmarkPath: string | undefined, flags: Flags): 
   }
 
   if (flags.report) {
-    await writeText(flags.report, renderReportHtml(result, { benchmark: gated }));
+    await writeText(
+      flags.report,
+      renderReportHtml(result, {
+        benchmark: gated,
+        syntheticEnvironment: isBundledEnvironment(result.environment),
+      }),
+    );
   }
 
   return score.thresholdsPassed ? 0 : 1;
@@ -382,6 +429,7 @@ export async function cmdReport(target: string | undefined, flags: Flags): Promi
   const run = (await readJson<RunResult>(path)) as RunResult;
   const html = renderReportHtml(flags.published ? sanitizeRunResult(run) : run, {
     mode: flags.published ? 'published' : 'full',
+    syntheticEnvironment: isBundledEnvironment(run.environment),
   });
 
   const out =
@@ -520,6 +568,18 @@ function agentsFor(benchmark: Benchmark, flags: Flags, fallback: AgentAdapter[])
   return flags.agent.map((id) =>
     id === REFERENCE_AGENT_ID ? createReferenceAgent(benchmark) : resolveAgentOrFail(id),
   );
+}
+
+/**
+ * Is this environment one of RigorRun's own bundled examples?
+ *
+ * The report footer used to declare every environment synthetic, which meant a
+ * report of a run against somebody's real system said in print that all of its
+ * records were fabricated. Derived from the registry rather than asserted, so
+ * it cannot drift from what is actually bundled.
+ */
+export function isBundledEnvironment(environmentId: string): boolean {
+  return WORKFLOWS.some((workflow) => workflow.registration.id === environmentId);
 }
 
 function resolveAgentOrFail(id: string) {

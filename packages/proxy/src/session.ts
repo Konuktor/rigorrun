@@ -23,7 +23,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import type { ToolDescription } from '@rigorrun/core';
+import { RIGORRUN_VERSION, type ToolDescription } from '@rigorrun/core';
 
 /**
  * The bounded channel a session speaks through.
@@ -43,7 +43,7 @@ export type ToolResult<T = unknown> =
   | { ok: true; data: T }
   | { ok: false; error: { code: string; message: string } };
 
-export const PROXY_INFO = { name: 'rigorrun-proxy', version: '0.1.0' } as const;
+export const PROXY_INFO = { name: 'rigorrun-proxy', version: RIGORRUN_VERSION } as const;
 
 /** One tool call, as it went past. */
 export interface ProxyCall {

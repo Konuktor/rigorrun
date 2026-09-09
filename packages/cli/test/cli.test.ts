@@ -133,9 +133,24 @@ describe('gate exit codes are the CI contract', () => {
     // `reference` replays the plan the expectation engine derived, so this is
     // really a check that the benchmark is satisfiable: a suite no correct
     // actor can pass is a broken suite, and it would fail here.
-    const { code, out } = await cli('gate', 'benchmark.json', '--agent', 'reference', '--quiet');
+    const { code, out } = await cli(
+      'gate',
+      'benchmark.json',
+      '--agent',
+      'reference',
+      '--allow-reference',
+      '--quiet',
+    );
     expect(code).toBe(0);
     expect(out).toContain('PASS');
+  }, 30_000);
+
+  it('refuses to gate on the reference implementation unless asked by name', async () => {
+    // A gate that cannot fail is not a gate. The oracle is handed the answer,
+    // so gating a build on it was a guaranteed pass dressed as a check.
+    const { code, err } = await cli('gate', 'benchmark.json', '--agent', 'reference', '--quiet');
+    expect(code).toBe(2);
+    expect(err).toContain('handed the answer');
   }, 30_000);
 
   it('honours a lowered bar', async () => {

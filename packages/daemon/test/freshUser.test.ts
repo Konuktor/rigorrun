@@ -213,7 +213,9 @@ describe('connecting an agent and getting an answer', () => {
     const result = await service.runAgent(project.id, added.agent.id);
     expect(result.caseResults.length).toBeGreaterThan(0);
     expect(result.verification).toBe('PARTIAL');
-    expect(result.isolation).toBe('RESET');
+    // The desk nominates a reset tool and nothing has called it twice to
+    // check, so the honest answer is that it was declared, not measured.
+    expect(result.isolation).toBe('DECLARED');
 
     // The agent drove itself through the proxy; these are its own calls.
     const tools = result.caseResults.flatMap((entry) => entry.steps.map((step) => step.tool));

@@ -16,7 +16,7 @@ This is not a feature tour. Four features are shown. Everything else is cut.
 
 ## Setup before recording
 
-1. Open <https://rigorrun.pages.dev> in a clean window at **1440 × 900**.
+1. Open <https://rigorrun.xyz> in a clean window at **1440 × 900**.
 2. Zoom **110%** so text is readable in a compressed video.
 3. Hide bookmarks. Close every other tab.
 4. Do a full dry run first — the demo takes about 8 seconds of real compute, and

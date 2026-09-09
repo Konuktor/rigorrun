@@ -11,7 +11,12 @@ import { dirname, isAbsolute, relative, resolve } from 'node:path';
 export class CliError extends Error {
   constructor(
     message: string,
-    readonly exitCode: 1 | 2 = 2,
+    /**
+     * 1 is a finding, 2 is our own failure, 3 is "we could not establish
+     * enough to say". Only `verify` produces 3; every other command predates
+     * it and keeps the two-value contract CI was written against.
+     */
+    readonly exitCode: 1 | 2 | 3 = 2,
   ) {
     super(message);
     this.name = 'CliError';

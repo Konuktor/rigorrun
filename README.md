@@ -9,7 +9,7 @@ RigorRun proves whether the agent can do the job safely — by reading the syste
 it changed, never by trusting what it says about itself.
 
 **[Get started →](docs/GETTING_STARTED.md)**
-&nbsp;·&nbsp; runs on your machine &nbsp;·&nbsp; **[Try the demo →](https://rigorrun.pages.dev)**
+&nbsp;·&nbsp; runs on your machine &nbsp;·&nbsp; **[Evidence →](https://rigorrun.xyz/#/evidence)**
 
 `Connect → Teach → Review → Build → Run → Compare`
 
@@ -54,12 +54,14 @@ case it can safely and reproducibly verify, and tells you what it could not
 test. A system it can seed and reset yields the richest suite — boundary and
 adversarial cases, and repeated destructive checks. A system without a reset
 still works, but produces fewer cases, disables repeated mutating cases, reports
-isolation as `NONE`, and verifies `PARTIAL`. Best results come from a staging or
+isolation as `NONE`, and verifies `PARTIAL`. Where you nominate a reset tool and
+nothing has run it twice and compared, isolation is `DECLARED` — believed rather
+than observed. Best results come from a staging or
 scratch environment with read-back and a reset (or seed). The bundled example is
 rich because its environment supports both; your own system may not, and
 RigorRun says so rather than pretending otherwise.
 
-**Early Access · v0.1.** It does what this page says and it is young: the
+**Early Access · v0.2.** It does what this page says and it is young: the
 limits are written down in [docs/V1_GAP_AUDIT.md](docs/V1_GAP_AUDIT.md), marked
 one by one, rather than left for you to find.
 
@@ -70,6 +72,33 @@ pnpm install && pnpm start
 ```
 
 See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
+
+## Or start with a server you already use
+
+An MCP server can annotate a tool `readOnlyHint: true`. Nothing checks that.
+
+```bash
+rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
+```
+
+No project, no browser, no agent, nothing to configure first. It resolves the
+reference against the registry, refuses to continue unless the bytes it
+downloaded hash to the sha512 the registry published, installs with lifecycle
+scripts disabled, builds an image with no `RUN` instruction, and runs the server
+with no network, no mounts, no capabilities and no environment. Then it calls
+each tool with arguments derived from its own schema and reads the container's
+filesystem before and after to find out what actually changed.
+
+Exit `0` verified · `1` a declaration was contradicted · `2` it could not run ·
+`3` it ran and established too little to be worth much.
+
+**Needs Docker.** Only `npm:` and `dir:` references, and only stdio servers — an
+OCI image, a git ref and a remote endpoint are refused rather than
+half-supported.
+
+Run against four published servers we did not write, it exercised **19 of 37
+tools**. The rest are named with reasons in every record rather than rounded
+away. <https://rigorrun.xyz/#/evidence>, or `docs/VERIFY_SERVER.md`.
 
 ## What is different?
 
@@ -95,7 +124,8 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [Connecting your agent over HTTP](docs/HTTP_AGENT.md) | The protocol, and the probe. |
 | [An agent that is a command](docs/CLI_AGENT.md) | The same protocol, over stdin and stdout. |
 | [An agent RigorRun cannot start](docs/DRIVEN_AGENT.md) | It asks for work instead. For an agent behind a login, in a notebook, or anywhere that will not take a request. |
-| [TypeScript agent SDK](docs/TYPESCRIPT_AGENT_SDK.md) | Ten lines. |
+| [Verifying a server](docs/VERIFY_SERVER.md) | `rigorrun verify`, the container, and what it cannot see. |
+| [TypeScript agent SDK](docs/TYPESCRIPT_AGENT_SDK.md) | Ten lines, and **not published to npm** — implement the HTTP protocol directly. |
 | [Python agent SDK](docs/PYTHON_AGENT_SDK.md) | Standard library only. |
 | [A production failure as a case](docs/TRACE_IMPORT.md) | What is taken from a trace, and what is not. |
 | [Putting the system back](docs/ENVIRONMENT_RESET.md) | Reset, and what happens without one. |
@@ -106,7 +136,9 @@ See [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md).
 | [Third-party dogfood](docs/THIRD_PARTY_DOGFOOD.md) | How we find out whether anybody else can use this. |
 | [An example feedback bundle](docs/examples/feedback-bundle.json) | Exactly what `rigorrun feedback export` sends, from a real session. |
 | [v1 gap audit](docs/V1_GAP_AUDIT.md) | Every capability marked WORKING, PARTIAL, DEMO-ONLY, BROKEN or MISSING, checked by doing it. |
-| [What is and is not built](docs/PRODUCT_REALITY_AUDIT.md) | The earlier inventory, left as written. |
+| [Product reality audit](docs/PRODUCT_REALITY_AUDIT.md) | Every public claim, checked by running something. What was untrue, and what still is not done. |
+| [Product decisions](docs/PRODUCT_DECISIONS.md) | What was decided about the product, and why. |
+| [Cloudflare readiness](docs/CLOUDFLARE_READINESS.md) | What Cloudflare powers, what it does not, and what is still deployed. |
 | [Roadmap](docs/ROADMAP.md) | Including the gaps. |
 
 ## Why does it exist?
@@ -139,13 +171,13 @@ Five things follow from that, and they are the whole product:
 | **The test is graded before the agent is** | Injected defects, a control that must survive, replay stability, hidden-answer isolation. |
 | **Everything is local-first** | Recordings and evidence stay on your machine. Publishing is an explicit, previewed, sanitising step. |
 
-**[See it on five different jobs →](https://rigorrun.pages.dev/#/proof)**
+**[See it on five different jobs →](https://rigorrun.xyz/#/proof)**
 
 ---
 
 ## Try it
 
-**In a browser, with nothing installed:** <https://rigorrun.pages.dev>
+**In a browser, with nothing installed:** <https://rigorrun.xyz>
 
 The whole pipeline — compile, generate, run both agents, verify — executes in
 the page. The numbers you see come from executions that happen when you press
@@ -153,9 +185,8 @@ the button.
 
 |                                      |                                                         |
 | ------------------------------------ | ------------------------------------------------------- |
-| Live demo                            | <https://rigorrun.pages.dev>                            |
+| Live demo                            | <https://rigorrun.xyz>                                  |
 | Northstar Support (the recorded app) | <https://rigorrun-crm.pages.dev>                        |
-| Control-plane API                    | <https://rigorrun.takhiroverbol.workers.dev/api/health> |
 
 ## Run it locally
 
@@ -260,11 +291,6 @@ flowchart TB
         llm["Groq · Gemini · any<br/>OpenAI-compatible API"]
     end
 
-    subgraph cloud["Cloudflare Workers Free — optional"]
-        api["Hono API"]
-        d1[("D1<br/>metadata only")]
-    end
-
     rec -->|trace.json| cli
     crm -.records.-> rec
     cli --> comp --> gen --> run
@@ -272,17 +298,11 @@ flowchart TB
     run --> ver --> score --> rep
     core -.- comp & gen & run & ver & rep
     run <-->|tool calls| demo & http & llm
-    cli -. "sanitised metadata only" .-> api --> d1
-
-    classDef cloudNode stroke-dasharray: 4 3;
-    class api,d1,cloud cloudNode;
 ```
 
-The expensive parts run locally. The cloud control plane is optional, stores
-metadata only, and the product is fully functional with it switched off — which
-is how it ships today: **the current CLI and interface do not call it.** It is
-deployable code, not a capability you need, and it is off unless you stand it up
-yourself.
+Everything runs locally. There is no server component: no account, no hosted
+API, no database. The demo, the CLI, the benchmark and CI need no service at
+all, which is why nothing here can generate a bill.
 
 ---
 
@@ -376,18 +396,12 @@ Model-backed agents work too — set `GROQ_API_KEY`, `GEMINI_API_KEY` or an
 
 ## Deploy for $0
 
-The MVP is designed so that **no part of it can generate a bill.** The demo,
-the CLI, the benchmark and CI need no service at all. The optional control
-plane runs on Cloudflare Workers Free with D1 Free:
+RigorRun is designed so that **no part of it can generate a bill.** The demo,
+the CLI, the benchmark and CI need no service at all, and there is no hosted
+component to pay for. Cloudflare serves the static landing page and the two demo
+apps on Pages and hosts DNS for `rigorrun.xyz`; both are free-plan features.
 
-```bash
-pnpm exec wrangler login
-pnpm exec wrangler d1 create rigorrun          # copy database_id into apps/worker/wrangler.toml
-pnpm -F @rigorrun/worker db:remote
-pnpm -F @rigorrun/worker deploy
-```
-
-Never enable Workers Paid; nothing here needs it. See
+See
 [docs/FREE_DEPLOYMENT.md](docs/FREE_DEPLOYMENT.md) and
 [docs/COST_GUARDRAILS.md](docs/COST_GUARDRAILS.md), which lists every service,
 its free limit, what happens when the limit is reached, and whether it can bill
@@ -434,7 +448,7 @@ packages/
   verifier/    14 assertion kinds over a filtered path language
   scoring/     rates · Wilson intervals · pass@k · thresholds
   agents/      demo pair · HTTP · OpenAI-compatible adapters
-  providers/   offline · Groq · Gemini · Workers AI · any OpenAI-compatible
+  providers/   offline · Groq · Gemini · any OpenAI-compatible
   runner/      reset → seed → execute → observe → verify → score
   report/      self-contained HTML report + publish sanitiser
   cli/         the `rigorrun` binary
@@ -442,7 +456,6 @@ apps/
   web/         landing page + dashboard
   demo-crm/    Northstar Support
   extension/   Chrome MV3 recorder
-  worker/      optional Hono + D1 control plane
 examples/refund-workflow/   a real trace, contract and benchmark
 docs/                       product, architecture, security, privacy, cost
 ```
@@ -483,7 +496,6 @@ pnpm release:verify --prod   # the above, plus production smoke and acceptance
 | Visual regression               | `pnpm visual`     |
 | Cross-browser critical path     | `pnpm cross`      |
 | Production smoke                | `pnpm smoke:prod` |
-| Production API and system state | `pnpm api:prod`   |
 | Production journeys             | `pnpm e2e:prod`   |
 
 See [TESTING.md](docs/TESTING.md) for what each layer is for, and

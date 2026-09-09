@@ -20,6 +20,7 @@
     "@rigorrun/env-mcp": "workspace:*",
     "@rigorrun/env-openapi": "workspace:*",
     "@rigorrun/environment": "workspace:*",
+    "@rigorrun/exec": "workspace:*",
     "@rigorrun/generator": "workspace:*",
     "@rigorrun/mcp": "workspace:*",
     "@rigorrun/proxy": "workspace:*",

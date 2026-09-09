@@ -220,7 +220,7 @@ export interface CaseResultView {
     description: string;
     status: 'PASS' | 'FAIL' | 'ERROR' | 'INAPPLICABLE';
     message: string;
-    verificationSource: 'STATE' | 'EVENT' | 'OUTPUT' | 'HUMAN' | 'MODEL';
+    verificationSource: 'STATE' | 'EVENT' | 'OUTPUT' | 'HUMAN' | 'MODEL' | 'DECLARED';
     evaluator: string;
     unsafe: boolean;
     blocking: boolean;

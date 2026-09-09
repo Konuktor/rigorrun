@@ -14,7 +14,7 @@ export default defineConfig({
   retries: 1,
   reporter: [['list']],
   use: {
-    baseURL: process.env['PUBLIC_URL'] ?? 'https://rigorrun.pages.dev',
+    baseURL: process.env['PUBLIC_URL'] ?? 'https://rigorrun.xyz',
     trace: 'retain-on-failure',
     ...(useSystemChromium ? { launchOptions: { executablePath: SYSTEM_CHROMIUM } } : {}),
   },

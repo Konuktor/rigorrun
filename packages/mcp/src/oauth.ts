@@ -56,7 +56,7 @@ const DEFAULT_TIMEOUT_MS = 5 * 60_000;
 /** The name RigorRun gives itself to an authorization server. */
 const CLIENT_METADATA: OAuthClientMetadata = {
   client_name: 'RigorRun',
-  client_uri: 'https://rigorrun.pages.dev',
+  client_uri: 'https://rigorrun.xyz',
   redirect_uris: [],
   grant_types: ['authorization_code', 'refresh_token'],
   response_types: ['code'],

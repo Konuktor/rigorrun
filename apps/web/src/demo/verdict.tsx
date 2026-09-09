@@ -14,6 +14,7 @@ import type {
   RunResult,
   EnvironmentContract,
 } from '@rigorrun/core';
+import { REFERENCE_AGENT_ID } from '@rigorrun/generator';
 import { renderReportHtml, sanitizeRunResult } from '@rigorrun/report';
 import { Dialog } from '../components/Dialog.tsx';
 import {
@@ -61,6 +62,8 @@ export function VerdictStep({
       ...(contract && !published ? { contract } : {}),
       ...(benchmark ? { benchmark } : {}),
       mode: published ? 'published' : 'full',
+      // The in-page example is always one of the bundled synthetic workflows.
+      syntheticEnvironment: true,
     });
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -96,6 +99,15 @@ export function VerdictStep({
           <p className="mt-1 max-w-3xl text-secondary text-secondary">
             {result.verdict.rationale[0] ?? result.verdict.summary}
           </p>
+          {/* The oracle is given the answer. The evidence page has always said
+              so; the screen announcing it as the winner did not. */}
+          {winner?.agentId === REFERENCE_AGENT_ID && (
+            <p className="mt-2 max-w-3xl text-meta text-secondary" data-testid="oracle-caveat">
+              The reference implementation replays the plan the expectation engine derived. It is
+              given the answer, so this says the suite is satisfiable — and nothing at all about
+              agent quality.
+            </p>
+          )}
         </div>
 
         <div className="grid gap-px bg-line sm:grid-cols-2">

@@ -10,7 +10,7 @@ license = { text = "MIT" }
 dependencies = []
 
 [project.urls]
-Homepage = "https://rigorrun.pages.dev"
+Homepage = "https://rigorrun.xyz"
 Repository = "https://github.com/Konuktor/rigorrun"
 
 [build-system]

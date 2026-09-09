@@ -66,6 +66,29 @@ describe('what gets published', () => {
     expect(help).toContain(`export const VERSION = '${pkg.version}'`);
   });
 
+  it('has exactly one version, and every surface reads it', async () => {
+    const pkg = await manifest();
+    const core = await readFile(`${here}../core/src/index.ts`, 'utf8');
+    expect(core).toContain(`export const RIGORRUN_VERSION = '${pkg.version}'`);
+
+    // Three of these used to be a literal '0.1.0' while 0.1.1 shipped, so a
+    // connected server logged the wrong version and every verification record
+    // named a harness that was never released. They import now; this fails if
+    // anybody types a number back in.
+    for (const [file, symbol] of [
+      ['../mcp/src/client.ts', 'CLIENT_INFO'],
+      ['../proxy/src/session.ts', 'PROXY_INFO'],
+    ] as const) {
+      const source = await readFile(`${here}${file}`, 'utf8');
+      const line = source.split('\n').find((l) => l.includes(`export const ${symbol}`)) ?? '';
+      expect(line).toContain('RIGORRUN_VERSION');
+      expect(line).not.toMatch(/version:\s*'\d/);
+    }
+
+    const sandbox = await readFile(`${here}../sandbox/src/verify.ts`, 'utf8');
+    expect(sandbox).toContain('const HARNESS_VERSION = RIGORRUN_VERSION');
+  });
+
   it('publishes on a channel that matches its version', async () => {
     const pkg = await manifest();
     expect(pkg.version).toMatch(/^\d+\.\d+\.\d+(-[a-z]+\.\d+)?$/);

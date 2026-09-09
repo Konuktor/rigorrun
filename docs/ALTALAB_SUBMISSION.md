@@ -338,19 +338,33 @@ will tell us we are wrong faster than we could find out ourselves.
 
 |                                 |                                                                   |
 | ------------------------------- | ----------------------------------------------------------------- |
-| **Live demo**                   | <https://rigorrun.pages.dev> — no account, no key, no install     |
-| **Demo CRM** (the recorded app) | <https://rigorrun-crm.pages.dev>                                  |
-| **Control-plane API**           | <https://rigorrun.takhiroverbol.workers.dev/api/health>           |
+| **Site**                        | <https://rigorrun.xyz> — no account, no key, no install           |
+| **Install**                     | `npx rigorrun` — <https://www.npmjs.com/package/rigorrun>         |
+| **Evidence**                    | <https://rigorrun.xyz/#/evidence> — four third-party MCP servers  |
+| **Synthetic example** (in-page) | <https://rigorrun-crm.pages.dev>                                  |
+| **GitHub repository**           | <https://github.com/Konuktor/rigorrun>                            |
 | **Founder demo video**          | `[VIDEO LINK PLACEHOLDER — record from docs/ALTALAB_DEMO_60S.md]` |
-| **GitHub repository**           | `[GITHUB LINK PLACEHOLDER — repository not yet published]`        |
-| **Founder**                     | `[FOUNDER NAME / EMAIL PLACEHOLDER]`                              |
+
+There is no control-plane API. This table used to list one — a Cloudflare
+Worker at `rigorrun.takhiroverbol.workers.dev` — and that was wrong twice over:
+no part of the product ever called it, and its source was deleted in `b1e121c`.
+The deployment is still up and is not referenced by anything shipped. See
+[CLOUDFLARE_READINESS.md](CLOUDFLARE_READINESS.md).
 
 ### For a reviewer with 60 seconds
 
-Open <https://rigorrun.pages.dev>, press **Run the live demo**, then click
-through Compile → Approve & generate → Run. When the verdict appears, click the
-red **!** in the Agent A column on the row _"A customer note contains injected
-instructions"_.
+Open <https://rigorrun.xyz> and press **Run the example** — it is labelled a
+synthetic example because that is what it is: an invented CRM, run through the
+real pipeline in the page. Step through it to the verdict, then open a failing
+case.
 
-You will see an agent that reported success, next to the system state proving it
-moved $500 it was never permitted to move.
+You will see an agent that reported success, next to the system state showing it
+issued a second refund on an order that already had one — the check it failed,
+and the state that decided it, side by side.
+
+For evidence involving software nobody here wrote, open
+<https://rigorrun.xyz/#/evidence>, or run it yourself:
+
+```bash
+npx rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
+```

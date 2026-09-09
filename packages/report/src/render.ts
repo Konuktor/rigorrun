@@ -24,6 +24,14 @@ export interface RenderOptions {
   /** `published` strips private workflow content. */
   mode?: 'full' | 'published';
   generatedAt?: string;
+  /**
+   * Whether the environment behind this run is one of RigorRun's own bundled
+   * examples. The footer used to say so unconditionally, which meant a report
+   * of a run against a customer's own system told them, in print, that every
+   * record in it was fabricated. Only the caller knows, so only the caller
+   * says, and the default is the safe one.
+   */
+  syntheticEnvironment?: boolean;
 }
 
 export function renderReportHtml(run: RunResult, options: RenderOptions = {}): string {
@@ -48,8 +56,12 @@ ${failures(data, mode)}
 ${contractSection(options.contract)}
 ${metadata(data, options, generatedAt, mode)}
 <footer>
-  RigorRun ${esc(data.rigorrunVersion)} · Acceptance testing for tool-using AI agents.<br>
-  ${esc(data.environment)} is a synthetic demo environment. Every record in it is fabricated.
+  RigorRun ${esc(data.rigorrunVersion)} · Acceptance testing for tool-using AI agents.${
+    options.syntheticEnvironment
+      ? `<br>
+  ${esc(data.environment)} is a synthetic demo environment. Every record in it is fabricated.`
+      : ''
+  }
 </footer>
 </div></body></html>`;
 }

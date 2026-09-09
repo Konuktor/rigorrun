@@ -67,9 +67,9 @@ describe('an imported benchmark cannot cause command execution', () => {
         spawners.push(relative(repoRoot, file));
       }
     }
-    expect(spawners).toEqual(['packages/daemon/src/exec.ts']);
+    expect(spawners).toEqual(['packages/exec/src/exec.ts']);
 
-    const exec = await readFile(join(repoRoot, 'packages/daemon/src/exec.ts'), 'utf8');
+    const exec = await readFile(join(repoRoot, 'packages/exec/src/exec.ts'), 'utf8');
     expect(exec).toMatch(/shell: false/);
     expect(exec).not.toMatch(/\bexecSync\(|shell: true/);
   });

@@ -109,9 +109,10 @@ The SDKs are still `private: true`, so `@rigorrun/agent-sdk` cannot be
 installed by anybody — the Python SDK is one standard-library file and can be
 copied.
 
-**No cloud sync, and the control plane is unused.** A real D1-backed service is
-deployed and tested and nothing in the product calls it. Either it becomes
-opt-in sync or it should be deleted.
+~~**No cloud sync, and the control plane is unused.**~~ Decided and done: the
+control plane was deleted. It was a real D1-backed service that nothing in the
+product called, so it was code rather than a capability. Removed from the tree,
+recoverable from git history. There is no cloud sync and no hosted component.
 
 **A live connection does not survive the runner stopping.** Discovery and an
 unfinished recording do — they are files under `~/.rigorrun`, and a reload
@@ -168,22 +169,18 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 
 ## Next, in the order it would matter
 
-1. **Publish to npm.** `pnpm dlx rigorrun` is the single largest piece of
-   friction between this and a stranger using it, and it is not a technical
-   problem.
-2. **Publishing the SDKs.** Every workspace package is `private: true`, so the
-   ten-line TypeScript agent SDK cannot be installed by anybody. The Python one
-   is a file to copy, which is fine and is not the same as a package.
-3. **A headless setup path.** Running and gating a project works from CI;
+1. **A headless setup path.** Running and gating a project works from CI;
    creating one does not. A `rigorrun project import` taking a description file
    would make a project reproducible from a repository.
-4. **Reconnect without a round trip.** Discovery and recordings persist now, so
+2. **Reconnect without a round trip.** Discovery and recordings persist now, so
    what is left is the child process behind a local MCP server: the runner
    stopping means somebody presses **Reconnect** before they can run. Holding
    the connection across a restart, or reopening it on demand, would remove the
    last step nobody asked for.
-5. **A Python agent SDK.** The protocol is a line of JSON each way, so this is
-   a small package rather than a port — but "small" is not "written".
-6. **Decide about the control plane.** It is deployed, tested, and called by
-   nothing. Either it becomes opt-in sync for teams who want a shared history,
-   or it should be deleted.
+
+Publishing to npm, a Python agent SDK, and deciding about the control plane
+were the other three entries here. All are settled: the package is published,
+the Python SDK is written, and the control plane was deleted. Publishing a
+public TypeScript SDK was considered and declined — the documentation claiming
+it was installable was removed in 0.1.1 instead, and nothing in the product
+needs the package to exist.

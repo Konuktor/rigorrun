@@ -1,10 +1,14 @@
 /**
  * RigorRun CLI entry point.
  *
- * Exit codes are part of the contract: 0 success or gate passed, 1 benchmark
- * or gate failed, 2 configuration or runtime error. CI depends on the
- * difference between 1 and 2 — a broken config must not look like a failing
- * agent.
+ * Exit codes are part of the contract: 0 success or gate passed, 1 benchmark,
+ * gate or conformance failure, 2 configuration or runtime error. CI depends on
+ * the difference between 1 and 2 — a broken config must not look like a
+ * failing agent, and a lying server must not look like a broken config.
+ *
+ * `verify` adds a fourth: 3 means the verification ran and did not establish
+ * enough to be worth much. No other command produces it, so every existing
+ * script keeps the contract it was written against.
  */
 import { parseArgs } from 'node:util';
 import { CliError } from './io.ts';
@@ -35,6 +39,7 @@ import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
 import { cmdFeedbackExport } from './feedback.ts';
+import { cmdVerify } from './verify.ts';
 import {
   cmdProjectCompare,
   cmdProjectGate,
@@ -94,10 +99,17 @@ async function dispatch(argv: string[]): Promise<number> {
         force: { type: 'boolean', default: false },
         yes: { type: 'boolean', default: false },
         as: { type: 'string' },
+        // A gate on the reference implementation passes by construction. It
+        // stays reachable for "is this suite satisfiable at all", by name.
+        'allow-reference': { type: 'boolean', default: false },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
         'max-unsafe': { type: 'string' },
+        // verify only.
+        'max-undetermined': { type: 'string' },
+        'min-exercised': { type: 'string' },
+        strict: { type: 'boolean', default: false },
         help: { type: 'boolean', short: 'h', default: false },
         version: { type: 'boolean', short: 'v', default: false },
       },
@@ -137,6 +149,7 @@ async function dispatch(argv: string[]): Promise<number> {
     project: values.project,
     home: values.home,
     baseline: values.baseline,
+    allowReference: values['allow-reference'] ?? false,
     minSuccess: rateFlag(values['min-success'], 'min-success'),
     minPolicy: rateFlag(values['min-policy'], 'min-policy'),
     maxPolicyViolations: numberFlag(values['max-policy-violations'], 'max-policy-violations'),
@@ -215,6 +228,15 @@ async function dispatch(argv: string[]): Promise<number> {
       return cmdInspectEnvironment(target, flags);
     case 'privacy':
       return cmdPrivacyInspect(target, parsed.positionals[2], flags.json);
+    case 'verify':
+      return cmdVerify(target, {
+        json: flags.json,
+        quiet: flags.quiet,
+        out: flags.out,
+        maxUndetermined: numberFlag(values['max-undetermined'], 'max-undetermined'),
+        minExercised: numberFlag(values['min-exercised'], 'min-exercised'),
+        strict: values.strict === true,
+      });
     case 'doctor':
       return cmdDoctorProduct(flags);
     default:

@@ -45,6 +45,13 @@ export type SeedCapability =
 /** How the world is returned to a known position between cases. */
 export type ResetCapability =
   | 'snapshot'
+  /**
+   * The environment is a container RigorRun starts, and resetting means
+   * throwing it away and starting another from the same image. The only reset
+   * kind that is a property of our own machinery rather than a promise made by
+   * somebody else's system.
+   */
+  | 'container'
   /** A tool the environment publishes, nominated by the operator. */
   | 'tool'
   /** An HTTP endpoint the operator configured. */
@@ -122,11 +129,59 @@ export function verificationStrength(caps: EnvironmentCapabilities): Verificatio
 export type IsolationLevel =
   /** The world was restored between cases. Results are independent. */
   | 'RESET'
+  /**
+   * Reset put the same things back, but not identically — a timestamp, a
+   * generated id. Differences between two states still mean something;
+   * comparing a state to a remembered absolute value does not.
+   */
+  | 'PARTIAL'
+  /**
+   * A reset was configured and nothing has ever checked that it works.
+   *
+   * This is a declaration, not a measurement. It exists because the honest
+   * answer to "were the cases isolated?" against somebody else's system is
+   * usually "they said so", and reporting that as `RESET` — which means cases
+   * were observed to start from the same state — claims a check nobody ran.
+   */
+  | 'DECLARED'
   /** No reset. Every case inherited whatever the previous one left behind. */
   | 'NONE';
 
-export function isolationLevel(caps: EnvironmentCapabilities): IsolationLevel {
-  return caps.reset === 'none' ? 'NONE' : 'RESET';
+/**
+ * What reset was measured to do, when anybody measured.
+ *
+ * This is the difference between `RESET` and `PARTIAL`, and it is why the
+ * function below takes a second argument. Everything above is a declaration:
+ * the operator nominated a reset tool, so the config says `reset: 'tool'`, and
+ * nothing has ever checked that the tool works. `PARTIAL` is not a thing an
+ * environment can declare about itself — it is a result. A caller that has
+ * actually run the world twice and compared passes what it found; a caller
+ * that has not, does not, and gets exactly the answer this function has always
+ * given.
+ */
+export interface ObservedIsolation {
+  /** Two resets produced byte-identical state. */
+  stable: boolean;
+  /** Two resets produced the same set of things, with differing contents. */
+  pathsStable: boolean;
+}
+
+/**
+ * Reset kinds that are RigorRun's own machinery rather than a promise made by
+ * somebody else's system. Throwing away a container or restoring an in-process
+ * snapshot is something this code does; calling a tool the operator nominated
+ * is something we asked for and never verified.
+ */
+const RESET_WE_CONTROL: ReadonlySet<ResetCapability> = new Set(['snapshot', 'container']);
+
+export function isolationLevel(
+  caps: EnvironmentCapabilities,
+  observed?: ObservedIsolation,
+): IsolationLevel {
+  if (caps.reset === 'none') return 'NONE';
+  if (observed) return observed.stable ? 'RESET' : observed.pathsStable ? 'PARTIAL' : 'NONE';
+  // Nobody measured. Say `RESET` only where the reset is ours to perform.
+  return RESET_WE_CONTROL.has(caps.reset) ? 'RESET' : 'DECLARED';
 }
 
 /**

@@ -8,7 +8,7 @@ deployments ship.
 | -------------------------- | -------------------------------------------- | ------------------------------------------- | -------------------------- |
 | **A — unit & integration** | `pnpm test`                                  | Is the business logic correct?              | Source                     |
 | **B — smoke**              | `pnpm smoke:prod`                            | Is the deployment catastrophically broken?  | Production                 |
-| **C — acceptance**         | `pnpm e2e`, `pnpm e2e:prod`, `pnpm api:prod` | Does the product actually work, for a user? | Local build and production |
+| **C — acceptance**         | `pnpm e2e`, `pnpm e2e:prod`                  | Does the product actually work, for a user? | Local build and production |
 | **D — release gate**       | `pnpm release:verify [--prod]`               | May this ship?                              | Everything above           |
 
 Supporting suites: `pnpm a11y` (WCAG A/AA), `pnpm visual` (golden screenshots),
@@ -32,19 +32,17 @@ can be.
 
 ## Layer A — unit and integration
 
-406 tests across 21 files: the environment SDK and its conformance kit, the
+762 tests across 64 files: the environment SDK and its conformance kit, the
 state-delta engine, the generic projection, canonical trace normalisation, the
 rule lifecycle, induction over a deliberately meaningless domain, counterfactual
 generation, expected outcomes, benchmark quality, the five demo workflows, a
 sixth domain the product has never seen, the bring-your-own HTTP agent, the
-verifier, scoring, redaction, the CLI, security properties, and the Worker's D1
-schema against real SQL via Node's built-in SQLite.
+verifier, scoring, redaction, the CLI, and security properties.
 
 ## Layer B — smoke
 
-Five tests, about three seconds. Landing serves and renders, the demo starts,
-the CRM serves, the control plane is healthy, the API issues a workspace. It is
-deliberately shallow.
+Three tests, about three seconds. Landing serves and renders, the demo starts,
+the CRM serves. It is deliberately shallow.
 
 ## Layer C — acceptance
 
@@ -62,12 +60,6 @@ back/forward, refresh, unknown routes, double-click protection, navigation
 during a run, no dead controls, and no console errors, failed requests or
 horizontal overflow anywhere.
 
-**Production API and system state** (`pnpm api:prod`) — the live Worker (health,
-auth, cross-workspace isolation, malformed payloads, 404s) and, critically, the
-**real system state** behind the demo: the benchmark is executed in Node and the
-resulting refund record is read directly — amount, approval, ticket linkage,
-audit entry — rather than trusting rendered text. The deployed UI is then
-asserted to agree with it.
 
 **Performance budgets** (`pnpm perf:prod`) — Core Web Vitals against the
 deployed site, measured three times from a cold browser context with the median

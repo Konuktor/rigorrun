@@ -489,6 +489,15 @@ function Verdict({ run }: { run: RunView }) {
             <p className="max-w-3xl text-body text-secondary" data-testid="verdict-because">
               {shipping.because}
             </p>
+            {/* DECLARED is a claim, not a check. Saying so where the verdict is
+                read, rather than in a log nobody opens. */}
+            {run.isolation === 'DECLARED' && (
+              <p className="max-w-3xl text-meta text-secondary" data-testid="isolation-declared">
+                Isolation is <span className="font-mono">DECLARED</span>: your system nominated a
+                reset and RigorRun has not run it twice and compared the results, so the cases are
+                believed to have started clean rather than observed to have.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-8">
@@ -682,7 +691,7 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
                     <span className="flex flex-wrap items-center gap-2">
                       {/* The tier that produced this verdict. Carried since the
                           beginning and shown nowhere until now. */}
-                      <Tag tone={check.verificationSource === 'STATE' ? 'pass' : 'warn'}>
+                      <Tag tone={VERIFICATION_TONE[check.verificationSource]}>
                         {VERIFICATION_TIER[check.verificationSource]}
                       </Tag>
                       {check.unsafe ? <Tag tone="fail">unsafe</Tag> : null}
@@ -768,6 +777,28 @@ const VERIFICATION_TIER: Record<CaseResultView['checks'][number]['verificationSo
   OUTPUT: 'from what the tool returned',
   HUMAN: 'decided by a person',
   MODEL: 'judged by a model',
+  DECLARED: 'claimed by the system itself, unverified',
+};
+
+/**
+ * `DECLARED` is deliberately not a warning.
+ *
+ * A warning reads as "probably fine, look when you can". A claim the system
+ * under test made about itself, which nothing has checked, is not probably
+ * fine — it is the thing the rest of the product exists to go and test. Giving
+ * it the same amber as a weaker-but-real tier would be the exact confusion
+ * this label was added to prevent.
+ */
+const VERIFICATION_TONE: Record<
+  CaseResultView['checks'][number]['verificationSource'],
+  'pass' | 'warn' | 'fail'
+> = {
+  STATE: 'pass',
+  EVENT: 'warn',
+  OUTPUT: 'warn',
+  HUMAN: 'warn',
+  MODEL: 'warn',
+  DECLARED: 'fail',
 };
 
 function Evidence({ label, children }: { label: string; children: React.ReactNode }) {

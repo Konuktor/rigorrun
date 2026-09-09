@@ -1,226 +1,240 @@
 # Product reality audit
 
-What RigorRun can actually do for a person who has never seen this source.
+**Written 10 September 2026**, against `rigorrun@0.1.1` as published, the
+deployed site, and the repository at `93e0b8c`. Every finding below was checked
+by running something. Where a claim is marked false, the command that showed it
+is in the row.
 
-> **This document has two halves.** The audit below was written first, against
-> commit `e1ced9b`, and answered all twenty of its questions NO. The work that
-> followed was aimed squarely at it. [What changed](#what-changed) at the bottom
-> re-answers every question against the current build, and says which ones are
-> still NO.
->
-> The original answers are left exactly as written. A product audit that gets
-> quietly edited as things improve is a product audit nobody can trust the next
-> time it says something uncomfortable.
-
-This document is written against the deployed build and the repository at
-commit `e1ced9b`, not against intent. Every claim carries a file, a line or a
-command whose output can be reproduced. Where the answer is NO, the current
-behaviour is marked **DEMO-ONLY**, which means: it works, it is tested, and it
-works only for material that ships inside RigorRun.
-
-The pipeline in the middle of this product is real. The unit suite is green —
-`pnpm test` reports **439 passing across 22 files** — and the sixth-domain
-acceptance test (`packages/environments/test/unknownDomain.test.ts`) genuinely
-proves the compiler has no business vocabulary in it. None of that is in
-question here. What is in question is whether any of it is *reachable* by
-someone outside this repository.
-
-## Summary
-
-**Twenty questions asked. Twenty answers are NO.**
-
-The single sentence version: *there is no way to get material that did not ship
-inside RigorRun into RigorRun.* Every entry point — the UI, the CLI, the
-environment SDK, the agent registry — either has no input surface at all, or
-resolves its input against a registry that is populated exclusively by the five
-bundled demo workflows.
-
-The two findings that matter most, because they are the ones that look solved
-and are not:
-
-1. **`rigorrun init-environment` scaffolds files that no RigorRun command can
-   load.** The scaffolded README tells you to run
-   `rigorrun inspect-environment <name>` next. That command resolves against a
-   registry populated only by `import '@rigorrun/environments'`, so it fails:
-
-   ```
-   $ pnpm rigorrun inspect-environment my-system
-   error Unknown environment "my-system". Registered environments:
-   finance-invoice, it-access, ops-fulfillment, sales-lead, support-refund.
-   ```
-
-   The documented thirty-minute "point RigorRun at your own system" path
-   (`docs/CONNECT_ENVIRONMENT_30_MINUTES.md`) is a dead end at its final step.
-   The only way to finish it is to edit `packages/environments/src/registry.ts`
-   — that is, to edit RigorRun.
-
-2. **There is no input surface anywhere in the product UI.** `apps/web/src`
-   contains zero `<input>`, `<textarea>` and `<select>` elements. There is
-   nothing to type a URL, a command, an endpoint or a project name into.
-
-## The twenty questions
-
-| # | Question | Answer | Evidence |
-| - | -------- | ------ | -------- |
-| 1 | Can a new external user create a project? | **NO** | No project concept exists. `grep -rn '\bproject\b' apps/*/src packages/*/src` returns two hits, both incidental English in comments. **DEMO-ONLY** |
-| 2 | Can they persist it? | **NO** | `apps/web/src` contains no `localStorage`, no `sessionStorage`, no `IndexedDB` and no `fetch`. The only cross-reload state is the URL hash; a refresh recomputes the pipeline from scratch (`apps/web/src/demo/useDemo.ts:357-408`). **DEMO-ONLY** |
-| 3 | Can they connect their own MCP server? | **NO** | There is no MCP implementation. Repo-wide grep for `modelcontextprotocol` and `MCP` returns zero hits in code; the sole `pnpm-lock.yaml` match is a base64 integrity hash. No package depends on an MCP SDK. **DEMO-ONLY** |
-| 4 | Can they connect a local MCP server? | **NO** | As above. No stdio transport, no subprocess spawning anywhere in `packages/`. **DEMO-ONLY** |
-| 5 | Can they connect a remote MCP server? | **NO** | As above. No HTTP or SSE MCP transport. **DEMO-ONLY** |
-| 6 | Can they connect an OpenAPI system? | **NO** | No OpenAPI parser, no spec ingestion, no operation mapping anywhere in the repository. **DEMO-ONLY** |
-| 7 | Can they connect a browser application? | **NO** | `docs/ROADMAP.md:33` states it plainly: "No browser execution lane." `STATUS_ADVANTAGE.md` rows 13 mark it "not built". The Chrome recorder exists but its `host_permissions` are `http://localhost/*` and `http://127.0.0.1/*` only (`apps/extension/manifest.json`), so it structurally cannot record a customer's staging site. **DEMO-ONLY** |
-| 8 | Can they connect their own agent? | **NO** | An HTTP agent adapter exists and is real (`packages/agents/src/http.ts:79`), but nothing exposes it. The CLI defines no endpoint flag (`packages/cli/src/main.ts:52-72`) and the UI has no input. The only route is to write TypeScript calling `availableAgents({ httpAgents })` (`packages/agents/src/registry.ts:37`) — i.e. inside this repository. **DEMO-ONLY** |
-| 9 | Can they invoke their own agent from RigorRun? | **NO** | Same cause as 8. The web app never imports the HTTP adapter; its agents are hardcoded: `const agents = [naiveAgent, carefulAgent, createReferenceAgent(benchmark)]` (`apps/web/src/demo/useDemo.ts:216`). **DEMO-ONLY** |
-| 10 | Can an existing MCP-based agent be evaluated without rewriting it? | **NO** | No MCP, and no proxy. The one external protocol that exists is harness-driven: RigorRun runs the loop and the agent must reply with one tool call at a time (`docs/AGENT_PROTOCOL.md`), which is a rewrite of any agent that owns its own loop. **DEMO-ONLY** |
-| 11 | Can a user record their own workflow? | **NO** | The recorder captures real interactions and is well tested (`e2e/extension.spec.ts`), but only against localhost, and the resulting trace is unusable without a registered environment — `cmdCompile` calls `createEnvironment(trace.environmentId)` (`packages/cli/src/commands.ts:206`), which only resolves the five bundled ids. **DEMO-ONLY** |
-| 12 | Can RigorRun infer a contract from THEIR workflow? | **NO** | Induction reads a declared `EnvironmentSchema` with semantic `role` annotations (`packages/environment/src/schema.ts:29`). Nothing derives such a schema from a real system; it must be hand-authored, and once authored it cannot be loaded (finding 1). **DEMO-ONLY** |
-| 13 | Can RigorRun generate cases against THEIR system? | **NO** | `cmdGenerate` resolves the environment through `listEnvironments()` (`packages/cli/src/commands.ts:246`) and fails on anything not bundled. **DEMO-ONLY** |
-| 14 | Can RigorRun reset THEIR environment between cases? | **NO** | `reset()` and `seed()` are required methods on `EnvironmentAdapter` (`packages/environment/src/adapter.ts:126-127`), satisfiable only by an in-process fake. There is no reset tool, endpoint, command or snapshot strategy for an external system, and no concept of an environment that cannot be reset. **DEMO-ONLY** |
-| 15 | Can RigorRun inspect THEIR authoritative state? | **NO** | Verification reads `getState(): CanonicalState` (`adapter.ts:129`), which asks an environment to hand over its entire world keyed by id. No real system offers that, and there is no partial or designated-read alternative. **DEMO-ONLY** |
-| 16 | Can RigorRun execute tests safely without touching production? | **NO** | There is no environment safety mode, no production/staging/local distinction, no write gating and no destructive-action confirmation anywhere in the codebase. The question has never had to be asked because every environment is an in-memory object. **DEMO-ONLY** |
-| 17 | Can they run all of this from the public UI? | **NO** | Three routes exist — `home`, `demo`, `proof` (`apps/web/src/App.tsx:10-11`) — and zero input elements. The step labelled "Connect agent" (`useDemo.ts:69`) renders a progress bar over the three hardcoded agents. **DEMO-ONLY** |
-| 18 | Can they run all of this from CLI/CI? | **NO** | The exit-code contract is real and usable (`packages/cli/src/main.ts:1-8`), and CI does gate on it — but only over bundled material. There is no flag to supply an environment, an agent endpoint or a project. **DEMO-ONLY** |
-| 19 | Can they do it without editing RigorRun core? | **NO** | This is finding 1. The scaffolder writes to `environments/<slug>/`; the loader reads a registry populated by `packages/environments/src/registry.ts:60`. Nothing bridges the two. **DEMO-ONLY** |
-| 20 | Can they get value without using Northstar or another bundled demo? | **NO** | Every path terminates in one of the five bundled workflows. The CLI's demo defaults to `'refund'` (`packages/cli/src/commands.ts:57`); the web app hardcodes `DEFAULT_WORKFLOW = 'refund'` (`useDemo.ts:81`) and offers no picker. **DEMO-ONLY** |
-
-## Three shipped surfaces that are not true
-
-These are separate from the twenty questions. They are places where the product
-currently asserts something that is false, which is worse than a missing
-feature.
-
-**The landing page publishes counts that contradict the pipeline.**
-`apps/web/src/pages/Landing.tsx:11-37` hardcodes "18 sanitised events",
-"5 observed · 7 inferred", "17 cases · 10 categories" — under the sentence
-"every count is what the live demo produces when you run it"
-(`Landing.tsx:124-127`). The pipeline produces 7 trace steps, 3 observed facts,
-19 proposed rules, 22 cases and 9 categories (`apps/web/src/proof.json`). The
-copy appears to be pinned to `examples/refund-workflow`, which is itself stale.
-
-**The CI benchmark gate is broken and has been reported as green.**
-`.github/workflows/ci.yml:94` and `:100` invoke `--agent demo-robust` and
-`--agent demo-weak`. Those ids do not exist:
-
-```
-$ pnpm rigorrun agents
-naive    Agent A (naive)
-careful  Agent B (careful)
-```
-
-`resolveAgent` throws on an unknown id (`packages/agents/src/registry.ts:45`),
-so both steps exit 2 rather than the expected 0 and 1. Separately,
-`examples/refund-workflow/benchmark.json` declares `"environment": "northstar"`,
-an id that no longer exists in the registry. `STATUS.md`'s claim that every
-gate is green does not hold for CI.
-
-**`/proof` is a static snapshot presented as evidence.** The page renders a
-committed JSON file stamped `"commit": "bb92b06"`
-(`apps/web/src/proof.json`), four commits behind HEAD. It is generated by
-running the real pipeline (`scripts/build-proof.mjs`), so it is not fabricated —
-but it is regenerated only by `pnpm release:verify`, which CI does not run.
-
-`STATUS.md` also reports "403 passing across 20 files"; the current figure is
-439 across 22.
-
-## What is real
-
-Stated for balance, because the list is not short and none of it needs
-rewriting:
-
-- The compiler, generator, projection engine, verifier, scoring and benchmark
-  self-grading, exercised by 439 passing tests.
-- The domain-blindness claim. `pnpm domain` is a genuine enforced constraint,
-  and `unknownDomain.test.ts` compiles a domain that exists only inside a test
-  file, with no product changes.
-- The demo's arithmetic. The six-step journey really does execute the same
-  packages the CLI uses, in the browser, at click time.
-- The Cloudflare control plane: real D1 schema, hashed bearer tokens,
-  per-query ownership filtering, tested against real SQL. It is called by
-  nothing in this repository — the CLI contains no `fetch` at all — but it works.
-- The HTTP agent adapter's hardening: SSRF guard, redirects refused, response
-  size capped (`packages/agents/src/http.ts:55-150`).
-- The recorder's credential handling, and the redaction module behind it.
-
-## Conclusion
-
-RigorRun is a correct and well-tested engine with no way in. Every one of the
-twenty capabilities a new user needs is either absent or reachable only by
-editing this repository. Passing 439 internal tests is evidence that the engine
-works on material RigorRun already had; it is not evidence that the product is
-usable, and it should not be reported as such.
-
+This replaces an earlier audit of the same name written on 6 September. That one
+answered "what could an external person do?"; this one asks "what does this
+product claim, and which of those claims survive contact with a measurement?"
 
 ---
 
-<a id="what-changed"></a>
+## Executive verdict
 
-## What changed
+**The product is more honest than its website, and its best capability had never
+shipped.**
 
-Re-answered against the current build. The evidence for every YES is a test
-that runs in CI, named beside it.
+The expected finding — a thin product behind a polished site — is not what is
+here. The engine is real, genuinely domain-generic (there is a build check that
+fails if a business noun reaches the compiler, generator, verifier or runner),
+and the npm README and `V1_GAP_AUDIT.md` are more candid than most shipping
+products. Three separate things were wrong instead:
 
-| # | Question | Then | Now | Evidence |
-| - | -------- | ---- | --- | -------- |
-| 1 | Create a project? | NO | **YES** | `e2e/external-user.spec.ts` creates one in a browser |
-| 2 | Persist it? | NO | **YES** | `packages/daemon/test/store.test.ts` |
-| 3 | Connect their own MCP server? | NO | **YES** | `packages/mcp/test/connect.test.ts` — a real handshake with a separate package |
-| 4 | Local MCP server? | NO | **YES** | stdio transport; the fixture is spawned as a child process |
-| 5 | Remote MCP server? | NO | **YES** | streamable HTTP transport; `packages/mcp/test/safety.test.ts` covers the guards |
-| 6 | OpenAPI system? | NO | **NO** | Not built. Deferred on purpose; see `docs/ROADMAP.md` |
-| 7 | Browser application? | NO | **NO** | Not built. Still the largest gap for anybody with no API |
-| 8 | Connect their own agent? | NO | **YES** | `packages/daemon/test/externalAgent.test.ts` |
-| 9 | Invoke their own agent? | NO | **YES** | Same test; the agent is a separate process |
-| 10 | Evaluate an existing MCP agent without rewriting it? | NO | **YES** | `packages/proxy/test/proxy.test.ts` drives it with the SDK's own client |
-| 11 | Record their own workflow? | NO | **YES** | Through the MCP operator, in the browser |
-| 12 | Infer a contract from *their* workflow? | NO | **YES** | `packages/mcp/test/induce.test.ts`, including the renamed-fields test |
-| 13 | Generate cases against *their* system? | NO | **YES** | `packages/daemon/test/freshUser.test.ts` |
-| 14 | Reset *their* environment? | NO | **YES** | A nominated reset tool; without one it says `ISOLATION: NONE` |
-| 15 | Inspect *their* authoritative state? | NO | **YES** | Nominated verifier reads; labelled `PARTIAL` because it is |
-| 16 | Execute safely without touching production? | NO | **YES** | Safety modes; writes refused at the channel and recorded |
-| 17 | All of it from the UI? | NO | **YES** | `e2e/external-user.spec.ts`, with screenshots in `docs/external-user-run/` |
-| 18 | All of it from CLI/CI? | NO | **PARTLY** | Running and gating a project: yes. Connecting and teaching are interface-only |
-| 19 | Without editing RigorRun? | NO | **YES** | Both dogfood fixtures import nothing from RigorRun but the public agent SDK |
-| 20 | Value without Northstar? | NO | **YES** | Northstar is not on any product path |
+1. **`rigorrun verify` existed, worked, and was invisible.** One command
+   verifies an arbitrary published MCP server against its own annotations — no
+   project, no browser, no agent, no recording. It was on an unmerged branch, in
+   no release, and on no page of the site.
+2. **Three shipped behaviours were untrue**, in the specific sense that they
+   asserted a check nobody ran or a fact that was not so.
+3. **The site led with an invented CRM**, and its evidence page put five
+   invented companies under the heading EVIDENCE.
 
-**Sixteen YES, two NO, one PARTLY, one that needs qualifying.**
+A fourth thing is true and remains true: a control plane deleted from the code
+is still deployed and publicly reachable.
 
-### The ones that are still NO
+---
 
-**OpenAPI and browser connectors do not exist.** MCP is the only way to connect
-a system. That was a deliberate choice — depth on one path over breadth across
-four — but it means anybody whose system has no MCP server has to write one.
+## What the product actually is
 
-**Connecting and teaching are interface-only.** `rigorrun run --project` and
-`rigorrun gate --project` work from a build server with no interface and no
-person. Setting a project *up* still needs the interface, because both steps are
-interactive by nature: you are looking at what came back. A headless setup path
-is not built.
+Two capabilities, both real, in the order a stranger meets them.
 
-### The ones that need qualifying
+**Connect a system, do the job once, test an agent against it.** A local runner
+serves an interface. It connects an MCP server (stdio or streamable HTTP,
+including OAuth), an HTTP API from an OpenAPI document, or a web application
+through a browser. A person does one job through the system's own tools while
+RigorRun reads the system before and after. It compiles rules from what changed,
+asks about what structure could not settle, and — only for rules a human
+confirms — generates an executable suite. An agent that speaks MCP connects
+unchanged. The verdict is read back from the system, never from the agent's
+prose, and is labelled with how strongly it was verified.
 
-**Nothing is published to npm.** Every doc says `pnpm dlx rigorrun`, and every
-one of them also says it is a clone today. That is the single largest piece of
-friction between this and a stranger actually using it.
+**Verify a server nobody wrote.** `rigorrun verify npm:<pkg>@<version>` resolves
+the reference against the registry, takes the published sha512, refuses to
+continue unless the downloaded bytes hash to it, installs with lifecycle scripts
+disabled, builds an image with no `RUN` instruction, and runs the server with no
+network, no mounts, no capabilities and no environment. It calls each tool with
+arguments derived from its own schema and hashes the writable mounts before and
+after. Isolation is measured by starting two containers and comparing, not read
+off a config flag.
 
-~~**Discovery and recordings live in the runner's memory.**~~ No longer true,
-and left struck through rather than deleted because this document's whole
-discipline is that it does not get quietly edited as things improve. Discovery
-and a half-finished recording are files under `~/.rigorrun`; a reload mid-flow
-resumes. The live connection to a local MCP server is still a child process and
-is still gone when the runner stops, which is what **Reconnect** is for.
+Everything else in the repository — five demo workflows, two demo apps, a Chrome
+recorder extension, a Python SDK, nine Playwright suites — is input to those two
+things or evidence about them.
 
-**The verdict a real system produces is `PARTIAL`, not `AUTHORITATIVE`.** That
-is correct rather than a shortcoming — RigorRun reads back what the nominated
-reads return and no more — but it means a verdict from a real system is a
-weaker claim than one from the bundled example, and that is stated on every
-result rather than smoothed over.
+---
 
-**The control plane is still called by nothing.** It is deployed, tested, and
-unused by the product.
+## Claim → implementation → evidence
 
-### What the technical gates now measure, and what they do not
+Verdicts: **PROVEN** (checked externally), **PARTIAL** (real, narrower than the
+sentence), **DEMO-ONLY**, **BROKEN**, **MISLEADING**, **FIXED** (was one of the
+last three, now is not).
 
-`pnpm verify` still measures whether RigorRun works on material that ships
-inside RigorRun. The gate that measures whether a stranger can use it is
-`pnpm e2e:external`, and it runs as its own CI job. A release where only the
-first is green is not a release.
+| Claim | Where it was said | Code | Evidence | Verdict |
+| --- | --- | --- | --- | --- |
+| Connect your MCP server | site, README | `packages/mcp/src/client.ts` | Four published `@modelcontextprotocol` servers launched and verified; `pnpm test` third-party suites | **PROVEN** |
+| Connect an OpenAPI API | README, GETTING_STARTED | `packages/env-openapi` | Integration tests; no write endpoint called during discovery | **PARTIAL** — `client_credentials` only |
+| Connect a browser application | README | `packages/env-browser` | e2e | **PARTIAL** — a browser cannot verify itself; verdicts are `OBSERVATIONAL` and the type refuses to let it be its own verifier |
+| OAuth works | V1_GAP_AUDIT | `packages/mcp/src/oauth.ts` | Against an AS that issues metadata, registers dynamically and checks PKCE | **PARTIAL** — the authorization URL is written to stderr, so a remote user must watch the terminal |
+| Teach one workflow | site, README | `packages/daemon/src/workspace.ts` | `pnpm e2e:external`, reload mid-recording | **PROVEN** |
+| Generate acceptance tests | site | `packages/generator` | Expected answers computed by hypothetical completion, not authored | **PROVEN** |
+| Verify actual state | site, README | `packages/verifier` | Assertions read state and events; `INAPPLICABLE` never counts as a pass | **PROVEN** |
+| Compare agent versions | README | `packages/daemon/src/compare.ts` | Refuses to interpret a diff across a changed suite, exit 2 | **PROVEN** |
+| Gate CI | README, `--help` | `packages/cli/src/commands.ts` | Exit 0/1/2 | **FIXED** — see below |
+| Credentials stay local | site, README, npm | OS keychain, no egress | Published bundle grepped: no control-plane URL | **PROVEN** |
+| No hosted component | README, STATUS | — | True of the product; a deleted control plane is still deployed | **PARTIAL** — see Cloudflare |
+| Confidence intervals alongside every rate | site | `packages/scoring/src/stats.ts` | Wilson intervals in CLI, report and demo verdict | **PROVEN** |
+| Works with arbitrary MCP systems | site | — | 19 of 37 tools across four servers | **PARTIAL**, and the denominator is now published |
+| A TypeScript SDK | README table | `packages/agent-sdk` | `npm view @rigorrun/agent-sdk` → 404 | **PARTIAL** — real, not installable, and no SDK will be published |
+
+---
+
+## What was untrue, and is no longer
+
+Each of these was found by running the thing, not by reading it.
+
+**The documented gate could not fail.** `--help` recommended
+`rigorrun gate <benchmark> --agent reference`, and `rigorrun run` with no
+`--agent` ran only the reference implementation and exited 0. The reference
+replays the plan the expectation engine derived — it is handed the answer. So
+the documented way to gate a build was a guaranteed pass.
+*Now:* `run` requires an agent; `gate` refuses `reference` without
+`--allow-reference`. Our own CI asks for it by name, because "is this suite
+satisfiable at all" is the one honest use.
+
+**Every report told its reader the records were fabricated.**
+`packages/report/src/render.ts` emitted "*<environment>* is a synthetic demo
+environment. Every record in it is fabricated." unconditionally — including a
+report of a run against a customer's own system. A test asserted it.
+*Now:* derived from the bundled registry, with a test on both branches.
+
+**Isolation was printed but never measured.** `isolationLevel(caps)` returned
+`RESET` — which means cases were *observed* to start from the same state —
+whenever any reset was configured. Nothing had ever run the reset twice and
+compared.
+*Now:* `RESET` only where the reset is RigorRun's own machinery (an in-process
+snapshot, a container we throw away). Where the operator nominated a tool, the
+answer is `DECLARED`: believed, not observed. Six tests asserted the overclaim.
+
+**`rigorrun record` printed a next step that errors.** It said
+`Next: rigorrun compile <file>`; `compile` reads a canonical trace and the
+recorder writes a workflow trace. Checked:
+`error: … environmentId Invalid input: expected string, received undefined`.
+*Now:* it says what the file is and what cannot be done with it.
+
+**The demo miscounted itself in public.** Three agents ran; the progress UI was
+sized for two. It rendered "66 of 44 case executions" with the bar at 150% and
+`aria-valuenow` above `aria-valuemax`.
+*Now:* 66 of 66, from the agents that actually ran.
+
+**Every default-size button was unreadable.** `styles.css` defines both
+`--text-secondary` (13px) and `--color-secondary` (#b4bdcb); Tailwind generates a
+`text-secondary` utility for each and the colour won. `Button`'s default size set
+a colour where the other sizes set a font size, so 29 buttons rendered at
+**1.6:1** against a 4.5:1 gate. Invisible because none was on a page the a11y
+gate covered.
+
+**The evidence freshness gate could never pass and never ran.** It diffed the
+whole of `proof.json`, three of whose fields are a clock, and was wired to
+`branches: [main]` in a repository whose default branch is `master`. The page
+drifted 13 commits behind HEAD under the sentence "every number below was
+produced by running the real pipeline". (Regenerating at HEAD changed nothing but
+the clocks — the numbers were right; only the stamp was stale.)
+
+**Four documented facts were false.** `rigorrun.pages.dev` does not 301 to the
+apex (it answers 200 with byte-identical content); `www.rigorrun.xyz` does not
+resolve at all; `ALTALAB_SUBMISSION.md` advertised a "Control-plane API" that no
+part of the product ever called; and `SECURITY.md` described a "baseline" agent
+obeying a prompt injection and a "hardened" one resisting it — neither agent
+exists, and on the generated injection case **all three shipped agents pass**.
+
+---
+
+## Synthetic, real, and the line between them
+
+Classified as the brief asked. A synthetic example is fine when it is labelled.
+
+| Thing | Class | Now |
+| --- | --- | --- |
+| `apps/demo-crm` (Northstar Support) | SYNTHETIC EXAMPLE | Kept. Labelled synthetic in its own banner and, now, on the site |
+| `apps/demo-ops` (four schema-driven systems) | SYNTHETIC EXAMPLE | Kept, no longer linked from a page claiming to be evidence |
+| The five bundled workflows | SYNTHETIC EXAMPLE | Kept. They are how the pipeline is exercised in CI |
+| `/#/proof` — five invented companies under "EVIDENCE" | **MISLEADING PUBLIC SURFACE** | **Deleted.** Replaced by `/#/evidence` |
+| `proof.json` | REAL EXAMPLE — real pipeline, invented inputs | Kept for the example's counts; freshness gate now works |
+| `evidence.json` | REAL PRODUCT, external | New. Four published servers, regenerable |
+| `fixtures/external/*` | TEST FIXTURE | Kept. Import nothing from RigorRun; one annotation is deliberately wrong, and says so |
+| `.rigorrun/records/*` | REAL PRODUCT | Real verification records, gitignored |
+| `packages/agents/src/http.ts` | DEAD CODE | Superseded by `daemon/src/httpAgent.ts` |
+| `packages/env-mcp` | DEAD CODE | Re-export shim, imported only by a test |
+| Cloudflare Worker + D1 | **DEPLOYED, SOURCE DELETED** | Still live. See `CLOUDFLARE_READINESS.md` |
+
+The distinction the brief asked for, kept: **generated by the real pipeline** is
+not **independently validated**. `proof.json` is the first. `evidence.json` is
+the second, and it is the only public number on the site that involves software
+nobody here wrote.
+
+---
+
+## Fresh-user findings
+
+Measured by `scripts/gate1.mjs`, which packs the tarball, installs it into a
+directory that has never seen RigorRun with a `HOME` that did not exist, and
+runs it with no browser reachable.
+
+- **Time to a real verdict, machine runtime: 14.9s.** One command.
+- **Manual steps to a verification record: one.** `rigorrun verify npm:…`
+- **Manual steps to an agent verdict: nine**, and all of them need a browser.
+  Setting a project up is interface-only; running, gating and comparing are not.
+- **Repository knowledge needed: none for `verify`.** For the agent path, none
+  either — `pnpm e2e:external` drives it as a stranger, from the packaged
+  artifact, with its own MCP server and its own agent process.
+- **Human time-to-first-real-verdict: UNMEASURED.** Machine runtime is not it and
+  is not reported as it. `docs/TTFRV_PROTOCOL.md` is the protocol; no subject has
+  run it.
+
+---
+
+## Priorities
+
+**P0 — prevented a stranger getting a real, trustworthy result. All fixed.**
+The guaranteed-pass gate; the report calling real data fabricated; unmeasured
+isolation reported as measured; `record` → `compile`; shipping `verify` at all;
+the demo's public miscount.
+
+**P1 — damaged trust. All fixed.** `/proof` framing; the freshness gate; version
+drift across five constants; the four false documented facts; the 1.6:1 buttons;
+missing OG/canonical metadata; a site with two links on it.
+
+**P2 — not done, deliberately.** Induction over-produces (~25% of proposed rules
+are discarded). Confidence numbers in the review UI are hardcoded priors, not
+calibrated. Four of six `VerificationSource` tiers, two of three evaluators,
+three of four state surfaces and about nine of fourteen assertion kinds are
+declared but never produced. `clearEnvironments()` is global mutable state that
+two projects in one process would contend for. LLM agent `costUsd` is always
+null. None blocks a first real result; all are now in `V1_GAP_AUDIT.md`.
+
+**Not now.** SDK publishing (decided against — the verify path needs none).
+Multi-user, cloud sync, hosted console, billing: blocked behind the project's own
+Gate 3, which is what that gate is for.
+
+---
+
+## Remaining limitations
+
+- **No external user has ever run this.** Tier 1 of the evidence hierarchy is
+  empty. Four servers from one publisher is our own scan, and our own scan is not
+  a user.
+- **About half a typical server's surface is reachable.** 19 of 37 measured. The
+  rest is itemised with reasons in every record.
+- **A verdict against a real system is `PARTIAL`, by design**, and isolation
+  against one is `DECLARED` unless something measures it.
+- **The container boundary is not a security guarantee.** Docker here is rootful;
+  an escape reaches the host. Recorded in every record's `harness.caveats`.
+- **`verify` needs Docker**, and supports only `npm:` and `dir:` references and
+  stdio servers. An OCI image, a git ref and a remote endpoint are refused rather
+  than half-supported.
+- **Setting a project up is interface-only.** Running, gating and comparing are
+  not, which is the half CI needs.
+- **A control plane is deployed and unreferenced.** Teardown is written down and
+  was not authorised in this pass.
