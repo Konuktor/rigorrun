@@ -1,0 +1,71 @@
+/**
+ * RigorRun type system.
+ *
+ * Two families, self-hosted, latin subset only — 88 kB for the whole system.
+ * They are served from our own origin because a font request to a third party
+ * is a request a visitor did not ask for, on a site whose argument is that
+ * RigorRun does not make requests you did not ask for.
+ *
+ * Both are variable fonts with a single file per style, so a weight change
+ * costs nothing at runtime and there is no 600-vs-700 round trip.
+ *
+ * The fallback faces below carry measured metric overrides. Instrument Sans is
+ * 1.47% wider than Arial and Geist Mono 0.34% narrower than the default
+ * monospace, measured in Chromium against a representative string. Applying
+ * that as `size-adjust`, with ascent and descent scaled to match, means the
+ * fallback occupies the same space as the real face and swapping between them
+ * moves nothing. Layout shift from fonts is therefore zero by construction
+ * rather than by luck, which is what `e2e/perf.spec.ts` asserts.
+ */
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/instrument-sans-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: italic;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/instrument-sans-latin-italic.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/geist-mono-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Metric-matched fallbacks. See the note above: these numbers were measured. */
+@font-face {
+  font-family: 'Instrument Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans');
+  size-adjust: 101.47%;
+  ascent-override: 95.59%;
+  descent-override: 24.64%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Geist Mono Fallback';
+  src: local('Menlo'), local('Consolas'), local('DejaVu Sans Mono'), local('Liberation Mono');
+  size-adjust: 99.66%;
+  ascent-override: 101.34%;
+  descent-override: 30.1%;
+  line-gap-override: 0%;
+}

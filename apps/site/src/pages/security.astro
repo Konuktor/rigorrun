@@ -1,0 +1,144 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import { REPO_URL, SECURITY_HREF, SECURITY_LABEL } from '../site';
+
+const boundaries = [
+  {
+    title: 'The interface is served by the process, not by us',
+    body: 'The runner binds a socket on 127.0.0.1 on an ephemeral port. There is no hosted console, no relay and no tunnel. A page on https cannot fetch http://127.0.0.1 in Firefox or Safari, so a hosted UI could not reach your staging box even if we wanted one — serving both halves from one loopback origin removes the problem rather than working around it.',
+  },
+  {
+    title: 'Three checks before a request is answered',
+    body: 'The socket is loopback-only; the Host header must be one of 127.0.0.1, localhost or ::1; and the interface is paired with a single-use code that is redeemed once for an HttpOnly, SameSite=Strict session cookie, so the code leaves the address bar immediately. Every mutating /api request is additionally checked against Sec-Fetch-Site and Origin.',
+  },
+  {
+    title: 'Credentials go to the operating system, not into a file we invented',
+    body: 'macOS Keychain, libsecret on Linux, DPAPI on Windows, with an owner-only file when none is present. The backend is chosen by a write-read-delete round trip rather than by platform name, and rigorrun doctor tells you which one you got. No command prints a secret, and rigorrun secrets set refuses a value on the command line, because that is shell history.',
+  },
+  {
+    title: 'An imported project is inert until somebody agrees to it',
+    body: 'A connector that arrived in a file is a command to run or a URL to open with your credentials. It is refused until somebody has seen it in full and said yes — a refusal rather than a warning, because opening it is the harmful act.',
+  },
+];
+
+const egress = [
+  ['rigorrun verify npm:…', 'Downloads the named package from registry.npmjs.org so it can be pinned to the exact bytes and run in a container.'],
+  ['Connecting your own system', "Requests go to the address you gave, with the credentials you configured. That is the product working; it is your server, not ours."],
+  ['An LLM-backed agent', 'Only exists if you have set GROQ_API_KEY, GEMINI_API_KEY or OPENAI_COMPATIBLE_*. Then it talks to that provider. Unset, no such agent is available.'],
+];
+
+const limits = [
+  'The container runtime daemon runs as root. RigorRun reduces blast radius but does not claim to prevent a container escape; an escape reaches the host.',
+  'Where a state reading came only from the server’s own tools, it is corroboration and not proof: the server that may be misdeclaring a tool is the one answering the read.',
+  'State is read from the container’s writable mounts, which is complete over durable storage and blind to state a process holds only in memory.',
+  'Verification records are hashed, not signed. There is no HMAC, Ed25519 or sigstore attestation on a record yet, so a record proves integrity against accidental change and not against a determined author.',
+];
+---
+<Base
+  title="Security"
+  description="RigorRun runs on your machine. How the local runner is isolated, where credentials go, exactly what leaves the machine and when, the limits of the container boundary, and how to report a vulnerability."
+>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>Security</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">
+        Local-first is an architecture here, not a promise.
+      </h1>
+      <p class="mt-7 text-lead text-secondary">
+        RigorRun connects to the systems that hold your real records, using your real credentials. So
+        the useful thing to publish is not a reassurance — it is where the boundaries actually are,
+        what crosses them, and what this cannot defend against.
+      </p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <h2 class="text-display font-medium">How it is built</h2>
+    <div class="mt-10 grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-2">
+      {
+        boundaries.map((item) => (
+          <div class="bg-surface p-6">
+            <h3 class="text-title font-medium">{item.title}</h3>
+            <p class="mt-3 text-support text-secondary">{item.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+      <div>
+        <h2 class="text-display font-medium text-balance">What leaves the machine</h2>
+        <p class="mt-5 text-lead text-secondary">
+          Three things can send a request, all three because you asked for them, and none of them to
+          us. There is no analytics SDK, no beacon and no crash reporter in the package.
+        </p>
+        <p class="mt-4 text-support text-muted">
+          RigorRun does write a local <span class="font-mono">activation.jsonl</span> — a stage id, a
+          timestamp, a counter and a coarse error class. It records no task content, no arguments, no
+          results, no names, no URLs and no credentials, and there is no uploader and no endpoint. If
+          telemetry is ever added, that is the shape it would send, and you can read the file first.
+        </p>
+      </div>
+
+      <dl class="ruled rounded-panel border border-line bg-surface">
+        {
+          egress.map(([what, detail]) => (
+            <div class="p-5">
+              <dt class="font-mono text-support text-fg">{what}</dt>
+              <dd class="mt-2 text-support text-secondary">{detail}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="rounded-panel border border-warn-line bg-warn-bg p-6 sm:p-8">
+      <h2 class="text-display font-medium">What this cannot defend against</h2>
+      <p class="mt-4 max-w-3xl text-lead text-secondary">
+        These are carried on every verification record RigorRun writes, not only on this page.
+      </p>
+      <ul class="mt-6 space-y-4">
+        {limits.map((limit) => <li class="max-w-4xl text-support text-secondary">{limit}</li>)}
+      </ul>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="grid gap-10 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <h2 class="text-title font-medium">Reporting a vulnerability</h2>
+        <p class="mt-4 text-support text-secondary">
+          Write to <a class="rr-link" href={SECURITY_HREF}>{SECURITY_LABEL}</a>. Include what you
+          did, what happened, and the version from
+          <span class="font-mono">rigorrun --version</span>. You will get a reply within 72 hours.
+        </p>
+        <p class="mt-4 text-support text-muted">
+          Please do not open a public issue for anything that could be used against somebody else's
+          machine before it is fixed. There is no bounty — it would be dishonest to advertise one
+          with no revenue behind it — but you will be credited in the changelog if you would like to
+          be.
+        </p>
+      </div>
+      <div>
+        <h2 class="text-title font-medium">Verifying what you installed</h2>
+        <p class="mt-4 text-support text-secondary">
+          The npm package is published from a GitHub Actions workflow that holds no npm token, using
+          trusted publishing, and carries a SLSA build provenance attestation. You can check it
+          against the source before you run it:
+        </p>
+        <pre data-theme="ink" class="mt-4 overflow-x-auto rounded-well border border-line bg-canvas p-4 font-mono text-support text-fg" tabindex="0" role="region" aria-label="Command to verify npm provenance"><code>npm audit signatures
+npm view rigorrun dist.integrity</code></pre>
+        <p class="mt-4 text-support text-muted">
+          The source that built it is <a class="rr-link" href={REPO_URL}>public</a>, which is the
+          point: provenance that points at a repository nobody can open proves very little.
+        </p>
+      </div>
+    </div>
+  </Section>
+</Base>

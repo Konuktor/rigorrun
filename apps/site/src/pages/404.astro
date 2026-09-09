@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Button from '../components/Button.astro';
+---
+<Base title="Page not found" description="That page does not exist." noindex>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>404</Eyebrow>
+      <h1 class="mt-4 text-display font-medium">There is nothing at this address.</h1>
+      <p class="mt-6 text-lead text-secondary">
+        The old site kept every page behind a <span class="font-mono text-support">#</span>, so a
+        few links from that era point at addresses that no longer resolve. These are the real ones.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <Button href="/">Home</Button>
+        <Button href="/evidence" variant="secondary">Evidence</Button>
+        <Button href="/start" variant="secondary">Get started</Button>
+      </div>
+    </div>
+  </Section>
+</Base>

@@ -21,7 +21,7 @@ jobs:
   # The gate that matters. Everything in `verify` measures whether RigorRun
   # works on material that ships inside RigorRun; this measures whether a
   # stranger can use it. If only the technical gates pass, the release is not
-  # green — see docs/PRODUCT_REALITY_AUDIT.md for why that distinction had to
+  # green — see https://rigorrun.xyz/what-is-built for why that distinction had to
   # be made explicit.
   product-acceptance:
     runs-on: ubuntu-latest
@@ -226,7 +226,7 @@ jobs:
     #
     # It does NOT prove that a good agent passes. Both shipped demo agents
     # currently fail this benchmark, and the gate says so rather than pretending
-    # otherwise. See docs/PRODUCT_REALITY_AUDIT.md.
+    # otherwise. See https://rigorrun.xyz/what-is-built.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

@@ -7,7 +7,7 @@ RigorRun to that person holding their first verification record.
 
 **Machine execution time is never reported as human time.**
 
-This is not pedantry. `docs/AUDIT_REMEDIATION_0.1.1.md:154-168` records that 0.1.0 shipped
+This is not pedantry. The 0.1.1 remediation record (private) shows that 0.1.0 shipped
 "in ten minutes" across the README, the getting-started guide and the site — a
 quantitative onboarding claim that had never been measured on an independent human. It was
 removed in 0.1.1 rather than defended. Re-introducing it from a stopwatch on a script
@@ -145,5 +145,5 @@ No human run has been conducted. No number is available, and none is estimated.
 
 ### Machine runtime
 
-Recorded per target as the vertical slice runs; see `STATUS_V2.md` for current figures and
+Recorded per target as the vertical slice runs; see the private status notes for current figures and
 the conditions they were taken under.

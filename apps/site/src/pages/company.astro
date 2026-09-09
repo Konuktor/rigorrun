@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Button from '../components/Button.astro';
+import { FOUNDER, CONTACT_EMAIL, REPO_URL, VERSION, contactHref, contactLabel } from '../site';
+---
+<Base
+  title="Company"
+  description="RigorRun is built by Erbol Tahirov. Acceptance infrastructure for agents that take real actions — what it is, where it is, and what has not happened yet."
+>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>Company</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">
+        Agents are being given permission to change things. Almost nothing checks that they did.
+      </h1>
+      <p class="mt-7 text-lead text-secondary">
+        Software teams have had a way to answer "did this change break the thing that matters" for
+        forty years. It is called an acceptance test, and it works because a machine can look at the
+        result. Agents arrived without one. The tools that exist score what the model wrote, which is
+        the one artefact that cannot tell you whether the work happened.
+      </p>
+      <p class="mt-5 text-lead text-secondary">
+        RigorRun is the missing half: watch a person do the job once, derive what the rules must be,
+        and then verify an agent against the state of the system rather than its own account of
+        itself.
+      </p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+      <div>
+        <h2 class="text-title font-medium">Who</h2>
+        <p class="mt-4 text-support text-secondary">
+          RigorRun is built by <span class="text-fg">{FOUNDER}</span>, working on it alone.
+        </p>
+        <p class="mt-4 text-support text-muted">
+          There is no company registered behind it yet, no funding, and no employees. Saying so is
+          cheaper than being found out, and a product that argues you should check claims rather
+          than believe them does not get to make unverifiable ones about itself.
+        </p>
+        <div class="mt-7 flex flex-wrap gap-3">
+          <Button href={contactHref(CONTACT_EMAIL)} variant="secondary">{contactLabel(CONTACT_EMAIL)}</Button>
+          <Button href={REPO_URL} variant="secondary" external>GitHub</Button>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-title font-medium">Where it actually is</h2>
+        <dl class="mt-5 ruled rounded-panel border border-line bg-surface">
+          {
+            [
+              ['Published', `rigorrun@${VERSION} on npm, MIT, with SLSA build provenance`],
+              ['Users', 'No external user has run this yet. That is the next thing that matters.'],
+              ['Revenue', 'None. There is no price and no billing.'],
+              ['Funding', 'None raised.'],
+              [
+                'Verified against',
+                'Four public MCP servers written by somebody else, and a fixture system written for the dogfood test. Not a customer.',
+              ],
+            ].map(([term, detail]) => (
+              <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:gap-6">
+                <dt class="w-40 shrink-0 text-micro font-semibold uppercase text-muted">{term}</dt>
+                <dd class="text-support text-secondary">{detail}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="mt-5 text-support text-muted">
+          If you have an agent doing a job you cannot afford to have silently break, that is the
+          conversation worth having. <a class="rr-link" href={contactHref(CONTACT_EMAIL)}>Get in touch.</a>
+        </p>
+      </div>
+    </div>
+  </Section>
+</Base>

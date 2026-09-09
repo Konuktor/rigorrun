@@ -1,0 +1,22 @@
+{
+  "name": "@rigorrun/site",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "rigorrun.xyz — the public site. Static HTML, one route per URL.",
+  "scripts": {
+    "dev": "astro dev --port 4321",
+    "build": "astro build",
+    "preview": "astro preview --port 4321",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@rigorrun/design": "workspace:*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^5.16.2",
+    "tailwindcss": "^4.3.3"
+  }
+}

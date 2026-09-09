@@ -165,7 +165,7 @@ const proof = {
   workflows,
 };
 
-const out = join(root, 'apps', 'web', 'src', 'proof.json');
+const out = join(root, 'apps', 'site', 'src', 'data', 'proof.json');
 const ESC = String.fromCharCode(27);
 
 /**

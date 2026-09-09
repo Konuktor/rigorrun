@@ -1,0 +1,35 @@
+---
+title: RigorRun documentation
+description: Acceptance testing for AI agents that take real actions. Show RigorRun a job once; it verifies your agent against the state of the system it changed.
+template: splash
+hero:
+  tagline: Show RigorRun a job once. It builds an acceptance suite and verifies your agent against what actually changed in your system.
+  actions:
+    - text: Install and run
+      link: /start/install/
+      icon: right-arrow
+    - text: What RigorRun is
+      link: /start/what-it-is/
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Start here" icon="rocket">
+    [Install and run](/start/install/) takes one command. Then
+    [your first project](/start/first-project/) connects a system and teaches it one job.
+  </Card>
+  <Card title="Understand the verdict" icon="approve-check">
+    [Verification strength](/concepts/verification-strength/) is the thing to read first. A verdict
+    against a real system is `PARTIAL`, and that is honest rather than a defect.
+  </Card>
+  <Card title="Connect your system" icon="setting">
+    An [MCP server](/systems/mcp/), an [HTTP API](/systems/openapi/), or a
+    [web application](/systems/browser/) — and what each one can prove.
+  </Card>
+  <Card title="Know the limits" icon="warning">
+    [Limitations](/trust/limitations/) is a real page with real entries. Three of the five evidence
+    tiers are unreachable today, and it says so.
+  </Card>
+</CardGrid>

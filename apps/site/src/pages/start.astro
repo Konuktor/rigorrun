@@ -1,0 +1,108 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Command from '../components/Command.astro';
+import Button from '../components/Button.astro';
+import { DOCS_URL, RELEASE_LABEL } from '../site';
+
+const steps = [
+  {
+    title: 'Start the runner',
+    body: 'One command. It prints a URL with a single-use pairing code and opens your browser. On a headless box, the printed URL is the whole interface.',
+    command: 'npx rigorrun',
+  },
+  {
+    title: 'Connect your system',
+    body: 'An MCP server you already run, an OpenAPI document, or a web application through a browser. Point it at staging or a scratch instance — RigorRun refuses to write to anything you mark production.',
+  },
+  {
+    title: 'Do the job once',
+    body: 'RigorRun reads your system before you start and again when you finish, and works out what the rules must be from what changed.',
+  },
+  {
+    title: 'Rule on what it worked out',
+    body: 'It shows you the evidence behind each proposed rule so you can disagree with the evidence rather than with a verdict. A rule you reject cannot fail your agent.',
+  },
+  {
+    title: 'Point it at your agent',
+    body: 'An HTTP endpoint, a command on this machine, or a key your own loop can pull work from. About ten lines if it already speaks MCP.',
+  },
+  {
+    title: 'Run it, and read the verdict',
+    body: 'Safe to ship — yes, conditional or no — with how strongly each answer could be verified, and what could not be checked at all.',
+  },
+  {
+    title: 'Gate the next change',
+    body: 'The same suite from the command line, with a non-zero exit when the bar is missed, so a regression stops the build.',
+    command: 'rigorrun gate --project <id>',
+  },
+];
+---
+<Base
+  title="Get started"
+  description="One command starts RigorRun on your machine. Connect your system, do the job once, connect your agent, read the verdict. Node 20.11 or newer; nothing to sign up for."
+>
+  <Section>
+    <div class="grid gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
+      <div>
+        <Eyebrow>{RELEASE_LABEL}</Eyebrow>
+        <h1 class="mt-4 text-display font-medium text-balance">Testing your own agent.</h1>
+        <p class="mt-6 max-w-xl text-lead text-secondary">
+          This part runs on your machine, and that is not a preference. Your MCP server, your
+          internal API, your staging box — a page served over <span class="font-mono text-support">https</span>
+          cannot reach any of them, so the interface for this work is served by a small local process
+          instead. Your credentials, your recordings and your systems never touch our infrastructure,
+          because there is no path by which they could.
+        </p>
+        <div class="mt-8"><Command command="npx rigorrun" size="lg" /></div>
+      </div>
+
+      <aside class="rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">Before you start</h2>
+        <ul class="mt-4 space-y-3 text-support text-secondary">
+          <li><span class="text-fg">Node 20.11 or newer.</span> Nothing else to install.</li>
+          <li>
+            <span class="text-fg">A system it is safe to change.</span> Staging, a scratch instance,
+            or a local copy.
+          </li>
+          <li>
+            <span class="text-fg">A way to read that system back.</span> One operation RigorRun can
+            call afterwards to see what changed. Without one it can still watch, but every verdict
+            will say <span class="font-mono">OBSERVATIONAL</span>.
+          </li>
+          <li>
+            <span class="text-fg">Docker, only for <span class="font-mono">rigorrun verify</span>.</span>
+            Not needed for anything else.
+          </li>
+        </ul>
+        <div class="mt-6 border-t border-line pt-5">
+          <Button href={DOCS_URL} variant="secondary" external>Read the docs</Button>
+        </div>
+      </aside>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <ol class="ruled rounded-panel border border-line bg-surface">
+      {
+        steps.map((step, index) => (
+          <li class="flex flex-col gap-4 p-6 sm:flex-row sm:gap-8">
+            <span class="shrink-0 font-mono text-support text-accent sm:w-10">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div class="min-w-0 flex-1">
+              <h2 class="text-title font-medium">{step.title}</h2>
+              <p class="mt-2 max-w-2xl text-support text-secondary">{step.body}</p>
+              {step.command && (
+                <div class="mt-4">
+                  <Command command={step.command} />
+                </div>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+</Base>

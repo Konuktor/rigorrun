@@ -1,0 +1,399 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Button from '../components/Button.astro';
+import Command from '../components/Command.astro';
+import ClaimGap from '../components/ClaimGap.astro';
+import { RELEASE_LABEL, DOCS_URL } from '../site';
+import proof from '../data/proof.json';
+import evidence from '../data/evidence.json';
+
+const demo = proof.workflows.find((workflow) => workflow.key === 'refund');
+if (!demo) throw new Error('proof.json has no refund workflow.');
+
+/** Every number below is what the pipeline produced, not what reads well. */
+const pipeline = [
+  {
+    n: '01',
+    title: 'Record',
+    body: 'A person does the job once, in their own application.',
+    stat: `${demo.traceSteps} sanitised steps`,
+  },
+  {
+    n: '02',
+    title: 'Compile',
+    body: 'The trace becomes an executable workflow contract.',
+    stat: `${demo.observedFacts} observed · ${demo.rulesProposed} proposed`,
+  },
+  {
+    n: '03',
+    title: 'Stress-test',
+    body: 'Normal, edge and adversarial cases are generated from the rules.',
+    stat: `${demo.cases} cases · ${demo.categories.length} categories`,
+  },
+  {
+    n: '04',
+    title: 'Verify',
+    body: 'Outcomes are checked against the system that changed.',
+    stat: `${demo.checks} checks across the suite`,
+  },
+  {
+    n: '05',
+    title: 'Gate',
+    body: 'A threshold decides whether the agent ships.',
+    stat: 'exit 1 stops the build',
+  },
+];
+
+const connectors = [
+  {
+    title: 'MCP server',
+    lede: 'The agent uses tools.',
+    body: 'Connect a server you already run for Claude or Cursor. RigorRun calls the reads you nominate after the run, so the verdict comes from records rather than from the transcript.',
+    strength: 'PARTIAL',
+    tone: 'warn',
+  },
+  {
+    title: 'HTTP API',
+    lede: 'The agent calls an API.',
+    body: 'Point RigorRun at an OpenAPI document and the address requests actually go to. Same shape: nominated reads afterwards decide what happened.',
+    strength: 'PARTIAL',
+    tone: 'warn',
+  },
+  {
+    title: 'Web application',
+    lede: 'The agent clicks.',
+    body: 'RigorRun drives a browser and watches. A page saying “done” is a claim by the system that would have to be wrong for it not to be done, so a browser alone cannot close the loop.',
+    strength: 'OBSERVATIONAL',
+    tone: 'muted',
+  },
+];
+---
+
+<Base
+  title="RigorRun"
+  description="Your agent said it worked. RigorRun checks what it actually did. Show it one job; it builds an executable acceptance suite and verifies your agent against the state of the system it changed. Runs on your machine."
+>
+  <!-- ───────────────────────────────────────────────────────────────── hero -->
+  <section>
+    <div
+      class="rr-container grid items-center gap-12 pb-[var(--spacing-section)] pt-[var(--spacing-section-tight)] lg:grid-cols-[1.08fr_1fr] lg:gap-14"
+    >
+      <div>
+        <p
+          class="inline-flex items-center gap-2 rounded-pill border border-line bg-surface px-3 py-1.5 text-meta text-secondary"
+        >
+          <span class="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>
+          {RELEASE_LABEL}
+        </p>
+
+        <h1 class="mt-6 text-hero font-medium text-balance">
+          Your agent said it worked.<br />
+          <span class="text-muted">RigorRun checks what it did.</span>
+        </h1>
+
+        <p class="mt-6 max-w-xl text-lead text-secondary">
+          Show RigorRun the job once. It turns that into a repeatable acceptance suite and decides
+          whether your agent is safe to ship by reading the system it changed — never by trusting
+          what it says about itself.
+        </p>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <Command command="npx rigorrun" size="lg" />
+          <Button href="/how-it-works" variant="secondary" size="lg">See how it works</Button>
+        </div>
+
+        <p class="mt-5 max-w-lg text-support text-muted">
+          Everything runs on your machine. There is no account, and no hosted component to send
+          your systems to.
+        </p>
+      </div>
+
+      <div><ClaimGap /></div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────────────────────────────────────── the problem -->
+  <Section ruled>
+    <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+      <div>
+        <Eyebrow>The gap</Eyebrow>
+        <h2 class="mt-4 text-display font-medium text-balance">
+          A transcript cannot tell you whether the work happened.
+        </h2>
+      </div>
+      <div class="max-w-prose space-y-5 text-lead text-secondary">
+        <p>
+          An agent that reports success and an agent that achieved it are indistinguishable from
+          the transcript. They are trivially distinguishable from the database.
+        </p>
+        <p>
+          So RigorRun does not score the answer. It reads the system afterwards through operations
+          you nominate, and asks the questions that have a fact behind them: does the refund exist,
+          is the amount right, is the ticket attached, was approval required, and did anything
+          change that should not have.
+        </p>
+        <p class="text-fg">
+          Every verdict is labelled with how strongly it could be checked. A verdict against a real
+          system is <span class="font-mono text-support">PARTIAL</span>, and says so.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ────────────────────────────────────────────────────────── how it works -->
+  <Section ruled id="how">
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div>
+        <Eyebrow>How it works</Eyebrow>
+        <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
+          One demonstration becomes a suite that runs forever.
+        </h2>
+      </div>
+      <Button href="/how-it-works" variant="ghost">Read the long version →</Button>
+    </div>
+
+    <ol class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
+      {
+        pipeline.map((step) => (
+          <li class="flex flex-col bg-surface p-5" data-reveal>
+            <span class="font-mono text-meta text-accent">{step.n}</span>
+            <h3 class="mt-3 text-title font-medium">{step.title}</h3>
+            <p class="mt-2 flex-1 text-support text-secondary">{step.body}</p>
+            <p class="mt-5 border-t border-line-soft pt-3 font-mono text-meta text-muted">
+              {step.stat}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="mt-5 text-support text-muted">
+      Those counts are what the pipeline produced on its last run, written by a script and checked
+      in CI — not numbers typed into a page.
+      <a class="rr-link" href="/how-it-works#synthetic">The system in this example is synthetic.</a>
+    </p>
+  </Section>
+
+  <!-- ───────────────────────────────────────────────────────────── evidence -->
+  <Section ruled>
+    <div class="grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
+      <div>
+        <Eyebrow>Evidence</Eyebrow>
+        <h2 class="mt-4 text-display font-medium text-balance">Evidence, with the denominator.</h2>
+        <p class="mt-6 max-w-md text-lead text-secondary">
+          RigorRun was run against {evidence.totals.servers} MCP servers nobody here wrote, each pinned
+          to the exact bytes the registry published and executed in a container with no network.
+        </p>
+        <p class="mt-4 max-w-md text-support text-muted">
+          It reached {evidence.totals.toolsExercised} of {evidence.totals.toolsDiscovered} tools. The
+          other {evidence.totals.toolsUntested} are named, each with the reason it was not reached.
+          A fabricated 100% would be worth less than a measured {Math.round(
+            (evidence.totals.toolsExercised / evidence.totals.toolsDiscovered) * 100,
+          )}% with the remainder itemised.
+        </p>
+        <div class="mt-8">
+          <Button href="/evidence" variant="secondary">Read the full record</Button>
+        </div>
+      </div>
+
+      <div class="rounded-panel border border-line bg-surface" data-reveal>
+        <div class="grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
+          {
+            [
+              { label: 'Servers', value: evidence.totals.servers },
+              { label: 'Tools found', value: evidence.totals.toolsDiscovered },
+              { label: 'Exercised', value: evidence.totals.toolsExercised },
+              { label: 'Contradicted', value: evidence.totals.contradicted },
+            ].map((cell) => (
+              <div class="bg-surface p-4">
+                <p class="text-micro font-semibold uppercase text-muted">{cell.label}</p>
+                <p class="mt-2 text-metric font-medium" data-numeric>
+                  {cell.value}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+        <div class="border-t border-line p-5">
+          <h3 class="text-micro font-semibold uppercase text-muted">What this does not establish</h3>
+          <ul class="mt-3 space-y-2 text-support text-secondary">
+            <li><span class="text-fg">Nothing about the wider registry.</span> Four servers, one publisher, all well maintained. That is the weakest possible sample.</li>
+            <li><span class="text-fg">No security claim about any of them.</span> A server that contradicted nothing here contradicted nothing this harness can observe, on the tools it could exercise.</li>
+            <li><span class="text-fg">No market validation.</span> Our own scan is not a user.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ──────────────────────────────────────────────────────── how it connects -->
+  <Section ruled>
+    <Eyebrow>How it connects</Eyebrow>
+    <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
+      Three ways in, and what each one can prove.
+    </h2>
+    <p class="mt-5 max-w-2xl text-lead text-secondary">
+      How RigorRun reaches your system decides how strong a verdict it can give you. That is stated
+      on every result rather than buried in a footnote.
+    </p>
+
+    <div class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-3">
+      {
+        connectors.map((connector) => (
+          <div class="flex flex-col bg-surface p-6" data-reveal>
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="text-title font-medium">{connector.title}</h3>
+              <span
+                class:list={[
+                  'rounded-pill border px-2.5 py-1 font-mono text-micro font-semibold',
+                  connector.tone === 'warn'
+                    ? 'border-warn-line bg-warn-bg text-warn'
+                    : 'border-line-strong text-muted',
+                ]}
+              >
+                {connector.strength}
+              </span>
+            </div>
+            <p class="mt-1.5 text-support text-muted">{connector.lede}</p>
+            <p class="mt-4 flex-1 text-support text-secondary">{connector.body}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-6 rounded-panel border border-line bg-raised p-5">
+      <p class="max-w-3xl text-support text-secondary">
+        <span class="text-fg">A verdict is never stronger than the read behind it.</span>
+        <span class="font-mono">AUTHORITATIVE</span> is direct, trusted state.
+        <span class="font-mono">PARTIAL</span> is verified through the reads your system exposes — a
+        normal connected server is PARTIAL, and that is honest, not a defect.
+        <span class="font-mono">OBSERVATIONAL</span> means the actions were watched and the final
+        state was not independently proven.
+      </p>
+    </div>
+  </Section>
+
+  <!-- ─────────────────────────────────────────────────────────── local first -->
+  <Section ruled>
+    <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
+      <div>
+        <Eyebrow>Local-first</Eyebrow>
+        <h2 class="mt-4 text-display font-medium text-balance">
+          There is no server to send your systems to.
+        </h2>
+        <p class="mt-6 max-w-md text-lead text-secondary">
+          A page served over <span class="font-mono text-support">https</span> cannot reach your
+          staging box or your internal API. So the interface is served by the local process instead.
+          Not a policy — an architecture with no route by which your credentials could reach us.
+        </p>
+        <div class="mt-8">
+          <Button href="/security" variant="secondary">How it is built</Button>
+        </div>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-2" data-reveal>
+        <div class="rounded-panel border border-line bg-surface p-5">
+          <h3 class="text-micro font-semibold uppercase text-muted">Stays on your machine</h3>
+          <ul class="mt-3 space-y-2 font-mono text-support text-fg">
+            <li>credentials</li>
+            <li>system access</li>
+            <li>recordings</li>
+            <li>raw execution</li>
+            <li>state read-back</li>
+            <li>run history</li>
+          </ul>
+        </div>
+        <div class="rounded-panel border border-line bg-surface p-5">
+          <h3 class="text-micro font-semibold uppercase text-muted">Leaves, only if you ask</h3>
+          <ul class="mt-3 space-y-3 text-support text-secondary">
+            <li>
+              <span class="font-mono text-fg">rigorrun verify</span> downloads the named package
+              from the npm registry.
+            </li>
+            <li>Connecting your own system sends requests to your own system.</li>
+            <li>
+              An LLM agent runs only if you have set a provider key, and then it talks to that
+              provider.
+            </li>
+          </ul>
+          <p class="mt-4 border-t border-line-soft pt-3 text-meta text-muted">
+            None of the three reach RigorRun. There is nowhere for them to reach.
+          </p>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ────────────────────────────────────────────────────────────── category -->
+  <Section ruled>
+    <Eyebrow>Not an eval harness</Eyebrow>
+    <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
+      Benchmarks tell you which model wins. This tells you whether yours did the job.
+    </h2>
+
+    <div class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-2">
+      <div class="bg-surface p-6">
+        <h3 class="text-micro font-semibold uppercase text-muted">An evaluation harness</h3>
+        <p class="mt-4 font-mono text-support text-secondary">
+          prompt → output → a judge scores the text
+        </p>
+        <p class="mt-4 text-support text-secondary">
+          Measures what the model wrote. Two agents with identical transcripts score identically,
+          including the one that changed nothing.
+        </p>
+      </div>
+      <div class="bg-surface p-6">
+        <h3 class="text-micro font-semibold uppercase text-accent">RigorRun</h3>
+        <p class="mt-4 font-mono text-support text-fg">
+          job → state before → acceptance suite → agent → state after → verdict
+        </p>
+        <p class="mt-4 text-support text-secondary">
+          Measures what changed. The tests come from a demonstration rather than from somebody
+          finding time to write them, and the verdict comes from the records.
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ─────────────────────────────────────────────────────────── get started -->
+  <Section ruled>
+    <div class="rounded-panel border border-line bg-surface p-8 sm:p-12">
+      <div class="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
+        <div>
+          <h2 class="text-display font-medium text-balance">Bring the workflow you cannot afford to break.</h2>
+          <p class="mt-5 max-w-lg text-lead text-secondary">
+            One command starts the runner on your machine. Connect your system, do the job once, and
+            point your agent at the suite it builds.
+          </p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Command command="npx rigorrun" size="lg" />
+            <Button href="/start" size="lg">Get started</Button>
+          </div>
+          <p class="mt-5 text-support text-muted">
+            Free, and there is no pricing yet. Node 20.11 or newer.
+            <a class="rr-link" href="/access">What Early Access means.</a>
+          </p>
+        </div>
+
+        <div data-theme="ink" class="rounded-well border border-line bg-canvas p-5">
+          <p class="text-micro font-semibold uppercase text-muted">Then, in CI</p>
+          <pre class="mt-3 overflow-x-auto font-mono text-support leading-relaxed text-fg" tabindex="0" role="region" aria-label="Example CI command and exit codes"><code>{`$ rigorrun gate --project checkout
+
+  task success      96.0%
+  policy compliance  100%
+  verified          PARTIAL
+  isolation         RESET
+
+  exit 0`}</code></pre>
+          <p class="mt-4 text-meta text-muted">
+            Exit 1 when the gate is missed, so a regression stops the build rather than reaching
+            production.
+            <a class="rr-link" href={`${DOCS_URL}/guides/ci`}>CI guide</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </Section>
+</Base>

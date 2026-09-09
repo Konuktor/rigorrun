@@ -1,0 +1,62 @@
+---
+import Prose from '../layouts/Prose.astro';
+import { CONTACT_EMAIL, REPO_URL, contactHref } from '../site';
+---
+<Prose
+  eyebrow="Legal"
+  title="Terms"
+  updated="10 September 2026"
+  description="RigorRun is MIT-licensed software you run yourself. There is no account, no service and no subscription, so these terms cover the licence, the warranty position and what a verdict does and does not mean."
+  lede="RigorRun is software you download and run yourself under the MIT licence. There is no hosted service, no account and no subscription, so these terms are about the software and the website — not about a relationship either of us has signed up to."
+>
+  <h2>Licence</h2>
+  <p>
+    The <code>rigorrun</code> package and its source are released under the MIT licence. The full
+    text ships in the package and is in the <a href={REPO_URL}>repository</a>. You may use it
+    commercially, modify it and redistribute it, subject to that licence.
+  </p>
+
+  <h2>No warranty</h2>
+  <p>
+    As the MIT licence states, the software is provided "as is", without warranty of any kind. That
+    is worth restating in plain language given what this tool is for:
+  </p>
+  <ul>
+    <li>
+      A passing verdict is a statement about the checks that ran, against the parts of your system
+      RigorRun was able to read, at the moment it ran. It is not a guarantee that your agent is
+      safe, correct or compliant.
+    </li>
+    <li>
+      A verdict against a real system is <code>PARTIAL</code> by design, and a verdict from a browser
+      connection is <code>OBSERVATIONAL</code>. Both are labelled on every result. Treating either as
+      stronger than it says it is, is a misreading this documentation cannot prevent.
+    </li>
+    <li>
+      RigorRun runs against systems you point it at, using credentials you supply, and it performs
+      actions that change data. Point it at staging. Deciding what is safe to run it against is
+      yours.
+    </li>
+  </ul>
+
+  <h2>Acceptable use</h2>
+  <p>
+    <code>rigorrun verify</code> downloads and executes third-party packages in a container in order
+    to observe them. Use it on software you are entitled to analyse. Publishing a finding about
+    somebody else's server is your responsibility, and the record it produces carries the limits of
+    what was actually established — please do not quote the finding without them.
+  </p>
+
+  <h2>The website</h2>
+  <p>
+    Content on rigorrun.xyz is provided for information. Figures on the evidence pages are generated
+    by scripts in the repository and can be reproduced; they describe specific runs on specific days
+    against specific versions, and nothing more.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    These terms may change as the product does. Material changes will appear in the changelog. If
+    something here is unclear, <a href={contactHref(CONTACT_EMAIL)}>ask</a>.
+  </p>
+</Prose>

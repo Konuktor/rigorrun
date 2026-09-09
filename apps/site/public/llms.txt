@@ -1,0 +1,38 @@
+# RigorRun
+
+> Acceptance testing for AI agents that take real actions. A person demonstrates
+> a real job once; RigorRun derives the rules from what changed in the system,
+> generates an executable acceptance suite, runs an agent against it, and decides
+> pass or fail by reading the system state afterwards rather than the agent's own
+> account of what it did.
+
+RigorRun is a local-first CLI and web interface, published on npm as `rigorrun`,
+MIT licensed, with SLSA build provenance. It runs entirely on the user's machine:
+there is no account and no hosted component.
+
+## Key distinctions
+
+- It is not an LLM evaluation harness. Evals score a model's output text.
+  RigorRun compares system state before and after, through read operations the
+  operator nominates.
+- Every verdict carries a verification strength: AUTHORITATIVE, PARTIAL or
+  OBSERVATIONAL. A verdict against a real external system is PARTIAL by design.
+- A browser-only connection is OBSERVATIONAL: the DOM is not authoritative state.
+- Isolation is reported as RESET, PARTIAL, DECLARED or NONE. DECLARED means a
+  reset was nominated but never observed to work.
+
+## Docs
+
+- Getting started: https://rigorrun.xyz/start
+- How it works: https://rigorrun.xyz/how-it-works
+- Evidence, against MCP servers written by others: https://rigorrun.xyz/evidence
+- Verify a published MCP server: https://rigorrun.xyz/verify
+- Security and local-first architecture: https://rigorrun.xyz/security
+- What is and is not built: https://rigorrun.xyz/what-is-built
+- Full documentation: https://docs.rigorrun.xyz
+
+## Honest limits
+
+No external team has used RigorRun yet. There are no customers, no funding and no
+revenue. Published evidence covers four MCP servers from a single publisher, in
+which 19 of 37 tools were exercised; the remainder are itemised with reasons.

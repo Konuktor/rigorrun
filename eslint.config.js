@@ -14,6 +14,9 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/coverage/**',
       '**/.wrangler/**',
+      // Astro's generated content and route types. Regenerated on every build,
+      // never edited, and not ours to hold to a style rule.
+      '**/.astro/**',
       'playwright-report/**',
       'test-results/**',
     ],

@@ -93,9 +93,12 @@ export async function expectNoOverflow(page: Page): Promise<void> {
 
 /* ------------------------------------------------------------- navigation */
 
+/**
+ * The app no longer has a landing page to click through — the public site is
+ * its own static build, and this bundle is only ever what the runner serves.
+ */
 export async function openDemo(page: Page): Promise<void> {
-  await page.goto('/');
-  await page.getByTestId('cta-run-demo').click();
+  await page.goto('/#/demo');
   await expect(page.getByRole('heading', { name: 'A person did the job once' })).toBeVisible();
 }
 

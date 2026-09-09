@@ -1,0 +1,57 @@
+---
+/**
+ * The install command, and the one thing on the page a visitor is meant to
+ * take away with them. It is a real button with real state — copying without
+ * saying so leaves somebody clicking twice.
+ */
+interface Props { command: string; class?: string; size?: 'md' | 'lg' }
+const { command, class: className = '', size = 'md' } = Astro.props;
+const type = size === 'lg' ? 'text-[1.0625rem]' : 'text-[0.9375rem]';
+---
+<div
+  data-theme="ink"
+  class={`group inline-flex max-w-full items-center gap-3 rounded-control border border-line bg-canvas py-2.5 pl-4 pr-2.5 ${className}`}
+>
+  <!--
+    `tabindex` because the element scrolls: a long command overflows on a phone,
+    and a scrollable region a keyboard user cannot reach is a piece of the page
+    they cannot read. `text-inset-muted` rather than `text-muted` because the
+    well is ink on both themes, so the theme-relative grey would be dark on dark.
+  -->
+  <code
+    class={`overflow-x-auto font-mono ${type} text-fg`}
+    tabindex="0"
+    role="region"
+    aria-label={`Command: ${command}`}
+    ><span class="select-none text-muted" aria-hidden="true">$ </span>{command}</code
+  >
+  <button
+    type="button"
+    class="rr-copy shrink-0 rounded-[6px] px-2 py-1 text-meta font-medium text-muted transition-colors hover:bg-white/10 hover:text-fg"
+    data-command={command}
+    aria-label={`Copy ${command} to the clipboard`}
+  >
+    <span class="rr-copy-label">copy</span>
+  </button>
+</div>
+
+<script>
+  // Progressive: the command is selectable text with or without this running.
+  for (const button of document.querySelectorAll<HTMLButtonElement>('.rr-copy')) {
+    button.addEventListener('click', async () => {
+      const label = button.querySelector('.rr-copy-label');
+      if (!label) return;
+      try {
+        await navigator.clipboard.writeText(button.dataset['command'] ?? '');
+        label.textContent = 'copied';
+      } catch {
+        // A denied clipboard permission is not an error worth shouting about;
+        // the text is right there and can be selected.
+        label.textContent = 'select it';
+      }
+      window.setTimeout(() => {
+        label.textContent = 'copy';
+      }, 1600);
+    });
+  }
+</script>

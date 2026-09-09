@@ -25,13 +25,6 @@ test.describe('the golden demo', () => {
   test('runs end to end and reaches a verdict', async ({ page }) => {
     const watchers = watchPage(page);
 
-    await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Acceptance tests');
-    // The primary action is now testing your own agent; the demo is the way out
-    // for somebody who is not ready to connect anything.
-    await expect(page.getByTestId('cta-test-your-agent')).toBeVisible();
-    await expect(page.getByText(/reading the system it changed/)).toBeVisible();
-
     await openDemo(page);
     // The recording is genuinely replayed in the browser, so the steps shown
     // are the ones that actually ran.

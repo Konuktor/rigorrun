@@ -30,7 +30,7 @@ import { VERSION } from './help.ts';
 function findUi(): string | undefined {
   const here = fileURLToPath(new URL('.', import.meta.url));
   for (const candidate of [
-    join(here, '..', '..', '..', 'apps', 'web', 'dist'),
+    join(here, '..', '..', '..', 'apps', 'app', 'dist'),
     join(here, '..', 'ui'),
   ]) {
     if (existsSync(join(candidate, 'index.html'))) return candidate;

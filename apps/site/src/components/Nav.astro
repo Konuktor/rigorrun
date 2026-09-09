@@ -1,0 +1,93 @@
+---
+import Logo from './Logo.astro';
+import Button from './Button.astro';
+import { DOCS_URL } from '../site';
+
+const links = [
+  { href: '/how-it-works', label: 'How it works' },
+  { href: '/evidence', label: 'Evidence' },
+  { href: '/verify', label: 'Verify a server' },
+  { href: '/security', label: 'Security' },
+  { href: DOCS_URL, label: 'Docs', external: true },
+  { href: '/company', label: 'Company' },
+];
+const path = Astro.url.pathname.replace(/\/$/, '');
+---
+
+<header
+  class="sticky top-0 z-[var(--z-sticky)] border-b border-line bg-canvas/85 backdrop-blur-md"
+>
+  <nav class="rr-container flex h-16 items-center gap-6" aria-label="Primary">
+    <a href="/" class="shrink-0 rounded-[6px]" aria-label="RigorRun home"><Logo /></a>
+
+    <ul class="ml-auto hidden items-center gap-6 lg:flex">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class:list={[
+                'text-[0.9375rem] transition-colors hover:text-fg',
+                path === link.href ? 'text-fg' : 'text-secondary',
+              ]}
+              aria-current={path === link.href ? 'page' : undefined}
+              {...link.external ? { target: '_blank', rel: 'noreferrer' } : {}}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="ml-auto flex items-center gap-2 lg:ml-0">
+      <Button href="/start" variant="primary" data-testid="nav-cta">Get started</Button>
+      <!--
+        A menu button rather than hiding links at small sizes. The nav used to
+        drop "Docs" below 640px, which is not responsive design, it is deciding
+        that a phone visitor does not need documentation.
+      -->
+      <button
+        type="button"
+        id="rr-menu-button"
+        class="inline-flex h-[var(--control-height-lg)] w-[var(--control-height-lg)] items-center justify-center rounded-control border border-line-strong text-fg lg:hidden"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="rr-menu"
+      >
+        <svg viewBox="0 0 20 20" class="h-5 w-5" fill="none" aria-hidden="true">
+          <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <div id="rr-menu" class="border-t border-line bg-canvas lg:hidden" hidden>
+    <ul class="rr-container flex flex-col py-2">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="flex min-h-[var(--control-height-lg)] items-center text-section text-secondary"
+              {...link.external ? { target: '_blank', rel: 'noreferrer' } : {}}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</header>
+
+<script>
+  const button = document.getElementById('rr-menu-button');
+  const menu = document.getElementById('rr-menu');
+  button?.addEventListener('click', () => {
+    const open = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!open));
+    button.setAttribute('aria-label', open ? 'Open menu' : 'Close menu');
+    if (menu) menu.hidden = open;
+  });
+</script>

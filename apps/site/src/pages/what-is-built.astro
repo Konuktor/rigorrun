@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import { REPO_URL, VERSION } from '../site';
+
+/**
+ * Kept in step with docs/V1_GAP_AUDIT.md, which is the version the npm README
+ * points at. A page that lists only what works is a brochure.
+ */
+const groups = [
+  {
+    title: 'Getting to a verdict',
+    rows: [
+      ['One command starts a runner and opens an interface', 'WORKING', 'From the public registry, in a clean HOME and cache. A headless box gets the URL printed.'],
+      ['Connect an MCP server on this machine, or over HTTP', 'WORKING', 'Against servers nobody here wrote, unmodified, including one behind OAuth with PKCE.'],
+      ['Connect an HTTP API from an OpenAPI 3 document', 'WORKING', 'JSON natively, YAML when the optional dependency is present. No discovered write endpoint is called during setup.'],
+      ['Connect a web application through a browser', 'PARTIAL', 'Works, and a browser cannot verify itself. Without a readable system attached every verdict says OBSERVATIONAL, and the type refuses to let a browser be its own verifier. That is the honest ceiling, not a gap to close.'],
+      ['Teach one job by doing it, and survive a reload', 'WORKING', 'Demonstrated in a browser, reloaded mid-recording, resumed.'],
+      ['Counterfactual cases synthesised from confirmed rules', 'WORKING', 'How many of the ten categories appear depends on what the job touched.'],
+      ['Gate a build on it', 'WORKING', 'Exit 0 passed, 1 the agent failed, 2 the setup is wrong. Until 0.2.0 the documented example gated on the reference implementation, which is handed the answer — a documented gate that could not fail. It now refuses.'],
+    ],
+  },
+  {
+    title: 'Trusting the verdict',
+    rows: [
+      ['Say how strongly a run was verified', 'WORKING', 'AUTHORITATIVE / PARTIAL / OBSERVATIONAL, computed from what the connected system can actually read back, shown beside the verdict rather than in a log.'],
+      ['Say whether cases were isolated', 'WORKING', 'It used to report RESET whenever any reset was configured, though nothing had run it twice and compared. It now says DECLARED where the reset is a tool the operator nominated.'],
+      ['A verdict against a real system is AUTHORITATIVE', 'PARTIAL BY DESIGN', 'It is PARTIAL. RigorRun reads back what the nominated reads return and no more. Claiming otherwise would be the single most damaging thing this product could do.'],
+      ['The full evidence hierarchy', 'PARTIAL', 'Five tiers exist and the tier is shown beside every check, but only STATE and EVENT are ever emitted. Nothing produces a model-judged or human-review evaluator, so three of the five are unreachable today.'],
+      ['Refuse to write against production', 'WORKING', 'A project marked production cannot be quality-checked and cannot mutate at all.'],
+      ['Signed verification records', 'NOT BUILT', 'Records are hashed, not signed. No HMAC, Ed25519 or sigstore attestation exists yet.'],
+    ],
+  },
+  {
+    title: 'Around the edges',
+    rows: [
+      ['Work survives a restart, and damage is reported', 'WORKING', 'The runner is killed with SIGKILL mid-flow and restarted; a deliberately corrupted project comes back naming the file rather than vanishing.'],
+      ['Credentials in the OS keychain', 'WORKING', 'Keychain, libsecret or DPAPI, chosen by a round trip rather than by platform name. No command prints a secret.'],
+      ['The agent SDKs on npm', 'NOT BUILT', 'All workspace packages are private, so npm i @rigorrun/agent-sdk does not resolve. The documentation says so. Connecting an agent over HTTP needs no SDK.'],
+      ['Continuous drift detection, hosted scheduling, a paid tier', 'NOT BUILT', 'Deliberately blocked behind evidence that somebody wants it, rather than built on the assumption.'],
+    ],
+  },
+];
+
+const TONE: Record<string, string> = {
+  WORKING: 'border-pass-line bg-pass-bg text-pass',
+  PARTIAL: 'border-warn-line bg-warn-bg text-warn',
+  'PARTIAL BY DESIGN': 'border-warn-line bg-warn-bg text-warn',
+  'NOT BUILT': 'border-line-strong text-muted',
+};
+---
+<Base
+  title="What is and is not built"
+  description="An honest capability list for RigorRun: what works, what is partial, and what does not exist. A test passing is not evidence a capability exists."
+>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>Early Access · v{VERSION}</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">What is, and is not, built.</h1>
+      <p class="mt-7 text-lead text-secondary">
+        A test passing is not evidence a capability exists. A test proves that a thing the author
+        thought of behaves the way the author expected. Everything below was checked by running it,
+        and the rows that say less than you would like are the reason this page is worth reading.
+      </p>
+      <p class="mt-4 text-support text-muted">
+        This is a summary of <a class="rr-link" href={`${REPO_URL}/blob/master/docs/V1_GAP_AUDIT.md`}>docs/V1_GAP_AUDIT.md</a>,
+        which carries how each line was checked.
+      </p>
+    </div>
+  </Section>
+
+  {
+    groups.map((group) => (
+      <Section ruled tight>
+        <h2 class="text-title font-medium">{group.title}</h2>
+        <div class="ruled mt-6 rounded-panel border border-line bg-surface">
+          {group.rows.map(([capability, mark, detail]) => (
+            <div class="grid gap-3 p-5 lg:grid-cols-[1.1fr_auto_1.4fr] lg:items-start lg:gap-8">
+              <p class="text-support text-fg">{capability}</p>
+              <span
+                class:list={[
+                  'justify-self-start rounded-pill border px-2.5 py-1 font-mono text-micro font-semibold whitespace-nowrap',
+                  TONE[mark],
+                ]}
+              >
+                {mark}
+              </span>
+              <p class="text-support text-muted">{detail}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+    ))
+  }
+</Base>
