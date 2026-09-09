@@ -155,6 +155,15 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Before the unit suite, not after it. `pnpm test` includes the browser
+      # environment tests, and those assert they are actually driving a browser
+      # rather than quietly skipping — which is the right assertion and means
+      # they fail outright when playwright-core is absent. This step used to sit
+      # below them, so `pnpm test` could not pass in CI at all. Nobody saw it
+      # because this workflow was wired to a branch that does not exist here.
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
+
       - name: Unit and integration tests
         run: pnpm test
 
@@ -167,9 +176,6 @@ jobs:
 
       - name: Design token contrast
         run: pnpm contrast
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: End-to-end tests
         run: pnpm e2e
