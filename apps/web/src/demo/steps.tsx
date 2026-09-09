@@ -122,7 +122,7 @@ export function RecordStep({
     <div className="space-y-4">
       <StepHeader
         title="A person did the job once"
-        lede={`This is what RigorRun captured while somebody worked in ${environmentName}: what they did, and what the system looked like before and after. It records the meaning of each step, not the page.`}
+        lede={`This is what RigorRun captured while somebody worked in ${environmentName}, a synthetic application built for this example: what they did, and what the system looked like before and after. It records the meaning of each step, not the page.`}
         action={
           <a
             href={CRM_URL}
@@ -596,10 +596,10 @@ export function BenchmarkStep({
       </Panel>
 
       <NextBar
-        note="Both agents run these cases from exactly the same seeded state."
+        note="Two candidate agents and a reference implementation run these cases from exactly the same seeded state."
         button={
           <Button onClick={onRun} testId="step-run" size="lg" busy={running}>
-            {running ? 'Running…' : 'Run Agent A vs Agent B →'}
+            {running ? 'Running…' : 'Run the agents →'}
           </Button>
         }
       />

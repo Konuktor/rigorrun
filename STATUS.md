@@ -110,7 +110,7 @@ questions about what an external person could do before and after that work.
 
 | | |
 | --- | --- |
-| Landing, quickstart, `/proof` and the bundled example | <https://rigorrun.pages.dev> |
+| Landing, quickstart, `/proof` and the bundled example | <https://rigorrun.xyz> |
 | Northstar Support (the example's app) | <https://rigorrun-crm.pages.dev> |
 | Four schema-driven systems | <https://rigorrun-ops.pages.dev> |
 

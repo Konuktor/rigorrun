@@ -8,6 +8,7 @@
  * hosted interface could never see the systems most people want tested.
  */
 import { Panel, SectionLabel, Tag } from '../components/primitives.tsx';
+import { RELEASE_LABEL } from '../version.ts';
 
 const STEPS = [
   {
@@ -60,7 +61,7 @@ const STEPS = [
 export function Quickstart() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
-      <Tag>Start with one command · Early Access · v0.1</Tag>
+      <Tag>Start with one command · {RELEASE_LABEL}</Tag>
       <h1 className="mt-4 text-title font-semibold">Testing your own agent</h1>
       <p className="mt-4 text-body text-secondary">
         This part runs on your machine, and that is not a preference. Your MCP server, your

@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
-const BASE = process.argv[2] ?? 'https://rigorrun.pages.dev';
+const BASE = process.argv[2] ?? 'https://rigorrun.xyz';
 const OUT = resolve(process.argv[3] ?? 'docs/submission-assets');
 const SYSTEM_CHROMIUM = '/usr/bin/chromium';
 

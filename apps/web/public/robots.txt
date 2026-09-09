@@ -1,0 +1,5 @@
+# The public site is served from https://rigorrun.xyz.
+# rigorrun.pages.dev 301s here, so a crawler that starts there lands on the
+# canonical origin without needing a rule of its own.
+User-agent: *
+Allow: /

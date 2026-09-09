@@ -1,0 +1,211 @@
+{
+  "generatedAt": "2026-09-09T18:38:23.199Z",
+  "commit": "ee547ad",
+  "generationMs": 115126,
+  "rigorrunVersion": "0.2.0-dev",
+  "dockerVersion": "28.5.2+dfsg4",
+  "publisher": "@modelcontextprotocol",
+  "totals": {
+    "servers": 4,
+    "toolsDiscovered": 37,
+    "toolsExercised": 19,
+    "toolsUntested": 18,
+    "contradicted": 0,
+    "undetermined": 2
+  },
+  "servers": [
+    {
+      "ref": "npm:@modelcontextprotocol/server-memory@2026.8.31",
+      "resolvedVersion": "2026.8.31",
+      "digest": "sha512-ljj/3S4aGjxdNSQWw6gucKKGnTLdBPWxzapyY/MT2tOVyZwvxChvevXSLPwx59nKJAlVpUVW+cOlnVRXRwiqMQ==",
+      "treeDigest": "sha256:f07145024e8880bbafaf4d07f3ba473926b525e9ce93e555036864e26fb44f8d",
+      "serverName": "memory-server",
+      "serverVersion": "0.6.3",
+      "exitCode": 0,
+      "toolsDiscovered": 9,
+      "toolsExercised": 5,
+      "contradicted": 0,
+      "undetermined": 0,
+      "conforms": 13,
+      "isolation": "RESET",
+      "resets": 2,
+      "networkEgress": false,
+      "baseImage": "node@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293",
+      "harnessVersion": "0.2.0-dev",
+      "untested": [
+        {
+          "tool": "add_observations",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "delete_entities",
+          "reason": "UNSAFE_TO_EXERCISE",
+          "detail": "the server declares this tool destructive, and RigorRun takes that at its word"
+        },
+        {
+          "tool": "delete_observations",
+          "reason": "UNSAFE_TO_EXERCISE",
+          "detail": "the server declares this tool destructive, and RigorRun takes that at its word"
+        },
+        {
+          "tool": "delete_relations",
+          "reason": "UNSAFE_TO_EXERCISE",
+          "detail": "the server declares this tool destructive, and RigorRun takes that at its word"
+        }
+      ],
+      "caveats": [
+        "The container runtime daemon runs as root. RigorRun reduces blast radius but does not claim to prevent a container escape; an escape reaches the host.",
+        "Where a state reading came only from the server’s own tools, it is corroboration and not proof: the server that may be misdeclaring a tool is the one answering the read.",
+        "State is read from the container’s writable mounts, which is complete over durable storage and blind to state a process holds only in memory."
+      ]
+    },
+    {
+      "ref": "npm:@modelcontextprotocol/server-filesystem@2026.8.31",
+      "resolvedVersion": "2026.8.31",
+      "digest": "sha512-kKaFkyAh6oipvc9+EAbJ552JafnMnOq5nzmzWkp1jJdBhTAAGpmIpWihUG1+rfNhmEFM98gUZDdCHCDD4v6a7Q==",
+      "treeDigest": "sha256:c82428d093ceb289d47bf602eda8d0940298c294435015729f1084240abd3b3f",
+      "serverName": "secure-filesystem-server",
+      "serverVersion": "0.2.0",
+      "exitCode": 0,
+      "toolsDiscovered": 14,
+      "toolsExercised": 2,
+      "contradicted": 0,
+      "undetermined": 0,
+      "conforms": 2,
+      "isolation": "RESET",
+      "resets": 2,
+      "networkEgress": false,
+      "baseImage": "node@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293",
+      "harnessVersion": "0.2.0-dev",
+      "untested": [
+        {
+          "tool": "directory_tree",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "get_file_info",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "list_directory",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "list_directory_with_sizes",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "read_file",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "read_media_file",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "read_text_file",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "search_files",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "create_directory",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "edit_file",
+          "reason": "UNSAFE_TO_EXERCISE",
+          "detail": "the server declares this tool destructive, and RigorRun takes that at its word"
+        },
+        {
+          "tool": "move_file",
+          "reason": "UNSAFE_TO_EXERCISE",
+          "detail": "the server declares this tool destructive, and RigorRun takes that at its word"
+        },
+        {
+          "tool": "write_file",
+          "reason": "UNSAFE_TO_EXERCISE",
+          "detail": "the server declares this tool destructive, and RigorRun takes that at its word"
+        }
+      ],
+      "caveats": [
+        "The container runtime daemon runs as root. RigorRun reduces blast radius but does not claim to prevent a container escape; an escape reaches the host.",
+        "Where a state reading came only from the server’s own tools, it is corroboration and not proof: the server that may be misdeclaring a tool is the one answering the read.",
+        "State is read from the container’s writable mounts, which is complete over durable storage and blind to state a process holds only in memory."
+      ]
+    },
+    {
+      "ref": "npm:@modelcontextprotocol/server-everything@2026.8.31",
+      "resolvedVersion": "2026.8.31",
+      "digest": "sha512-5U3OZh8Xq0Li4nA26l6uNvV9/1suMDuWSn+NjLZIhzinhMY6N3A4DCrxVecBGPf2PsNFKTEv5krxGPRwzxc7jQ==",
+      "treeDigest": "sha256:5d02de7a4f9a9acb596e47be3919e1ea95f2bd28c98c408c4b014fa5bd198f54",
+      "serverName": "mcp-servers/everything",
+      "serverVersion": "2.0.0",
+      "exitCode": 3,
+      "toolsDiscovered": 13,
+      "toolsExercised": 11,
+      "contradicted": 0,
+      "undetermined": 2,
+      "conforms": 29,
+      "isolation": "RESET",
+      "resets": 2,
+      "networkEgress": false,
+      "baseImage": "node@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293",
+      "harnessVersion": "0.2.0-dev",
+      "untested": [
+        {
+          "tool": "gzip-file-as-resource",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "the call returned an error"
+        },
+        {
+          "tool": "simulate-research-query",
+          "reason": "NEEDS_FIXTURE",
+          "detail": "MCP error -32600: Tool \"simulate-research-query\" requires task-based execution. Use client.experimental.tasks.callToolStream() instead."
+        }
+      ],
+      "caveats": [
+        "The container runtime daemon runs as root. RigorRun reduces blast radius but does not claim to prevent a container escape; an escape reaches the host.",
+        "Where a state reading came only from the server’s own tools, it is corroboration and not proof: the server that may be misdeclaring a tool is the one answering the read.",
+        "State is read from the container’s writable mounts, which is complete over durable storage and blind to state a process holds only in memory."
+      ]
+    },
+    {
+      "ref": "npm:@modelcontextprotocol/server-sequential-thinking@2026.8.31",
+      "resolvedVersion": "2026.8.31",
+      "digest": "sha512-/EMH++1j2e+VmHwpibw1IUPHxA0tcQY09Yo5/OIPwW/8irEKLAufJNGSZQhCK18n8TUvV6WwZyQOuaDKxe/CeQ==",
+      "treeDigest": "sha256:b1b357177e97d048e6721e7dc327fe2f2954479820fd8c1c90c1a5c4a17c2683",
+      "serverName": "sequential-thinking-server",
+      "serverVersion": "2026.8.31",
+      "exitCode": 0,
+      "toolsDiscovered": 1,
+      "toolsExercised": 1,
+      "contradicted": 0,
+      "undetermined": 0,
+      "conforms": 3,
+      "isolation": "RESET",
+      "resets": 2,
+      "networkEgress": false,
+      "baseImage": "node@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293",
+      "harnessVersion": "0.2.0-dev",
+      "untested": [],
+      "caveats": [
+        "The container runtime daemon runs as root. RigorRun reduces blast radius but does not claim to prevent a container escape; an escape reaches the host.",
+        "Where a state reading came only from the server’s own tools, it is corroboration and not proof: the server that may be misdeclaring a tool is the one answering the read.",
+        "State is read from the container’s writable mounts, which is complete over durable storage and blind to state a process holds only in memory."
+      ]
+    }
+  ]
+}

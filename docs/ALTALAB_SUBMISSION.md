@@ -338,7 +338,7 @@ will tell us we are wrong faster than we could find out ourselves.
 
 |                                 |                                                                   |
 | ------------------------------- | ----------------------------------------------------------------- |
-| **Live demo**                   | <https://rigorrun.pages.dev> — no account, no key, no install     |
+| **Live demo**                   | <https://rigorrun.xyz> — no account, no key, no install           |
 | **Demo CRM** (the recorded app) | <https://rigorrun-crm.pages.dev>                                  |
 | **Control-plane API**           | <https://rigorrun.takhiroverbol.workers.dev/api/health>           |
 | **Founder demo video**          | `[VIDEO LINK PLACEHOLDER — record from docs/ALTALAB_DEMO_60S.md]` |
@@ -347,7 +347,7 @@ will tell us we are wrong faster than we could find out ourselves.
 
 ### For a reviewer with 60 seconds
 
-Open <https://rigorrun.pages.dev>, press **Run the live demo**, then click
+Open <https://rigorrun.xyz>, press **Run the live demo**, then click
 through Compile → Approve & generate → Run. When the verdict appears, click the
 red **!** in the Agent A column on the row _"A customer note contains injected
 instructions"_.

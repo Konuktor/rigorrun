@@ -7,8 +7,10 @@
  * a fake logo or a testimonial.
  */
 import { useState } from 'react';
-import { Button, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
+import { Button, Mono, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
 import proof from '../proof.json';
+import evidence from '../evidence.json';
+import { RELEASE_LABEL } from '../version.ts';
 
 /**
  * The counts below are read out of the generated evidence, not typed here.
@@ -21,6 +23,16 @@ import proof from '../proof.json';
  * run, so this drifts only if the evidence does.
  */
 const DEMO = proof.workflows.find((workflow) => workflow.key === 'refund')!;
+
+/**
+ * A real third-party server, and the totals across all four.
+ *
+ * Read from `evidence.json`, which `node scripts/build-evidence.mjs` writes by
+ * running the shipped `rigorrun verify` against servers published by somebody
+ * else. Nothing on this page about them is typed by hand.
+ */
+const EVIDENCE = evidence;
+const VERIFIED = evidence.servers.find((s) => s.ref.includes('sequential-thinking'))!;
 
 /** A real failing case from the same run. Regenerated, never typed. */
 const FAILURE = DEMO.failure as {
@@ -62,11 +74,11 @@ const PIPELINE = [
 export function Landing({
   onTestYourAgent,
   onRunDemo,
-  onSeeProof,
+  onSeeEvidence,
 }: {
   onTestYourAgent: () => void;
   onRunDemo: () => void;
-  onSeeProof: () => void;
+  onSeeEvidence: () => void;
 }) {
   return (
     <div className="mx-auto max-w-6xl px-5 pb-24">
@@ -89,7 +101,7 @@ export function Landing({
               person deciding whether to bother. */}
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <CopyCommand command="npx rigorrun" />
-            <span className="text-meta text-muted">Early Access · v0.1</span>
+            <span className="text-meta text-muted">{RELEASE_LABEL}</span>
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Button onClick={onTestYourAgent} testId="cta-test-your-agent" size="lg">
@@ -97,24 +109,16 @@ export function Landing({
             </Button>
             <button
               type="button"
-              onClick={onRunDemo}
-              data-testid="cta-run-demo"
+              onClick={onSeeEvidence}
+              data-testid="cta-evidence"
               className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
             >
-              Try the example
-            </button>
-            <button
-              type="button"
-              onClick={onSeeProof}
-              data-testid="cta-proof"
-              className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
-            >
-              One compiler, five jobs
+              See it run on servers we did not write
             </button>
           </div>
           <p className="mt-4 text-meta text-muted">
-            Testing your own agent runs on your machine. The example runs in this page and touches
-            nothing of yours.
+            Everything runs on your machine. There is no account, and no hosted component to send
+            your systems to.
           </p>
         </div>
 
@@ -125,9 +129,13 @@ export function Landing({
         {FAILURE ? (
           <Panel className="overflow-hidden">
             <div className="border-b border-line bg-raised px-4 py-2.5">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <StatusMark status="unsafe" size="sm" />
                 <span className="text-micro font-semibold uppercase text-fail">Policy failure</span>
+                {/* Where this came from, next to it. It is a real run of the
+                    real pipeline over an invented CRM, and a reader has no way
+                    to tell those apart unless it is said. */}
+                <Tag>From the synthetic example</Tag>
               </div>
               <p className="mt-1 text-secondary text-fg">{FAILURE.check}</p>
             </div>
@@ -160,12 +168,98 @@ export function Landing({
         ) : null}
       </section>
 
+      {/* -------------------------------------------------------- verify */}
+      {/* The second command, and the only one that produces a real result
+          against software nobody here wrote without connecting anything
+          first. It needs Docker, and that is said here rather than discovered
+          at an error message. */}
+      <section id="verify" className="scroll-mt-20 border-t border-line pt-12">
+        <SectionLabel>Or start with a server you already use</SectionLabel>
+        <h2 className="mt-3 text-title font-semibold">
+          Find out what a server&rsquo;s tools actually do
+        </h2>
+        <p className="mt-3 max-w-3xl text-body text-secondary">
+          An MCP server can annotate a tool <Mono>readOnlyHint: true</Mono>. Nothing checks that.
+          RigorRun fetches the server, pins it to the exact bytes the registry published, runs it
+          in a container with no network and no access to your machine, calls each tool with
+          arguments derived from its own schema, and reads the filesystem before and after to see
+          what actually changed.
+        </p>
+        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start">
+          <div>
+            <CopyCommand command={`rigorrun verify ${VERIFIED.ref}`} />
+            <p className="mt-3 text-meta text-muted">
+              No project, no browser, no agent, nothing to configure first. Needs Docker, because
+              every server runs in a container that is thrown away afterwards.
+            </p>
+            <p className="mt-3 text-meta text-muted">
+              Exit <Mono className="text-fg">0</Mono> verified · <Mono className="text-fg">1</Mono>{' '}
+              a declaration was contradicted · <Mono className="text-fg">3</Mono> ran, established
+              too little to mean much.
+            </p>
+          </div>
+          {/* Verbatim from a real run of the command above. */}
+          <pre
+            tabIndex={0}
+            role="region"
+            aria-label="Output of rigorrun verify"
+            className="overflow-auto rounded-panel border border-line bg-raised p-4 font-mono text-[11px] leading-relaxed text-secondary"
+          >
+{`  resolve    ${VERIFIED.ref}
+  stage      installing with lifecycle scripts disabled
+  isolation  measuring whether reset actually resets
+  discover   ${VERIFIED.toolsDiscovered} tool(s)
+
+  digest     ${VERIFIED.digest.slice(0, 46)}…
+  isolation  ${VERIFIED.isolation}
+  egress     ${VERIFIED.networkEgress ? 'permitted' : 'none'}
+
+Declared, versus what it did
+tool                declared                result    verification
+------------------  ----------------------  --------  ------------
+sequentialthinking  readOnlyHint: true      CONFORMS  PARTIAL
+sequentialthinking  destructiveHint: false  CONFORMS  PARTIAL
+sequentialthinking  idempotentHint: true    CONFORMS  PARTIAL
+
+Every discovered tool was exercised.`}
+          </pre>
+        </div>
+        <p className="mt-4 text-meta text-muted">
+          Run against{' '}
+          <button
+            type="button"
+            onClick={onSeeEvidence}
+            className="underline hover:text-fg"
+            data-testid="verify-evidence"
+          >
+            four published servers
+          </button>
+          , it exercised {EVIDENCE.totals.toolsExercised} of{' '}
+          {EVIDENCE.totals.toolsDiscovered} tools. The rest are named with reasons rather than
+          rounded away.
+        </p>
+      </section>
+
       {/* --------------------------------------------------- how it works */}
       <section id="how-it-works" className="scroll-mt-20 border-t border-line pt-12">
         <SectionLabel>How it works</SectionLabel>
         <p className="mt-3 max-w-3xl text-body text-secondary">
           A support agent processes one refund in a CRM. Everything below is derived from that
-          single recording — and every count is what the live demo produces when you run it.
+          single recording — and every count is what the pipeline produces when it runs.
+        </p>
+        <p className="mt-2 max-w-3xl text-meta text-muted">
+          The CRM is <span className="text-secondary">synthetic</span>: an application written for
+          this example, with invented customers and orders. The pipeline running over it is the one
+          that ships. For results against software nobody here wrote, see{' '}
+          <button
+            type="button"
+            onClick={onSeeEvidence}
+            className="underline hover:text-fg"
+            data-testid="how-it-works-evidence"
+          >
+            the evidence page
+          </button>
+          .
         </p>
         <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {PIPELINE.map((item, index) => (
@@ -256,21 +350,46 @@ export function Landing({
         />
         <Feature
           title="Vendor independent"
-          body="Any agent behind an HTTP endpoint or an OpenAI-compatible API runs against the same private cases. Where your system can be reset, every agent starts from the same state; where it cannot, RigorRun runs what it safely can and reports isolation as NONE rather than pretending."
+          body="Any agent behind an HTTP endpoint or an OpenAI-compatible API runs against the same private cases. Where RigorRun performs the reset itself, isolation is RESET. Where your system nominated one and nothing has checked it, it says DECLARED. Where there is none, NONE — and repeated mutating cases are refused rather than quietly run."
         />
       </section>
 
       {/* ----------------------------------------------------------- CTA */}
-      <section className="mt-12 rounded-panel border border-line bg-surface px-6 py-10 text-center">
-        <h2 className="text-title font-semibold">See it fail, then see it caught</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-body text-secondary">
-          The demo runs a recorded refund workflow through the whole pipeline and puts two agents
-          against {DEMO.cases} cases — including a prompt injection hidden inside customer data.
-        </p>
-        <div className="mt-6">
-          <Button onClick={onRunDemo} testId="cta-run-demo-footer" size="lg">
-            Run the live demo
-          </Button>
+      <section className="mt-12 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+        <div className="rounded-panel border border-line bg-surface px-6 py-8">
+          <h2 className="text-title font-semibold">Test your own agent</h2>
+          <p className="mt-3 max-w-2xl text-body text-secondary">
+            One command starts a runner on your machine. Connect your system, do the job once, and
+            point your agent at the suite it builds.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <CopyCommand command="npx rigorrun" />
+            <Button onClick={onTestYourAgent} testId="cta-test-your-agent-footer">
+              Get started
+            </Button>
+          </div>
+        </div>
+
+        {/* The example, kept and labelled. It explains the idea without
+            installing anything, and it is not the product. */}
+        <div className="rounded-panel border border-line bg-surface px-6 py-8">
+          <Tag>Synthetic example</Tag>
+          <h2 className="mt-3 text-section font-semibold">See it fail, then see it caught</h2>
+          <p className="mt-2 text-meta text-secondary">
+            An invented CRM, a recorded refund, {DEMO.cases} generated cases including a prompt
+            injection hidden in customer data. The whole pipeline executes in this page, against
+            data that is not real and no system of yours.
+          </p>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={onRunDemo}
+              data-testid="cta-run-demo"
+              className="inline-flex h-10 items-center rounded-control border border-line px-4 text-body text-fg hover:border-line-strong"
+            >
+              Run the example
+            </button>
+          </div>
         </div>
       </section>
     </div>

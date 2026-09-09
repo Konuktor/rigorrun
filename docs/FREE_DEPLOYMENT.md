@@ -51,7 +51,7 @@ Currently deployed:
 
 | | |
 | --- | --- |
-| Landing, quickstart and the bundled example | <https://rigorrun.pages.dev> |
+| Landing, quickstart and the bundled example | <https://rigorrun.xyz> |
 | Northstar Support | <https://rigorrun-crm.pages.dev> |
 | Four schema-driven systems | <https://rigorrun-ops.pages.dev> |
 
@@ -62,8 +62,14 @@ could cost anything.
 
 ## Custom domain
 
-Not required and not configured. `pages.dev` is free and sufficient; nothing in
-this repository assumes a domain, and none is purchased.
+`rigorrun.xyz` is the canonical production domain. Cloudflare hosts its DNS —
+required, because Pages can only attach an apex domain that is a Cloudflare zone
+— while the registrar stays Gen.xyz.
+
+This adds nothing to the bill beyond the registration itself. The zone, Universal
+SSL, the `www` redirect rule and the bulk redirect off `pages.dev` are all
+free-plan features. `rigorrun.pages.dev` now 301s to the apex, so links published
+before the move still resolve.
 
 ## Keeping it free
 

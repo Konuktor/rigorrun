@@ -98,6 +98,14 @@ export interface DemoState {
   phase: RunPhase;
   liveResults: CaseResult[];
   activeCase: { agentId: string; caseName: string } | null;
+  /**
+   * How many agents the current run puts against the suite.
+   *
+   * Carried in state rather than assumed, because the screen that reports
+   * progress used to assume two while three ran, and rendered "66 of 44 case
+   * executions" with the bar at 150%.
+   */
+  agentCount: number;
   result: RunResult | null;
   elapsedMs: number | null;
   error: string | null;
@@ -142,6 +150,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     phase: 'idle',
     liveResults: [],
     activeCase: null,
+    agentCount: 0,
     result: null,
     elapsedMs: null,
     error: null,
@@ -214,6 +223,9 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
       // Two candidates plus the reference implementation, which is an oracle
       // and is labelled as one wherever it appears.
       const agents = [naiveAgent, carefulAgent, createReferenceAgent(benchmark)];
+      // Tell the progress screen how many there are, rather than letting it
+      // guess. It guessed two.
+      setState((prev) => ({ ...prev, agentCount: agents.length }));
       const result = await runBenchmark(benchmark, agents, {
         onProgress: async (event) => {
           if (runToken.current !== token) return;
@@ -344,6 +356,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
       phase: 'idle',
       liveResults: [],
       activeCase: null,
+      agentCount: 0,
       result: null,
       elapsedMs: null,
       error: null,

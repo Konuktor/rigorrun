@@ -26,18 +26,30 @@ import { Quickstart } from './pages/Quickstart.tsx';
 const DemoPage = lazy(() =>
   import('./demo/DemoPage.tsx').then((m) => ({ default: m.DemoPage })),
 );
-const Proof = lazy(() => import('./pages/Proof.tsx').then((m) => ({ default: m.Proof })));
+const Evidence = lazy(() => import('./pages/Evidence.tsx').then((m) => ({ default: m.Evidence })));
+
+/**
+ * One place for the repository address.
+ *
+ * A path into a checkout is useless to somebody who installed from npm and has
+ * no checkout, so every route out of this page is an absolute URL.
+ */
+export const REPO_URL = 'https://github.com/Konuktor/rigorrun';
 import { Button, Spinner, Wordmark } from './components/primitives.tsx';
 import { ProjectsPage } from './product/ProjectsPage.tsx';
 import { ProjectPage } from './product/ProjectPage.tsx';
 import { api } from './product/api.ts';
+import { RIGORRUN_VERSION } from './version.ts';
 
-type Route = 'home' | 'demo' | 'proof' | 'projects' | 'project' | 'quickstart';
+type Route = 'home' | 'demo' | 'evidence' | 'projects' | 'project' | 'quickstart';
 
 function currentRoute(): { route: Route; projectId?: string } {
   const hash = window.location.hash;
   if (hash.startsWith('#/demo')) return { route: 'demo' };
-  if (hash.startsWith('#/proof')) return { route: 'proof' };
+  // `#/proof` was this page's address for the whole of 0.1. It is a link
+  // people may have, so it still resolves rather than silently landing on the
+  // homepage the way every other unknown hash does.
+  if (hash.startsWith('#/evidence') || hash.startsWith('#/proof')) return { route: 'evidence' };
   if (hash.startsWith('#/quickstart')) return { route: 'quickstart' };
   const project = /^#\/projects\/([A-Za-z0-9_-]+)/.exec(hash);
   if (project?.[1]) return { route: 'project', projectId: project[1] };
@@ -70,8 +82,8 @@ export function App() {
     document.title =
       route === 'demo'
         ? 'Live demo — RigorRun'
-        : route === 'proof'
-          ? 'One compiler, five jobs — RigorRun'
+        : route === 'evidence'
+          ? 'Evidence — RigorRun'
           : route === 'projects' || route === 'project'
             ? 'Projects — RigorRun'
             : route === 'quickstart'
@@ -111,25 +123,48 @@ export function App() {
               </Button>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => go('#/proof')}
-                  data-testid="nav-proof"
-                  // A real hit area, not just a label: the release gate measures
-                  // every control on the page and this one was 17px tall.
+                {/* Real anchors, not buttons. The whole page used to have two
+                    links on it, so nothing here was crawlable and there was no
+                    route to the documentation or the source. A real hit area
+                    too: the release gate measures every control and one of
+                    these was 17px tall. */}
+                <a
+                  href="#/evidence"
+                  data-testid="nav-evidence"
                   className={`inline-flex h-9 items-center rounded-control px-2 text-meta ${
-                    route === 'proof' ? 'text-fg' : 'text-muted hover:text-fg'
+                    route === 'evidence' ? 'text-fg' : 'text-muted hover:text-fg'
                   }`}
                 >
-                  Five workflows
-                </button>
-                <Button
-                  variant={route === 'demo' ? 'secondary' : 'primary'}
-                  size="sm"
-                  onClick={() => go(route === 'demo' ? '#/' : '#/demo/record')}
-                  testId="nav-demo"
+                  Evidence
+                </a>
+                <a
+                  href={`${REPO_URL}/tree/master/docs`}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="nav-docs"
+                  // Four controls do not fit beside the wordmark at 390px, and
+                  // the release gate measures that. Docs is the one that also
+                  // lives in the footer, so it is the one that folds.
+                  className="hidden h-9 items-center rounded-control px-2 text-meta text-muted hover:text-fg sm:inline-flex"
                 >
-                  {route === 'demo' ? 'Overview' : 'Try the example'}
+                  Docs
+                </a>
+                <a
+                  href={REPO_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="nav-github"
+                  className="inline-flex h-9 items-center rounded-control px-2 text-meta text-muted hover:text-fg"
+                >
+                  GitHub
+                </a>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => go('#/quickstart')}
+                  testId="nav-get-started"
+                >
+                  Get started
                 </Button>
               </>
             )}
@@ -146,9 +181,9 @@ export function App() {
           <Suspense fallback={<PageLoading />}>
             <DemoPage />
           </Suspense>
-        ) : route === 'proof' ? (
+        ) : route === 'evidence' ? (
           <Suspense fallback={<PageLoading />}>
-            <Proof />
+            <Evidence />
           </Suspense>
         ) : route === 'quickstart' ? (
           <Quickstart />
@@ -161,7 +196,11 @@ export function App() {
             <ProjectPage projectId={location.projectId} onBack={() => go('#/projects')} />
           </div>
         ) : (
-          <Landing onTestYourAgent={() => go('#/quickstart')} onRunDemo={() => go('#/demo/record')} onSeeProof={() => go('#/proof')} />
+          <Landing
+            onTestYourAgent={() => go('#/quickstart')}
+            onRunDemo={() => go('#/demo/record')}
+            onSeeEvidence={() => go('#/evidence')}
+          />
         )}
       </main>
 
@@ -172,16 +211,36 @@ export function App() {
           <span>
             {/* A path into the repository is useless to somebody who installed
                 from npm and has no repository. A link works from both. */}
-            RigorRun {local && runner?.version ? `v${runner.version}` : 'v0.1'} — Early Access.{' '}
+            RigorRun {local && runner?.version ? `v${runner.version}` : `v${RIGORRUN_VERSION}`} —
+            Early Access.{' '}
             <a
               className="underline hover:text-fg"
-              href="https://github.com/Konuktor/rigorrun/blob/master/docs/V1_GAP_AUDIT.md"
+              href={`${REPO_URL}/blob/master/docs/V1_GAP_AUDIT.md`}
               target="_blank"
               rel="noreferrer"
             >
               What is and is not built
             </a>
-            .
+            {' · '}
+            {/* The nav folds Docs away on a narrow screen, so the footer keeps
+                a route to both from every viewport. */}
+            <a
+              className="underline hover:text-fg"
+              href={`${REPO_URL}/tree/master/docs`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Docs
+            </a>
+            {' · '}
+            <a
+              className="underline hover:text-fg"
+              href={REPO_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub
+            </a>
           </span>
           <span>
             {local

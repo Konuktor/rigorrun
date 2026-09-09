@@ -9,7 +9,7 @@ RigorRun proves whether the agent can do the job safely — by reading the syste
 it changed, never by trusting what it says about itself.
 
 **[Get started →](docs/GETTING_STARTED.md)**
-&nbsp;·&nbsp; runs on your machine &nbsp;·&nbsp; **[Try the demo →](https://rigorrun.pages.dev)**
+&nbsp;·&nbsp; runs on your machine &nbsp;·&nbsp; **[Try the demo →](https://rigorrun.xyz)**
 
 `Connect → Teach → Review → Build → Run → Compare`
 
@@ -139,13 +139,13 @@ Five things follow from that, and they are the whole product:
 | **The test is graded before the agent is** | Injected defects, a control that must survive, replay stability, hidden-answer isolation. |
 | **Everything is local-first** | Recordings and evidence stay on your machine. Publishing is an explicit, previewed, sanitising step. |
 
-**[See it on five different jobs →](https://rigorrun.pages.dev/#/proof)**
+**[See it on five different jobs →](https://rigorrun.xyz/#/proof)**
 
 ---
 
 ## Try it
 
-**In a browser, with nothing installed:** <https://rigorrun.pages.dev>
+**In a browser, with nothing installed:** <https://rigorrun.xyz>
 
 The whole pipeline — compile, generate, run both agents, verify — executes in
 the page. The numbers you see come from executions that happen when you press
@@ -153,7 +153,7 @@ the button.
 
 |                                      |                                                         |
 | ------------------------------------ | ------------------------------------------------------- |
-| Live demo                            | <https://rigorrun.pages.dev>                            |
+| Live demo                            | <https://rigorrun.xyz>                                  |
 | Northstar Support (the recorded app) | <https://rigorrun-crm.pages.dev>                        |
 
 ## Run it locally
@@ -366,8 +366,8 @@ Model-backed agents work too — set `GROQ_API_KEY`, `GEMINI_API_KEY` or an
 
 RigorRun is designed so that **no part of it can generate a bill.** The demo,
 the CLI, the benchmark and CI need no service at all, and there is no hosted
-component to pay for. The only Cloudflare use is Pages, which serves the static
-landing page and the two demo apps.
+component to pay for. Cloudflare serves the static landing page and the two demo
+apps on Pages and hosts DNS for `rigorrun.xyz`; both are free-plan features.
 
 See
 [docs/FREE_DEPLOYMENT.md](docs/FREE_DEPLOYMENT.md) and

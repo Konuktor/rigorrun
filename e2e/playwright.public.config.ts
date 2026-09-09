@@ -10,7 +10,7 @@ import { existsSync } from 'node:fs';
 const SYSTEM_CHROMIUM = '/usr/bin/chromium';
 const useSystemChromium = !process.env['CI'] && existsSync(SYSTEM_CHROMIUM);
 
-export const PUBLIC_URL = process.env['PUBLIC_URL'] ?? 'https://rigorrun.pages.dev';
+export const PUBLIC_URL = process.env['PUBLIC_URL'] ?? 'https://rigorrun.xyz';
 
 export default defineConfig({
   testDir: '.',

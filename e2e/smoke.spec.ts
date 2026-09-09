@@ -19,6 +19,17 @@ test.describe('production smoke', () => {
     // they are willing to run anything locally.
     await expect(page.getByTestId('cta-test-your-agent')).toBeVisible();
     await expect(page.getByTestId('cta-run-demo')).toBeVisible();
+    // Real anchors out of the page. The whole site once had two links on it,
+    // so there was no route to the source or the documentation at all.
+    await expect(page.getByTestId('nav-github')).toBeVisible();
+    await expect(page.getByTestId('nav-docs')).toBeVisible();
+  });
+
+  test('the evidence page shows third-party results', async ({ page }) => {
+    await page.goto('/#/evidence');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('did not write');
+    // The denominator, not just the successes.
+    await expect(page.getByText('of 37', { exact: false }).first()).toBeVisible();
   });
 
   test('the demo starts', async ({ page }) => {
