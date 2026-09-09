@@ -11,7 +11,7 @@
  *   node scripts/build-proof.mjs
  */
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -166,9 +166,55 @@ const proof = {
 };
 
 const out = join(root, 'apps', 'web', 'src', 'proof.json');
+const ESC = String.fromCharCode(27);
+
+/**
+ * Everything about this evidence except when it was produced and how long it
+ * took.
+ *
+ * The freshness gate used to diff the whole file, which can never pass: three
+ * of its fields are a clock. So the gate was red-by-construction, and because
+ * it also ran on a branch that does not exist in this repository, it never ran
+ * at all — and the page drifted thirteen commits behind HEAD while saying it
+ * was what the pipeline produces. Comparing what the pipeline *found* is the
+ * check that was meant.
+ */
+function stable(value) {
+  return JSON.stringify(
+    {
+      workflows: value.workflows.map(({ timings: _timings, quality, ...rest }) => ({
+        ...rest,
+        // `wallClockMs` is the second clock in this file, nested one level
+        // deeper than the obvious one.
+        quality: (({ wallClockMs: _wallClockMs, ...q }) => q)(quality),
+      })),
+    },
+    null,
+    2,
+  );
+}
+
+if (process.argv.includes('--check')) {
+  let committed;
+  try {
+    committed = JSON.parse(await readFile(out, 'utf8'));
+  } catch {
+    console.error(`${ESC}[31mNo ${out} to check against.${ESC}[0m`);
+    process.exit(1);
+  }
+  if (stable(committed) !== stable(proof)) {
+    console.error(
+      `${ESC}[31mproof.json no longer matches what the pipeline produces.${ESC}[0m\n` +
+        'Run `node scripts/build-proof.mjs` and commit the result.',
+    );
+    process.exit(1);
+  }
+  console.log(`${ESC}[32mproof.json still matches the pipeline${ESC}[0m at ${commit}.`);
+  process.exit(0);
+}
+
 await writeFile(out, `${JSON.stringify(proof, null, 2)}\n`);
 
-const ESC = String.fromCharCode(27);
 console.log(`${ESC}[32mProof regenerated${ESC}[0m from ${workflows.length} workflows at ${commit}.`);
 for (const workflow of workflows) {
   console.log(

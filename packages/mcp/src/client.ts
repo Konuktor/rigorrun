@@ -27,8 +27,9 @@ import {
   type DiscoveredTool,
   type DiscoveryResult,
 } from '@rigorrun/connector';
+import { RIGORRUN_VERSION } from '@rigorrun/core';
 
-export const CLIENT_INFO = { name: 'rigorrun', version: '0.1.0' } as const;
+export const CLIENT_INFO = { name: 'rigorrun', version: RIGORRUN_VERSION } as const;
 
 export type { DiscoveredTool, DiscoveryResult };
 

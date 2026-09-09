@@ -8,7 +8,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # This said [main] while the default branch is master, so every job here
+    # ran only on pull requests and nothing checked a merge.
+    branches: [master, main]
   pull_request:
 
 concurrency:
@@ -183,10 +185,10 @@ jobs:
       # being presented as evidence. Regenerating here and failing on a diff
       # means the page is either current or the build is red.
       - name: The evidence page still matches what the pipeline produces
-        run: |
-          node scripts/build-proof.mjs
-          git diff --exit-code apps/web/src/proof.json \
-            || (echo "proof.json is stale — commit the regenerated file" && exit 1)
+        # --check compares what the pipeline found, not when it was run. The
+        # previous form diffed the whole file, three of whose fields are a
+        # clock, so it could never pass.
+        run: node scripts/build-proof.mjs --check
 
       - name: Cross-browser critical path
         run: pnpm cross

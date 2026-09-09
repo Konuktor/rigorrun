@@ -66,10 +66,27 @@ could cost anything.
 required, because Pages can only attach an apex domain that is a Cloudflare zone
 — while the registrar stays Gen.xyz.
 
-This adds nothing to the bill beyond the registration itself. The zone, Universal
-SSL, the `www` redirect rule and the bulk redirect off `pages.dev` are all
-free-plan features. `rigorrun.pages.dev` now 301s to the apex, so links published
-before the move still resolve.
+This adds nothing to the bill beyond the registration itself. The zone and
+Universal SSL are free-plan features.
+
+Two things this file used to claim, both checked on 10 September 2026 and both
+untrue:
+
+- **`rigorrun.pages.dev` does not redirect.** It answers 200 with byte-identical
+  content, because both hostnames are attached to the same Pages project. That is
+  duplicate content, and what resolves it is the `<link rel="canonical">` in
+  `apps/web/index.html` pointing at the apex. A 301 would need a redirect rule
+  that does not exist; the canonical tag is what is actually deployed.
+- **`www.rigorrun.xyz` does not resolve.** There is no record and no redirect
+  rule. Nothing links to it, so nothing is broken, but the rule described here
+  was never created.
+
+```console
+$ curl -sS -o /dev/null -w '%{http_code} %{num_redirects}\n' -L https://rigorrun.pages.dev
+200 0
+$ curl -sS -I https://www.rigorrun.xyz
+curl: (6) Could not resolve host: www.rigorrun.xyz
+```
 
 ## Keeping it free
 

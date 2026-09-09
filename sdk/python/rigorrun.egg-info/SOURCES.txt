@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+rigorrun/__init__.py
+rigorrun.egg-info/PKG-INFO
+rigorrun.egg-info/SOURCES.txt
+rigorrun.egg-info/dependency_links.txt
+rigorrun.egg-info/top_level.txt
+tests/test_protocol.py

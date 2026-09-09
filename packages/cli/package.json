@@ -1,6 +1,6 @@
 {
   "name": "rigorrun",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Acceptance testing for tool-using AI agents. Connect your system, show it one job, connect your agent, get a trustworthy pass or fail.",
   "keywords": [
     "mcp",

@@ -29,6 +29,7 @@ import {
   type ToolRecord,
   type Untested,
   type VerificationRecord,
+  RIGORRUN_VERSION,
 } from '@rigorrun/core';
 import { judge, planTool, type ObservedBehavior } from '@rigorrun/conformance';
 import { McpConnection, type DiscoveredTool } from '@rigorrun/mcp';
@@ -63,7 +64,7 @@ export interface VerifyOptions {
   onProgress?: (phase: string, detail: string) => void;
 }
 
-const HARNESS_VERSION = '0.2.0-dev';
+const HARNESS_VERSION = RIGORRUN_VERSION;
 
 function reading(surface: StateSurfaceId, dump: string): SurfaceReading {
   return { surface, entries: parseStatedump(dump), readable: dump.length > 0 };

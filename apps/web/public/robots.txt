@@ -1,5 +1,8 @@
-# The public site is served from https://rigorrun.xyz.
-# rigorrun.pages.dev 301s here, so a crawler that starts there lands on the
-# canonical origin without needing a rule of its own.
+# The canonical origin is https://rigorrun.xyz.
+#
+# The same Cloudflare Pages project also answers on rigorrun.pages.dev, which
+# serves byte-identical content and does not redirect. That is duplicate
+# content, and the <link rel="canonical"> in index.html is what resolves it —
+# a rule here would not, because robots.txt cannot express "prefer that host".
 User-agent: *
 Allow: /
