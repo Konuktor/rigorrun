@@ -108,3 +108,25 @@ reason rather than reporting a product failure. Set `QA_WORKSPACE_ID` /
 test accepts either answer and checks both properly: a 201 must carry a
 well-formed workspace and token, and a 429 must carry the limiter's error and a
 positive `retryAfter`. A 500, a timeout or a malformed body still fails.
+
+## Why visual regression is not a CI gate
+
+`pnpm visual` compares 24 screenshots against a committed baseline. The baseline
+is host-specific: the same landing page renders 2567px tall on a maintainer's
+machine and 2600px on `ubuntu-latest`, because the font stack resolves
+differently. That is a 0.06 pixel ratio against a 0.01 threshold, and none of it
+is a regression in anything.
+
+Three ways out of that, and why this one:
+
+- **Loosen the threshold** until CI stops failing. It would then stop catching
+  what it exists to catch.
+- **Regenerate the baseline inside the CI image** on every change. Correct, and
+  it makes every visual change a two-machine round trip.
+- **Run it where the baseline was made.** `pnpm visual` runs in
+  `pnpm release:verify`, on the machine that owns the snapshots, before every
+  release.
+
+The third, for now. What matters is that it is not listed as something CI
+checks, because it never was: this workflow was wired to a branch that does not
+exist in this repository, so until 10 September 2026 none of it had ever run.

@@ -183,8 +183,18 @@ jobs:
       - name: Accessibility (WCAG A/AA)
         run: pnpm a11y
 
-      - name: Visual regression
-        run: pnpm visual
+      # Visual regression is deliberately NOT here. The snapshots are host
+      # specific: generated on a maintainer's machine they are 2567px tall, and
+      # on ubuntu-latest the same page renders 2600px, because the font stack
+      # resolves differently. That is a 0.06 pixel ratio against a 0.01
+      # threshold, and it is not a regression in anything.
+      #
+      # The options were to regenerate them inside the CI image, to loosen the
+      # threshold until it stopped failing, or to run the gate where its
+      # baseline was made. Loosening it would have made it stop catching what it
+      # exists to catch. So `pnpm visual` runs in `pnpm release:verify`, on the
+      # machine that owns the snapshots, before every release — and it is not
+      # claimed as a CI gate. See docs/TESTING.md.
 
       # The /proof page is generated from real runs. It was regenerated only by
       # `release:verify`, which CI did not run, so it drifted behind HEAD while

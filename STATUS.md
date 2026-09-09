@@ -54,7 +54,7 @@ public agent SDK. Screenshots of what the person saw are written to
 | Unit + integration | `pnpm test` | 846 passing across 73 files, plus 8 in Python |
 | Build | `pnpm build` | all apps, CLI and extension |
 | Local E2E | `pnpm e2e` | 25 passing |
-| Visual regression | `pnpm visual` | 24 passing |
+| Visual regression | `pnpm visual` | 24 passing, locally — snapshots are host-specific, so this is a release gate rather than a CI one |
 | Cross-browser | `pnpm cross` | 6 passing (WebKit skipped: host lacks its system libraries) |
 | Accessibility | `pnpm a11y` | 16 passing, zero WCAG A/AA violations |
 | Production smoke | `pnpm smoke:prod` | 5 passing |
