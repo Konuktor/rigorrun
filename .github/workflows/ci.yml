@@ -221,7 +221,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: The suite is satisfiable (reference must pass)
-        run: pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent reference --quiet
+        run: pnpm rigorrun gate examples/refund-workflow/benchmark.json --agent reference --allow-reference --quiet
 
       - name: The suite discriminates (naive agent must fail)
         run: |

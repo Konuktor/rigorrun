@@ -135,6 +135,15 @@ export type IsolationLevel =
    * comparing a state to a remembered absolute value does not.
    */
   | 'PARTIAL'
+  /**
+   * A reset was configured and nothing has ever checked that it works.
+   *
+   * This is a declaration, not a measurement. It exists because the honest
+   * answer to "were the cases isolated?" against somebody else's system is
+   * usually "they said so", and reporting that as `RESET` — which means cases
+   * were observed to start from the same state — claims a check nobody ran.
+   */
+  | 'DECLARED'
   /** No reset. Every case inherited whatever the previous one left behind. */
   | 'NONE';
 
@@ -157,14 +166,22 @@ export interface ObservedIsolation {
   pathsStable: boolean;
 }
 
+/**
+ * Reset kinds that are RigorRun's own machinery rather than a promise made by
+ * somebody else's system. Throwing away a container or restoring an in-process
+ * snapshot is something this code does; calling a tool the operator nominated
+ * is something we asked for and never verified.
+ */
+const RESET_WE_CONTROL: ReadonlySet<ResetCapability> = new Set(['snapshot', 'container']);
+
 export function isolationLevel(
   caps: EnvironmentCapabilities,
   observed?: ObservedIsolation,
 ): IsolationLevel {
   if (caps.reset === 'none') return 'NONE';
-  if (!observed) return 'RESET';
-  if (observed.stable) return 'RESET';
-  return observed.pathsStable ? 'PARTIAL' : 'NONE';
+  if (observed) return observed.stable ? 'RESET' : observed.pathsStable ? 'PARTIAL' : 'NONE';
+  // Nobody measured. Say `RESET` only where the reset is ours to perform.
+  return RESET_WE_CONTROL.has(caps.reset) ? 'RESET' : 'DECLARED';
 }
 
 /**

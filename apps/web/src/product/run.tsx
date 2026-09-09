@@ -489,6 +489,15 @@ function Verdict({ run }: { run: RunView }) {
             <p className="max-w-3xl text-body text-secondary" data-testid="verdict-because">
               {shipping.because}
             </p>
+            {/* DECLARED is a claim, not a check. Saying so where the verdict is
+                read, rather than in a log nobody opens. */}
+            {run.isolation === 'DECLARED' && (
+              <p className="max-w-3xl text-meta text-secondary" data-testid="isolation-declared">
+                Isolation is <span className="font-mono">DECLARED</span>: your system nominated a
+                reset and RigorRun has not run it twice and compared the results, so the cases are
+                believed to have started clean rather than observed to have.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-8">

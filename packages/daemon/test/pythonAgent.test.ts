@@ -100,7 +100,9 @@ describe('an agent written in Python', () => {
     const tools = result.caseResults.flatMap((entry) => entry.steps.map((step) => step.tool));
     expect(tools).toContain('confirm_booking');
     expect(result.verification).toBe('PARTIAL');
-    expect(result.isolation).toBe('RESET');
+    // The desk nominates a reset tool and nothing has called it twice to
+    // check, so the honest answer is that it was declared, not measured.
+    expect(result.isolation).toBe('DECLARED');
     expect(result.caseResults.length).toBeGreaterThan(0);
   }, 240_000);
 });

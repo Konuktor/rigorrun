@@ -38,7 +38,15 @@ async function workspace(): Promise<{ home: string; store: ProjectStore }> {
 }
 
 const flags = (home: string, extra: Record<string, unknown> = {}): Flags =>
-  ({ home, json: false, quiet: true, agent: [], published: false, ...extra }) as Flags;
+  ({
+    home,
+    json: false,
+    quiet: true,
+    agent: [],
+    published: false,
+    allowReference: false,
+    ...extra,
+  }) as Flags;
 
 afterEach(async () => {
   for (const home of roots.splice(0)) await rm(home, { recursive: true, force: true });

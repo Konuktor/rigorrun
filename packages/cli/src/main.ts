@@ -99,6 +99,9 @@ async function dispatch(argv: string[]): Promise<number> {
         force: { type: 'boolean', default: false },
         yes: { type: 'boolean', default: false },
         as: { type: 'string' },
+        // A gate on the reference implementation passes by construction. It
+        // stays reachable for "is this suite satisfiable at all", by name.
+        'allow-reference': { type: 'boolean', default: false },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
@@ -146,6 +149,7 @@ async function dispatch(argv: string[]): Promise<number> {
     project: values.project,
     home: values.home,
     baseline: values.baseline,
+    allowReference: values['allow-reference'] ?? false,
     minSuccess: rateFlag(values['min-success'], 'min-success'),
     minPolicy: rateFlag(values['min-policy'], 'min-policy'),
     maxPolicyViolations: numberFlag(values['max-policy-violations'], 'max-policy-violations'),

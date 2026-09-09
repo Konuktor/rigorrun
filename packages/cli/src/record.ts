@@ -88,7 +88,18 @@ export async function receiveTrace(port: number, outPath?: string): Promise<numb
           line(`${c.green('received')}  ${trace.events.length} events from ${trace.app.origin}`);
           line(`${c.grey('written')}   ${written}`);
           line();
-          line(c.grey(`Next: rigorrun compile ${target} -o contract.json`));
+          // This used to say `Next: rigorrun compile <file>`, which does not
+          // work: `compile` reads a canonical trace, which names an
+          // environment and carries the state before and after the job. A
+          // browser recording of an uninstrumented page has none of those, so
+          // the command failed on a schema error. Saying what the file is
+          // beats printing a next step that cannot run.
+          line(c.grey('This is a browser recording. It is not a contract, and `rigorrun compile`'));
+          line(c.grey('cannot read it: compiling needs the state your system held before and'));
+          line(c.grey('after the job, which a page cannot supply.'));
+          line();
+          line(c.grey('To build a suite, connect the system through `rigorrun` and do the job'));
+          line(c.grey('there instead. See docs/V1_GAP_AUDIT.md for what this path does not do.'));
           server.close(() => resolve(0));
         })();
       });

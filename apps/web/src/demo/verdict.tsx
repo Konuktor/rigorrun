@@ -61,6 +61,8 @@ export function VerdictStep({
       ...(contract && !published ? { contract } : {}),
       ...(benchmark ? { benchmark } : {}),
       mode: published ? 'published' : 'full',
+      // The in-page example is always one of the bundled synthetic workflows.
+      syntheticEnvironment: true,
     });
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);

@@ -279,7 +279,9 @@ describe('grading an agent on it', () => {
     // The verdict rests on what the desk said afterwards, through the reads the
     // operator nominated — which is genuinely partial, and says so.
     expect(result.verification).toBe('PARTIAL');
-    expect(result.isolation).toBe('RESET');
+    // The desk nominates a reset tool and nothing has called it twice to
+    // check, so the honest answer is that it was declared, not measured.
+    expect(result.isolation).toBe('DECLARED');
     expect(result.caseResults.length).toBe(built.benchmark.cases.length);
 
     const limits = result.limits.map((limit) => limit.id);

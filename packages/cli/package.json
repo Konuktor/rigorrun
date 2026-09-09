@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/Konuktor/rigorrun.git"
   },
-  "homepage": "https://rigorrun.pages.dev",
+  "homepage": "https://rigorrun.xyz",
   "type": "module",
   "engines": {
     "node": ">=20.11"

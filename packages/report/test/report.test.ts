@@ -12,6 +12,7 @@ const html = renderReportHtml(run, {
   contract: pipeline.contract,
   benchmark: pipeline.benchmark,
   generatedAt: '2026-01-20T10:00:00.000Z',
+  syntheticEnvironment: true,
 });
 
 describe('escaping', () => {
@@ -83,8 +84,21 @@ describe('the rendered report', () => {
     expect(html).toContain('state delta');
   });
 
-  it('says the environment is synthetic', () => {
+  it('says the environment is synthetic when it is', () => {
     expect(html).toContain('synthetic demo environment');
+  });
+
+  it('does not call somebody else\'s system synthetic', () => {
+    // A run against a real system used to carry a footer telling its owner
+    // that every record in it was fabricated.
+    const real = renderReportHtml(run, {
+      contract: pipeline.contract,
+      benchmark: pipeline.benchmark,
+      generatedAt: '2026-01-20T10:00:00.000Z',
+    });
+    expect(real).not.toContain('synthetic demo environment');
+    expect(real).not.toContain('fabricated');
+    expect(real).toContain('Acceptance testing for tool-using AI agents');
   });
 
   it('carries print styles', () => {

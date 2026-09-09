@@ -167,6 +167,12 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
       // against a system nothing could be read back from is a different claim
       // from one that passed against a system that could.
       line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+      if (result.isolation === 'DECLARED') {
+        line(
+          c.grey('              your system nominated a reset; RigorRun has not run it twice'),
+        );
+        line(c.grey('              and compared, so isolation is believed rather than observed'));
+      }
       for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
       line();
       line(failures.length === 0 ? c.green('PASS') : `${c.red('FAIL')}  ${failures.join('; ')}`);

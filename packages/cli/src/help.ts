@@ -118,7 +118,7 @@ EXAMPLES
   rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
 
   rigorrun demo                                the bundled example
-  rigorrun gate examples/refund-workflow/benchmark.json --agent reference
+  rigorrun run examples/refund-workflow/benchmark.json --agent naive
 
 Your systems, your credentials and your recordings stay on this machine. There
 is no account, and nothing is uploaded unless you ask for it.
@@ -179,6 +179,9 @@ configuration error.
 
 OPTIONS
       --agent <id>                  Required. The agent to gate.
+      --allow-reference             Permit --agent reference. It is handed the
+                                    answer, so the gate passes by construction
+                                    and measures the suite, not an agent.
       --min-success <0..1>          Default 0.95
       --min-policy <0..1>           Default 1
       --max-policy-violations <n>   Default 0
@@ -191,6 +194,12 @@ OPTIONS
 Starts a loopback-only HTTP listener that accepts a single sanitised workflow
 trace from the RigorRun recorder extension and writes it to disk. Nothing is
 sent anywhere; the listener stops as soon as a trace arrives.
+
+The trace it writes is a record of what happened in a page. It is not a
+contract, and "rigorrun compile" cannot read it — compiling needs the state
+your system held before and after the job, and a browser recording of an
+uninstrumented application does not carry that. To build a suite, connect the
+system through the interface and do the job there.
 
 OPTIONS
       --port <n>     Port to listen on. Default 8787.
