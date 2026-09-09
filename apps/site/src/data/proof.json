@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-09T18:47:57.976Z",
-  "commit": "74d2f13",
-  "generationMs": 845,
+  "generatedAt": "2026-09-09T21:53:54.497Z",
+  "commit": "cc84c9e",
+  "generationMs": 814,
   "workflows": [
     {
       "key": "refund",
@@ -47,11 +47,11 @@
       "mustPerform": 6,
       "mustRefuse": 16,
       "timings": {
-        "record": 4.147,
-        "compile": 15.181,
-        "review": 0.124,
-        "generate": 40.743,
-        "total": 60.196
+        "record": 3.772,
+        "compile": 14.57,
+        "review": 0.168,
+        "generate": 41.534,
+        "total": 60.044
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -64,7 +64,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 96
+        "wallClockMs": 85
       },
       "failure": {
         "caseName": "the work has already been done for this approval id",
@@ -210,11 +210,11 @@
       "mustPerform": 7,
       "mustRefuse": 6,
       "timings": {
-        "record": 0.696,
-        "compile": 2.142,
-        "review": 0.086,
-        "generate": 30.627,
-        "total": 33.551
+        "record": 0.609,
+        "compile": 1.76,
+        "review": 0.015,
+        "generate": 27.934,
+        "total": 30.318
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -227,7 +227,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 86
+        "wallClockMs": 89
       },
       "failure": {
         "caseName": "amount of 1000.01, against a limit of 1000",
@@ -389,11 +389,11 @@
       "mustPerform": 6,
       "mustRefuse": 4,
       "timings": {
-        "record": 0.844,
-        "compile": 1.952,
-        "review": 0.023,
-        "generate": 14.481,
-        "total": 17.301
+        "record": 0.451,
+        "compile": 0.991,
+        "review": 0.012,
+        "generate": 16.694,
+        "total": 18.147
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -406,7 +406,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 54
+        "wallClockMs": 49
       },
       "failure": {
         "caseName": "the work has already been done for this company id",
@@ -560,11 +560,11 @@
       "mustPerform": 4,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.47,
-        "compile": 0.759,
-        "review": 0.011,
-        "generate": 15.697,
-        "total": 16.937
+        "record": 0.408,
+        "compile": 0.711,
+        "review": 0.01,
+        "generate": 12.031,
+        "total": 13.16
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -577,7 +577,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 40
+        "wallClockMs": 48
       },
       "failure": {
         "caseName": "the work has already been done for this approval id",
@@ -725,11 +725,11 @@
       "mustPerform": 3,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.452,
-        "compile": 0.794,
+        "record": 0.423,
+        "compile": 0.758,
         "review": 0.012,
-        "generate": 11.557,
-        "total": 12.815
+        "generate": 12.107,
+        "total": 13.299
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -742,7 +742,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 35
+        "wallClockMs": 41
       },
       "failure": {
         "caseName": "the work has already been done for this check id",

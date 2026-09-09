@@ -7,22 +7,31 @@
  */
 import type { ReactNode } from 'react';
 
+/**
+ * The mark, and the same one the site and the docs use.
+ *
+ * It used to be the letters "RR" in the system monospace font inside a 1.5px
+ * rounded square, re-created here in CSS while `index.html` carried a second
+ * copy as a data URI — and the two had already drifted, `#e7eaee` against a
+ * token of `#e9ecf1`. This is the source in `packages/design/logo/mark.svg`,
+ * inlined so it takes `currentColor` and needs no request.
+ *
+ * The shape is a double turnstile with unequal arms. `A ⊢ B` is "derivable
+ * from what was written down"; `A ⊨ B` is "true in the thing itself". An
+ * agent's transcript is the first and RigorRun reports the second, and the
+ * arms are unequal because "19 of 37, with the rest itemised" is the other
+ * half of the idea.
+ */
 export function Wordmark({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-  const box =
-    size === 'lg'
-      ? 'h-9 w-9 text-[13px]'
-      : size === 'sm'
-        ? 'h-6 w-6 text-[10px]'
-        : 'h-7 w-7 text-[11px]';
-  const text = size === 'lg' ? 'text-title' : size === 'sm' ? 'text-secondary' : 'text-section';
+  const box = size === 'lg' ? 'h-6 w-6' : size === 'sm' ? 'h-4 w-4' : 'h-5 w-5';
+  const text = size === 'lg' ? 'text-title' : size === 'sm' ? 'text-support' : 'text-section';
   return (
     <span className="inline-flex items-center gap-2">
-      <span
-        aria-hidden="true"
-        className={`grid ${box} shrink-0 place-items-center rounded-[9px] border-[1.5px] border-fg font-mono font-bold tracking-tighter`}
-      >
-        RR
-      </span>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`${box} shrink-0 text-accent`}>
+        <path d="M5.5 4.25V19.75" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <path d="M5.5 9H12.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <path d="M5.5 15H19" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      </svg>
       <span className={`${text} font-semibold tracking-tight`}>RigorRun</span>
     </span>
   );
