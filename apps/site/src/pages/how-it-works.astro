@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Button from '../components/Button.astro';
+import proof from '../data/proof.json';
+
+const demo = proof.workflows.find((workflow) => workflow.key === 'refund');
+if (!demo) throw new Error('proof.json has no refund workflow.');
+
+const steps = [
+  {
+    n: '01',
+    title: 'Do the job once',
+    stat: `${demo.traceSteps} sanitised steps`,
+    body: 'RigorRun reads your system before you start and again when you finish, then works out what the rules must be from what changed. It reads the shape of the data and never the names of things, which is what stops it only working on businesses it has already seen — and is also why a few things it genuinely cannot know.',
+    aside: 'A job that leaves no trace cannot be learned. If nothing observable changed, there is nothing to derive a rule from.',
+  },
+  {
+    n: '02',
+    title: 'Rule on what it worked out',
+    stat: `${demo.observedFacts} observed · ${demo.rulesProposed} proposed`,
+    body: 'Each proposed rule shows the evidence behind it, so you disagree with the evidence rather than with a verdict. The ones it is least sure about come first. RigorRun deliberately proposes more than it expects you to keep: missing a real rule is far worse than proposing one you do not want.',
+    aside: 'A rule you reject cannot fail your agent, so rejecting one costs you nothing. Only rules that were observed outright or that you confirmed are allowed to block a release.',
+  },
+  {
+    n: '03',
+    title: 'It builds the suite',
+    stat: `${demo.cases} cases · ${demo.categories.length} categories`,
+    body: 'The confirmed rules become executable cases — the happy path, boundaries, missing preconditions, duplicate actions, policy violations, malformed input, tool failures, timeouts, unexpected state, and prompt injection hidden where an agent would actually meet it.',
+    aside: 'How many categories appear depends on what the job touched. A two-step job produces fewer, and RigorRun says which it could not build and why.',
+  },
+  {
+    n: '04',
+    title: 'Your agent runs it',
+    stat: 'HTTP, a local process, or your own loop',
+    body: 'RigorRun hands your agent one task at a time and a URL to work through. It works however it normally works. The private half — the checks and the reference plan — is never sent to the agent, so there is nothing to read the answer from.',
+    aside: 'If your agent already speaks MCP, the integration is roughly ten lines. If RigorRun cannot start it, you can pull work with a key instead, so the agent can live behind a login.',
+  },
+  {
+    n: '05',
+    title: 'The verdict comes from the system',
+    stat: `${demo.checks} checks across the suite`,
+    body: 'After each case, RigorRun calls the reads you nominated and compares what it finds to what should be true. The agent’s own account of what it did is displayed, labelled, and never scored.',
+    aside: 'Every verdict carries how strongly it was verified and whether the cases were isolated from each other. A verdict against a real system is PARTIAL, and says so on the same line as the answer.',
+  },
+  {
+    n: '06',
+    title: 'Gate the next change',
+    stat: 'exit 1 stops the build',
+    body: 'The same suite runs from the command line against a threshold you set. Change a prompt, swap a model, upgrade a tool — the run tells you which specific case regressed rather than that a score moved.',
+    aside: 'Until 0.2.0 the documented gate example ran the reference implementation, which is handed the answer. A documented gate that could not fail is worse than none, so gate now refuses it.',
+  },
+];
+---
+<Base
+  title="How it works"
+  description="A person does the job once. RigorRun derives the rules from what changed, generates an acceptance suite across ten case categories, runs your agent against it, and decides from the state of the system rather than the transcript."
+>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>How it works</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">
+        Most tools ask you to write the tests. This one watches you do the work.
+      </h1>
+      <p class="mt-7 text-lead text-secondary">
+        The reason acceptance tests for agents do not exist is not that nobody wants them. It is that
+        writing them means writing down every rule your business already knows and never said out
+        loud. RigorRun gets them from a demonstration instead.
+      </p>
+      <pre data-theme="ink" class="mt-8 overflow-x-auto rounded-well border border-line bg-canvas p-5 font-mono text-support leading-relaxed text-fg" tabindex="0" role="region" aria-label="Comparison of how tests are produced"><code>{`most tools:   you write the tests   →  the tool runs them
+  RigorRun:   you do the job once   →  RigorRun writes the tests`}</code></pre>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <ol class="ruled rounded-panel border border-line bg-surface">
+      {
+        steps.map((step) => (
+          <li class="grid gap-6 p-6 sm:p-8 lg:grid-cols-[auto_1.2fr_1fr] lg:gap-10">
+            <span class="font-mono text-support text-accent">{step.n}</span>
+            <div>
+              <h2 class="text-title font-medium">{step.title}</h2>
+              <p class="mt-3 text-support text-secondary">{step.body}</p>
+              <p class="mt-4 font-mono text-meta text-muted">{step.stat}</p>
+            </div>
+            <p class="border-t border-line-soft pt-4 text-support text-muted lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+              {step.aside}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section ruled tight id="synthetic">
+    <div class="rr-prose-width">
+      <h2 class="text-title font-medium">About the numbers on this page</h2>
+      <p class="mt-4 text-support text-secondary">
+        They come from one worked example: a support agent processing a single refund in a CRM. Every
+        count is what the pipeline produces when it runs, written into the page by a script and
+        checked in CI against a fresh run, so it cannot quietly drift.
+      </p>
+      <p class="mt-4 text-support text-secondary">
+        That CRM is <span class="text-fg">synthetic</span> — an application written for this example,
+        with invented customers and orders. The pipeline running over it is the one that ships. For
+        results against software nobody here wrote, the evidence page is the honest place to look.
+      </p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <Button href="/evidence" variant="secondary">See results on software we did not write</Button>
+        <Button href="/start">Get started</Button>
+      </div>
+    </div>
+  </Section>
+</Base>

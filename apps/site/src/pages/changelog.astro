@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import { NPM_URL, REPO_URL } from '../site';
+
+const releases = [
+  {
+    version: '0.2.0',
+    date: '9 September 2026',
+    summary: 'Verify a server nobody wrote, and stop a gate that could not fail.',
+    changes: [
+      ['Added', 'rigorrun verify — pins a published MCP server to the bytes the registry served, runs it in a container with no network, exercises every tool it safely can, and reports what changed against what the server declared.'],
+      ['Fixed', 'gate now refuses --agent reference without --allow-reference, and run requires an agent. The documented way to gate a build had been running the implementation that is handed the answer, so it was a guaranteed pass.'],
+      ['Fixed', 'Isolation reports DECLARED rather than RESET where the reset is a tool the operator nominated and nothing has run it twice and compared. It had been claiming an observation it never made.'],
+      ['Changed', 'The site leads with what a stranger can check rather than with an invented CRM.'],
+      ['Infrastructure', 'Published by GitHub Actions with npm trusted publishing and a SLSA build provenance attestation. No npm token exists to be stolen from repository secrets.'],
+    ],
+  },
+  {
+    version: '0.1.1',
+    date: '6 September 2026',
+    summary: 'The install was broken. Corrected, along with four claims that overreached.',
+    changes: [
+      ['Fixed', 'The published package did not install cleanly on a machine that had never seen the source.'],
+      ['Changed', 'Four claims narrowed to what had actually been measured.'],
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '6 September 2026',
+    summary: 'First public release.',
+    changes: [['Added', 'The local runner, the six-step project flow, contract compilation from one demonstration, case generation, agent connection over HTTP or a local process, verdicts, and CI gating.']],
+  },
+];
+---
+<Base
+  title="Changelog"
+  description="Every released version of RigorRun, what changed, and what was wrong before. Published releases only."
+>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>Changelog</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">Every release, including what was wrong.</h1>
+      <p class="mt-7 text-lead text-secondary">
+        Three releases so far, all on <a class="rr-link" href={NPM_URL}>npm</a>. Fixes describe the
+        defect rather than the patch, because "improved reliability" tells you nothing about whether
+        you were affected.
+      </p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="space-y-5">
+      {
+        releases.map((release) => (
+          <article class="overflow-hidden rounded-panel border border-line bg-surface">
+            <header class="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line bg-raised px-6 py-4">
+              <h2 class="font-mono text-title font-medium">
+                <a class="rr-link" href={`${REPO_URL}/releases/tag/v${release.version}`}>
+                  v{release.version}
+                </a>
+              </h2>
+              <time class="text-support text-muted">{release.date}</time>
+              <p class="w-full text-support text-secondary sm:w-auto sm:flex-1">{release.summary}</p>
+            </header>
+            <ul class="ruled">
+              {release.changes.map(([kind, detail]) => (
+                <li class="grid gap-2 px-6 py-4 sm:grid-cols-[7rem_1fr] sm:gap-6">
+                  <span class="text-micro font-semibold uppercase text-muted">{kind}</span>
+                  <p class="text-support text-secondary">{detail}</p>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </Section>
+</Base>

@@ -1,0 +1,25 @@
+---
+import Base from './Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+
+interface Props { title: string; description: string; eyebrow: string; lede?: string; updated?: string }
+const { title, description, eyebrow, lede, updated } = Astro.props;
+---
+<Base title={title} description={description}>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">{title}</h1>
+      {lede && <p class="mt-6 text-lead text-secondary">{lede}</p>}
+      {updated && <p class="mt-4 text-meta text-muted">Last updated {updated}.</p>}
+    </div>
+  </Section>
+  <Section ruled tight>
+    <div
+      class="rr-prose-width [&_a]:rr-link [&_code]:font-mono [&_code]:text-support [&_code]:text-fg [&_h2]:mt-12 [&_h2]:text-title [&_h2]:font-medium [&_h2:first-child]:mt-0 [&_h3]:mt-8 [&_h3]:text-section [&_h3]:font-semibold [&_li]:text-secondary [&_p]:mt-4 [&_p]:text-secondary [&_ul]:mt-4 [&_ul]:space-y-2 [&_ul]:pl-5 [&_ul]:list-disc"
+    >
+      <slot />
+    </div>
+  </Section>
+</Base>

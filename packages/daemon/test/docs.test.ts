@@ -178,7 +178,10 @@ describe('what the docs do not claim', () => {
     ) as { scripts: Record<string, string> };
 
     expect(manifest.scripts['start'], 'the documented first command must exist').toBeTruthy();
-    expect(manifest.scripts['start']).toContain('build:web');
+    // `build:app`, not `build:web`: the interface and the public site were one
+    // build until 0.3, and `pnpm start` must build the interface — the half
+    // that ships inside the package — rather than the website.
+    expect(manifest.scripts['start']).toContain('build:app');
     expect(manifest.scripts['start']).toContain('rigorrun');
 
     const readme = await readFile(

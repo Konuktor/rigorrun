@@ -12,6 +12,12 @@ packages:
 # the platform binary pnpm already installed as an optional dependency.
 allowBuilds:
   esbuild: false
+  # Astro pulls sharp in for its default image service. `apps/site` uses the
+  # passthrough service instead — every image on the site is an SVG or a PNG
+  # rendered ahead of time by scripts/build-brand.mjs — so sharp's native build
+  # would be compiled and then never called. Denied rather than left unanswered,
+  # so `pnpm install` neither runs a script nor stops to ask.
+  sharp: false
   workerd: true
   '@tailwindcss/oxide': true
 

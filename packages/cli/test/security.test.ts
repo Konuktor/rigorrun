@@ -206,7 +206,7 @@ describe('no secret ever reaches a shipped artefact', () => {
 describe('the frontend never reads a provider key', () => {
   it('has no key lookup in any app source', async () => {
     const offenders: string[] = [];
-    for (const app of ['apps/web/src', 'apps/demo-crm/src', 'apps/extension/src']) {
+    for (const app of ['apps/app/src', 'apps/demo-crm/src', 'apps/extension/src']) {
       for (const file of await sourceFiles(join(repoRoot, app))) {
         const source = await readFile(file, 'utf8');
         if (/GROQ_API_KEY|GEMINI_API_KEY|OPENAI_COMPATIBLE_API_KEY|CLOUDFLARE_API_TOKEN/.test(source)) {

@@ -47,7 +47,7 @@ function run(command, args, options = {}) {
 // ------------------------------------------------------------------- 1. build
 
 console.log(bold('\nBuilding what would be published'));
-run('pnpm', ['build:web'], { stdio: 'ignore' });
+run('pnpm', ['build:app'], { stdio: 'ignore' });
 run('pnpm', ['build:cli'], { stdio: 'ignore' });
 check('the interface was built into the package', await exists(join(pkgDir, 'ui', 'index.html')));
 

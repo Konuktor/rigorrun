@@ -23,3 +23,6 @@ packages/cli/ui/
 packages/cli/package/
 # Packed tarballs.
 *.tgz
+
+# Astro's generated types and content cache, rebuilt on every build.
+apps/*/.astro/

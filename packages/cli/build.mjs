@@ -13,7 +13,7 @@
  * "Dynamic require of child_process is not supported", which is a runtime crash
  * on the first local connector somebody configures.
  *
- * **The interface travels with the runner.** `apps/web/dist` is copied in, so a
+ * **The interface travels with the runner.** `apps/app/dist` is copied in, so a
  * person who runs `npx rigorrun` gets a working interface rather than a working
  * API and a message about building one. There is no second step.
  */
@@ -24,7 +24,7 @@ import { join } from 'node:path';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
 const root = join(here, '..', '..');
-const webDist = join(root, 'apps', 'web', 'dist');
+const uiDist = join(root, 'apps', 'app', 'dist');
 
 /**
  * Left to npm to install.
@@ -80,21 +80,23 @@ await chmod(join(here, 'dist', 'rigorrun.mjs'), 0o755);
 // with RigorRun is `npx rigorrun` is not a degraded experience, it is the
 // whole experience. A tarball without an interface should be impossible to
 // build, so it now fails.
-const built = await stat(join(webDist, 'index.html')).catch(() => undefined);
+const built = await stat(join(uiDist, 'index.html')).catch(() => undefined);
 if (!built) {
   console.error(
-    'No interface to bundle. Run `pnpm build:web` first — a package without one\n' +
+    'No interface to bundle. Run `pnpm build:app` first — a package without one\n' +
       'is a package whose first screen is an error message.',
   );
   process.exit(1);
 }
 await rm(join(here, 'ui'), { recursive: true, force: true });
-await cp(webDist, join(here, 'ui'), { recursive: true });
-console.log('bundled the interface from apps/web/dist');
+await cp(uiDist, join(here, 'ui'), { recursive: true });
+console.log('bundled the interface from apps/app/dist');
 
-// `_redirects` is a Cloudflare Pages instruction. It means nothing inside an
-// npm package and only invites the question of what it is doing there.
+// A Cloudflare Pages instruction and a crawler file mean nothing inside an npm
+// package, and only invite the question of what they are doing there. The
+// interface build no longer produces either, so this is belt and braces.
 await rm(join(here, 'ui', '_redirects'), { force: true });
+await rm(join(here, 'ui', 'robots.txt'), { force: true });
 
 /**
  * The directory that gets packed, which is not the directory we develop in.

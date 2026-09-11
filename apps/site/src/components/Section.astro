@@ -1,0 +1,18 @@
+---
+/**
+ * A page section. The gutter and the rhythm come from tokens, so no page sets
+ * its own padding and no two sections disagree about how far apart things are.
+ */
+interface Props {
+  id?: string;
+  /** A hairline above the section, the way a ruled sheet separates entries. */
+  ruled?: boolean;
+  tight?: boolean;
+  class?: string;
+}
+const { id, ruled = false, tight = false, class: className = '' } = Astro.props;
+const pad = tight ? 'py-[var(--spacing-section-tight)]' : 'py-[var(--spacing-section)]';
+---
+<section id={id} class={`${ruled ? 'rule-top' : ''} ${className}`}>
+  <div class={`rr-container ${pad}`}><slot /></div>
+</section>

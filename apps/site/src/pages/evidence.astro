@@ -1,0 +1,184 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Command from '../components/Command.astro';
+import evidence from '../data/evidence.json';
+
+const { totals } = evidence;
+const percent = Math.round((totals.toolsExercised / totals.toolsDiscovered) * 100);
+/*
+ * UTC, because the date has to be the one stamped on the record. Rendering it
+ * in the build machine's zone moved it to the tenth on a record that says the
+ * ninth, which is a small lie in the one paragraph on the site that exists to
+ * let somebody check the work.
+ */
+const generated = new Date(evidence.generatedAt).toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+/** Small numbers read as words in a sentence, and as digits in a table. */
+const WORDS = ['zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+const spelled = WORDS[totals.servers] ?? String(totals.servers);
+const seconds = Math.round(evidence.generationMs / 1000);
+
+const REASONS: Record<string, string> = {
+  NEEDS_FIXTURE: 'needs a fixture the harness will not invent',
+  UNSAFE_TO_EXERCISE: 'declared destructive, and believed rather than tried',
+};
+
+/** Every caveat is carried on every record, not collected into a footer. */
+const caveats = [...new Set(evidence.servers.flatMap((server) => server.caveats))];
+---
+
+<Base
+  title="Evidence"
+  description={`RigorRun run against ${totals.servers} MCP servers nobody here wrote. ${totals.toolsExercised} of ${totals.toolsDiscovered} tools exercised, the rest named with the reason each was not. Reproduce any row with one command.`}
+>
+  <Section>
+    <Eyebrow>Evidence</Eyebrow>
+    <h1 class="mt-4 max-w-3xl text-hero font-medium text-balance">
+      {spelled} servers we did not write.
+    </h1>
+    <p class="mt-7 max-w-2xl text-lead text-secondary">
+      Each one was fetched from the public registry, pinned to the exact bytes the registry
+      published, and run in a container with no network, no mounts and no access to this machine.
+      Every tool was called with arguments derived from its own schema, and the container's
+      filesystem was read before and after to see what actually changed. Then that was compared
+      against what the server declared about itself.
+    </p>
+
+    <div class="mt-8">
+      <Command command={`rigorrun verify ${evidence.servers[0]?.ref}`} />
+      <p class="mt-3 text-support text-muted">Reproduce any row below with one command.</p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">What it reached</h2>
+        <p class="mt-4 text-support text-secondary">
+          <span class="font-mono text-fg">{totals.toolsExercised} of {totals.toolsDiscovered}</span>
+          tools were exercised — {percent}%. The other {totals.toolsUntested} are named below with the
+          reason each one was not.
+        </p>
+        <p class="mt-4 text-support text-muted">
+          That is the shape of the answer and it is worth stating plainly rather than tuning away: a
+          general harness with no credentials and no fixtures verifies about half of a typical
+          server's surface. A fabricated 100% would be worth less than a measured {percent}% with the
+          remainder itemised.
+        </p>
+      </div>
+
+      <div class="rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">What this does not establish</h2>
+        <ul class="mt-4 space-y-3 text-support text-secondary">
+          <li>
+            <span class="text-fg">Nothing about the wider registry.</span> {totals.servers} servers, all
+            published by <span class="font-mono">{evidence.publisher}</span>, all well maintained. That
+            is the weakest possible sample.
+          </li>
+          <li>
+            <span class="text-fg">No security claim about any of them.</span> A server that contradicted
+            nothing here contradicted nothing <em>this harness can observe</em>, on the tools it could
+            exercise, at one digest, on one day.
+          </li>
+          <li>
+            <span class="text-fg">No claim that unexercised tools are safe.</span> They are unexercised.
+          </li>
+          <li><span class="text-fg">No market validation.</span> Our own scan is not a user.</li>
+        </ul>
+      </div>
+    </div>
+  </Section>
+
+  <!-- ────────────────────────────────────────────────────────── the records -->
+  <Section ruled tight>
+    <div class="space-y-5">
+      {
+        evidence.servers.map((server) => (
+          <article class="overflow-hidden rounded-panel border border-line bg-surface">
+            <header class="flex flex-wrap items-start justify-between gap-4 border-b border-line bg-raised px-5 py-4">
+              <div class="min-w-0">
+                <h2 class="break-all font-mono text-support text-fg">{server.ref}</h2>
+                <p class="mt-1.5 break-all font-mono text-meta text-muted">{server.digest}</p>
+              </div>
+              <div class="flex shrink-0 items-center gap-2.5">
+                <span
+                  class:list={[
+                    'rounded-pill border px-2.5 py-1 font-mono text-micro font-semibold',
+                    server.exitCode === 0
+                      ? 'border-pass-line bg-pass-bg text-pass'
+                      : 'border-warn-line bg-warn-bg text-warn',
+                  ]}
+                >
+                  exit {server.exitCode}
+                </span>
+                <span class="text-meta text-muted">
+                  {server.exitCode === 0
+                    ? 'verified, nothing contradicted'
+                    : 'ran, established too little to mean much'}
+                </span>
+              </div>
+            </header>
+
+            <dl class="grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
+              {[
+                { label: 'Tools discovered', value: String(server.toolsDiscovered) },
+                { label: 'Exercised', value: `${server.toolsExercised} of ${server.toolsDiscovered}` },
+                { label: 'Contradicted', value: String(server.contradicted) },
+                { label: 'Undetermined', value: String(server.undetermined) },
+                { label: 'Isolation', value: `${server.isolation} · ${server.resets} starts compared` },
+                { label: 'Network egress', value: server.networkEgress ? 'permitted' : 'none' },
+                { label: 'Server reports', value: `${server.serverName} ${server.serverVersion}` },
+                { label: 'Base image', value: server.baseImage },
+              ].map((cell) => (
+                <div class="bg-surface px-5 py-3.5">
+                  <dt class="text-micro font-semibold uppercase text-muted">{cell.label}</dt>
+                  <dd class="mt-1.5 truncate font-mono text-support text-fg" title={cell.value}>
+                    {cell.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+
+            {server.untested.length > 0 && (
+              <div class="border-t border-line px-5 py-4">
+                <h3 class="text-micro font-semibold uppercase text-muted">Not exercised</h3>
+                <ul class="mt-3 grid gap-x-8 gap-y-1.5 sm:grid-cols-2">
+                  {server.untested.map((item) => (
+                    <li class="text-support">
+                      <span class="font-mono text-fg">{item.tool}</span>
+                      <span class="text-muted"> — {REASONS[item.reason] ?? item.detail}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="rounded-panel border border-line bg-raised p-6">
+      <h2 class="text-title font-medium">What the harness itself cannot do</h2>
+      <p class="mt-2 text-support text-muted">Carried on every record it writes, not only on this page.</p>
+      <ul class="mt-5 space-y-3 text-support text-secondary">
+        {caveats.map((caveat) => <li class="max-w-4xl">{caveat}</li>)}
+      </ul>
+    </div>
+
+    <p class="mt-8 max-w-4xl text-meta text-muted">
+      Produced by <span class="font-mono">node scripts/build-evidence.mjs</span> at commit
+      <span class="font-mono">{evidence.commit}</span> on {generated}, using RigorRun
+      <span class="font-mono">{evidence.rigorrunVersion}</span> and Docker
+      <span class="font-mono">{evidence.dockerVersion}</span>. Took {seconds}s. Re-run it and compare.
+    </p>
+  </Section>
+</Base>

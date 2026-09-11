@@ -134,7 +134,7 @@ const evidence = {
   servers,
 };
 
-const out = join(root, 'apps', 'web', 'src', 'evidence.json');
+const out = join(root, 'apps', 'site', 'src', 'data', 'evidence.json');
 await writeFile(out, `${JSON.stringify(evidence, null, 2)}\n`);
 
 console.log(

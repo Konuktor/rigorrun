@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Command from '../components/Command.astro';
+import Button from '../components/Button.astro';
+import { CONTACT_EMAIL, contactHref } from '../site';
+---
+<Base
+  title="Access and price"
+  description="RigorRun is free and there is no pricing. It runs on your machine, there is no account, and no external team has used it yet. What Early Access does and does not mean."
+>
+  <Section>
+    <div class="rr-prose-width">
+      <Eyebrow>Access</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">Free, and there is no price yet.</h1>
+      <p class="mt-7 text-lead text-secondary">
+        Not free-for-now-then-we-will-see. There is no billing, no account, no seat, no quota and no
+        usage meter, because there is no server: the thing you install runs entirely on your machine
+        and never talks to us.
+      </p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">What Early Access means</h2>
+        <ul class="mt-4 space-y-3 text-support text-secondary">
+          <li>The published package works and is verified end to end from a clean machine before every release.</li>
+          <li>Parts of it are honestly unfinished, and they are <a class="rr-link" href="/what-is-built">listed rather than hidden</a>.</li>
+          <li>Interfaces may change between minor versions while this says Early Access.</li>
+          <li>Nothing is deprecated without it appearing in the <a class="rr-link" href="/changelog">changelog</a>.</li>
+        </ul>
+      </div>
+
+      <div class="rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">What it does not mean</h2>
+        <ul class="mt-4 space-y-3 text-support text-secondary">
+          <li>
+            <span class="text-fg">There is no cohort.</span> No waitlist, no invitation, no
+            application, and no group of design partners you would be joining.
+          </li>
+          <li>
+            <span class="text-fg">There are no customers.</span> No external team has run this yet.
+            Sooner or later a page like this says "trusted by"; this one cannot.
+          </li>
+          <li>
+            <span class="text-fg">Nothing is being withheld to sell later.</span> There is no paid
+            tier that exists and is switched off.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <div class="rounded-panel border border-line bg-surface p-8 sm:p-10">
+      <h2 class="max-w-2xl text-display font-medium text-balance">
+        Bring one workflow your agent cannot afford to break.
+      </h2>
+      <p class="mt-5 max-w-2xl text-lead text-secondary">
+        Install it and run it; nothing needs to be arranged first. If you want the awkward version of
+        the conversation — what it could not verify, and why — that is the more useful one.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Command command="npx rigorrun" size="lg" />
+        <Button href={contactHref(CONTACT_EMAIL)} size="lg">Talk to me</Button>
+      </div>
+    </div>
+  </Section>
+</Base>

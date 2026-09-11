@@ -1,0 +1,11 @@
+# The canonical origin is https://rigorrun.xyz.
+#
+# The same Cloudflare Pages project also answers on rigorrun.pages.dev, which
+# serves byte-identical content and does not redirect. That is duplicate
+# content, and the <link rel="canonical"> in each page is what resolves it — a
+# rule here would not, because robots.txt cannot express "prefer that host".
+
+User-agent: *
+Allow: /
+
+Sitemap: https://rigorrun.xyz/sitemap.xml

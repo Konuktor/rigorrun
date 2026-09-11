@@ -4,7 +4,7 @@ Written against commit `7ef0750` on 6 September 2026 by walking the product
 rather than by reading its tests, and re-answered at `v0.1.0` against what the
 public registry serves. **Revised 10 September 2026 at `v0.2.0`**, after a
 due-diligence pass that found six shipped behaviours claiming more than they
-had checked. Those are in `docs/PRODUCT_REALITY_AUDIT.md`; the rows here are
+had checked. Those are recorded privately; the rows here are
 updated to match.
 
 **A test passing is not evidence a capability exists.** A test proves that a

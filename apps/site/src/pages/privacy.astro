@@ -1,0 +1,67 @@
+---
+import Prose from '../layouts/Prose.astro';
+import { CONTACT_EMAIL, MAIL_LIVE, contactHref, contactLabel } from '../site';
+---
+<Prose
+  eyebrow="Legal"
+  title="Privacy"
+  updated="10 September 2026"
+  description="RigorRun has no account, no server and no analytics. What the website collects, what the local tool records, and what neither of them sends anywhere."
+  lede="Short, because there is very little to describe. RigorRun has no account system, no hosted backend and no analytics, so most of what a privacy policy usually covers does not exist here."
+>
+  <h2>The software you install</h2>
+  <p>
+    <code>npx rigorrun</code> runs entirely on your machine. Your systems, your credentials, your
+    recordings, your runs and your verdicts are written to <code>~/.rigorrun</code> and to your
+    operating system's credential store. None of it is transmitted to us, because there is no
+    service to transmit it to.
+  </p>
+  <p>
+    RigorRun writes a local file, <code>activation.jsonl</code>, containing a stage identifier, a
+    timestamp, a counter and a coarse error class. It records no task content, no tool arguments, no
+    results, no project or record names, no URLs, no commands and no credentials. There is no
+    uploader and no endpoint. If usage reporting is ever added, that is the shape it would take, and
+    it would be opt-in and announced in the changelog.
+  </p>
+  <p>Three things can make a network request, all because you asked:</p>
+  <ul>
+    <li><code>rigorrun verify</code> downloads the named package from the npm registry.</li>
+    <li>Connecting your own system sends requests to the address you configured, with your credentials.</li>
+    <li>An LLM-backed agent, which exists only if you have set a provider API key, talks to that provider.</li>
+  </ul>
+  <p>None of the three reach RigorRun.</p>
+
+  <h2>This website</h2>
+  <p>
+    rigorrun.xyz is a set of static files on Cloudflare Pages. There are no cookies, no analytics, no
+    tag manager, no advertising pixels and no third-party embeds. Fonts are served from this origin
+    rather than from a font CDN, so loading a page does not tell anybody else that you did.
+  </p>
+  <p>
+    Cloudflare, as the host, processes request metadata such as IP address and user agent in order to
+    serve and protect the site. That is described in
+    <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>. We do not
+    receive, store or analyse it.
+  </p>
+
+  <h2>If you get in touch</h2>
+  <p>
+    {MAIL_LIVE
+      ? 'Email to an @rigorrun.xyz address is forwarded to a personal mailbox and kept only as long as it is useful to the conversation.'
+      : 'Contact currently goes through GitHub, which means it is public and governed by GitHub’s own privacy policy.'}
+    {' '}Nothing you send is added to a mailing list, because there is no mailing list.
+    {' '}<a href={contactHref(CONTACT_EMAIL)}>{contactLabel(CONTACT_EMAIL)}</a>.
+  </p>
+
+  <h2>Feedback bundles</h2>
+  <p>
+    <code>rigorrun feedback export</code> produces a sanitised bundle you can attach to a bug report.
+    It is written to a file for you to inspect and send yourself. Nothing is uploaded by the command.
+  </p>
+
+  <h2>Changes</h2>
+  <p>
+    If this ever describes something that collects data, the change will appear in the changelog
+    before it ships, not quietly in this page.
+  </p>
+</Prose>

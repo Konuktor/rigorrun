@@ -1,0 +1,14 @@
+{
+  "name": "@rigorrun/design",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "RigorRun design tokens, type system and logo. One system, two themes.",
+  "exports": {
+    "./tokens.css": "./src/tokens.css",
+    "./fonts.css": "./src/fonts.css",
+    "./fonts/*": "./fonts/*",
+    "./logo/*": "./logo/*"
+  },
+  "files": ["src/", "fonts/", "logo/"]
+}

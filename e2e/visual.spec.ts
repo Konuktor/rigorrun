@@ -62,10 +62,10 @@ async function stabilise(page: Page): Promise<void> {
 }
 
 test.describe('visual regression', () => {
-  test('landing', async ({ page }) => {
-    await page.goto('/');
+  test('projects', async ({ page }) => {
+    await page.goto('/#/projects');
     await stabilise(page);
-    await expect(page).toHaveScreenshot('landing.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('projects.png', { fullPage: true });
   });
 
   test('record step', async ({ page }) => {

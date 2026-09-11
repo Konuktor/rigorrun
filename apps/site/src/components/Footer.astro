@@ -1,0 +1,100 @@
+---
+import Logo from './Logo.astro';
+import {
+  VERSION,
+  REPO_URL,
+  DOCS_URL,
+  NPM_URL,
+  CONTACT_EMAIL,
+  FOUNDER,
+  contactHref,
+  contactLabel,
+  SECURITY_HREF,
+} from '../site';
+
+const columns = [
+  {
+    title: 'Product',
+    links: [
+      { href: '/how-it-works', label: 'How it works' },
+      { href: '/verify', label: 'Verify a server' },
+      { href: '/evidence', label: 'Evidence' },
+      { href: '/start', label: 'Get started' },
+      { href: '/access', label: 'Access and price' },
+    ],
+  },
+  {
+    title: 'Developers',
+    links: [
+      { href: DOCS_URL, label: 'Documentation', external: true },
+      { href: `${DOCS_URL}/cli/commands`, label: 'CLI reference', external: true },
+      { href: `${DOCS_URL}/start/ci-gate`, label: 'CI gating', external: true },
+      { href: NPM_URL, label: 'npm package', external: true },
+      { href: REPO_URL, label: 'Source', external: true },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { href: '/company', label: 'About' },
+      { href: '/changelog', label: 'Changelog' },
+      { href: '/what-is-built', label: 'What is and is not built' },
+      { href: contactHref(CONTACT_EMAIL), label: contactLabel(CONTACT_EMAIL) },
+    ],
+  },
+  {
+    title: 'Trust',
+    links: [
+      { href: '/security', label: 'Security' },
+      { href: '/privacy', label: 'Privacy' },
+      { href: '/terms', label: 'Terms' },
+      { href: SECURITY_HREF, label: 'Report a vulnerability' },
+    ],
+  },
+];
+const year = new Date().getFullYear();
+---
+
+<footer class="rule-top">
+  <div class="rr-container py-[var(--spacing-section-tight)]">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+      <div class="max-w-xs">
+        <Logo />
+        <p class="mt-4 text-support text-muted">
+          Acceptance testing for AI agents that take real actions. Runs on your machine.
+        </p>
+      </div>
+      {
+        columns.map((column) => (
+          <div>
+            <h2 class="text-micro font-semibold uppercase text-muted">{column.title}</h2>
+            <ul class="mt-4 flex flex-col gap-2.5">
+              {column.links.map((link) => (
+                <li>
+                  <a
+                    href={link.href}
+                    class="text-support text-secondary transition-colors hover:text-fg"
+                    {...'external' in link && link.external
+                      ? { target: '_blank', rel: 'noreferrer' }
+                      : {}}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-meta text-muted sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p>
+        RigorRun v{VERSION} — Early Access. Built by {FOUNDER}. MIT licensed. © {year}.
+      </p>
+      <p>Local-first. The runner does the work; this page never sees your systems.</p>
+    </div>
+  </div>
+</footer>

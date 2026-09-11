@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@import '@rigorrun/design/fonts.css';
+@import '@rigorrun/design/tokens.css';
+
+/*
+ * The local product.
+ *
+ * Everything visual lives in @rigorrun/design, which the public site imports
+ * too. This file holds only what is true of the product and not of the site:
+ * a denser body size, because this is a working surface somebody has open for
+ * an afternoon rather than a page a stranger reads once.
+ *
+ * The `ink` theme is set on <html> in index.html, not here, so the first paint
+ * is already dark rather than flashing paper-white while the stylesheet loads.
+ */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+}

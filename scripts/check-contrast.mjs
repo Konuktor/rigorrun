@@ -26,7 +26,7 @@ export const contrast = (a, b) => {
   return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 };
 
-/** Dark theme — the product surface. */
+/** `ink` — the local product surface. */
 const DARK = {
   canvas: '#0B0D10',
   surface: '#101318',
@@ -39,8 +39,34 @@ const DARK = {
   success: '#4ADE80',
   danger: '#FF8080',
   warning: '#F0B72F',
-  info: '#93B4FF',
+  accent: '#96A6FF',
 };
+
+
+/**
+ * `paper` — the public site.
+ *
+ * Verdict colours are darkened for a light ground: #4ADE80 on off-white is
+ * 1.7:1 and unreadable. Green, amber and red still mean exactly what they mean
+ * on `ink`; only their lightness changes.
+ */
+const PAPER = {
+  canvas: '#F7F6F4',
+  surface: '#FFFFFF',
+  raised: '#F1EEE9',
+  overlay: '#FFFFFF',
+  text: '#12141A',
+  textSecondary: '#3A404B',
+  textMuted: '#5A616E',
+  textDisabled: '#656B77',
+  accent: '#2A41DE',
+  success: '#0E6B3D',
+  danger: '#B3261E',
+  warning: '#7A5200',
+};
+
+/** Ink wells: code and terminal output keep the dark surface on both themes. */
+const INSET = { bg: '#12141A', fg: '#E9ECF1', muted: '#939FAF' };
 
 /** Light theme — the Northstar demo application. */
 const LIGHT = {
@@ -75,10 +101,26 @@ for (const surface of ['canvas', 'surface', 'raised', 'overlay']) {
   for (const token of ['text', 'textSecondary', 'textMuted', 'textDisabled']) {
     check(`dark ${token} on ${surface}`, DARK[token], DARK[surface]);
   }
-  for (const token of ['success', 'danger', 'warning', 'info']) {
+  for (const token of ['success', 'danger', 'warning', 'accent']) {
     check(`dark ${token} on ${surface}`, DARK[token], DARK[surface]);
   }
 }
+
+// paper: every text token against every surface it can legitimately sit on.
+for (const surface of ['canvas', 'surface', 'raised', 'overlay']) {
+  for (const token of ['text', 'textSecondary', 'textMuted', 'textDisabled']) {
+    check(`paper ${token} on ${surface}`, PAPER[token], PAPER[surface]);
+  }
+  for (const token of ['accent', 'success', 'danger', 'warning']) {
+    check(`paper ${token} on ${surface}`, PAPER[token], PAPER[surface]);
+  }
+}
+// The accent is also a button fill, so white has to survive on top of it.
+check('paper accent-fg on accent', '#FFFFFF', PAPER.accent);
+check('ink accent-fg on accent', '#0B0D10', DARK.accent);
+// A code well is dark on both themes, so its text is checked once.
+check('inset fg on inset', INSET.fg, INSET.bg);
+check('inset muted on inset', INSET.muted, INSET.bg);
 
 // Light: the Northstar palette.
 for (const surface of ['canvas', 'surface']) {

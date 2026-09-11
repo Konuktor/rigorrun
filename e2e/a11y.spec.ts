@@ -38,8 +38,8 @@ function describeViolations(violations: Awaited<ReturnType<typeof scan>>['violat
 }
 
 test.describe('accessibility', () => {
-  test('landing page has no WCAG A/AA violations', async ({ page }) => {
-    await page.goto('/');
+  test('projects page has no WCAG A/AA violations', async ({ page }) => {
+    await page.goto('/#/projects');
     const { violations } = await scan(page);
     expect(violations, `\n  ${describeViolations(violations)}`).toEqual([]);
   });

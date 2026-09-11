@@ -1,0 +1,106 @@
+@import '@rigorrun/design/fonts.css';
+
+/*
+ * Starlight, wearing the RigorRun palette.
+ *
+ * Starlight themes through its own `--sl-color-*` variables, so this maps the
+ * design tokens onto them rather than fighting the theme with overrides. The
+ * values are the same hexes `scripts/check-contrast.mjs` gates in the release —
+ * documentation that quietly drifts to a different grey is documentation that
+ * looks like a different company.
+ *
+ * The docs follow the reader's preference rather than picking a side: the
+ * marketing site is paper and the product is ink, and a person reads
+ * documentation in whichever of those two contexts they are already in.
+ */
+:root {
+  --sl-font: 'Instrument Sans', 'Instrument Fallback', system-ui, sans-serif;
+  --sl-font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, monospace;
+
+  --sl-color-accent-low: #d6dcff;
+  --sl-color-accent: #2a41de;
+  --sl-color-accent-high: #1b2a94;
+
+  --sl-color-white: #12141a;
+  --sl-color-gray-1: #1a1d24;
+  --sl-color-gray-2: #3a404b;
+  --sl-color-gray-3: #5a616e;
+  --sl-color-gray-4: #918d85;
+  --sl-color-gray-5: #cbc5ba;
+  --sl-color-gray-6: #e4e0d9;
+  --sl-color-gray-7: #efece6;
+  --sl-color-black: #f7f6f4;
+
+  --sl-color-bg: #f7f6f4;
+  --sl-color-bg-nav: #f7f6f4;
+  --sl-color-bg-sidebar: #f7f6f4;
+  --sl-color-text-accent: #2a41de;
+  --sl-color-hairline: #e4e0d9;
+  --sl-color-hairline-light: #efece6;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-accent-low: #1b2a94;
+  --sl-color-accent: #4c60e8;
+  --sl-color-accent-high: #96a6ff;
+
+  --sl-color-white: #e9ecf1;
+  --sl-color-gray-1: #e9ecf1;
+  --sl-color-gray-2: #b4bdcb;
+  --sl-color-gray-3: #939faf;
+  --sl-color-gray-4: #6c7889;
+  --sl-color-gray-5: #2f3742;
+  --sl-color-gray-6: #232830;
+  --sl-color-gray-7: #1a1e25;
+  --sl-color-black: #0b0d10;
+
+  --sl-color-bg: #0b0d10;
+  --sl-color-bg-nav: #0b0d10;
+  --sl-color-bg-sidebar: #0b0d10;
+  --sl-color-bg-inline-code: #1a1e25;
+  --sl-color-text-accent: #96a6ff;
+  --sl-color-hairline: #232830;
+  --sl-color-hairline-light: #1a1e25;
+}
+
+/* Display sizes at a regular weight, the way the rest of the brand sets them. */
+.sl-markdown-content h1,
+.content-panel h1 {
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.sl-markdown-content :is(h2, h3, h4) {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* Numbers in a table are there to be compared. */
+.sl-markdown-content table {
+  font-variant-numeric: tabular-nums;
+}
+
+.sl-markdown-content :is(code, pre) {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * A token in a table cell is a name, and a name that wraps is a name you have
+ * to reassemble: the verification-strength table rendered `AUTHORITATIVE` as
+ * three stacked fragments. Cells hold short identifiers here, so the column
+ * takes the width the name needs.
+ */
+.sl-markdown-content :is(td, th) code {
+  white-space: nowrap;
+}
+
+/*
+ * Starlight sizes h2 for a marketing page. In a reference document the reader
+ * is scanning for the section they need, not being sold the section above it.
+ */
+.sl-markdown-content h2 {
+  font-size: var(--sl-text-2xl);
+}
+.sl-markdown-content h3 {
+  font-size: var(--sl-text-xl);
+}

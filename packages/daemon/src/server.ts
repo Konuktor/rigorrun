@@ -740,7 +740,7 @@ function clipValue(value: unknown): unknown {
 const NO_UI_PAGE = `<!doctype html><meta charset="utf-8"><title>RigorRun runner</title>
 <body style="font:14px system-ui;margin:3rem;max-width:40rem">
 <h1>The runner is up; the interface is not built.</h1>
-<p>Run <code>pnpm build:web</code> and start the runner again. The API is
+<p>Run <code>pnpm build:app</code> and start the runner again. The API is
 answering either way, so <code>rigorrun run --project</code> works now.</p>`;
 
 // Deliberately not "run `rigorrun pair`" — for months this page named a command

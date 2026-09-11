@@ -55,7 +55,7 @@ const GENERIC = [
   'packages/cli/src',
   // The product screens. Not the demo ones, which are under `demo/` and are
   // supposed to know what they are showing.
-  'apps/web/src/product',
+  'apps/app/src/product',
   // The schema-driven renderer is held to the same standard as the compiler.
   // Four products that look nothing alike, and one implementation with no idea
   // which of them it is drawing.

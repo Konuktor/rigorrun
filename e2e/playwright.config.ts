@@ -14,7 +14,7 @@ export default defineConfig({
   // The public suite runs against the deployed URL and has its own config, so
   // the two never mix and each count means what it says.
   // Each layer has its own config so every count means what it says.
-  testIgnore: /(public|prod|smoke|a11y|visual|critical|perf|api|external-user)\.spec\.ts/,
+  testIgnore: /(public|site|smoke|a11y|visual|critical|perf|api|external-user)\.spec\.ts/,
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
@@ -48,7 +48,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: 'pnpm -F @rigorrun/web dev',
+      command: 'pnpm -F @rigorrun/app dev',
       url: 'http://127.0.0.1:5173/',
       reuseExistingServer: true,
       timeout: 60_000,

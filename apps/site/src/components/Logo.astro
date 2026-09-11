@@ -1,0 +1,35 @@
+---
+/**
+ * The mark is a double turnstile with unequal arms.
+ *
+ * `A ⊢ B` is "B is derivable" — it follows from what was written down.
+ * `A ⊨ B` is "B holds in the model" — it is actually true in the thing itself.
+ * An agent's transcript is the first. RigorRun reads the system and reports the
+ * second. The arms are unequal because "19 of 37, with the rest itemised" is
+ * the other half of the idea.
+ */
+interface Props {
+  /** `full` is mark plus wordmark; `mark` is the symbol alone. */
+  variant?: 'full' | 'mark';
+  class?: string;
+}
+const { variant = 'full', class: className = '' } = Astro.props;
+---
+
+<span class={`inline-flex items-center gap-2.5 ${className}`}>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+    class="h-[1.35em] w-[1.35em] shrink-0 text-accent"
+  >
+    <path d="M5.5 4.25V19.75" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+    <path d="M5.5 9H12.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+    <path d="M5.5 15H19" stroke="currentColor" stroke-width="3" stroke-linecap="round"></path>
+  </svg>
+  {
+    variant === 'full' && (
+      <span class="text-[1.0625rem] font-semibold tracking-[-0.02em] text-fg">RigorRun</span>
+    )
+  }
+</span>

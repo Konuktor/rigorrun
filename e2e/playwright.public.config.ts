@@ -14,7 +14,7 @@ export const PUBLIC_URL = process.env['PUBLIC_URL'] ?? 'https://rigorrun.xyz';
 
 export default defineConfig({
   testDir: '.',
-  testMatch: /prod\.spec\.ts/,
+  testMatch: /site\.spec\.ts/,
   timeout: 120_000,
   expect: { timeout: 20_000 },
   fullyParallel: false,

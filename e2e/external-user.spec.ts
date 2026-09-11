@@ -34,6 +34,17 @@ const SHOTS = join(root, 'docs', 'external-user-run');
 let shot = 0;
 async function evidence(page: Page, name: string): Promise<void> {
   shot += 1;
+  /*
+   * A full-page capture scrolls the document, and a `position: sticky` header
+   * travels with it — so it lands in the middle of the image, over whatever is
+   * behind it. The committed verdict screenshot had the header sitting across
+   * the four score metrics, which is precisely the row somebody opens the
+   * screenshot to read. Pinning the header for the capture shows the page the
+   * way a person scrolling it sees it, one screen at a time.
+   */
+  await page.addStyleTag({
+    content: '[data-screenshot="pin"], header { position: static !important; }',
+  });
   await page.screenshot({
     path: join(SHOTS, `${String(shot).padStart(2, '0')}-${name}.png`),
     fullPage: true,
@@ -302,11 +313,11 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   await expect(page.getByTestId('verdict-because')).not.toBeEmpty();
 
   // A verdict never appears without how it was reached beside it.
-  await expect(page.getByText('verified: PARTIAL')).toBeVisible();
+  await expect(page.getByTestId('verdict-verification')).toHaveText('PARTIAL');
   // DECLARED, not RESET. The desk nominated a reset tool and nothing has run
   // it twice and compared, so isolation here is believed rather than observed.
   // This said RESET for the whole of 0.1, which claimed a check nobody ran.
-  await expect(page.getByText('isolation: DECLARED')).toBeVisible();
+  await expect(page.getByTestId('verdict-isolation')).toHaveText('DECLARED');
   await expect(page.getByTestId('isolation-declared')).toContainText(
     'believed to have started clean rather than observed to have',
   );

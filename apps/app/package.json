@@ -1,0 +1,27 @@
+{
+  "name": "@rigorrun/app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 5173 --strictPort"
+  },
+  "dependencies": {
+    "@rigorrun/agents": "workspace:*",
+    "@rigorrun/compiler": "workspace:*",
+    "@rigorrun/core": "workspace:*",
+    "@rigorrun/generator": "workspace:*",
+    "@rigorrun/report": "workspace:*",
+    "@rigorrun/runner": "workspace:*",
+    "@rigorrun/scoring": "workspace:*",
+    "@rigorrun/verifier": "workspace:*",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@rigorrun/environments": "workspace:*",
+    "@rigorrun/environment": "workspace:*",
+    "@rigorrun/design": "workspace:*"
+  },
+  "description": "The interface the local runner serves. Ships inside the rigorrun npm package."
+}

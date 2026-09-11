@@ -1,0 +1,71 @@
+@import 'tailwindcss';
+@import '@rigorrun/design/fonts.css';
+@import '@rigorrun/design/tokens.css';
+
+/*
+ * Site-only base.
+ *
+ * The product reads at 14px because it is a dense working surface somebody has
+ * open for an afternoon. A page a stranger reads once is not that, so the site
+ * sets 16px and a looser measure. Same tokens, different default.
+ */
+@layer base {
+  body {
+    font-size: var(--text-section);
+    line-height: 1.6;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 999px;
+  }
+
+  /* Anything that scrolls sideways does so inside its own box. The page never
+     scrolls sideways; `e2e` asserts it at every viewport. */
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  /*
+   * A grid or flex child is `min-width: auto` by default, which means it
+   * refuses to shrink below its content. A wide <pre> inside one therefore
+   * widens the whole track and pushes the page sideways, and `overflow-x` on
+   * the <pre> never gets a chance to do anything. Zero-specificity so a
+   * component can still opt out.
+   */
+  :where(.grid, .flex) > * {
+    min-width: 0;
+  }
+}
+
+@layer utilities {
+  /* A hairline that reads as a ruled sheet rather than a border. */
+  .rule-top {
+    border-top: 1px solid var(--color-line);
+  }
+
+  .rr-link {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-decoration-color: var(--color-accent-line);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out);
+  }
+  .rr-link:hover {
+    text-decoration-color: var(--color-accent);
+  }
+
+  /*
+   * The grid the evidence tables sit on. Ruled rows, not boxes: a record has
+   * lines, a dashboard has cards, and this is a record.
+   */
+  .ruled > * + * {
+    border-top: 1px solid var(--color-line-soft);
+  }
+}

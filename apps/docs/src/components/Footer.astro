@@ -1,0 +1,35 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+<Default><slot /></Default>
+<div class="rr-footer">
+  <p>
+    <a href="https://rigorrun.xyz">rigorrun.xyz</a> ·
+    <a href="https://rigorrun.xyz/what-is-built">What is and is not built</a> ·
+    <a href="https://rigorrun.xyz/security">Security</a> ·
+    <a href="https://www.npmjs.com/package/rigorrun">npm</a>
+  </p>
+  <p class="rr-note">
+    RigorRun is Early Access, built by Erbol Tahirov. These docs describe the published release;
+    anything not yet built is listed rather than omitted.
+  </p>
+</div>
+
+<style>
+  .rr-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--sl-color-hairline);
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+  }
+  .rr-footer p {
+    margin: 0 0 0.4rem;
+  }
+  .rr-footer a {
+    color: var(--sl-color-gray-2);
+  }
+  .rr-note {
+    max-width: 46ch;
+  }
+</style>

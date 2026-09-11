@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" role="img" aria-label="RigorRun">
+  <!--
+    The double turnstile, with unequal arms.
+
+    In logic `A ⊢ B` means B is derivable — it follows from what was written
+    down. `A ⊨ B` means B is true in the model — it actually holds in the thing
+    itself. An agent's transcript is ⊢. RigorRun reads the system and reports ⊨.
+    That distinction is the entire product, so it is the mark.
+
+    The arms are deliberately unequal: a short numerator over a long
+    denominator, because "19 of 37" with the remainder itemised is the other
+    half of what this is for.
+  -->
+  <path d="M5.5 4.25V19.75" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M5.5 9H12.5" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M5.5 15H19" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+</svg>

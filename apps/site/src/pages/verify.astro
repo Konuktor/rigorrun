@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import Section from '../components/Section.astro';
+import Eyebrow from '../components/Eyebrow.astro';
+import Command from '../components/Command.astro';
+import Button from '../components/Button.astro';
+import evidence from '../data/evidence.json';
+
+const sample = evidence.servers.find((server) => server.ref.includes('sequential-thinking'));
+---
+<Base
+  title="Verify an MCP server"
+  description="An MCP server can annotate a tool readOnlyHint: true and nothing checks it. rigorrun verify pins the server to the bytes the registry published, runs it in a container with no network, exercises every tool it safely can, and reports what actually changed."
+>
+  <Section>
+    <div class="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+      <div>
+        <Eyebrow>One command, no project</Eyebrow>
+        <h1 class="mt-4 text-display font-medium text-balance">
+          Find out what a server’s tools actually do.
+        </h1>
+        <p class="mt-6 max-w-xl text-lead text-secondary">
+          An MCP server can annotate a tool <span class="font-mono text-support">readOnlyHint: true</span>.
+          Nothing checks that. Agents use it to decide whether a tool can be called without asking
+          you first.
+        </p>
+        <p class="mt-4 max-w-xl text-support text-secondary">
+          RigorRun fetches the server, pins it to the exact bytes the registry published, runs it in a
+          container with no network and no access to your machine, calls each tool with arguments
+          derived from its own schema, and reads the filesystem before and after to see what actually
+          changed. Then it compares that with what the server declared about itself.
+        </p>
+        <div class="mt-8">
+          <Command command="rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31" />
+        </div>
+        <p class="mt-4 max-w-xl text-support text-muted">
+          No project, no browser, no agent, nothing to configure first. Needs Docker, because every
+          server runs in a container that is thrown away afterwards.
+        </p>
+      </div>
+
+      <div data-theme="ink" class="rounded-panel border border-line bg-canvas p-5" data-reveal>
+        <pre class="overflow-x-auto font-mono text-meta leading-relaxed text-fg" tabindex="0" role="region" aria-label="Example output of rigorrun verify"><code>{`resolve    npm:@modelcontextprotocol/server-memory@2026.8.31
+stage      installing with lifecycle scripts disabled
+isolation  measuring whether reset actually resets
+discover   ${sample?.toolsDiscovered ?? 9} tool(s)
+
+digest     ${(sample?.digest ?? '').slice(0, 46)}…
+isolation  RESET
+egress     none
+
+Declared, versus what it did
+tool                declared              result    verification
+-----------------   -------------------   -------   ------------
+sequentialthinking  readOnlyHint: true    CONFORMS  PARTIAL
+sequentialthinking  destructiveHint:false CONFORMS  PARTIAL
+sequentialthinking  idempotentHint: true  CONFORMS  PARTIAL
+
+Every discovered tool was exercised.`}</code></pre>
+      </div>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <h2 class="text-display font-medium">What each exit code means</h2>
+    <dl class="mt-10 grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+      {
+        [
+          ['0', 'Verified', 'Every claim it could check held, and nothing was contradicted.'],
+          ['1', 'Contradicted', 'A declaration the server made about itself was contradicted by what it was observed to do.'],
+          ['3', 'Too little', 'It ran, and established too little to be worth much. Fewer tools were reachable than you asked for.'],
+          ['2', 'Harness failed', 'Something in the setup or the runtime broke. Never a finding about the server, and never dressed up as one.'],
+        ].map(([code, title, body]) => (
+          <div class="bg-surface p-5">
+            <dt class="flex items-baseline gap-2.5">
+              <span class="font-mono text-metric font-medium text-accent">{code}</span>
+              <span class="text-section font-semibold">{title}</span>
+            </dt>
+            <dd class="mt-2 text-support text-secondary">{body}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <div class="mt-8 rounded-panel border border-line bg-raised p-6">
+      <p class="max-w-3xl text-support text-secondary">
+        <span class="text-fg">Nothing it could not establish is reported as a fact.</span> A tool it
+        could not exercise safely is listed with the reason, and a record that omits what it could not
+        reach is not a cleaner record — it is a false one. Run against
+        {' '}{evidence.totals.servers} published servers, it exercised {evidence.totals.toolsExercised}
+        {' '}of {evidence.totals.toolsDiscovered} tools; the rest are named rather than rounded away.
+      </p>
+      <div class="mt-6"><Button href="/evidence" variant="secondary">Read the full record</Button></div>
+    </div>
+  </Section>
+</Base>
