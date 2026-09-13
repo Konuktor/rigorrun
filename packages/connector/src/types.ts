@@ -59,9 +59,11 @@ export interface DiscoveryResult {
 /**
  * What came back from one call.
  *
- * `content` and `structured` are kept apart on purpose. Only `structured` is
- * ever read for state, because RigorRun compares records and never prose —
- * a system that answers in sentences can be watched and cannot be verified.
+ * `content` and `structured` are kept apart on purpose, and neither is read
+ * for state directly: `normalizeCallResult` in `result.ts` is the one place
+ * that decides what counts as records. Structured content always does; a text
+ * block does only when the whole block is JSON data; a sentence never does —
+ * a system that answers in prose can be watched and cannot be verified.
  */
 export interface CallResult {
   ok: boolean;

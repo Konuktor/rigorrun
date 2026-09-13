@@ -26,6 +26,8 @@ import {
 import {
   SystemEnvironment,
   detectMismatch,
+  hasPayload,
+  normalizeCallResult,
   stateFromPayloads,
   type AnnotationMismatch,
   type SystemConnection,
@@ -360,8 +362,11 @@ export class Workspace {
     if (live.connection.canReadState === false) return [];
     const payloads: unknown[] = [];
     for (const read of project.verifierReads) {
-      const result = await live.connection.call(read.tool, read.args);
-      if (result.ok && result.structured !== undefined) payloads.push(result.structured);
+      // The one reading of a result, shared with the setup probe and the
+      // runner: a server that answers with JSON inside a text block is read
+      // here exactly as it was read when the probe said it could be.
+      const normalized = normalizeCallResult(await live.connection.call(read.tool, read.args));
+      if (hasPayload(normalized)) payloads.push(normalized.payload);
     }
     return payloads;
   }
@@ -413,8 +418,9 @@ export class Workspace {
     const before = claimsReadOnly ? await this.readPayloads(project) : undefined;
 
     const result = await live.connection.call(tool, args);
-    if (result.structured !== undefined) {
-      live.demonstration.observations.push({ tool, payload: result.structured });
+    const normalized = normalizeCallResult(result);
+    if (hasPayload(normalized)) {
+      live.demonstration.observations.push({ tool, payload: normalized.payload });
     }
 
     if (before !== undefined) {

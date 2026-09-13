@@ -38,6 +38,7 @@ import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
+import { hasPayload, normalizeCallResult } from '@rigorrun/connector';
 import {
   describeAgent,
   newProject,
@@ -303,20 +304,30 @@ export class Service {
       );
     }
 
+    // Read through the same normaliser the demonstration and the runner use.
+    // The probe once looked at `structured ?? content` while capture looked at
+    // `structured` alone, and a server that answers with JSON inside a text
+    // block passed here and produced nothing later — after the person had
+    // done the whole job. Whatever this says now is what capture will see.
     const observations: PayloadObservation[] = [];
     const failed: string[] = [];
+    const prose: string[] = [];
+    let sawEmpty = false;
     for (const read of project.verifierReads) {
       const result = await connection.call(read.tool, read.args).catch(() => undefined);
       if (!result?.ok) {
         failed.push(read.tool);
         continue;
       }
-      observations.push({ tool: read.tool, payload: result.structured ?? result.content });
+      const normalized = normalizeCallResult(result);
+      if (hasPayload(normalized)) observations.push({ tool: read.tool, payload: normalized.payload });
+      else if (normalized.kind === 'text') prose.push(read.tool);
+      else sawEmpty = true;
     }
     if (failed.length > 0) {
       return `These reads did not answer: ${failed.join(', ')}. RigorRun will not be able to verify what they cover.`;
     }
-    if (induceSchema(observations).schema.entities.length !== 0) return '';
+    if (observations.length > 0 && induceSchema(observations).schema.entities.length !== 0) return '';
 
     // Nothing was induced, and there are two very different reasons for that.
     // A system that answers in prose can never be verified. A system that is
@@ -324,7 +335,7 @@ export class Service {
     // the moment somebody demonstrates a job — reporting that as a problem
     // would be sending people to fix something that is not broken, which is
     // the mistake this whole probe exists to stop making.
-    if (payloadsAreEmpty(observations.map((entry) => entry.payload))) {
+    if (prose.length === 0 && (sawEmpty || payloadsAreEmpty(observations.map((entry) => entry.payload)))) {
       return (
         'These reads answered, and there is nothing in this system yet, so RigorRun cannot tell ' +
         'what its records look like. That is fine — it will work them out from what your ' +

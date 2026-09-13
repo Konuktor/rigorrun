@@ -1,5 +1,6 @@
 export * from './jsonSchema.ts';
 export * from './risk.ts';
+export * from './result.ts';
 export * from './rows.ts';
 export * from './types.ts';
 export * from './url.ts';

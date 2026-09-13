@@ -18,6 +18,7 @@ import {
   type EntitySchema,
   type EnvironmentSchema,
 } from '@rigorrun/environment';
+import { canonicalisePayload } from './result.ts';
 
 const MAX_DEPTH = 6;
 
@@ -55,7 +56,10 @@ export function rowsFromPayload(payload: unknown, entity: EntitySchema): EntityR
     }
     for (const nested of Object.values(value)) walk(nested, depth + 1);
   };
-  walk(payload, 0);
+  // The same rewrite induction applied, so a shape recognised then is
+  // recognised now — a tagged cell or a wrapped row must not match as a
+  // record in one place and vanish in the other.
+  walk(canonicalisePayload(payload), 0);
   return found;
 }
 

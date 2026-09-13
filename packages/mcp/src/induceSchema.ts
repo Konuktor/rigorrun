@@ -33,11 +33,17 @@ import type {
   RelationshipSchema,
   Unit,
 } from '@rigorrun/environment';
+import { canonicalisePayload } from '@rigorrun/connector';
 
 /** One thing a tool gave back, and which tool gave it. */
 export interface PayloadObservation {
   tool: string;
-  /** The `structuredContent` of a result, or a parsed JSON body. */
+  /**
+   * The data a result carried: `structuredContent`, or a JSON body, or JSON
+   * that arrived inside a text block — as `normalizeCallResult` reads it.
+   * Never a raw content-block array: `{type:'text', text:'…'}` has two scalar
+   * fields and would be taken for a record.
+   */
   payload: unknown;
 }
 
@@ -238,11 +244,27 @@ function chooseIdField(evidence: EntityEvidence): string | undefined {
   });
 
   // Where several fields qualify, prefer the one that distinguishes the most
-  // records; ties fall back to declaration order, which is why this produces a
-  // question rather than a decision.
+  // records. Among ties, a field whose values look like identifiers — whole
+  // numbers, or strings without whitespace — beats one whose values look like
+  // measurements or sentences: three rows with three different amounts and
+  // three different titles are still identified by their number, not by their
+  // price. Structural, and still a question rather than a decision.
   return candidates.sort(
-    (a, b) => distinctOf(evidence, b).size - distinctOf(evidence, a).size,
+    (a, b) =>
+      distinctOf(evidence, b).size - distinctOf(evidence, a).size ||
+      identifierLikeness(evidence, b) - identifierLikeness(evidence, a),
   )[0];
+}
+
+/** 1 when every value is a whole number or a whitespace-free string, else 0. */
+function identifierLikeness(evidence: EntityEvidence, field: string): number {
+  return valuesOf(evidence, field).every(
+    (value) =>
+      (typeof value === 'number' && Number.isInteger(value)) ||
+      (typeof value === 'string' && !/\s/.test(value)),
+  )
+    ? 1
+    : 0;
 }
 
 /** Rows grouped by which record they are, once an identifier is known. */
@@ -328,6 +350,13 @@ function entityNameFrom(evidence: EntityEvidence, index: number): string {
     .join('');
 }
 
+function uniqueName(proposed: string, taken: Set<string>): string {
+  let name = proposed;
+  for (let suffix = 2; taken.has(name); suffix += 1) name = `${proposed}${suffix}`;
+  taken.add(name);
+  return name;
+}
+
 const ROLE_OPTIONS: readonly FieldRole[] = [
   'identifier',
   'quantity',
@@ -352,7 +381,10 @@ const UNIT_OPTIONS: readonly Unit[] = [
 export function induceSchema(observations: readonly PayloadObservation[]): InducedSchema {
   const collected = new Map<string, EntityEvidence>();
   for (const observation of observations) {
-    collect(observation.payload, '', 0, collected);
+    // The same rewrite row extraction applies, so what is recognised here is
+    // recognised at run time: tagged cells become values, wrapped rows become
+    // rows.
+    collect(canonicalisePayload(observation.payload), '', 0, collected);
   }
 
   const worthKeeping = [...collected.values()].filter(
@@ -366,8 +398,12 @@ export function induceSchema(observations: readonly PayloadObservation[]): Induc
   const entities: EntitySchema[] = [];
   const idValuesByEntity = new Map<string, Set<string>>();
 
+  // Two shapes that arrived under the same container name — two reads that
+  // each answer with `rows` — are two record types, and must not share a name
+  // or their rows would land in one table and collide by identifier.
+  const taken = new Set<string>();
   worthKeeping.forEach((evidence, index) => {
-    const name = entityNameFrom(evidence, index);
+    const name = uniqueName(entityNameFrom(evidence, index), taken);
     const idField = chooseIdField(evidence);
     const records = idField ? byRecord(evidence, idField) : new Map();
     const recordCount = idField ? records.size : evidence.rows.length;

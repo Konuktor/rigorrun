@@ -46,6 +46,7 @@ import {
 } from '@rigorrun/environment';
 import type { SystemConnection } from './types.ts';
 import type { SystemEnvironmentConfig } from './environmentConfig.ts';
+import { hasPayload, normalizeCallResult } from './result.ts';
 import { stateFromPayloads } from './rows.ts';
 
 export class SystemEnvironment implements EnvironmentAdapter {
@@ -173,8 +174,8 @@ export class SystemEnvironment implements EnvironmentAdapter {
   async getState(): Promise<CanonicalState> {
     const payloads: unknown[] = [];
     for (const read of this.config.verifierReads) {
-      const result = await this.connection.call(read.tool, read.args ?? {});
-      if (result.ok && result.structured !== undefined) payloads.push(result.structured);
+      const normalized = normalizeCallResult(await this.connection.call(read.tool, read.args ?? {}));
+      if (hasPayload(normalized)) payloads.push(normalized.payload);
     }
     return stateFromPayloads(payloads, this.schema);
   }
@@ -194,6 +195,9 @@ export class SystemEnvironment implements EnvironmentAdapter {
       ok: result.ok,
       ...(result.ok ? {} : { error: result.error?.message ?? 'the call failed' }),
     });
+    // The agent is handed the system's own answer, unrewritten: what it sees
+    // is the server, not RigorRun's reading of the server. Only state reads
+    // go through the normaliser.
     return result.ok
       ? { ok: true, data: result.structured ?? result.content }
       : {
