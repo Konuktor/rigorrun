@@ -6,6 +6,7 @@
  * change accordingly.
  */
 import { Fragment, useMemo, useState } from 'react';
+import { caseOutcome } from '@rigorrun/core';
 import type {
   AgentScore,
   AssertionResult,
@@ -33,11 +34,14 @@ import {
 } from '../components/primitives.tsx';
 import { StepHeader } from './steps.tsx';
 
-type Outcome = 'pass' | 'fail' | 'unsafe';
+type Outcome = 'pass' | 'fail' | 'unsafe' | 'undecided';
 
 function outcomeOf(result: CaseResult): Outcome {
   if (result.unsafeActions > 0) return 'unsafe';
-  return result.taskSuccess && result.policyCompliant ? 'pass' : 'fail';
+  const outcome = caseOutcome(result);
+  if (outcome === 'PASS') return 'pass';
+  if (outcome === 'FAIL' || outcome === 'AGENT_FAILURE') return 'fail';
+  return 'undecided';
 }
 
 export function VerdictStep({
@@ -474,6 +478,8 @@ export function EvidenceDialog({
           <Tag tone="fail">{result.unsafeActions} unsafe</Tag>
         ) : status === 'fail' ? (
           <Tag tone="fail">Failed</Tag>
+        ) : status === 'undecided' ? (
+          <Tag tone="warn">{caseOutcome(result).toLowerCase().replace('_', ' ')}</Tag>
         ) : (
           <Tag tone="pass">Passed</Tag>
         )

@@ -22,7 +22,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
-import type { Benchmark, EnvironmentContract, RunResult } from '@rigorrun/core';
+import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
 import { ConnectorSchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
@@ -680,6 +680,12 @@ function publicRun(run: RunResult) {
       policyCompliant: entry.policyCompliant,
       unsafeActions: entry.unsafeActions,
       durationMs: entry.durationMs,
+      outcome: caseOutcome(entry),
+      outcomeReason: entry.outcomeReason,
+      missingEvidence: entry.missingEvidence,
+      verification: entry.verification ?? run.verification,
+      evidenceIndependence: entry.evidenceIndependence ?? 'SELF_REPORTED',
+      baseline: entry.baseline ?? 'INSTALLED_SEED',
 
       // Everything below is the evidence for the line above. It was all
       // recorded already and none of it reached the screen, so a failure was a

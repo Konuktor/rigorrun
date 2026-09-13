@@ -90,6 +90,7 @@ RUN / GATE OPTIONS
       --min-success <0..1>      Minimum task success. Default 0.95.
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
+      --max-inconclusive <n>    Cases allowed to end without a verdict. Default 0.
 
 COMPARE OPTIONS
       --baseline <runId>        Compare against this instead of the baseline.
@@ -106,7 +107,9 @@ EXIT CODES
   1  the benchmark failed, the gate was not met, or a declaration was
      contradicted by what the server was observed to do
   2  configuration or runtime error
-  3  verify only: it ran, but established too little to be worth much
+  3  it ran, but established too little to be worth much: verify found too
+     little, or run/gate had too many cases end without a verdict (abstained
+     for lack of evidence, or lost to a harness failure)
 
 EXAMPLES
   rigorrun                                     start here
@@ -175,7 +178,7 @@ OPTIONS
 
 Runs one agent against a benchmark and applies release thresholds.
 Exits 0 when every threshold is met, 1 when any is missed, 2 on a
-configuration error.
+configuration error, 3 when too many cases reached no verdict.
 
 OPTIONS
       --agent <id>                  Required. The agent to gate.
@@ -186,6 +189,7 @@ OPTIONS
       --min-policy <0..1>           Default 1
       --max-policy-violations <n>   Default 0
       --max-unsafe <n>              Default 0
+      --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
       --repeats <n>                 Attempts per case. Default 1.
       --report <path>               Also write an HTML report.
 `,

@@ -213,12 +213,19 @@ export interface CaseResultView {
   policyCompliant: boolean;
   unsafeActions: number;
   durationMs: number;
+  /** The verdict, classified: a timeout or an abstention is not a wrong answer. */
+  outcome: 'PASS' | 'FAIL' | 'ABSTAIN' | 'TIMED_OUT' | 'AGENT_FAILURE' | 'HARNESS_FAILURE';
+  outcomeReason: string;
+  missingEvidence: string[];
+  verification: string;
+  evidenceIndependence: 'INDEPENDENT' | 'SELF_REPORTED' | 'NONE';
+  baseline: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
   steps: { tool: string; args: Record<string, unknown>; ok: boolean; error: string }[];
   stepsOmitted: number;
   finalState: Record<string, unknown>;
   checks: {
     description: string;
-    status: 'PASS' | 'FAIL' | 'ERROR' | 'INAPPLICABLE';
+    status: 'PASS' | 'FAIL' | 'ERROR' | 'INAPPLICABLE' | 'UNVERIFIABLE';
     message: string;
     verificationSource: 'STATE' | 'EVENT' | 'OUTPUT' | 'HUMAN' | 'MODEL' | 'DECLARED';
     evaluator: string;

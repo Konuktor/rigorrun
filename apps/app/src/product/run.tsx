@@ -702,7 +702,8 @@ function formatElapsed(ms: number): string {
  */
 function CaseRow({ entry }: { entry: CaseResultView }) {
   const [open, setOpen] = useState(false);
-  const passed = entry.taskSuccess && entry.policyCompliant;
+  const passed = entry.outcome === 'PASS';
+  const undecided = entry.outcome === 'ABSTAIN' || entry.outcome === 'HARNESS_FAILURE' || entry.outcome === 'TIMED_OUT';
   const failedChecks = entry.checks.filter((check) => check.status === 'FAIL');
 
   return (
@@ -714,9 +715,12 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
         data-testid={`case-${entry.caseId}`}
         aria-expanded={open}
       >
-        <StatusMark status={passed ? 'pass' : 'fail'} />
+        <StatusMark status={passed ? 'pass' : undecided ? 'undecided' : 'fail'} />
         <span className="min-w-0 flex-1 truncate text-body text-fg">{entry.caseName}</span>
         <Tag tone="neutral">{entry.category}</Tag>
+        {entry.outcome !== 'PASS' && entry.outcome !== 'FAIL' ? (
+          <Tag tone={entry.outcome === 'AGENT_FAILURE' ? 'fail' : 'warn'}>{entry.outcome.toLowerCase().replace('_', ' ')}</Tag>
+        ) : null}
         {entry.unsafeActions > 0 ? <Tag tone="fail">{entry.unsafeActions} unsafe</Tag> : null}
         <span className="text-meta text-muted">{open ? 'Hide' : 'What happened'}</span>
       </button>

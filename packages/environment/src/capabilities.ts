@@ -79,6 +79,14 @@ export type SafetyMode = 'production' | 'staging' | 'local' | 'ephemeral';
 export interface EnvironmentCapabilities {
   discovery: DiscoveryCapability;
   stateRead: StateReadCapability;
+  /**
+   * Whether the reads come from something the agent under test never touched.
+   * `independent` when a separate verifier connection serves every nominated
+   * read; `self-reported` when the reads go through the system under test's
+   * own connection. Absent means: full state read is independent by
+   * construction, designated reads are self-reported.
+   */
+  stateReadIndependence?: 'independent' | 'self-reported';
   seed: SeedCapability;
   reset: ResetCapability;
   events: EventsCapability;

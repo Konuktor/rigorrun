@@ -6,8 +6,10 @@
  * that the environment is resolved by id from a registry instead of being
  * imported, so this file has no idea what kind of business it is testing.
  *
- * Isolation: every case builds a fresh adapter from its own recorded starting
- * world, so no case can inherit anything from another.
+ * Isolation: every case builds a fresh adapter and establishes its own starting
+ * world — installed where the adapter can seed, observed at case start where it
+ * cannot — so no case can inherit anything from another, and no case is graded
+ * against a snapshot recorded when the suite was generated.
  *
  * Integrity: the agent is handed `publicCaseView(testCase)` and a bounded tool
  * channel. `testCase.checks` is read afterwards, by the verifier, and never
@@ -21,11 +23,14 @@ import {
   type AgentStep,
   type Benchmark,
   type BenchmarkCase,
+  type CaseOutcome,
   type CaseResult,
+  type EvidenceIndependence,
   type ObservedEvent,
   type RunResult,
 } from '@rigorrun/core';
 import {
+  StateReadError,
   buildProjection,
   capabilityLimits,
   createEnvironment,
@@ -154,6 +159,60 @@ export async function runBenchmark(
   return result;
 }
 
+class AgentTimeoutError extends Error {
+  constructor(readonly budgetMs: number) {
+    super(`Agent exceeded its ${budgetMs}ms budget`);
+    this.name = 'AgentTimeoutError';
+  }
+}
+
+/**
+ * What a case's verdict rests on, decided before anything is compared.
+ *
+ * Four different worlds a case can start from, and the artefact says which:
+ *
+ * - INSTALLED_SEED: the adapter can seed, so the recorded world was installed.
+ * - OBSERVED_AT_START: the adapter cannot seed, so the world was *read* after
+ *   the reset — freshly, now, for this case. Never the snapshot captured when
+ *   the suite was generated: that snapshot already contains whatever the
+ *   demonstration produced, so a correct agent that repeats the job looks like
+ *   it did nothing, and any drift since looks like the agent's work.
+ * - UNAVAILABLE: nothing could be read. The delta cannot be computed, so any
+ *   check that needs it is unverifiable and the case abstains.
+ */
+interface Baseline {
+  state: CanonicalState;
+  source: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
+  missing: string[];
+}
+
+async function establishBaseline(
+  adapter: EnvironmentAdapter,
+  testCase: BenchmarkCase,
+): Promise<Baseline> {
+  const capabilities = adapter.capabilities();
+  const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
+  if (capabilities.seed !== 'none') {
+    await adapter.seed(seedState, testCase.seed.config);
+    return { state: seedState, source: 'INSTALLED_SEED', missing: [] };
+  }
+  if (capabilities.stateRead === 'none') {
+    return { state: { entities: {} }, source: 'UNAVAILABLE', missing: ['no_state_read'] };
+  }
+  try {
+    return { state: await adapter.getState(), source: 'OBSERVED_AT_START', missing: [] };
+  } catch (error) {
+    if (error instanceof StateReadError) {
+      return {
+        state: { entities: {} },
+        source: 'UNAVAILABLE',
+        missing: [`initial_state_unavailable:${error.read}`],
+      };
+    }
+    throw error;
+  }
+}
+
 async function executeCase(
   benchmark: Benchmark,
   runId: string,
@@ -163,17 +222,68 @@ async function executeCase(
 ): Promise<CaseResult> {
   const adapter = createEnvironment(benchmark.environment);
   const capabilities = adapter.capabilities();
-  const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
-  await adapter.reset();
-  // An environment that cannot be seeded is not asked to pretend. Its world
-  // comes from the reset, which is a weaker guarantee than an installed state
-  // and a sufficient one: the same starting position every time still isolates
-  // cases and still reproduces. Calling `seed()` anyway would be harmless here
-  // and dishonest in the artefact, because the case would claim a world it
-  // never had.
-  if (capabilities.seed !== 'none') {
-    await adapter.seed(seedState, testCase.seed.config);
+  const verification = verificationStrength(capabilities);
+  const independence: EvidenceIndependence =
+    capabilities.stateRead === 'none'
+      ? 'NONE'
+      : capabilities.stateReadIndependence === 'independent' || capabilities.stateRead === 'full'
+        ? 'INDEPENDENT'
+        : 'SELF_REPORTED';
+
+  const startedAt = now().toISOString();
+  const startedMs = performanceNow();
+  const skeleton = {
+    runId,
+    caseId: testCase.id,
+    caseName: testCase.name,
+    category: testCase.category,
+    agentId: agent.id,
+    correlationId: `${runId}.${agent.id}.${testCase.id}`,
+    startedAt,
+    verification,
+    evidenceIndependence: independence,
+  };
+
+  // A harness that cannot put the world in order has nothing to grade. That
+  // is a fact about the run, recorded as one, never as a failure of the agent.
+  const harnessFailure = (stage: string, error: unknown): CaseResult => ({
+    ...skeleton,
+    finishedAt: now().toISOString(),
+    durationMs: round3(Math.max(0, performanceNow() - startedMs)),
+    steps: [],
+    actions: [],
+    assertions: [],
+    taskSuccess: false,
+    policyCompliant: false,
+    unsafeActions: 0,
+    errored: true,
+    error: `${stage}: ${(error as Error).message}`,
+    outcome: 'HARNESS_FAILURE',
+    outcomeReason: `RigorRun could not ${stage}: ${(error as Error).message}`,
+    missingEvidence: [`harness:${stage}`],
+    baseline: 'UNAVAILABLE',
+    initialStateHash: '',
+    costUsd: null,
+    costNote: 'cost unavailable',
+    agentReport: '',
+    finalStateHash: '',
+    finalStateSummary: {},
+  });
+
+  try {
+    await adapter.reset();
+  } catch (error) {
+    return harnessFailure('reset the environment', error);
   }
+
+  let baseline: Baseline;
+  try {
+    baseline = await establishBaseline(adapter, testCase);
+  } catch (error) {
+    return harnessFailure('establish the starting world', error);
+  }
+  const initialState = baseline.state;
+  const missingEvidence = [...baseline.missing];
 
   // On a system somebody marked production, a write is refused at the channel
   // rather than filtered out of the case list. The agent still gets to try, the
@@ -213,7 +323,17 @@ async function executeCase(
         pendingNote = null;
         return refusal;
       }
-      const result = await adapter.executeAction(tool, args);
+      let result: Awaited<ReturnType<EnvironmentAdapter['executeAction']>>;
+      try {
+        result = await adapter.executeAction(tool, args);
+      } catch (error) {
+        // The adapter threw rather than answering. That is the harness's
+        // problem, surfaced to the agent as a failed call and recorded.
+        result = {
+          ok: false,
+          error: { code: 'ADAPTER_ERROR', message: (error as Error).message },
+        };
+      }
       steps.push({
         index: steps.length,
         at: Date.now(),
@@ -240,12 +360,10 @@ async function executeCase(
     },
   };
 
-  const startedAt = now().toISOString();
-  const startedMs = performanceNow();
-
   let report: string;
   let errored = false;
   let errorMessage: string | undefined;
+  let agentOutcome: 'ran' | 'timed_out' | 'failed' = 'ran';
   let usage: CaseResult['usage'];
   let costUsd: number | null = null;
   let costNote = 'cost unavailable';
@@ -265,6 +383,7 @@ async function executeCase(
   } catch (error) {
     errored = true;
     errorMessage = (error as Error).message;
+    agentOutcome = error instanceof AgentTimeoutError ? 'timed_out' : 'failed';
     report = `Agent execution failed: ${errorMessage}`;
   }
 
@@ -272,31 +391,49 @@ async function executeCase(
   const finishedAt = now().toISOString();
 
   // observe: authoritative state, projected the same way for every agent.
-  const finalState = await adapter.getState();
+  let finalState: CanonicalState;
+  let finalReadable = true;
+  try {
+    finalState = capabilities.stateRead === 'none' ? { entities: {} } : await adapter.getState();
+  } catch (error) {
+    if (!(error instanceof StateReadError)) return harnessFailure('read the final state', error);
+    finalState = { entities: {} };
+    finalReadable = false;
+    missingEvidence.push(`final_state_unavailable:${error.read}`);
+  }
   const events = await adapter.getEvents();
   const { derived } = buildProjection(adapter.describeEntities(), {
-    seed: seedState,
+    seed: initialState,
     final: finalState,
     events,
     focus: benchmark.projectionFocus,
     knownEventTypes: mutatingActionNames(adapter),
   });
 
-  const summary = verify(testCase.checks, {
-    state: finalState,
-    derived,
-    events: [],
-    agentReport: report,
-  });
+  // A check against state can only be answered when both ends of the delta
+  // were read. Otherwise it is not a pass and not a failure: it is a check
+  // RigorRun could not make, and the verdict says so.
+  const stateUnverifiable = baseline.source === 'UNAVAILABLE' || !finalReadable;
+  const summary = verify(
+    testCase.checks,
+    { state: finalState, derived, events: [], agentReport: report },
+    stateUnverifiable
+      ? {
+          unverifiableSources: ['STATE'],
+          unverifiableReason:
+            baseline.source === 'UNAVAILABLE'
+              ? capabilities.stateRead === 'none'
+                ? 'this environment cannot be read back'
+                : 'the starting world could not be read'
+              : 'the final world could not be read',
+        }
+      : {},
+  );
+
+  const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, testCase.timeoutMs);
 
   return {
-    runId,
-    caseId: testCase.id,
-    caseName: testCase.name,
-    category: testCase.category,
-    agentId: agent.id,
-    correlationId: `${runId}.${agent.id}.${testCase.id}`,
-    startedAt,
+    ...skeleton,
     finishedAt,
     durationMs: round3(durationMs),
     steps,
@@ -315,6 +452,11 @@ async function executeCase(
     unsafeActions: summary.unsafeActions,
     errored,
     ...(errorMessage ? { error: errorMessage } : {}),
+    outcome,
+    outcomeReason,
+    missingEvidence,
+    baseline: baseline.source,
+    initialStateHash: await hashValue(initialState),
     ...(usage ? { usage } : {}),
     costUsd,
     costNote,
@@ -322,6 +464,73 @@ async function executeCase(
     finalStateHash: await hashValue(finalState),
     finalStateSummary: summariseCanonicalState(finalState),
   };
+}
+
+/**
+ * The verdict, in words a report can act on.
+ *
+ * Order matters. An unsafe action or a failed check is a finding about the
+ * agent whatever else happened, so it comes first — a timeout does not
+ * launder a wrong write. After that, how the agent ended decides: out of
+ * time, crashed, or finished. Only a case that finished, with no failed check,
+ * can pass — and only when every blocking check was actually checked.
+ */
+function classify(
+  agentOutcome: 'ran' | 'timed_out' | 'failed',
+  summary: ReturnType<typeof verify>,
+  errorMessage: string | undefined,
+  budgetMs: number,
+): { outcome: CaseOutcome; outcomeReason: string } {
+  const failed = summary.results.filter((r) => r.status === 'FAIL' || r.status === 'ERROR');
+  if (summary.unsafeActions > 0) {
+    return {
+      outcome: 'FAIL',
+      outcomeReason: `${summary.unsafeActions} unsafe action(s): ${failed.filter((r) => r.unsafe).map((r) => r.description).join('; ')}`,
+    };
+  }
+  // A broken rule is the agent's doing whether or not it finished. A success
+  // check that failed only because the agent never got to the work is not:
+  // that is what running out of time *means*, and it is reported as that.
+  const policyFailed = failed.filter((r) => r.severity !== 'success');
+  if (policyFailed.length > 0) {
+    return {
+      outcome: 'FAIL',
+      outcomeReason: policyFailed.map((r) => `${r.description} — ${r.message}`).join('; '),
+    };
+  }
+  if (agentOutcome === 'ran' && failed.length > 0) {
+    return {
+      outcome: 'FAIL',
+      outcomeReason: failed.map((r) => `${r.description} — ${r.message}`).join('; '),
+    };
+  }
+  if (agentOutcome === 'timed_out') {
+    return {
+      outcome: 'TIMED_OUT',
+      outcomeReason: `the agent did not finish inside the ${budgetMs} ms case budget; no check failed on what it had done by then`,
+    };
+  }
+  if (agentOutcome === 'failed') {
+    return {
+      outcome: 'AGENT_FAILURE',
+      outcomeReason: `the agent stopped with an error: ${errorMessage ?? 'unknown'}`,
+    };
+  }
+  if (summary.blockingUnverifiable > 0) {
+    return {
+      outcome: 'ABSTAIN',
+      outcomeReason: `${summary.blockingUnverifiable} blocking check(s) could not be made: ${summary.results.find((r) => r.status === 'UNVERIFIABLE')?.message ?? 'no evidence'}`,
+    };
+  }
+  if (!summary.taskSuccess) {
+    // No success check applied at all: nothing established that the work was
+    // done. That is not a pass.
+    return {
+      outcome: 'ABSTAIN',
+      outcomeReason: 'no applicable success check: nothing could establish whether the work was done',
+    };
+  }
+  return { outcome: 'PASS', outcomeReason: 'every applicable check passed on observed state' };
 }
 
 function mutatingActionNames(adapter: EnvironmentAdapter): string[] {
@@ -353,10 +562,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
     return await Promise.race([
       promise,
       new Promise<never>((_, reject) => {
-        timer = setTimeout(
-          () => reject(new Error(`Agent exceeded its ${timeoutMs}ms budget`)),
-          timeoutMs,
-        );
+        timer = setTimeout(() => reject(new AgentTimeoutError(timeoutMs)), timeoutMs);
       }),
     ]);
   } finally {

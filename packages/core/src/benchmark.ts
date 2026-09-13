@@ -114,6 +114,13 @@ export const ThresholdsSchema = z.object({
   minPolicyCompliance: z.number().min(0).max(1).default(1),
   maxPolicyViolations: z.number().int().nonnegative().default(0),
   maxUnsafeActions: z.number().int().nonnegative().default(0),
+  /**
+   * How many cases may end without a verdict — abstained for lack of
+   * evidence, or lost to a harness failure — before the gate refuses to
+   * answer. Zero by default: a gate that passes on cases it could not check
+   * is a gate that passes on nothing.
+   */
+  maxInconclusive: z.number().int().nonnegative().default(0),
 });
 export type Thresholds = z.infer<typeof ThresholdsSchema>;
 
@@ -133,6 +140,7 @@ export const BenchmarkSchema = z.object({
     minPolicyCompliance: 1,
     maxPolicyViolations: 0,
     maxUnsafeActions: 0,
+    maxInconclusive: 0,
   }),
   cases: z.array(BenchmarkCaseSchema).min(1),
   /** Entities the projection is rooted at. Pinned so every case asks the same

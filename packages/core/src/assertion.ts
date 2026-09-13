@@ -164,8 +164,13 @@ export function isBlocking(assertion: Assertion): boolean {
 /**
  * `INAPPLICABLE` is not a pass. It means the case does not exercise this rule
  * — usually because a mutation removed whatever the rule was about.
+ *
+ * `UNVERIFIABLE` is not a pass either, and not a failure. It means the
+ * evidence this check needs does not exist here: the environment could not be
+ * read back, or a nominated read did not answer. A verdict built on such a
+ * check abstains rather than inventing confidence in either direction.
  */
-export const AssertionStatusSchema = z.enum(['PASS', 'FAIL', 'ERROR', 'INAPPLICABLE']);
+export const AssertionStatusSchema = z.enum(['PASS', 'FAIL', 'ERROR', 'INAPPLICABLE', 'UNVERIFIABLE']);
 export type AssertionStatus = z.infer<typeof AssertionStatusSchema>;
 
 export const AssertionResultSchema = z.object({

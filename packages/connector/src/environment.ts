@@ -33,6 +33,7 @@
  * left to quietly mean the wrong thing.
  */
 import {
+  StateReadError,
   type ActionDefinition,
   type CanonicalState,
   type CaseConfig,
@@ -175,6 +176,12 @@ export class SystemEnvironment implements EnvironmentAdapter {
     const payloads: unknown[] = [];
     for (const read of this.config.verifierReads) {
       const normalized = normalizeCallResult(await this.connection.call(read.tool, read.args ?? {}));
+      // A read that fails leaves the world unknown, and unknown is not empty:
+      // said so, rather than handed back as a world in which everything has
+      // vanished.
+      if (normalized.kind === 'error') {
+        throw new StateReadError(read.tool, normalized.error?.message ?? 'the call failed');
+      }
       if (hasPayload(normalized)) payloads.push(normalized.payload);
     }
     return stateFromPayloads(payloads, this.schema);

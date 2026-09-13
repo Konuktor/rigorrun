@@ -8,12 +8,15 @@ import { join } from 'node:path';
 import {
   applyReview,
   blockingRules,
+  caseOutcome,
   parseBenchmark,
   parseCanonicalTrace,
   parseEnvironmentContract,
   rulesAwaitingReview,
+  type AgentScore,
   type Benchmark,
   type CanonicalHumanTrace,
+  type CaseResult,
   type EnvironmentContract,
   type RunResult,
 } from '@rigorrun/core';
@@ -45,6 +48,8 @@ export interface Flags {
   minPolicy?: number | undefined;
   maxPolicyViolations?: number | undefined;
   maxUnsafe?: number | undefined;
+  /** Cases allowed to end without a verdict before the gate refuses to answer. */
+  maxInconclusive?: number | undefined;
   /** Which project to act on. The product path, as against a benchmark file. */
   project?: string | undefined;
   /** Where the store lives. Overridden in tests and in CI. */
@@ -339,7 +344,17 @@ export async function cmdRun(benchmarkPath: string | undefined, flags: Flags): P
     if (!flags.json) line(`${c.grey('report')}  ${written}`);
   }
 
-  return result.scores.every((s) => s.thresholdsPassed) ? 0 : 1;
+  return exitCodeForScores(result.scores);
+}
+
+/**
+ * 0 when every threshold is met; 3 when the only thing that failed is that too
+ * many cases reached no verdict — the same code `verify` uses for "ran, but
+ * established too little" — and 1 when an agent genuinely fell short.
+ */
+export function exitCodeForScores(scores: readonly AgentScore[]): number {
+  if (scores.every((s) => s.thresholdsPassed)) return 0;
+  return scores.every((s) => s.thresholdsPassed || s.inconclusive) ? 3 : 1;
 }
 
 // ---------------------------------------------------------------------- gate
@@ -371,6 +386,7 @@ export async function cmdGate(benchmarkPath: string | undefined, flags: Flags): 
       minPolicyCompliance: flags.minPolicy ?? benchmark.thresholds.minPolicyCompliance,
       maxPolicyViolations: flags.maxPolicyViolations ?? benchmark.thresholds.maxPolicyViolations,
       maxUnsafeActions: flags.maxUnsafe ?? benchmark.thresholds.maxUnsafeActions,
+      maxInconclusive: flags.maxInconclusive ?? benchmark.thresholds.maxInconclusive,
     },
   };
 
@@ -417,7 +433,7 @@ export async function cmdGate(benchmarkPath: string | undefined, flags: Flags): 
     );
   }
 
-  return score.thresholdsPassed ? 0 : 1;
+  return exitCodeForScores([score]);
 }
 
 // -------------------------------------------------------------------- report
@@ -481,12 +497,7 @@ async function executeRun(
     if (event.type === 'case_finished') {
       done += 1;
       const { result } = event;
-      const mark =
-        result.unsafeActions > 0
-          ? c.red('!')
-          : result.taskSuccess && result.policyCompliant
-            ? c.green('ok')
-            : c.red('x');
+      const mark = outcomeMark(result);
       line(
         `  ${c.grey(String(done).padStart(String(total).length))}/${total}  ${mark}  ` +
           `${c.grey(result.agentId.padEnd(12))} ${result.caseId.replace(/^case_/, '').padEnd(22)} ${c.grey(fmtMs(result.durationMs))}`,
@@ -501,6 +512,26 @@ async function executeRun(
     onProgress,
     version: VERSION,
   });
+}
+
+/** One word per verdict, so a timeout or an abstention never reads as a wrong answer. */
+function outcomeMark(result: CaseResult): string {
+  const outcome = caseOutcome(result);
+  if (result.unsafeActions > 0) return c.red('!');
+  switch (outcome) {
+    case 'PASS':
+      return c.green('ok');
+    case 'FAIL':
+      return c.red('x');
+    case 'ABSTAIN':
+      return c.yellow('abstain');
+    case 'TIMED_OUT':
+      return c.yellow('timeout');
+    case 'AGENT_FAILURE':
+      return c.red('agent-error');
+    case 'HARNESS_FAILURE':
+      return c.yellow('harness');
+  }
 }
 
 function printComparison(result: RunResult): void {
@@ -524,8 +555,19 @@ function printComparison(result: RunResult): void {
   line(
     `${c.grey(`n=${result.scores[0]?.n ?? 0} cases per agent. Ranges are 95% Wilson intervals.`)}`,
   );
+  for (const s of result.scores) {
+    const undecided = s.abstained + s.timedOut + s.agentFailures + s.harnessFailures;
+    if (undecided > 0) {
+      line(
+        `${c.grey('outcomes')}  ${s.agentName}: ${s.decided ?? s.n}/${s.n} decided · ` +
+          `${s.abstained} abstained · ${s.timedOut} timed out · ${s.agentFailures} agent failure(s) · ${s.harnessFailures} harness failure(s)`,
+      );
+    }
+  }
+  line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+  for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
   line();
-  line(`${c.bold('Verdict')}  ${result.verdict.summary}`);
+  line(`${c.bold('Verdict')}  ${result.verdict.outcome ?? ''} ${result.verdict.summary}`);
   for (const reason of result.verdict.rationale) line(`  ${c.grey('-')} ${c.grey(reason)}`);
 }
 

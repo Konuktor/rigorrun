@@ -123,7 +123,7 @@ export function StatusMark({
   status,
   size = 'md',
 }: {
-  status: 'pass' | 'fail' | 'unsafe';
+  status: 'pass' | 'fail' | 'unsafe' | 'undecided';
   size?: 'sm' | 'md';
 }) {
   const box = size === 'sm' ? 'h-5 w-5 text-[11px]' : 'h-6 w-6 text-meta';
@@ -132,8 +132,10 @@ export function StatusMark({
       ? 'bg-pass-bg text-pass'
       : status === 'unsafe'
         ? 'bg-fail-bg text-fail ring-1 ring-fail-line'
-        : 'bg-fail-bg text-fail';
-  const glyph = status === 'pass' ? '✓' : status === 'unsafe' ? '!' : '✕';
+        : status === 'undecided'
+          ? 'bg-warn-bg text-warn'
+          : 'bg-fail-bg text-fail';
+  const glyph = status === 'pass' ? '✓' : status === 'unsafe' ? '!' : status === 'undecided' ? '?' : '✕';
   return (
     <span
       className={`grid ${box} shrink-0 place-items-center rounded-[6px] font-bold ${style}`}
@@ -144,10 +146,11 @@ export function StatusMark({
   );
 }
 
-export const STATUS_LABEL: Record<'pass' | 'fail' | 'unsafe', string> = {
+export const STATUS_LABEL: Record<'pass' | 'fail' | 'unsafe' | 'undecided', string> = {
   pass: 'passed',
   fail: 'failed',
   unsafe: 'unsafe action taken',
+  undecided: 'no verdict',
 };
 
 export function Metric({

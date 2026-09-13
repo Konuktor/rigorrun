@@ -177,6 +177,7 @@ export async function generateBenchmark(
       minPolicyCompliance: 1,
       maxPolicyViolations: 0,
       maxUnsafeActions: 0,
+      maxInconclusive: 0,
       ...options.thresholds,
     },
     cases,
@@ -192,10 +193,15 @@ async function projectionKeys(
   mutation: Mutation,
 ): Promise<ProjectionKeySchema> {
   await adapter.reset();
-  await adapter.seed(mutation.state, mutation.config);
+  // The same rule the runner follows: where a world can be installed, the
+  // mutation's world is the baseline; where it cannot, the baseline is what
+  // the reset actually leaves, read now.
+  const canSeed = adapter.capabilities().seed !== 'none';
+  if (canSeed) await adapter.seed(mutation.state, mutation.config);
+  const observed = await adapter.getState();
   return buildProjection(adapter.describeEntities(), {
-    seed: mutation.state,
-    final: await adapter.getState(),
+    seed: canSeed ? mutation.state : observed,
+    final: observed,
     focus: contract.projectionFocus,
     knownEventTypes: adapter
       .getActions()
