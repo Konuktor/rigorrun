@@ -1,0 +1,100 @@
+[
+  {
+    "id": "q_name_Id",
+    "kind": "entity_name",
+    "entity": "Id",
+    "text": "Is \"Id\" the right name for this kind of record?",
+    "evidence": "19 distinct record(s) seen, with fields: kind, value.",
+    "proposed": "Id",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Id",
+    "kind": "id_field",
+    "entity": "Id",
+    "text": "Does \"value\" identify one Id?",
+    "evidence": "Its value was different for every Id in each list the server returned, and never changed for the same one.",
+    "proposed": "value",
+    "options": [
+      "kind",
+      "value"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Id_kind",
+    "kind": "field_role",
+    "entity": "Id",
+    "field": "kind",
+    "text": "What kind of thing is \"kind\"?",
+    "evidence": "A small, repeated set of values, though none was seen changing. Values seen: Real, Integer, Text.",
+    "proposed": "status",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_name_Table",
+    "kind": "entity_name",
+    "entity": "Table",
+    "text": "Is \"Table\" the right name for this kind of record?",
+    "evidence": "2 distinct record(s) seen, with fields: name, sql.",
+    "proposed": "Table",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Table",
+    "kind": "id_field",
+    "entity": "Table",
+    "text": "Does \"name\" identify one Table?",
+    "evidence": "Its value was different for every Table in each list the server returned, and never changed for the same one.",
+    "proposed": "name",
+    "options": [
+      "name",
+      "sql"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Table_sql",
+    "kind": "field_role",
+    "entity": "Table",
+    "field": "sql",
+    "text": "What kind of thing is \"sql\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: CREATE TABLE audit_log (\n  id INTEGER PR…, CREATE TABLE tasks (\n  id INTEGER PRIMAR….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Table_sql",
+    "kind": "untrusted",
+    "entity": "Table",
+    "field": "sql",
+    "text": "Can somebody outside your organisation write \"sql\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  }
+]

@@ -1,0 +1,35 @@
+{
+  "id": "EM-MH-05-to-as-list-and-comma",
+  "target": "email-mcp",
+  "class": "BOUNDARY",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 1.46,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 1.46,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 1.46,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "3/3"
+}

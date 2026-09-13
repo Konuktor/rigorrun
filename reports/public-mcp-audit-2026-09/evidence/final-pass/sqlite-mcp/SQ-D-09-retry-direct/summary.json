@@ -1,0 +1,19 @@
+{
+  "id": "SQ-D-09-retry-direct",
+  "target": "sqlite-mcp",
+  "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+  "truth": "EXPECTED_FAIL",
+  "injected": true,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 5.09,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "1/1"
+}

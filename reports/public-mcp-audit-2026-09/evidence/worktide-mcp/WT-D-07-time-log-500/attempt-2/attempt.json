@@ -1,0 +1,59 @@
+{
+  "case": {
+    "id": "WT-D-07-time-log-500",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "MISSING_ACTION (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "time.log must create one 30-minute time entry",
+    "calls": [
+      {
+        "tool": "time.log",
+        "args": {
+          "startsAt": "2026-09-13T10:00:00+02:00",
+          "durationMinutes": 30,
+          "description": "audit log entry"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True and after['db_time_entry_count']==before['db_time_entry_count']+1"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "time.log",
+        "args": {
+          "startsAt": "2026-09-13T10:00:00+02:00",
+          "durationMinutes": 30,
+          "description": "audit log entry"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[500] Typed property App\\Entity\\TimeEntry::$user must not be accessed before initialization"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "seconds": 0.32,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

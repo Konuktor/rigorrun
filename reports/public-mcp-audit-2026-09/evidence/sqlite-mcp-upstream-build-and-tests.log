@@ -1,0 +1,32 @@
+rustc 1.98.1 (48a229cea 2026-09-01)
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+   Compiling r2d2_sqlite v0.33.0
+   Compiling mcp-server-sqlite v1.0.0 (/src)
+    Finished `release` profile [optimized] target(s) in 1m 49s
+-rwxr-xr-x 2 root root 8908912 Sep 13 19:06 target/release/mcp-server-sqlite
+        PASS [   0.015s] (176/198) mcp-server-sqlite::list_views dropped_view_no_longer_returned
+        PASS [   0.017s] (177/198) mcp-server-sqlite::list_views returns_created_views
+        PASS [   0.024s] (178/198) mcp-server-sqlite::list_triggers table_name_field_matches_attached_table
+        PASS [   0.023s] (179/198) mcp-server-sqlite::list_triggers trigger_disappears_after_drop
+        PASS [   0.015s] (180/198) mcp-server-sqlite::list_views returns_multiple_views
+        PASS [   0.014s] (181/198) mcp-server-sqlite::list_views sql_contains_full_create_view_statement
+        PASS [   0.017s] (182/198) mcp-server-sqlite::list_views views_do_not_appear_in_list_tables
+        PASS [   0.016s] (183/198) mcp-server-sqlite::search_fts boolean_and_requires_both_terms_present
+        PASS [   0.025s] (184/198) mcp-server-sqlite::list_views returns_empty_when_no_views
+        PASS [   0.018s] (185/198) mcp-server-sqlite::search_fts default_highlight_markers_are_bold_tags
+        PASS [   0.014s] (186/198) mcp-server-sqlite::search_fts returns_empty_for_no_matches
+        PASS [   0.023s] (187/198) mcp-server-sqlite::search_fts boolean_or_matches_either_term
+        PASS [   0.018s] (188/198) mcp-server-sqlite::search_fts limit_restricts_number_of_returned_results
+        PASS [   0.030s] (189/198) mcp-server-sqlite::list_views views_returned_in_alphabetical_order
+        PASS [   0.012s] (190/198) mcp-server-sqlite::search_fts returns_error_for_nonexistent_fts_table
+        PASS [   0.020s] (191/198) mcp-server-sqlite::search_fts phrase_search_matches_exact_sequence
+        PASS [   0.020s] (192/198) mcp-server-sqlite::search_fts multi_column_fts_returns_one_snippet_per_column
+        PASS [   0.019s] (193/198) mcp-server-sqlite::search_fts results_are_ordered_by_rank_best_first
+        PASS [   0.017s] (194/198) mcp-server-sqlite::search_fts returns_error_for_invalid_match_syntax
+        PASS [   0.033s] (195/198) mcp-server-sqlite::search_fts boolean_not_excludes_term
+        PASS [   0.017s] (196/198) mcp-server-sqlite::search_fts returns_matching_results_ranked_by_relevance
+        PASS [   0.012s] (197/198) mcp-server-sqlite::search_fts rowids_correspond_to_source_rows
+        PASS [   0.011s] (198/198) mcp-server-sqlite::search_fts snippets_contain_highlight_markers
+────────────
+     Summary [   0.207s] 198 tests run: 198 passed, 0 skipped
+NEXTEST_EXIT=0

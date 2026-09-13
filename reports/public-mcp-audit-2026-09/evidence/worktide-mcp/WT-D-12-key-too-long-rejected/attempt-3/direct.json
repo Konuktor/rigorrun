@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "projects.create",
+      "args": {
+        "name": "too long",
+        "key": "ABCDEFGHIJKLMNOPQ"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Invalid arguments: [\n  {\n    \"code\": \"too_big\",\n    \"maximum\": 16,\n    \"type\": \"string\",\n    \"inclusive\": true,\n    \"exact\": false,\n    \"message\": \"String must contain at most 16 character(s)\",\n    \"path\": [\n      \"key\"\n    ]\n  }\n]"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

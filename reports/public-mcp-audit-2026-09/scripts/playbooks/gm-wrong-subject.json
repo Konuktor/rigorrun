@@ -1,0 +1,22 @@
+{
+  "name": "gm-wrong-subject",
+  "steps": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "{inputs.to}",
+        "subject": "Audit 71",
+        "body": "{inputs.body}",
+        "service": "default"
+      }
+    },
+    {
+      "tool": "check_inbox",
+      "args": {
+        "service": "default",
+        "limit": 50
+      }
+    }
+  ],
+  "report": "Sent one email to {inputs.to} with subject {inputs.subject}."
+}

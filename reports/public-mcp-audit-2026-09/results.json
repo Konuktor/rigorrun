@@ -1,0 +1,1576 @@
+{
+  "audit_version": "1.0.0",
+  "date": "2026-09-13",
+  "rigorrun_version": "0.2.0",
+  "rigorrun_commit": "07dda8c738d6daada161ffcf2bfc046b3c874ac5",
+  "question": "Can RigorRun find real, reproducible failures in external state-changing MCP/agent workflows?",
+  "totals": {
+    "cases_total": 58,
+    "rigorrun_scored_cases": 26,
+    "true_positives": 10,
+    "true_negatives": 0,
+    "false_positives": 6,
+    "false_negatives": 10,
+    "injected_failures": 3,
+    "injected_failures_detected_by_oracle": 2,
+    "injected_failures_detected_by_rigorrun": 0,
+    "true_positive_rate": 0.5,
+    "false_positive_rate": 1,
+    "mutation_detection_rate": 0.5,
+    "confirmed_upstream_findings": 10,
+    "confirmed_rigorrun_findings": 8,
+    "findings_total": 21
+  },
+  "findings": [
+    {
+      "id": "E-1",
+      "target": "email-mcp",
+      "category": "TARGET_MCP_BUG",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED",
+      "title": "check_inbox and search_emails crash for the documented local MailHog/Mailpit services",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "E-2",
+      "target": "email-mcp",
+      "category": "TARGET_MCP_BUG",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED",
+      "title": "13 advertised tools fail with ModuleNotFoundError: the autorespond and watcher modules are not in the repository",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "E-3",
+      "target": "email-mcp",
+      "category": "TARGET_MCP_RELIABILITY_RISK",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "send_email is at-least-once with no idempotency key: a lost response plus one client retry delivers two messages",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "E-4",
+      "target": "email-mcp",
+      "category": "NO_ISSUE_FOUND",
+      "severity": "INFO",
+      "status": "CONFIRMED",
+      "title": "Runtime service configuration is lost on restart, exactly as documented",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "W-1",
+      "target": "worktide-mcp",
+      "category": "TARGET_MCP_BUG",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "Every tool that resolves an IRI doubles the /v1 prefix and gets a 404: tasks.get, tasks.update, tasks.complete, projects.get, projects.archive",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "W-2",
+      "target": "worktide-mcp",
+      "category": "TARGET_MCP_BUG",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "tasks.create, tasks.addDependency, time.log and projects.create answer 500 against the pinned backend: the MCP omits the workspace/user the API requires",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "W-3",
+      "target": "worktide-mcp",
+      "category": "TARGET_MCP_RELIABILITY_RISK",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "The backend answers a missing required relation with HTTP 500 instead of a validation error",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "S-1",
+      "target": "sqlite-mcp",
+      "category": "TARGET_MCP_BUG",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED",
+      "title": "backup copies the whole database to any path under deny-everything (and read-only); vacuum is correctly denied",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "S-2",
+      "target": "sqlite-mcp",
+      "category": "TARGET_MCP_BUG",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "rows_changed reports the previous statement's count for a read-only statement",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "S-3",
+      "target": "sqlite-mcp",
+      "category": "TARGET_MCP_RELIABILITY_RISK",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "A read-only server pointed at a missing path silently creates an empty database file",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "S-4",
+      "target": "sqlite-mcp",
+      "category": "TARGET_MCP_RELIABILITY_RISK",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "execute is at-least-once: a lost response plus one client retry inserts two rows",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "S-5",
+      "target": "sqlite-mcp",
+      "category": "NO_ISSUE_FOUND",
+      "severity": "INFO",
+      "status": "CONFIRMED",
+      "title": "Presets, column-level deny, timeout interruption, single-statement enforcement and sequential BEGIN/INSERT/ROLLBACK all behave as documented",
+      "reproduction": "3/3"
+    },
+    {
+      "id": "R-1",
+      "target": "all",
+      "category": "RIGORRUN_BUG",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "For a system that cannot be seeded, the verdict's baseline is the demonstration-time snapshot, not a fresh read at case start: a correct agent fails and a drifted world passes",
+      "reproduction": "3/3 on sqlite (W1 and W1b), 3/3 on email (reset and accumulate modes), 3/3 with a real LLM agent"
+    },
+    {
+      "id": "R-2",
+      "target": "all",
+      "category": "RIGORRUN_PRODUCT_GAP",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "No independent oracle: the verdict can only read the target server's own nominated tools, and a project takes one connector",
+      "reproduction": "structural (packages/daemon/src/project.ts, packages/connector/src/environment.ts)"
+    },
+    {
+      "id": "R-3",
+      "target": "sqlite-mcp",
+      "category": "RIGORRUN_PRODUCT_GAP",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED",
+      "title": "Column-cell result shapes are induced as a value-keyed 'Id' entity, not as table rows; RigorRun's own quality gate flags the resulting suite",
+      "reproduction": "2/2 journeys (W1, W1b)"
+    },
+    {
+      "id": "R-4",
+      "target": "all",
+      "category": "RIGORRUN_PRODUCT_GAP",
+      "severity": "MEDIUM",
+      "status": "CONFIRMED",
+      "title": "Generated cases carry a fixed 15 s budget, shorter than the 20 s MCP call timeout, so a case cannot survive one lost response, and slow local models cannot finish",
+      "reproduction": "3/3 (EM-GM-06), 3/3 (SQ-LLM-01), 3/3 (EM-LLM-01)"
+    },
+    {
+      "id": "R-5",
+      "target": "sqlite-mcp",
+      "category": "RIGORRUN_BUG",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "The task instruction is built from the primary tool's description rather than the project goal, and a dual-purpose tool's last call becomes the primary action",
+      "reproduction": "2/2 journeys"
+    },
+    {
+      "id": "R-6",
+      "target": "all",
+      "category": "RIGORRUN_PRODUCT_GAP",
+      "severity": "LOW",
+      "status": "CONFIRMED",
+      "title": "No headless project setup; connecting and teaching are interface-only, so the audit drove the runner's HTTP API directly",
+      "reproduction": "documented (docs/V1_GAP_AUDIT.md)"
+    },
+    {
+      "id": "R-8",
+      "target": "worktide-mcp",
+      "category": "RIGORRUN_BUG",
+      "severity": "HIGH",
+      "status": "CONFIRMED",
+      "title": "A server that returns JSON only as text content passes the read-nomination probe but yields no records at demonstration time, so compile refuses after the job has been demonstrated",
+      "reproduction": "2/2 journeys (W2, W3)"
+    },
+    {
+      "id": "R-7",
+      "target": "all",
+      "category": "RIGORRUN_PRODUCT_GAP",
+      "severity": "INFO",
+      "status": "CONFIRMED",
+      "title": "`rigorrun verify --needs-credential` is documented but not wired into the CLI; verify accepts only Node servers from npm: or dir:",
+      "reproduction": "1/1"
+    },
+    {
+      "id": "A-1",
+      "target": "email-mcp",
+      "category": "AGENT_FAILURE",
+      "severity": "INFO",
+      "status": "CONFIRMED",
+      "title": "qwen2.5:3b did not finish the email task inside 15 s with a 47-tool catalogue; llama3.1:8b did not finish any case inside 15 s",
+      "reproduction": "3/3"
+    }
+  ],
+  "targets": [
+    {
+      "target": "email-mcp",
+      "target_commit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "environment": "local MailHog container (documented by upstream) as the primary sink; local GreenMail fake IMAP/SMTP container behind a loopback STARTTLS relay as a labelled supplement",
+      "workflows": [
+        "W1 (GreenMail supplement) send one email",
+        "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+        "W1 (GreenMail) via a real local LLM agent (Ollama qwen2.5:3b)"
+      ],
+      "rigorrun_setups": [
+        "gm-fault-setup",
+        "gm-w1-setup",
+        "w1-setup"
+      ],
+      "rigorrun_journeys_refused": [
+        "w1-setup"
+      ],
+      "cases_total": 21,
+      "cases_expected_pass_held": 8,
+      "cases_expected_state_violated": 13,
+      "rigorrun_scored_cases": 12,
+      "true_positives": 5,
+      "true_negatives": 0,
+      "false_positives": 3,
+      "false_negatives": 4,
+      "rigorrun_abstained": 1,
+      "injected_failures": 2,
+      "injected_failures_detected_by_oracle": 1,
+      "injected_failures_detected_by_rigorrun": 0,
+      "true_positive_rate": 0.556,
+      "false_positive_rate": 1,
+      "verification_strength": [
+        "PARTIAL"
+      ],
+      "confirmed_target_findings": [
+        "E-1",
+        "E-2",
+        "E-3"
+      ],
+      "confirmed_rigorrun_findings": [],
+      "limitations": [
+        "MailHog has no IMAP, so folder/move/delete/flag tools cannot be exercised against it (they need an IMAP backend)",
+        "the auto-responder and watcher modules are absent from the repository, so those 13 tools cannot run at all (finding E-2)",
+        "the GreenMail track is a deviation from the MailHog-only instruction and is reported separately"
+      ],
+      "cases": [
+        {
+          "id": "EM-GM-01-correct",
+          "class": "BASELINE",
+          "workflow": "W1 (GreenMail supplement) send one email",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GM-02-missing-action-false-claim",
+          "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+          "workflow": "W1 (GreenMail supplement) send one email",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GM-03-duplicate",
+          "class": "DUPLICATE_SIDE_EFFECT",
+          "workflow": "W1 (GreenMail supplement) send one email",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent the email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GM-04-wrong-recipient",
+          "class": "WRONG_ENTITY",
+          "workflow": "W1 (GreenMail supplement) send one email",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GM-05-wrong-subject",
+          "class": "WRONG_VALUE",
+          "workflow": "W1 (GreenMail supplement) send one email",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GM-06-retry-after-lost-response",
+          "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+          "workflow": "W1 (GreenMail supplement) send one email",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": true,
+          "supplement": true,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "reproduction": "0/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Agent execution failed: Agent exceeded its 15000ms budget"
+        },
+        {
+          "id": "EM-GM-07-retry-direct",
+          "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_FAIL",
+          "injected": true,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-GMA-01-correct",
+          "class": "BASELINE",
+          "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GMA-02-missing-action-false-claim",
+          "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+          "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GMA-03-duplicate",
+          "class": "DUPLICATE_SIDE_EFFECT",
+          "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent the email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GMA-04-wrong-recipient",
+          "class": "WRONG_ENTITY",
+          "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-GMA-05-wrong-subject",
+          "class": "WRONG_VALUE",
+          "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": true,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "1/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        },
+        {
+          "id": "EM-LLM-01-qwen2.5-3b",
+          "class": "AGENT-LEVEL (real LLM)",
+          "workflow": "W1 (GreenMail) via a real local LLM agent (Ollama qwen2.5:3b)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": true,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "0/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Agent execution failed: Agent exceeded its 15000ms budget"
+        },
+        {
+          "id": "EM-MH-01-send-one",
+          "class": "BASELINE",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-02-check-inbox-crashes",
+          "class": "SCHEMA / TOOL ERROR (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-03-search-emails-crashes",
+          "class": "SCHEMA / TOOL ERROR (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-04-auto-rule-modules-missing",
+          "class": "SCHEMA / TOOL ERROR (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-05-to-as-list-and-comma",
+          "class": "BOUNDARY",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-06-empty-recipient",
+          "class": "BOUNDARY",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-07-unknown-service",
+          "class": "WRONG_ENTITY / boundary",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "EM-MH-08-service-not-persisted-across-restart",
+          "class": "RESTART / PERSISTENCE",
+          "workflow": null,
+          "mode": "shell",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        }
+      ]
+    },
+    {
+      "target": "worktide-mcp",
+      "target_commit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "environment": "self-authored docker compose from upstream docs/INSTALL-docker-compose.md: FrankenPHP dev image, MySQL 8.0, Valkey; fixtures loaded; personal access token minted through the REST API; no ddev",
+      "workflows": [],
+      "rigorrun_setups": [
+        "w2-setup",
+        "w3-setup"
+      ],
+      "rigorrun_journeys_refused": [
+        "w2-setup",
+        "w3-setup"
+      ],
+      "cases_total": 13,
+      "cases_expected_pass_held": 5,
+      "cases_expected_state_violated": 8,
+      "rigorrun_scored_cases": 0,
+      "true_positives": 0,
+      "true_negatives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "rigorrun_abstained": 2,
+      "injected_failures": 0,
+      "injected_failures_detected_by_oracle": 0,
+      "injected_failures_detected_by_rigorrun": 0,
+      "true_positive_rate": null,
+      "false_positive_rate": null,
+      "verification_strength": [],
+      "confirmed_target_findings": [
+        "W-1",
+        "W-2",
+        "W-3"
+      ],
+      "confirmed_rigorrun_findings": [
+        "R-8"
+      ],
+      "limitations": [
+        "the two SPAs were not built (not needed: the REST API and MySQL are the oracle)",
+        "the backend's own PHPUnit suite was not run (the target under audit is the MCP server; the backend is the fixture)",
+        "MCP commit (2026-07-10) predates the backend commit (2026-08-01); findings are stated against exactly these two commits"
+      ],
+      "cases": [
+        {
+          "id": "WT-D-01-tasks-get-doubled-prefix",
+          "class": "SCHEMA / TOOL ERROR (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-02-tasks-update-doubled-prefix",
+          "class": "WRONG_VALUE / MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-03-tasks-complete-doubled-prefix",
+          "class": "MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-04-projects-get-archive-doubled-prefix",
+          "class": "MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-05-tasks-create-500",
+          "class": "MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-06-add-dependency-500",
+          "class": "MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-07-time-log-500",
+          "class": "MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-08-projects-create-500",
+          "class": "MISSING_ACTION (target)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-09-timer-start-stop",
+          "class": "BASELINE (timer)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-10-double-start-closes-first",
+          "class": "DUPLICATE_SIDE_EFFECT / boundary",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-11-stop-with-nothing-running",
+          "class": "BOUNDARY",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-12-key-too-long-rejected",
+          "class": "SCHEMA / TOOL ERROR",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "WT-D-13-nonexistent-task",
+          "class": "BOUNDARY",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        }
+      ]
+    },
+    {
+      "target": "sqlite-mcp",
+      "target_commit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "environment": "a disposable SQLite file created from scripts/seed-sqlite.sql for every case",
+      "workflows": [
+        "W1b via a real local LLM agent (Ollama llama3.1:8b)",
+        "W1b via a real local LLM agent (Ollama qwen2.5:3b)",
+        "W1 insert one task",
+        "W1b insert one task (INSERT demonstrated last)"
+      ],
+      "rigorrun_setups": [
+        "w1-setup",
+        "w1b-setup"
+      ],
+      "rigorrun_journeys_refused": [],
+      "cases_total": 24,
+      "cases_expected_pass_held": 8,
+      "cases_expected_state_violated": 16,
+      "rigorrun_scored_cases": 14,
+      "true_positives": 5,
+      "true_negatives": 0,
+      "false_positives": 3,
+      "false_negatives": 6,
+      "rigorrun_abstained": 0,
+      "injected_failures": 1,
+      "injected_failures_detected_by_oracle": 1,
+      "injected_failures_detected_by_rigorrun": 0,
+      "true_positive_rate": 0.455,
+      "false_positive_rate": 1,
+      "verification_strength": [
+        "PARTIAL"
+      ],
+      "confirmed_target_findings": [
+        "S-1",
+        "S-2",
+        "S-3",
+        "S-4"
+      ],
+      "confirmed_rigorrun_findings": [
+        "R-3",
+        "R-5"
+      ],
+      "limitations": [
+        "no `rigorrun verify` run: the sandbox only builds Node servers from npm: or dir: references"
+      ],
+      "cases": [
+        {
+          "id": "SQ-D-01-readonly-denies-insert",
+          "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "1/1",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-02-backup-under-deny-everything",
+          "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-03-rows-changed-leak",
+          "class": "WRONG_VALUE (tool result)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-04-transaction-across-calls",
+          "class": "STATE CONSISTENCY / transaction",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-05-column-deny-blocks-aggregate",
+          "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-06-timeout-interrupts",
+          "class": "TIMEOUT",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-07-multi-statement-rejected",
+          "class": "SCHEMA / TOOL ERROR",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-08-readonly-creates-missing-file",
+          "class": "BOUNDARY / side effect",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-09-retry-direct",
+          "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_FAIL",
+          "injected": true,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "3/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-D-10-backup-under-column-deny",
+          "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+          "workflow": null,
+          "mode": "direct",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "reproduction": "0/3",
+          "verification": [],
+          "agentReport": null
+        },
+        {
+          "id": "SQ-LLM-01-llama3.1-8b",
+          "class": "AGENT-LEVEL (real LLM)",
+          "workflow": "W1b via a real local LLM agent (Ollama llama3.1:8b)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "0/1",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Agent execution failed: Agent exceeded its 15000ms budget"
+        },
+        {
+          "id": "SQ-LLM-02-qwen2.5-3b",
+          "class": "AGENT-LEVEL (real LLM)",
+          "workflow": "W1b via a real local LLM agent (Ollama qwen2.5:3b)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted the record into tasks table."
+        },
+        {
+          "id": "SQ-W1-01-correct",
+          "class": "BASELINE",
+          "workflow": "W1 insert one task",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back."
+        },
+        {
+          "id": "SQ-W1-02-missing-action-false-claim",
+          "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+          "workflow": "W1 insert one task",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back."
+        },
+        {
+          "id": "SQ-W1-03-duplicate",
+          "class": "DUPLICATE_SIDE_EFFECT",
+          "workflow": "W1 insert one task",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted the task 'Quarterly report'."
+        },
+        {
+          "id": "SQ-W1-04-wrong-value",
+          "class": "WRONG_VALUE",
+          "workflow": "W1 insert one task",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+        },
+        {
+          "id": "SQ-W1-05-wrong-entity",
+          "class": "WRONG_ENTITY",
+          "workflow": "W1 insert one task",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+        },
+        {
+          "id": "SQ-W1-06-forbidden-extra-delete",
+          "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+          "workflow": "W1 insert one task",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and tidied the table."
+        },
+        {
+          "id": "SQ-W1B-01-correct",
+          "class": "BASELINE",
+          "workflow": "W1b insert one task (INSERT demonstrated last)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back."
+        },
+        {
+          "id": "SQ-W1B-02-missing-action-false-claim",
+          "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+          "workflow": "W1b insert one task (INSERT demonstrated last)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back."
+        },
+        {
+          "id": "SQ-W1B-03-duplicate",
+          "class": "DUPLICATE_SIDE_EFFECT",
+          "workflow": "W1b insert one task (INSERT demonstrated last)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted the task 'Quarterly report'."
+        },
+        {
+          "id": "SQ-W1B-04-wrong-value",
+          "class": "WRONG_VALUE",
+          "workflow": "W1b insert one task (INSERT demonstrated last)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+        },
+        {
+          "id": "SQ-W1B-05-wrong-entity",
+          "class": "WRONG_ENTITY",
+          "workflow": "W1b insert one task (INSERT demonstrated last)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "PASS"
+          ],
+          "classification": "FALSE_NEGATIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+        },
+        {
+          "id": "SQ-W1B-06-forbidden-extra-delete",
+          "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+          "workflow": "W1b insert one task (INSERT demonstrated last)",
+          "mode": "rigorrun",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "supplement": false,
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunVerdicts": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "reproduction": "3/3",
+          "verification": [
+            "PARTIAL"
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and tidied the table."
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "RigorRun has no independent-oracle assertion type; its verdicts rest on the target server's own nominated reads, so the audit's ground truth had to live outside RigorRun",
+    "RigorRun has no headless project setup; the runner's HTTP API was driven directly (the same routes the interface calls)",
+    "RigorRun's generated cases carry a fixed 15 s budget; the 8B local model and the 47-tool email catalogue did not fit inside it",
+    "one machine, one day, three servers: nothing here generalises to the MCP server population"
+  ],
+  "generated_by": "scripts/aggregate-results.mjs"
+}

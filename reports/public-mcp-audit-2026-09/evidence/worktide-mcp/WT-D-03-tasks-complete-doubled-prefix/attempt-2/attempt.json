@@ -1,0 +1,55 @@
+{
+  "case": {
+    "id": "WT-D-03-tasks-complete-doubled-prefix",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "MISSING_ACTION (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "tasks.complete must move AUD-1 to the workspace's completed status",
+    "calls": [
+      {
+        "tool": "tasks.complete",
+        "args": {
+          "task": "AUD-1"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True and [t for t in after['tasks'] if t['identifier']=='AUD-1'][0]['status']!=[t for t in before['tasks'] if t['identifier']=='AUD-1'][0]['status']"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "tasks.complete",
+        "args": {
+          "task": "AUD-1"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "seconds": 0.36,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

@@ -1,0 +1,60 @@
+{
+  "command": [
+    "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-only",
+    "--timeout-ms",
+    "200"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM c WHERE x<30000000) SELECT count(*) FROM c"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "failed to read query results: interrupted"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT 1"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[{\"columns\":{\"1\":{\"kind\":\"Integer\",\"value\":1}}}],\"rows_changed\":0}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [
+            {
+              "columns": {
+                "1": {
+                  "kind": "Integer",
+                  "value": 1
+                }
+              }
+            }
+          ],
+          "rows_changed": 0
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "entities": [
+    {
+      "name": "Id",
+      "idField": "value",
+      "fields": [
+        {
+          "name": "kind",
+          "type": "enum",
+          "nullable": false,
+          "role": "status",
+          "enumValues": [
+            "Integer",
+            "Real",
+            "Text"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Table",
+      "idField": "name",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "sql",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    }
+  ],
+  "relationships": []
+}

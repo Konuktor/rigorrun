@@ -1,0 +1,18 @@
+{
+  "name": "sq-w1-wrong-value",
+  "steps": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'done', 4550, 'cy')"
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT * FROM tasks ORDER BY id"
+      }
+    }
+  ],
+  "report": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+}

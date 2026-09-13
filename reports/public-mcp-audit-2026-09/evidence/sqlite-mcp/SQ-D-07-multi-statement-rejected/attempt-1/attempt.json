@@ -1,0 +1,53 @@
+{
+  "case": {
+    "id": "SQ-D-07-multi-statement-rejected",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "SCHEMA / TOOL ERROR",
+    "truth": "EXPECTED_PASS",
+    "intent": "two statements in one execute must be rejected atomically (neither applied)",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "read-write"
+    ],
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title) VALUES ('a'); INSERT INTO tasks (title) VALUES ('b')"
+        }
+      }
+    ],
+    "expect": "calls[0]['result']['isError']==True and after==before"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title) VALUES ('a'); INSERT INTO tasks (title) VALUES ('b')"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "failed to prepare statement: Multiple statements provided"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 0.03,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

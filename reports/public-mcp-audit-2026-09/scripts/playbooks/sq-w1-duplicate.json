@@ -1,0 +1,24 @@
+{
+  "name": "sq-w1-duplicate",
+  "steps": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT * FROM tasks ORDER BY id"
+      }
+    }
+  ],
+  "report": "Inserted the task 'Quarterly report'."
+}

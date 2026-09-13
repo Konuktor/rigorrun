@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_c3b5982b515a",
+  "name": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back.",
+  "description": "Compiled from one recorded execution in sqlite W1 insert a task.",
+  "goal": "Marker type for the `execute` tool. Implements `SqliteServerTool` to wire up\nthe tool's schema, handler, and routing. Stateless — all context comes from\n`McpServerSqlite`",
+  "environmentId": "p_c3b5982b515a",
+  "sourceTraceId": "trace_p_c3b5982b515a",
+  "primaryAction": "execute",
+  "focusEntity": "Id",
+  "focusScope": "created",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "execute": {
+      "query": "SELECT * FROM tasks ORDER BY id"
+    }
+  },
+  "projectionFocus": [
+    "Id"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Id 4 was created",
+      "key": "Id.4",
+      "value": {
+        "kind": "Integer",
+        "value": 4
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Id 4 was created"
+        }
+      ]
+    },
+    {
+      "id": "fact_002",
+      "statement": "Id 45.5 was created",
+      "key": "Id.45.5",
+      "value": {
+        "kind": "Real",
+        "value": 45.5
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_1",
+          "detail": "Id 45.5 was created"
+        }
+      ]
+    },
+    {
+      "id": "fact_003",
+      "statement": "Id Quarterly report was created",
+      "key": "Id.Quarterly report",
+      "value": {
+        "kind": "Text",
+        "value": "Quarterly report"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_2",
+          "detail": "Id Quarterly report was created"
+        }
+      ]
+    },
+    {
+      "id": "fact_004",
+      "statement": "Id cy was created",
+      "key": "Id.cy",
+      "value": {
+        "kind": "Text",
+        "value": "cy"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_3",
+          "detail": "Id cy was created"
+        }
+      ]
+    }
+  ],
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-13T19:14:10.501Z"
+}

@@ -1,0 +1,95 @@
+{
+  "date": "2026-09-13",
+  "rigorrun": {
+    "repository": "Konuktor/rigorrun",
+    "branch": "redesign/brand-site-product",
+    "commit": "07dda8c738d6daada161ffcf2bfc046b3c874ac5",
+    "version": "0.2.0",
+    "implementation": "repository sources at this commit run with pnpm rigorrun (tsx); the 0.2.0 tarball in dist/ carries the same version and was not re-packed"
+  },
+  "host": {
+    "os": "Linux 6.19.14+kali-amd64 x86_64",
+    "node": "v22.22.2",
+    "pnpm": "11.7.0",
+    "python": "3.13.12 (host) / 3.12.13 (uv, email-mcp)",
+    "docker": "28.5.2",
+    "ollama": "0.23.2",
+    "gpu": "NVIDIA GeForce GTX 1650",
+    "rust_on_host": false
+  },
+  "targets": {
+    "email-mcp": {
+      "repository": "sandraschi/email-mcp",
+      "commit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "commit_date": "2026-09-11T18:02:39+02:00",
+      "version": "0.5.0",
+      "runtime": "Python 3.12 via uv, FastMCP",
+      "transport": "stdio",
+      "tools": 47,
+      "environment": "local MailHog container (documented by upstream) as the primary sink; local GreenMail fake IMAP/SMTP container behind a loopback STARTTLS relay as a labelled supplement",
+      "upstream_tests": {
+        "command": "uv run --extra test pytest tests -q",
+        "result": "PASS",
+        "passed": 220,
+        "failed": 0,
+        "skipped": 0,
+        "coverage": "46% (gate 30%)"
+      },
+      "limitations": [
+        "MailHog has no IMAP, so folder/move/delete/flag tools cannot be exercised against it (they need an IMAP backend)",
+        "the auto-responder and watcher modules are absent from the repository, so those 13 tools cannot run at all (finding E-2)",
+        "the GreenMail track is a deviation from the MailHog-only instruction and is reported separately"
+      ]
+    },
+    "worktide-mcp": {
+      "repository": "Worktide-IO/worktide-mcp (+ Worktide-IO/worktide backend)",
+      "commit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "commit_date": "2026-07-10T15:00:21+02:00",
+      "backend_commit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "backend_commit_date": "2026-08-01T22:47:55+02:00",
+      "version": "0.1.0",
+      "runtime": "Node 22, TypeScript build (tsc)",
+      "transport": "stdio",
+      "tools": 18,
+      "environment": "self-authored docker compose from upstream docs/INSTALL-docker-compose.md: FrankenPHP dev image, MySQL 8.0, Valkey; fixtures loaded; personal access token minted through the REST API; no ddev",
+      "upstream_tests": {
+        "command": "(none: the repository has no test suite; package.json's test:tools points at a file that does not exist)",
+        "result": "NONE",
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      "limitations": [
+        "the two SPAs were not built (not needed: the REST API and MySQL are the oracle)",
+        "the backend's own PHPUnit suite was not run (the target under audit is the MCP server; the backend is the fixture)",
+        "MCP commit (2026-07-10) predates the backend commit (2026-08-01); findings are stated against exactly these two commits"
+      ]
+    },
+    "sqlite-mcp": {
+      "repository": "0xOmarA/mcp-server-sqlite",
+      "commit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "commit_date": "2026-04-04T21:20:21+03:00",
+      "version": "1.0.0",
+      "runtime": "Rust 2024 edition, built with cargo 1.98.1 inside rust:1-bookworm",
+      "transport": "stdio",
+      "tools": 13,
+      "environment": "a disposable SQLite file created from scripts/seed-sqlite.sql for every case",
+      "upstream_tests": {
+        "command": "cargo nextest run (inside rust:1-bookworm)",
+        "result": "PASS",
+        "passed": 198,
+        "failed": 0,
+        "skipped": 0
+      },
+      "limitations": [
+        "no `rigorrun verify` run: the sandbox only builds Node servers from npm: or dir: references"
+      ]
+    }
+  },
+  "limitations": [
+    "RigorRun has no independent-oracle assertion type; its verdicts rest on the target server's own nominated reads, so the audit's ground truth had to live outside RigorRun",
+    "RigorRun has no headless project setup; the runner's HTTP API was driven directly (the same routes the interface calls)",
+    "RigorRun's generated cases carry a fixed 15 s budget; the 8B local model and the 47-tool email catalogue did not fit inside it",
+    "one machine, one day, three servers: nothing here generalises to the MCP server population"
+  ]
+}

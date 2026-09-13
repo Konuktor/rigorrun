@@ -1,0 +1,12 @@
+{
+  "name": "sq-w1-missing-action",
+  "steps": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT * FROM tasks ORDER BY id"
+      }
+    }
+  ],
+  "report": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back."
+}

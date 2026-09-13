@@ -26,3 +26,6 @@ packages/cli/package/
 
 # Astro's generated types and content cache, rebuilt on every build.
 apps/*/.astro/
+
+# Audit scratch: upstream clones and disposable state, never committed.
+tmp/

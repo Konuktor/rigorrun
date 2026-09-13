@@ -1,0 +1,31 @@
+{
+  "name": "gm-duplicate",
+  "steps": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "{inputs.to}",
+        "subject": "{inputs.subject}",
+        "body": "{inputs.body}",
+        "service": "default"
+      }
+    },
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "{inputs.to}",
+        "subject": "{inputs.subject}",
+        "body": "{inputs.body}",
+        "service": "default"
+      }
+    },
+    {
+      "tool": "check_inbox",
+      "args": {
+        "service": "default",
+        "limit": 50
+      }
+    }
+  ],
+  "report": "Sent the email to {inputs.to} with subject {inputs.subject}."
+}

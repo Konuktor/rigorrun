@@ -1,0 +1,35 @@
+{
+  "id": "EM-MH-07-unknown-service",
+  "target": "email-mcp",
+  "class": "WRONG_ENTITY / boundary",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 1.43,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 1.45,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 1.44,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "3/3"
+}

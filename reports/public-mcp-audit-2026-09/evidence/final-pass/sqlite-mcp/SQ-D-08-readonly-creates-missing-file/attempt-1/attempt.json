@@ -1,0 +1,56 @@
+{
+  "case": {
+    "id": "SQ-D-08-readonly-creates-missing-file",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "BOUNDARY / side effect",
+    "truth": "EXPECTED_PASS",
+    "intent": "a read-only server pointed at a missing path should not create a file",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/missing.db",
+      "--preset",
+      "read-only"
+    ],
+    "env": {
+      "AUDIT_SQLITE_DB": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/missing.db"
+    },
+    "calls": [
+      {
+        "tool": "list_tables",
+        "args": {}
+      }
+    ],
+    "expect": "before['exists']==False and after['exists']==False",
+    "reset_kind": "sqlite-mcp"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "list_tables",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"tables\":[]}"
+            }
+          ],
+          "structuredContent": {
+            "tables": []
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 0.04,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

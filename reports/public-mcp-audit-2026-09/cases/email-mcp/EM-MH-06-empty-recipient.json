@@ -1,0 +1,35 @@
+{
+  "id": "EM-MH-06-empty-recipient",
+  "target": "email-mcp",
+  "mode": "direct",
+  "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+  "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+  "env": {
+    "MAILHOG_ENABLED": "true",
+    "MAILHOG_SMTP_HOST": "127.0.0.1",
+    "MAILHOG_SMTP_PORT": "1025",
+    "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+  },
+  "server": [
+    "uv",
+    "--directory",
+    "{REPO}/tmp/rigorrun-audit/email-mcp",
+    "run",
+    "email-mcp"
+  ],
+  "class": "BOUNDARY",
+  "truth": "EXPECTED_PASS",
+  "intent": "an empty recipient must be refused and nothing delivered",
+  "calls": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "",
+        "subject": "Audit empty",
+        "body": "x",
+        "service": "mailhog"
+      }
+    }
+  ],
+  "expect": "after['total']==before['total'] and ((calls[0]['result'].get('structuredContent') or {}).get('success')==False or calls[0]['result'].get('isError')==True)"
+}

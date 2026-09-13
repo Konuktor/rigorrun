@@ -1,0 +1,19 @@
+{
+  "id": "SQ-W1B-01-correct",
+  "target": "sqlite-mcp",
+  "class": "BASELINE",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.63,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "FAIL",
+      "classification": "FALSE_POSITIVE"
+    }
+  ],
+  "reproduction": "1/1"
+}
