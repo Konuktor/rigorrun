@@ -36,10 +36,12 @@ export function resolvePath(root: unknown, path: string): Resolution {
 
   for (const segment of tokenize(path)) {
     if (segment.kind === 'property') {
+      // `.length` / `.count` measure a list or a string. On anything else they
+      // are ordinary property names: `derived.count.Order.total` walks into the
+      // projection's `count` section, it does not ask an object for its length.
       if (segment.name === 'length' || segment.name === 'count') {
         if (Array.isArray(current)) return { found: true, value: current.length };
         if (typeof current === 'string') return { found: true, value: current.length };
-        return NOT_FOUND;
       }
       if (afterFilter && Array.isArray(current)) {
         current = current[0];

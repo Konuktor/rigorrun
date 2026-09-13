@@ -186,6 +186,38 @@ describe('verifier synthesis', () => {
     expect(blockingRules(confirmed).length).toBe(contract.rules.length);
   });
 
+  it('counts what the agent created for a scope rule, and does not gate it on itself', async () => {
+    // The environment's own declaration says writeLog touches LogEntry and
+    // the job never did, so "must not create a log entry" is observed. It
+    // used to count the total and then require the total to be within the
+    // limit before applying — inapplicable in exactly the run that broke it.
+    const contract = await compile();
+    const created: EnvironmentContract = {
+      ...contract,
+      rules: [
+        {
+          ...contract.rules[0]!,
+          id: 'rule_no_log',
+          status: 'observed',
+          predicate: { kind: 'count_constraint', entity: 'LogEntry', scope: 'created', groupBy: [], where: [], max: 0 },
+        },
+        {
+          ...contract.rules[0]!,
+          id: 'rule_few_logs',
+          status: 'observed',
+          predicate: { kind: 'count_constraint', entity: 'LogEntry', scope: 'all', groupBy: [], where: [], max: 5 },
+        },
+      ],
+    };
+    const { result } = await synthesise(created);
+    const noLog = result.assertions.find((a) => a.ruleId === 'rule_no_log')!;
+    expect(noLog.target).toBe('derived.count.LogEntry.created');
+    expect(noLog.applicableWhen).toBeUndefined();
+    const fewLogs = result.assertions.find((a) => a.ruleId === 'rule_few_logs')!;
+    expect(fewLogs.target).toBe('derived.count.LogEntry.total');
+    expect(fewLogs.applicableWhen).toEqual({ kind: 'numeric_lte', target: 'derived.seed.LogEntry.length', expected: 5 });
+  });
+
   it('refuses a path the projection cannot answer instead of letting it pass', async () => {
     const contract = await compile();
     const broken: EnvironmentContract = {

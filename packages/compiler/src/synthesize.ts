@@ -218,12 +218,28 @@ function compileRule(
         clauses.push(rendered);
       }
 
+      // Counting the scope the rule names. "Must not create a log entry" is
+      // a count of *created* rows; it used to read the total and then gate
+      // itself on that same total, which made the check inapplicable in
+      // exactly the run where the agent had broken it.
       const target =
         clauses.length > 0
           ? `derived.${scope}.${entity}[${clauses.join(' & ')}].length`
-          : `derived.count.${entity}.total`;
+          : `derived.count.${entity}.${scope === 'all' ? 'total' : scope}`;
       const problem = validateProjectionPath(keys, target);
       if (problem) return { error: problem };
+
+      // A world that already breached the limit before the agent arrived
+      // cannot be put right by refusing, so a rule over *all* rows does not
+      // apply there — failing a correct implementation for it would make the
+      // case unsatisfiable. A rule over what the agent created or changed is
+      // about the agent alone, and always applies.
+      const preBreach =
+        scope === 'all'
+          ? clauses.length > 0
+            ? `derived.seed.${entity}[${clauses.join(' & ')}].length`
+            : `derived.seed.${entity}.length`
+          : undefined;
 
       return {
         assertions: [
@@ -234,15 +250,9 @@ function compileRule(
             description: rule.statement,
             target,
             expected: max,
-            // A world that already breached the limit before the agent
-            // arrived cannot be put right by refusing, so the rule does not
-            // apply — and failing a correct implementation for it would make
-            // the case unsatisfiable.
-            applicableWhen: {
-              kind: 'numeric_lte',
-              target: target.replace(`derived.${scope}.`, 'derived.seed.'),
-              expected: max,
-            },
+            ...(preBreach
+              ? { applicableWhen: { kind: 'numeric_lte' as const, target: preBreach, expected: max } }
+              : {}),
           },
         ],
       };

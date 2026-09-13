@@ -86,3 +86,13 @@ describe('resolvePath', () => {
     expect(() => resolvePath(world, 'state.refunds[orderId=ORD-1')).toThrow(/Unterminated/);
   });
 });
+
+describe('the count section of a projection', () => {
+  it('walks into `derived.count` rather than measuring the object', () => {
+    const observation = { derived: { count: { Order: { total: 3, created: 1 } }, created: { Order: [{ id: 'a' }] } } };
+    expect(resolvePath(observation, 'derived.count.Order.total')).toEqual({ found: true, value: 3 });
+    expect(resolvePath(observation, 'derived.count.Order.created')).toEqual({ found: true, value: 1 });
+    expect(resolvePath(observation, 'derived.created.Order.count')).toEqual({ found: true, value: 1 });
+    expect(resolvePath(observation, 'derived.created.Order.length')).toEqual({ found: true, value: 1 });
+  });
+});
