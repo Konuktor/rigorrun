@@ -23,6 +23,13 @@ export const ASSERTION_KINDS = [
   'json_path_equals',
   'event_occurred',
   'event_not_occurred',
+  /**
+   * A record changed the way the demonstration changed it. `target` resolves
+   * the record now; `expected` is `{seed, field, from?, to, compare}`, where
+   * `seed` resolves the same record in the starting world (null for a record
+   * the job created). See the verifier for how a different start is judged.
+   */
+  'state_change',
 ] as const;
 
 export const AssertionKindSchema = z.enum(ASSERTION_KINDS);

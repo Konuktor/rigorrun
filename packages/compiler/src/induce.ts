@@ -20,6 +20,8 @@ import {
   type CanonicalHumanTrace,
   type ContractRule,
   type EnvironmentContract,
+  type ExpectedChange,
+  type Literal,
   type ObservedFact,
   type Provenance,
   type RulePredicate,
@@ -221,6 +223,8 @@ export function induceContract(
   ].sort((a, b) => a.id.localeCompare(b.id));
 
   const createdAt = options.createdAt ?? new Date().toISOString();
+  const bindings = argumentBindings(context);
+  const changes = expectedChanges(context, bindings);
   const contract: EnvironmentContract = {
     schemaVersion: ENVIRONMENT_CONTRACT_SCHEMA_VERSION,
     id: options.contractId ?? `ec_${trace.id}`,
@@ -248,9 +252,10 @@ export function induceContract(
       ]),
     ].sort(),
     observedFacts: observedFacts(context),
-    argumentBindings: argumentBindings(context),
+    argumentBindings: bindings,
     expectedDeltaCount: expectedDeltaCount(context),
     expectedDeletedCount: expectedDeletedCount(context),
+    ...(changes.length > 0 ? { expectedChanges: changes } : {}),
     rules,
     successAssertions: [],
     policyAssertions: [],
@@ -339,6 +344,110 @@ function expectedDeltaCount(context: Context): number {
 function expectedDeletedCount(context: Context): number {
   const name = context.focusEntity.name;
   return context.deltas.filter((delta) => delta.kind === 'entity_deleted' && delta.entity === name).length;
+}
+
+/**
+ * How each record the job is about must change, read off the demonstration.
+ *
+ * A count says how many records changed, never how. On a total — minutes on a
+ * report row, units in a bucket — one entry and two entries both change one
+ * row, and only the amount tells them apart. So a changed record is held to
+ * the change the demonstration made to each of its fields, except the fields
+ * that name it, the ones an argument already binds, and clocks. A created
+ * record is held only on the parts of a total: everything else about a new
+ * record, its identifier or its number, is the system's to assign. A record
+ * nothing names cannot be told from its replacement, and that is recorded
+ * rather than counted.
+ */
+function expectedChanges(context: Context, bindings: readonly ArgumentBinding[]): ExpectedChange[] {
+  const entity = context.focusEntity;
+  const naming = entity.keyFields ?? [entity.idField];
+  const bound = new Set(bindings.map((binding) => binding.field));
+  const own = (delta: StateDelta): boolean => delta.entity === entity.name;
+  const created = context.deltas.filter(
+    (delta): delta is Extract<StateDelta, { kind: 'entity_created' }> => own(delta) && delta.kind === 'entity_created',
+  );
+
+  if (entity.identity === 'unestablished') {
+    const replaced = created.length > 0 && context.deltas.some((delta) => own(delta) && delta.kind === 'entity_deleted');
+    return replaced ? [{ record: {}, field: '', compare: 'unattributable' }] : [];
+  }
+
+  // A value the operator typed into a preparatory call is theirs, not the
+  // system's: an approver's name given when asking for a sign-off. The agent is
+  // never handed those arguments, so holding a case to them would fail an
+  // agent that asked a different approver. The job's own arguments are
+  // different — the case carries them, and the bindings decide what they pin.
+  const typedElsewhere = typedArguments(context);
+
+  const changes: ExpectedChange[] = [];
+  if (context.focusScope === 'changed') {
+    const table = context.after.entities[entity.name] ?? {};
+    for (const delta of context.deltas) {
+      if (delta.kind !== 'field_changed' || !own(delta)) continue;
+      const field = fieldByName(entity, delta.field);
+      if (!field || field.type === 'timestamp' || field.role === 'timestamp') continue;
+      if (naming.includes(field.name) || bound.has(field.name)) continue;
+      if (typedElsewhere(field.name, asLiteral(delta.to))) continue;
+      const row = table[delta.id];
+      if (!row) continue;
+      changes.push({
+        record: Object.fromEntries(naming.map((name) => [name, asLiteral(row[name])])),
+        field: field.name,
+        from: asLiteral(delta.from),
+        to: asLiteral(delta.to),
+        compare: field.type === 'number' ? 'quantity' : field.type === 'boolean' || field.type === 'enum' ? 'closed' : 'open',
+      });
+    }
+  } else if (created.length === 1) {
+    const row = created[0]!.row;
+    for (const field of entity.fields) {
+      if (field.totals === undefined || naming.includes(field.name) || bound.has(field.name)) continue;
+      const value = row[field.name];
+      if (typeof value !== 'number') continue;
+      changes.push({ record: {}, field: field.name, to: value, compare: 'quantity' });
+    }
+  }
+  return changes.sort(
+    (a, b) => JSON.stringify(a.record).localeCompare(JSON.stringify(b.record)) || a.field.localeCompare(b.field),
+  );
+}
+
+/**
+ * Whether a value carries an argument the operator gave to a call other than
+ * the job's own, by the same relations argument bindings observe: equal, the
+ * field containing the argument, or the argument containing the field as a
+ * whole token. A boolean or one-character value counts only under the
+ * argument's own name, because those coincide with far too much.
+ */
+function typedArguments(context: Context): (field: string, value: Literal) => boolean {
+  const primary = context.demonstratedArgs[context.primaryAction] ?? {};
+  const scalar = (value: unknown): value is string | number | boolean =>
+    value !== null && value !== undefined && typeof value !== 'object';
+  const ownValues = new Set(Object.values(primary).filter(scalar).map((value) => String(value)));
+  const typed = Object.entries(context.demonstratedArgs)
+    .filter(([action]) => action !== context.primaryAction)
+    .flatMap(([, args]) => Object.entries(args))
+    .filter((entry): entry is [string, string | number | boolean] => scalar(entry[1]))
+    .filter(([, value]) => !ownValues.has(String(value)));
+  return (field, value) => {
+    if (value === null) return false;
+    const weak = typeof value === 'boolean' || String(value).trim().length < 2;
+    return typed.some(([param, arg]) => {
+      if (weak && param !== field) return false;
+      if (String(arg) === String(value)) return true;
+      if (typeof value === 'string' && typeof arg === 'string' && arg.trim().length >= 3 && value.includes(arg)) {
+        return true;
+      }
+      return typeof arg === 'string' && typeof value !== 'boolean' && wholeToken(arg, value);
+    });
+  };
+}
+
+function asLiteral(value: unknown): Literal {
+  return value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    ? value
+    : null;
 }
 
 /**

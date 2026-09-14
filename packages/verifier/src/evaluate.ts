@@ -121,6 +121,8 @@ function evaluateKind(
       case 'event_occurred':
       case 'event_not_occurred':
         return eventPresence(kind, target, expected, observation);
+      case 'state_change':
+        return stateChange(target, expected, observation);
     }
   } catch (error) {
     return {
@@ -198,6 +200,145 @@ function numericCompare(
     observed: actual,
     message: `${target} = ${actual}, required ${symbol} ${expected}`,
   };
+}
+
+interface ChangeSpec {
+  seed?: string | null;
+  field?: string;
+  from?: unknown;
+  to?: unknown;
+  compare?: 'quantity' | 'closed' | 'open' | 'unattributable';
+  reason?: string;
+}
+
+/**
+ * A record changed the way the demonstration changed it.
+ *
+ * The case is compared with where it started, not with a number written down
+ * at compile time: `seed` resolves the same record in the starting world. From
+ * the demonstration's start, the end must be the demonstration's end. From
+ * anywhere else one demonstration may not say what the job does — "add 10" and
+ * "set to 10" both went 0 → 10 — so a result that either reading explains is no
+ * verdict, and only a result that no reading explains fails. A free-text value
+ * that differs may be the system's own rendering, and is not judged either.
+ */
+function stateChange(target: string, expected: unknown, observation: Observation): Outcome {
+  const spec = (expected ?? {}) as ChangeSpec;
+  if (spec.compare === 'unattributable') {
+    return {
+      status: 'UNVERIFIABLE',
+      observed: null,
+      message: `not checked: ${spec.reason ?? 'nothing names one record, so its change cannot be attributed'}`,
+    };
+  }
+  const field = spec.field;
+  if (!field || spec.compare === undefined) {
+    return { status: 'ERROR', observed: null, message: 'state_change needs a field and a comparison' };
+  }
+
+  const created = spec.seed === null || spec.seed === undefined;
+  const now = recordsAt(observation, target);
+  const start = created ? [] : recordsAt(observation, spec.seed as string);
+  if (now.length > 1 || start.length > 1) {
+    return {
+      status: 'UNVERIFIABLE',
+      observed: now.length,
+      message: `more than one record answers to ${target}, so which one changed cannot be told`,
+    };
+  }
+  const record = now[0];
+  const started = start[0];
+  if (!created && started === undefined) {
+    return {
+      status: 'UNVERIFIABLE',
+      observed: record?.[field] ?? null,
+      message: `the record the demonstration changed did not exist when this case started (${target})`,
+    };
+  }
+  if (record === undefined) {
+    return {
+      status: 'FAIL',
+      observed: null,
+      message: created
+        ? `the record the demonstration created is not there (${target})`
+        : `the record the demonstration changed is gone (${target})`,
+    };
+  }
+
+  const value = record[field];
+  const demonstrated = changeWords(field, created ? undefined : spec.from, spec.to);
+  const observed = changeWords(field, created ? undefined : started?.[field], value);
+  if (created || sameValue(started?.[field], spec.from)) {
+    if (sameValue(value, spec.to)) return { status: 'PASS', observed: value, message: `${demonstrated}, as demonstrated` };
+    if (spec.compare === 'open') {
+      return {
+        status: 'UNVERIFIABLE',
+        observed: value,
+        message: `expected ${demonstrated}; observed ${observed}. Free text can be the system's own rendering, so a different value is not judged`,
+      };
+    }
+    return { status: 'FAIL', observed: value, message: `expected ${demonstrated}; observed ${observed}` };
+  }
+
+  const from = spec.from;
+  const to = spec.to;
+  const begun = started?.[field];
+  const elsewhere = `the case started at ${field} ${quoted(begun)}, not the demonstrated ${quoted(from)}`;
+  if (spec.compare === 'quantity' && typeof begun === 'number' && typeof from === 'number' && typeof to === 'number') {
+    const added = round6(begun + (to - from));
+    const byAdding = typeof value === 'number' && sameValue(value, added);
+    const bySetting = sameValue(value, to);
+    if (byAdding && bySetting) return { status: 'PASS', observed: value, message: `${observed}, as demonstrated` };
+    if (!byAdding && !bySetting) {
+      return {
+        status: 'FAIL',
+        observed: value,
+        message: `${elsewhere}: adding the demonstrated ${signed(to - from)} gives ${added} and setting it gives ${to}; observed ${observed}`,
+      };
+    }
+    return {
+      status: 'UNVERIFIABLE',
+      observed: value,
+      message: `${elsewhere}: ${quoted(value)} is what ${byAdding ? `adding ${signed(to - from)}` : `setting ${to}`} gives, and one demonstration cannot tell whether the job adds or sets`,
+    };
+  }
+  if (sameValue(value, to)) return { status: 'PASS', observed: value, message: `${field} reached the demonstrated ${quoted(to)}` };
+  return { status: 'UNVERIFIABLE', observed: value, message: `${elsewhere}, so what it should become is not known; observed ${observed}` };
+}
+
+function recordsAt(observation: Observation, path: string): Record<string, unknown>[] {
+  const { found, value } = resolvePath(observation, path);
+  if (!found || value === null || value === undefined) return [];
+  return (Array.isArray(value) ? value : [value]).filter(
+    (entry): entry is Record<string, unknown> => typeof entry === 'object' && entry !== null,
+  );
+}
+
+/** Numbers compared after rounding, as the projection rounds; null and absent are one thing. */
+function sameValue(a: unknown, b: unknown): boolean {
+  if (typeof a === 'number' && typeof b === 'number') return round6(a) === round6(b);
+  if ((a === null || a === undefined) && (b === null || b === undefined)) return true;
+  return deepEqual(a, b);
+}
+
+/** `minutes 0 → 1 (+1)`, or `minutes 4` for a record that had no value before. */
+function changeWords(field: string, from: unknown, to: unknown): string {
+  if (from === undefined) return `${field} ${quoted(to)}`;
+  const delta = typeof from === 'number' && typeof to === 'number' ? ` (${signed(to - from)})` : '';
+  return `${field} ${quoted(from)} → ${quoted(to)}${delta}`;
+}
+
+function signed(value: number): string {
+  const rounded = round6(value);
+  return rounded >= 0 ? `+${rounded}` : String(rounded);
+}
+
+function quoted(value: unknown): string {
+  return value === undefined ? 'nothing' : JSON.stringify(value);
+}
+
+function round6(value: number): number {
+  return Math.round(value * 1e6) / 1e6;
 }
 
 function containment(

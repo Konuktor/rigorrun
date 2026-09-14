@@ -17,6 +17,7 @@ import {
   type Benchmark,
   type BenchmarkCase,
   type EnvironmentContract,
+  type ExpectedChange,
   type Literal,
   type Thresholds,
 } from '@rigorrun/core';
@@ -231,7 +232,7 @@ function buildCase(
 ): BenchmarkCase {
   const policy = synthesizeAssertions(contract, keys, { bindings: expected.bindings });
   const checks = [
-    ...successChecks(adapter, contract, mutation, expected, keys),
+    ...successChecks(adapter, contract, fixture, mutation, expected, keys),
     ...policy.assertions,
   ];
 
@@ -284,6 +285,7 @@ function buildCase(
 function successChecks(
   adapter: EnvironmentAdapter,
   contract: EnvironmentContract,
+  fixture: EnvironmentFixture,
   mutation: Mutation,
   expected: ExpectedOutcome,
   keys: ProjectionKeySchema,
@@ -389,7 +391,83 @@ function successChecks(
       expected: contract.expectedDeletedCount,
     });
   }
+
+  // And each record the job is about changed the way the demonstration changed
+  // it: by the demonstrated amount, to the demonstrated value. A count cannot
+  // see this — a second entry on the same total still changes one record. The
+  // record is named by the values that name it: the request's value where an
+  // argument binds one, otherwise the demonstrated value, and only when this
+  // case asks for what the demonstration asked for. Otherwise which record the
+  // case concerns cannot be predicted, and no such check is made.
+  const asDemonstrated = deepEqual(serialisableRequest(mutation.request), serialisableRequest(fixture.request));
+  (contract.expectedChanges ?? []).forEach((change, index) => {
+    const id = `success__as_demonstrated__${index + 1}`;
+    const name = contract.focusEntity;
+    if (change.compare === 'unattributable') {
+      checks.push({
+        ...common,
+        id,
+        kind: 'state_change',
+        description: `the change is attributable to one ${name} record`,
+        target: collection,
+        expected: {
+          compare: 'unattributable',
+          reason: `nothing observed names one ${name}, so a changed one cannot be told from a replaced one`,
+        },
+      });
+      return;
+    }
+    if (!fields.includes(change.field)) return;
+    if (scope === 'created') {
+      checks.push({
+        ...common,
+        id,
+        kind: 'state_change',
+        description: `the ${name} the job created holds ${changeWords(change)}, as demonstrated`,
+        target: collection,
+        expected: { seed: null, field: change.field, to: change.to, compare: change.compare },
+      });
+      return;
+    }
+    const clauses: string[] = [];
+    for (const [field, demonstratedValue] of Object.entries(change.record)) {
+      if (!fields.includes(field)) return;
+      const binding = bindings.find((candidate) => candidate.field === field && candidate.mode === 'equals');
+      const value = binding ? mutation.request[binding.param] : asDemonstrated ? demonstratedValue : undefined;
+      if (value === undefined) return;
+      const rendered = literal(value as Literal);
+      if (rendered === null) return;
+      clauses.push(`${field}=${rendered}`);
+    }
+    if (clauses.length === 0) return;
+    const record = `[${clauses.join(' & ')}]`;
+    checks.push({
+      ...common,
+      id,
+      kind: 'state_change',
+      description: `the ${name} the job changed goes ${changeWords(change)}, as demonstrated`,
+      target: `derived.all.${name}${record}`,
+      expected: {
+        seed: `derived.seed.${name}${record}`,
+        field: change.field,
+        from: change.from ?? null,
+        to: change.to,
+        compare: change.compare,
+      },
+    });
+  });
   return checks;
+}
+
+/** `minutes 0 → 1 (+1)`, as a person reads a check. */
+function changeWords(change: ExpectedChange): string {
+  const to = JSON.stringify(change.to);
+  if (change.from === undefined) return `${change.field} ${to}`;
+  if (typeof change.from !== 'number' || typeof change.to !== 'number') {
+    return `${change.field} ${JSON.stringify(change.from)} → ${to}`;
+  }
+  const delta = Math.round((change.to - change.from) * 1e6) / 1e6;
+  return `${change.field} ${change.from} → ${change.to} (${delta >= 0 ? '+' : ''}${delta})`;
 }
 
 /**

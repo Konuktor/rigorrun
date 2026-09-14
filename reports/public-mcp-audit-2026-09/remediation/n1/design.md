@@ -213,3 +213,15 @@ Each entry produces one `success__as_demonstrated__<n>` check.
 - **One check generator:** `successChecks`.
 
 No package outside these, and no frontend, is changed.
+
+## Amendments made during implementation
+
+These are appended; the design above is unchanged. Each was found by running the code, not by rereading it.
+
+1. **Pairing compares whole readings, never list entries.** Induction walks every list entry twice: once inside its list, and once as a record on its own, so that records nested inside it are reached. Pairing those per-entry copies by position would pair *different* records whenever a list gains a row at its front, as in a newest-first inbox. Change evidence therefore compares only top-level lists and records that stand on their own. Anything inside a list entry is left out.
+2. **A value typed into a preparatory call is not held to its demonstrated value.**
+   - **Where it surfaced:** the full suite. `packages/daemon/test/independentVerifier.test.ts` and `packages/cli/test/project.test.ts` abstained on correct agents.
+   - **Why:** the recording signed a booking off as "Dana Whitlock", an argument of `record_signoff`, which is a call before the job. The agents signed off as someone else. `signedOffBy` changed to a value the operator typed, and the agent is never given those arguments.
+   - **Rule:** such a change is excluded from `expectedChanges`. A value comes from a preparatory call when it is related to that call's argument in the way argument bindings recognise: equal, containing it, or contained in it as a whole token. Booleans and one-character values count only under the argument's own name.
+   - **The job's own arguments** are unaffected: the case carries them, and argument bindings decide what they pin.
+   - **The cost** is a weaker check, never a false failure. A duplicate visible *only* in a value typed into a preparatory call is not caught by this check.

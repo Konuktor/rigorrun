@@ -19,7 +19,7 @@
 import { z } from 'zod';
 import { ENVIRONMENT_CONTRACT_SCHEMA_VERSION } from './versions.ts';
 import { AssertionSchema } from './assertion.ts';
-import { RulePredicateSchema } from './predicate.ts';
+import { LiteralSchema, RulePredicateSchema } from './predicate.ts';
 
 export { ENVIRONMENT_CONTRACT_SCHEMA_VERSION } from './versions.ts';
 
@@ -160,6 +160,29 @@ export const ArgumentBindingSchema = z.object({
 });
 export type ArgumentBinding = z.infer<typeof ArgumentBindingSchema>;
 
+/**
+ * A change the demonstration made to one record the job is about, which a case
+ * must reproduce.
+ *
+ * Observed, never named: the compiler reads it off the delta between the
+ * recording's readings. `record` holds the values that name the record (empty
+ * for the record the job created). `compare` says how a case that starts from a
+ * different value is reasoned about: arithmetic for a quantity, the value itself
+ * for a closed set, nothing predictable for free text. `unattributable` records
+ * that nothing observed names one record, so a change cannot be told from a
+ * replacement and the case must abstain rather than count.
+ */
+export const ExpectedChangeSchema = z.object({
+  record: z.record(z.string(), LiteralSchema).default({}),
+  /** The changed field; empty for `unattributable`. */
+  field: z.string(),
+  /** The value before the job; absent when the job created the record. */
+  from: LiteralSchema.optional(),
+  to: LiteralSchema.optional(),
+  compare: z.enum(['quantity', 'closed', 'open', 'unattributable']),
+});
+export type ExpectedChange = z.infer<typeof ExpectedChangeSchema>;
+
 export const EnvironmentContractSchema = z.object({
   schemaVersion: z.literal(ENVIRONMENT_CONTRACT_SCHEMA_VERSION),
   id: z.string().min(1),
@@ -217,6 +240,13 @@ export const EnvironmentContractSchema = z.object({
    * an agent that deletes one has done something the job does not.
    */
   expectedDeletedCount: z.number().int().nonnegative().optional(),
+  /**
+   * How the records the job is about must change, as the demonstration changed
+   * them. A count cannot see a duplicate that lands on the same record: one
+   * time entry and two both change one row of a report, and only the amount
+   * tells them apart.
+   */
+  expectedChanges: z.array(ExpectedChangeSchema).optional(),
   rules: z.array(ContractRuleSchema).default([]),
   successAssertions: z.array(AssertionSchema).default([]),
   policyAssertions: z.array(AssertionSchema).default([]),
