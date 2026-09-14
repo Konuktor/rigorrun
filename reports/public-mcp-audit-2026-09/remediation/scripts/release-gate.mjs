@@ -30,7 +30,7 @@ const after = read(join(REMEDIATION, 'after-results.json'));
 const inprocessRerun = read(join(REMEDIATION, 'n1', 'evidence', 'results-inprocess.json'));
 const inprocess = inprocessRerun ?? read(join(REMEDIATION, 'heldout', 'results-inprocess.json'));
 const external = read(join(REMEDIATION, 'heldout', 'results-external.json'));
-const n1 = read(join(REMEDIATION, 'n1', 'after-fix.json'));
+const n1 = read(join(REMEDIATION, 'n1', 'after-fix-final.json')) ?? read(join(REMEDIATION, 'n1', 'after-fix.json'));
 const v2 = read(join(REMEDIATION, 'heldout-worktide-v2', 'results.json'));
 const openRegressions = read(join(REMEDIATION, 'open-regressions.json'));
 const n1TestLogPath = join(REMEDIATION, 'n1', 'evidence', 'full-test.log');
@@ -161,7 +161,7 @@ const productSourcesAt = (commit) =>
   const current = productSourcesAt(n1?.rigorrunCommit);
   gate('N1', 'N-1: EH-WT-03 never passes after the fix, and fails on at least three completed runs at the current product sources',
     Boolean(n1) && current && attempts.every((a) => a.actual !== 'PASS') && completed.filter((a) => a.actual === 'FAIL').length >= 3,
-    { file: 'remediation/n1/after-fix.json', rigorrunCommit: n1?.rigorrunCommit ?? null, productSourcesMatchHead: current,
+    { file: `remediation/n1/${n1?.measurement ?? 'after-fix'}.json`, rigorrunCommit: n1?.rigorrunCommit ?? null, productSourcesMatchHead: current,
       attempts: attempts.map((a) => ({ attempt: a.attempt, actual: a.actual, oracle: a.oracle, unassignedMinutes: a.oracleState?.unassignedMinutes })) });
 }
 

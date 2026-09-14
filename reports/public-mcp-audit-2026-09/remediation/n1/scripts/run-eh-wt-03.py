@@ -14,8 +14,11 @@ them.
 
   run-eh-wt-03.py                         # EH-WT-03 three times
   run-eh-wt-03.py --also-sanity           # plus EH-WT-01 and EH-WT-02 once each
+  run-eh-wt-03.py --measurement after-fix-final --setup final   # a later measurement, kept apart
 
-Writes n1/after-fix.json.
+Writes n1/<measurement>.json. Each measurement's evidence root holds
+measurement.json, naming the product sources it measured; a rebuild never
+re-dates it.
 """
 import argparse
 import importlib.util
@@ -32,8 +35,17 @@ HELDOUT = os.path.join(REMEDIATION, "heldout")
 REPORT = os.path.dirname(REMEDIATION)
 REPO = os.path.abspath(os.path.join(REPORT, "..", ".."))
 SCRIPTS = os.path.join(REPORT, "scripts")
-RESULTS = os.path.join(N1, "after-fix.json")
 TRACES = os.path.join(N1, "evidence", "agent-traces")
+MEASUREMENT = "after-fix"
+SETUP = ""
+
+
+def results_path():
+    return os.path.join(N1, f"{MEASUREMENT}.json")
+
+
+def evidence_root():
+    return os.path.join(N1, "evidence", MEASUREMENT)
 
 spec = importlib.util.spec_from_file_location("heldout_external", os.path.join(HELDOUT, "external", "run-heldout-external.py"))
 heldout = importlib.util.module_from_spec(spec)
@@ -46,7 +58,7 @@ def git(*args):
 
 
 def project():
-    entry = heldout.load(os.path.join(N1, "projects.json"))["home-worktide-w2"]
+    entry = heldout.load(os.path.join(N1, SETUP, "projects.json"))["home-worktide-w2"]
     home = entry["home"].replace("{REPO}", REPO)
     project_dir = os.path.join(home, "projects", entry["project"])
     shape = [c["category"] for c in heldout.load(os.path.join(project_dir, "benchmark.json"))["cases"]]
@@ -105,7 +117,7 @@ def details(record, attempt_dir, info):
 
 def rebuilt(info):
     """Every attempt on record, re-derived from its evidence: the oracle verdict is judged again from its reads."""
-    root = os.path.join(N1, "evidence", "after-fix")
+    root = evidence_root()
     records = []
     for attempt_name in sorted(os.listdir(root)) if os.path.isdir(root) else []:
         if not attempt_name.startswith("attempt-"):
@@ -131,11 +143,21 @@ def rebuilt(info):
     return sorted(records, key=lambda r: (r["id"], r["attempt"]))
 
 
+def measured_commit():
+    path = os.path.join(evidence_root(), "measurement.json")
+    if not os.path.exists(path):
+        os.makedirs(evidence_root(), exist_ok=True)
+        with open(path, "w") as fh:
+            json.dump({"measurement": MEASUREMENT, "productSourcesOf": git("rev-parse", "HEAD")}, fh, indent=2)
+    return heldout.load(path)["productSourcesOf"]
+
+
 def write(info, attempts):
-    with open(RESULTS, "w") as fh:
+    with open(results_path(), "w") as fh:
         json.dump({
             "generatedBy": "remediation/n1/scripts/run-eh-wt-03.py",
-            "rigorrunCommit": git("rev-parse", "HEAD"),
+            "measurement": MEASUREMENT,
+            "rigorrunCommit": measured_commit(),
             "caseDefinitions": "remediation/heldout/external/cases.json (unchanged)",
             "project": {"home": "{REPO}/" + os.path.relpath(info["home"], REPO), "id": info["project"]},
             "attempts": attempts,
@@ -146,8 +168,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--attempts", nargs="*", type=int, default=[1, 2, 3], help="EH-WT-03 attempt numbers to run")
     parser.add_argument("--also-sanity", action="store_true")
-    parser.add_argument("--rebuild", action="store_true", help="only re-derive after-fix.json from the evidence on disk")
+    parser.add_argument("--rebuild", action="store_true", help="only re-derive the results from the evidence on disk")
+    parser.add_argument("--measurement", default="after-fix")
+    parser.add_argument("--setup", default="", help="the setup-w2.py --into directory whose W2 project to use")
     a = parser.parse_args()
+    global MEASUREMENT, SETUP
+    MEASUREMENT, SETUP = a.measurement, a.setup
     info = project()
     if not a.rebuild:
         if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", "packages", "apps", "fixtures"]).returncode != 0:
@@ -155,8 +181,12 @@ def main():
         plan = [("EH-WT-03", n) for n in a.attempts]
         if a.also_sanity:
             plan += [("EH-WT-01", 1), ("EH-WT-02", 1)]
+        if os.path.exists(os.path.join(evidence_root(), "measurement.json")) and measured_commit() != git("rev-parse", "HEAD") and \
+                subprocess.run(["git", "-C", REPO, "diff", "--quiet", measured_commit(), "HEAD", "--", "packages", "apps", "fixtures"]).returncode != 0:
+            raise SystemExit(f"refusing: {MEASUREMENT} measured other product sources; use a new --measurement")
+        measured_commit()
         for case_id, attempt in plan:
-            heldout.EVIDENCE = os.path.join(N1, "evidence", "after-fix", f"attempt-{attempt}")
+            heldout.EVIDENCE = os.path.join(evidence_root(), f"attempt-{attempt}")
             heldout.FAULT_LOG = os.path.join(N1, "evidence", "fault-proxy.unused.jsonl")
             heldout.run_case(CASES[case_id], info)
             done = next(r for r in rebuilt(info) if r["id"] == case_id and r["attempt"] == attempt)

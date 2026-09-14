@@ -51,7 +51,9 @@ function attemptsOf(afterFix, id) {
   };
 }
 
-const afterFix = read(join(N1, 'after-fix.json'));
+// The final measurement, when there is one, is the one reported; the first stays on record in after-fix.json.
+const firstFix = read(join(N1, 'after-fix.json'));
+const afterFix = read(join(N1, 'after-fix-final.json')) ?? firstFix;
 const v2Results = read(join(V2, 'results.json'));
 const v2Cases = read(join(V2, 'cases.json'));
 const freeze = read(join(V2, 'freeze.json'));
@@ -59,6 +61,8 @@ const inprocess = read(join(N1, 'evidence', 'results-inprocess.json'));
 
 const results = {
   commit: afterFix?.rigorrunCommit ?? null,
+  measurement: afterFix?.measurement ?? null,
+  FIRST_MEASUREMENT: firstFix && firstFix !== afterFix ? { commit: firstFix.rigorrunCommit, EH_WT_03: attemptsOf(firstFix, 'EH-WT-03') } : null,
   EH_WT_03: afterFix ? attemptsOf(afterFix, 'EH-WT-03') : null,
   EH_WT_01: afterFix ? attemptsOf(afterFix, 'EH-WT-01') : null,
   EH_WT_02: afterFix ? attemptsOf(afterFix, 'EH-WT-02') : null,
