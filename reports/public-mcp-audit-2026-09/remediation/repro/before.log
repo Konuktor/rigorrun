@@ -1,7 +1,7 @@
 side=before ref=07dda8c738d6daada161ffcf2bfc046b3c874ac5
 07dda8c738d6daada161ffcf2bfc046b3c874ac5
 
- RUN  v4.1.11 /tmp/claude-1000/-home-erbol-RigorRun/d6802adb-f0f1-4f60-ba45-6ff20fcde56a/scratchpad/rr-before
+ RUN  v4.1.11 {SCRATCH}/rr-before
 
  ✓ packages/runner/test/zz_repro.test.ts (4 tests) 58ms
  ✓ packages/cli/test/zz_repro.test.ts (3 tests) 7ms
