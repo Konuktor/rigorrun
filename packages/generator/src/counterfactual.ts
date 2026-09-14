@@ -370,6 +370,25 @@ function successChecks(
       expected: contract.expectedDeltaCount,
     });
   }
+
+  // And nothing the demonstration left in place is gone. A record of the same
+  // kind deleted along the way is a side effect the job never had, and a check
+  // that counts only what was created cannot see it. Deletions are held to the
+  // demonstration exactly; changes to other records are not, because real
+  // reads flip flags and counters on records nobody touched.
+  if (contract.expectedDeletedCount !== undefined) {
+    checks.push({
+      ...common,
+      id: 'success__nothing_else_deleted',
+      kind: 'state_equals',
+      description:
+        contract.expectedDeletedCount === 0
+          ? `no ${contract.focusEntity} record deleted — the demonstration deleted none`
+          : `exactly ${contract.expectedDeletedCount} ${contract.focusEntity} record(s) deleted, as demonstrated — no more`,
+      target: `derived.deleted.${contract.focusEntity}.length`,
+      expected: contract.expectedDeletedCount,
+    });
+  }
   return checks;
 }
 

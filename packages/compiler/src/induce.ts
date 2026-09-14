@@ -250,6 +250,7 @@ export function induceContract(
     observedFacts: observedFacts(context),
     argumentBindings: argumentBindings(context),
     expectedDeltaCount: expectedDeltaCount(context),
+    expectedDeletedCount: expectedDeletedCount(context),
     rules,
     successAssertions: [],
     policyAssertions: [],
@@ -327,6 +328,17 @@ function expectedDeltaCount(context: Context): number {
       .filter((delta) => delta.entity === name && delta.kind !== 'entity_created' && delta.kind !== 'entity_deleted')
       .map((delta) => delta.id),
   ).size;
+}
+
+/**
+ * How many records of the kind the job is about the demonstration deleted —
+ * usually none. Read from the delta like the count above, so a job that
+ * replaces a record is held to deleting exactly one, and a job that only
+ * creates is held to deleting nothing.
+ */
+function expectedDeletedCount(context: Context): number {
+  const name = context.focusEntity.name;
+  return context.deltas.filter((delta) => delta.kind === 'entity_deleted' && delta.entity === name).length;
 }
 
 /**

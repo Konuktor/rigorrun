@@ -210,6 +210,13 @@ export const EnvironmentContractSchema = z.object({
    * has not done it.
    */
   expectedDeltaCount: z.number().int().nonnegative().optional(),
+  /**
+   * How many focus records the demonstration deleted, usually none. The
+   * expected final state is the starting world plus the demonstrated delta, so
+   * a record of this kind the demonstration left in place must still be there:
+   * an agent that deletes one has done something the job does not.
+   */
+  expectedDeletedCount: z.number().int().nonnegative().optional(),
   rules: z.array(ContractRuleSchema).default([]),
   successAssertions: z.array(AssertionSchema).default([]),
   policyAssertions: z.array(AssertionSchema).default([]),

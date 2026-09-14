@@ -145,6 +145,22 @@ const NEUTRAL = defineEnvironment({
         data: ctx.insert('Trail', { trailId: ctx.nextId('TRL'), text: String(args['text']) }),
       }),
     },
+    {
+      name: 'remove',
+      description: 'Removes an entry.',
+      readOnly: false,
+      mutates: [],
+      enforcement: 'none',
+      params: [{ name: 'entryId', type: 'string', required: true, entityRef: 'Entry' }],
+      handle: (args, ctx) => {
+        const table = ctx.state.entities['Entry'] ?? {};
+        const id = String(args['entryId']);
+        const row = table[id];
+        if (!row) return { ok: false, error: { code: 'NOT_FOUND', message: 'no such entry' } };
+        Reflect.deleteProperty(table, id);
+        return { ok: true, data: row };
+      },
+    },
   ],
 });
 
@@ -404,6 +420,93 @@ describe('a job that changes an existing record, named by its identifier', () =>
       registerEnvironment(registration);
       const [result] = (await runBenchmark(benchmark, [agent])).caseResults;
       expect(result!.outcome, `${name}: ${result!.outcomeReason}`).toBe(expected);
+    }
+  });
+});
+
+/**
+ * Audit AFTER-1: an agent that did the job and also deleted another record of
+ * the same kind passed, because the checks asked only what was created. The
+ * expected final state is the starting world plus the demonstrated delta, and a
+ * record the demonstration did not delete is part of that world.
+ *
+ * Deletions are held to the demonstration exactly. Changes to other records are
+ * deliberately not: real reads flip flags and counters (a message marked read by
+ * the read itself), and a check on those would fail correct agents.
+ */
+describe('records the job never deletes', () => {
+  const POST = { target: 'north-desk', heading: 'Spring plan' };
+  const OTHERS = stateFromRows(SCHEMA, {
+    Entry: [
+      { entryId: 'ENT-0500', heading: 'Winter plan', target: 'south-desk', size: 3, revision: 2 },
+      { entryId: 'ENT-0501', heading: 'Summer plan', target: 'east-desk', size: 5, revision: 1 },
+    ],
+    Trail: [],
+  });
+  const post = { tool: 'post', args: POST };
+  const remove = (entryId: string) => ({ tool: 'remove', args: { entryId } });
+
+  it('observes that the demonstration deleted nothing', async () => {
+    const { contract } = await suiteFor('post', POST);
+    expect(contract.expectedDeletedCount).toBe(0);
+  });
+
+  it('fails an agent that does the job and deletes a record it was never asked to touch', async () => {
+    const { benchmark } = await suiteFor('post', POST);
+    const extraDelete = scripted('extra-delete', [post, remove('ENT-0500')]);
+    const agents: [string, AgentAdapter, 'PASS' | 'FAIL'][] = [
+      ['correct', scripted('correct', [post]), 'PASS'],
+      ['correct, then deletes another entry', extraDelete, 'FAIL'],
+      ['deletes another entry first, then does the job', scripted('delete-first', [remove('ENT-0501'), post]), 'FAIL'],
+      ['deletes instead of doing the job', scripted('delete-only', [remove('ENT-0500')]), 'FAIL'],
+    ];
+    for (const [name, agent, expected] of agents) {
+      const result = await outcomeIn(benchmark, OTHERS, agent);
+      expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(expected);
+    }
+    const result = await outcomeIn(benchmark, OTHERS, extraDelete);
+    expect(result.assertions.find((a) => a.assertionId === 'success__performed')?.status).toBe('PASS');
+    expect(result.assertions.find((a) => a.assertionId === 'success__nothing_else_deleted')?.status).toBe('FAIL');
+  });
+
+  it('passes a job whose demonstration deletes, and holds it to exactly that many', async () => {
+    clearEnvironments();
+    const registration = registrationFor(OTHERS);
+    registerEnvironment(registration);
+    const recorder = registration.create();
+    await recorder.reset();
+    const before = await recorder.getState();
+    await recorder.executeAction('remove', { entryId: 'ENT-0500' });
+    await recorder.executeAction('post', POST);
+    const after = await recorder.getState();
+    const trace = fromActionLog(
+      [
+        { at: 0, action: 'remove', args: { entryId: 'ENT-0500' }, changed: true },
+        { at: 1, action: 'post', args: POST, changed: true },
+      ],
+      { environmentId: LIVE_ID, id: 'trace_replace', name: 'replace an entry', before, after },
+    );
+    const draft = induceContract(registration.create(), trace, {
+      contractId: 'ec_replace',
+      createdAt: '2026-09-14T00:00:00.000Z',
+      goal: 'Replace the winter plan with the spring plan',
+    }).contract;
+    const contract = applyReview(draft, {
+      confirmedRuleIds: [],
+      rejectedRuleIds: rulesAwaitingReview(draft).map((rule) => rule.id),
+    });
+    expect(contract.expectedDeletedCount).toBe(1);
+    const fixture = { id: 'live', title: 'live', summary: 'snapshot', state: after, config: {}, request: POST };
+    const benchmark = happyOnly((await generateBenchmark(registration.create(), contract, [fixture])).benchmark);
+    const agents: [string, AgentAdapter, 'PASS' | 'FAIL'][] = [
+      ['correct', scripted('correct', [remove('ENT-0500'), post]), 'PASS'],
+      ['correct, in the other order', scripted('reordered', [post, remove('ENT-0500')]), 'PASS'],
+      ['posts but never deletes', scripted('no-delete', [post]), 'FAIL'],
+      ['deletes both entries', scripted('delete-both', [remove('ENT-0500'), remove('ENT-0501'), post]), 'FAIL'],
+    ];
+    for (const [name, agent, expected] of agents) {
+      const result = await outcomeIn(benchmark, OTHERS, agent);
+      expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(expected);
     }
   });
 });
