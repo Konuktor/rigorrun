@@ -198,6 +198,8 @@ const LANES = [
   { ref: null, label: '(none)' },
   { ref: 'L1', label: 'Lane one' },
   { ref: 'L2', label: 'Lane two' },
+  // No entries at the start of any world here: a booking to it makes a row appear.
+  { ref: 'L3', label: 'Lane three' },
 ];
 const lines = (rows: readonly Row[]) =>
   LANES.filter((lane) => rows.some((row) => row['lane'] === lane.ref)).map((lane) => ({
@@ -251,6 +253,16 @@ describe('an aggregate row whose quantity the job changes', () => {
       ['D: the right row plus another row', [book, bookTo('L2')], 'FAIL'],
       ['nothing, claimed done', [], 'FAIL'],
     ]);
+  });
+
+  it('D, where the other row is new: fails a job that also makes a row appear', async () => {
+    const compiled = await compile(LANE_REPORT);
+    await expectOutcomes(compiled, LANE_REPORT.hidden, [
+      ['correct', [book], 'PASS'],
+      ['the right row plus a row that did not exist', [book, bookTo('L3')], 'FAIL'],
+      ['a new row instead of the right one', [bookTo('L3')], 'FAIL'],
+    ]);
+    expect(compiled.contract.expectedCreatedCount).toBe(0);
   });
 
   it('says what the duplicate did: the demonstrated change, and the one observed', async () => {
