@@ -1,0 +1,458 @@
+side=after
+852154ce6eeef781144395ccaebf75a01a453bb4
+ M packages/compiler/src/induce.ts
+ M packages/compiler/src/synthesize.ts
+ M packages/compiler/test/induce.test.ts
+ M packages/core/src/canonicalTrace.ts
+ M packages/core/src/environmentContract.ts
+ M packages/core/src/index.ts
+ M packages/core/src/traceNormalize.ts
+ M packages/core/test/environmentContract.test.ts
+ M packages/daemon/src/service.ts
+ M packages/daemon/src/workspace.ts
+ M packages/environment/src/projection.ts
+ M packages/generator/src/counterfactual.ts
+ M packages/runner/test/honesty.test.ts
+ M packages/verifier/src/path.ts
+ M packages/verifier/test/path.test.ts
+ M reports/public-mcp-audit-2026-09/remediation/progress.md
+?? packages/core/src/pathSyntax.ts
+?? packages/daemon/test/stepChange.test.ts
+?? packages/runner/test/expectedDelta.test.ts
+?? reports/public-mcp-audit-2026-09/remediation/repro/
+
+ RUN  v4.1.11 /home/erbol/RigorRun
+
+ ❯ packages/runner/test/zz_repro.test.ts (4 tests | 4 failed) 58ms
+     × DEFECT: a correct agent is failed (false positive) 38ms
+     × DEFECT: a duplicate side effect is passed (false negative) 9ms
+     × DEFECT: an agent that did nothing is passed when the world drifted (false negative) 5ms
+     × DEFECT: an agent that also writes a record the job never writes is passed 4ms
+ ❯ packages/daemon/test/zz_repro.test.ts (3 tests | 3 failed) 701ms
+     × DEFECT: the read probe is silent, then compile refuses after the job was demonstrated 348ms
+     × DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description 318ms
+     × DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/daemon/test/zz_repro.test.ts > R-8 — JSON inside a text block > DEFECT: the read probe is silent, then compile refuses after the job was demonstrated
+AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "argumentBindings": [],
++   "completionActions": [],
++   "createdAt": "2026-09-14T07:35:42.079Z",
++   "demonstratedArgs": {
++     "confirm_booking": {
++       "bookingId": "BKG-4001",
++     },
++     "record_signoff": {
++       "approver": "Dana Whitlock",
++       "bookingId": "BKG-4001",
++     },
++   },
++   "description": "Compiled from one recorded execution in text-json desk.",
++   "environmentId": "p_a835bfb6e426",
++   "expectedDeltaCount": 1,
++   "focusEntity": "Booking",
++   "focusScope": "changed",
++   "goal": "Confirm a held booking",
++   "id": "ec_p_a835bfb6e426",
++   "name": "Confirm a held booking.",
++   "observedFacts": [
++     {
++       "id": "fact_001",
++       "key": "Booking.bookingStatus",
++       "provenance": [
++         {
++           "detail": "Booking BKG-4001: bookingStatus changed \"held\" → \"confirmed\"",
++           "kind": "state_delta",
++           "ref": "delta_0",
++         },
++       ],
++       "statement": "Booking BKG-4001: bookingStatus changed \"held\" → \"confirmed\"",
++       "value": {
++         "from": "held",
++         "to": "confirmed",
++       },
++     },
++     {
++       "id": "fact_002",
++       "key": "Booking.signedOffBy",
++       "provenance": [
++         {
++           "detail": "Booking BKG-4001: signedOffBy changed nothing → \"Dana Whitlock\"",
++           "kind": "state_delta",
++           "ref": "delta_1",
++         },
++       ],
++       "statement": "Booking BKG-4001: signedOffBy changed nothing → \"Dana Whitlock\"",
++       "value": {
++         "from": null,
++         "to": "Dana Whitlock",
++       },
++     },
++   ],
++   "policyAssertions": [],
++   "primaryAction": "confirm_booking",
++   "projectionFocus": [
++     "Booking",
++   ],
++   "remedyActions": [
++     "record_signoff",
++   ],
++   "rules": [
++     {
++       "confidence": 0.5,
++       "generatedAssertions": [],
++       "generatedCases": [],
++       "id": "rule_action_order__record_signoff__confirm_booking",
++       "implications": [
++         "An agent that does them the other way round will fail.",
++       ],
++       "predicate": {
++         "after": "confirm_booking",
++         "before": "record_signoff",
++         "kind": "event_order",
++       },
++       "provenance": [
++         {
++           "detail": "the operator did record_signoff, then confirm_booking",
++           "kind": "recorded_action",
++           "ref": "record_signoff__confirm_booking",
++         },
++       ],
++       "question": {
++         "reason": "That was the order in the recording. It may simply have been convenient.",
++         "text": "Must \"record signoff\" always come before \"confirm booking\"?",
++       },
++       "statement": "\"record signoff\" must happen before \"confirm booking\"",
++       "status": "inferred",
++       "template": "action_order",
++     },
++     {
++       "confidence": 0.45,
++       "generatedAssertions": [],
++       "generatedCases": [],
++       "id": "rule_field_relation__lte__booking_venue__capacity__depositAmount",
++       "implications": [
++         "An agent that goes over will fail.",
++       ],
++       "predicate": {
++         "entity": "Booking",
++         "kind": "row_constraint",
++         "scope": "changed",
++         "then": [
++           {
++             "describe": "the booking's venue capacity is at most the booking's deposit amount",
++             "field": "cmp__booking_venue__capacity__minus__depositAmount",
++             "op": "lte",
++             "value": 0,
++           },
++         ],
++         "when": [],
++       },
++       "provenance": [
++         {
++           "detail": "in the demonstration the booking's venue capacity was below the booking's deposit amount",
++           "kind": "state_delta",
++           "ref": "Booking",
++         },
++       ],
++       "question": {
++         "reason": "One recording stayed below the other value; nothing showed what happens above it.",
++         "text": "Must the booking's venue capacity never exceed the booking's deposit amount?",
++       },
++       "statement": "the booking's venue capacity must not exceed the booking's deposit amount",
++       "status": "inferred",
++       "template": "field_relation",
++     },
++     {
++       "confidence": 0.45,
++       "generatedAssertions": [],
++       "generatedCases": [],
++       "id": "rule_field_relation__lte__booking_venue__enquiries__depositAmount",
++       "implications": [
++         "An agent that goes over will fail.",
++       ],
++       "predicate": {
++         "entity": "Booking",
++         "kind": "row_constraint",
++         "scope": "changed",
++         "then": [
++           {
++             "describe": "the booking's venue enquiries is at most the booking's deposit amount",
++             "field": "cmp__booking_venue__enquiries__minus__depositAmount",
++             "op": "lte",
++             "value": 0,
++           },
++         ],
++         "when": [],
++       },
++       "provenance": [
++         {
++           "detail": "in the demonstration the booking's venue enquiries was below the booking's deposit amount",
++           "kind": "state_delta",
++           "ref": "Booking",
++         },
++       ],
++       "question": {
++         "reason": "One recording stayed below the other value; nothing showed what happens above it.",
++         "text": "Must the booking's venue enquiries never exceed the booking's deposit amount?",
++       },
++       "statement": "the booking's venue enquiries must not exceed the booking's deposit amount",
++       "status": "inferred",
++       "template": "field_relation",
++     },
++     {
++       "confidence": 0.65,
++       "generatedAssertions": [],
++       "generatedCases": [],
++       "id": "rule_relation_required__booking_organiser",
++       "implications": [
++         "An agent that completes the job without an organiser will fail.",
++       ],
++       "predicate": {
++         "entity": "Booking",
++         "kind": "row_constraint",
++         "scope": "changed",
++         "then": [
++           {
++             "describe": "an organiser is linked",
++             "field": "booking_organiser__exists",
++             "op": "eq",
++             "value": true,
++           },
++         ],
++         "when": [],
++       },
++       "provenance": [
++         {
++           "detail": "the demonstration linked an organiser",
++           "kind": "state_delta",
++           "ref": "Booking",
++         },
++         {
++           "detail": "declared by the environment",
++           "kind": "env_schema",
++           "ref": "Booking.booking_organiser",
++         },
++       ],
++       "question": {
++         "reason": "One recording linked an organiser. Whether it is mandatory was never demonstrated.",
++         "text": "Does every booking always need an organiser?",
++       },
++       "statement": "every booking must be linked to an organiser",
++       "status": "inferred",
++       "template": "relation_required",
++     },
++     {
++       "confidence": 0.65,
++       "generatedAssertions": [],
++       "generatedCases": [],
++       "id": "rule_relation_required__booking_venue",
++       "implications": [
++         "An agent that completes the job without a venue will fail.",
++       ],
++       "predicate": {
++         "entity": "Booking",
++         "kind": "row_constraint",
++         "scope": "changed",
++         "then": [
++           {
++             "describe": "a venue is linked",
++             "field": "booking_venue__exists",
++             "op": "eq",
++             "value": true,
++           },
++         ],
++         "when": [],
++       },
++       "provenance": [
++         {
++           "detail": "the demonstration linked a venue",
++           "kind": "state_delta",
++           "ref": "Booking",
++         },
++         {
++           "detail": "declared by the environment",
++           "kind": "env_schema",
++           "ref": "Booking.booking_venue",
++         },
++       ],
++       "question": {
++         "reason": "One recording linked a venue. Whether it is mandatory was never demonstrated.",
++         "text": "Does every booking always need a venue?",
++       },
++       "statement": "every booking must be linked to a venue",
++       "status": "inferred",
++       "template": "relation_required",
++     },
++     {
++       "confidence": 0.5,
++       "generatedAssertions": [],
++       "generatedCases": [],
++       "id": "rule_target_state__booking_organiser__standing",
++       "implications": [
++         "An agent acting on a record in another state will fail.",
++       ],
++       "predicate": {
++         "entity": "Booking",
++         "kind": "row_constraint",
++         "scope": "changed",
++         "then": [
++           {
++             "describe": "the booking's organiser standing is \"good\"",
++             "field": "seed__booking_organiser__standing",
++             "op": "in",
++             "value": [
++               "good",
++             ],
++           },
++         ],
++         "when": [],
++       },
++       "provenance": [
++         {
++           "detail": "the linked record was \"good\" when work began",
++           "kind": "state_delta",
++           "ref": "Booking",
++         },
++       ],
++       "question": {
++         "reason": "The recorded case happened to be \"good\". It could also be \"flagged\", and none of those were exercised.",
++         "text": "Must the booking's organiser standing always be \"good\" for this work to be allowed?",
++       },
++       "statement": "the booking's organiser standing must be \"good\" when the work is done",
++       "status": "inferred",
++       "template": "target_state",
++     },
++   ],
++   "schemaVersion": 1,
++   "sourceTraceId": "trace_p_a835bfb6e426",
++   "successAssertions": [],
+  }
+
+ ❯ packages/daemon/test/zz_repro.test.ts:62:46
+     60|     await service.teachStep(project.id, 'confirm_booking', { bookingId…
+     61|     await service.finishTeaching(project.id);
+     62|     await expect(service.compile(project.id)).rejects.toThrow(/text ra…
+       |                                              ^
+     63|   }, 120_000);
+     64| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  packages/daemon/test/zz_repro.test.ts > R-5 — the last call, not the call that changed something, is the job > DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/daemon/test/zz_repro.test.ts:85:22
+     83|       contract.primaryAction !== 'confirm_booking' ||
+     84|       (contract.demonstratedArgs['confirm_booking'] as { bookingId?: s…
+     85|     expect(wrongJob).toBe(true);
+       |                      ^
+     86|     expect(contract.goal).not.toContain('Confirm the held booking');
+     87|   }, 180_000);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  packages/daemon/test/zz_repro.test.ts > R-3 — typed cells induce a value-keyed entity > DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ packages/daemon/test/zz_repro.test.ts:101:98
+     99|     };
+    100|     const entities = induceSchema([{ tool: 'query', payload }]).schema…
+    101|     expect(entities.some((e) => e.idField === 'id' && e.fields.some((f…
+       |                                                                                                  ^
+    102|   });
+    103| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  packages/runner/test/zz_repro.test.ts > R-1 — the generation snapshot is the baseline > DEFECT: a correct agent is failed (false positive)
+AssertionError: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ packages/runner/test/zz_repro.test.ts:142:80
+    140|   it('DEFECT: a correct agent is failed (false positive)', async () =>…
+    141|     const benchmark = await suite(LIVE);
+    142|     expect(verdict(await runBenchmark(benchmark, [agent('correct', [FI…
+       |                                                                                ^
+    143|   });
+    144|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  packages/runner/test/zz_repro.test.ts > R-1 — the generation snapshot is the baseline > DEFECT: a duplicate side effect is passed (false negative)
+AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
+
+Expected: "PASS"
+Received: "FAIL"
+
+ ❯ packages/runner/test/zz_repro.test.ts:147:88
+    145|   it('DEFECT: a duplicate side effect is passed (false negative)', asy…
+    146|     const benchmark = await suite(LIVE);
+    147|     expect(verdict(await runBenchmark(benchmark, [agent('duplicate', […
+       |                                                                                        ^
+    148|   });
+    149|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  packages/runner/test/zz_repro.test.ts > R-1 — the generation snapshot is the baseline > DEFECT: an agent that did nothing is passed when the world drifted (false negative)
+AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
+
+Expected: "PASS"
+Received: "FAIL"
+
+ ❯ packages/runner/test/zz_repro.test.ts:155:80
+    153|     const drifted = world({ ...CLEAN, Claim: [{ claimId: 'CLM-0001', a…
+    154|     registerEnvironment(registration(drifted, LIVE));
+    155|     expect(verdict(await runBenchmark(benchmark, [agent('did-nothing',…
+       |                                                                                ^
+    156|   });
+    157| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  packages/runner/test/zz_repro.test.ts > scope checks — "must not create X" never fires > DEFECT: an agent that also writes a record the job never writes is passed
+AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
+
+Expected: "PASS"
+Received: "FAIL"
+
+ ❯ packages/runner/test/zz_repro.test.ts:163:61
+    161|     const benchmark = await suite({});
+    162|     const extra = agent('extra-write', [FILE, { tool: 'writeLog', args…
+    163|     expect(verdict(await runBenchmark(benchmark, [extra]))).toBe('PASS…
+       |                                                             ^
+    164|   });
+    165| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  7 failed (7)
+   Start at  13:35:41
+   Duration  1.31s (transform 500ms, setup 0ms, import 853ms, tests 760ms, environment 0ms)
+

@@ -1,0 +1,15 @@
+side=before ref=07dda8c738d6daada161ffcf2bfc046b3c874ac5
+07dda8c738d6daada161ffcf2bfc046b3c874ac5
+
+ RUN  v4.1.11 /tmp/claude-1000/-home-erbol-RigorRun/d6802adb-f0f1-4f60-ba45-6ff20fcde56a/scratchpad/rr-before
+
+ ✓ packages/runner/test/zz_repro.test.ts (4 tests) 64ms
+ ✓ packages/daemon/test/zz_repro.test.ts (3 tests) 681ms
+     ✓ DEFECT: the read probe is silent, then compile refuses after the job was demonstrated  335ms
+     ✓ DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description  314ms
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  13:34:59
+   Duration  1.36s (transform 567ms, setup 0ms, import 945ms, tests 745ms, environment 0ms)
+
