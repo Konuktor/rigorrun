@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "id": "trace_p_7026aaef7bd9",
+  "name": "Start a timer described 'Audit timer', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running.",
+  "environmentId": "p_7026aaef7bd9",
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "durationMs": 62472,
+  "actor": {
+    "id": "operator",
+    "kind": "human",
+    "label": "Operator"
+  },
+  "source": "action_log",
+  "before": {
+    "entities": {
+      "Record1": {
+        "945": {
+          "from": "2026-09-01T00:00:00+02:00",
+          "to": "2026-09-30T00:00:00+02:00",
+          "groupBy": "task",
+          "totalMinutes": 945,
+          "billableMinutes": 945,
+          "billedMinutes": 0
+        }
+      },
+      "Group": {
+        "0": {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 0,
+          "billableMinutes": 0,
+          "billedMinutes": 0
+        },
+        "225": {
+          "key": "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+          "label": "WORK-1 — MVP Skeleton aufsetzen",
+          "minutes": 225,
+          "billableMinutes": 225,
+          "billedMinutes": 0
+        },
+        "315": {
+          "key": "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+          "label": "WORK-2 — Login-Form bauen",
+          "minutes": 315,
+          "billableMinutes": 315,
+          "billedMinutes": 0
+        },
+        "405": {
+          "key": "01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+          "label": "WORK-3 — Time-Tracker UI prototypen",
+          "minutes": 405,
+          "billableMinutes": 405,
+          "billedMinutes": 0
+        }
+      },
+      "Task": {
+        "01a09c48-96db-7179-93b5-9de4616ac34e": {
+          "id": "01a09c48-96db-7179-93b5-9de4616ac34e",
+          "identifier": "AUD-2",
+          "title": "Collect the evidence",
+          "priority": "normal",
+          "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+          "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+          "createdAt": "2026-09-13T21:39:58+02:00",
+          "updatedAt": "2026-09-13T21:39:58+02:00"
+        },
+        "01a09c48-97a6-7202-b2de-e76be5553721": {
+          "id": "01a09c48-97a6-7202-b2de-e76be5553721",
+          "identifier": "AUD-3",
+          "title": "Publish the report",
+          "priority": "normal",
+          "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+          "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+          "createdAt": "2026-09-13T21:39:58+02:00",
+          "updatedAt": "2026-09-13T21:39:58+02:00"
+        },
+        "01a09c48-960d-7a2b-9cb4-63b84ba76c74": {
+          "id": "01a09c48-960d-7a2b-9cb4-63b84ba76c74",
+          "identifier": "AUD-1",
+          "title": "Write the audit plan",
+          "priority": "normal",
+          "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+          "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+          "createdAt": "2026-09-13T21:39:57+02:00",
+          "updatedAt": "2026-09-13T21:39:57+02:00"
+        }
+      },
+      "Record4": {},
+      "Record5": {}
+    }
+  },
+  "after": {
+    "entities": {
+      "Record1": {
+        "946": {
+          "from": "2026-09-01T00:00:00+02:00",
+          "to": "2026-09-30T00:00:00+02:00",
+          "groupBy": "task",
+          "totalMinutes": 946,
+          "billableMinutes": 946,
+          "billedMinutes": 0
+        }
+      },
+      "Group": {
+        "1": {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 1,
+          "billableMinutes": 1,
+          "billedMinutes": 0
+        },
+        "225": {
+          "key": "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+          "label": "WORK-1 — MVP Skeleton aufsetzen",
+          "minutes": 225,
+          "billableMinutes": 225,
+          "billedMinutes": 0
+        },
+        "315": {
+          "key": "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+          "label": "WORK-2 — Login-Form bauen",
+          "minutes": 315,
+          "billableMinutes": 315,
+          "billedMinutes": 0
+        },
+        "405": {
+          "key": "01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+          "label": "WORK-3 — Time-Tracker UI prototypen",
+          "minutes": 405,
+          "billableMinutes": 405,
+          "billedMinutes": 0
+        }
+      },
+      "Task": {
+        "01a09c48-96db-7179-93b5-9de4616ac34e": {
+          "id": "01a09c48-96db-7179-93b5-9de4616ac34e",
+          "identifier": "AUD-2",
+          "title": "Collect the evidence",
+          "priority": "normal",
+          "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+          "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+          "createdAt": "2026-09-13T21:39:58+02:00",
+          "updatedAt": "2026-09-13T21:39:58+02:00"
+        },
+        "01a09c48-97a6-7202-b2de-e76be5553721": {
+          "id": "01a09c48-97a6-7202-b2de-e76be5553721",
+          "identifier": "AUD-3",
+          "title": "Publish the report",
+          "priority": "normal",
+          "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+          "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+          "createdAt": "2026-09-13T21:39:58+02:00",
+          "updatedAt": "2026-09-13T21:39:58+02:00"
+        },
+        "01a09c48-960d-7a2b-9cb4-63b84ba76c74": {
+          "id": "01a09c48-960d-7a2b-9cb4-63b84ba76c74",
+          "identifier": "AUD-1",
+          "title": "Write the audit plan",
+          "priority": "normal",
+          "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+          "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+          "createdAt": "2026-09-13T21:39:57+02:00",
+          "updatedAt": "2026-09-13T21:39:57+02:00"
+        }
+      },
+      "Record4": {},
+      "Record5": {}
+    }
+  },
+  "steps": [
+    {
+      "id": "step_001",
+      "ordinal": 0,
+      "at": 724,
+      "kind": "action",
+      "action": {
+        "name": "time.start",
+        "args": {
+          "description": "Audit timer"
+        },
+        "ok": true,
+        "changedState": true
+      },
+      "surfaceText": []
+    },
+    {
+      "id": "step_002",
+      "ordinal": 1,
+      "at": 62472,
+      "kind": "action",
+      "action": {
+        "name": "time.stop",
+        "args": {},
+        "ok": true,
+        "changedState": true
+      },
+      "surfaceText": []
+    }
+  ],
+  "meta": {
+    "recorder": "rigorrun-action-log",
+    "recorderVersion": "1",
+    "redaction": "caller-supplied",
+    "droppedSensitiveEvents": 0
+  }
+}

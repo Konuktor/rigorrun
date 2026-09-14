@@ -1,0 +1,310 @@
+{
+  "entities": [
+    {
+      "name": "Record1",
+      "idField": "totalMinutes",
+      "fields": [
+        {
+          "name": "from",
+          "type": "timestamp",
+          "nullable": false,
+          "role": "timestamp",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "to",
+          "type": "timestamp",
+          "nullable": false,
+          "role": "timestamp",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "groupBy",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "totalMinutes",
+          "type": "number",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "billableMinutes",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "billedMinutes",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "groups",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Group",
+      "idField": "minutes",
+      "fields": [
+        {
+          "name": "key",
+          "type": "enum",
+          "nullable": true,
+          "role": "status",
+          "enumValues": [
+            "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+            "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+            "01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+          ]
+        },
+        {
+          "name": "label",
+          "type": "enum",
+          "nullable": false,
+          "role": "status",
+          "enumValues": [
+            "(unassigned)",
+            "WORK-1 — MVP Skeleton aufsetzen",
+            "WORK-2 — Login-Form bauen",
+            "WORK-3 — Time-Tracker UI prototypen"
+          ]
+        },
+        {
+          "name": "minutes",
+          "type": "number",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "billableMinutes",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "billedMinutes",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "precision": 1,
+          "unit": "count"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Task",
+      "idField": "id",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "identifier",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "assignees",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "tags",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "createdAt",
+          "type": "timestamp",
+          "nullable": false,
+          "role": "timestamp",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "nullable": false,
+          "role": "timestamp",
+          "precision": 1,
+          "unit": "count"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Record4",
+      "idField": "timerId",
+      "fields": [
+        {
+          "name": "closedTimeEntryId",
+          "type": "string",
+          "nullable": true,
+          "role": "freetext"
+        },
+        {
+          "name": "running",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        },
+        {
+          "name": "timerId",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "startedAt",
+          "type": "timestamp",
+          "nullable": false,
+          "role": "timestamp",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "elapsedSeconds",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "taskId",
+          "type": "string",
+          "nullable": true,
+          "role": "freetext"
+        },
+        {
+          "name": "projectId",
+          "type": "string",
+          "nullable": true,
+          "role": "freetext"
+        },
+        {
+          "name": "typeOfWorkId",
+          "type": "string",
+          "nullable": true,
+          "role": "freetext"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "isBillable",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Record5",
+      "idField": "timeEntryId",
+      "fields": [
+        {
+          "name": "timeEntryId",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "durationMinutes",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    }
+  ],
+  "relationships": [
+    {
+      "name": "record1_group",
+      "from": "Record1",
+      "to": "Group",
+      "via": {
+        "kind": "fk",
+        "field": "billedMinutes"
+      },
+      "cardinality": "one",
+      "required": false
+    },
+    {
+      "name": "record4_group",
+      "from": "Record4",
+      "to": "Group",
+      "via": {
+        "kind": "fk",
+        "field": "elapsedSeconds"
+      },
+      "cardinality": "one",
+      "required": false
+    },
+    {
+      "name": "record5_group",
+      "from": "Record5",
+      "to": "Group",
+      "via": {
+        "kind": "fk",
+        "field": "durationMinutes"
+      },
+      "cardinality": "one",
+      "required": false
+    }
+  ]
+}
