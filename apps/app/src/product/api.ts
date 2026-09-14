@@ -192,7 +192,15 @@ export interface RunView {
   isolation: string;
   limits: { id: string; limit: string; remedy: string }[];
   notTestable: { rule: string; reason: string }[];
-  verdict: { winnerAgentId: string | null; summary: string; rationale: string[] };
+  /** What the suite's own quality check said; warnings are shown beside the verdict. */
+  suiteQuality: {
+    assessed: boolean;
+    mutantKillRate: number | null;
+    independentKillRate: number | null;
+    falsePositiveRate: number | null;
+    warnings: string[];
+  } | null;
+  verdict: { winnerAgentId: string | null; summary: string; rationale: string[]; outcome?: 'PASS' | 'FAIL' | 'INCONCLUSIVE' };
   scores: {
     agentId: string;
     agentName: string;

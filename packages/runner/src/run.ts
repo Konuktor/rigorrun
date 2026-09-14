@@ -28,6 +28,7 @@ import {
   type EvidenceIndependence,
   type ObservedEvent,
   type RunResult,
+  type SuiteQuality,
 } from '@rigorrun/core';
 import {
   StateReadError,
@@ -69,6 +70,12 @@ export interface RunOptions {
    * needs more time than the suite was generated with. Recorded on each case.
    */
   caseTimeoutMs?: number;
+  /**
+   * The suite's own quality check. Its warnings go into the verdict's
+   * rationale and an unassessed suite is a limit, so a clean-looking PASS never
+   * hides a suite that cannot separate a good agent from a bad one.
+   */
+  suiteQuality?: SuiteQuality;
   version?: string;
 }
 
@@ -110,6 +117,14 @@ export async function runBenchmark(
     });
   }
 
+  if (options.suiteQuality && !options.suiteQuality.assessed) {
+    limits.push({
+      id: 'suite_quality_unassessed',
+      limit: 'Nobody has checked whether this suite can tell a correct agent from a broken one.',
+      remedy: 'Run the suite check before trusting a PASS from it.',
+    });
+  }
+
   await options.onProgress?.({
     type: 'run_started',
     runId,
@@ -144,6 +159,11 @@ export async function runBenchmark(
     ),
   );
 
+  const verdict = decideVerdict(scores);
+  for (const warning of options.suiteQuality?.warnings ?? []) {
+    verdict.rationale.push(`Suite quality: ${warning}.`);
+  }
+
   const result: RunResult = {
     schemaVersion: RUN_SCHEMA_VERSION,
     runId,
@@ -157,11 +177,12 @@ export async function runBenchmark(
     agents: agents.map((a) => ({ id: a.id, name: a.name, kind: a.kind })),
     caseResults,
     scores,
-    verdict: decideVerdict(scores),
+    verdict,
     verification: verificationStrength(capabilities),
     isolation: isolationLevel(capabilities),
     limits,
     notTestable: benchmark.notTestable ?? [],
+    ...(options.suiteQuality ? { suiteQuality: options.suiteQuality } : {}),
     resultHash: '',
     rigorrunVersion: options.version ?? '0.1.0',
   };

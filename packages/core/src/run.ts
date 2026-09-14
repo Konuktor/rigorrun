@@ -203,6 +203,26 @@ export const RunLimitSchema = z.object({
 });
 export type RunLimit = z.infer<typeof RunLimitSchema>;
 
+/**
+ * What the suite's own quality check said about the suite this run used.
+ *
+ * Carried on the run because a verdict from a suite that cannot tell a correct
+ * agent from a broken one is a different claim from one that can, and the
+ * audit found that difference sitting in a separate file nobody opened. A PASS
+ * never travels without it.
+ */
+export const SuiteQualitySchema = z.object({
+  assessed: z.boolean(),
+  mutantKillRate: z.number().nullable().default(null),
+  independentKillRate: z.number().nullable().default(null),
+  falsePositiveRate: z.number().nullable().default(null),
+  replayStable: z.boolean().nullable().default(null),
+  hiddenAnswerIsolated: z.boolean().nullable().default(null),
+  deadRules: z.number().int().nonnegative().default(0),
+  warnings: z.array(z.string()).default([]),
+});
+export type SuiteQuality = z.infer<typeof SuiteQualitySchema>;
+
 export const RunResultSchema = z.object({
   schemaVersion: z.literal(RUN_SCHEMA_VERSION),
   runId: z.string(),
@@ -238,6 +258,8 @@ export const RunResultSchema = z.object({
   limits: z.array(RunLimitSchema).default([]),
   /** Cases the generator could not build here, with a reason for each. */
   notTestable: z.array(z.object({ rule: z.string(), reason: z.string() })).default([]),
+  /** The suite's own quality check, when the caller knew it. */
+  suiteQuality: SuiteQualitySchema.optional(),
   /** Hash of this result, computed after the run is sealed. */
   resultHash: z.string().default(''),
   rigorrunVersion: z.string().default('0.1.0'),

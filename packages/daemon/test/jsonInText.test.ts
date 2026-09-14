@@ -111,12 +111,18 @@ describe('JSON in a text block is data', () => {
 
     const result = await service.runAgent(project.id, added.agent.id);
     expect(result.verification).toBe('PARTIAL');
+    // Nobody checked this suite, and the run says so beside the verdict.
+    expect(result.suiteQuality?.assessed).toBe(false);
+    expect(result.limits.map((limit) => limit.id)).toContain('suite_quality_unassessed');
+    expect(result.verdict.rationale.some((reason) => reason.startsWith('Suite quality:'))).toBe(true);
     const happy = result.caseResults.find((entry) => entry.category === 'happy_path');
     expect(happy).toBeDefined();
     // The state was read back through the same normaliser, so the verdict
     // rests on records, not on an empty world.
     expect(Object.keys(happy!.finalStateSummary)).toContain('Booking');
     expect(happy!.taskSuccess).toBe(true);
+    // Read back through the connection the agent used: not independent.
+    expect(happy!.evidenceIndependence).toBe('SELF_REPORTED');
   }, 300_000);
 });
 

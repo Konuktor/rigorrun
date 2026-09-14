@@ -570,6 +570,7 @@ function printComparison(result: RunResult): void {
   }
   line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
+  for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
   line();
   line(`${c.bold('Verdict')}  ${result.verdict.outcome ?? ''} ${result.verdict.summary}`);
   for (const reason of result.verdict.rationale) line(`  ${c.grey('-')} ${c.grey(reason)}`);

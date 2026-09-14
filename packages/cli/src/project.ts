@@ -173,7 +173,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
 
     const exitCode = failures.length > 0 ? 1 : inconclusive.length > 0 ? 3 : 0;
     if (flags.json) {
-      line(JSON.stringify({ passed: exitCode === 0, failures: [...failures, ...inconclusive], inconclusive: exitCode === 3, score }, null, 2));
+      line(JSON.stringify({ passed: exitCode === 0, failures: [...failures, ...inconclusive], inconclusive: exitCode === 3, score, suiteQuality: result.suiteQuality ?? null }, null, 2));
     } else {
       heading(`Gate: ${agent.name}`);
       table(
@@ -197,6 +197,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
         line(c.grey('              and compared, so isolation is believed rather than observed'));
       }
       for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
+      for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
       line();
       line(
         exitCode === 0
@@ -321,6 +322,7 @@ function printRun(result: RunResult, json: boolean): void {
   line();
   line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
+  for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
 }
 
 function pct(value: number): string {

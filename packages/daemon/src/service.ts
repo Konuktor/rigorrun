@@ -21,6 +21,7 @@ import {
   type CanonicalHumanTrace,
   type EnvironmentContract,
   type RunResult,
+  type SuiteQuality,
 } from '@rigorrun/core';
 import { induceContract } from '@rigorrun/compiler';
 import { createReferenceAgent, generateBenchmark, replayFailure } from '@rigorrun/generator';
@@ -566,6 +567,10 @@ export class Service {
       { caseTimeoutMs: project.budgets.caseMs },
     );
     await this.store.writeArtefact(projectId, 'benchmark', benchmark);
+    // A quality check describes the suite it checked. A regenerated suite has
+    // not been checked, and carrying the old verdict forward would put a
+    // number on a run that was never measured.
+    await this.store.deleteArtefact(projectId, 'quality');
 
     const updated: Project = {
       ...project,
@@ -816,6 +821,7 @@ export class Service {
         {
           runId: `run_${randomBytes(6).toString('hex')}`,
           ...(options.caseTimeoutMs !== undefined ? { caseTimeoutMs: options.caseTimeoutMs } : {}),
+          suiteQuality: suiteQualityOf(await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality')),
         },
       );
     } catch (error) {
@@ -1116,4 +1122,55 @@ function payloadsAreEmpty(payloads: readonly unknown[]): boolean {
 
   for (const payload of payloads) walk(payload, 0);
   return sawContainer && !sawContent;
+}
+
+/**
+ * The suite's quality check, reduced to what a verdict must carry.
+ *
+ * Every warning is a reason a PASS from this suite is worth less than it looks:
+ * a reference implementation it fails, broken agents it lets through, verdicts
+ * that change on replay, an answer the agent can see, rules nothing exercises.
+ * An unassessed suite says so rather than saying nothing.
+ */
+export function suiteQualityOf(quality: BenchmarkQuality | undefined): SuiteQuality {
+  if (!quality) {
+    return {
+      assessed: false,
+      mutantKillRate: null,
+      independentKillRate: null,
+      falsePositiveRate: null,
+      replayStable: null,
+      hiddenAnswerIsolated: null,
+      deadRules: 0,
+      warnings: ['this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one'],
+    };
+  }
+  const percent = (value: number) => `${Math.round(value * 100)}%`;
+  const measured = quality.measures.find((measure) => measure.id === 'false_positive_rate')?.value;
+  const falsePositiveRate = typeof measured === 'number' ? measured : null;
+  const warnings: string[] = [];
+  if (falsePositiveRate !== null && falsePositiveRate > 0) {
+    warnings.push(`the reference implementation fails ${percent(falsePositiveRate)} of cases, so a correct agent can be failed`);
+  }
+  if (quality.mutantKillRate < 1) {
+    warnings.push(`it caught ${percent(quality.mutantKillRate)} of deliberately broken agents`);
+  }
+  if (quality.independentKillRate < 1) {
+    warnings.push(`it caught ${percent(quality.independentKillRate)} of the defects its rules never mention`);
+  }
+  if (!quality.replayStable) warnings.push('the same agent did not get the same verdict twice');
+  if (!quality.hiddenAnswerIsolated) warnings.push('an expected answer is visible to the agent');
+  if (quality.deadRules.length > 0) {
+    warnings.push(`${quality.deadRules.length} confirmed rule(s) are never exercised by any case`);
+  }
+  return {
+    assessed: true,
+    mutantKillRate: quality.mutantKillRate,
+    independentKillRate: quality.independentKillRate,
+    falsePositiveRate,
+    replayStable: quality.replayStable,
+    hiddenAnswerIsolated: quality.hiddenAnswerIsolated,
+    deadRules: quality.deadRules.length,
+    warnings,
+  };
 }

@@ -378,6 +378,7 @@ function metadata(
     <dt>Verification</dt><dd>${esc(run.verification)}</dd>
     <dt>Isolation</dt><dd>${esc(run.isolation)}</dd>
     ${run.limits.map((limit) => `<dt>Limit</dt><dd>${esc(limit.limit)}${limit.remedy ? ` <span class="dim">${esc(limit.remedy)}</span>` : ''}</dd>`).join('')}
+    ${(run.suiteQuality?.warnings ?? []).map((warning) => `<dt>Suite quality</dt><dd>${esc(warning)}</dd>`).join('')}
   </dl>
   <p class="dim mono" style="margin-top:10px">
     Hashes are SHA-256 over the canonical JSON of each artefact. The benchmark hash is computed

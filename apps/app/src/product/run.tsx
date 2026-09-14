@@ -564,6 +564,17 @@ function Verdict({ run }: { run: RunView }) {
         </dl>
       </section>
 
+      {run.suiteQuality && run.suiteQuality.warnings.length > 0 ? (
+        <section className="flex flex-col gap-2" data-testid="suite-quality">
+          <SectionLabel>What the suite’s own check said</SectionLabel>
+          {run.suiteQuality.warnings.map((warning) => (
+            <Panel key={warning}>
+              <p className="text-body text-secondary">{warning}</p>
+            </Panel>
+          ))}
+        </section>
+      ) : null}
+
       {run.limits.length > 0 ? (
         <section className="flex flex-col gap-2">
           <SectionLabel>What this system stopped RigorRun doing</SectionLabel>

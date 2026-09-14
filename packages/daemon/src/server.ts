@@ -670,6 +670,7 @@ function publicRun(run: RunResult) {
     isolation: run.isolation,
     limits: run.limits,
     notTestable: run.notTestable,
+    suiteQuality: run.suiteQuality ?? null,
     verdict: run.verdict,
     scores: run.scores,
     caseResults: run.caseResults.map((entry) => ({
