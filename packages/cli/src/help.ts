@@ -29,6 +29,7 @@ VERIFY A SERVER
 
 PROJECTS
   projects                 List the projects on this machine.
+  setup <spec.json>        Create a project from a spec, with no interface.
   run --project <id>       Run the project's suite against its agent.
   gate --project <id>      Same, but exit non-zero if it misses the bar.
   compare-runs --project <id> <runId>
@@ -101,6 +102,7 @@ VERIFY OPTIONS
       --max-undetermined <n>    Undetermined findings tolerated. Default 0.
       --min-exercised <n>       Tools that must have been exercised. Default 1.
       --strict                  Treat minor contradictions as failures too.
+      --needs-credential <tool> A tool that needs a credential. Repeatable. Never inferred.
   -o, --out <file>              Where to write the record.
       --json                    Print the record and nothing else.
 
@@ -152,6 +154,7 @@ OPTIONS
       --max-undetermined <n>  Undetermined findings tolerated. Default 0.
       --min-exercised <n>     Tools that must have been exercised. Default 1.
       --strict                Treat minor contradictions as failures too.
+      --needs-credential <tool> A tool that needs a credential. Repeatable. Never inferred.
   -o, --out <file>            Where to write the record.
       --json                  Print the record to stdout and nothing else.
 
@@ -175,6 +178,22 @@ OPTIONS
       --report <path>  Also write an HTML report.
       --json         Print the run result as JSON.
       --quiet        Suppress per-case progress.
+`,
+  setup: `rigorrun setup <spec.json> - create a project with no interface
+
+Drives the same steps the interface does, from a JSON spec: connect, nominate
+reads, demonstrate the job, answer schema questions, compile, decide rules,
+build the suite, optionally check it, register agents. Prints the project id.
+
+A spec names the environment variable each secret comes from ("secrets":
+{"API_TOKEN": "MY_TOKEN_VAR"}); values are never read from the spec. A rule
+RigorRun only inferred is confirmed only when a "review.confirm" pattern
+matches its statement; every other inferred rule is rejected.
+
+OPTIONS
+      --home <dir>   Where the project store lives.
+      --json         Print a summary instead of the project id.
+      --quiet        Suppress progress.
 `,
   gate: `rigorrun gate <benchmark.json> - fail a build on an unreliable agent
 

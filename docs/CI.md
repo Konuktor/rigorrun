@@ -25,6 +25,15 @@ run that sets a project up in a browser then shells out to `rigorrun gate
 --project` against that workspace and checks the code. The snippet below is the
 command that test runs.
 
+## Setting a project up without the interface
+
+```bash
+MY_TOKEN_VAR=... rigorrun setup project.json   # prints the project id
+```
+
+The spec names where each credential comes from, never its value, and confirms
+only the inferred rules it names. See `rigorrun setup --help`.
+
 ## Commands
 
 ```bash

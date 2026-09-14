@@ -40,6 +40,7 @@ import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
 import { cmdFeedbackExport } from './feedback.ts';
 import { cmdVerify } from './verify.ts';
+import { cmdSetup } from './setup.ts';
 import {
   cmdProjectCompare,
   cmdProjectGate,
@@ -111,6 +112,8 @@ async function dispatch(argv: string[]): Promise<number> {
         // verify only.
         'max-undetermined': { type: 'string' },
         'min-exercised': { type: 'string' },
+        // Tools the operator says need a credential. Repeatable, never inferred.
+        'needs-credential': { type: 'string', multiple: true, default: [] },
         strict: { type: 'boolean', default: false },
         help: { type: 'boolean', short: 'h', default: false },
         version: { type: 'boolean', short: 'v', default: false },
@@ -240,7 +243,10 @@ async function dispatch(argv: string[]): Promise<number> {
         maxUndetermined: numberFlag(values['max-undetermined'], 'max-undetermined'),
         minExercised: numberFlag(values['min-exercised'], 'min-exercised'),
         strict: values.strict === true,
+        needsCredential: values['needs-credential'] ?? [],
       });
+    case 'setup':
+      return cmdSetup(target, flags);
     case 'doctor':
       return cmdDoctorProduct(flags);
     default:

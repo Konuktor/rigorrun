@@ -33,6 +33,8 @@ export interface VerifyFlags {
   maxUndetermined?: number | undefined;
   minExercised?: number | undefined;
   strict: boolean;
+  /** Tools the operator says need a credential RigorRun does not have. */
+  needsCredential?: readonly string[];
 }
 
 /** Every way the harness itself can fail. All of them are exit code 2. */
@@ -56,6 +58,9 @@ export async function cmdVerify(reference: string | undefined, flags: VerifyFlag
   let record: VerificationRecord;
   try {
     record = await verifyServer(reference, {
+      ...(flags.needsCredential && flags.needsCredential.length > 0
+        ? { needsCredential: flags.needsCredential }
+        : {}),
       ...(flags.quiet || flags.json
         ? {}
         : { onProgress: (phase, detail) => line(`  ${phase.padEnd(10)} ${detail}`) }),
