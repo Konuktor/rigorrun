@@ -23,11 +23,17 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REMEDIATION = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
-const AFTER = join(REMEDIATION, 'after');
+// AFTER_RUN names the run directory: `after` (the current measurement) or a
+// superseded run kept for the record, e.g. `after-1`. Each has its own results
+// file and its own prose markers, so both stay checkable.
+const RUN = process.env.AFTER_RUN ?? 'after';
+if (!/^after(-\d+)?$/.test(RUN)) throw new Error(`AFTER_RUN must be after or after-N, not ${RUN}`);
+const AFTER = join(REMEDIATION, RUN);
+const TAG = RUN === 'after' ? 'n' : `n-${RUN}`;
 const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const manifest = read(join(REMEDIATION, 'baseline-manifest.json'));
 const journeys = existsSync(join(AFTER, 'journeys.json')) ? read(join(AFTER, 'journeys.json')) : {};
-const findingStatus = existsSync(join(REMEDIATION, 'findings-status.json')) ? read(join(REMEDIATION, 'findings-status.json')) : {};
+const findingStatus = RUN === 'after' && existsSync(join(REMEDIATION, 'findings-status.json')) ? read(join(REMEDIATION, 'findings-status.json')) : {};
 const uniq = (xs) => [...new Set(xs)];
 const SCORED = ['TRUE_POSITIVE', 'TRUE_NEGATIVE', 'FALSE_POSITIVE', 'FALSE_NEGATIVE'];
 
@@ -166,12 +172,12 @@ const results = {
   cases,
 };
 
-const out = join(REMEDIATION, 'after-results.json');
+const out = join(REMEDIATION, `${RUN}-results.json`);
 if (process.argv.includes('--check')) {
   const expected = JSON.stringify(results, null, 2);
   const actual = existsSync(out) ? readFileSync(out, 'utf8') : '';
   if (actual.trim() !== expected.trim()) {
-    console.error('after-results.json is stale: regenerate with node remediation/scripts/aggregate-after.mjs');
+    console.error(`${RUN}-results.json is stale: regenerate with AFTER_RUN=${RUN} node remediation/scripts/aggregate-after.mjs`);
     process.exit(1);
   }
   const flat = {};
@@ -184,7 +190,7 @@ if (process.argv.includes('--check')) {
   let bad = 0;
   let checked = 0;
   for (const f of readdirSync(REMEDIATION).filter((name) => name.endsWith('.md'))) {
-    for (const m of readFileSync(join(REMEDIATION, f), 'utf8').matchAll(/<!-- n:([^ ]+) -->([^<]*)<!-- \/n -->/g)) {
+    for (const m of readFileSync(join(REMEDIATION, f), 'utf8').matchAll(new RegExp(`<!-- ${TAG}:([^ ]+) -->([^<]*)<!-- \\/${TAG} -->`, 'g'))) {
       checked += 1;
       if (flat[m[1]] === undefined || String(flat[m[1]]) !== m[2].trim()) {
         bad += 1;
@@ -197,5 +203,5 @@ if (process.argv.includes('--check')) {
 } else {
   writeFileSync(out, JSON.stringify(results, null, 2) + '\n');
   const t = totals(cases);
-  console.log(`after-results.json written: ${t.TOTAL_CASES} cases, TP ${t.TRUE_POSITIVES} TN ${t.TRUE_NEGATIVES} FP ${t.FALSE_POSITIVES} FN ${t.FALSE_NEGATIVES}, abstentions ${t.ABSTENTIONS}`);
+  console.log(`${RUN}-results.json written: ${t.TOTAL_CASES} cases, TP ${t.TRUE_POSITIVES} TN ${t.TRUE_NEGATIVES} FP ${t.FALSE_POSITIVES} FN ${t.FALSE_NEGATIVES}, abstentions ${t.ABSTENTIONS}`);
 }

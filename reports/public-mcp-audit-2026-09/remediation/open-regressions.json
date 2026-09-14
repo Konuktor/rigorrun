@@ -1,0 +1,20 @@
+[
+  {
+    "id": "N-1",
+    "kind": "newly_reachable_defect",
+    "serious": true,
+    "title": "Worktide W2/W3 suites key a time-report group by its minutes value, so the generated case is unsatisfiable",
+    "summary": "With R-8 fixed, the Worktide W2 and W3 journeys compile and build a suite for the first time. The only nominated read is a time report. Its groups carry no identifier-like field, so schema induction chose the integer 'minutes' as the identity. The demonstration raised one group's minutes from 0 to 1, which the contract reads as one Group created. The generated checks are 'derived.created.Group exists' and 'derived.created.Group.length == 1'. The suite's own quality check replays the job without the minute passing and reports false_positive_rate 1 and false_accusation 1 on both suites.",
+    "regression": false,
+    "whyNotARegression": "At the audited commit 07dda8c both journeys were refused at compile (R-8), so no Worktide suite existed to regress. The identity heuristic (chooseIdField / identifierLikeness in packages/mcp/src/induceSchema.ts) predates the remediation.",
+    "impactOnFrozenBenchmark": "none: all 13 frozen Worktide cases are direct probes that RigorRun does not grade",
+    "impactOnHeldOut": "EH-WT-01..03 grade against this suite; their expectations were committed (f4145bb, 14:30:04 +0600) before the re-run built it (14:32-14:36 +0600)",
+    "evidence": [
+      "remediation/after/traces/worktide-mcp/w2-setup/quality.json",
+      "remediation/after/traces/worktide-mcp/w3-setup/quality.json",
+      "remediation/after/traces/worktide-mcp/w2-setup/schema.json",
+      "remediation/after/journeys.json"
+    ],
+    "status": "OPEN"
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "confirmedRuleIds": [],
+  "rejectedRuleIds": [
+    "rule_action_order__time.start__time.stop",
+    "rule_field_relation__interval__billableMinutes__billedMinutes"
+  ],
+  "rules": [
+    {
+      "id": "rule_action_order__time.start__time.stop",
+      "status": "rejected",
+      "statement": "\"time.start\" must happen before \"time.stop\""
+    },
+    {
+      "id": "rule_field_relation__interval__billableMinutes__billedMinutes",
+      "status": "rejected",
+      "statement": "the group's billable minutes must be no more than 1 after the group's billed minutes"
+    }
+  ]
+}

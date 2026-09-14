@@ -1,26 +1,42 @@
 side=after
-c5746881dbafc400d84e2a2f30b9faa1a09244d3
+514128b9380f64fb413e8ffc803bd7ae57f8e087
+ M packages/compiler/src/induce.ts
+ M packages/core/src/environmentContract.ts
+ M packages/generator/src/counterfactual.ts
+ M packages/runner/test/expectedDelta.test.ts
+ M reports/public-mcp-audit-2026-09/evidence/rigorrun-test-remediation-baseline.log
+ M reports/public-mcp-audit-2026-09/remediation/heldout/external/run-heldout-external.py
+ M reports/public-mcp-audit-2026-09/remediation/progress.md
  M reports/public-mcp-audit-2026-09/remediation/repro/after.log
  M reports/public-mcp-audit-2026-09/remediation/repro/before.log
- M reports/public-mcp-audit-2026-09/remediation/repro/run-repro.sh
-?? reports/public-mcp-audit-2026-09/remediation/repro/cli.repro.test.ts
-?? reports/public-mcp-audit-2026-09/remediation/scripts/recreate-stacks.sh
+ M reports/public-mcp-audit-2026-09/remediation/scripts/aggregate-after.mjs
+ M reports/public-mcp-audit-2026-09/remediation/scripts/run-cases-after.py
+?? reports/public-mcp-audit-2026-09/remediation/after-1-results.json
+?? reports/public-mcp-audit-2026-09/remediation/after-1/
+?? reports/public-mcp-audit-2026-09/remediation/after-dryrun/
+?? reports/public-mcp-audit-2026-09/remediation/heldout/inprocess.log
+?? reports/public-mcp-audit-2026-09/remediation/open-regressions.json
+?? reports/public-mcp-audit-2026-09/remediation/rerun.console.log
+?? reports/public-mcp-audit-2026-09/remediation/scripts/quarantine-baseline-writes.py
+?? reports/public-mcp-audit-2026-09/remediation/scripts/redact-evidence.py
+?? reports/public-mcp-audit-2026-09/remediation/scripts/release-gate.mjs
+?? reports/public-mcp-audit-2026-09/scripts/__pycache__/
 
- RUN  v4.1.11 /home/erbol/RigorRun
+ RUN  v4.1.11 {REPO}
 
- ❯ packages/runner/test/zz_repro.test.ts (4 tests | 4 failed) 73ms
-     × DEFECT: a correct agent is failed (false positive) 51ms
-     × DEFECT: a duplicate side effect is passed (false negative) 10ms
-     × DEFECT: an agent that did nothing is passed when the world drifted (false negative) 6ms
-     × DEFECT: an agent that also writes a record the job never writes is passed 4ms
- ❯ packages/cli/test/zz_repro.test.ts (3 tests | 3 failed) 34ms
-     × DEFECT: the documented flag is rejected before anything runs 22ms
-     × DEFECT: no command creates a project from the command line 1ms
+ ❯ packages/runner/test/zz_repro.test.ts (4 tests | 4 failed) 59ms
+     × DEFECT: a correct agent is failed (false positive) 41ms
+     × DEFECT: a duplicate side effect is passed (false negative) 6ms
+     × DEFECT: an agent that did nothing is passed when the world drifted (false negative) 5ms
+     × DEFECT: an agent that also writes a record the job never writes is passed 5ms
+ ❯ packages/cli/test/zz_repro.test.ts (3 tests | 3 failed) 35ms
+     × DEFECT: the documented flag is rejected before anything runs 25ms
+     × DEFECT: no command creates a project from the command line 2ms
      × DEFECT: a verifier on an MCP connector is silently dropped 4ms
- ❯ packages/daemon/test/zz_repro.test.ts (3 tests | 3 failed) 751ms
-     × DEFECT: the read probe is silent, then compile refuses after the job was demonstrated 378ms
-     × DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description 338ms
-     × DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier 2ms
+ ❯ packages/daemon/test/zz_repro.test.ts (3 tests | 3 failed) 746ms
+     × DEFECT: the read probe is silent, then compile refuses after the job was demonstrated 389ms
+     × DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description 319ms
+     × DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier 1ms
 
 ⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
 
@@ -45,13 +61,13 @@ AssertionError: expected 'error RigorRun does not know how to f…' to match /ne
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
 
  FAIL  packages/cli/test/zz_repro.test.ts > R-6 — headless project setup > DEFECT: no command creates a project from the command line
-AssertionError: expected 'error /tmp/rigorrun-cli-repro-7vEtDu/…' to match /Unknown command/
+AssertionError: expected 'error /tmp/rigorrun-cli-repro-31RU9e/…' to match /Unknown command/
 
 - Expected:
 /Unknown command/
 
 + Received:
-"error /tmp/rigorrun-cli-repro-7vEtDu/project.json is not a usable spec: ENOENT: no such file or directory, open '/tmp/rigorrun-cli-repro-7vEtDu/project.json'
+"error /tmp/rigorrun-cli-repro-31RU9e/project.json is not a usable spec: ENOENT: no such file or directory, open '/tmp/rigorrun-cli-repro-31RU9e/project.json'
 "
 
  ❯ packages/cli/test/zz_repro.test.ts:53:18
@@ -92,7 +108,7 @@ undefined
 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
 
  FAIL  packages/daemon/test/zz_repro.test.ts > R-8 — JSON inside a text block > DEFECT: the read probe is silent, then compile refuses after the job was demonstrated
-AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of rejecting
+AssertionError: promise resolved "{ schemaVersion: 1, …(21) }" instead of rejecting
 
 - Expected
 + Received
@@ -100,9 +116,16 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
 - Error {
 -   "message": "rejected promise",
 + {
-+   "argumentBindings": [],
++   "argumentBindings": [
++     {
++       "demonstrated": "BKG-4001",
++       "field": "bookingId",
++       "mode": "equals",
++       "param": "bookingId",
++     },
++   ],
 +   "completionActions": [],
-+   "createdAt": "2026-09-14T08:15:03.907Z",
++   "createdAt": "2026-09-14T09:19:40.421Z",
 +   "demonstratedArgs": {
 +     "confirm_booking": {
 +       "bookingId": "BKG-4001",
@@ -113,12 +136,13 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
 +     },
 +   },
 +   "description": "Compiled from one recorded execution in text-json desk.",
-+   "environmentId": "p_467d71d23ba3",
++   "environmentId": "p_71cd850c9241",
++   "expectedDeletedCount": 0,
 +   "expectedDeltaCount": 1,
 +   "focusEntity": "Booking",
 +   "focusScope": "changed",
 +   "goal": "Confirm a held booking",
-+   "id": "ec_p_467d71d23ba3",
++   "id": "ec_p_71cd850c9241",
 +   "name": "Confirm a held booking.",
 +   "observedFacts": [
 +     {
@@ -390,7 +414,7 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
 +     },
 +   ],
 +   "schemaVersion": 1,
-+   "sourceTraceId": "trace_p_467d71d23ba3",
++   "sourceTraceId": "trace_p_71cd850c9241",
 +   "successAssertions": [],
   }
 
@@ -509,6 +533,6 @@ Received: "FAIL"
 
  Test Files  3 failed (3)
       Tests  10 failed (10)
-   Start at  14:15:02
-   Duration  1.45s (transform 964ms, setup 0ms, import 1.81s, tests 857ms, environment 0ms)
+   Start at  15:19:39
+   Duration  1.47s (transform 1.21s, setup 0ms, import 1.95s, tests 839ms, environment 0ms)
 

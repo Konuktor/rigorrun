@@ -1,0 +1,3 @@
+{"before_restart": ["audit-local", "mailhog"], "after_restart": ["mailhog"]}
+
+--- stderr ---

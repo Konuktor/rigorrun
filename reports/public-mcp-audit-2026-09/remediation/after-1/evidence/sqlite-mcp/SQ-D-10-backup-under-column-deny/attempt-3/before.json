@@ -1,0 +1,5 @@
+{
+  "exists": false,
+  "oracle": "sqlite-ro",
+  "tables": {}
+}

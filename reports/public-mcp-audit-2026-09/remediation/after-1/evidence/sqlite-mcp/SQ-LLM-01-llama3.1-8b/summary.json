@@ -1,0 +1,19 @@
+{
+  "id": "SQ-LLM-01-llama3.1-8b",
+  "target": "sqlite-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 68.33,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "FAIL",
+      "classification": "FALSE_POSITIVE",
+      "rigorrunOutcome": "TIMED_OUT",
+      "outcomeClassification": "TIMED_OUT"
+    }
+  ],
+  "reproduction": "1/1"
+}

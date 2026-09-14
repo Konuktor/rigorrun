@@ -72,7 +72,23 @@ if bad:
 PY
 
 echo "== 4/5 run the 58 frozen cases ($(date -u +%H:%M:%S))"
-python3 "$HERE/run-cases-after.py" > "$LOGS/run-cases-after.log" 2>&1
+# The one case that drives a 4.9 GB local model runs last and alone, after any
+# loaded model is unloaded: on a 16 GB host the first measured run was stopped
+# by the host's low-memory guard as that model loaded. Every attempt resets its
+# own target before its oracle reads, so the order changes nothing a case sees.
+HEAVY="SQ-LLM-01-llama3.1-8b"
+mapfile -t LIGHT < <(python3 - "$REMEDIATION/baseline-manifest.json" "$HEAVY" <<'PY'
+import json, sys
+print("\n".join(c["id"] for c in json.load(open(sys.argv[1]))["cases"] if c["id"] != sys.argv[2]))
+PY
+)
+echo "  ${#LIGHT[@]} cases first, then $HEAVY"
+python3 "$HERE/run-cases-after.py" --only "${LIGHT[@]}" > "$LOGS/run-cases-after.log" 2>&1
+if command -v ollama > /dev/null; then
+  ollama ps 2> /dev/null | awk 'NR > 1 { print $1 }' | while read -r model; do ollama stop "$model" > /dev/null 2>&1 || true; done
+fi
+echo "memory before $HEAVY: $(free -m | awk '/Mem:/ { print $7 }') MiB available" | tee -a "$LOGS/run-cases-after.log"
+python3 "$HERE/run-cases-after.py" --only "$HEAVY" >> "$LOGS/run-cases-after.log" 2>&1
 grep -c " attempt " "$LOGS/run-cases-after.log" | sed 's/^/  attempts run: /'
 
 echo "== 5/5 aggregate ($(date -u +%H:%M:%S))"

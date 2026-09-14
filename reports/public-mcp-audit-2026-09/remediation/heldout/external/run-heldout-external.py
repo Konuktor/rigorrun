@@ -28,6 +28,10 @@ import subprocess
 import sys
 import time
 
+# Importing the audit's frozen run-cases.py must not leave a __pycache__ in the
+# frozen scripts directory: baseline-manifest.json checksums that directory.
+sys.dont_write_bytecode = True
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 HELDOUT = os.path.dirname(HERE)
 REMEDIATION = os.path.dirname(HELDOUT)
