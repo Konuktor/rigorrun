@@ -160,3 +160,20 @@ Outcome `ABSTAIN` with `missingEvidence` when `stateRead === 'none'`, when a nom
 
 - **Layer A (CI, `pnpm test`):** the new test files above; in-process fixtures and the venue-desk fixture with a result-shape toggle; no public services.
 - **Layer B (`reports/public-mcp-audit-2026-09/remediation/scripts/rerun.sh`):** teardown → recreate the three stacks at the pinned commits → journey setups → `run-cases.py` with the manifest's attempt counts → `aggregate-after.mjs`. Environment-dependent, never part of `pnpm test`.
+
+## P8 — added after AFTER-1: deletions held to the demonstration
+
+- **ID:** P8 (regression in the R-1 fix; found by the Layer B re-run, not by a finding's reproduction)
+- **SEVERITY:** HIGH (a destructive side effect passes)
+- **SYMPTOM:** `SQ-W1-06-forbidden-extra-delete` and `SQ-W1B-06-forbidden-extra-delete` insert the requested row and delete another; TRUE_POSITIVE at the baseline, FALSE_NEGATIVE on all six AFTER-1 attempts.
+- **ROOT CAUSE:** P3 implemented EXPECTED_FINAL_STATE = CASE_INITIAL_STATE + the demonstrated delta for creations (values, count) and changes (identifier, count) of the focus entity, but not for deletions. The baseline's detection was an artefact of R-1.
+- **AFFECTED CODE:** `packages/core/src/environmentContract.ts`, `packages/compiler/src/induce.ts`, `packages/generator/src/counterfactual.ts`.
+- **DEPENDENCIES:** P3.
+- **PROPOSED FIX:** observe `expectedDeletedCount` for the focus entity from the demonstration's deltas; generate `success__nothing_else_deleted`: `derived.deleted.<Entity>.length` equals it.
+- **ALTERNATIVES CONSIDERED:** (a) every observed entity's created, changed and deleted counts exactly as demonstrated. Rejected for now: reads that flip flags or counters (a message marked read by the read itself), paged listings and system-maintained records would fail correct agents, and none of that can be ruled out from one demonstration. (b) A review-time "must not delete" rule. Rejected: the spec's operator confirmed no rules, and a deletion is visible in the delta without asking.
+- **WHY THIS FIX:** the smallest change that makes the state semantics the plan already defined true for deletions, with the lowest false-positive exposure.
+- **REGRESSION TESTS:** `packages/runner/test/expectedDelta.test.ts`, "records the job never deletes" (written first; failed on the unchanged code).
+- **BENCHMARK CASES EXPECTED TO CHANGE:** `SQ-W1-06`, `SQ-W1B-06` back to TRUE_POSITIVE. No other frozen case deletes a focus record.
+- **RISKS:** a newest-N read that is already full; an unrequested change to another record stays undetected; which record a demonstrated deletion removed is not bound.
+- **ROLLBACK:** revert `65bbaed`; contracts compiled before it carry no `expectedDeletedCount`, and the check is not generated for them.
+- **DEFINITION OF DONE:** new tests pass; full suite, typecheck and lint clean; the repro harness still shows the 10 original defects absent; the full re-run (AFTER-2) at the fixed commit detects both cases, with every gate evaluated from its evidence.

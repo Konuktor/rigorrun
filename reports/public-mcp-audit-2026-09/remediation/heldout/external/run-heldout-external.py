@@ -258,12 +258,31 @@ def run_case(case, info):
     }
 
 
+def merged_with_previous(results):
+    """This invocation's records plus those of earlier `--only` invocations.
+
+    Lets the set run in bounded pieces on a memory-constrained host. A record is
+    replaced only by a later run of the same case; order follows cases.json.
+    """
+    if not os.path.exists(RESULTS):
+        return results
+    ran = {r["id"] for r in results}
+    kept = [r for r in load(RESULTS).get("cases", []) if r["id"] not in ran]
+    order = [c["id"] for c in load(os.path.join(HERE, "cases.json"))]
+    return sorted(kept + results, key=lambda r: order.index(r["id"]) if r["id"] in order else len(order))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--fresh", action="store_true")
     a = parser.parse_args()
     os.makedirs(EVIDENCE, exist_ok=True)
+    if os.path.exists(RESULTS):
+        earlier = load(RESULTS).get("rigorrunCommit")
+        if earlier and subprocess.run(["git", "-C", REPO, "diff", "--quiet", earlier, "HEAD", "--", "packages", "apps", "fixtures"]).returncode != 0:
+            print(f"refusing: results-external.json came from {earlier}, whose product sources differ from HEAD", file=sys.stderr)
+            return 1
     cases = load(os.path.join(HERE, "cases.json"))
     if a.only:
         cases = [c for c in cases if c["id"] in a.only]
@@ -282,13 +301,14 @@ def main():
         results.append(record)
         print(f"{record['id']}: expected {record['expected']} actual {record['actual']} oracle {record.get('oracle')} "
               f"{'' if record['match'] else '<-- MISMATCH'} {record.get('reason', '')[:160]}", flush=True)
-        count = lambda predicate: sum(1 for r in results if predicate(r))
+        everything = merged_with_previous(results)
+        count = lambda predicate: sum(1 for r in everything if predicate(r))
         with open(RESULTS, "w") as fh:
             json.dump({
                 "generatedBy": "remediation/heldout/external/run-heldout-external.py",
                 "rigorrunCommit": subprocess.run(["git", "-C", REPO, "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
                 "totals": {
-                    "cases": len(results),
+                    "cases": len(everything),
                     "run": count(lambda r: r["actual"] != "NOT_RUN"),
                     "matchingExpected": count(lambda r: r["match"]),
                     "knownGoodIncorrectlyFailed": count(lambda r: r["truth"] == "KNOWN_GOOD" and r["actual"] == "FAIL"),
@@ -300,7 +320,7 @@ def main():
                     "oracleDisagreesWithTruthLabel": count(lambda r: r.get("truthHeldByOracle") is False),
                     "faultNotAsIntended": count(lambda r: r.get("faultAsIntended") is False),
                 },
-                "cases": results,
+                "cases": everything,
             }, fh, indent=2)
     return 0
 

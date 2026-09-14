@@ -82,3 +82,9 @@ Variants on the real MCP servers, defined in `external/` and committed before th
 | EH-WT-03 | JSON normalisation | KNOWN_BAD | FAIL | Worktide: two time entries instead of one |
 
 Run: `python3 external/run-heldout-external.py` → `results-external.json`, `external/evidence/`.
+
+## Run notes (appended; the expectations above are unchanged)
+
+- **In-process set, first run:** commit `f4145bb`, 23 of 23 as expected. Kept as `results-inprocess.f4145bb.json` and `inprocess.f4145bb.log`.
+- **A product change after that run:** the first full re-run of the frozen benchmark (AFTER-1) found that an agent which does the job and also deletes another record of the same kind passed. `65bbaed` (P8 in `../PLAN.md`) makes deletions of the focus entity match the demonstration exactly. It was prompted by the frozen benchmark, not by this set. No held-out case involves a deletion, so neither set tests P8. What they do test is that P8 changes none of their outcomes.
+- **Final runs:** both sets are run at the final product commit (`26d1e6a`) after the AFTER-2 re-run. The in-process set overwrites `results-inprocess.json`, and the external set writes `results-external.json` on its first and only run.
