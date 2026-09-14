@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ✓ packages/runner/test/zz_n1_repro.test.ts (1 test) 16ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  20:39:21
+   Duration  606ms (transform 318ms, setup 0ms, import 493ms, tests 16ms, environment 0ms)
+
