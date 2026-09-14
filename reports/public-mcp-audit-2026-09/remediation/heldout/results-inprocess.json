@@ -1,6 +1,6 @@
 {
   "generatedBy": "remediation/heldout/inprocess/heldout.inprocess.test.ts",
-  "rigorrunCommit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
+  "rigorrunCommit": "d4ba04deff13c5f242a923ab789c8c391ae937be",
   "totals": {
     "cases": 23,
     "matchingExpected": 23,
@@ -134,7 +134,7 @@
       "truth": "UNDECIDABLE",
       "expected": "ABSTAIN",
       "actual": "ABSTAIN",
-      "reason": "2 blocking check(s) could not be made: not checked: the final world could not be read",
+      "reason": "3 blocking check(s) could not be made: not checked: the final world could not be read",
       "match": true
     },
     {
@@ -143,7 +143,7 @@
       "truth": "UNDECIDABLE",
       "expected": "ABSTAIN",
       "actual": "ABSTAIN",
-      "reason": "2 blocking check(s) could not be made: not checked: the final world could not be read",
+      "reason": "3 blocking check(s) could not be made: not checked: the final world could not be read",
       "match": true
     },
     {
@@ -152,7 +152,7 @@
       "truth": "UNDECIDABLE",
       "expected": "ABSTAIN",
       "actual": "ABSTAIN",
-      "reason": "2 blocking check(s) could not be made: not checked: this environment cannot be read back",
+      "reason": "3 blocking check(s) could not be made: not checked: this environment cannot be read back",
       "match": true
     },
     {
@@ -161,7 +161,7 @@
       "truth": "UNDECIDABLE",
       "expected": "ABSTAIN",
       "actual": "ABSTAIN",
-      "reason": "2 blocking check(s) could not be made: not checked: this environment cannot be read back",
+      "reason": "3 blocking check(s) could not be made: not checked: this environment cannot be read back",
       "match": true
     },
     {
@@ -206,7 +206,7 @@
       "truth": "UNDECIDABLE",
       "expected": "ABSTAIN",
       "actual": "ABSTAIN",
-      "reason": "2 blocking check(s) could not be made: not checked: the starting world could not be read",
+      "reason": "3 blocking check(s) could not be made: not checked: the starting world could not be read",
       "match": true
     },
     {
@@ -215,7 +215,7 @@
       "truth": "UNDECIDABLE",
       "expected": "ABSTAIN",
       "actual": "ABSTAIN",
-      "reason": "2 blocking check(s) could not be made: not checked: the starting world could not be read",
+      "reason": "3 blocking check(s) could not be made: not checked: the starting world could not be read",
       "match": true
     }
   ]
