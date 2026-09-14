@@ -178,6 +178,9 @@ export class SystemEnvironment implements EnvironmentAdapter {
   /**
    * The world, as far as the nominated reads can see it.
    *
+   * A read that fails, or answers in prose, leaves the world unknown and throws
+   * StateReadError; an unknown world is never handed back as an empty one.
+   *
    * Rows that no verifier read returns are simply absent, and absent is not the
    * same as empty: a check against them resolves to INAPPLICABLE rather than
    * failing, so a missing read narrows what can be concluded instead of
@@ -194,6 +197,13 @@ export class SystemEnvironment implements EnvironmentAdapter {
       // vanished.
       if (normalized.kind === 'error') {
         throw new StateReadError(read.tool, normalized.error?.message ?? 'the call failed');
+      }
+      // Prose where records were nominated is not an empty world either. The
+      // read answered and said nothing RigorRun can compare, so the world is
+      // unknown for this case and the verdict abstains. Treating it as empty
+      // would make every record look deleted and fail a correct agent.
+      if (normalized.kind === 'text') {
+        throw new StateReadError(read.tool, 'it answered with text rather than records');
       }
       if (hasPayload(normalized)) payloads.push(normalized.payload);
     }
