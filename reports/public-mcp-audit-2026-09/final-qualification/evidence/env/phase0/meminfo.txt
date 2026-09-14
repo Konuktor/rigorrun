@@ -1,0 +1,7 @@
+$ grep -E MemTotal|MemAvailable|SwapTotal|SwapFree|Committed_AS /proc/meminfo
+MemTotal:       16033440 kB
+MemAvailable:    9591076 kB
+SwapTotal:      16436220 kB
+SwapFree:       13230000 kB
+Committed_AS:   27531372 kB
+(exit 0)

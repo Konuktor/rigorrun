@@ -1,0 +1,9 @@
+{
+  "name": "io-extra-update",
+  "steps": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } },
+    { "tool": "update_task", "args": { "id": 2, "status": "done" } }
+  ],
+  "report": "Created one task titled Quarterly report."
+}

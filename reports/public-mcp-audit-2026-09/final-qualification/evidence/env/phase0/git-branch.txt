@@ -1,0 +1,3 @@
+$ git -C {REPO} rev-parse --abbrev-ref HEAD
+redesign/brand-site-product
+(exit 0)

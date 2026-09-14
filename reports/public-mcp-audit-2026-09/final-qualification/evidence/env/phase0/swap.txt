@@ -1,0 +1,4 @@
+$ swapon --show
+NAME           TYPE       SIZE USED PRIO
+/dev/nvme0n1p6 partition 15,7G 3,1G   -1
+(exit 0)

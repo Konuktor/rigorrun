@@ -1,0 +1,9 @@
+{
+  "name": "io-readback",
+  "steps": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } },
+    { "tool": "list_tasks", "args": {} }
+  ],
+  "report": "Created one task titled Quarterly report; list_tasks now shows it as open."
+}

@@ -1,0 +1,4 @@
+$ nvidia-smi --query-gpu=name,memory.total,memory.used,driver_version --format=csv
+name, memory.total [MiB], memory.used [MiB], driver_version
+NVIDIA GeForce GTX 1650, 4096 MiB, 6 MiB, 550.163.01
+(exit 0)

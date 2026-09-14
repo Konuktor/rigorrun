@@ -1,0 +1,18 @@
+$ sh -c ps -eo pid,rss,comm --sort=-rss | head -16
+    PID   RSS COMMAND
+2007170 586240 chrome
+2011579 472508 claude
+1410824 405060 chrome
+2014094 386700 chrome
+1721097 377748 claude
+1042001 367116 chrome
+1934208 354704 chrome
+1184749 336316 chrome
+   5039 335496 chrome
+1385035 334760 chrome
+1526634 288436 claude
+2036438 279980 node
+ 133591 190652 chrome
+  56456 179912 telegram-deskto
+   1104 170540 hermes
+(exit 0)

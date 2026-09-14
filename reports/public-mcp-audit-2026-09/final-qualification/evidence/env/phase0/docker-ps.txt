@@ -1,0 +1,13 @@
+$ docker ps -a --format {{.Names}}\t{{.Status}}\t{{.Image}}
+emotomo-gateway	Exited (0) 24 minutes ago	emotomo-v2-gateway
+emotomo-llm-router	Exited (0) 24 minutes ago	emotomo-v2-llm-router
+emotomo-auth-service	Exited (0) 24 minutes ago	emotomo-v2-auth-service
+emotomo-memory-engine	Exited (0) 24 minutes ago	emotomo-v2-memory-engine
+emotomo-session-service	Exited (0) 24 minutes ago	emotomo-v2-session-service
+emotomo-brain-service	Exited (0) 24 minutes ago	emotomo-v2-brain-service
+emotomo-postgres	Exited (0) 24 minutes ago	pgvector/pgvector:pg16
+emotomo-nats	Exited (0) 24 minutes ago	nats:2-alpine
+emotomo-redis	Exited (0) 24 minutes ago	redis:7-alpine
+agent-gauntlet-db	Up 16 hours (healthy)	postgres:17-alpine
+mad_devs-reminder-worker-1	Up 16 hours	mad_devs-reminder-worker
+(exit 0)

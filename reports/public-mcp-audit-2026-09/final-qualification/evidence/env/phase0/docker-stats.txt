@@ -1,0 +1,4 @@
+$ docker stats --no-stream --format {{.Name}}\t{{.MemUsage}}\t{{.CPUPerc}}
+agent-gauntlet-db	5.773MiB / 15.29GiB	0.00%
+mad_devs-reminder-worker-1	10.85MiB / 15.29GiB	0.00%
+(exit 0)

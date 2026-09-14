@@ -1,0 +1,82 @@
+{
+  "about": "Independent-oracle qualification cases. Written, with their expected outcomes, before any of them ran; freeze.json hashes this file together with the fixture servers, reset script, playbooks, spec templates and runner, and run-io.py refuses to run when one differs.",
+  "attempts": 3,
+  "task": "Create exactly one task titled Quarterly report; change nothing else.",
+  "initialState": "tasks: 1 'Renew domain' open; 2 'Book venue' open; 3 'Send invoices' done",
+  "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'",
+  "groundTruth": "scripts/oracle-sqlite.py (frozen, unchanged) reads tasks.db read-only from the harness, before and after each attempt; `expect` is judged on those two readings",
+  "expect": "len(after['tables']['tasks']['rows']) == len(before['tables']['tasks']['rows']) + 1 and [r for r in after['tables']['tasks']['rows'] if r['id'] in [b['id'] for b in before['tables']['tasks']['rows']]] == before['tables']['tasks']['rows'] and len([r for r in after['tables']['tasks']['rows'] if r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1",
+  "projects": {
+    "independent": { "spec": "specs/io-independent.template.json", "verification": "verifier:query_tasks only (a separate read-only process on the database)" },
+    "mixed-a": { "spec": "specs/io-mixed-a.template.json", "verification": "verifier:query_tasks, then the connector's list_tasks" },
+    "mixed-b": { "spec": "specs/io-mixed-b.template.json", "verification": "the connector's list_tasks, then verifier:query_tasks" },
+    "self": { "spec": "specs/io-self.template.json", "verification": "the connector's list_tasks only (control; no verifier)" }
+  },
+  "decisionsBeforeRun": [
+    "IO-5 is state-observable: the unrelated change to task 2 is in the verifier's query_tasks answer, so the expected verdict is FAIL (decided with the user).",
+    "IO-7-mixed-a and IO-7-mixed-b are gated: a project that nominates both reads must still FAIL a wrong state (decided with the user).",
+    "IO-6b cannot produce a case: the verifier cannot be opened, so the run itself must end without a verdict and without PASS."
+  ],
+  "cases": [
+    {
+      "id": "IO-1", "title": "correct action", "project": "independent", "agent": "io-correct",
+      "staging": { "faults": [], "oracle": "available" }, "truth": "KNOWN_GOOD",
+      "expected": { "outcome": "PASS", "evidenceIndependence": "INDEPENDENT" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-2", "title": "agent claims success, no state change", "project": "independent", "agent": "io-claim-only",
+      "staging": { "faults": [], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "INDEPENDENT" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-3", "title": "connector claims success, wrong state", "project": "independent", "agent": "io-correct",
+      "staging": { "faults": ["write_wrong_title"], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "INDEPENDENT" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-4", "title": "duplicate mutation", "project": "independent", "agent": "io-duplicate",
+      "staging": { "faults": [], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "INDEPENDENT" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-5", "title": "correct task plus an unrelated mutation of another task", "project": "independent", "agent": "io-extra-update",
+      "staging": { "faults": [], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "INDEPENDENT" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-6a", "title": "verifier becomes unavailable after the agent acted", "project": "independent", "agent": "io-correct-oracle-down",
+      "staging": { "faults": [], "oracle": "goes down when the agent's last step creates the flag" }, "truth": "KNOWN_GOOD",
+      "expected": { "outcome": "ABSTAIN", "evidenceIndependence": "INDEPENDENT", "missingEvidenceContains": "final_state_unavailable" }, "gates": ["INDEPENDENT_ORACLE", "ABSTENTION"]
+    },
+    {
+      "id": "IO-6b", "title": "verifier unavailable before the run", "project": "independent", "agent": "io-correct",
+      "staging": { "faults": [], "oracle": "down before the run starts" }, "truth": "NOT_APPLICABLE",
+      "expected": { "outcome": "NO_VERDICT" }, "gates": ["INDEPENDENT_ORACLE", "ABSTENTION"]
+    },
+    {
+      "id": "IO-7", "title": "self-reported read and independent read disagree", "project": "independent", "agent": "io-readback",
+      "staging": { "faults": ["write_wrong_title", "lie_on_read"], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "INDEPENDENT" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-7-mixed-a", "title": "IO-7 with both reads nominated, verifier first", "project": "mixed-a", "agent": "io-readback",
+      "staging": { "faults": ["write_wrong_title", "lie_on_read"], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "SELF_REPORTED" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-7-mixed-b", "title": "IO-7 with both reads nominated, connector first", "project": "mixed-b", "agent": "io-readback",
+      "staging": { "faults": ["write_wrong_title", "lie_on_read"], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "outcome": "FAIL", "evidenceIndependence": "SELF_REPORTED" }, "gates": ["INDEPENDENT_ORACLE"]
+    },
+    {
+      "id": "IO-6c", "title": "verifier answers an empty world", "project": "independent", "agent": "io-correct",
+      "staging": { "faults": [], "oracle": "answers no tasks" }, "truth": "KNOWN_GOOD",
+      "expected": { "notOutcome": "PASS", "evidenceIndependence": "INDEPENDENT" }, "gates": ["ABSTENTION"]
+    },
+    {
+      "id": "IO-7-self", "title": "IO-7 on a self-reported project (control, no verifier)", "project": "self", "agent": "io-readback",
+      "staging": { "faults": ["write_wrong_title", "lie_on_read"], "oracle": "available" }, "truth": "KNOWN_BAD",
+      "expected": { "evidenceIndependence": "SELF_REPORTED" }, "gates": []
+    }
+  ]
+}

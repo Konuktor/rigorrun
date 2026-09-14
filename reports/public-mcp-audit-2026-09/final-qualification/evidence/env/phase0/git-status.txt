@@ -1,0 +1,4 @@
+$ git -C {REPO} status --porcelain=v1 --branch
+## redesign/brand-site-product...origin/redesign/brand-site-product [ahead 46]
+?? reports/public-mcp-audit-2026-09/final-qualification/
+(exit 0)

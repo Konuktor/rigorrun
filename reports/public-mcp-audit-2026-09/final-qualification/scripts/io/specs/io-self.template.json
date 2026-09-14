@@ -1,0 +1,26 @@
+{
+  "name": "taskdesk: create one task, self-reported (control, no verifier)",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "{PYTHON}",
+    "args": ["{IO}/taskdesk_server.py", "--db", "{STATE}/tasks.db", "--faults", "{STATE}/faults.json", "--shadow", "{STATE}/shadow.json", "--calls-log", "{STATE}/calls.log"],
+    "url": "",
+    "secretNames": []
+  },
+  "safety": "local",
+  "readOnlyTools": ["list_tasks"],
+  "verifierReads": [{ "tool": "list_tasks", "args": {} }],
+  "reset": { "kind": "none" },
+  "teach": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } }
+  ],
+  "answers": {},
+  "review": { "confirm": [], "reject": [] },
+  "quality": false,
+  "agents": [
+    { "name": "io-readback", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-readback.json", "{TRACES}"], "cwd": "{STATE}" }
+  ]
+}

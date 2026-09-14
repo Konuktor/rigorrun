@@ -1,0 +1,9 @@
+{
+  "name": "io-duplicate",
+  "steps": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } }
+  ],
+  "report": "Created one task titled Quarterly report."
+}
