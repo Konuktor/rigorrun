@@ -99,6 +99,7 @@ def details(record, attempt_dir, info):
             "focusScope": contract["focusScope"],
             "expectedDeltaCount": contract.get("expectedDeltaCount"),
             "expectedDeletedCount": contract.get("expectedDeletedCount"),
+            "expectedCreatedCount": contract.get("expectedCreatedCount"),
             "expectedChanges": contract.get("expectedChanges", []),
         },
         "oracleState": {

@@ -13,7 +13,7 @@
       "tool": "time.runningTimer",
       "args": {},
       "attempt": 1,
-      "ms": 53,
+      "ms": 64,
       "result": {
         "content": [
           {
@@ -29,12 +29,12 @@
         "description": "Audit timer"
       },
       "attempt": 1,
-      "ms": 61,
+      "ms": 76,
       "result": {
         "content": [
           {
             "type": "text",
-            "text": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"closedTimeEntryId\\\": null,\\n  \\\"running\\\": true,\\n  \\\"timerId\\\": \\\"01a0a07a-49f8-7dc7-907c-de3f30e9844f\\\",\\n  \\\"startedAt\\\": \\\"2026-09-14T17:12:44+02:00\\\",\\n  \\\"elapsedSeconds\\\": 0,\\n  \\\"taskId\\\": null,\\n  \\\"projectId\\\": null,\\n  \\\"typeOfWorkId\\\": null,\\n  \\\"description\\\": \\\"Audit timer\\\",\\n  \\\"isBillable\\\": true\\n}\"}]"
+            "text": "[{\"type\":\"text\",\"text\":\"{\\n  \\\"closedTimeEntryId\\\": null,\\n  \\\"running\\\": true,\\n  \\\"timerId\\\": \\\"01a0a0a2-11e5-7055-8af5-78365ab06332\\\",\\n  \\\"startedAt\\\": \\\"2026-09-14T17:56:11+02:00\\\",\\n  \\\"elapsedSeconds\\\": 0,\\n  \\\"taskId\\\": null,\\n  \\\"projectId\\\": null,\\n  \\\"typeOfWorkId\\\": null,\\n  \\\"description\\\": \\\"Audit timer\\\",\\n  \\\"isBillable\\\": true\\n}\"}]"
           }
         ]
       }
