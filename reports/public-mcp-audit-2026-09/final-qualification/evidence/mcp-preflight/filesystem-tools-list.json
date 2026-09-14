@@ -1,0 +1,13 @@
+{
+  "id": "filesystem-tools-list",
+  "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+  "check": "tools/list: RigorRun sees every tool the server offers",
+  "status": "PASS",
+  "observed": {
+    "rigorrun": 14,
+    "raw": 14,
+    "rawPages": 1,
+    "missing": []
+  },
+  "expected": "equal counts"
+}

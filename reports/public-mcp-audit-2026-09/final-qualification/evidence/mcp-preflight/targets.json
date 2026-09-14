@@ -1,0 +1,51 @@
+{
+  "about": "Per-target MCP compatibility statements for the next public audits, from the preflight (evidence/mcp-preflight/*.json) and the pinned packages' own sources. SUPPORTED: measured through RigorRun's client. PARTIAL: protocol-compatible by the target's own source, not measured here; the listed preconditions are mandatory before any finding is attributed upstream. UNSUPPORTED / UNKNOWN would fail GATE 9.",
+  "rigorrunClient": {
+    "sdk": "@modelcontextprotocol/sdk 1.30.0",
+    "protocolVersions": ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05", "2024-10-07"],
+    "handshake": "legacy initialize",
+    "transports": ["stdio", "streamable-http"],
+    "2026-07-28": "UNSUPPORTED (client side); a server that speaks only 2026-07-28 is refused at connect with a visible error and no case runs (evidence: modern-only-server.json)"
+  },
+  "targets": [
+    {
+      "name": "Filesystem MCP",
+      "package": "@modelcontextprotocol/server-filesystem 2026.8.31",
+      "serverProtocol": "legacy: depends on @modelcontextprotocol/sdk ^1.30.0 (latest 2025-11-25)",
+      "status": "SUPPORTED",
+      "measured": ["filesystem-connect", "filesystem-tools-list", "filesystem-call", "filesystem-error", "filesystem-teardown"],
+      "blocking": false,
+      "preconditions": [
+        "record the negotiated protocol version from a raw handshake (RigorRun records \"negotiated\" for stdio)"
+      ]
+    },
+    {
+      "name": "GitHub MCP",
+      "package": "github/github-mcp-server (main), github.com/modelcontextprotocol/go-sdk v1.7.0",
+      "serverProtocol": "dual-era: go-sdk v1.7.0 supports 2026-07-28, 2025-11-25, 2025-06-18, 2025-03-26, 2024-11-05, and answers the legacy initialize handshake capped at 2025-11-25",
+      "status": "PARTIAL",
+      "measured": [],
+      "blocking": false,
+      "preconditions": [
+        "pin the server build and record the negotiated version from a raw initialize handshake (expected 2025-11-25)",
+        "compare RigorRun's discovered tool count with a raw paged tools/list; go-sdk's default page size is 1000, but RigorRun ignores nextCursor, so any second page would be invisible",
+        "prefer the stdio binary or container with the token in the environment; the remote HTTP endpoint needs a secret literally named Authorization, and every project secret is handed to every connector, verifier included",
+        "reproduce any timeout with a raw client before attributing it upstream"
+      ]
+    },
+    {
+      "name": "Playwright MCP",
+      "package": "@playwright/mcp 0.0.80 (playwright-core 1.63.0-alpha-2026-08-31)",
+      "serverProtocol": "legacy: the MCP SDK bundled in playwright-core declares LATEST_PROTOCOL_VERSION 2025-11-25; no 2026-07-28 support in the package",
+      "status": "PARTIAL",
+      "measured": [],
+      "blocking": false,
+      "preconditions": [
+        "record the negotiated version and a raw paged tools/list count before the audit",
+        "measure the server's stderr volume with a raw client: RigorRun pipes stderr and never reads it, and 200 KB stalled both calls (stderr-flood.json); any TIMED_OUT must be reproduced with a raw client before it is called an upstream failure",
+        "browser tool results are prose snapshots and images, which normalise to text or empty: verdicts must rest on an independent verifier read (a separate process reading browser or application state), never on the tools' own results",
+        "raise toolCallMs for browser actions that can exceed the 20 s default, keeping caseMs >= toolCallMs + 5000"
+      ]
+    }
+  ]
+}

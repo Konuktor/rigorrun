@@ -16,7 +16,8 @@ FQ = os.path.abspath(os.path.join(HERE, ".."))
 REPORT = os.path.abspath(os.path.join(FQ, ".."))
 REMEDIATION = os.path.join(REPORT, "remediation")
 REPO = os.path.abspath(os.path.join(REPORT, "..", ".."))
-RUN = os.path.join(FQ, "evidence", "frozen-58", "run")
+# FQ_RUN_DIR points a separately labelled run (the GreenMail happy-path diagnostic) somewhere else; unset, it is the strict run.
+RUN = os.environ.get("FQ_RUN_DIR") or os.path.join(FQ, "evidence", "frozen-58", "run")
 HOMES = os.path.join(REPO, "tmp", "rigorrun-audit", "fq-homes")
 
 

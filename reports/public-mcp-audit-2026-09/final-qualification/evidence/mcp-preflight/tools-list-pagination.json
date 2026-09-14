@@ -1,0 +1,34 @@
+{
+  "id": "tools-list-pagination",
+  "target": "RigorRun client",
+  "check": "tools/list follows nextCursor",
+  "status": "LIMIT",
+  "observed": {
+    "rigorrunTools": [
+      "structured_only",
+      "json_text",
+      "prose",
+      "tool_error",
+      "rpc_error",
+      "slow",
+      "resource_link",
+      "image_only",
+      "stderr_flood"
+    ],
+    "rawTools": [
+      "structured_only",
+      "json_text",
+      "prose",
+      "tool_error",
+      "rpc_error",
+      "slow",
+      "resource_link",
+      "image_only",
+      "stderr_flood",
+      "page_two_tool"
+    ],
+    "rawPages": 2
+  },
+  "expected": "every page listed",
+  "impact": "Only the first page is discovered. A tool listed after a nextCursor is invisible to setup and to the agent proxy; an audit must compare its tool count with a raw paged tools/list before relying on the catalogue."
+}

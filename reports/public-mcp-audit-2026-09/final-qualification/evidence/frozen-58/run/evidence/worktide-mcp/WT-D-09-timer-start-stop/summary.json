@@ -1,0 +1,39 @@
+{
+  "id": "WT-D-09-timer-start-stop",
+  "target": "worktide-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.48,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 0.42,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 0.4,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "3/3"
+}

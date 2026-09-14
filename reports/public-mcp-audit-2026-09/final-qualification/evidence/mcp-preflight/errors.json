@@ -1,0 +1,25 @@
+{
+  "id": "errors",
+  "target": "RigorRun client",
+  "check": "isError results and JSON-RPC errors are errors, not data",
+  "status": "PASS",
+  "observed": {
+    "toolError": {
+      "ok": false,
+      "kind": "error",
+      "error": {
+        "code": "CALL_FAILED",
+        "message": "the call failed"
+      }
+    },
+    "rpcError": {
+      "ok": false,
+      "kind": "error",
+      "error": {
+        "code": "call_failed",
+        "message": "MCP error -32602: invalid params"
+      }
+    }
+  },
+  "expected": "both ok false, kind error"
+}

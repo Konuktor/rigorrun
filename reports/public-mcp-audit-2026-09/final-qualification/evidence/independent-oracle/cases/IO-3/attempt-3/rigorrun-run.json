@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_16dfe0eca358",
+  "benchmarkId": "bm_ec_p_82d0ea2c1dbc",
+  "benchmarkName": "Create exactly one task titled Quarterly report; change nothing else. \u2014 private benchmark",
+  "benchmarkHash": "sha256:d0dc9f95441be4f9341b1fcc3a78aec49d3985f09d1996fd2471dd8d779e0999",
+  "contractHash": "sha256:a315e8fbed29c49ca30d9bff88a095e9fb955fddb1f7d660c6581ef3ed7e3165",
+  "environment": "p_82d0ea2c1dbc",
+  "startedAt": "2026-09-14T17:31:50.131Z",
+  "finishedAt": "2026-09-14T17:31:50.219Z",
+  "agents": [
+    {
+      "id": "a_a6b2ac38",
+      "name": "io-correct",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_16dfe0eca358",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_a6b2ac38",
+      "correlationId": "run_16dfe0eca358.a_a6b2ac38.case_live__happy_path",
+      "startedAt": "2026-09-14T17:31:50.131Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "INDEPENDENT",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-14T17:31:50.205Z",
+      "durationMs": 74.057,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789407110199,
+          "tool": "list_tasks",
+          "args": {},
+          "ok": true,
+          "result": {
+            "tasks": [
+              {
+                "id": 1,
+                "title": "Renew domain",
+                "status": "open"
+              },
+              {
+                "id": 2,
+                "title": "Book venue",
+                "status": "open"
+              },
+              {
+                "id": 3,
+                "title": "Send invoices",
+                "status": "done"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "at": 1789407110203,
+          "tool": "create_task",
+          "args": {
+            "title": "Quarterly report"
+          },
+          "ok": true,
+          "result": {
+            "task": {
+              "id": 4,
+              "title": "Quarterly report",
+              "status": "open"
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "list_tasks",
+          "at": 1,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "create_task",
+          "at": 2,
+          "payload": {
+            "title": "Quarterly report"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Task[title=\"Quarterly report\"] is absent but was required"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Task record(s) created, as demonstrated \u2014 no more",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 1,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Task record deleted \u2014 the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Task.length equals the expected value"
+        }
+      ],
+      "taskSuccess": false,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "FAIL",
+      "outcomeReason": "the requested work was actually performed \u2014 derived.created.Task[title=\"Quarterly report\"] is absent but was required",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "initialStateHash": "sha256:8d81aa597fa3dcfd9baf812bce52c79210aa93f70ec66cffb50f62aec0985b94",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Created one task titled Quarterly report.",
+      "finalStateHash": "sha256:6d5daec4502692221392760ec21155495d0b0ce25677f69605902228b9ed84b2",
+      "finalStateSummary": {
+        "Task": {
+          "count": 4,
+          "rows": [
+            {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            {
+              "id": 2,
+              "title": "Book venue",
+              "status": "open"
+            },
+            {
+              "id": 3,
+              "title": "Send invoices",
+              "status": "done"
+            },
+            {
+              "id": 4,
+              "title": "Quarterly repotr",
+              "status": "open"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_a6b2ac38",
+      "agentName": "io-correct",
+      "n": 1,
+      "taskSuccessRate": 0,
+      "taskSuccessInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 74.057,
+      "medianLatencyMs": 74.057,
+      "p95LatencyMs": 74.057,
+      "avgSteps": 2,
+      "passAtK": {
+        "pass@1": 0
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": false,
+      "failedThresholds": [
+        "task success 0.0% < required 95.0%"
+      ]
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": null,
+    "outcome": "FAIL",
+    "summary": "No agent met the release thresholds. Best of the group was io-correct.",
+    "rationale": [
+      "io-correct does NOT meet the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 0.0%\u201379.3%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": false,
+    "mutantKillRate": null,
+    "independentKillRate": null,
+    "falsePositiveRate": null,
+    "replayStable": null,
+    "hiddenAnswerIsolated": null,
+    "deadRules": 0,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "resultHash": "sha256:c9bad029e77d466f1e753cdf469287a37f7e87460f55ecc14dd32aab6800e6e8",
+  "rigorrunVersion": "0.1.0"
+}

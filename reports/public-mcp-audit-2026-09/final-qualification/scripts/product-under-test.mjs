@@ -65,7 +65,7 @@ function frozenInputs(problems) {
   for (const [directory, key, field] of [['email-mcp', 'email-mcp', 'commit'], ['worktide-mcp', 'worktide-mcp', 'commit'], ['worktide', 'worktide-mcp', 'backendCommit'], ['sqlite-mcp', 'sqlite-mcp', 'commit']]) {
     const clone = join(REPO, 'tmp', 'rigorrun-audit', directory);
     const expected = manifest.targets[key][field];
-    let actual = null;
+    let actual;
     let modifiedTracked = [];
     try {
       actual = execFileSync('git', ['-C', clone, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();

@@ -1,0 +1,72 @@
+== 2026-09-14T17:54:04Z
+== free -m
+               total        used        free      shared  buff/cache   available
+Mem:           15657        4806        5676         524        6250       10851
+Swap:          16050        7294        8756
+== swapon
+NAME           TYPE       SIZE USED PRIO
+/dev/nvme0n1p6 partition 15,7G 7,1G   -1
+== nvidia-smi
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce GTX 1650, 4096 MiB, 6 MiB
+== docker stats
+rr-audit-greenmail	205.5MiB / 15.29GiB
+rr-audit-mailhog	9.914MiB / 15.29GiB
+rr-audit-worktide-app-1	53.12MiB / 15.29GiB
+rr-audit-worktide-database-1	55.84MiB / 15.29GiB
+rr-audit-worktide-valkey-1	4.258MiB / 15.29GiB
+agent-gauntlet-db	5.34MiB / 15.29GiB
+mad_devs-reminder-worker-1	10.84MiB / 15.29GiB
+== top processes by RSS
+    PID   RSS COMMAND
+2068524 490496 chrome
+2011579 390772 claude
+1526634 256780 claude
+1721097 255960 claude
+   5039 219244 chrome
+2061636 196960 java
+   1104 167320 hermes
+2007170 111740 chrome
+2014094 110176 chrome
+   1514 94136 dockerd
+1410824 85088 chrome
+   5113 81360 chrome
+1184749 79616 chrome
+   5115 78172 chrome
+   6510 76084 chrome
+== ollama ps
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+== ollama show qwen2.5:3b
+  Model
+    architecture        qwen2     
+    parameters          3.1B      
+    context length      32768     
+    embedding length    2048      
+    quantization        Q4_K_M    
+
+  Capabilities
+    completion    
+    tools         
+
+  System
+    You are Qwen, created by Alibaba Cloud. You are a helpful assistant.    
+
+  License
+    Qwen RESEARCH LICENSE AGREEMENT                                     
+    Qwen RESEARCH LICENSE AGREEMENT Release Date: September 19, 2024    
+    ...                                                                 
+
+== ollama list
+NAME                       ID              SIZE      MODIFIED     
+gemma2:2b                  8ccf136fdd52    1.6 GB    8 days ago      
+qwen2.5:1.5b               65ec06548149    986 MB    3 weeks ago     
+llama3.2:1b                baf6a787fdff    1.3 GB    3 weeks ago     
+llama3.1:8b                46e0c10c039e    4.9 GB    3 weeks ago     
+kali-glm:latest            b5f6c9b8492d    -         4 weeks ago     
+glm-5.1:cloud              7aea7667808a    -         5 weeks ago     
+glm-5.2:cloud              7e916d58b325    -         5 weeks ago     
+nomic-embed-text:latest    0a109f422b47    274 MB    2 months ago    
+qwen2.5:3b                 357c53fb659c    1.9 GB    2 months ago    
+llama3.2:3b                a80c4f17acd5    2.0 GB    3 months ago    
+qwen3:8b                   500a1f067a9f    5.2 GB    4 months ago    
+qwen2.5:7b                 845dbda0ea48    4.7 GB    4 months ago    

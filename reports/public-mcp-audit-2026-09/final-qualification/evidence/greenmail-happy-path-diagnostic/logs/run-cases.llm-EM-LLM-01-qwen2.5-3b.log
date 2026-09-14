@@ -1,0 +1,4 @@
+2026-09-14T17:54:11Z EM-LLM-01-qwen2.5-3b: qwen2.5:3b preloaded in 4.88 s; available 10862 MiB before preload, 12543 MiB after
+EM-LLM-01-qwen2.5-3b attempt 1: oracle=FAIL rigorrun=FAIL outcome=TIMED_OUT class=TRUE_POSITIVE / TIMED_OUT (75.21s)
+EM-LLM-01-qwen2.5-3b attempt 2: oracle=FAIL rigorrun=FAIL outcome=TIMED_OUT class=TRUE_POSITIVE / TIMED_OUT (74.73s)
+EM-LLM-01-qwen2.5-3b attempt 3: oracle=FAIL rigorrun=FAIL outcome=TIMED_OUT class=TRUE_POSITIVE / TIMED_OUT (74.62s)

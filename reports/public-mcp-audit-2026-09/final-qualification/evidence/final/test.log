@@ -1,0 +1,267 @@
+free MiB at start: 11183
+$ vitest run
+
+ RUN  v4.1.11 {REPO}
+
+
+    time to first real verdict: 1.8s (project created -> own agent graded against own system)
+
+    regression: policy compliance 60.0% -> 40.0%, unsafe 3 -> 7, 1 case(s) regressed: case_desk__happy_path
+ ✓ packages/daemon/test/durability.test.ts (17 tests) 4417ms
+     ✓ keeps what the system published, so a fresh page can show it  1158ms
+     ✓ resumes a recording that was half done  1481ms
+     ✓ opens the session again and reports that nothing moved  869ms
+     ✓ reports itself as in progress before anything has been written  861ms
+ ✓ packages/daemon/test/processAgent.test.ts (5 tests) 4518ms
+     ✓ probes a real one, and gets its name from the answer  800ms
+     ✓ grades it exactly as it grades an agent behind a URL  2463ms
+ ✓ packages/cli/test/doctor.test.ts (5 tests) 3971ms
+     ✓ reaches a system that is there, and says what it found  852ms
+     ✓ names the credential a project needs and this machine does not have  536ms
+     ✓ says an agent is not answering rather than leaving it looking fine  471ms
+     ✓ exits 2, because a configuration problem is never an agent failing  479ms
+     ✓ names secrets and never prints one  674ms
+ ✓ packages/daemon/test/jsonInText.test.ts (4 tests) 5463ms
+     ✓ passes the read probe, for the right reason  820ms
+     ✓ captures the demonstration and compiles a contract from it  349ms
+     ✓ warns before anybody records a job  745ms
+ ✓ packages/daemon/test/runner.test.ts (8 tests) 5793ms
+     ✓ connects the system and reports the tools with their risk  953ms
+     ✓ walks the rest of the way to a verdict  749ms
+ ✓ packages/daemon/test/drivenAgent.test.ts (9 tests) 5831ms
+     ✓ runs the whole suite against it, and grades it the same way  445ms
+ ✓ packages/daemon/test/freshUser.test.ts (15 tests) 6021ms
+     ✓ connects a system nobody at RigorRun wrote, and sees what is there  904ms
+     ✓ builds one once a person has ruled  320ms
+     ✓ runs the customer’s own agent and reads the desk back to grade it  366ms
+ ✓ packages/daemon/test/externalAgent.test.ts (4 tests) 5980ms
+     ✓ is caught by comparing two runs, without being told what changed  397ms
+ ✓ packages/daemon/test/pythonAgent.test.ts (2 tests) 1193ms
+     ✓ does the job through the MCP endpoint it was handed  509ms
+ ✓ packages/daemon/test/independentVerifier.test.ts (3 tests) 6472ms
+     ✓ connects to both, and says so  1857ms
+     ✓ builds a suite whose reads all go through the verifier, and offers the agent none of its tools  343ms
+
+  suite quality: 100% of injected defects caught, 100% of the independent ones
+ ✓ packages/quality/test/quality.test.ts (37 tests) 1541ms
+       ✓ fails no implementation that follows the policy  440ms
+       ✓ fails no implementation that follows the policy  315ms
+ ✓ packages/daemon/test/suiteQuality.test.ts (4 tests) 1777ms
+     ✓ reports how many injected defects it caught  679ms
+
+  browser available: true
+ ✓ packages/mcp/test/oauth.test.ts (8 tests) 1560ms
+ ✓ packages/mcp/test/connectHttp.test.ts (3 tests) 1469ms
+     ✓ completes a handshake and reports who answered  309ms
+ ✓ packages/daemon/test/docs.test.ts (14 tests) 3462ms
+     ✓ never tell anybody to run an agent id that no longer exists  3420ms
+ ✓ packages/daemon/test/stepChange.test.ts (2 tests) 1530ms
+     ✓ records which calls changed the system  1128ms
+     ✓ takes the job, its arguments and its goal from what changed and what the person said  318ms
+ ✓ packages/cli/test/cli.test.ts (25 tests) 1675ms
+     ✓ runs the demo and writes every artefact  547ms
+     ✓ renders a full report and a sanitised one  363ms
+ ✓ packages/env-browser/test/browser.test.ts (7 tests) 2742ms
+     ✓ does the job, and says what it saw rather than what it changed  524ms
+     ✓ reports OBSERVATIONAL when there is nothing behind it  321ms
+ ✓ packages/runner/test/outcomes.test.ts (11 tests) 1031ms
+     ✓ TIMED_OUT when the agent does not finish inside the case budget  453ms
+     ✓ FAIL, not TIMED_OUT, when a check failed on what the agent did before the budget ran out  380ms
+ ✓ packages/mcp/test/connect.test.ts (7 tests) 4846ms
+     ✓ completes a handshake and reports who answered  389ms
+     ✓ discovers the tools the server publishes, and their arguments  417ms
+     ✓ reads a closed set of values as an enum, from its structure alone  435ms
+     ✓ treats a server’s annotations as a claim, never as permission  609ms
+     ✓ keeps the output schema where the server publishes one, and notes where it does not  1129ms
+     ✓ calls a tool and gets the server’s own structured answer back  971ms
+     ✓ reports a tool error as a failed call rather than throwing  893ms
+ ✓ packages/env-mcp/test/endToEnd.test.ts (9 tests) 1214ms
+ ✓ packages/cli/test/setup.test.ts (3 tests) 1192ms
+     ✓ creates, teaches, compiles and builds a project from a spec  1176ms
+ ✓ packages/daemon/test/traceImport.test.ts (4 tests) 1258ms
+ ✓ packages/daemon/test/budgets.test.ts (5 tests) 1177ms
+     ✓ saves budgets that work and refuses ones that do not  880ms
+ ✓ packages/mcp/test/thirdParty.test.ts (5 tests) 1948ms
+     ✓ completes a handshake and names itself  463ms
+     ✓ reads argument schemas it has never seen, without guessing  354ms
+     ✓ calls a tool and gets the server’s own answer back  383ms
+     ✓ finds no records to verify against, because this system answers in prose  426ms
+ ✓ packages/mcp/test/induce.test.ts (14 tests) 872ms
+
+  induced from a public server: Entitie(name,entityType,observations) Relation(from,to,relationType)
+ ✓ packages/runner/test/honesty.test.ts (12 tests) 818ms
+ ✓ packages/daemon/test/browserProject.test.ts (4 tests) 1166ms
+     ✓ connects, and publishes the actions a browser has  857ms
+ ✓ packages/daemon/test/mismatch.test.ts (5 tests) 1038ms
+ ✓ packages/daemon/test/publicServerJourney.test.ts (5 tests) 773ms
+     ✓ connects to it, unmodified, from npm  505ms
+ ✓ packages/agents/test/http.test.ts (3 tests) 829ms
+     ✓ runs against a generated benchmark with no change to RigorRun  483ms
+     ✓ is caught when it ignores the policy, like any other agent  329ms
+ ✓ packages/runner/test/retry.test.ts (13 tests) 580ms
+ ✓ packages/exec/test/exec.test.ts (5 tests) 423ms
+     ✓ reports a timeout as a result rather than throwing  315ms
+ ✓ packages/environments/test/unknownDomain.test.ts (10 tests) 692ms
+ ✓ packages/runner/test/capabilities.test.ts (7 tests) 501ms
+ ✓ packages/cli/test/security.test.ts (11 tests) 440ms
+ ✓ packages/environments/test/workflows.test.ts (48 tests) 489ms
+ ✓ packages/generator/test/enforcement.test.ts (4 tests) 436ms
+     ✓ finds nothing to drop in any of the five demo workflows  345ms
+ ✓ packages/daemon/test/thirdParty.test.ts (4 tests) 547ms
+     ✓ connects, and finds everything the server publishes  436ms
+ ✓ packages/cli/test/budgets.test.ts (3 tests) 434ms
+ ✓ packages/generator/test/regression.test.ts (3 tests) 389ms
+ ✓ packages/daemon/test/openapiProject.test.ts (7 tests) 460ms
+ ✓ packages/proxy/test/proxy.test.ts (9 tests) 321ms
+ ✓ packages/runner/test/expectedDelta.test.ts (12 tests) 276ms
+ ✓ packages/runner/test/baseline.test.ts (5 tests) 219ms
+ ✓ packages/runner/test/aggregateIdentity.test.ts (14 tests) 208ms
+ ✓ packages/generator/test/counterfactual.test.ts (11 tests) 171ms
+ ✓ packages/compiler/test/induce.test.ts (23 tests) 206ms
+ ✓ packages/env-openapi/test/oauth.test.ts (9 tests) 153ms
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-aKh9Iu/bundle.json
+
+  No credential values. The 1 name(s) it needs travel with it:
+    DESK_TOKEN
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-hyoeP5/with-secrets.json
+
+  This file contains credential values:
+    DESK_TOKEN
+  Written 0600. Do not attach it to anything.
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-DfJBdY/everything.json
+
+  This file contains credential values:
+    DESK_TOKEN
+  Written 0600. Do not attach it to anything.
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-R2NMFv/oauth.json
+
+  No credential values. The 2 name(s) it needs travel with it:
+    REGISTRY_CLIENT_ID
+    REGISTRY_CLIENT_SECRET
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-Vq3QWk/bundle.json
+
+  No credential values. The 1 name(s) it needs travel with it:
+    DESK_TOKEN
+
+Imported as Desk agent (imported)
+  p_10b335ul
+
+  Its connector, which came from this file rather than from you:
+    run `/usr/local/bin/desk-mcp --staging`
+
+  RigorRun will not open it until you have read that line and said yes,
+  in the interface or with `rigorrun trust p_10b335ul`.
+
+  Credentials it needs and this machine does not have:
+    DESK_TOKEN
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-AOJXvE/bundle.json
+
+  No credential values. The 1 name(s) it needs travel with it:
+    DESK_TOKEN
+
+Imported as Desk agent (imported)
+  p_fdfkc37d
+
+  Its connector, which came from this file rather than from you:
+    run `/usr/local/bin/desk-mcp --staging`
+
+  RigorRun will not open it until you have read that line and said yes,
+  in the interface or with `rigorrun trust p_fdfkc37d`.
+
+  Credentials it needs and this machine does not have:
+    DESK_TOKEN
+
+Opening Desk agent (imported) would
+  run `/usr/local/bin/desk-mcp --staging`
+
+  Read that line. If it is what you expect, run this again with --yes.
+
+Opening Desk agent (imported) would
+  run `/usr/local/bin/desk-mcp --staging`
+
+  Trusted. RigorRun will open it from now on.
+ ✓ packages/daemon/test/migration.test.ts (5 tests) 55ms
+
+Backed up
+  /tmp/rigorrun-bundle-Ri7WJD/backup
+
+  1 project(s), and the names of your credentials.
+  Not your credentials themselves — those stay where they are.
+
+Backed up
+  /tmp/rigorrun-bundle-44cc7A/backup
+
+  1 project(s), and the names of your credentials.
+  Not your credentials themselves — those stay where they are.
+
+Restored
+id   name      
+---  ----------
+p_1  Desk agent
+
+  Credentials are not in a backup. Set them again with `rigorrun secrets set`.
+ ✓ packages/cli/test/backup.test.ts (8 tests) 116ms
+ ✓ packages/trace-import/test/otel.test.ts (9 tests) 36ms
+ ✓ packages/env-openapi/test/openapi.test.ts (9 tests) 98ms
+ ✓ packages/daemon/test/store.test.ts (22 tests) 74ms
+ ✓ packages/environment/test/environment.test.ts (28 tests) 56ms
+ ✓ packages/daemon/test/secrets.test.ts (6 tests) 31ms
+ ✓ packages/daemon/test/csrf.test.ts (7 tests) 164ms
+ ✓ packages/core/test/hash.test.ts (13 tests) 37ms
+ ✓ packages/daemon/test/orphans.test.ts (4 tests) 48ms
+ ✓ apps/demo-ops/test/renderer.test.ts (33 tests) 45ms
+ ✓ packages/daemon/test/activation.test.ts (11 tests) 50ms
+ ✓ packages/cli/test/package.test.ts (14 tests) 22ms
+ ✓ packages/report/test/report.test.ts (24 tests) 46ms
+ ✓ packages/core/test/record.test.ts (9 tests) 26ms
+ ✓ packages/core/test/redaction.test.ts (56 tests) 26ms
+ ✓ packages/mcp/test/external.test.ts (5 tests) 25ms
+ ✓ packages/connector/test/environment.test.ts (8 tests) 25ms
+ ✓ packages/verifier/test/evaluate.test.ts (24 tests) 25ms
+ ✓ packages/core/test/canonicalTrace.test.ts (6 tests) 23ms
+ ✓ packages/verifier/test/stateChange.test.ts (13 tests) 22ms
+ ✓ packages/conformance/test/exit.test.ts (8 tests) 36ms
+ ✓ packages/mcp/test/identity.test.ts (14 tests) 26ms
+ ✓ packages/conformance/test/plan.test.ts (11 tests) 24ms
+ ✓ packages/daemon/test/pairing.test.ts (12 tests) 21ms
+ ✓ packages/environment/test/capabilities.test.ts (12 tests) 10ms
+ ✓ packages/core/test/environmentContract.test.ts (12 tests) 21ms
+ ✓ packages/core/test/selector.test.ts (21 tests) 22ms
+ ✓ packages/verifier/test/path.test.ts (22 tests) 19ms
+ ✓ packages/daemon/test/compare.test.ts (7 tests) 15ms
+ ✓ packages/scoring/test/stats.test.ts (14 tests) 12ms
+ ✓ packages/mcp/test/safety.test.ts (20 tests) 24ms
+ ✓ packages/connector/test/result.test.ts (19 tests) 16ms
+ ✓ packages/connector/test/rows.test.ts (9 tests) 19ms
+ ✓ packages/sandbox/test/posture.test.ts (13 tests) 16ms
+ ✓ packages/core/test/logger.test.ts (5 tests) 10ms
+ ✓ packages/conformance/test/judge.test.ts (11 tests) 9ms
+ ✓ packages/sandbox/test/reference.test.ts (6 tests) 9ms
+ ✓ packages/cli/test/verifyFlags.test.ts (2 tests) 6ms
+ ✓ packages/sandbox/test/surfaces.test.ts (7 tests) 6ms
+ ✓ packages/daemon/test/suiteQualityOnRun.test.ts (3 tests) 4ms
+ ✓ packages/cli/test/project.test.ts (8 tests) 20946ms
+     ✓ runs the suite and reports how the verdict was reached  4736ms
+     ✓ gates, and says which threshold it missed  5391ms
+     ✓ passes when the bar is one the agent clears  5043ms
+     ✓ names the case that broke and exits non-zero  4451ms
+ ✓ packages/sandbox/test/adversarial.test.ts (10 tests) 25356ms
+
+ Test Files  92 passed (92)
+      Tests  1017 passed (1017)
+   Start at  23:58:23
+   Duration  26.50s (transform 8.09s, setup 0ms, import 39.51s, tests 138.20s, environment 13ms)
+
+exit 0

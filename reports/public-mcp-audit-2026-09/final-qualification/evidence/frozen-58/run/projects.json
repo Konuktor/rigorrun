@@ -1,0 +1,26 @@
+{
+  "home-sqlite-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes/home-sqlite-w1",
+    "project": "p_685a24c9aa85"
+  },
+  "home-sqlite-w1b": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes/home-sqlite-w1b",
+    "project": "p_04ed810d4b40"
+  },
+  "home-email-gm-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes/home-email-gm-w1",
+    "project": "p_6ac447989a59"
+  },
+  "home-email-gm-fault": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes/home-email-gm-fault",
+    "project": "p_efa2a0340436"
+  },
+  "home-worktide-w2": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes/home-worktide-w2",
+    "project": "p_34c01a0eaac2"
+  },
+  "home-worktide-w3": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes/home-worktide-w3",
+    "project": "p_c8b683c1151f"
+  }
+}

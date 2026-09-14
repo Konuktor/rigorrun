@@ -1,0 +1,12 @@
+{
+  "id": "recorded-protocol-version",
+  "target": "RigorRun client",
+  "check": "the negotiated protocol version is recorded for a stdio server",
+  "status": "LIMIT",
+  "observed": {
+    "recorded": "negotiated",
+    "actuallyNegotiated": "2025-11-25"
+  },
+  "expected": "the version the server negotiated",
+  "impact": "Discovery records the literal \"negotiated\" for stdio servers; an audit must record the version from its own raw handshake."
+}

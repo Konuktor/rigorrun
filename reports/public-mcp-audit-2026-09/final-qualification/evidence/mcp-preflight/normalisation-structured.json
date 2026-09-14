@@ -1,0 +1,12 @@
+{
+  "id": "normalisation-structured",
+  "target": "RigorRun normaliser",
+  "check": "structuredContent is records",
+  "status": "PASS",
+  "observed": {
+    "ok": true,
+    "kind": "structured",
+    "error": null
+  },
+  "expected": "structured"
+}

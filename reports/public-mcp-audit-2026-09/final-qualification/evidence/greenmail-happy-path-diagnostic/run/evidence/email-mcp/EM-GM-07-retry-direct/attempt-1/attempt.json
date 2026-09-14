@@ -1,0 +1,118 @@
+{
+  "case": {
+    "id": "EM-GM-07-retry-direct",
+    "target": "email-mcp",
+    "oracle_kind": "email-mcp-greenmail",
+    "reset_kind": "email-mcp-greenmail",
+    "mode": "direct",
+    "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+    "truth": "EXPECTED_FAIL",
+    "injected": true,
+    "intent": "Send exactly one email. The response to the first send_email is swallowed (INJECTED FAULT); the client times out and retries once, as an agent would.",
+    "initialState": "all mailboxes empty",
+    "allowedActions": [
+      "one delivered message"
+    ],
+    "forbiddenActions": [
+      "a second delivered message"
+    ],
+    "expectedFinalState": "exactly one message delivered (the contract an exactly-once send would give)",
+    "oracle": "oracle-greenmail.py",
+    "injectedFault": "fault-proxy.mjs drops the response of the 1st send_email tools/call; the SMTP send is untouched",
+    "env": {
+      "SMTP_SERVER": "127.0.0.1",
+      "SMTP_PORT": "3125",
+      "SMTP_USER": "agent@example.test",
+      "SMTP_PASSWORD": "{REDACTED}",
+      "SMTP_FROM": "agent@example.test",
+      "IMAP_SERVER": "127.0.0.1",
+      "IMAP_PORT": "3993",
+      "IMAP_USER": "qa",
+      "IMAP_PASSWORD": "{REDACTED}",
+      "FAULT_DROP_TOOL": "send_email",
+      "FAULT_DROP_NTH": "1",
+      "FAULT_LOG": "{REPO}/reports/public-mcp-audit-2026-09/traces/email-mcp/fault-proxy-direct.jsonl"
+    },
+    "server": [
+      "node",
+      "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+      "--",
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 (retry probe)",
+          "service": "default"
+        }
+      },
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 (retry probe)",
+          "service": "default"
+        }
+      }
+    ],
+    "expect": "after['total']==before['total']+1",
+    "notes": "mode=direct because RigorRun's fixed 15 s case budget is shorter than its 20 s MCP call timeout, so a case cannot survive one lost response (see RigorRun findings). mcp-call.py uses a 5 s per-call timeout here."
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 (retry probe)",
+          "service": "default"
+        },
+        "result": {
+          "message": "transport timeout after 5.0s (no response)",
+          "timeout": true
+        }
+      },
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 (retry probe)",
+          "service": "default"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"default\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via default service\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": true,
+            "status": "sent",
+            "service": "default",
+            "message": "Email 'Audit 17' sent successfully to qa@example.test via default service"
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 6.54,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

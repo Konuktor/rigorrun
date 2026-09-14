@@ -1,0 +1,10 @@
+{
+  "home-email-gm-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes-diagnostic/home-email-gm-w1",
+    "project": "p_6ac447989a59"
+  },
+  "home-email-gm-fault": {
+    "home": "{REPO}/tmp/rigorrun-audit/fq-homes-diagnostic/home-email-gm-fault",
+    "project": "p_efa2a0340436"
+  }
+}

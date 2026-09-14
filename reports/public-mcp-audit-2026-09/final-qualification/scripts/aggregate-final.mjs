@@ -36,14 +36,16 @@ const product = read(join(FQ, 'product-under-test.json'));
 const runInfo = read(join(RUN, 'run-info.json'));
 const after2 = read(join(REMEDIATION, 'after-results.json'));
 const after1 = read(join(REMEDIATION, 'after-1-results.json'));
+// Cases the frozen protocol refused to run, with the recorded reason (evidence/frozen-58/not-run.json).
+const refused = read(join(FQ, 'evidence', 'frozen-58', 'not-run.json'))?.cases ?? {};
 
 function consensus(values) {
   const set = uniq(values);
   return set.length === 1 ? set[0] : set.length === 0 ? 'NOT_RUN' : 'INCONSISTENT';
 }
 
-function attemptsOf(target, id) {
-  const dir = join(RUN, 'evidence', target, id);
+function attemptsOf(runDir, target, id) {
+  const dir = join(runDir, 'evidence', target, id);
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((d) => d.startsWith('attempt-') && existsSync(join(dir, d, 'attempt.json')))
@@ -67,8 +69,8 @@ function previousOf(frozen) {
   return { source: 'BASELINE', rigorrunCommit: manifest.rigorrun.commit, attempts: frozen.originalOracleVerdicts?.length ?? null, oracleVerdicts: uniq(frozen.originalOracleVerdicts ?? []), rigorrunOutcomes: null, classification: frozen.classification, outcomeClassification: null };
 }
 
-const cases = manifest.cases.map((frozen) => {
-  const attempts = attemptsOf(frozen.target, frozen.id);
+function buildCase(frozen, runDir, diagnostic = false) {
+  const attempts = attemptsOf(runDir, frozen.target, frozen.id);
   const perAttempt = attempts.map((a) => {
     const rr = happy(a)[0] ?? null;
     return {
@@ -89,7 +91,7 @@ const cases = manifest.cases.map((frozen) => {
       exit: a.result?.rigorrun?.exit ?? null,
     };
   });
-  const summary = read(join(RUN, 'evidence', frozen.target, frozen.id, 'summary.json'));
+  const summary = read(join(runDir, 'evidence', frozen.target, frozen.id, 'summary.json'));
   const blocked = read(join(FQ, 'evidence', 'local-model', frozen.id, 'blocked.json'));
   const rigorrun = frozen.mode === 'rigorrun';
   const status = attempts.length === 0
@@ -106,7 +108,7 @@ const cases = manifest.cases.map((frozen) => {
     attemptsPlanned: frozen.attempts,
     attempts: attempts.length,
     status,
-    notRunReason: attempts.length > 0 ? null : blocked ? 'BLOCKED_BY_HOST_RESOURCES' : summary?.notRun ?? 'no evidence was written for this case',
+    notRunReason: attempts.length > 0 ? null : diagnostic ? 'not run in the diagnostic' : refused[frozen.id] ?? (blocked ? 'BLOCKED_BY_HOST_RESOURCES' : summary?.notRun ?? 'no evidence was written for this case'),
     oracleVerdicts: uniq(perAttempt.map((a) => a.oracleVerdict)),
     rigorrunOutcomes: uniq(perAttempt.map((a) => a.rigorrunOutcome)),
     classification: consensus(perAttempt.map((a) => a.classification)),
@@ -117,7 +119,8 @@ const cases = manifest.cases.map((frozen) => {
     perAttempt,
     previous: previousOf(frozen),
   };
-});
+}
+const cases = manifest.cases.map((frozen) => buildCase(frozen, RUN));
 
 function totals(list) {
   const rr = list.filter((c) => c.mode === 'rigorrun');
@@ -193,13 +196,31 @@ function totals(list) {
   };
 }
 
-const r1Cases = cases.filter((c) => c.r1);
-const r1 = {
+const r1Of = (list) => {
+  const r1Cases = list.filter((c) => c.r1);
+  return {
   cases: r1Cases.length,
   casesRun: r1Cases.filter((c) => c.attempts > 0).length,
   reproductions: r1Cases.filter((c) => c.perAttempt.some((a) => ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(a.outcomeClassification) || ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(a.classification))).length,
   casesWithoutVerdict: r1Cases.filter((c) => c.attempts === 0 || c.perAttempt.some((a) => !SCORED.includes(a.outcomeClassification))).map((c) => c.id),
   perCase: r1Cases.map((c) => ({ id: c.id, attempts: c.attempts, oracle: c.oracleVerdicts, outcome: c.outcomeClassification, originalRule: c.classification, status: c.status })),
+  };
+};
+const r1 = r1Of(cases);
+
+// The GreenMail happy-path-only diagnostic: a labelled deviation for the cases the frozen protocol refused.
+// Reported beside the frozen 58 and never merged into it or read by any gate.
+const DIAG = join(FQ, 'evidence', 'greenmail-happy-path-diagnostic');
+const diagCases = existsSync(join(DIAG, 'run', 'evidence'))
+  ? manifest.cases.filter((frozen) => Object.keys(refused).includes(frozen.id)).map((frozen) => buildCase(frozen, join(DIAG, 'run'), true))
+  : [];
+const diagnostic = diagCases.length === 0 ? null : {
+  label: 'DEVIATION: throwaway GreenMail home copies whose suite keeps only the generated happy_path case; never counted by any gate',
+  deviation: read(join(DIAG, 'deviation.json')),
+  ...totals(diagCases),
+  R1: r1Of(diagCases),
+  changedVsPrevious: diagCases.filter((c) => c.attempts > 0 && (c.previous.outcomeClassification !== c.outcomeClassification || c.previous.classification !== c.classification)).map((c) => ({ id: c.id, previous: c.previous, outcome: c.outcomeClassification, originalRule: c.classification })),
+  cases: Object.fromEntries(diagCases.map((c) => [c.id, c])),
 };
 
 // ---- other sections, each null until its evidence exists
@@ -264,10 +285,23 @@ const results = {
   n1: {
     ehWt03: n1Final ? { rigorrunCommit: n1Final.rigorrunCommit, attempts: (n1Final.attempts ?? []).filter((a) => a.id === 'EH-WT-03').map((a) => ({ attempt: a.attempt, actual: a.actual, oracle: a.oracle })) } : null,
     heldoutWorktideV2: v2 ? { rigorrunCommit: v2.rigorrunCommit, blocks: v2.blocks } : null,
-    crossRegression: crossRegression?.summary ?? null,
+    // Counts for prose; the lists themselves are in evidence/n1-cross-regression.json.
+    crossRegression: crossRegression ? {
+      regressions: crossRegression.summary.regressions.length,
+      unmeasured: crossRegression.summary.unmeasured?.length ?? null,
+      suiteShapeChanges: crossRegression.summary.suiteShapeChanges?.length ?? null,
+      identityChanges: crossRegression.summary.identityChanges.length,
+      changedValueAsIdentity: crossRegression.summary.changedValueAsIdentity.length,
+      nullableIdentityNow: crossRegression.summary.nullableIdentityNow.length,
+      focusEntityMoved: crossRegression.summary.focusEntityMoved.length,
+      duplicateKeysInFinalState: crossRegression.summary.duplicateKeysInFinalState.length,
+      diagnosticCorrectOnEveryAttempt: crossRegression.summary.greenmailHappyPathDiagnostic?.correctOnEveryAttempt ?? null,
+      diagnosticRegressions: crossRegression.summary.greenmailHappyPathDiagnostic?.regressions?.length ?? null,
+    } : null,
   },
   heldoutInprocess: inprocess ? { rigorrunCommit: inprocess.rigorrunCommit, ...inprocess.totals } : null,
   independentOracle: io?.summary ?? null,
+  greenmailHappyPathDiagnostic: diagnostic,
   mcpPreflight: preflight ?? null,
   checks: { phase0: checks('phase0'), final: checks('final') },
 };

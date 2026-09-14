@@ -1,0 +1,124 @@
+{
+  "generatedBy": "final-qualification/scripts/mcp/mcp-preflight.ts",
+  "statuses": {
+    "PASS": 14,
+    "LIMIT": 5,
+    "FAIL": 0
+  },
+  "checks": [
+    {
+      "id": "sdk-versions",
+      "target": "RigorRun client",
+      "check": "protocol versions the installed MCP SDK can negotiate",
+      "status": "LIMIT"
+    },
+    {
+      "id": "filesystem-connect",
+      "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+      "check": "connection, identity and negotiated version",
+      "status": "PASS"
+    },
+    {
+      "id": "recorded-protocol-version",
+      "target": "RigorRun client",
+      "check": "the negotiated protocol version is recorded for a stdio server",
+      "status": "LIMIT"
+    },
+    {
+      "id": "filesystem-tools-list",
+      "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+      "check": "tools/list: RigorRun sees every tool the server offers",
+      "status": "PASS"
+    },
+    {
+      "id": "filesystem-call",
+      "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+      "check": "tools/call, and normalisation that follows the result shape",
+      "status": "PASS"
+    },
+    {
+      "id": "filesystem-error",
+      "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+      "check": "a refused call is an error, never data",
+      "status": "PASS"
+    },
+    {
+      "id": "filesystem-teardown",
+      "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+      "check": "close() ends the stdio child",
+      "status": "PASS"
+    },
+    {
+      "id": "memory-structured",
+      "target": "@modelcontextprotocol/server-memory 2026.8.31",
+      "check": "a structured result is read as records",
+      "status": "PASS"
+    },
+    {
+      "id": "memory-teardown",
+      "target": "@modelcontextprotocol/server-memory 2026.8.31",
+      "check": "close() ends the stdio child",
+      "status": "PASS"
+    },
+    {
+      "id": "tools-list-pagination",
+      "target": "RigorRun client",
+      "check": "tools/list follows nextCursor",
+      "status": "LIMIT"
+    },
+    {
+      "id": "normalisation-structured",
+      "target": "RigorRun normaliser",
+      "check": "structuredContent is records",
+      "status": "PASS"
+    },
+    {
+      "id": "normalisation-json-in-text",
+      "target": "RigorRun normaliser",
+      "check": "JSON inside a text block is records (R-8)",
+      "status": "PASS"
+    },
+    {
+      "id": "normalisation-prose",
+      "target": "RigorRun normaliser",
+      "check": "prose is never records",
+      "status": "PASS"
+    },
+    {
+      "id": "errors",
+      "target": "RigorRun client",
+      "check": "isError results and JSON-RPC errors are errors, not data",
+      "status": "PASS"
+    },
+    {
+      "id": "normalisation-links-and-images",
+      "target": "RigorRun normaliser",
+      "check": "resource_link and image-only results",
+      "status": "LIMIT"
+    },
+    {
+      "id": "timeout",
+      "target": "RigorRun client",
+      "check": "a call past its timeout is an error, not an empty result",
+      "status": "PASS"
+    },
+    {
+      "id": "stderr-flood",
+      "target": "RigorRun client",
+      "check": "a server writing 200 KB to stderr is still answered",
+      "status": "LIMIT"
+    },
+    {
+      "id": "teardown-local",
+      "target": "RigorRun client",
+      "check": "close() settles and ends the stdio child after a blocked call",
+      "status": "PASS"
+    },
+    {
+      "id": "modern-only-server",
+      "target": "RigorRun client",
+      "check": "a server that speaks only 2026-07-28 is refused at connect, visibly",
+      "status": "PASS"
+    }
+  ]
+}

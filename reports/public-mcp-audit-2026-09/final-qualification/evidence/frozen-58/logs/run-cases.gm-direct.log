@@ -1,0 +1,5 @@
+2026-09-14T17:46:27Z batch gm-direct (1 cases); available MiB 7283; swap free MiB 12956
+EM-GM-07-retry-direct attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.52s)
+EM-GM-07-retry-direct attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.53s)
+EM-GM-07-retry-direct attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.51s)
+2026-09-14T17:46:51Z batch gm-direct exit 0; available MiB 7273
