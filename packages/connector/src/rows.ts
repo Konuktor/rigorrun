@@ -94,7 +94,8 @@ export function stateFromPayloads(
     for (const entity of schema.entities) {
       const table = state.entities[entity.name] ?? {};
       // Within one answer a record seen twice must be the same record. Across
-      // answers the later reading stands, as it always has.
+      // the answers of the reads a verdict uses, the later reading stands. Those
+      // are never a verifier's and the system's own at once: see readsForVerdict.
       const inThisAnswer = new Map<string, EntityRow>();
       for (const [key, row] of keyedRows(entity, rowsFromPayload(payload, entity))) {
         const earlier = inThisAnswer.get(key);

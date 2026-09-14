@@ -20,11 +20,12 @@
  * isolated and still reproducible. They simply cannot be *arbitrary*.
  *
  * `getState()` asks for every row a system holds. Nothing offers that either.
- * What this returns is whatever the nominated verifier reads came back with —
- * genuinely partial, declared as `designated-reads`, and labelled PARTIAL on
- * every verdict built from it. A check written against a record nobody
- * nominated a read for is inapplicable rather than passing, which is the whole
- * reason the verifier has a tri-state.
+ * What this returns is whatever the nominated reads came back with — only the
+ * verifier's, once one is nominated — genuinely partial, declared as
+ * `designated-reads`, and labelled PARTIAL on every verdict built from it. A
+ * record no read returns is absent, and absent reads as nonexistent: RigorRun
+ * cannot tell a record nobody nominated a read for from one that is not there,
+ * so what the reads cover is what a verdict can speak about.
  *
  * `restore()` expects time travel. It resets. That is sound *only* because
  * seeding is impossible here: the one world anybody could want back is the one
@@ -48,7 +49,7 @@ import {
 import type { SystemConnection } from './types.ts';
 import type { SystemEnvironmentConfig } from './environmentConfig.ts';
 import { hasPayload, normalizeCallResult } from './result.ts';
-import { isVerifierTool } from './verified.ts';
+import { isVerifierTool, readsForVerdict } from './verified.ts';
 import { IdentityConflictError, stateFromPayloads } from './rows.ts';
 
 export class SystemEnvironment implements EnvironmentAdapter {
@@ -82,9 +83,11 @@ export class SystemEnvironment implements EnvironmentAdapter {
           : 'none',
       // A real system does not let you install a world.
       seed: 'none',
-      // Independent only when every read goes through a connection the agent
-      // never touches. One read through the system's own tools is enough to
-      // make the verdict rest, in part, on the system's account of itself.
+      // Independent only when every nominated read goes through a connection
+      // the agent never touches. The label follows what was nominated: once a
+      // verifier read is nominated the world is read through it alone (see
+      // readsForVerdict), but a project that also nominates the system's own
+      // reads has asked for them, and is labelled for what it asked for.
       stateReadIndependence:
         this.config.verifierReads.length > 0 &&
         this.config.verifierReads.every((read) => isVerifierTool(read.tool))
@@ -181,20 +184,24 @@ export class SystemEnvironment implements EnvironmentAdapter {
   }
 
   /**
-   * The world, as far as the nominated reads can see it.
+   * The world, as far as the reads a verdict uses can see it.
+   *
+   * Once a verifier read is nominated, those are the verifier's alone, and the
+   * system's own reads are not called (audit IO-7-mixed-a; see readsForVerdict).
    *
    * A read that fails, or answers in prose, leaves the world unknown and throws
    * StateReadError; an unknown world is never handed back as an empty one.
    *
-   * Rows that no verifier read returns are simply absent, and absent is not the
-   * same as empty: a check against them resolves to INAPPLICABLE rather than
-   * failing, so a missing read narrows what can be concluded instead of
-   * inventing a verdict.
+   * Rows that no used read returns are absent, and the verifier treats absent
+   * as nonexistent: a `state_exists` check on them fails, and a record present
+   * at the start but absent now reads as deleted. A read that answers empty and
+   * a record type no read covers look the same from here, which is why what the
+   * reads cover is a decision for the person nominating them.
    */
   async getState(): Promise<CanonicalState> {
     const payloads: unknown[] = [];
     const answeredBy: string[] = [];
-    for (const read of this.config.verifierReads) {
+    for (const read of readsForVerdict(this.config.verifierReads).used) {
       const normalized = normalizeCallResult(
         await this.connection.call(read.tool, read.args ?? {}, this.config.toolCallMs),
       );

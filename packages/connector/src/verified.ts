@@ -21,6 +21,23 @@ export function isVerifierTool(name: string): boolean {
   return name.startsWith(VERIFIER_PREFIX);
 }
 
+/**
+ * The nominated reads a verdict rests on, and the ones it sets aside.
+ *
+ * Audit IO-7-mixed-a: a project nominated a verifier read and one of the
+ * system's own reads, and the later answer's rows replaced the earlier's — so a
+ * system that misreported its own state, read after the verifier, decided the
+ * verdict. Once a witness the agent cannot reach is nominated, a read through
+ * the system's own connection can only add the system's account of itself. It
+ * is not merged in, and it is not called: calling it could only add a side
+ * effect or a failure to a world that is already read.
+ */
+export function readsForVerdict<T extends { tool: string }>(reads: readonly T[]): { used: T[]; ignored: T[] } {
+  const verifier = reads.filter((read) => isVerifierTool(read.tool));
+  if (verifier.length === 0) return { used: [...reads], ignored: [] };
+  return { used: verifier, ignored: reads.filter((read) => !isVerifierTool(read.tool)) };
+}
+
 export class VerifiedConnection implements SystemConnection {
   readonly discovery: DiscoveryResult;
   readonly childPid: number | null;

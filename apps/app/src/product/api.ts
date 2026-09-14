@@ -375,7 +375,7 @@ export const api = {
       { connector, safety },
     ),
   configure: (id: string, config: unknown) =>
-    post<{ project: ProjectView; readsProblem: string }>(
+    post<{ project: ProjectView; readsProblem: string; readsIgnored?: string[] }>(
       `/api/projects/${id}/environment/config`,
       config,
     ),

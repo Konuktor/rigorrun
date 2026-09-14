@@ -347,14 +347,14 @@ export class Runner {
 
     app.post('/api/projects/:id/environment/config', async (context) => {
       const body = await context.req.json<Parameters<Service['configureEnvironment']>[1]>();
-      const { project, readsProblem } = await service.configureEnvironment(
+      const { project, readsProblem, readsIgnored } = await service.configureEnvironment(
         context.req.param('id'),
         body,
       );
       // Travels beside the saved project rather than as an error: the
       // configuration is valid and was saved, and what RigorRun has to say is
       // about what it will be able to prove later.
-      return context.json({ project: summarise(project), readsProblem });
+      return context.json({ project: summarise(project), readsProblem, readsIgnored });
     });
 
     // ---------------------------------------------------------- teach a job

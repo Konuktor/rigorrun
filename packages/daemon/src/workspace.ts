@@ -29,6 +29,7 @@ import {
   detectMismatch,
   hasPayload,
   normalizeCallResult,
+  readsForVerdict,
   stateFromPayloads,
   type AnnotationMismatch,
   type SystemConnection,
@@ -389,7 +390,13 @@ export class Workspace {
     // honest answer, and everything downstream already says OBSERVATIONAL.
     if (live.connection.canReadState === false) return [];
     const answers: { read: string; payload: unknown }[] = [];
+    // Once a verifier read is nominated, the demonstration is recorded through
+    // it alone, exactly as verdicts are read (audit IO-7-mixed-a). The label
+    // keeps each read's place in the nomination, so a reading is named the same
+    // way however many reads are set aside.
+    const { used } = readsForVerdict(project.verifierReads);
     for (const [index, read] of project.verifierReads.entries()) {
+      if (!used.includes(read)) continue;
       // The one reading of a result, shared with the setup probe and the
       // runner: a server that answers with JSON inside a text block is read
       // here exactly as it was read when the probe said it could be.

@@ -40,7 +40,7 @@ import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
-import { hasPayload, normalizeCallResult } from '@rigorrun/connector';
+import { hasPayload, normalizeCallResult, readsForVerdict } from '@rigorrun/connector';
 import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
   BudgetsSchema,
@@ -252,7 +252,7 @@ export class Service {
       reset: { kind: 'tool' | 'none'; tool?: string };
       budgets?: { toolCallMs?: number; caseMs?: number };
     },
-  ): Promise<{ project: Project; readsProblem: string }> {
+  ): Promise<{ project: Project; readsProblem: string; readsIgnored: string[] }> {
     const project = await this.store.read(projectId);
     const budgets = BudgetsSchema.parse({ ...project.budgets, ...(input.budgets ?? {}) });
     const problem = budgetProblem(budgets);
@@ -268,11 +268,25 @@ export class Service {
       budgets,
     };
     await this.store.write(updated);
-    return { project: updated, readsProblem: await this.probeVerifierReads(updated) };
+    // Said at setup rather than discovered in a verdict: a read the person
+    // nominated that RigorRun will never call is something to hear about now.
+    const readsIgnored = readsForVerdict(updated.verifierReads).ignored.map((read) => read.tool);
+    const ignoredWarning =
+      readsIgnored.length > 0
+        ? 'A verifier read is nominated, so RigorRun reads the result only through the verifier. ' +
+          `These reads go through the system's own connection and will be ignored: ${readsIgnored.join(', ')}. ` +
+          'Verdicts stay labelled SELF_REPORTED while they are nominated; remove them to have verdicts labelled INDEPENDENT.'
+        : '';
+    const probe = await this.probeVerifierReads(updated);
+    return {
+      project: updated,
+      readsProblem: [ignoredWarning, probe].filter(Boolean).join('\n\n'),
+      readsIgnored,
+    };
   }
 
   /**
-   * Calls the nominated reads and says whether records came back.
+   * Calls the reads a verdict will use and says whether records came back.
    *
    * This exists because of what a real third-party MCP server did. It published
    * fourteen tools, connected cleanly, and every one of its reads returned
@@ -323,7 +337,7 @@ export class Service {
     const failed: string[] = [];
     const prose: string[] = [];
     let sawEmpty = false;
-    for (const read of project.verifierReads) {
+    for (const read of readsForVerdict(project.verifierReads).used) {
       const result = await connection
         .call(read.tool, read.args, project.budgets.toolCallMs)
         .catch(() => undefined);

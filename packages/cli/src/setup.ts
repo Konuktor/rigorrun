@@ -169,6 +169,7 @@ export async function cmdSetup(specPath: string | undefined, flags: Flags): Prom
           {
             projectId: project.id,
             readsProblem: configured.readsProblem,
+            readsIgnored: configured.readsIgnored,
             tools: connected.tools.length,
             records: finished.schema.entities.map((entity) => entity.name),
             rules: { total: draft.rules.length, confirmed: confirmed.length, rejected: rejected.length },
