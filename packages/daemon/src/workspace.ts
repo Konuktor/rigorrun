@@ -352,18 +352,33 @@ export class Workspace {
     live.connection.allowWrites?.();
 
     await this.environment(project, { entities: [], relationships: [] }).reset();
-    const beforePayloads = await this.readPayloads(project);
+    const beforeAnswers = await this.readAnswers(project);
     live.demonstration = {
       startedAt: Date.now(),
-      beforePayloads,
+      beforePayloads: beforeAnswers.map((answer) => answer.payload),
       entries: [],
-      observations: beforePayloads.map((payload) => ({ tool: 'before', payload })),
+      observations: beforeAnswers.map((answer) => ({
+        tool: 'before',
+        payload: answer.payload,
+        reading: { read: answer.read, moment: 'before' as const },
+      })),
     };
     await this.saveDemonstration(project);
   }
 
   /** Calls every nominated read and keeps the answers exactly as they came. */
   private async readPayloads(project: Project): Promise<unknown[]> {
+    return (await this.readAnswers(project)).map((answer) => answer.payload);
+  }
+
+  /**
+   * The nominated reads' answers, each labelled with the read that gave it.
+   *
+   * The label is what lets induction compare two readings of the same read,
+   * taken before and after the job: a field that changed between them for the
+   * same record describes that record, and must never be what names it.
+   */
+  private async readAnswers(project: Project): Promise<{ read: string; payload: unknown }[]> {
     const live = this.live.get(project.id);
     if (!live) throw new Error(`${project.name} is not connected.`);
     // A connector that cannot read the system back reads nothing, whatever its
@@ -373,17 +388,19 @@ export class Workspace {
     // agent against the system's own account of what it did. Empty is the
     // honest answer, and everything downstream already says OBSERVATIONAL.
     if (live.connection.canReadState === false) return [];
-    const payloads: unknown[] = [];
-    for (const read of project.verifierReads) {
+    const answers: { read: string; payload: unknown }[] = [];
+    for (const [index, read] of project.verifierReads.entries()) {
       // The one reading of a result, shared with the setup probe and the
       // runner: a server that answers with JSON inside a text block is read
       // here exactly as it was read when the probe said it could be.
       const normalized = normalizeCallResult(
         await live.connection.call(read.tool, read.args, project.budgets.toolCallMs),
       );
-      if (hasPayload(normalized)) payloads.push(normalized.payload);
+      if (hasPayload(normalized)) {
+        answers.push({ read: `${index}:${read.tool}:${JSON.stringify(read.args ?? {})}`, payload: normalized.payload });
+      }
     }
-    return payloads;
+    return answers;
   }
 
   /**
@@ -505,10 +522,15 @@ export class Workspace {
     const live = this.live.get(project.id);
     if (!live?.demonstration) throw new Error('Nothing is being recorded right now.');
 
-    const afterPayloads = await this.readPayloads(project);
+    const afterAnswers = await this.readAnswers(project);
+    const afterPayloads = afterAnswers.map((answer) => answer.payload);
     const observations = [
       ...live.demonstration.observations,
-      ...afterPayloads.map((payload) => ({ tool: 'after', payload })),
+      ...afterAnswers.map((answer) => ({
+        tool: 'after',
+        payload: answer.payload,
+        reading: { read: answer.read, moment: 'after' as const },
+      })),
     ];
 
     // Induction comes first, then both states are built from the payloads that

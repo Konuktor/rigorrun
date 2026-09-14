@@ -36,6 +36,7 @@ import {
 } from './schema.ts';
 import {
   deepEqual,
+  entriesOf,
   rowById,
   rowsOf,
   rowReferences,
@@ -141,26 +142,29 @@ export function buildProjection(
     const entity = entityByName(schema, entityName);
     if (!entity) continue;
 
-    const decorated = rowsOf(input.final, entityName).map((row) =>
-      decorateRow(schema, entity, row, input),
-    );
+    // Rows are matched by the key they are stored under, never by reading an
+    // identifier back off the row: a record named by several fields, or by
+    // nothing, has no single field to read.
+    const finalEntries = entriesOf(input.final, entityName);
+    const decorated = finalEntries.map(([key, row]) => decorateRow(schema, entity, key, row, input));
+    const finalKeys = finalEntries.map(([key]) => key);
     const deletedRows = [...(deletedIds[entityName] ?? [])]
       .sort()
-      .map((id) => rowById(input.seed, entityName, id))
-      .filter((row): row is EntityRow => row !== undefined)
-      .map((row) => decorateRow(schema, entity, row, { ...input, final: input.seed }));
+      .map((key): [string, EntityRow | undefined] => [key, input.seed.entities[entityName]?.[key]])
+      .filter((entry): entry is [string, EntityRow] => entry[1] !== undefined)
+      .map(([key, row]) => decorateRow(schema, entity, key, row, { ...input, final: input.seed }));
 
     all[entityName] = decorated;
     // Decorated against the seed on both sides, so it describes the starting
     // world rather than a mixture of before and after.
-    seedRows[entityName] = rowsOf(input.seed, entityName).map((row) =>
-      decorateRow(schema, entity, row, { ...input, final: input.seed }),
+    seedRows[entityName] = entriesOf(input.seed, entityName).map(([key, row]) =>
+      decorateRow(schema, entity, key, row, { ...input, final: input.seed }),
     );
-    created[entityName] = decorated.filter((row) =>
-      (createdIds[entityName] ?? new Set()).has(String(row[entity.idField])),
+    created[entityName] = decorated.filter((_, index) =>
+      (createdIds[entityName] ?? new Set()).has(finalKeys[index] ?? ''),
     );
-    changed[entityName] = decorated.filter((row) =>
-      (changedIds[entityName] ?? new Set()).has(String(row[entity.idField])),
+    changed[entityName] = decorated.filter((_, index) =>
+      (changedIds[entityName] ?? new Set()).has(finalKeys[index] ?? ''),
     );
     deleted[entityName] = deletedRows;
 
@@ -252,6 +256,7 @@ export function buildProjection(
 function decorateRow(
   schema: EnvironmentSchema,
   entity: EntitySchema,
+  key: string,
   row: EntityRow,
   input: ProjectionInput,
 ): DecoratedRow {
@@ -261,7 +266,7 @@ function decorateRow(
   // The row's own fields as they were when work began. This is what makes
   // "this status may not go straight from new to closed" answerable without
   // the verifier knowing what a status is.
-  const seedRow = rowById(input.seed, entity.name, row[entity.idField]);
+  const seedRow = input.seed.entities[entity.name]?.[key];
   for (const field of hoistableFields(entity)) {
     decorated[`seed__${field.name}`] = seedRow?.[field.name] ?? null;
   }
@@ -525,9 +530,9 @@ function buildReferences(
     .sort((a, b) => a.name.localeCompare(b.name));
 
   for (const source of sources) {
-    const sourceRows = rowsOf(input.final, source.name).filter((row) =>
-      (createdIds[source.name] ?? new Set()).has(String(row[source.idField])),
-    );
+    const sourceRows = entriesOf(input.final, source.name)
+      .filter(([key]) => (createdIds[source.name] ?? new Set()).has(key))
+      .map(([, row]) => row);
     for (const target of targets) {
       if (source.name === target.name) continue;
       const targetIds = [...(createdIds[target.name] ?? new Set())].sort();

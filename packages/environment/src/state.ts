@@ -6,7 +6,7 @@
  * from this plus the declared schema, which is why an adapter cannot smuggle a
  * domain opinion into the verifier even by accident.
  */
-import type { EnvironmentSchema } from './schema.ts';
+import type { EntitySchema, EnvironmentSchema } from './schema.ts';
 
 export type EntityRow = Record<string, unknown>;
 
@@ -62,9 +62,69 @@ export function rowById(
   return state.entities[entityName]?.[String(id)];
 }
 
+/** A table's rows with the keys they are stored under, in key order. */
+export function entriesOf(state: CanonicalState, entityName: string): [string, EntityRow][] {
+  const table = state.entities[entityName];
+  if (!table) return [];
+  return Object.keys(table)
+    .sort()
+    .map((key): [string, EntityRow | undefined] => [key, table[key]])
+    .filter((entry): entry is [string, EntityRow] => entry[1] !== undefined);
+}
+
+/**
+ * The key a row is stored under, and the only place one is worked out.
+ *
+ * A record named by one field keeps that field's value as its key, exactly as
+ * it always has. One named by several fields is keyed by all of them together,
+ * with null a value like any other: the report row for "no project" is still a
+ * row. One with no established identity is keyed by its content, and
+ * `keyedRows` numbers identical rows so that two of them stay two. `undefined`
+ * when the row does not carry what names it.
+ */
+export function recordKey(entity: EntitySchema, row: EntityRow): string | undefined {
+  if (entity.identity === 'unestablished') {
+    return JSON.stringify(entity.fields.map((field) => scalarOrNull(row[field.name])));
+  }
+  if (entity.keyFields !== undefined && entity.keyFields.length > 0) {
+    if (!entity.keyFields.some((field) => row[field] !== undefined)) return undefined;
+    const values = entity.keyFields.map((field) => row[field] ?? null);
+    if (values.some((value) => typeof value === 'object' && value !== null)) return undefined;
+    return JSON.stringify(values);
+  }
+  const id = row[entity.idField];
+  return id === undefined || id === null ? undefined : String(id);
+}
+
+/**
+ * The rows of one answer under their keys. Identical rows of a record with no
+ * established identity are numbered, so both are kept; rows that do not carry
+ * what names them are left out.
+ */
+export function keyedRows(entity: EntitySchema, rows: readonly EntityRow[]): [string, EntityRow][] {
+  const occurrences = new Map<string, number>();
+  const keyed: [string, EntityRow][] = [];
+  for (const row of rows) {
+    const key = recordKey(entity, row);
+    if (key === undefined) continue;
+    if (entity.identity !== 'unestablished') {
+      keyed.push([key, row]);
+      continue;
+    }
+    const occurrence = (occurrences.get(key) ?? 0) + 1;
+    occurrences.set(key, occurrence);
+    keyed.push([`${key}#${occurrence}`, row]);
+  }
+  return keyed;
+}
+
+function scalarOrNull(value: unknown): unknown {
+  return value === undefined || (typeof value === 'object' && value !== null) ? null : value;
+}
+
 /**
  * Builds a state from plain arrays, which is how fixtures are written.
- * Rows are keyed by the entity's declared id field.
+ * Rows are keyed by what names them, through `recordKey`.
  */
 export function stateFromRows(
   schema: EnvironmentSchema,
@@ -74,13 +134,12 @@ export function stateFromRows(
   for (const entity of schema.entities) {
     const table = state.entities[entity.name];
     if (!table) continue;
-    for (const row of rows[entity.name] ?? []) {
-      const id = row[entity.idField];
-      if (id === undefined || id === null) {
-        throw new Error(`${entity.name} row is missing its id field "${entity.idField}"`);
-      }
-      table[String(id)] = { ...row };
+    const given = rows[entity.name] ?? [];
+    const keyed = keyedRows(entity, given);
+    if (keyed.length !== given.length) {
+      throw new Error(`${entity.name} row is missing its id field "${entity.idField}"`);
     }
+    for (const [key, row] of keyed) table[key] = { ...row };
   }
   return state;
 }

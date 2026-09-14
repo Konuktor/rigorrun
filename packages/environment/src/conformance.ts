@@ -12,7 +12,7 @@
 import { canonicalJson } from '@rigorrun/core';
 import type { EnvironmentAdapter, EnvironmentFixture } from './adapter.ts';
 import { validateSchema, type EntitySchema, type EnvironmentSchema } from './schema.ts';
-import { cloneState, deepEqual, rowById, type CanonicalState } from './state.ts';
+import { cloneState, deepEqual, recordKey, rowById, type CanonicalState } from './state.ts';
 
 export interface ConformanceProblem {
   check: string;
@@ -276,10 +276,12 @@ function checkRow(
   where: string,
 ): ConformanceProblem[] {
   const problems: ConformanceProblem[] = [];
-  if (String(row[entity.idField]) !== id) {
+  if (entity.identity !== 'unestablished' && recordKey(entity, row) !== id) {
     problems.push({
       check: 'fixture',
-      message: `${where}: ${entity.name} is keyed "${id}" but its ${entity.idField} says "${String(row[entity.idField])}"`,
+      message: entity.keyFields
+        ? `${where}: ${entity.name} is keyed "${id}" but its ${entity.keyFields.join(' and ')} say "${String(recordKey(entity, row))}"`
+        : `${where}: ${entity.name} is keyed "${id}" but its ${entity.idField} says "${String(row[entity.idField])}"`,
     });
   }
   for (const field of entity.fields) {

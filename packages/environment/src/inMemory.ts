@@ -31,6 +31,7 @@ import type { EnvironmentRegistration } from './registry.ts';
 import {
   cloneState,
   emptyState,
+  recordKey,
   rowById,
   type CanonicalState,
   type EntityRow,
@@ -254,13 +255,13 @@ export class InMemoryEnvironment implements EnvironmentAdapter {
       insert: (entityName, row) => {
         const entity = this.definition.schema.entities.find((e) => e.name === entityName);
         if (!entity) throw new Error(`Unknown entity "${entityName}".`);
-        const id = row[entity.idField];
-        if (id === undefined || id === null) {
+        const key = recordKey(entity, row);
+        if (key === undefined) {
           throw new Error(`Cannot insert into ${entityName} without "${entity.idField}".`);
         }
         const table = (this.state.entities[entityName] ??= {});
-        table[String(id)] = { ...row };
-        return table[String(id)] as EntityRow;
+        table[key] = { ...row };
+        return table[key] as EntityRow;
       },
       update: (entityName, id, patch) => {
         const existing = rowById(this.state, entityName, id);

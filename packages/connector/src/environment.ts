@@ -49,7 +49,7 @@ import type { SystemConnection } from './types.ts';
 import type { SystemEnvironmentConfig } from './environmentConfig.ts';
 import { hasPayload, normalizeCallResult } from './result.ts';
 import { isVerifierTool } from './verified.ts';
-import { stateFromPayloads } from './rows.ts';
+import { IdentityConflictError, stateFromPayloads } from './rows.ts';
 
 export class SystemEnvironment implements EnvironmentAdapter {
   readonly id: string;
@@ -119,8 +119,13 @@ export class SystemEnvironment implements EnvironmentAdapter {
           // server's own identifier field — both sides come from the same
           // system, so this is not RigorRun bringing a vocabulary, it is
           // RigorRun noticing that a system is consistent with itself.
+          // Only a record named by that one field: a report row named by
+          // several dimensions has no single value an argument could carry.
           const entity = this.schema.entities.find(
-            (candidate) => candidate.idField === param.name,
+            (candidate) =>
+              candidate.idField === param.name &&
+              candidate.keyFields === undefined &&
+              candidate.identity === undefined,
           );
           return entity ? { ...param, entityRef: entity.name } : param;
         }),
@@ -188,6 +193,7 @@ export class SystemEnvironment implements EnvironmentAdapter {
    */
   async getState(): Promise<CanonicalState> {
     const payloads: unknown[] = [];
+    const answeredBy: string[] = [];
     for (const read of this.config.verifierReads) {
       const normalized = normalizeCallResult(
         await this.connection.call(read.tool, read.args ?? {}, this.config.toolCallMs),
@@ -205,9 +211,21 @@ export class SystemEnvironment implements EnvironmentAdapter {
       if (normalized.kind === 'text') {
         throw new StateReadError(read.tool, 'it answered with text rather than records');
       }
-      if (hasPayload(normalized)) payloads.push(normalized.payload);
+      if (hasPayload(normalized)) {
+        payloads.push(normalized.payload);
+        answeredBy.push(read.tool);
+      }
     }
-    return stateFromPayloads(payloads, this.schema);
+    try {
+      return stateFromPayloads(payloads, this.schema);
+    } catch (error) {
+      // Two different records under one identity: keeping either would invent
+      // a world, so the world is unknown for this case.
+      if (error instanceof IdentityConflictError) {
+        throw new StateReadError(answeredBy[error.payloadIndex] ?? 'a nominated read', error.message);
+      }
+      throw error;
+    }
   }
 
   getEvents(): EnvEvent[] {
