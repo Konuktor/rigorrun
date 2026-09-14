@@ -16,6 +16,7 @@
  * facts that are literally in the delta are `observed`.
  */
 import {
+  type ArgumentBinding,
   type CanonicalHumanTrace,
   type ContractRule,
   type EnvironmentContract,
@@ -23,7 +24,7 @@ import {
   type Provenance,
   type RulePredicate,
   ENVIRONMENT_CONTRACT_SCHEMA_VERSION,
-  actionSteps,
+  effectiveSteps,
   surfaceText,
 } from '@rigorrun/core';
 import {
@@ -58,6 +59,12 @@ export interface InduceOptions {
   contractId?: string;
   name?: string;
   createdAt?: string;
+  /**
+   * What the person said the job is, in their words. Used as the goal the
+   * agent is given; the primary tool's own description is only a fallback,
+   * because a server's doc comment is a description of a tool, not of a job.
+   */
+  goal?: string;
 }
 
 export interface Induction {
@@ -151,7 +158,7 @@ export function induceContract(
   // Remedies are the mutating things the operator did *before* the job itself
   // — asking for an approval, opening a record. Anything after it is a side
   // effect, not a way of unblocking the work.
-  const performed = actionSteps(trace).map((step) => step.action?.name ?? '');
+  const performed = effectiveSteps(trace).map((step) => step.action?.name ?? '');
   const primaryIndex = performed.lastIndexOf(primary);
   const isMutating = (name: string): boolean =>
     !(adapter.getActions().find((a) => a.name === name)?.readOnly ?? true);
@@ -161,8 +168,10 @@ export function induceContract(
   const completionActions = performed
     .slice(primaryIndex + 1)
     .filter((name) => name !== '' && name !== primary && isMutating(name));
+  // The last call of each action that did something. A read-back through a
+  // tool that also writes is not the job, and its arguments are not the job's.
   const demonstratedArgs: Record<string, Record<string, unknown>> = {};
-  for (const step of actionSteps(trace)) {
+  for (const step of effectiveSteps(trace)) {
     if (step.action) demonstratedArgs[step.action.name] = step.action.args;
   }
 
@@ -217,7 +226,7 @@ export function induceContract(
     id: options.contractId ?? `ec_${trace.id}`,
     name: options.name ?? trace.name,
     description: `Compiled from one recorded execution in ${adapter.name}.`,
-    goal: goalStatement(context),
+    goal: goalStatement(context, options.goal),
     environmentId: adapter.id,
     sourceTraceId: trace.id,
     primaryAction: primary,
@@ -239,6 +248,8 @@ export function induceContract(
       ]),
     ].sort(),
     observedFacts: observedFacts(context),
+    argumentBindings: argumentBindings(context),
+    expectedDeltaCount: expectedDeltaCount(context),
     rules,
     successAssertions: [],
     policyAssertions: [],
@@ -289,11 +300,112 @@ function factValue(delta: StateDelta): unknown {
   }
 }
 
-function goalStatement(context: Context): string {
+function goalStatement(context: Context, stated: string | undefined): string {
+  const said = stated?.trim().replace(/\.+$/, '');
+  if (said && said.length > 0) return said;
   const definition = context.adapter.getActions().find((a) => a.name === context.primaryAction);
   const label = entityLabel(context.schema, context.focusEntity.name);
   const described = definition?.description?.trim().replace(/\.+$/, '');
   return described && described.length > 0 ? described : `Complete ${article(label)} correctly`;
+}
+
+/**
+ * How many records of the kind the job is about the demonstration produced.
+ *
+ * Read from the delta, so a job that files two lines at once is expected to
+ * file two, and one that files one is expected to file exactly one. This is
+ * the number that makes a duplicate detectable: "a record exists" is true of a
+ * world with two of them.
+ */
+function expectedDeltaCount(context: Context): number {
+  const name = context.focusEntity.name;
+  if (context.focusScope === 'created') {
+    return context.deltas.filter((delta) => delta.kind === 'entity_created' && delta.entity === name).length;
+  }
+  return new Set(
+    context.deltas
+      .filter((delta) => delta.entity === name && delta.kind !== 'entity_created' && delta.kind !== 'entity_deleted')
+      .map((delta) => delta.id),
+  ).size;
+}
+
+/**
+ * Which fields of the created (or changed) record carry which arguments.
+ *
+ * Purely by value, on this one demonstration: a field holds exactly what was
+ * passed, or its text contains what was passed (a wrapper around a subject),
+ * or what was passed contains its value as a whole token (a title inside a
+ * query). Nothing here reads a name for meaning. Three guards keep a
+ * coincidence from becoming a check that fails a correct agent:
+ *
+ * - the identifier is never bound: it is the system's to assign;
+ * - a boolean or a one-character value is bound only where the system itself
+ *   gave the argument the field's name, because `1` and `true` coincide with
+ *   far too much to be evidence;
+ * - one argument equal to several fields is ambiguous, and ambiguity is not
+ *   evidence: only a same-named field keeps the binding, otherwise none does.
+ *
+ * Under-binding costs a weaker check. Over-binding costs a false failure.
+ */
+function argumentBindings(context: Context): ArgumentBinding[] {
+  const args = Object.entries(context.demonstratedArgs[context.primaryAction] ?? {}).filter(
+    (entry): entry is [string, string | number | boolean] =>
+      entry[1] !== null && entry[1] !== undefined && typeof entry[1] !== 'object',
+  );
+  const rank: Record<ArgumentBinding['mode'], number> = {
+    equals: 0,
+    field_contains_param: 1,
+    param_contains_field: 2,
+  };
+
+  const perField: ArgumentBinding[] = [];
+  for (const field of context.focusEntity.fields) {
+    if (field.name === context.focusEntity.idField) continue;
+    const raw = context.focusRow[field.name];
+    if (raw === null || raw === undefined || typeof raw === 'object') continue;
+    const value = raw as string | number | boolean;
+    const weak = typeof value === 'boolean' || String(value).trim().length < 2;
+
+    let best: ArgumentBinding | undefined;
+    let bestSameName = false;
+    for (const [param, arg] of args) {
+      const sameName = param === field.name;
+      if (weak && !sameName) continue;
+      let mode: ArgumentBinding['mode'] | undefined;
+      if (String(arg) === String(value)) mode = 'equals';
+      else if (typeof value === 'string' && typeof arg === 'string' && arg.trim().length >= 3 && value.includes(arg)) {
+        mode = 'field_contains_param';
+      } else if (typeof arg === 'string' && typeof value !== 'boolean' && wholeToken(arg, value)) {
+        mode = 'param_contains_field';
+      }
+      if (mode === undefined) continue;
+      const better =
+        best === undefined ||
+        rank[mode] < rank[best.mode] ||
+        (rank[mode] === rank[best.mode] && sameName && !bestSameName);
+      if (better) {
+        best = { field: field.name, param, mode, demonstrated: value };
+        bestSameName = sameName;
+      }
+    }
+    if (best) perField.push(best);
+  }
+
+  return perField
+    .filter((binding) => {
+      if (binding.mode !== 'equals') return true;
+      const rivals = perField.filter((other) => other.mode === 'equals' && other.param === binding.param);
+      return rivals.length === 1 || binding.field === binding.param;
+    })
+    .sort((a, b) => a.field.localeCompare(b.field));
+}
+
+/** Whether `text` contains `value` as a whole token, not as part of a longer one. */
+function wholeToken(text: string, value: string | number): boolean {
+  const needle = String(value).trim();
+  if (needle.length < 2) return false;
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|[^A-Za-z0-9_.])${escaped}([^A-Za-z0-9_.]|$)`).test(text);
 }
 
 // ------------------------------------------------------------------- templates
@@ -1234,7 +1346,7 @@ function guardedActions(context: Context, guarded: ReadonlySet<string>): Set<str
 }
 
 function actionOrder(context: Context, conditional: ReadonlySet<string>): ContractRule[] {
-  const performed = actionSteps(context.trace)
+  const performed = effectiveSteps(context.trace)
     .map((step) => step.action?.name)
     .filter((name): name is string => name !== undefined)
     .filter((name) => !(context.adapter.getActions().find((a) => a.name === name)?.readOnly ?? true));
@@ -1377,7 +1489,7 @@ function resolvePrimaryAction(
     return definition.mutates.some((entity) => !appendOnly.has(entity) && touched.has(entity));
   };
 
-  const performed = actionSteps(trace)
+  const performed = effectiveSteps(trace)
     .map((step) => step.action?.name)
     .filter((name): name is string => name !== undefined);
 
@@ -1419,7 +1531,7 @@ function resolveFocusEntity(
 }
 
 function eventsFromTrace(trace: CanonicalHumanTrace): EnvEvent[] {
-  return actionSteps(trace).map((step, index) => ({
+  return effectiveSteps(trace).map((step, index) => ({
     type: step.action?.name ?? 'unknown',
     ordinal: index,
     at: step.at,

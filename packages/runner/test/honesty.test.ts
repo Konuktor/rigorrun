@@ -13,7 +13,19 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearEnvironments, registerEnvironment } from '@rigorrun/environment';
 import { runBenchmark } from '../src/index.ts';
-import { CLEAN_ROWS, CORRECT, DEMONSTRATED_CLAIM, FALSE_CLAIM, WRONG_ENTITY, liveBenchmark, liveRegistration, scripted, world } from './liveWorld.ts';
+import {
+  CLEAN_ROWS,
+  CORRECT,
+  DEMONSTRATED_CLAIM,
+  DUPLICATE,
+  FALSE_CLAIM,
+  WRONG_ENTITY,
+  WRONG_VALUE,
+  liveBenchmark,
+  liveRegistration,
+  scripted,
+  world,
+} from './liveWorld.ts';
 
 afterEach(() => clearEnvironments());
 
@@ -46,6 +58,8 @@ const KNOWN_GOOD = [
 const KNOWN_BAD = [
   FALSE_CLAIM,
   WRONG_ENTITY,
+  DUPLICATE,
+  WRONG_VALUE,
   scripted('reads-only', [{ tool: 'getItem', args: { itemId: 'ITM-1' } }], 'Filed one claim of 30 on ITM-1.'),
 ];
 

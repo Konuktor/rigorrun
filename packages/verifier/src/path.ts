@@ -9,18 +9,21 @@
  *   `derived.refunds[orderId=ORD-3001]`      filter, yields all matches
  *   `derived.refunds[amount>50 & approvalStatus!=approved]`   compound filter
  *
- * Filter values are parsed as `true`, `false`, `null`, a number, or otherwise a
- * bare string. After a filter, a following property applies to the first match
- * (`.length`/`.count` still apply to the whole match list) — that keeps
- * assertions readable without turning this into a query engine.
+ * Filter values are parsed as `true`, `false`, `null`, a number, a JSON-quoted
+ * string (`[subject="Audit 17"]`, which may contain `&`, `]` and spaces), or
+ * otherwise a bare string. `~=` tests that a string contains the value, or
+ * that a list holds it. After a filter, a following property applies to the
+ * first match (`.length`/`.count` still apply to the whole match list) — that
+ * keeps assertions readable without turning this into a query engine.
  */
+import { closingBracket, splitClauses } from '@rigorrun/core';
 
 export interface Resolution {
   found: boolean;
   value: unknown;
 }
 
-type Comparator = '=' | '!=' | '>' | '<' | '>=' | '<=';
+type Comparator = '=' | '!=' | '>' | '<' | '>=' | '<=' | '~=';
 
 interface Condition {
   field: string;
@@ -96,7 +99,7 @@ function tokenize(path: string): Segment[] {
     }
     if (char === '[') {
       flush();
-      const close = path.indexOf(']', i);
+      const close = closingBracket(path, i);
       if (close === -1) throw new Error(`Unterminated '[' in path: ${path}`);
       const inner = path.slice(i + 1, close);
       i = close;
@@ -111,8 +114,8 @@ function tokenize(path: string): Segment[] {
 }
 
 function parseConditions(inner: string, path: string): Condition[] {
-  return inner.split('&').map((clause) => {
-    const match = /^\s*([A-Za-z0-9_.]+)\s*(!=|>=|<=|=|>|<)\s*(.*?)\s*$/.exec(clause);
+  return splitClauses(inner).map((clause) => {
+    const match = /^\s*([A-Za-z0-9_.]+)\s*(!=|>=|<=|~=|=|>|<)\s*(.*?)\s*$/.exec(clause);
     if (!match) throw new Error(`Invalid filter '${clause.trim()}' in path: ${path}`);
     const [, field, op, rawValue] = match;
     return { field: field!, op: op as Comparator, value: parseLiteral(rawValue!) };
@@ -120,6 +123,15 @@ function parseConditions(inner: string, path: string): Condition[] {
 }
 
 function parseLiteral(raw: string): unknown {
+  // A JSON-quoted string is exactly that string, whatever it contains.
+  if (raw.length >= 2 && raw.startsWith('"') && raw.endsWith('"')) {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (typeof parsed === 'string') return parsed;
+    } catch {
+      // Fall through to the bare reading.
+    }
+  }
   const trimmed = raw.replace(/^['"]|['"]$/g, '');
   if (raw === 'true') return true;
   if (raw === 'false') return false;
@@ -148,7 +160,15 @@ function matches(entry: Record<string, unknown>, condition: Condition): boolean 
       return numeric(actual) >= numeric(condition.value);
     case '<=':
       return numeric(actual) <= numeric(condition.value);
+    case '~=':
+      return contains(actual, condition.value);
   }
+}
+
+function contains(actual: unknown, wanted: unknown): boolean {
+  if (typeof actual === 'string') return actual.includes(String(wanted));
+  if (Array.isArray(actual)) return actual.some((entry) => looseEquals(entry, wanted));
+  return false;
 }
 
 function looseEquals(a: unknown, b: unknown): boolean {

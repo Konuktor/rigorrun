@@ -409,13 +409,17 @@ export class Workspace {
     const live = this.live.get(project.id);
     if (!live?.demonstration) throw new Error('Nothing is being recorded right now.');
 
-    // What the system looked like before this call, so a claim can be checked
-    // against what actually happened. Only read for tools the *system* says are
-    // read-only: everything else is expected to change things, so comparing
-    // would cost a round trip to learn nothing.
+    // What the system looked like before this call, so what the call did can
+    // be seen rather than assumed. Read for every tool the operator has not
+    // vouched for as read-only — those are the calls that might be the job,
+    // and a call of a tool that can write but wrote nothing (a SELECT through
+    // `execute`) must not be mistaken for it — and for tools the *system*
+    // claims are read-only, so the claim can be checked.
     const claimsReadOnly =
       live.connection.discovery.tools.find((entry) => entry.name === tool)?.hints.readOnly === true;
-    const before = claimsReadOnly ? await this.readPayloads(project) : undefined;
+    const vouchedReadOnly = project.readOnlyTools.includes(tool);
+    const watch = claimsReadOnly || !vouchedReadOnly;
+    const before = watch ? await this.readPayloads(project) : undefined;
 
     const result = await live.connection.call(tool, args);
     const normalized = normalizeCallResult(result);
@@ -423,33 +427,40 @@ export class Workspace {
       live.demonstration.observations.push({ tool, payload: normalized.payload });
     }
 
+    let changed: boolean | undefined;
     if (before !== undefined) {
       const after = await this.readPayloads(project);
-      const mismatch = detectMismatch(
-        tool,
-        { readOnly: true },
-        JSON.stringify(after) !== JSON.stringify(before),
-      );
-      // Recorded rather than acted on. RigorRun already treats every
-      // unconfirmed tool as writing, so this changes nothing about what it
-      // does — it changes what the person is told, which is the part that
-      // matters. A system that claims a tool only reads and then changes state
-      // is either wrong about its own implementation or misdescribing itself,
-      // and both are worth knowing before trusting a verdict from it.
-      if (mismatch && !live.mismatches.some((entry) => entry.tool === mismatch.tool)) {
-        live.mismatches.push(mismatch);
+      const differs = JSON.stringify(after) !== JSON.stringify(before);
+      // Whether a call changed anything is only knowable when the reads showed
+      // something. Two empty answers — a system that answers in prose, a
+      // browser that cannot read itself back — are "could not tell", and
+      // recording them as "changed nothing" would drop the job itself.
+      if (before.length > 0 || after.length > 0) changed = differs;
+      if (claimsReadOnly) {
+        const mismatch = detectMismatch(tool, { readOnly: true }, differs);
+        // Recorded rather than acted on. RigorRun already treats every
+        // unconfirmed tool as writing, so this changes nothing about what it
+        // does — it changes what the person is told, which is the part that
+        // matters. A system that claims a tool only reads and then changes state
+        // is either wrong about its own implementation or misdescribing itself,
+        // and both are worth knowing before trusting a verdict from it.
+        if (mismatch && !live.mismatches.some((entry) => entry.tool === mismatch.tool)) {
+          live.mismatches.push(mismatch);
+        }
       }
     }
 
     // Reads are watched but not written into the trace. The contract is
     // induced from what *changed*, and a read that changed nothing would
-    // become a step the agent is expected to reproduce.
-    if (!project.readOnlyTools.includes(tool)) {
+    // become a step the agent is expected to reproduce. A call that could
+    // have written is recorded with whether it did.
+    if (!vouchedReadOnly) {
       live.demonstration.entries.push({
         at: Date.now() - live.demonstration.startedAt,
         action: tool,
         args,
         ok: result.ok,
+        ...(changed === undefined ? {} : { changed }),
       });
     }
 

@@ -377,21 +377,27 @@ const OPERATORS: Partial<Record<Condition['op'], string>> = {
 };
 
 /**
- * Renders a value for the filter language, or refuses.
+ * Renders a value for the filter language.
  *
- * The filter parser splits on `&` and `]`, so a value containing either would
- * change the meaning of the path around it. Values reaching here can originate
- * in fields the environment declares as operator- or customer-authored, and
- * RigorRun deliberately writes hostile text into exactly those fields when it
- * generates injection cases. Refusing is the only safe answer.
+ * A bare token is written as it is. Anything else — a value with a space, a
+ * `&`, a `]` — is written as a JSON string, which the path language reads as
+ * one opaque value: it cannot add a clause, close the filter, or change the
+ * meaning of the path around it. Values reaching here can originate in fields
+ * the environment declares as operator- or customer-authored, and RigorRun
+ * deliberately writes hostile text into exactly those fields when it generates
+ * injection cases, so this is the place that must hold. Refusing such values
+ * outright, as this once did, meant a subject with a space in it could never be
+ * checked at all.
  */
 export function literal(value: Literal | Literal[] | undefined): string | null {
   if (Array.isArray(value)) return null;
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return Number.isFinite(value) ? String(value) : null;
   if (typeof value === 'boolean') return String(value);
-  if (!/^[A-Za-z0-9_.:@/+-]*$/.test(value)) return null;
-  return value;
+  if (/^[A-Za-z0-9_.:@/+-]+$/.test(value) && !['true', 'false', 'null'].includes(value) && Number.isNaN(Number(value))) {
+    return value;
+  }
+  return JSON.stringify(value);
 }
 
 function unsafeValueMessage(conditions: readonly Condition[]): string {

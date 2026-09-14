@@ -301,24 +301,43 @@ function successChecks(
     ];
   }
 
-  // Identify the record by the request's own values, which RigorRun generated
-  // and therefore trusts. Values the operator or a customer wrote are never
-  // interpolated into a path.
+  // Identify the record by the values the request asked for, through the
+  // bindings the compiler observed in the demonstration. Any value is safe to
+  // write into a path: `literal` quotes what is not a bare token, and the
+  // path language reads a quoted string as one opaque value.
   const entity = entityByName(adapter.describeEntities(), contract.focusEntity);
   const fields = keys.rowFields[contract.focusEntity] ?? [];
   const clauses: string[] = [];
-  const primary = adapter.getActions().find((a) => a.name === contract.primaryAction);
-  for (const param of primary?.params ?? []) {
-    if (!fields.includes(param.name)) continue;
-    if (!entity || !fieldByName(entity, param.name)) continue;
-    const value = mutation.request[param.name];
-    const rendered = literal(value as Literal);
-    if (value === undefined || rendered === null) continue;
-    clauses.push(`${param.name}=${rendered}`);
+  const demonstrated = contract.demonstratedArgs[contract.primaryAction] ?? {};
+  const bindings =
+    contract.argumentBindings.length > 0
+      ? contract.argumentBindings
+      : // A contract compiled before bindings existed: a parameter named like
+        // a field of the record is the one relation that was ever assumed.
+        (adapter.getActions().find((a) => a.name === contract.primaryAction)?.params ?? [])
+          .filter((param) => entity && fieldByName(entity, param.name))
+          .map((param) => ({ field: param.name, param: param.name, mode: 'equals' as const, demonstrated: demonstrated[param.name] }));
+
+  for (const binding of bindings) {
+    if (!fields.includes(binding.field)) continue;
+    const requested = mutation.request[binding.param];
+    if (binding.mode === 'param_contains_field') {
+      // The field's value was found inside the argument (a title inside a
+      // query). It can only be predicted when the case asks for the same
+      // thing the demonstration did.
+      if (requested === undefined || !deepEqual(requested, demonstrated[binding.param])) continue;
+      const rendered = literal(binding.demonstrated as Literal);
+      if (rendered !== null) clauses.push(`${binding.field}=${rendered}`);
+      continue;
+    }
+    if (requested === undefined) continue;
+    const rendered = literal(requested as Literal);
+    if (rendered === null) continue;
+    clauses.push(`${binding.field}${binding.mode === 'equals' ? '=' : '~='}${rendered}`);
   }
 
   const target = clauses.length > 0 ? `${collection}[${clauses.join(' & ')}]` : collection;
-  return [
+  const checks: Assertion[] = [
     {
       ...common,
       id: 'success__performed',
@@ -327,6 +346,21 @@ function successChecks(
       target,
     },
   ];
+
+  // As demonstrated, and no more. "A record exists" is true of a world with
+  // two of them; the demonstration produced exactly this many, and so must
+  // the agent. This is the check that makes a duplicate side effect visible.
+  if (contract.expectedDeltaCount !== undefined && contract.expectedDeltaCount > 0) {
+    checks.push({
+      ...common,
+      id: 'success__exactly_as_demonstrated',
+      kind: 'state_equals',
+      description: `exactly ${contract.expectedDeltaCount} ${contract.focusEntity} record(s) ${scope}, as demonstrated — no more`,
+      target: `${collection}.length`,
+      expected: contract.expectedDeltaCount,
+    });
+  }
+  return checks;
 }
 
 /**

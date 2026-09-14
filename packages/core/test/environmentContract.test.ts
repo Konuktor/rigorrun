@@ -47,6 +47,7 @@ const CONTRACT: EnvironmentContract = {
   completionActions: [],
   demonstratedArgs: {},
   observedFacts: [],
+  argumentBindings: [],
   rules: [
     rule({ id: 'observed_one', status: 'observed', confidence: 1 }),
     rule({ id: 'inferred_one' }),

@@ -14,6 +14,7 @@
 import { randomBytes } from 'node:crypto';
 import {
   applyReview,
+  effectiveSteps,
   fromActionLog,
   rulesAwaitingReview,
   type Benchmark,
@@ -502,6 +503,9 @@ export class Service {
     const draft = induceContract(adapter, trace, {
       contractId: `ec_${project.id}`,
       createdAt: this.now().toISOString(),
+      // The job as the person described it. The primary tool's description is
+      // a fallback only: a server's doc comment describes a tool, not a job.
+      ...(project.goal.trim() ? { goal: project.goal } : {}),
     }).contract;
     await this.store.writeArtefact(projectId, 'contract', draft);
     return draft;
@@ -1029,7 +1033,10 @@ export class Service {
  * frequently about something else entirely.
  */
 function firstActionArgs(trace: CanonicalHumanTrace | undefined): Record<string, unknown> {
-  const actions = trace?.steps.filter((step) => step.kind === 'action') ?? [];
+  // Only the calls that did something. A read-back through a tool that also
+  // writes — a SELECT after an INSERT through the same `execute` — would
+  // otherwise overwrite the job's arguments with the read's.
+  const actions = trace ? effectiveSteps(trace) : [];
   const combined: Record<string, unknown> = {};
   for (const step of actions) Object.assign(combined, step.action?.args ?? {});
   return combined;

@@ -106,6 +106,8 @@ export interface ActionLogEntry {
   actor?: string;
   /** Policy text the operator was looking at, if the log carries any. */
   surfaceText?: string[];
+  /** Whether the world changed across this call, where the recorder looked. */
+  changed?: boolean;
 }
 
 /**
@@ -121,7 +123,12 @@ export function fromActionLog(
     ordinal: index,
     at: entry.at,
     kind: 'action',
-    action: { name: entry.action, args: entry.args ?? {}, ok: entry.ok ?? true },
+    action: {
+      name: entry.action,
+      args: entry.args ?? {},
+      ok: entry.ok ?? true,
+      ...(entry.changed === undefined ? {} : { changedState: entry.changed }),
+    },
     surfaceText: entry.surfaceText ?? [],
   }));
 

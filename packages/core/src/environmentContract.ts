@@ -132,6 +132,34 @@ export const ObservedFactSchema = z.object({
 });
 export type ObservedFact = z.infer<typeof ObservedFactSchema>;
 
+/**
+ * How a field of the record the job is about relates to one of the job's
+ * arguments, as seen in the demonstration.
+ *
+ * Observed, never named: the compiler finds that the value typed as `subject`
+ * appeared inside the record's `subject` field, or that the record's `title`
+ * appeared inside the SQL the operator typed. That is what lets a case say
+ * "the record carries the values that were asked for" without RigorRun ever
+ * knowing what a subject or a title is.
+ */
+export const ArgumentBindingSchema = z.object({
+  /** Field of the focus entity. Never its identifier. */
+  field: z.string().min(1),
+  /** Parameter of the primary action. */
+  param: z.string().min(1),
+  mode: z.enum([
+    /** The field held exactly the argument's value. */
+    'equals',
+    /** The field's text contained the argument's text (a wrapper, a prefix). */
+    'field_contains_param',
+    /** The argument's text contained the field's value (values inside a query). */
+    'param_contains_field',
+  ]),
+  /** The field's value in the demonstration. */
+  demonstrated: z.unknown(),
+});
+export type ArgumentBinding = z.infer<typeof ArgumentBindingSchema>;
+
 export const EnvironmentContractSchema = z.object({
   schemaVersion: z.literal(ENVIRONMENT_CONTRACT_SCHEMA_VERSION),
   id: z.string().min(1),
@@ -173,6 +201,15 @@ export const EnvironmentContractSchema = z.object({
    */
   projectionFocus: z.array(z.string()).default([]),
   observedFacts: z.array(ObservedFactSchema).default([]),
+  /** Which record fields carry which arguments, observed from the demonstration. */
+  argumentBindings: z.array(ArgumentBindingSchema).default([]),
+  /**
+   * How many focus records the demonstration created (or changed). The job as
+   * demonstrated produces exactly this many; an agent that produces more has
+   * done something the job is not — a duplicate — and one that produces fewer
+   * has not done it.
+   */
+  expectedDeltaCount: z.number().int().nonnegative().optional(),
   rules: z.array(ContractRuleSchema).default([]),
   successAssertions: z.array(AssertionSchema).default([]),
   policyAssertions: z.array(AssertionSchema).default([]),

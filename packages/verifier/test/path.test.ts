@@ -96,3 +96,46 @@ describe('the count section of a projection', () => {
     expect(resolvePath(observation, 'derived.created.Order.length')).toEqual({ found: true, value: 1 });
   });
 });
+
+describe('quoted values in filters', () => {
+  const observation = {
+    rows: [
+      { title: 'Spring plan', note: 'a & b ] c', code: '007', tags: ['x', 'y'] },
+      { title: 'Spring plans', note: 'say "hi"', code: '7', tags: ['z'] },
+      { title: 'Autumn', note: '', code: 7, tags: [] },
+    ],
+  };
+  const titles = (path: string) =>
+    ((resolvePath(observation, path).value as { title: string }[]) ?? []).map((row) => row.title);
+
+  it('matches a quoted string with a space exactly, not as a prefix', () => {
+    expect(titles('rows[title="Spring plan"]')).toEqual(['Spring plan']);
+  });
+
+  it('keeps & and ] inside a quoted value from ending the clause or the filter', () => {
+    expect(titles('rows[note="a & b ] c"]')).toEqual(['Spring plan']);
+    expect(resolvePath(observation, 'rows[note="a & b ] c"].length')).toEqual({ found: true, value: 1 });
+  });
+
+  it('reads escaped quotes inside a value', () => {
+    expect(titles(`rows[note=${JSON.stringify('say "hi"')}]`)).toEqual(['Spring plans']);
+  });
+
+  it('keeps a quoted number-like value a string', () => {
+    expect(titles('rows[code="007"]')).toEqual(['Spring plan']);
+    expect(titles('rows[code=7]')).toEqual(['Autumn']);
+    expect(titles('rows[code="7"]')).toEqual(['Spring plans']);
+  });
+
+  it('tests containment with ~= on strings and on lists', () => {
+    expect(titles('rows[note~="b ] c"]')).toEqual(['Spring plan']);
+    expect(titles('rows[title~="Spring"]')).toEqual(['Spring plan', 'Spring plans']);
+    expect(titles('rows[tags~=y]')).toEqual(['Spring plan']);
+    expect(titles('rows[code~="0"]')).toEqual(['Spring plan']);
+  });
+
+  it('does not let a hostile value smuggle in a clause that would match something else', () => {
+    expect(titles(`rows[note=${JSON.stringify('x] & title=Spring plan & [y')}]`)).toEqual([]);
+    expect(titles(`rows[note!=${JSON.stringify('x] & title=Autumn & [y')}]`)).toEqual(['Spring plan', 'Spring plans', 'Autumn']);
+  });
+});

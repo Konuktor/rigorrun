@@ -25,6 +25,7 @@
  *     the compiler validates every generated path against this list and fails
  *     loudly instead.
  */
+import { filterBodies, splitClauses, withoutFilters } from '@rigorrun/core';
 import {
   entityByName,
   relationshipsFrom,
@@ -606,8 +607,7 @@ export function validateProjectionPath(keys: ProjectionKeySchema, path: string):
   if (!path.startsWith('derived.')) return null;
   if (keys.scalarPaths.includes(path)) return null;
 
-  const withoutFilters = path.replace(/\[[^\]]*\]/g, '');
-  const parts = withoutFilters.split('.');
+  const parts = withoutFilters(path).split('.');
   const section = parts[1];
   if (section === undefined) return `"${path}" names no projection section`;
 
@@ -618,8 +618,8 @@ export function validateProjectionPath(keys: ProjectionKeySchema, path: string):
     if (!fields) {
       return `"${path}" reads entity "${entity}", which the projection does not cover (covered: ${keys.entities.join(', ') || 'none'})`;
     }
-    const filterFields = [...path.matchAll(/\[([^\]]*)\]/g)]
-      .flatMap((match) => (match[1] ?? '').split('&'))
+    const filterFields = filterBodies(path)
+      .flatMap((body) => splitClauses(body))
       .map((clause) => /^\s*([A-Za-z0-9_.]+)/.exec(clause)?.[1])
       .filter((name): name is string => name !== undefined && !/^\d+$/.test(name));
     for (const field of filterFields) {

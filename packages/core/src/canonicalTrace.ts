@@ -72,6 +72,14 @@ export const TraceStepSchema = z.object({
       name: z.string().min(1),
       args: z.record(z.string(), z.unknown()).default({}),
       ok: z.boolean().default(true),
+      /**
+       * Whether the nominated reads changed across this call, where the
+       * recorder looked. Absent means it did not look. `false` is the signal
+       * that matters: a call of a tool that can write, which wrote nothing —
+       * a read-back through a dual-purpose tool — is not the job, whatever
+       * its position in the recording.
+       */
+      changedState: z.boolean().optional(),
     })
     .optional(),
   /** A semantic event the application emitted. */
@@ -131,6 +139,24 @@ export function parseCanonicalTrace(input: unknown): CanonicalHumanTrace {
 /** Actions the operator performed, in order. */
 export function actionSteps(trace: CanonicalHumanTrace): TraceStep[] {
   return trace.steps.filter((step) => step.action !== undefined && step.action.ok);
+}
+
+/**
+ * The actions that did something.
+ *
+ * Where the recorder watched the world across each call, a call that changed
+ * nothing is left out: it was a read through a tool that can also write, and
+ * treating it as work is how a trailing SELECT became the job. Where the
+ * recorder did not watch, every action counts, as before.
+ */
+export function effectiveSteps(trace: CanonicalHumanTrace): TraceStep[] {
+  const steps = actionSteps(trace);
+  // "Changed nothing" only means something where the recorder could see a
+  // change at all. If no call was ever seen changing anything — a system read
+  // back in prose, a browser, reads that do not cover what the job touched —
+  // it means "could not tell", and dropping every step would lose the job.
+  if (!steps.some((step) => step.action?.changedState === true)) return steps;
+  return steps.filter((step) => step.action?.changedState !== false);
 }
 
 /** Every piece of text the operator could see, deduplicated, in order. */

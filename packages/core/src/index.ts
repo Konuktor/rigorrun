@@ -4,6 +4,7 @@ export * from './ids.ts';
 export * from './logger.ts';
 export * from './redaction.ts';
 export * from './assertion.ts';
+export * from './pathSyntax.ts';
 export * from './trace.ts';
 export * from './canonicalTrace.ts';
 export * from './traceNormalize.ts';
