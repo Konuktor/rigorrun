@@ -74,8 +74,11 @@ const cases = manifest.cases.map((frozen) => {
     outcomeReasons: uniq(rr.map((c) => c.outcomeReason).filter(Boolean)).slice(0, 3),
     missingEvidence: uniq(rr.flatMap((c) => c.missingEvidence ?? [])),
     reproduction: existsSync(join(AFTER, 'evidence', frozen.target, frozen.id, 'summary.json'))
-      ? read(join(AFTER, 'evidence', frozen.target, frozen.id, 'summary.json')).reproduction
+      ? read(join(AFTER, 'evidence', frozen.target, frozen.id, 'summary.json')).reproduction ?? null
       : null,
+    notRun: existsSync(join(AFTER, 'evidence', frozen.target, frozen.id, 'summary.json'))
+      ? read(join(AFTER, 'evidence', frozen.target, frozen.id, 'summary.json')).notRun ?? null
+      : 'no evidence was written for this case',
     before: {
       oracleVerdicts: frozen.originalOracleVerdicts,
       rigorrunVerdicts: frozen.originalRigorrunVerdicts,
@@ -85,18 +88,26 @@ const cases = manifest.cases.map((frozen) => {
 });
 
 function totals(list) {
-  const rigorrun = list.filter((c) => c.mode === 'rigorrun' && c.attempts > 0);
+  const rigorrunAll = list.filter((c) => c.mode === 'rigorrun');
+  const rigorrun = rigorrunAll.filter((c) => c.attempts > 0);
   const byOutcome = (k) => rigorrun.filter((c) => c.outcomeClassification === k).length;
   const byOriginal = (k) => rigorrun.filter((c) => c.classification === k).length;
   const knownGood = rigorrun.filter((c) => c.oracleVerdicts.length === 1 && c.oracleVerdicts[0] === 'PASS');
   const injected = list.filter((c) => c.injected && c.attempts > 0);
   const injectedReachable = injected.filter((c) => c.mode === 'rigorrun' && c.oracleVerdicts.length === 1 && c.oracleVerdicts[0] === 'FAIL');
   return {
-    TOTAL_CASES: list.filter((c) => c.attempts > 0).length,
-    RIGORRUN_MODE_CASES: rigorrun.length,
+    // Every frozen case counts, run or not: a case that could not run is
+    // reported as such, never quietly removed from the denominator.
+    TOTAL_CASES: list.length,
+    CASES_RUN: list.filter((c) => c.attempts > 0).length,
+    RIGORRUN_MODE_CASES: rigorrunAll.length,
+    RIGORRUN_MODE_CASES_RUN: rigorrun.length,
     SCORED_CASES: rigorrun.filter((c) => SCORED.includes(c.outcomeClassification)).length,
-    ABSTENTIONS: rigorrun.filter((c) => c.outcomeClassification.startsWith('NOT_SCORED_ABSTAIN') || c.outcomeClassification.startsWith('NOT_SCORED_HARNESS')).length,
-    NOT_REACHING_VERDICT: rigorrun.filter((c) => !SCORED.includes(c.outcomeClassification)).length,
+    ABSTENTIONS:
+      rigorrun.filter((c) => c.outcomeClassification.startsWith('NOT_SCORED_ABSTAIN') || c.outcomeClassification.startsWith('NOT_SCORED_HARNESS')).length +
+      rigorrunAll.filter((c) => c.attempts === 0).length,
+    NOT_RUN_CASES: rigorrunAll.filter((c) => c.attempts === 0).map((c) => ({ id: c.id, reason: c.notRun })),
+    NOT_REACHING_VERDICT: rigorrunAll.filter((c) => !SCORED.includes(c.outcomeClassification)).length,
     INCONSISTENT_ACROSS_ATTEMPTS: rigorrun.filter((c) => c.outcomeClassification === 'INCONSISTENT' || c.classification === 'INCONSISTENT').length,
     TRUE_POSITIVES: byOutcome('TRUE_POSITIVE'),
     TRUE_NEGATIVES: byOutcome('TRUE_NEGATIVE'),
@@ -131,6 +142,10 @@ const results = {
   R1_REPRODUCTIONS: r1.filter((c) => ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(c.outcomeClassification)).length,
   R1_REPRODUCTIONS_ORIGINAL_RULE: r1.filter((c) => ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(c.classification)).length,
   BASELINE_FALSE_POSITIVES_NOW: cases.filter((c) => c.before.classification === 'FALSE_POSITIVE').map((c) => ({ id: c.id, outcome: c.outcomeClassification, originalRule: c.classification, oracle: c.oracleVerdicts })),
+  BASELINE_KNOWN_GOOD_NOW: manifest.cases.filter((m) => m.knownGoodGradedByRigorrun).map((m) => {
+    const c = cases.find((x) => x.id === m.id);
+    return { id: m.id, outcome: c.outcomeClassification, originalRule: c.classification, oracle: c.oracleVerdicts, rigorrunOutcomes: c.rigorrunOutcomes };
+  }),
   BASELINE_FALSE_NEGATIVES_NOW: cases.filter((c) => c.before.classification === 'FALSE_NEGATIVE').map((c) => ({ id: c.id, outcome: c.outcomeClassification, originalRule: c.classification, oracle: c.oracleVerdicts })),
   RIGORRUN_FINDINGS_FIXED: statuses.filter((s) => s === 'FIXED').length,
   RIGORRUN_FINDINGS_PARTIAL: statuses.filter((s) => s === 'PARTIAL').length,

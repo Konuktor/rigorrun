@@ -141,6 +141,18 @@ def main():
         if entry["target"] not in targets or (a.only and entry["id"] not in a.only):
             continue
         frozen = load(os.path.join(REPORT, entry["caseFile"]))
+        if frozen["mode"] == "rigorrun" and os.path.basename(frozen["home"]) not in projects:
+            # The remediated product could not re-create this project. That is
+            # an abstention to report, never a reason to abort the run or to
+            # drop the case from the 58.
+            reason = f"the project for {os.path.basename(frozen['home'])} could not be re-created; see after/journeys.json"
+            case_dir = os.path.join(AFTER, "evidence", frozen["target"], frozen["id"])
+            os.makedirs(case_dir, exist_ok=True)
+            with open(os.path.join(case_dir, "summary.json"), "w") as fh:
+                json.dump({"id": frozen["id"], "target": frozen["target"], "truth": frozen["truth"], "mode": frozen["mode"],
+                           "attempts": [], "notRun": reason}, fh, indent=2)
+            print(f"{frozen['id']}: NOT RUN — {reason}", flush=True)
+            continue
         case = mapped(frozen, projects)
         attempts = []
         for n in range(1, entry["attempts"] + 1):
