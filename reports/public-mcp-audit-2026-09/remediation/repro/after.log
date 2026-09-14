@@ -1,39 +1,95 @@
 side=after
-852154ce6eeef781144395ccaebf75a01a453bb4
- M packages/compiler/src/induce.ts
- M packages/compiler/src/synthesize.ts
- M packages/compiler/test/induce.test.ts
- M packages/core/src/canonicalTrace.ts
- M packages/core/src/environmentContract.ts
- M packages/core/src/index.ts
- M packages/core/src/traceNormalize.ts
- M packages/core/test/environmentContract.test.ts
- M packages/daemon/src/service.ts
- M packages/daemon/src/workspace.ts
- M packages/environment/src/projection.ts
- M packages/generator/src/counterfactual.ts
- M packages/runner/test/honesty.test.ts
- M packages/verifier/src/path.ts
- M packages/verifier/test/path.test.ts
- M reports/public-mcp-audit-2026-09/remediation/progress.md
-?? packages/core/src/pathSyntax.ts
-?? packages/daemon/test/stepChange.test.ts
-?? packages/runner/test/expectedDelta.test.ts
-?? reports/public-mcp-audit-2026-09/remediation/repro/
+c5746881dbafc400d84e2a2f30b9faa1a09244d3
+ M reports/public-mcp-audit-2026-09/remediation/repro/after.log
+ M reports/public-mcp-audit-2026-09/remediation/repro/before.log
+ M reports/public-mcp-audit-2026-09/remediation/repro/run-repro.sh
+?? reports/public-mcp-audit-2026-09/remediation/repro/cli.repro.test.ts
+?? reports/public-mcp-audit-2026-09/remediation/scripts/recreate-stacks.sh
 
  RUN  v4.1.11 /home/erbol/RigorRun
 
- ❯ packages/runner/test/zz_repro.test.ts (4 tests | 4 failed) 58ms
-     × DEFECT: a correct agent is failed (false positive) 38ms
-     × DEFECT: a duplicate side effect is passed (false negative) 9ms
-     × DEFECT: an agent that did nothing is passed when the world drifted (false negative) 5ms
+ ❯ packages/runner/test/zz_repro.test.ts (4 tests | 4 failed) 73ms
+     × DEFECT: a correct agent is failed (false positive) 51ms
+     × DEFECT: a duplicate side effect is passed (false negative) 10ms
+     × DEFECT: an agent that did nothing is passed when the world drifted (false negative) 6ms
      × DEFECT: an agent that also writes a record the job never writes is passed 4ms
- ❯ packages/daemon/test/zz_repro.test.ts (3 tests | 3 failed) 701ms
-     × DEFECT: the read probe is silent, then compile refuses after the job was demonstrated 348ms
-     × DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description 318ms
-     × DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier 1ms
+ ❯ packages/cli/test/zz_repro.test.ts (3 tests | 3 failed) 34ms
+     × DEFECT: the documented flag is rejected before anything runs 22ms
+     × DEFECT: no command creates a project from the command line 1ms
+     × DEFECT: a verifier on an MCP connector is silently dropped 4ms
+ ❯ packages/daemon/test/zz_repro.test.ts (3 tests | 3 failed) 751ms
+     × DEFECT: the read probe is silent, then compile refuses after the job was demonstrated 378ms
+     × DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description 338ms
+     × DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier 2ms
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/cli/test/zz_repro.test.ts > R-7 — verify --needs-credential > DEFECT: the documented flag is rejected before anything runs
+AssertionError: expected 'error RigorRun does not know how to f…' to match /needs-credential/
+
+- Expected:
+/needs-credential/
+
++ Received:
+"error RigorRun does not know how to fetch \"bogus-reference\". Supported today: npm:<package>@<version> for a published server, and dir:<path> for one on this machine. A container image reference, a git ref and a remote endpoint are planned and deliberately not pretended to work yet.
+"
+
+ ❯ packages/cli/test/zz_repro.test.ts:45:18
+     43|     const { code, text } = await cli('verify', 'bogus-reference', '--n…
+     44|     expect(code).toBe(2);
+     45|     expect(text).toMatch(/needs-credential/);
+       |                  ^
+     46|   });
+     47| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  packages/cli/test/zz_repro.test.ts > R-6 — headless project setup > DEFECT: no command creates a project from the command line
+AssertionError: expected 'error /tmp/rigorrun-cli-repro-7vEtDu/…' to match /Unknown command/
+
+- Expected:
+/Unknown command/
+
++ Received:
+"error /tmp/rigorrun-cli-repro-7vEtDu/project.json is not a usable spec: ENOENT: no such file or directory, open '/tmp/rigorrun-cli-repro-7vEtDu/project.json'
+"
+
+ ❯ packages/cli/test/zz_repro.test.ts:53:18
+     51|     const { code, text } = await cli('setup', join(scratch, 'project.j…
+     52|     expect(code).toBe(2);
+     53|     expect(text).toMatch(/Unknown command/);
+       |                  ^
+     54|   });
+     55| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  packages/cli/test/zz_repro.test.ts > R-2 — an independent verifier for an MCP project > DEFECT: a verifier on an MCP connector is silently dropped
+AssertionError: expected { kind: 'mcp', …(6) } to be undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  "args": [],
+  "auth": "header",
+  "command": "reader",
+  "kind": "mcp",
+  "secretNames": [],
+  "transport": "stdio",
+  "url": "",
+}
+
+ ❯ packages/cli/test/zz_repro.test.ts:63:32
+     61|       verifier: { kind: 'mcp', transport: 'stdio', command: 'reader', …
+     62|     }) as Record<string, unknown>;
+     63|     expect(parsed['verifier']).toBeUndefined();
+       |                                ^
+     64|   });
+     65| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
 
  FAIL  packages/daemon/test/zz_repro.test.ts > R-8 — JSON inside a text block > DEFECT: the read probe is silent, then compile refuses after the job was demonstrated
 AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of rejecting
@@ -46,7 +102,7 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
 + {
 +   "argumentBindings": [],
 +   "completionActions": [],
-+   "createdAt": "2026-09-14T07:35:42.079Z",
++   "createdAt": "2026-09-14T08:15:03.907Z",
 +   "demonstratedArgs": {
 +     "confirm_booking": {
 +       "bookingId": "BKG-4001",
@@ -57,12 +113,12 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
 +     },
 +   },
 +   "description": "Compiled from one recorded execution in text-json desk.",
-+   "environmentId": "p_a835bfb6e426",
++   "environmentId": "p_467d71d23ba3",
 +   "expectedDeltaCount": 1,
 +   "focusEntity": "Booking",
 +   "focusScope": "changed",
 +   "goal": "Confirm a held booking",
-+   "id": "ec_p_a835bfb6e426",
++   "id": "ec_p_467d71d23ba3",
 +   "name": "Confirm a held booking.",
 +   "observedFacts": [
 +     {
@@ -334,7 +390,7 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
 +     },
 +   ],
 +   "schemaVersion": 1,
-+   "sourceTraceId": "trace_p_a835bfb6e426",
++   "sourceTraceId": "trace_p_467d71d23ba3",
 +   "successAssertions": [],
   }
 
@@ -346,7 +402,7 @@ AssertionError: promise resolved "{ schemaVersion: 1, …(20) }" instead of reje
      63|   }, 120_000);
      64| });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
 
  FAIL  packages/daemon/test/zz_repro.test.ts > R-5 — the last call, not the call that changed something, is the job > DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description
 AssertionError: expected false to be true // Object.is equality
@@ -365,7 +421,7 @@ AssertionError: expected false to be true // Object.is equality
      86|     expect(contract.goal).not.toContain('Confirm the held booking');
      87|   }, 180_000);
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
 
  FAIL  packages/daemon/test/zz_repro.test.ts > R-3 — typed cells induce a value-keyed entity > DEFECT: a table of {kind,value} cells yields no row entity keyed by its identifier
 AssertionError: expected true to be false // Object.is equality
@@ -384,7 +440,7 @@ AssertionError: expected true to be false // Object.is equality
     102|   });
     103| });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
 
  FAIL  packages/runner/test/zz_repro.test.ts > R-1 — the generation snapshot is the baseline > DEFECT: a correct agent is failed (false positive)
 AssertionError: expected 'PASS' to be 'FAIL' // Object.is equality
@@ -400,7 +456,7 @@ Received: "PASS"
     143|   });
     144|
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
 
  FAIL  packages/runner/test/zz_repro.test.ts > R-1 — the generation snapshot is the baseline > DEFECT: a duplicate side effect is passed (false negative)
 AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
@@ -416,7 +472,7 @@ Received: "FAIL"
     148|   });
     149|
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
 
  FAIL  packages/runner/test/zz_repro.test.ts > R-1 — the generation snapshot is the baseline > DEFECT: an agent that did nothing is passed when the world drifted (false negative)
 AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
@@ -432,7 +488,7 @@ Received: "FAIL"
     156|   });
     157| });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
 
  FAIL  packages/runner/test/zz_repro.test.ts > scope checks — "must not create X" never fires > DEFECT: an agent that also writes a record the job never writes is passed
 AssertionError: expected 'FAIL' to be 'PASS' // Object.is equality
@@ -448,11 +504,11 @@ Received: "FAIL"
     164|   });
     165| });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/10]⎯
 
 
- Test Files  2 failed (2)
-      Tests  7 failed (7)
-   Start at  13:35:41
-   Duration  1.31s (transform 500ms, setup 0ms, import 853ms, tests 760ms, environment 0ms)
+ Test Files  3 failed (3)
+      Tests  10 failed (10)
+   Start at  14:15:02
+   Duration  1.45s (transform 964ms, setup 0ms, import 1.81s, tests 857ms, environment 0ms)
 

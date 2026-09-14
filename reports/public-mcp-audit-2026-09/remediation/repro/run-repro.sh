@@ -16,8 +16,9 @@ LOG="$HERE/$SIDE.log"
 place() { # $1 = checkout root
   cp "$HERE/runner.repro.test.ts" "$1/packages/runner/test/zz_repro.test.ts"
   cp "$HERE/daemon.repro.test.ts" "$1/packages/daemon/test/zz_repro.test.ts"
+  cp "$HERE/cli.repro.test.ts" "$1/packages/cli/test/zz_repro.test.ts"
 }
-unplace() { rm -f "$1/packages/runner/test/zz_repro.test.ts" "$1/packages/daemon/test/zz_repro.test.ts"; }
+unplace() { rm -f "$1/packages/runner/test/zz_repro.test.ts" "$1/packages/daemon/test/zz_repro.test.ts" "$1/packages/cli/test/zz_repro.test.ts"; }
 
 if [ "$SIDE" = before ]; then
   WT=${REPRO_WORKTREE:-$(mktemp -d)/rr-before}
@@ -30,11 +31,11 @@ if [ "$SIDE" = before ]; then
   # The fixture toggle is test infrastructure the reproduction needs.
   cp "$REPO/fixtures/external/mcp-venue-desk/src/server.ts" "$WT/fixtures/external/mcp-venue-desk/src/server.ts"
   place "$WT"
-  { echo "side=before ref=$REF"; git -C "$WT" rev-parse HEAD; (cd "$WT" && node_modules/.bin/vitest run packages/runner/test/zz_repro.test.ts packages/daemon/test/zz_repro.test.ts 2>&1); } > "$LOG"
+  { echo "side=before ref=$REF"; git -C "$WT" rev-parse HEAD; (cd "$WT" && node_modules/.bin/vitest run packages/runner/test/zz_repro.test.ts packages/daemon/test/zz_repro.test.ts packages/cli/test/zz_repro.test.ts 2>&1); } > "$LOG"
   git -C "$REPO" worktree remove --force "$WT" >/dev/null
 else
   place "$REPO"
-  { echo "side=after"; git -C "$REPO" rev-parse HEAD; git -C "$REPO" status --short | grep -v zz_repro; (cd "$REPO" && node_modules/.bin/vitest run packages/runner/test/zz_repro.test.ts packages/daemon/test/zz_repro.test.ts 2>&1); } > "$LOG"
+  { echo "side=after"; git -C "$REPO" rev-parse HEAD; git -C "$REPO" status --short | grep -v zz_repro; (cd "$REPO" && node_modules/.bin/vitest run packages/runner/test/zz_repro.test.ts packages/daemon/test/zz_repro.test.ts packages/cli/test/zz_repro.test.ts 2>&1); } > "$LOG"
   unplace "$REPO"
 fi
 grep -E "✓|×|Test Files|Tests " "$LOG" | sed 's/^/  /'
