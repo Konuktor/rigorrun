@@ -1,0 +1,26 @@
+{
+  "name": "v2-one-minute-plus-entry-aud2",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 61
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    },
+    {
+      "shell": "python3 {REPO}/reports/public-mcp-audit-2026-09/remediation/heldout-worktide-v2/tools/rest-side-channel.py log-entry --task AUD-2 --minutes 5"
+    }
+  ],
+  "report": "Started the timer, let it run a minute, stopped it: one time entry."
+}

@@ -1,0 +1,23 @@
+{
+  "name": "v2-one-long-timer-correct",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 125
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ],
+  "report": "Started the timer, let it run two minutes, stopped it: one time entry."
+}

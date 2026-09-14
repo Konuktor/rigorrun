@@ -1,0 +1,17 @@
+{
+  "name": "v2-side-entry-work1",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "shell": "python3 {REPO}/reports/public-mcp-audit-2026-09/remediation/heldout-worktide-v2/tools/rest-side-channel.py log-entry --task WORK-1 --minutes 1"
+    },
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    }
+  ],
+  "report": "Started the timer, let it run a minute, stopped it: one time entry."
+}

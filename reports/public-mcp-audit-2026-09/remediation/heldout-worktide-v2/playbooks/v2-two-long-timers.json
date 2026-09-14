@@ -1,0 +1,32 @@
+{
+  "name": "v2-two-long-timers",
+  "steps": [
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 125
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 125
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ],
+  "report": "Started the timer, let it run two minutes, stopped it: one time entry."
+}
