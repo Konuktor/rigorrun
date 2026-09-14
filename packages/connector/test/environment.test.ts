@@ -92,6 +92,11 @@ describe('SystemEnvironment.getState', () => {
     await expect(prose.getState()).rejects.toThrow(/answered with text rather than records/);
   });
 
+  it('throws StateReadError when two different records in one answer claim one identity (audit N-1)', async () => {
+    const clash = [{ itemId: 'I-1', label: 'first' }, { itemId: 'I-1', label: 'renamed' }];
+    await expect(environment({ ok: true, durationMs: 0, structured: { items: clash } }).getState()).rejects.toThrow(StateReadError);
+  });
+
   it('reads an empty answer as an empty world', async () => {
     const state = await environment({ ok: true, durationMs: 0, content: [] }).getState();
     expect(state.entities['Item']).toEqual({});

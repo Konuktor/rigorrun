@@ -105,5 +105,18 @@ describe('a recording that ends in calls which change nothing', () => {
     expect(happy!.task.instruction).not.toContain('Moves a held booking to confirmed');
     expect(happy!.task.inputs['bookingId']).toBe('BKG-4001');
     expect(happy!.checks.find((check) => check.id === 'success__performed')?.target).toContain('bookingId=BKG-4001');
+
+    // Audit N-1: the recording's reads before and after the job reach induction
+    // as two readings of the same read. The booking's status changed between
+    // them, so it is a value of the booking and never its name, and the case
+    // holds the named booking to the change the demonstration made.
+    const induced = await store.readArtefact<{ questions: { id: string; proposed: string; evidence: string }[] }>(project.id, 'induced');
+    const idQuestion = induced?.questions.find((question) => question.id === 'q_id_Booking');
+    expect(idQuestion?.proposed).toBe('bookingId');
+    expect(idQuestion?.evidence).toMatch(/bookingStatus/);
+    expect(contract.expectedChanges).toContainEqual(
+      expect.objectContaining({ record: { bookingId: 'BKG-4001' }, field: 'bookingStatus', to: 'confirmed', compare: 'closed' }),
+    );
+    expect(happy!.checks.some((check) => check.kind === 'state_change' && check.target.includes('bookingId=BKG-4001'))).toBe(true);
   }, 180_000);
 });
