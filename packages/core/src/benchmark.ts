@@ -7,6 +7,7 @@
  * the other is a type error, and a test asserts it at runtime as well.
  */
 import { z } from 'zod';
+import { DEFAULT_CASE_TIMEOUT_MS } from './budgets.ts';
 import { BENCHMARK_SCHEMA_VERSION } from './versions.ts';
 import { AssertionSchema } from './assertion.ts';
 
@@ -105,7 +106,7 @@ export const BenchmarkCaseSchema = z.object({
     .array(z.object({ action: z.string(), args: z.record(z.string(), z.unknown()).default({}) }))
     .default([]),
   maxSteps: z.number().int().positive().default(24),
-  timeoutMs: z.number().int().positive().default(15_000),
+  timeoutMs: z.number().int().positive().default(DEFAULT_CASE_TIMEOUT_MS),
 });
 export type BenchmarkCase = z.infer<typeof BenchmarkCaseSchema>;
 

@@ -40,7 +40,10 @@ import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
 import { hasPayload, normalizeCallResult } from '@rigorrun/connector';
+import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
+  BudgetsSchema,
+  budgetProblem,
   describeAgent,
   newProject,
   type AgentConfig,
@@ -246,9 +249,13 @@ export class Service {
       readOnlyTools: string[];
       verifierReads: { tool: string; args?: Record<string, unknown> }[];
       reset: { kind: 'tool' | 'none'; tool?: string };
+      budgets?: { toolCallMs?: number; caseMs?: number };
     },
   ): Promise<{ project: Project; readsProblem: string }> {
     const project = await this.store.read(projectId);
+    const budgets = BudgetsSchema.parse({ ...project.budgets, ...(input.budgets ?? {}) });
+    const problem = budgetProblem(budgets);
+    if (problem) throw new Error(problem);
     const updated: Project = {
       ...project,
       readOnlyTools: input.readOnlyTools,
@@ -257,6 +264,7 @@ export class Service {
         args: read.args ?? {},
       })),
       reset: { kind: input.reset.kind, tool: input.reset.tool ?? '' },
+      budgets,
     };
     await this.store.write(updated);
     return { project: updated, readsProblem: await this.probeVerifierReads(updated) };
@@ -315,7 +323,9 @@ export class Service {
     const prose: string[] = [];
     let sawEmpty = false;
     for (const read of project.verifierReads) {
-      const result = await connection.call(read.tool, read.args).catch(() => undefined);
+      const result = await connection
+        .call(read.tool, read.args, project.budgets.toolCallMs)
+        .catch(() => undefined);
       if (!result?.ok) {
         failed.push(read.tool);
         continue;
@@ -553,6 +563,7 @@ export class Service {
       this.workspace.environment(project, schema),
       contract,
       [fixture],
+      { caseTimeoutMs: project.budgets.caseMs },
     );
     await this.store.writeArtefact(projectId, 'benchmark', benchmark);
 
@@ -765,8 +776,16 @@ export class Service {
     };
   }
 
-  async runAgent(projectId: string, agentId: string): Promise<RunResult> {
+  async runAgent(
+    projectId: string,
+    agentId: string,
+    options: { caseTimeoutMs?: number } = {},
+  ): Promise<RunResult> {
     const project = await this.store.read(projectId);
+    if (options.caseTimeoutMs !== undefined) {
+      const problem = budgetProblem({ toolCallMs: project.budgets.toolCallMs, caseMs: options.caseTimeoutMs });
+      if (problem) throw new Error(problem);
+    }
     const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
     if (!benchmark) throw new Error('There is no benchmark to run yet.');
 
@@ -786,10 +805,18 @@ export class Service {
 
     let result;
     try {
+      // The longest budget any case will run under, so the agent process is
+      // never stopped before the runner's own budget has had its say.
+      const longestCaseMs = Math.max(
+        ...benchmark.cases.map((entry) => options.caseTimeoutMs ?? entry.timeoutMs),
+      );
       result = await runBenchmark(
         benchmark,
-        [this.adapterFor(config, { total: benchmark.cases.length })],
-        { runId: `run_${randomBytes(6).toString('hex')}` },
+        [this.adapterFor(config, { total: benchmark.cases.length, caseBudgetMs: longestCaseMs })],
+        {
+          runId: `run_${randomBytes(6).toString('hex')}`,
+          ...(options.caseTimeoutMs !== undefined ? { caseTimeoutMs: options.caseTimeoutMs } : {}),
+        },
       );
     } catch (error) {
       await this.activation.attempt('run_failed', projectId);
@@ -930,7 +957,15 @@ export class Service {
     await this.activation.stage('agent_connected', projectId);
   }
 
-  adapterFor(config: AgentConfig, options: { total?: number } = {}): AgentAdapter {
+  adapterFor(config: AgentConfig, options: { total?: number; caseBudgetMs?: number } = {}): AgentAdapter {
+    // An agent's own timeout is only ever raised, never lowered: at least its
+    // usual allowance, and at least the case budget plus a margin, so that a
+    // slow case ends as TIMED_OUT by the runner rather than as a killed agent.
+    const floorMs = config.kind === 'external' ? 10 * 60_000 : 120_000;
+    const agentTimeout =
+      options.caseBudgetMs !== undefined
+        ? { timeoutMs: Math.max(floorMs, options.caseBudgetMs + BUDGET_MARGIN_MS) }
+        : {};
     if (config.kind === 'external') {
       // Nothing is called. The adapter publishes the case and waits for
       // whoever holds this agent's key to come and do it.
@@ -939,6 +974,7 @@ export class Service {
         name: config.name,
         proxy: this.options.proxy,
         total: options.total ?? 0,
+        ...agentTimeout,
       });
     }
     if (config.kind === 'process') {
@@ -956,6 +992,7 @@ export class Service {
         args: config.args,
         ...(config.cwd ? { cwd: config.cwd } : {}),
         proxy: this.options.proxy,
+        ...agentTimeout,
       });
     }
     return createHttpV2Agent({
@@ -963,6 +1000,7 @@ export class Service {
       name: config.name,
       endpoint: config.endpoint,
       proxy: this.options.proxy,
+      ...agentTimeout,
     });
   }
 

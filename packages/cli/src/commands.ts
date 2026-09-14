@@ -50,6 +50,8 @@ export interface Flags {
   maxUnsafe?: number | undefined;
   /** Cases allowed to end without a verdict before the gate refuses to answer. */
   maxInconclusive?: number | undefined;
+  /** Wall-clock budget per case for this run, overriding the suite's. */
+  caseTimeoutMs?: number | undefined;
   /** Which project to act on. The product path, as against a benchmark file. */
   project?: string | undefined;
   /** Where the store lives. Overridden in tests and in CI. */
@@ -509,6 +511,8 @@ async function executeRun(
 
   return runBenchmark(benchmark, agents, {
     ...(flags.repeats ? { repeats: flags.repeats } : {}),
+    // `!== undefined`, not truthiness: a budget of 0 must be refused, not ignored.
+    ...(flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {}),
     onProgress,
     version: VERSION,
   });

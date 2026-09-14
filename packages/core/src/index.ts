@@ -11,6 +11,7 @@ export * from './traceNormalize.ts';
 export * from './predicate.ts';
 export * from './selector.ts';
 export * from './environmentContract.ts';
+export * from './budgets.ts';
 export * from './benchmark.ts';
 export * from './run.ts';
 export * from './record.ts';

@@ -365,7 +365,9 @@ export class Workspace {
       // The one reading of a result, shared with the setup probe and the
       // runner: a server that answers with JSON inside a text block is read
       // here exactly as it was read when the probe said it could be.
-      const normalized = normalizeCallResult(await live.connection.call(read.tool, read.args));
+      const normalized = normalizeCallResult(
+        await live.connection.call(read.tool, read.args, project.budgets.toolCallMs),
+      );
       if (hasPayload(normalized)) payloads.push(normalized.payload);
     }
     return payloads;
@@ -421,7 +423,7 @@ export class Workspace {
     const watch = claimsReadOnly || !vouchedReadOnly;
     const before = watch ? await this.readPayloads(project) : undefined;
 
-    const result = await live.connection.call(tool, args);
+    const result = await live.connection.call(tool, args, project.budgets.toolCallMs);
     const normalized = normalizeCallResult(result);
     if (hasPayload(normalized)) {
       live.demonstration.observations.push({ tool, payload: normalized.payload });
@@ -544,6 +546,7 @@ export function environmentConfig(project: Project): SystemEnvironmentConfig {
         : { kind: 'none' },
     safety: project.safety,
     readOnlyTools: project.readOnlyTools,
+    toolCallMs: project.budgets.toolCallMs,
   };
 }
 

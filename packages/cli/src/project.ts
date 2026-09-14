@@ -100,7 +100,11 @@ export async function cmdProjectRun(projectId: string | undefined, flags: Flags)
       );
     }
 
-    const result = await service.runAgent(projectId, agent.id);
+    const result = await service.runAgent(
+      projectId,
+      agent.id,
+      flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {},
+    );
     printRun(result, flags.json);
 
     const comparison = await service
@@ -131,7 +135,11 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
       : project.agents[project.agents.length - 1];
     if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
 
-    const result = await service.runAgent(projectId, agent.id);
+    const result = await service.runAgent(
+      projectId,
+      agent.id,
+      flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {},
+    );
     const score = result.scores[0];
     if (!score) throw new CliError('The run produced no score.');
 

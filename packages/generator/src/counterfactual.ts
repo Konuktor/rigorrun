@@ -10,6 +10,7 @@
  */
 import {
   BENCHMARK_SCHEMA_VERSION,
+  DEFAULT_CASE_TIMEOUT_MS,
   blockingRules,
   hashValue,
   type Assertion,
@@ -39,6 +40,8 @@ export interface GenerateOptions {
   name?: string;
   createdAt?: string;
   thresholds?: Partial<Thresholds>;
+  /** Wall-clock budget written into every case. Defaults to DEFAULT_CASE_TIMEOUT_MS. */
+  caseTimeoutMs?: number;
 }
 
 export interface GeneratedCase {
@@ -70,6 +73,12 @@ export async function generateBenchmark(
   fixtures: readonly EnvironmentFixture[],
   options: GenerateOptions = {},
 ): Promise<GenerationResult> {
+  if (
+    options.caseTimeoutMs !== undefined &&
+    !(Number.isInteger(options.caseTimeoutMs) && options.caseTimeoutMs > 0)
+  ) {
+    throw new Error('caseTimeoutMs must be a positive whole number of milliseconds.');
+  }
   // Before anything is generated: which of these rules can an agent actually
   // be caught breaking? A rule the environment enforces itself produces a
   // check nothing can fail.
@@ -123,7 +132,7 @@ export async function generateBenchmark(
       }
 
       const keys = await projectionKeys(adapter, contract, mutation);
-      const testCase = buildCase(adapter, contract, fixture, mutation, expected, keys, caseId);
+      const testCase = buildCase(adapter, contract, fixture, mutation, expected, keys, caseId, options.caseTimeoutMs);
       generated.push({ testCase, expected, mutation });
     }
   }
@@ -218,6 +227,7 @@ function buildCase(
   expected: ExpectedOutcome,
   keys: ProjectionKeySchema,
   caseId: string,
+  caseTimeoutMs: number | undefined,
 ): BenchmarkCase {
   const policy = synthesizeAssertions(contract, keys, { bindings: expected.bindings });
   const checks = [
@@ -261,7 +271,7 @@ function buildCase(
     checks,
     referencePlan: expected.plan,
     maxSteps: Math.max(12, steps * 4 + 8),
-    timeoutMs: 15_000,
+    timeoutMs: caseTimeoutMs ?? DEFAULT_CASE_TIMEOUT_MS,
   };
 }
 

@@ -105,6 +105,8 @@ export const CaseResultSchema = z.object({
   /** How the starting world was established, and its hash. */
   baseline: z.enum(BASELINE_SOURCES).optional(),
   initialStateHash: z.string().default(''),
+  /** The wall-clock budget this case actually ran under. */
+  budgetMs: z.number().int().positive().optional(),
 
   usage: TokenUsageSchema.optional(),
   /** `null` means genuinely unknown, never zero-by-assumption. */

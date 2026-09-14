@@ -64,6 +64,11 @@ export interface RunOptions {
   onProgress?: (event: RunProgress) => void | Promise<void>;
   /** Injectable clock so tests and examples can be byte-reproducible. */
   now?: () => Date;
+  /**
+   * Overrides every case's wall-clock budget for this run — for an agent that
+   * needs more time than the suite was generated with. Recorded on each case.
+   */
+  caseTimeoutMs?: number;
   version?: string;
 }
 
@@ -75,6 +80,12 @@ export async function runBenchmark(
   options: RunOptions = {},
 ): Promise<RunResult> {
   if (agents.length === 0) throw new Error('At least one agent is required to run a benchmark.');
+  if (
+    options.caseTimeoutMs !== undefined &&
+    !(Number.isInteger(options.caseTimeoutMs) && options.caseTimeoutMs > 0)
+  ) {
+    throw new Error('caseTimeoutMs must be a positive whole number of milliseconds.');
+  }
 
   const runId = options.runId ?? prefixedId('run');
   const now = options.now ?? (() => new Date());
@@ -117,7 +128,7 @@ export async function runBenchmark(
           caseId: testCase.id,
           caseName: testCase.name,
         });
-        const result = await executeCase(benchmark, runId, testCase, agent, now);
+        const result = await executeCase(benchmark, runId, testCase, agent, now, options.caseTimeoutMs);
         caseResults.push(result);
         await options.onProgress?.({ type: 'case_finished', runId, result });
       }
@@ -219,8 +230,10 @@ async function executeCase(
   testCase: BenchmarkCase,
   agent: AgentAdapter,
   now: () => Date,
+  budgetOverrideMs: number | undefined,
 ): Promise<CaseResult> {
   const adapter = createEnvironment(benchmark.environment);
+  const budgetMs = budgetOverrideMs ?? testCase.timeoutMs;
   const capabilities = adapter.capabilities();
   const verification = verificationStrength(capabilities);
   const independence: EvidenceIndependence =
@@ -242,6 +255,7 @@ async function executeCase(
     startedAt,
     verification,
     evidenceIndependence: independence,
+    budgetMs,
   };
 
   // A harness that cannot put the world in order has nothing to grade. That
@@ -374,7 +388,7 @@ async function executeCase(
         { caseId: testCase.id, task: publicCaseView(testCase).task, maxSteps: testCase.maxSteps },
         env,
       ),
-      testCase.timeoutMs,
+      budgetMs,
     );
     report = output.report;
     if (output.usage) usage = output.usage;
@@ -430,7 +444,7 @@ async function executeCase(
       : {},
   );
 
-  const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, testCase.timeoutMs);
+  const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, budgetMs);
 
   return {
     ...skeleton,

@@ -15,6 +15,7 @@
  * forgotten in a serialiser, a file has to be opened on purpose.
  */
 import { z } from 'zod';
+import { BUDGET_MARGIN_MS, DEFAULT_CASE_TIMEOUT_MS, DEFAULT_TOOL_CALL_TIMEOUT_MS } from '@rigorrun/core';
 
 export const PROJECT_SCHEMA_VERSION = 1;
 
@@ -302,6 +303,37 @@ export const TimingsSchema = z.object({
 });
 export type Timings = z.infer<typeof TimingsSchema>;
 
+/**
+ * How long things may take, for this project. See the budget hierarchy in
+ * `@rigorrun/core`. Defaulted so a project written before budgets existed
+ * parses with the defaults.
+ */
+export const BudgetsSchema = z.object({
+  /** How long one tool call may wait for its answer. */
+  toolCallMs: z.number().int().positive().default(DEFAULT_TOOL_CALL_TIMEOUT_MS),
+  /** How long one case may take, end to end. */
+  caseMs: z.number().int().positive().default(DEFAULT_CASE_TIMEOUT_MS),
+});
+export type Budgets = z.infer<typeof BudgetsSchema>;
+
+/**
+ * Why a budget cannot work, or null.
+ *
+ * A case that cannot outlast one call that never answers cannot observe what
+ * an agent does about a lost response — the audit's retry case died this way —
+ * so the configuration is refused rather than accepted and silently useless.
+ */
+export function budgetProblem(budgets: Budgets): string | null {
+  if (budgets.caseMs < budgets.toolCallMs + BUDGET_MARGIN_MS) {
+    return (
+      `A case budget of ${budgets.caseMs} ms cannot outlast one tool call that times out at ` +
+      `${budgets.toolCallMs} ms and leave the agent time to respond to it. Give each case at least ` +
+      `${budgets.toolCallMs + BUDGET_MARGIN_MS} ms, or shorten the tool-call timeout.`
+    );
+  }
+  return null;
+}
+
 export const ProjectSchema = z.object({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   id: z.string(),
@@ -314,6 +346,10 @@ export const ProjectSchema = z.object({
   /** Tools a person has confirmed only read. Never the server's own opinion. */
   readOnlyTools: z.array(z.string()).default([]),
   verifierReads: z.array(VerifierReadSchema).default([]),
+  budgets: BudgetsSchema.default({
+    toolCallMs: DEFAULT_TOOL_CALL_TIMEOUT_MS,
+    caseMs: DEFAULT_CASE_TIMEOUT_MS,
+  }),
   reset: z
     .object({ kind: z.enum(['tool', 'none']), tool: z.string().default('') })
     .default({ kind: 'none', tool: '' }),
@@ -356,6 +392,7 @@ export function newProject(input: { id: string; name: string; goal?: string; now
     id: input.id,
     name: input.name,
     goal: input.goal ?? '',
+    budgets: { toolCallMs: DEFAULT_TOOL_CALL_TIMEOUT_MS, caseMs: DEFAULT_CASE_TIMEOUT_MS },
     timings: { createdAt: input.now },
   });
 }

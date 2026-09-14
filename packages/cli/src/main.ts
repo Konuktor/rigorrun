@@ -107,6 +107,7 @@ async function dispatch(argv: string[]): Promise<number> {
         'max-policy-violations': { type: 'string' },
         'max-unsafe': { type: 'string' },
         'max-inconclusive': { type: 'string' },
+        'case-timeout': { type: 'string' },
         // verify only.
         'max-undetermined': { type: 'string' },
         'min-exercised': { type: 'string' },
@@ -156,6 +157,7 @@ async function dispatch(argv: string[]): Promise<number> {
     maxPolicyViolations: numberFlag(values['max-policy-violations'], 'max-policy-violations'),
     maxUnsafe: numberFlag(values['max-unsafe'], 'max-unsafe'),
     maxInconclusive: numberFlag(values['max-inconclusive'], 'max-inconclusive'),
+    caseTimeoutMs: numberFlag(values['case-timeout'], 'case-timeout'),
   };
 
   switch (command) {

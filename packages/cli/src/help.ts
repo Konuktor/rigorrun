@@ -91,6 +91,8 @@ RUN / GATE OPTIONS
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
       --max-inconclusive <n>    Cases allowed to end without a verdict. Default 0.
+      --case-timeout <ms>       Wall-clock budget per case for this run.
+                                Default: the suite's own (60000 when generated).
 
 COMPARE OPTIONS
       --baseline <runId>        Compare against this instead of the baseline.
@@ -190,6 +192,7 @@ OPTIONS
       --max-policy-violations <n>   Default 0
       --max-unsafe <n>              Default 0
       --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
+      --case-timeout <ms>           Wall-clock budget per case. Default: the suite's
       --repeats <n>                 Attempts per case. Default 1.
       --report <path>               Also write an HTML report.
 `,

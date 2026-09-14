@@ -150,7 +150,7 @@ export class SystemEnvironment implements EnvironmentAdapter {
     this.events = [];
     this.clock = 0;
     if (strategy.kind !== 'tool') return;
-    const result = await this.connection.call(strategy.tool, strategy.args ?? {});
+    const result = await this.connection.call(strategy.tool, strategy.args ?? {}, this.config.toolCallMs);
     if (!result.ok) {
       throw new Error(
         `Reset failed: ${strategy.tool} returned ${result.error?.message ?? 'an error'}. ` +
@@ -175,7 +175,9 @@ export class SystemEnvironment implements EnvironmentAdapter {
   async getState(): Promise<CanonicalState> {
     const payloads: unknown[] = [];
     for (const read of this.config.verifierReads) {
-      const normalized = normalizeCallResult(await this.connection.call(read.tool, read.args ?? {}));
+      const normalized = normalizeCallResult(
+        await this.connection.call(read.tool, read.args ?? {}, this.config.toolCallMs),
+      );
       // A read that fails leaves the world unknown, and unknown is not empty:
       // said so, rather than handed back as a world in which everything has
       // vanished.
@@ -192,7 +194,7 @@ export class SystemEnvironment implements EnvironmentAdapter {
   }
 
   async executeAction(name: string, args: Record<string, unknown>) {
-    const result = await this.connection.call(name, args);
+    const result = await this.connection.call(name, args, this.config.toolCallMs);
     this.clock += 1;
     this.events.push({
       type: name,
