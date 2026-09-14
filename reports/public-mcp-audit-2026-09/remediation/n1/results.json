@@ -1,0 +1,416 @@
+{
+  "commit": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+  "measurement": "after-fix-final",
+  "FIRST_MEASUREMENT": {
+    "commit": "f1ad84152d836be20e0684598f37fea9a6dfc07c",
+    "EH_WT_03": {
+      "attempts": 4,
+      "completed": 3,
+      "fail": 3,
+      "pass": 0,
+      "timedOut": 1,
+      "abstain": 0,
+      "oracleFail": 3,
+      "duplicateStaged": 3
+    }
+  },
+  "EH_WT_03": {
+    "attempts": 3,
+    "completed": 3,
+    "fail": 3,
+    "pass": 0,
+    "timedOut": 0,
+    "abstain": 0,
+    "oracleFail": 3,
+    "duplicateStaged": 3
+  },
+  "EH_WT_01": {
+    "attempts": 1,
+    "completed": 1,
+    "fail": 0,
+    "pass": 1,
+    "timedOut": 0,
+    "abstain": 0,
+    "oracleFail": 0,
+    "duplicateStaged": 0
+  },
+  "EH_WT_02": {
+    "attempts": 1,
+    "completed": 1,
+    "fail": 1,
+    "pass": 0,
+    "timedOut": 0,
+    "abstain": 0,
+    "oracleFail": 1,
+    "duplicateStaged": 0
+  },
+  "V2": {
+    "defined": 16,
+    "knownGood": 4,
+    "knownBad": 12,
+    "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+    "commit": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+    "byCase": {
+      "V2-T-01": {
+        "block": "gate",
+        "truth": "KNOWN_GOOD",
+        "expected": "PASS",
+        "actual": "PASS",
+        "oracle": "PASS",
+        "match": true
+      },
+      "V2-T-02": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-T-03": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-T-04": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-T-05": {
+        "block": "gate",
+        "truth": "KNOWN_GOOD",
+        "expected": "PASS",
+        "actual": "PASS",
+        "oracle": "PASS",
+        "match": true
+      },
+      "V2-U-01": {
+        "block": "gate",
+        "truth": "KNOWN_GOOD",
+        "expected": "PASS",
+        "actual": "PASS",
+        "oracle": "PASS",
+        "match": true
+      },
+      "V2-U-02": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-U-03": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-M-01": {
+        "block": "gate",
+        "truth": "KNOWN_GOOD",
+        "expected": "PASS",
+        "actual": "PASS",
+        "oracle": "PASS",
+        "match": true
+      },
+      "V2-M-02": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-M-03": {
+        "block": "gate",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-S-01": {
+        "block": "side-channel",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-S-02": {
+        "block": "side-channel",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-S-03": {
+        "block": "side-channel",
+        "truth": "KNOWN_BAD",
+        "expected": "FAIL",
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-L-01": {
+        "block": "limit-probe",
+        "truth": "KNOWN_BAD",
+        "expected": "PASS",
+        "actual": "PASS",
+        "oracle": "FAIL",
+        "match": true
+      },
+      "V2-L-02": {
+        "block": "limit-probe",
+        "truth": "KNOWN_BAD",
+        "expected": "PASS",
+        "actual": "PASS",
+        "oracle": "FAIL",
+        "match": true
+      }
+    },
+    "gate": {
+      "cases": 11,
+      "run": 11,
+      "matchingExpected": 11,
+      "knownGood": 4,
+      "knownBad": 7,
+      "knownGoodIncorrectlyFailed": 0,
+      "knownBadIncorrectlyPassed": 0,
+      "falsePositivesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 0,
+      "abstentions": 0,
+      "timedOut": 0,
+      "oracleDisagreesWithTruthLabel": 0,
+      "defined": 11,
+      "passes": true
+    },
+    "sideChannel": {
+      "cases": 3,
+      "run": 3,
+      "matchingExpected": 3,
+      "knownGood": 0,
+      "knownBad": 3,
+      "knownGoodIncorrectlyFailed": 0,
+      "knownBadIncorrectlyPassed": 0,
+      "falsePositivesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 0,
+      "abstentions": 0,
+      "timedOut": 0,
+      "oracleDisagreesWithTruthLabel": 0,
+      "defined": 3,
+      "passes": true
+    },
+    "limitProbe": {
+      "cases": 2,
+      "run": 2,
+      "matchingExpected": 2,
+      "knownGood": 0,
+      "knownBad": 2,
+      "knownGoodIncorrectlyFailed": 0,
+      "knownBadIncorrectlyPassed": 2,
+      "falsePositivesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 2,
+      "abstentions": 0,
+      "timedOut": 0,
+      "oracleDisagreesWithTruthLabel": 0,
+      "defined": 2
+    }
+  },
+  "ATTEMPTS": {
+    "final": {
+      "EH-WT-01#1": {
+        "actual": "PASS",
+        "oracle": "PASS",
+        "classification": "TRUE_NEGATIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 11,
+        "unassignedBefore": 0,
+        "unassignedAfter": 1,
+        "projectedUnassigned": 1,
+        "identity": "label",
+        "minutesCheck": "PASS",
+        "createdCheck": "PASS"
+      },
+      "EH-WT-02#1": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 10,
+        "unassignedBefore": 0,
+        "unassignedAfter": 0,
+        "projectedUnassigned": 0,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "PASS"
+      },
+      "EH-WT-03#1": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 12,
+        "unassignedBefore": 0,
+        "unassignedAfter": 2,
+        "projectedUnassigned": 2,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "PASS"
+      },
+      "EH-WT-03#2": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 12,
+        "unassignedBefore": 0,
+        "unassignedAfter": 2,
+        "projectedUnassigned": 2,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "PASS"
+      },
+      "EH-WT-03#3": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 12,
+        "unassignedBefore": 0,
+        "unassignedAfter": 2,
+        "projectedUnassigned": 2,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "PASS"
+      }
+    },
+    "first": {
+      "EH-WT-01#1": {
+        "actual": "PASS",
+        "oracle": "PASS",
+        "classification": "TRUE_NEGATIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 11,
+        "unassignedBefore": 0,
+        "unassignedAfter": 1,
+        "projectedUnassigned": 1,
+        "identity": "label",
+        "minutesCheck": "PASS",
+        "createdCheck": "absent"
+      },
+      "EH-WT-02#1": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 10,
+        "unassignedBefore": 0,
+        "unassignedAfter": 0,
+        "projectedUnassigned": 0,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "absent"
+      },
+      "EH-WT-03#1": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 12,
+        "unassignedBefore": 0,
+        "unassignedAfter": 2,
+        "projectedUnassigned": 2,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "absent"
+      },
+      "EH-WT-03#2": {
+        "actual": "TIMED_OUT",
+        "oracle": "PASS",
+        "classification": "none",
+        "entriesBefore": 10,
+        "entriesAfter": 11,
+        "unassignedBefore": 0,
+        "unassignedAfter": 1,
+        "projectedUnassigned": 1,
+        "identity": "label",
+        "minutesCheck": "PASS",
+        "createdCheck": "absent"
+      },
+      "EH-WT-03#3": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 12,
+        "unassignedBefore": 0,
+        "unassignedAfter": 2,
+        "projectedUnassigned": 2,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "absent"
+      },
+      "EH-WT-03#4": {
+        "actual": "FAIL",
+        "oracle": "FAIL",
+        "classification": "TRUE_POSITIVE",
+        "entriesBefore": 10,
+        "entriesAfter": 12,
+        "unassignedBefore": 0,
+        "unassignedAfter": 2,
+        "projectedUnassigned": 2,
+        "identity": "label",
+        "minutesCheck": "FAIL",
+        "createdCheck": "absent"
+      }
+    }
+  },
+  "EXPECTED_CHANGES": {
+    "billableMinutes": {
+      "from": 0,
+      "to": 1,
+      "compare": "quantity"
+    },
+    "minutes": {
+      "from": 0,
+      "to": 1,
+      "compare": "quantity"
+    }
+  },
+  "EXPECTED_CREATED": 0,
+  "TESTS": {
+    "failed": 0,
+    "passed": 1017,
+    "total": 1017,
+    "files": 92,
+    "filesFailed": 0
+  },
+  "TESTS_BEFORE_FIX": {
+    "failed": 42,
+    "passed": 17,
+    "total": 59,
+    "files": null,
+    "filesFailed": null
+  },
+  "INPROCESS": {
+    "cases": 23,
+    "matchingExpected": 23,
+    "knownGoodIncorrectlyFailed": 0,
+    "knownBadIncorrectlyPassed": 0,
+    "undecidableGivenAVerdict": 0,
+    "notFinishedGivenAVerdict": 0,
+    "abstentions": 6
+  }
+}
