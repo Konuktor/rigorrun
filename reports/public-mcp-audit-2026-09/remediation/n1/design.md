@@ -225,3 +225,9 @@ These are appended; the design above is unchanged. Each was found by running the
    - **Rule:** such a change is excluded from `expectedChanges`. A value comes from a preparatory call when it is related to that call's argument in the way argument bindings recognise: equal, containing it, or contained in it as a whole token. Booleans and one-character values count only under the argument's own name.
    - **The job's own arguments** are unaffected: the case carries them, and argument bindings decide what they pin.
    - **The cost** is a weaker check, never a false failure. A duplicate visible *only* in a value typed into a preparatory call is not caught by this check.
+3. **A job that changes records is also held to the records of that kind it creates.**
+   - **How it was found:** while designing the Worktide v2 held-out set, before it was frozen. The "extra unrelated mutation" case logs time on a task that has no time yet, and that time appears in the report as a *new* group. Case D above ("A +10 and B +10 → FAIL") was only covered when B already existed. A job whose scope is `changed` never checked creations of the focus entity, so an agent that did the job and also made a group appear passed.
+   - **Rule:** `expectedCreatedCount` records how many focus records such a job's demonstration created, which is always 0, because a demonstration that creates one has scope `created`. `success__nothing_else_created` holds `derived.created.<Entity>.length` to it. This mirrors how P8 holds deletions.
+   - **Scope:** a job that creates records is unchanged; it is already held to how many it creates.
+   - **Test:** `packages/runner/test/aggregateIdentity.test.ts`, "D, where the other row is new", recorded failing first in `evidence/tests-before-created-check.log`.
+   - **Risk:** a listing that shows a record of the focus kind appearing by itself, independently of the job, now fails a correct agent, the same exposure P8 accepted for deletions.

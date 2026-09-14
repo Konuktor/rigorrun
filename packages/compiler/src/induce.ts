@@ -255,6 +255,7 @@ export function induceContract(
     argumentBindings: bindings,
     expectedDeltaCount: expectedDeltaCount(context),
     expectedDeletedCount: expectedDeletedCount(context),
+    ...(focusScope === 'changed' ? { expectedCreatedCount: createdCount(context) } : {}),
     ...(changes.length > 0 ? { expectedChanges: changes } : {}),
     rules,
     successAssertions: [],
@@ -344,6 +345,12 @@ function expectedDeltaCount(context: Context): number {
 function expectedDeletedCount(context: Context): number {
   const name = context.focusEntity.name;
   return context.deltas.filter((delta) => delta.kind === 'entity_deleted' && delta.entity === name).length;
+}
+
+/** How many records of the kind the job is about the demonstration created. */
+function createdCount(context: Context): number {
+  const name = context.focusEntity.name;
+  return context.deltas.filter((delta) => delta.kind === 'entity_created' && delta.entity === name).length;
 }
 
 /**

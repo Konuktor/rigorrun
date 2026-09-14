@@ -392,6 +392,24 @@ function successChecks(
     });
   }
 
+  // A job that changes records creates none of that kind beyond what the
+  // demonstration created. A report that gains a group it never had is a side
+  // effect in the same way a deleted record is, and a check on changed records
+  // cannot see it. A job that creates records is already held to their number.
+  if (scope === 'changed' && contract.expectedCreatedCount !== undefined) {
+    checks.push({
+      ...common,
+      id: 'success__nothing_else_created',
+      kind: 'state_equals',
+      description:
+        contract.expectedCreatedCount === 0
+          ? `no ${contract.focusEntity} record created — the demonstration created none`
+          : `exactly ${contract.expectedCreatedCount} ${contract.focusEntity} record(s) created, as demonstrated — no more`,
+      target: `derived.created.${contract.focusEntity}.length`,
+      expected: contract.expectedCreatedCount,
+    });
+  }
+
   // And each record the job is about changed the way the demonstration changed
   // it: by the demonstrated amount, to the demonstrated value. A count cannot
   // see this — a second entry on the same total still changes one record. The

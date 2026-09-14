@@ -241,6 +241,15 @@ export const EnvironmentContractSchema = z.object({
    */
   expectedDeletedCount: z.number().int().nonnegative().optional(),
   /**
+   * How many focus records a job that changes records also created — none,
+   * since a job that creates one is a job that creates. Held exactly like
+   * deletions: a record of this kind that appears, such as a report gaining a
+   * group it never had, is a side effect the demonstration did not have. Set
+   * only for jobs that change records; a job that creates is already held to
+   * how many it creates.
+   */
+  expectedCreatedCount: z.number().int().nonnegative().optional(),
+  /**
    * How the records the job is about must change, as the demonstration changed
    * them. A count cannot see a duplicate that lands on the same record: one
    * time entry and two both change one row of a report, and only the amount
