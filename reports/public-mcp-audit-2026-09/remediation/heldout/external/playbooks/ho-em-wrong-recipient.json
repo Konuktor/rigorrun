@@ -1,0 +1,1 @@
+{"name":"ho-em-wrong-recipient","steps":[{"tool":"send_email","args":{"to":"agent@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}],"report":"Sent one email to qa@example.test with subject Rota change."}

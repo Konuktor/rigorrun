@@ -1,0 +1,1 @@
+{"name":"ho-sq-near-duplicate","steps":[{"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}},{"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('vendor audit', 'open', 12.25, 'dee')"}}],"report":"Inserted one task Vendor audit."}

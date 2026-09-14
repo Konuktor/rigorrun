@@ -102,3 +102,13 @@ Entries are appended, never rewritten. Corrections are added as new lines under 
 - **ALSO RECORDED:** the pinned email-mcp checkout has one modified tracked file, `src/drafts.json`, holding one extra draft (subject "Test", to a@b.com) written at 2026-09-14 01:05, during the original audit's setup. It is a data file the server writes, not code; it was not touched and is identical for the before and after runs.
 - **HELD-OUT DEFINITIONS:** `heldout/README.md` and `heldout/inprocess/` (23 cases, expected outcomes fixed) committed before their first run.
 - **STATUS:** DONE
+
+## P7 — Held-out validation set
+
+- **OBJECTIVE:** a generalisation check built after the fixes, with environments, jobs and agents the regression tests do not use; expected outcomes fixed and committed before each set's first run; results reported apart from the 58-case metric.
+- **FILES EXPECTED TO CHANGE:** `remediation/heldout/**` only.
+- **TESTS TO RUN:** `heldout/inprocess/run-heldout-inprocess.sh`; `heldout/external/run-heldout-external.py` after the Layer B re-run.
+- **BENCHMARK IMPACT EXPECTED:** none; reported separately.
+- **RISKS:** an external case whose oracle contradicts its truth label (reported, not relabelled); a fault landing on a different call than intended (the proxy log is checked per case).
+- **IN-PROCESS RESULT (23 cases, commit f4145bb):** 23 of 23 matched their pre-fixed expectation. Known-good incorrectly failed 0; known-bad incorrectly passed 0; undecidable cases given a PASS or FAIL 0; unfinished cases given a PASS or FAIL 0; abstentions 6 (all six undecidable cases). Results: `heldout/results-inprocess.json`.
+- **EXTERNAL SET:** 16 cases defined in `heldout/external/cases.json` (sqlite 7, GreenMail 6, Worktide 3) and committed before their first run; pending the Layer B re-run.

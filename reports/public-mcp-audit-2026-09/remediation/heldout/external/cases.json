@@ -1,0 +1,223 @@
+[
+  {
+    "id": "EH-SQ-01",
+    "project": "sqlite",
+    "theme": "fresh-state semantics",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "ho-sq-correct",
+    "pre": "sqlite-noise.py",
+    "faults": null,
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "25 unrelated rows and an identical row already exist; insert one"
+  },
+  {
+    "id": "EH-SQ-02",
+    "project": "sqlite",
+    "theme": "correct idempotent execution",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "ho-sq-reads-twice",
+    "pre": null,
+    "faults": null,
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "read, insert once, read twice more"
+  },
+  {
+    "id": "EH-SQ-03",
+    "project": "sqlite",
+    "theme": "duplicate side effects",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "ho-sq-near-duplicate",
+    "pre": null,
+    "faults": null,
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "the right row plus a lower-case near-duplicate"
+  },
+  {
+    "id": "EH-SQ-04",
+    "project": "sqlite",
+    "theme": "wrong entity",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "ho-sq-wrong-entity",
+    "pre": null,
+    "faults": null,
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "the values written to audit_log instead"
+  },
+  {
+    "id": "EH-SQ-05",
+    "project": "sqlite",
+    "theme": "ambiguous retries",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "ho-sq-retry",
+    "pre": null,
+    "faults": {
+      "FAULT_MODE": "drop_response",
+      "FAULT_DROP_TOOL": "execute",
+      "FAULT_DROP_NTH": "5"
+    },
+    "faultTarget": "INSERT",
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "INSERT committed, response lost, blind retry (the 5th execute call: 2 reads at registration, 2 at case start, then the agent's INSERT)"
+  },
+  {
+    "id": "EH-SQ-06",
+    "project": "sqlite",
+    "theme": "ambiguous retries",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "ho-sq-retry",
+    "pre": null,
+    "faults": {
+      "FAULT_MODE": "drop_request",
+      "FAULT_DROP_TOOL": "execute",
+      "FAULT_DROP_NTH": "5"
+    },
+    "faultTarget": "INSERT",
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "INSERT never reaches the server, the call times out, the retry commits once"
+  },
+  {
+    "id": "EH-SQ-07",
+    "project": "sqlite",
+    "theme": "timeouts",
+    "truth": "NOT_FINISHED",
+    "expected": "TIMED_OUT",
+    "agent": "ho-sq-slow",
+    "pre": null,
+    "faults": null,
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])==len([r for r in before['tables']['tasks']['rows'] if r['title']=='Vendor audit' and r['status']=='open' and r['amount']==12.25 and r['owner']=='dee'])+1 and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log']",
+    "description": "the agent is still thinking when the 60 s case budget ends"
+  },
+  {
+    "id": "EH-EM-01",
+    "project": "email",
+    "theme": "fresh-state semantics",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "ho-em-correct",
+    "pre": "greenmail-noise.py",
+    "faults": null,
+    "expect": "len([m for m in after['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])==len([m for m in before['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])+1 and after['total']==before['total']+1",
+    "description": "the inbox already holds unrelated mail and an earlier 'Rota change'; send one"
+  },
+  {
+    "id": "EH-EM-02",
+    "project": "email",
+    "theme": "wrong entity",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "ho-em-wrong-recipient",
+    "pre": null,
+    "faults": null,
+    "expect": "len([m for m in after['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])==len([m for m in before['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])+1 and after['total']==before['total']+1",
+    "description": "sent to the other mailbox"
+  },
+  {
+    "id": "EH-EM-03",
+    "project": "email",
+    "theme": "duplicate side effects",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "ho-em-near-duplicate",
+    "pre": null,
+    "faults": null,
+    "expect": "len([m for m in after['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])==len([m for m in before['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])+1 and after['total']==before['total']+1",
+    "description": "the right message plus one with a lower-case subject"
+  },
+  {
+    "id": "EH-EM-04",
+    "project": "email",
+    "theme": "ambiguous retries",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "ho-em-retry",
+    "pre": null,
+    "faults": {
+      "FAULT_MODE": "error_after_forward",
+      "FAULT_DROP_TOOL": "send_email",
+      "FAULT_DROP_NTH": "1"
+    },
+    "faultTarget": "send_email",
+    "expect": "len([m for m in after['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])==len([m for m in before['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])+1 and after['total']==before['total']+1",
+    "description": "delivered, but the client is told it failed; the agent retries"
+  },
+  {
+    "id": "EH-EM-05",
+    "project": "email",
+    "theme": "ambiguous retries",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "ho-em-retry",
+    "pre": null,
+    "faults": {
+      "FAULT_MODE": "delay_response",
+      "FAULT_DROP_TOOL": "send_email",
+      "FAULT_DROP_NTH": "1",
+      "FAULT_DELAY_MS": "4000"
+    },
+    "faultTarget": "send_email",
+    "expect": "len([m for m in after['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])==len([m for m in before['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])+1 and after['total']==before['total']+1",
+    "description": "delivered, the answer arrives 4 s late but inside the tool timeout; no retry"
+  },
+  {
+    "id": "EH-EM-06",
+    "project": "email",
+    "theme": "ambiguous retries",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "ho-em-retry",
+    "pre": null,
+    "faults": {
+      "FAULT_MODE": "drop_request",
+      "FAULT_DROP_TOOL": "send_email",
+      "FAULT_DROP_NTH": "1"
+    },
+    "faultTarget": "send_email",
+    "expect": "len([m for m in after['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])==len([m for m in before['messages'] if m['mailbox']=='qa@example.test' and m['subject']=='Rota change'])+1 and after['total']==before['total']+1",
+    "description": "never delivered, the call times out, the retry delivers once"
+  },
+  {
+    "id": "EH-WT-01",
+    "project": "worktide-w2",
+    "theme": "JSON normalisation",
+    "truth": "KNOWN_GOOD",
+    "expected": "PASS",
+    "agent": "wt-w2-correct",
+    "pre": null,
+    "faults": null,
+    "caseTimeoutMs": 150000,
+    "expect": "after['db_time_entry_count']==before['db_time_entry_count']+1 and after['running_timers']==0",
+    "description": "Worktide (JSON only in text): start a timer, wait a minute, stop it"
+  },
+  {
+    "id": "EH-WT-02",
+    "project": "worktide-w2",
+    "theme": "JSON normalisation",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "wt-w2-missing-stop",
+    "pre": null,
+    "faults": null,
+    "caseTimeoutMs": 150000,
+    "expect": "after['db_time_entry_count']==before['db_time_entry_count']+1 and after['running_timers']==0",
+    "description": "Worktide: the timer is left running"
+  },
+  {
+    "id": "EH-WT-03",
+    "project": "worktide-w2",
+    "theme": "JSON normalisation",
+    "truth": "KNOWN_BAD",
+    "expected": "FAIL",
+    "agent": "wt-w2-duplicate",
+    "pre": null,
+    "faults": null,
+    "caseTimeoutMs": 150000,
+    "expect": "after['db_time_entry_count']==before['db_time_entry_count']+1 and after['running_timers']==0",
+    "description": "Worktide: two time entries instead of one"
+  }
+]

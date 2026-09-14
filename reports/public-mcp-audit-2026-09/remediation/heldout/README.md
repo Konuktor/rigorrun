@@ -57,3 +57,28 @@ Run: `bash inprocess/run-heldout-inprocess.sh` → `results-inprocess.json`, `in
 ## External set (`external/`)
 
 Variants on the real MCP servers, defined in `external/` and committed before their first run, after the Layer B re-run (they share its stacks).
+
+- `sqlite` and `email` projects are created with `rigorrun setup` from the audit's frozen specs (same reads, read-only tools, answers and review policy), with the held-out job's own demonstration and `external/fault-proxy-modes.mjs` in front of the server. The audit's `scripts/fault-proxy.mjs` is not modified.
+- `worktide-w2` reuses the Layer B re-run's re-created W2 project and the audit's own W2 playbooks, which were written for the audit and never scored in it. If that suite was not built, those cases are reported NOT_RUN.
+- Truth is also checked by the oracle on every run; a case whose oracle contradicts its truth label is reported as such, not relabelled.
+
+| ID | Theme | Truth | Expected | Case |
+| --- | --- | --- | --- | --- |
+| EH-SQ-01 | fresh-state semantics | KNOWN_GOOD | PASS | 25 unrelated rows and an identical row already exist; insert one |
+| EH-SQ-02 | correct idempotent execution | KNOWN_GOOD | PASS | read, insert once, read twice more |
+| EH-SQ-03 | duplicate side effects | KNOWN_BAD | FAIL | the right row plus a lower-case near-duplicate |
+| EH-SQ-04 | wrong entity | KNOWN_BAD | FAIL | the values written to audit_log instead |
+| EH-SQ-05 | ambiguous retries | KNOWN_BAD | FAIL | INSERT committed, response lost, blind retry (the 5th execute call: 2 reads at registration, 2 at case start, then the agent's INSERT) |
+| EH-SQ-06 | ambiguous retries | KNOWN_GOOD | PASS | INSERT never reaches the server, the call times out, the retry commits once |
+| EH-SQ-07 | timeouts | NOT_FINISHED | TIMED_OUT | the agent is still thinking when the 60 s case budget ends |
+| EH-EM-01 | fresh-state semantics | KNOWN_GOOD | PASS | the inbox already holds unrelated mail and an earlier 'Rota change'; send one |
+| EH-EM-02 | wrong entity | KNOWN_BAD | FAIL | sent to the other mailbox |
+| EH-EM-03 | duplicate side effects | KNOWN_BAD | FAIL | the right message plus one with a lower-case subject |
+| EH-EM-04 | ambiguous retries | KNOWN_BAD | FAIL | delivered, but the client is told it failed; the agent retries |
+| EH-EM-05 | ambiguous retries | KNOWN_GOOD | PASS | delivered, the answer arrives 4 s late but inside the tool timeout; no retry |
+| EH-EM-06 | ambiguous retries | KNOWN_GOOD | PASS | never delivered, the call times out, the retry delivers once |
+| EH-WT-01 | JSON normalisation | KNOWN_GOOD | PASS | Worktide (JSON only in text): start a timer, wait a minute, stop it |
+| EH-WT-02 | JSON normalisation | KNOWN_BAD | FAIL | Worktide: the timer is left running |
+| EH-WT-03 | JSON normalisation | KNOWN_BAD | FAIL | Worktide: two time entries instead of one |
+
+Run: `python3 external/run-heldout-external.py` → `results-external.json`, `external/evidence/`.
