@@ -29,7 +29,7 @@ export const PROJECT_SCHEMA_VERSION = 1;
  */
 const secretNames = z.array(z.string()).default([]);
 
-export const McpConnectorSchema = z.object({
+const McpConnectorBaseSchema = z.object({
   kind: z.literal('mcp'),
   transport: z.enum(['stdio', 'http']),
   /** For stdio. The binary, never a shell string. */
@@ -50,7 +50,7 @@ export const McpConnectorSchema = z.object({
   secretNames,
 });
 
-export const OpenApiConnectorSchema = z.object({
+const OpenApiConnectorBaseSchema = z.object({
   kind: z.literal('openapi'),
   /** The document itself, kept whole so a run does not depend on a URL. */
   spec: z.string().max(8_000_000).default(''),
@@ -83,6 +83,30 @@ export const OpenApiConnectorSchema = z.object({
   secretNames,
 });
 
+/**
+ * A second connection to the same system, used only for the verdict.
+ *
+ * The same shapes a project connects with, minus a verifier of its own. On a
+ * browser it is the only way a verdict reaches records; on an MCP server or an
+ * OpenAPI document it is what makes a verdict independent of the connection
+ * the agent used (audit R-2). Its tools are nominated as `verifier:<tool>`.
+ */
+const VerifierConnectorSchema = z.discriminatedUnion('kind', [McpConnectorBaseSchema, OpenApiConnectorBaseSchema]);
+
+// Optional rather than defaulted on these two, so a project written before a
+// verifier existed — or written by hand — needs no new field to be valid.
+export const McpConnectorSchema = McpConnectorBaseSchema.extend({
+  verifier: VerifierConnectorSchema.nullable().optional(),
+});
+export const OpenApiConnectorSchema = OpenApiConnectorBaseSchema.extend({
+  verifier: VerifierConnectorSchema.nullable().optional(),
+});
+
+/** A connector that opens one connection: what a verifier may be. */
+export type DirectConnector =
+  | z.infer<typeof McpConnectorBaseSchema>
+  | z.infer<typeof OpenApiConnectorBaseSchema>;
+
 export const BrowserConnectorSchema = z.object({
   kind: z.literal('browser'),
   /** Where the job starts. Every navigation is checked against its origin. */
@@ -98,10 +122,7 @@ export const BrowserConnectorSchema = z.object({
    * project says OBSERVATIONAL — RigorRun watched what the agent did and did
    * not check what changed.
    */
-  verifier: z
-    .discriminatedUnion('kind', [McpConnectorSchema, OpenApiConnectorSchema])
-    .nullable()
-    .default(null),
+  verifier: VerifierConnectorSchema.nullable().default(null),
   secretNames,
 });
 
@@ -138,12 +159,12 @@ export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
  * to be repeated in a list is a person setting up a project correctly and
  * being told their credential is missing when it is sitting right there.
  */
-export function secretNamesOf(connector: Connector): string[] {
+export function secretNamesOf(connector: Connector | DirectConnector): string[] {
   const names = [...connector.secretNames];
   if (connector.kind === 'openapi' && connector.oauth) {
     names.push(connector.oauth.clientIdSecret, connector.oauth.clientSecretSecret);
   }
-  if (connector.kind === 'browser' && connector.verifier) {
+  if ('verifier' in connector && connector.verifier) {
     names.push(...secretNamesOf(connector.verifier));
   }
   return [...new Set(names.filter((name) => name.length > 0))];
@@ -152,12 +173,15 @@ export function secretNamesOf(connector: Connector): string[] {
 /** One line naming what a project connects to, for a list or a diagnostic. */
 export function describeConnector(connector: Connector | null): string {
   if (!connector) return 'not connected';
+  const verified = connector.kind !== 'browser' && connector.verifier ? ' · independently verified' : '';
   if (connector.kind === 'mcp') {
-    return connector.transport === 'http' && connector.auth === 'oauth'
-      ? 'MCP · http · signed in'
-      : `MCP · ${connector.transport}`;
+    return (
+      (connector.transport === 'http' && connector.auth === 'oauth'
+        ? 'MCP · http · signed in'
+        : `MCP · ${connector.transport}`) + verified
+    );
   }
-  if (connector.kind === 'openapi') return 'OpenAPI';
+  if (connector.kind === 'openapi') return `OpenAPI${verified}`;
   return connector.verifier ? 'Browser · verified' : 'Browser · observed only';
 }
 
@@ -170,6 +194,16 @@ export function describeConnector(connector: Connector | null): string {
  * nobody can act on.
  */
 export function describeConnectorAction(connector: Connector): string {
+  const own = describeOneConnectorAction(connector);
+  // Opening a project with a verifier runs two things. The confirmation for an
+  // imported project has to name both, or it is not the whole truth.
+  if (connector.kind !== 'browser' && connector.verifier) {
+    return `${own}, and ${describeOneConnectorAction(connector.verifier)} to check the result`;
+  }
+  return own;
+}
+
+function describeOneConnectorAction(connector: Connector | DirectConnector): string {
   if (connector.kind === 'browser') {
     return `open a browser at ${connector.startUrl}`;
   }

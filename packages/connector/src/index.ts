@@ -3,6 +3,7 @@ export * from './risk.ts';
 export * from './result.ts';
 export * from './rows.ts';
 export * from './types.ts';
+export * from './verified.ts';
 export * from './url.ts';
 export * from './environmentConfig.ts';
 export * from './environment.ts';

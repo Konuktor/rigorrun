@@ -25,6 +25,7 @@ import {
 } from '@rigorrun/mcp';
 import {
   SystemEnvironment,
+  VerifiedConnection,
   detectMismatch,
   hasPayload,
   normalizeCallResult,
@@ -41,8 +42,8 @@ import { basename, join } from 'node:path';
 import {
   describeConnectorAction,
   secretNamesOf,
-  type Connector,
   type Project,
+  type DirectConnector,
 } from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
 import { openInBrowser } from './openUrl.ts';
@@ -165,12 +166,24 @@ export class Workspace {
         evidenceDir: join(this.store.path, 'projects', project.id, 'evidence'),
       });
     }
-    return this.openConnector(connector, await this.secretsFor(project));
+    const secrets = await this.secretsFor(project);
+    const primary = await this.openConnector(connector, secrets);
+    if (!connector.verifier) return primary;
+    // A second connection to the same system, for the verdict only. Opened
+    // after the first, and if it cannot be opened the first is closed: a
+    // project that asked for independent reads does not quietly fall back to
+    // reading through the agent's own connection.
+    try {
+      return new VerifiedConnection(primary, await this.openConnector(connector.verifier, secrets));
+    } catch (error) {
+      await primary.close().catch(() => undefined);
+      throw error;
+    }
   }
 
   /** One connector, already narrowed, with its credentials already fetched. */
   private async openConnector(
-    connector: Exclude<Connector, { kind: 'browser' }>,
+    connector: DirectConnector,
     secrets: Record<string, string>,
   ): Promise<SystemConnection> {
     if (connector.kind === 'openapi') {

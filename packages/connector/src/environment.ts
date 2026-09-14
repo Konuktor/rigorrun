@@ -48,6 +48,7 @@ import {
 import type { SystemConnection } from './types.ts';
 import type { SystemEnvironmentConfig } from './environmentConfig.ts';
 import { hasPayload, normalizeCallResult } from './result.ts';
+import { isVerifierTool } from './verified.ts';
 import { stateFromPayloads } from './rows.ts';
 
 export class SystemEnvironment implements EnvironmentAdapter {
@@ -81,6 +82,14 @@ export class SystemEnvironment implements EnvironmentAdapter {
           : 'none',
       // A real system does not let you install a world.
       seed: 'none',
+      // Independent only when every read goes through a connection the agent
+      // never touches. One read through the system's own tools is enough to
+      // make the verdict rest, in part, on the system's account of itself.
+      stateReadIndependence:
+        this.config.verifierReads.length > 0 &&
+        this.config.verifierReads.every((read) => isVerifierTool(read.tool))
+          ? 'independent'
+          : 'self-reported',
       reset: this.config.reset.kind === 'tool' ? 'tool' : 'none',
       // Every call goes through this adapter, so the log is ours rather than
       // the system's own audit trail. Weaker evidence, honestly labelled.
@@ -96,6 +105,8 @@ export class SystemEnvironment implements EnvironmentAdapter {
   getActions(): ActionDefinition[] {
     const readOnly = new Set(this.config.readOnlyTools);
     return this.connection.discovery.tools
+      // A verifier's tools are how the result is checked, never something to do.
+      .filter((tool) => !isVerifierTool(tool.name))
       .map((tool) => ({
         name: tool.name,
         description: tool.description,
@@ -194,6 +205,15 @@ export class SystemEnvironment implements EnvironmentAdapter {
   }
 
   async executeAction(name: string, args: Record<string, unknown>) {
+    if (isVerifierTool(name)) {
+      return {
+        ok: false,
+        error: {
+          code: 'NOT_AN_ACTION',
+          message: `${name} is how RigorRun checks the result; it is not something an agent can call.`,
+        },
+      };
+    }
     const result = await this.connection.call(name, args, this.config.toolCallMs);
     this.clock += 1;
     this.events.push({
