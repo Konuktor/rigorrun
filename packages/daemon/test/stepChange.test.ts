@@ -91,6 +91,11 @@ describe('a recording that ends in calls which change nothing', () => {
     expect(contract.demonstratedArgs['confirm_booking']).toEqual({ bookingId: 'BKG-4001' });
     expect(contract.completionActions).not.toContain('find_bookings');
     expect(contract.goal).toBe('Confirm the held booking for the annual general meeting');
+    // The job changes an existing booking, so the booking's identifier is how
+    // the request says which one — and a check that omits it passes the wrong one.
+    expect(contract.argumentBindings).toContainEqual(
+      expect.objectContaining({ field: 'bookingId', param: 'bookingId', mode: 'equals' }),
+    );
 
     await service.review(project.id, { confirmedRuleIds: contract.rules.map((rule) => rule.id) });
     const benchmark: Benchmark = await service.generate(project.id);
@@ -99,5 +104,6 @@ describe('a recording that ends in calls which change nothing', () => {
     expect(happy!.task.instruction).toContain('Confirm the held booking for the annual general meeting');
     expect(happy!.task.instruction).not.toContain('Moves a held booking to confirmed');
     expect(happy!.task.inputs['bookingId']).toBe('BKG-4001');
+    expect(happy!.checks.find((check) => check.id === 'success__performed')?.target).toContain('bookingId=BKG-4001');
   }, 180_000);
 });

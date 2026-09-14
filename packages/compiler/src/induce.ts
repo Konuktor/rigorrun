@@ -338,7 +338,9 @@ function expectedDeltaCount(context: Context): number {
  * query). Nothing here reads a name for meaning. Three guards keep a
  * coincidence from becoming a check that fails a correct agent:
  *
- * - the identifier is never bound: it is the system's to assign;
+ * - a created record's identifier is never bound: it is the system's to
+ *   assign. A changed record's identifier is the opposite — it is how the
+ *   request names *which* record — so it is bound, by equality only;
  * - a boolean or a one-character value is bound only where the system itself
  *   gave the argument the field's name, because `1` and `true` coincide with
  *   far too much to be evidence;
@@ -360,7 +362,8 @@ function argumentBindings(context: Context): ArgumentBinding[] {
 
   const perField: ArgumentBinding[] = [];
   for (const field of context.focusEntity.fields) {
-    if (field.name === context.focusEntity.idField) continue;
+    const isId = field.name === context.focusEntity.idField;
+    if (isId && context.focusScope === 'created') continue;
     const raw = context.focusRow[field.name];
     if (raw === null || raw === undefined || typeof raw === 'object') continue;
     const value = raw as string | number | boolean;
@@ -379,6 +382,7 @@ function argumentBindings(context: Context): ArgumentBinding[] {
         mode = 'param_contains_field';
       }
       if (mode === undefined) continue;
+      if (isId && mode !== 'equals') continue;
       const better =
         best === undefined ||
         rank[mode] < rank[best.mode] ||

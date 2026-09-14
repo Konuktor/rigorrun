@@ -287,3 +287,123 @@ describe('values that arrive inside one free-text argument', () => {
     });
   }
 });
+
+describe('a job that changes an existing record, named by its identifier', () => {
+  const TICKETS: EnvironmentSchema = {
+    entities: [
+      {
+        name: 'Ticket',
+        idField: 'ticketId',
+        mutable: true,
+        appendOnly: false,
+        fields: [
+          { name: 'ticketId', type: 'string', nullable: false, role: 'identifier' },
+          { name: 'subject', type: 'string', nullable: false, role: 'freetext' },
+          { name: 'state', type: 'enum', nullable: false, role: 'status', enumValues: ['closed', 'open'] },
+        ],
+      },
+    ],
+    relationships: [],
+  };
+  // Two open tickets that are identical except for their identifier.
+  const OPEN = stateFromRows(TICKETS, {
+    Ticket: [
+      { ticketId: 'T-1', subject: 'Printer', state: 'open' },
+      { ticketId: 'T-2', subject: 'Printer', state: 'open' },
+      { ticketId: 'T-3', subject: 'Badge', state: 'closed' },
+    ],
+  });
+  const TICKET_DESK = defineEnvironment({
+    id: 'ticket-desk',
+    name: 'Ticket desk',
+    description: 'Tickets that can be closed.',
+    schema: TICKETS,
+    presentation: { label: 'Tickets', tagline: 'nothing', accent: '#334155', mark: 'T', navEntities: ['Ticket'], focusEntity: 'Ticket' },
+    fixtures: [{ id: 'open', title: 'Open', summary: 'two open twins', state: OPEN, config: {}, request: {} }],
+    actions: [
+      {
+        name: 'list_tickets',
+        description: 'Every ticket.',
+        readOnly: true,
+        mutates: [],
+        enforcement: 'none',
+        params: [],
+        handle: (_args, ctx) => ({ ok: true, data: Object.values(ctx.state.entities['Ticket'] ?? {}) }),
+      },
+      {
+        name: 'close_ticket',
+        description: 'Closes a ticket.',
+        readOnly: false,
+        mutates: [],
+        enforcement: 'none',
+        params: [{ name: 'ticketId', type: 'string', required: true, entityRef: 'Ticket' }],
+        // Idempotent: closing a closed ticket changes nothing.
+        handle: (args, ctx) => {
+          const row = ctx.update('Ticket', args['ticketId'], { state: 'closed' });
+          return row ? { ok: true, data: row } : { ok: false, error: { code: 'NOT_FOUND', message: 'no such ticket' } };
+        },
+      },
+    ],
+  });
+  const registration: EnvironmentRegistration = {
+    id: LIVE_ID,
+    name: TICKET_DESK.name,
+    description: TICKET_DESK.description,
+    fixtures: TICKET_DESK.fixtures,
+    create: () => new LiveWorld(TICKET_DESK.create(), { resetTo: OPEN }),
+  };
+
+  async function closingSuite(): Promise<{ contract: EnvironmentContract; benchmark: Benchmark }> {
+    clearEnvironments();
+    registerEnvironment(registration);
+    const recorder = registration.create();
+    await recorder.reset();
+    const before = await recorder.getState();
+    await recorder.executeAction('close_ticket', { ticketId: 'T-1' });
+    const after = await recorder.getState();
+    const trace = fromActionLog([{ at: 0, action: 'close_ticket', args: { ticketId: 'T-1' }, changed: true }], {
+      environmentId: LIVE_ID,
+      id: 'trace_close',
+      name: 'close one ticket',
+      before,
+      after,
+    });
+    const draft = induceContract(registration.create(), trace, {
+      contractId: 'ec_close',
+      createdAt: '2026-09-14T00:00:00.000Z',
+      goal: 'Close the printer ticket',
+    }).contract;
+    const contract = applyReview(draft, {
+      confirmedRuleIds: [],
+      rejectedRuleIds: rulesAwaitingReview(draft).map((rule) => rule.id),
+    });
+    const fixture = { id: 'live', title: 'live', summary: 'snapshot', state: after, config: {}, request: { ticketId: 'T-1' } };
+    const { benchmark } = await generateBenchmark(registration.create(), contract, [fixture]);
+    return { contract, benchmark: happyOnly(benchmark) };
+  }
+
+  it('binds the identifier of the record the job changes, by equality', async () => {
+    const { contract } = await closingSuite();
+    expect(contract.focusScope).toBe('changed');
+    expect(contract.argumentBindings.map((b) => [b.field, b.param, b.mode])).toContainEqual(['ticketId', 'ticketId', 'equals']);
+    expect(contract.expectedDeltaCount).toBe(1);
+  });
+
+  it('passes closing the named ticket and fails closing its identical twin', async () => {
+    const { benchmark } = await closingSuite();
+    const close = (ticketId: string) => ({ tool: 'close_ticket', args: { ticketId } });
+    const agents: [string, AgentAdapter, 'PASS' | 'FAIL'][] = [
+      ['correct', scripted('correct', [close('T-1')]), 'PASS'],
+      ['correct, repeated (idempotent)', scripted('repeat', [close('T-1'), { tool: 'list_tickets' }, close('T-1')]), 'PASS'],
+      ['wrong twin', scripted('twin', [close('T-2')]), 'FAIL'],
+      ['both twins', scripted('both', [close('T-1'), close('T-2')]), 'FAIL'],
+      ['nothing', scripted('nothing', [], 'Closed it.'), 'FAIL'],
+    ];
+    for (const [name, agent, expected] of agents) {
+      clearEnvironments();
+      registerEnvironment(registration);
+      const [result] = (await runBenchmark(benchmark, [agent])).caseResults;
+      expect(result!.outcome, `${name}: ${result!.outcomeReason}`).toBe(expected);
+    }
+  });
+});
