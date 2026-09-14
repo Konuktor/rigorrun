@@ -150,10 +150,16 @@ gate('NO_NEW_REGRESSION', 'No serious new regression discovered',
   const goodFailed = cases.filter((c) => c.truth === 'KNOWN_GOOD' && c.actual === 'FAIL');
   const badPassed = cases.filter((c) => c.truth === 'KNOWN_BAD' && c.actual === 'PASS');
   const undecidedVerdicts = cases.filter((c) => ['UNDECIDABLE', 'NOT_FINISHED'].includes(c.truth) && (c.actual === 'PASS' || c.actual === 'FAIL'));
-  const notRun = cases.filter((c) => c.actual === 'NOT_RUN');
+  // A defined case with no record at all has not run either: every case in
+  // external/cases.json must appear in results-external.json with a run.
+  const definedPath = join(REMEDIATION, 'heldout', 'external', 'cases.json');
+  const defined = existsSync(definedPath) ? JSON.parse(readFileSync(definedPath, 'utf8')).map((c) => c.id) : [];
+  const recorded = new Set((external?.cases ?? []).map((c) => c.id));
+  const unrecorded = defined.filter((id) => !recorded.has(id)).map((id) => ({ id, set: 'external', actual: 'NOT_RUN' }));
+  const notRun = [...cases.filter((c) => c.actual === 'NOT_RUN'), ...unrecorded];
   const oracleDisagrees = cases.filter((c) => c.truthHeldByOracle === false);
   gate('HELDOUT', 'Held-out: no known-good case failed; no known-bad case passed; every case run',
-    Boolean(inprocess) && Boolean(external) && goodFailed.length === 0 && badPassed.length === 0 && undecidedVerdicts.length === 0 && notRun.length === 0,
+    Boolean(inprocess) && Boolean(external) && defined.length > 0 && goodFailed.length === 0 && badPassed.length === 0 && undecidedVerdicts.length === 0 && notRun.length === 0,
     { inProcess: inprocess?.totals ?? null, external: external?.totals ?? null,
       knownGoodFailed: goodFailed.map((c) => `${c.set}:${c.id}`), knownBadPassed: badPassed.map((c) => `${c.set}:${c.id}`),
       undecidableGivenAVerdict: undecidedVerdicts.map((c) => `${c.set}:${c.id}`), notRun: notRun.map((c) => `${c.set}:${c.id}`),

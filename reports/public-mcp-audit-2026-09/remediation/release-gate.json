@@ -221,39 +221,22 @@
     {
       "id": "TESTS_ORIGINAL",
       "title": "Original RigorRun tests: 100% pass",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "log": "remediation/evidence/final-test.log",
-        "passed": 0,
-        "total": 0,
+        "passed": 969,
+        "total": 969,
         "originalBaseline": 847
       }
     },
     {
       "id": "TESTS_NEW",
       "title": "New regression tests: 100% pass",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "files": 16,
         "missing": [],
-        "notInLog": [
-          "packages/connector/test/result.test.ts",
-          "packages/connector/test/rows.test.ts",
-          "packages/connector/test/environment.test.ts",
-          "packages/runner/test/baseline.test.ts",
-          "packages/runner/test/outcomes.test.ts",
-          "packages/runner/test/honesty.test.ts",
-          "packages/runner/test/expectedDelta.test.ts",
-          "packages/runner/test/retry.test.ts",
-          "packages/daemon/test/jsonInText.test.ts",
-          "packages/daemon/test/stepChange.test.ts",
-          "packages/daemon/test/budgets.test.ts",
-          "packages/daemon/test/suiteQualityOnRun.test.ts",
-          "packages/daemon/test/independentVerifier.test.ts",
-          "packages/cli/test/budgets.test.ts",
-          "packages/cli/test/setup.test.ts",
-          "packages/cli/test/verifyFlags.test.ts"
-        ]
+        "notInLog": []
       }
     },
     {
@@ -277,10 +260,10 @@
     {
       "id": "METRICS",
       "title": "Every prose metric matches after-results.json",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "check": "aggregate-after.mjs --check",
-        "output": "after-results.json is stale: regenerate with AFTER_RUN=after node remediation/scripts/aggregate-after.mjs"
+        "output": "after-results.json verified; 85 numbers checked in prose, 0 mismatches"
       }
     },
     {
@@ -291,6 +274,36 @@
         "file": "remediation/open-regressions.json",
         "present": true,
         "entries": [
+          {
+            "id": "P8",
+            "kind": "regression",
+            "serious": true,
+            "title": "An agent that does the job and also deletes another record of the same kind passed",
+            "summary": "Introduced by the P3 expected-delta checks, which covered creations and changes of the focus entity but not deletions. AFTER-1 (f4145bb) graded SQ-W1-06 and SQ-W1B-06 FALSE_NEGATIVE on all six attempts; the baseline had caught them only through R-1.",
+            "fix": "65bbaed: expectedDeletedCount observed from the demonstration and success__nothing_else_deleted generated",
+            "status": "RESOLVED",
+            "resolvedBy": {
+              "run": "AFTER-2",
+              "commit": "26d1e6a product sources (measured as 0abf8ef)",
+              "cases": {
+                "SQ-W1-06-forbidden-extra-delete": {
+                  "attempts": 3,
+                  "outcome": "TRUE_POSITIVE",
+                  "originalRule": "TRUE_POSITIVE"
+                },
+                "SQ-W1B-06-forbidden-extra-delete": {
+                  "attempts": 3,
+                  "outcome": "TRUE_POSITIVE",
+                  "originalRule": "TRUE_POSITIVE"
+                }
+              }
+            },
+            "evidence": [
+              "remediation/after-1-results.json",
+              "remediation/after-results.json",
+              "packages/runner/test/expectedDelta.test.ts"
+            ]
+          },
           {
             "id": "N-1",
             "kind": "newly_reachable_defect",
@@ -315,7 +328,7 @@
     {
       "id": "HELDOUT",
       "title": "Held-out: no known-good case failed; no known-bad case passed; every case run",
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": {
         "inProcess": {
           "cases": 23,
@@ -326,7 +339,19 @@
           "notFinishedGivenAVerdict": 0,
           "abstentions": 6
         },
-        "external": null,
+        "external": {
+          "cases": 7,
+          "run": 7,
+          "matchingExpected": 7,
+          "knownGoodIncorrectlyFailed": 0,
+          "knownBadIncorrectlyPassed": 0,
+          "falsePositivesAgainstOracle": 0,
+          "falseNegativesAgainstOracle": 0,
+          "abstentions": 0,
+          "timedOut": 1,
+          "oracleDisagreesWithTruthLabel": 0,
+          "faultNotAsIntended": 0
+        },
         "knownGoodFailed": [],
         "knownBadPassed": [],
         "undecidableGivenAVerdict": [],

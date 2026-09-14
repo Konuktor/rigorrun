@@ -83,13 +83,13 @@ R-8, Worktide: at the baseline both journeys were refused at compile. In AFTER-2
 ## Test suite
 
 - **BEFORE.** <!-- n:baseline.tests.passed -->847<!-- /n --> of <!-- n:baseline.tests.tests -->847<!-- /n --> tests passed in <!-- n:baseline.tests.files -->73<!-- /n --> files, at the audited commit (`../evidence/rigorrun-test-remediation-baseline.log`).
-- **AFTER.** The final full-suite run did not happen: the host never had the memory headroom for it. The last full run at the fixed product code is recorded in `progress.md` (P8), and it is not counted as the final run.
+- **AFTER.** <!-- n:TESTS.testsPassed -->969<!-- /n --> of <!-- n:TESTS.tests -->969<!-- /n --> tests passed in <!-- n:TESTS.filesPassed -->89<!-- /n --> of <!-- n:TESTS.files -->89<!-- /n --> files. Any failure recorded: <!-- n:TESTS.failed -->false<!-- /n -->. This was the full suite at the final commit (`evidence/final-test.log`).
 
 ## Held-out validation, reported separately
 
 Both sets were built after the fixes, their expectations committed before the first run, and neither is merged into the numbers above. P8 (`65bbaed`) changed product code after the in-process set's first run; a commit shown below that predates `65bbaed` means that set has not been re-run since.
 
-- **In-process set (commit <!-- n:HELDOUT.inprocess.rigorrunCommit -->f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1<!-- /n -->).**
+- **In-process set (commit <!-- n:HELDOUT.inprocess.rigorrunCommit -->d4ba04deff13c5f242a923ab789c8c391ae937be<!-- /n -->).**
   - <!-- n:HELDOUT.inprocess.matchingExpected -->23<!-- /n --> of <!-- n:HELDOUT.inprocess.cases -->23<!-- /n --> cases matched their expectation.
   - Known-good cases failed: <!-- n:HELDOUT.inprocess.knownGoodIncorrectlyFailed -->0<!-- /n -->. Known-bad cases passed: <!-- n:HELDOUT.inprocess.knownBadIncorrectlyPassed -->0<!-- /n -->.
   - Undecidable cases given a verdict: <!-- n:HELDOUT.inprocess.undecidableGivenAVerdict -->0<!-- /n -->. Unfinished cases given a verdict: <!-- n:HELDOUT.inprocess.notFinishedGivenAVerdict -->0<!-- /n -->.

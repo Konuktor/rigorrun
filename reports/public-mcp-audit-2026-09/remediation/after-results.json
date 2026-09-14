@@ -524,7 +524,7 @@
   },
   "HELDOUT": {
     "inprocess": {
-      "rigorrunCommit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
+      "rigorrunCommit": "d4ba04deff13c5f242a923ab789c8c391ae937be",
       "cases": 23,
       "matchingExpected": 23,
       "knownGoodIncorrectlyFailed": 0,
@@ -548,7 +548,14 @@
       "faultNotAsIntended": 0
     }
   },
-  "TESTS": null,
+  "TESTS": {
+    "log": "remediation/evidence/final-test.log",
+    "filesPassed": 89,
+    "files": 89,
+    "testsPassed": 969,
+    "tests": 969,
+    "failed": false
+  },
   "JOURNEYS": {
     "sqlite-mcp/w1": {
       "target": "sqlite-mcp",
