@@ -10,7 +10,7 @@
  *   `derived.refunds[amount>50 & approvalStatus!=approved]`   compound filter
  *
  * Filter values are parsed as `true`, `false`, `null`, a number, a JSON-quoted
- * string (`[subject="Audit 17"]`, which may contain `&`, `]` and spaces), or
+ * string (`[subject="Plan [v2] & notes"]`, which may contain `&`, `]` and spaces), or
  * otherwise a bare string. `~=` tests that a string contains the value, or
  * that a list holds it. After a filter, a following property applies to the
  * first match (`.length`/`.count` still apply to the whole match list) — that
