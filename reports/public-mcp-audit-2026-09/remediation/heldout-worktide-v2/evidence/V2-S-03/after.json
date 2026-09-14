@@ -1,0 +1,138 @@
+{
+  "db_active_timer_count": 0,
+  "db_dependency_count": 4,
+  "db_tasks": [
+    [
+      "AUD-1",
+      "Write the audit plan"
+    ],
+    [
+      "AUD-2",
+      "Collect the evidence"
+    ],
+    [
+      "AUD-3",
+      "Publish the report"
+    ]
+  ],
+  "db_time_entry_count": 12,
+  "oracle": "worktide-rest+mysql",
+  "project": {
+    "exists": true,
+    "isArchived": null,
+    "key": "AUD"
+  },
+  "projects": [
+    "AUD",
+    "KA",
+    "PORT",
+    "WIKI",
+    "WORK"
+  ],
+  "running_timers": 0,
+  "task_count": 3,
+  "tasks": [
+    {
+      "assignees": [],
+      "dueOn": null,
+      "identifier": "AUD-1",
+      "isCompleted": null,
+      "priority": "normal",
+      "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+      "title": "Write the audit plan"
+    },
+    {
+      "assignees": [],
+      "dueOn": null,
+      "identifier": "AUD-2",
+      "isCompleted": null,
+      "priority": "normal",
+      "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+      "title": "Collect the evidence"
+    },
+    {
+      "assignees": [],
+      "dueOn": null,
+      "identifier": "AUD-3",
+      "isCompleted": null,
+      "priority": "normal",
+      "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+      "title": "Publish the report"
+    }
+  ],
+  "time_entries": [
+    {
+      "durationMinutes": 1,
+      "isBillable": null,
+      "note": "side channel",
+      "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+    },
+    {
+      "durationMinutes": 60,
+      "isBillable": null,
+      "note": "Arbeit an: MVP Skeleton aufsetzen",
+      "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+    },
+    {
+      "durationMinutes": 75,
+      "isBillable": null,
+      "note": "Arbeit an: MVP Skeleton aufsetzen",
+      "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+    },
+    {
+      "durationMinutes": 90,
+      "isBillable": null,
+      "note": "Arbeit an: MVP Skeleton aufsetzen",
+      "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+    },
+    {
+      "durationMinutes": 105,
+      "isBillable": null,
+      "note": "Arbeit an: Login-Form bauen",
+      "task": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7"
+    },
+    {
+      "durationMinutes": 120,
+      "isBillable": null,
+      "note": "Arbeit an: Login-Form bauen",
+      "task": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7"
+    },
+    {
+      "durationMinutes": 90,
+      "isBillable": null,
+      "note": "Arbeit an: Login-Form bauen",
+      "task": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7"
+    },
+    {
+      "durationMinutes": 120,
+      "isBillable": null,
+      "note": "Arbeit an: Time-Tracker UI prototypen",
+      "task": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+    },
+    {
+      "durationMinutes": 135,
+      "isBillable": null,
+      "note": "Arbeit an: Time-Tracker UI prototypen",
+      "task": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+    },
+    {
+      "durationMinutes": 150,
+      "isBillable": null,
+      "note": "Arbeit an: Time-Tracker UI prototypen",
+      "task": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+    },
+    {
+      "durationMinutes": 0,
+      "isBillable": null,
+      "note": "audit timer",
+      "task": null
+    },
+    {
+      "durationMinutes": 1,
+      "isBillable": null,
+      "note": "Ledger check",
+      "task": null
+    }
+  ],
+  "time_entry_count": 12
+}

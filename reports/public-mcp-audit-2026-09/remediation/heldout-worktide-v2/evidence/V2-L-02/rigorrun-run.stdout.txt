@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_cddda5606736",
+  "benchmarkId": "bm_ec_p_101a63d9bca2",
+  "benchmarkName": "Start a timer described 'Desk review', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running. — private benchmark",
+  "benchmarkHash": "sha256:5f2aebc28e66dbfd198df9ad362e1eccc811750f5c1f702d5d0a997911eb768e",
+  "contractHash": "sha256:7b809645ce303d40a5a59a0d9edb30c088e83ff215f0e8e69cee248e3427f957",
+  "environment": "p_101a63d9bca2",
+  "startedAt": "2026-09-14T16:32:42.341Z",
+  "finishedAt": "2026-09-14T16:32:43.492Z",
+  "agents": [
+    {
+      "id": "a_7e1c1bd8",
+      "name": "v2-side-entry-work1",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_cddda5606736",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_7e1c1bd8",
+      "correlationId": "run_cddda5606736.a_7e1c1bd8.case_live__happy_path",
+      "startedAt": "2026-09-14T16:32:42.341Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "SELF_REPORTED",
+      "budgetMs": 180000,
+      "finishedAt": "2026-09-14T16:32:43.190Z",
+      "durationMs": 848.507,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789403562794,
+          "tool": "time.runningTimer",
+          "args": {},
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"running\": false\n}"
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "at": 1789403563187,
+          "tool": "time.runningTimer",
+          "args": {},
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"running\": false\n}"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": "time.runningTimer",
+          "at": 1,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "time.runningTimer",
+          "at": 2,
+          "payload": {},
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [
+            {
+              "billableMinutes": 226,
+              "billedMinutes": 0,
+              "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+              "label": "Sven Wappler",
+              "minutes": 226,
+              "seed__billableMinutes": 225,
+              "seed__billedMinutes": 0,
+              "seed__key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+              "seed__minutes": 225,
+              "cmp__billableMinutes__minus__billedMinutes": 226,
+              "cmp__billableMinutes__minus__minutes": 0,
+              "cmp__billedMinutes__minus__minutes": -226
+            }
+          ],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Group is present"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Group record(s) changed, as demonstrated — no more",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 1,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Group record deleted — the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_created",
+          "kind": "state_equals",
+          "description": "no Group record created — the demonstration created none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__as_demonstrated__1",
+          "kind": "state_change",
+          "description": "the Group the job changed goes billableMinutes 225 → 226 (+1), as demonstrated",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 226,
+          "expected": {
+            "seed": "derived.seed.Group[key=01a09c3a-5be3-7cb2-89d8-597c14e4799d]",
+            "field": "billableMinutes",
+            "from": 225,
+            "to": 226,
+            "compare": "quantity"
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "billableMinutes 225 → 226 (+1), as demonstrated"
+        },
+        {
+          "assertionId": "success__as_demonstrated__2",
+          "kind": "state_change",
+          "description": "the Group the job changed goes minutes 225 → 226 (+1), as demonstrated",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 226,
+          "expected": {
+            "seed": "derived.seed.Group[key=01a09c3a-5be3-7cb2-89d8-597c14e4799d]",
+            "field": "minutes",
+            "from": 225,
+            "to": 226,
+            "compare": "quantity"
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "minutes 225 → 226 (+1), as demonstrated"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "PASS",
+      "outcomeReason": "every applicable check passed on observed state",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "initialStateHash": "sha256:87a033486bdbc5f8053f0e65beb02c439f2c59a91d2af11739dfd71895b989b7",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Started the timer, let it run a minute, stopped it: one time entry.",
+      "finalStateHash": "sha256:57a39aa1d9a4f83d6be1cd684fefb850cd8a296b23152a6d9771adbbc29093b3",
+      "finalStateSummary": {
+        "Group": {
+          "count": 2,
+          "rows": [
+            {
+              "key": "01a09c3a-5d41-74fc-b582-5d0aa0c5ce59",
+              "label": "Alex Becker",
+              "minutes": 720,
+              "billableMinutes": 720,
+              "billedMinutes": 0
+            },
+            {
+              "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+              "label": "Sven Wappler",
+              "minutes": 226,
+              "billableMinutes": 226,
+              "billedMinutes": 0
+            }
+          ]
+        },
+        "Record1": {
+          "count": 1,
+          "rows": [
+            {
+              "from": "2026-09-01T00:00:00+02:00",
+              "to": "2026-09-30T00:00:00+02:00",
+              "groupBy": "user",
+              "totalMinutes": 946,
+              "billableMinutes": 946,
+              "billedMinutes": 0
+            }
+          ]
+        },
+        "Record4": {
+          "count": 0,
+          "rows": []
+        },
+        "Record5": {
+          "count": 0,
+          "rows": []
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": "01a09c48-96db-7179-93b5-9de4616ac34e",
+              "identifier": "AUD-2",
+              "title": "Collect the evidence",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:58+02:00",
+              "updatedAt": "2026-09-13T21:39:58+02:00"
+            },
+            {
+              "id": "01a09c48-97a6-7202-b2de-e76be5553721",
+              "identifier": "AUD-3",
+              "title": "Publish the report",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:58+02:00",
+              "updatedAt": "2026-09-13T21:39:58+02:00"
+            },
+            {
+              "id": "01a09c48-960d-7a2b-9cb4-63b84ba76c74",
+              "identifier": "AUD-1",
+              "title": "Write the audit plan",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:57+02:00",
+              "updatedAt": "2026-09-13T21:39:57+02:00"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_7e1c1bd8",
+      "agentName": "v2-side-entry-work1",
+      "n": 1,
+      "taskSuccessRate": 1,
+      "taskSuccessInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 848.507,
+      "medianLatencyMs": 848.507,
+      "p95LatencyMs": 848.507,
+      "avgSteps": 2,
+      "passAtK": {
+        "pass@1": 1
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": true,
+      "failedThresholds": []
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": "a_7e1c1bd8",
+    "outcome": "PASS",
+    "summary": "v2-side-entry-work1 wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 decided cases.",
+    "rationale": [
+      "v2-side-entry-work1 meets the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 20.6%–100.0%; a larger benchmark would narrow it.",
+      "Suite quality: the reference implementation fails 100% of cases, so a correct agent can be failed."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": true,
+    "mutantKillRate": 1,
+    "independentKillRate": 1,
+    "falsePositiveRate": 1,
+    "replayStable": true,
+    "hiddenAnswerIsolated": true,
+    "deadRules": 0,
+    "warnings": [
+      "the reference implementation fails 100% of cases, so a correct agent can be failed"
+    ]
+  },
+  "resultHash": "sha256:4dd74ba59c82fbc8c61310331ada02549c9b49b65abc64d780fbf5f03eed8730",
+  "rigorrunVersion": "0.1.0"
+}
+
+Against the baseline  Nothing changed across 1 case(s).
+
+--- stderr ---
