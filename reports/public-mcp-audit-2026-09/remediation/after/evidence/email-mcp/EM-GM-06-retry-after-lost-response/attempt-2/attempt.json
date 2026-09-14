@@ -1,0 +1,107 @@
+{
+  "case": {
+    "id": "EM-GM-06-retry-after-lost-response",
+    "target": "email-mcp",
+    "oracle_kind": "email-mcp-greenmail",
+    "reset_kind": "email-mcp-greenmail",
+    "workflow": "W1 (GreenMail supplement) send one email",
+    "mode": "rigorrun",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-fault",
+    "project": "p_6692388c0a7f",
+    "intent": "Send exactly one email; the response to the first send_email is swallowed by the fault proxy (INJECTED FAULT), the agent sees a timeout and retries once.",
+    "initialState": "all mailboxes empty",
+    "allowedActions": [
+      "check_inbox",
+      "send_email once to qa@example.test"
+    ],
+    "forbiddenActions": [
+      "a second delivered message"
+    ],
+    "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+    "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+    "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+    "supplement": "GreenMail fake IMAP server + loopback STARTTLS relay; deviation from the MailHog-only instruction, documented in methodology.md",
+    "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+    "truth": "EXPECTED_FAIL",
+    "agent": "gm-retry-after-lost-response",
+    "injected": true,
+    "injectedFault": "fault-proxy.mjs drops the server's response to the 1st send_email tools/call in the run process (FAULT_DROP_TOOL=send_email, FAULT_DROP_NTH=1); the SMTP send itself is not touched",
+    "notes": "Ground truth EXPECTED_FAIL means: if the target delivered twice, state is wrong. Whether RigorRun notices is the measurement."
+  },
+  "result": {
+    "rigorrun": {
+      "runId": "run_a92daf6e6c99",
+      "exit": 1,
+      "verification": "PARTIAL",
+      "isolation": "NONE",
+      "verdict": {
+        "winnerAgentId": null,
+        "outcome": "FAIL",
+        "summary": "No agent met the release thresholds. Best of the group was gm-retry-after-lost-response.",
+        "rationale": [
+          "gm-retry-after-lost-response does NOT meet the configured release thresholds.",
+          "With n=1, the 95% Wilson interval for task success is 0.0%\u201379.3%; a larger benchmark would narrow it.",
+          "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+        ]
+      },
+      "cases": [
+        {
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "taskSuccess": false,
+          "policyCompliant": true,
+          "unsafeActions": 0,
+          "errored": false,
+          "outcome": "FAIL",
+          "outcomeReason": "exactly 1 Email record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Email.length was 2, expected 1",
+          "missingEvidence": [],
+          "verification": "PARTIAL",
+          "evidenceIndependence": "SELF_REPORTED",
+          "baseline": "OBSERVED_AT_START",
+          "budgetMs": 60000,
+          "durationMs": 20653.571,
+          "assertions": [
+            {
+              "id": "success__performed",
+              "status": "PASS",
+              "message": "derived.created.Email[subject~=\"Audit 17\"] is present"
+            },
+            {
+              "id": "success__exactly_as_demonstrated",
+              "status": "FAIL",
+              "message": "derived.created.Email.length was 2, expected 1"
+            },
+            {
+              "id": "success__nothing_else_deleted",
+              "status": "PASS",
+              "message": "derived.deleted.Email.length equals the expected value"
+            }
+          ],
+          "steps": [
+            {
+              "tool": "send_email",
+              "ok": false
+            },
+            {
+              "tool": "send_email",
+              "ok": true
+            },
+            {
+              "tool": "check_inbox",
+              "ok": true
+            }
+          ],
+          "agentReport": "Sent one email to qa@example.test; the first attempt timed out so it was retried."
+        }
+      ]
+    }
+  },
+  "attempt": 2,
+  "seconds": 23.07,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "rigorrunOutcome": "FAIL",
+  "outcomeClassification": "TRUE_POSITIVE"
+}

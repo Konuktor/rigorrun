@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_f5f16484bea8",
+  "benchmarkId": "bm_ec_p_fe0a307657bc",
+  "benchmarkName": "Insert exactly one new task titled Vendor audit with status open, amount 12.25 and owner dee into the tasks table. — private benchmark",
+  "benchmarkHash": "sha256:3edc495b7519d10fe4009de536aa91d63dec01c01b3805c8f91ad50f6ddf416d",
+  "contractHash": "sha256:2b0affcc5d096f257f9e01fecf18a782cbbb0e0345760bdff7b4f2e45dd9795c",
+  "environment": "p_fe0a307657bc",
+  "startedAt": "2026-09-14T10:30:34.389Z",
+  "finishedAt": "2026-09-14T10:30:34.461Z",
+  "agents": [
+    {
+      "id": "a_b0c13467",
+      "name": "ho-sq-wrong-entity",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_f5f16484bea8",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_b0c13467",
+      "correlationId": "run_f5f16484bea8.a_b0c13467.case_live__happy_path",
+      "startedAt": "2026-09-14T10:30:34.390Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "SELF_REPORTED",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-14T10:30:34.450Z",
+      "durationMs": 59.968,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789381834448,
+          "tool": "execute",
+          "args": {
+            "query": "INSERT INTO audit_log (task_id, action, note) VALUES (2, 'Vendor audit', 'open 12.25 dee')"
+          },
+          "ok": true,
+          "result": {
+            "rows": [],
+            "rows_changed": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "execute",
+          "at": 1,
+          "payload": {
+            "query": "INSERT INTO audit_log (task_id, action, note) VALUES (2, 'Vendor audit', 'open 12.25 dee')"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Row[amount=12.25 & owner=dee & status=open & title=\"Vendor audit\"] is absent but was required"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Row record(s) created, as demonstrated — no more",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Row.length was 0, expected 1"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Row record deleted — the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Row.length equals the expected value"
+        }
+      ],
+      "taskSuccess": false,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "FAIL",
+      "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=12.25 & owner=dee & status=open & title=\"Vendor audit\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "initialStateHash": "sha256:702ced4485be489a8e25a0485be3c762975a41f09c598f074d8657a1904c6bf1",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Inserted one task Vendor audit.",
+      "finalStateHash": "sha256:e7f11dafde4734f98293bafe632ca429a22abbc59e33470fa8a9a888ff472936",
+      "finalStateSummary": {
+        "Row": {
+          "count": 3,
+          "rows": [
+            {
+              "amount": 120.5,
+              "id": 1,
+              "owner": "ada",
+              "status": "open",
+              "title": "Prepare invoice"
+            },
+            {
+              "amount": 80,
+              "id": 2,
+              "owner": "bo",
+              "status": "open",
+              "title": "Review contract"
+            },
+            {
+              "amount": 0,
+              "id": 3,
+              "owner": "ada",
+              "status": "done",
+              "title": "Archive old files"
+            }
+          ]
+        },
+        "Row2": {
+          "count": 2,
+          "rows": [
+            {
+              "action": "completed",
+              "id": 1,
+              "note": "seed",
+              "task_id": 3
+            },
+            {
+              "action": "Vendor audit",
+              "id": 2,
+              "note": "open 12.25 dee",
+              "task_id": 2
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_b0c13467",
+      "agentName": "ho-sq-wrong-entity",
+      "n": 1,
+      "taskSuccessRate": 0,
+      "taskSuccessInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 59.968,
+      "medianLatencyMs": 59.968,
+      "p95LatencyMs": 59.968,
+      "avgSteps": 1,
+      "passAtK": {
+        "pass@1": 0
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": false,
+      "failedThresholds": [
+        "task success 0.0% < required 95.0%"
+      ]
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": null,
+    "outcome": "FAIL",
+    "summary": "No agent met the release thresholds. Best of the group was ho-sq-wrong-entity.",
+    "rationale": [
+      "ho-sq-wrong-entity does NOT meet the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 0.0%–79.3%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": false,
+    "mutantKillRate": null,
+    "independentKillRate": null,
+    "falsePositiveRate": null,
+    "replayStable": null,
+    "hiddenAnswerIsolated": null,
+    "deadRules": 0,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "resultHash": "sha256:374b4d6b3c73af5758318ae9cbf8161d3371151c3444ef6ebae3a35cb69aa9fd",
+  "rigorrunVersion": "0.1.0"
+}
+
+Against the baseline  1 case regressed: The job as demonstrated — the job is no longer done.
+  regressed The job as demonstrated — the job is no longer done
+
+--- stderr ---
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"

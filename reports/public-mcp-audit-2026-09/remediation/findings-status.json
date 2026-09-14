@@ -1,0 +1,124 @@
+{
+  "R-1": {
+    "title": "Stale generation-time baseline for connectors that cannot seed",
+    "status": "FIXED",
+    "fix": "The runner observes the world at case start when the connector cannot seed, records baseline OBSERVED_AT_START and the initial state hash, and projects against that. Compile observes the demonstrated delta: argument-to-field bindings, the created or changed count, and a changed record's identifier. The generator emits a value-filtered success__performed check and a success__exactly_as_demonstrated count check. After AFTER-1 showed that an agent doing the job and also deleting another record passed, deletions of the focus entity are held to the demonstration as well (P8).",
+    "commits": [
+      "33a153a",
+      "42ba272",
+      "481f876",
+      "14a75f7",
+      "65bbaed"
+    ],
+    "tests": [
+      "packages/runner/test/baseline.test.ts",
+      "packages/runner/test/honesty.test.ts",
+      "packages/runner/test/expectedDelta.test.ts",
+      "packages/verifier/test/path.test.ts",
+      "packages/compiler/test/induce.test.ts"
+    ],
+    "reproduction": "remediation/repro: holds at 07dda8c, absent after",
+    "rerunEvidence": "AFTER-1 (f4145bb): 0 of the 11 R-1 cases reproduce under either rule. AFTER-2 (26d1e6a product sources): 0 reproductions among the R-1 cases that ran; see R1_CASES_RUN and R1_REPRODUCTIONS in after-results.json. Correct agents now pass against a world observed at case start, and duplicates, wrong values, wrong entities and extra deletions fail.",
+    "regressionFoundAndFixed": "AFTER-1: SQ-W1-06 and SQ-W1B-06 (extra delete) TRUE_POSITIVE at the baseline only through R-1, FALSE_NEGATIVE at f4145bb; fixed by 65bbaed and re-measured in AFTER-2",
+    "limits": "Changes to other records and the identity of a demonstrated deletion are not checked; only the focus entity is held to the demonstrated delta."
+  },
+  "R-2": {
+    "title": "No independent oracle",
+    "status": "FIXED",
+    "fix": "MCP and OpenAPI connectors accept a verifier connection. Its tools are exposed only to verification as verifier:<tool>, never offered to the agent, and every case reports evidenceIndependence INDEPENDENT, SELF_REPORTED or NONE.",
+    "commits": [
+      "aa5161e"
+    ],
+    "tests": [
+      "packages/daemon/test/independentVerifier.test.ts"
+    ],
+    "reproduction": "remediation/repro/cli.repro.test.ts (a verifier on an MCP connector was silently dropped at 07dda8c)",
+    "limits": "A capability, not a change to the frozen benchmark: the re-run keeps the audit's single-connector specs, so every re-run verdict is labelled SELF_REPORTED."
+  },
+  "R-3": {
+    "title": "Column-cell result shapes induce a value-keyed entity",
+    "status": "FIXED",
+    "fix": "canonicalisePayload unwraps exact {kind|type, value} tagged scalars and keeps a wrapped list entry under its list's name; induced entity names are deduplicated; ties in identifier choice prefer whole numbers and whitespace-free strings.",
+    "commits": [
+      "3692079"
+    ],
+    "tests": [
+      "packages/connector/test/rows.test.ts",
+      "packages/connector/test/result.test.ts",
+      "packages/mcp/test/induce.test.ts"
+    ],
+    "rerunEvidence": "sqlite W1/W1b induce Row keyed by id (baseline: Id keyed by value) with value-bound checks. In AFTER-2 every SQ-W1-* and SQ-W1B-* case matches the oracle on every attempt: correct agents TRUE_NEGATIVE, missing action, duplicate, wrong value, wrong entity and extra delete TRUE_POSITIVE. The audit specs disable the quality check for sqlite, so no kill-rate figure exists for these suites."
+  },
+  "R-4": {
+    "title": "15 s case budget below the 20 s tool timeout; timeouts indistinguishable from failures",
+    "status": "FIXED",
+    "fix": "Outcome classes PASS, FAIL, ABSTAIN, TIMED_OUT, AGENT_FAILURE, HARNESS_FAILURE; typed agent timeout; project budgets toolCallMs 20000 and caseMs 60000 validated so caseMs >= toolCallMs + 5000; --case-timeout; the agent process timeout is derived from the case budget.",
+    "commits": [
+      "33a153a",
+      "ab6f3ed"
+    ],
+    "tests": [
+      "packages/runner/test/outcomes.test.ts",
+      "packages/runner/test/retry.test.ts",
+      "packages/daemon/test/budgets.test.ts",
+      "packages/cli/test/budgets.test.ts"
+    ],
+    "rerunEvidence": "EM-GM-06 (injected lost response) now reaches the retry inside the 60 s budget and is TRUE_POSITIVE on every attempt in AFTER-1 and AFTER-2 (baseline: the 15 s budget killed it before the retry; FALSE_POSITIVE). Timeouts are reported as TIMED_OUT, never as a verification FAIL: EM-LLM-01 and SQ-LLM-01 in AFTER-1.",
+    "limits": "A slow agent that does the job but exceeds the budget is TIMED_OUT, not PASS (SQ-LLM-01 in AFTER-1); the original scoring rule counts that as a false positive."
+  },
+  "R-5": {
+    "title": "Instruction from the tool description; a dual-purpose tool's last call becomes the primary action",
+    "status": "FIXED",
+    "fix": "The demonstration records whether each non-read-only call changed the nominated reads; the primary action and its arguments come from the last call that changed state; the project goal is the contract goal.",
+    "commits": [
+      "481f876"
+    ],
+    "tests": [
+      "packages/daemon/test/stepChange.test.ts",
+      "packages/compiler/test/induce.test.ts"
+    ],
+    "rerunEvidence": "sqlite W1 contract: goal is the project goal (baseline: the execute tool's doc comment); case inputs are the INSERT (baseline: SELECT * FROM tasks ORDER BY id). Home: tmp/rigorrun-audit/after-homes/home-sqlite-w1, trace remediation/after/traces/sqlite-mcp/w1-setup Same in AFTER-2."
+  },
+  "R-6": {
+    "title": "No headless project setup",
+    "status": "FIXED",
+    "fix": "rigorrun setup <spec.json> drives connect, reads, demonstration, schema answers, compile, rules, suite, optional quality check and agents in-process; credentials come from environment variables the spec names.",
+    "commits": [
+      "c574688"
+    ],
+    "tests": [
+      "packages/cli/test/setup.test.ts"
+    ],
+    "reproduction": "remediation/repro/cli.repro.test.ts",
+    "rerunEvidence": "the external held-out sqlite and GreenMail projects are created with rigorrun setup; docs/V1_GAP_AUDIT.md lists it as WORKING"
+  },
+  "R-7": {
+    "title": "verify --needs-credential documented but not wired",
+    "status": "PARTIAL",
+    "fix": "The repeatable flag is parsed and reaches the planner as NEEDS_CREDENTIAL.",
+    "commits": [
+      "c574688"
+    ],
+    "tests": [
+      "packages/cli/test/verifyFlags.test.ts"
+    ],
+    "reproduction": "remediation/repro/cli.repro.test.ts",
+    "unresolved": "The verify sandbox image is still Node-only, so Python, Rust and unpublished servers such as the three audited targets still cannot go through verify."
+  },
+  "R-8": {
+    "title": "JSON-in-text passes the read probe but yields no records at demonstration",
+    "status": "FIXED",
+    "fix": "One normalizeCallResult (structured, json_text, text, empty, error) used by the probe, demonstration capture, compile inputs and runtime reads; JSON text is data only with an object or array top level; prose at run time is missing evidence, never an empty world.",
+    "commits": [
+      "3692079",
+      "3db42f9"
+    ],
+    "tests": [
+      "packages/connector/test/result.test.ts",
+      "packages/daemon/test/jsonInText.test.ts",
+      "packages/connector/test/environment.test.ts"
+    ],
+    "rerunEvidence": "Worktide W2 and W3 compile and build suites in AFTER-1 and AFTER-2 (baseline: both refused at compile with \"returned text rather than structured records\").",
+    "openAfterFix": "N-1 (open-regressions.json): the newly built Worktide suites key a time-report group by its minutes value and fail their own quality check (false_positive_rate 1). The normalisation defect is fixed; verdicts on Worktide through these suites are not trustworthy."
+  }
+}

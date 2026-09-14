@@ -1,0 +1,14 @@
+2026-09-14T09:34:50Z batch r2-3 at 0abf8ef5bb5466ff4bba75156836e3cd628a7841: WT-D-01-tasks-get-doubled-prefix WT-D-02-tasks-update-doubled-prefix WT-D-03-tasks-complete-doubled-prefix WT-D-04-projects-get-archive-doubled-prefix
+WT-D-01-tasks-get-doubled-prefix attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.37s)
+WT-D-01-tasks-get-doubled-prefix attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.32s)
+WT-D-01-tasks-get-doubled-prefix attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.37s)
+WT-D-02-tasks-update-doubled-prefix attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.37s)
+WT-D-02-tasks-update-doubled-prefix attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.3s)
+WT-D-02-tasks-update-doubled-prefix attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.29s)
+WT-D-03-tasks-complete-doubled-prefix attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.43s)
+WT-D-03-tasks-complete-doubled-prefix attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.38s)
+WT-D-03-tasks-complete-doubled-prefix attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.37s)
+WT-D-04-projects-get-archive-doubled-prefix attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.5s)
+WT-D-04-projects-get-archive-doubled-prefix attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.38s)
+WT-D-04-projects-get-archive-doubled-prefix attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.43s)
+2026-09-14T09:40:05Z batch r2-3 exit 0

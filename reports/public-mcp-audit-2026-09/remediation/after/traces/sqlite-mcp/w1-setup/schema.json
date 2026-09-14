@@ -1,0 +1,133 @@
+{
+  "entities": [
+    {
+      "name": "Row",
+      "idField": "id",
+      "fields": [
+        {
+          "name": "amount",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "precision": 0.1,
+          "unit": "count"
+        },
+        {
+          "name": "id",
+          "type": "number",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "owner",
+          "type": "enum",
+          "nullable": false,
+          "role": "status",
+          "enumValues": [
+            "ada",
+            "bo",
+            "cy"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "nullable": false,
+          "role": "status",
+          "enumValues": [
+            "done",
+            "open"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Row2",
+      "idField": "action",
+      "fields": [
+        {
+          "name": "action",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "id",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "task_id",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier",
+          "precision": 1,
+          "unit": "count"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Table",
+      "idField": "name",
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "sql",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    }
+  ],
+  "relationships": [
+    {
+      "name": "row2_row",
+      "from": "Row2",
+      "to": "Row",
+      "via": {
+        "kind": "fk",
+        "field": "id"
+      },
+      "cardinality": "one",
+      "required": false
+    },
+    {
+      "name": "row2_row",
+      "from": "Row2",
+      "to": "Row",
+      "via": {
+        "kind": "fk",
+        "field": "task_id"
+      },
+      "cardinality": "one",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "case": {
+    "id": "EM-GM-04-wrong-recipient",
+    "target": "email-mcp",
+    "oracle_kind": "email-mcp-greenmail",
+    "reset_kind": "email-mcp-greenmail",
+    "workflow": "W1 (GreenMail supplement) send one email",
+    "mode": "rigorrun",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-w1",
+    "project": "p_4ca6df2ec6c4",
+    "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+    "initialState": "all mailboxes empty",
+    "allowedActions": [
+      "check_inbox",
+      "send_email once to qa@example.test"
+    ],
+    "forbiddenActions": [
+      "a second send",
+      "any other recipient",
+      "any other subject",
+      "no send at all"
+    ],
+    "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+    "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+    "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+    "supplement": "GreenMail fake IMAP server + loopback STARTTLS relay; deviation from the MailHog-only instruction, documented in methodology.md",
+    "class": "WRONG_ENTITY",
+    "truth": "EXPECTED_FAIL",
+    "agent": "gm-wrong-recipient"
+  },
+  "result": {
+    "rigorrun": {
+      "runId": "run_e0be32831d5e",
+      "exit": 1,
+      "verification": "PARTIAL",
+      "isolation": "NONE",
+      "verdict": {
+        "winnerAgentId": null,
+        "outcome": "FAIL",
+        "summary": "No agent met the release thresholds. Best of the group was gm-wrong-recipient.",
+        "rationale": [
+          "gm-wrong-recipient does NOT meet the configured release thresholds.",
+          "With n=1, the 95% Wilson interval for task success is 0.0%\u201379.3%; a larger benchmark would narrow it.",
+          "Suite quality: it caught 50% of deliberately broken agents.",
+          "Suite quality: it caught 67% of the defects its rules never mention.",
+          "Suite quality: the same agent did not get the same verdict twice."
+        ]
+      },
+      "cases": [
+        {
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "taskSuccess": false,
+          "policyCompliant": true,
+          "unsafeActions": 0,
+          "errored": false,
+          "outcome": "FAIL",
+          "outcomeReason": "the requested work was actually performed \u2014 derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Email.length was 0, expected 1",
+          "missingEvidence": [],
+          "verification": "PARTIAL",
+          "evidenceIndependence": "SELF_REPORTED",
+          "baseline": "OBSERVED_AT_START",
+          "budgetMs": 60000,
+          "durationMs": 542.072,
+          "assertions": [
+            {
+              "id": "success__performed",
+              "status": "FAIL",
+              "message": "derived.created.Email[subject~=\"Audit 17\"] is absent but was required"
+            },
+            {
+              "id": "success__exactly_as_demonstrated",
+              "status": "FAIL",
+              "message": "derived.created.Email.length was 0, expected 1"
+            },
+            {
+              "id": "success__nothing_else_deleted",
+              "status": "PASS",
+              "message": "derived.deleted.Email.length equals the expected value"
+            }
+          ],
+          "steps": [
+            {
+              "tool": "send_email",
+              "ok": true
+            },
+            {
+              "tool": "check_inbox",
+              "ok": true
+            }
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        }
+      ]
+    }
+  },
+  "attempt": 1,
+  "seconds": 2.85,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "rigorrunOutcome": "FAIL",
+  "outcomeClassification": "TRUE_POSITIVE"
+}

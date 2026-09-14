@@ -140,3 +140,9 @@ Entries are appended, never rewritten. Corrections are added as new lines under 
 - **AFTER-2 RESUME, 09:32–09:51Z:** batches `r2-1`…`r2-5` ran every remaining case that uses no local model. That was 46 cases and 138 attempts, every one completed, so AFTER-2 then had 55 cases and 144 attempts recorded. `SQ-W1-06` and `SQ-W1B-06` are TRUE_POSITIVE on all six attempts. `SQ-W1-01` and `SQ-W1B-01` (correct) are TRUE_NEGATIVE on all six.
 - **LOCAL-MODEL CASES HELD FOR MEMORY (09:53Z):** `EM-LLM-01` was not started: available memory was 1.4–2.1 GB against a 5 GB threshold after a 120 s wait (`after/logs/run-cases-after.r2-6.log`). The thresholds are now per model, set from what AFTER-1 observed and not from any result. `qwen2.5:3b` loaded 100% on the 4 GB GPU, so its host-memory need is small, and its two cases (`EM-LLM-01`, `SQ-LLM-02`) need 3 GB available. `llama3.1:8b` ran 43% on the CPU, so `SQ-LLM-01` keeps 5 GB. `SQ-LLM-02` is one of the 11 R-1 cases; if it cannot run, the R-1 gate cannot pass.
 - **LOCAL-MODEL CASES STILL HELD (10:00Z, 10:07Z):** `SQ-LLM-02` did not start in two 360 s waits. Available memory fell from 1.4 GB to 1.1 GB against its 3 GB threshold (`after/logs/run-cases-after.r2-7.log`, `r2-8.log`). Nothing was forced.
+- **HOST MEMORY, 10:00–10:46Z:** available memory stayed between 0.5 and 1.8 GB. The desktop browser's resident memory grew to about 16 GB; it was not touched. Each piece of held work now starts only behind a check, in this order:
+  - **1.5 GB steady:** the final full test suite (two workers), the external held-out pieces, the in-process held-out re-run.
+  - **3 GB:** `SQ-LLM-02`, then `EM-LLM-01`.
+  - **5 GB:** `SQ-LLM-01`.
+
+  External held-out at the final product commit: `EH-SQ-01`…`EH-SQ-07` ran at 10:29–10:32Z (7 of 7 as expected). `EH-EM-*` did not start at 10:37Z or 10:46Z.

@@ -1,0 +1,19 @@
+{"at":"2026-09-14T10:30:36.487Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":1,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.491Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":2,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.499Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":3,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.500Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":4,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.552Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:36.552Z","pid":1434005,"mode":"drop_response","injected":"WILL_ALTER_RESPONSE","id":6,"call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:36.554Z","pid":1434005,"mode":"drop_response","injected":"RESPONSE_DROPPED","id":6}
+{"at":"2026-09-14T10:30:56.563Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":6,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:56.581Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":7,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:56.583Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":8,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.659Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":1,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.662Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":2,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.666Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":3,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.666Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":4,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.718Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:58.718Z","pid":1434639,"mode":"drop_request","injected":"REQUEST_DROPPED","id":6,"call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:31:18.726Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":6,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:31:18.733Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":7,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:31:18.735Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":8,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}

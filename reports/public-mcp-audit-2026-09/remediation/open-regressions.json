@@ -1,5 +1,35 @@
 [
   {
+    "id": "P8",
+    "kind": "regression",
+    "serious": true,
+    "title": "An agent that does the job and also deletes another record of the same kind passed",
+    "summary": "Introduced by the P3 expected-delta checks, which covered creations and changes of the focus entity but not deletions. AFTER-1 (f4145bb) graded SQ-W1-06 and SQ-W1B-06 FALSE_NEGATIVE on all six attempts; the baseline had caught them only through R-1.",
+    "fix": "65bbaed: expectedDeletedCount observed from the demonstration and success__nothing_else_deleted generated",
+    "status": "RESOLVED",
+    "resolvedBy": {
+      "run": "AFTER-2",
+      "commit": "26d1e6a product sources (measured as 0abf8ef)",
+      "cases": {
+        "SQ-W1-06-forbidden-extra-delete": {
+          "attempts": 3,
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE"
+        },
+        "SQ-W1B-06-forbidden-extra-delete": {
+          "attempts": 3,
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE"
+        }
+      }
+    },
+    "evidence": [
+      "remediation/after-1-results.json",
+      "remediation/after-results.json",
+      "packages/runner/test/expectedDelta.test.ts"
+    ]
+  },
+  {
     "id": "N-1",
     "kind": "newly_reachable_defect",
     "serious": true,

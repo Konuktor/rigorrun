@@ -1,0 +1,232 @@
+{
+  "exists": true,
+  "oracle": "sqlite-ro",
+  "tables": {
+    "audit_log": {
+      "count": 1,
+      "rows": [
+        {
+          "action": "completed",
+          "id": 1,
+          "note": "seed",
+          "task_id": 3
+        }
+      ]
+    },
+    "tasks": {
+      "count": 30,
+      "rows": [
+        {
+          "amount": 120.5,
+          "id": 1,
+          "owner": "ada",
+          "status": "open",
+          "title": "Prepare invoice"
+        },
+        {
+          "amount": 80.0,
+          "id": 2,
+          "owner": "bo",
+          "status": "open",
+          "title": "Review contract"
+        },
+        {
+          "amount": 0.0,
+          "id": 3,
+          "owner": "ada",
+          "status": "done",
+          "title": "Archive old files"
+        },
+        {
+          "amount": 1.0,
+          "id": 4,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 1"
+        },
+        {
+          "amount": 2.0,
+          "id": 5,
+          "owner": "cy",
+          "status": "done",
+          "title": "Backlog item 2"
+        },
+        {
+          "amount": 3.0,
+          "id": 6,
+          "owner": "dee",
+          "status": "open",
+          "title": "Backlog item 3"
+        },
+        {
+          "amount": 4.0,
+          "id": 7,
+          "owner": "ada",
+          "status": "done",
+          "title": "Backlog item 4"
+        },
+        {
+          "amount": 5.0,
+          "id": 8,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 5"
+        },
+        {
+          "amount": 6.0,
+          "id": 9,
+          "owner": "cy",
+          "status": "done",
+          "title": "Backlog item 6"
+        },
+        {
+          "amount": 7.0,
+          "id": 10,
+          "owner": "dee",
+          "status": "open",
+          "title": "Backlog item 7"
+        },
+        {
+          "amount": 8.0,
+          "id": 11,
+          "owner": "ada",
+          "status": "done",
+          "title": "Backlog item 8"
+        },
+        {
+          "amount": 9.0,
+          "id": 12,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 9"
+        },
+        {
+          "amount": 10.0,
+          "id": 13,
+          "owner": "cy",
+          "status": "done",
+          "title": "Backlog item 10"
+        },
+        {
+          "amount": 11.0,
+          "id": 14,
+          "owner": "dee",
+          "status": "open",
+          "title": "Backlog item 11"
+        },
+        {
+          "amount": 12.0,
+          "id": 15,
+          "owner": "ada",
+          "status": "done",
+          "title": "Backlog item 12"
+        },
+        {
+          "amount": 13.0,
+          "id": 16,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 13"
+        },
+        {
+          "amount": 14.0,
+          "id": 17,
+          "owner": "cy",
+          "status": "done",
+          "title": "Backlog item 14"
+        },
+        {
+          "amount": 15.0,
+          "id": 18,
+          "owner": "dee",
+          "status": "open",
+          "title": "Backlog item 15"
+        },
+        {
+          "amount": 16.0,
+          "id": 19,
+          "owner": "ada",
+          "status": "done",
+          "title": "Backlog item 16"
+        },
+        {
+          "amount": 17.0,
+          "id": 20,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 17"
+        },
+        {
+          "amount": 18.0,
+          "id": 21,
+          "owner": "cy",
+          "status": "done",
+          "title": "Backlog item 18"
+        },
+        {
+          "amount": 19.0,
+          "id": 22,
+          "owner": "dee",
+          "status": "open",
+          "title": "Backlog item 19"
+        },
+        {
+          "amount": 20.0,
+          "id": 23,
+          "owner": "ada",
+          "status": "done",
+          "title": "Backlog item 20"
+        },
+        {
+          "amount": 21.0,
+          "id": 24,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 21"
+        },
+        {
+          "amount": 22.0,
+          "id": 25,
+          "owner": "cy",
+          "status": "done",
+          "title": "Backlog item 22"
+        },
+        {
+          "amount": 23.0,
+          "id": 26,
+          "owner": "dee",
+          "status": "open",
+          "title": "Backlog item 23"
+        },
+        {
+          "amount": 24.0,
+          "id": 27,
+          "owner": "ada",
+          "status": "done",
+          "title": "Backlog item 24"
+        },
+        {
+          "amount": 25.0,
+          "id": 28,
+          "owner": "bo",
+          "status": "open",
+          "title": "Backlog item 25"
+        },
+        {
+          "amount": 12.25,
+          "id": 29,
+          "owner": "dee",
+          "status": "open",
+          "title": "Vendor audit"
+        },
+        {
+          "amount": 12.25,
+          "id": 30,
+          "owner": "dee",
+          "status": "open",
+          "title": "Vendor audit"
+        }
+      ]
+    }
+  }
+}

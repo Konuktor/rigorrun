@@ -1,0 +1,17 @@
+2026-09-14T09:44:44Z batch r2-5 at 0abf8ef5bb5466ff4bba75156836e3cd628a7841: WT-D-09-timer-start-stop WT-D-10-double-start-closes-first WT-D-11-stop-with-nothing-running WT-D-12-key-too-long-rejected WT-D-13-nonexistent-task
+WT-D-09-timer-start-stop attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.39s)
+WT-D-09-timer-start-stop attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.31s)
+WT-D-09-timer-start-stop attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.38s)
+WT-D-10-double-start-closes-first attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.63s)
+WT-D-10-double-start-closes-first attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.63s)
+WT-D-10-double-start-closes-first attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.72s)
+WT-D-11-stop-with-nothing-running attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.3s)
+WT-D-11-stop-with-nothing-running attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.3s)
+WT-D-11-stop-with-nothing-running attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.29s)
+WT-D-12-key-too-long-rejected attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.2s)
+WT-D-12-key-too-long-rejected attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.2s)
+WT-D-12-key-too-long-rejected attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.18s)
+WT-D-13-nonexistent-task attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.32s)
+WT-D-13-nonexistent-task attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.3s)
+WT-D-13-nonexistent-task attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.32s)
+2026-09-14T09:51:12Z batch r2-5 exit 0

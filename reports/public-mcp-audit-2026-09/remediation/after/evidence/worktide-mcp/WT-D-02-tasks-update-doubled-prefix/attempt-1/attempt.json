@@ -1,0 +1,59 @@
+{
+  "case": {
+    "id": "WT-D-02-tasks-update-doubled-prefix",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "WRONG_VALUE / MISSING_ACTION (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "tasks.update must set priority=urgent on AUD-3",
+    "calls": [
+      {
+        "tool": "tasks.update",
+        "args": {
+          "task": "AUD-3",
+          "priority": "urgent"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True and [t for t in after['tasks'] if t['identifier']=='AUD-3'][0]['priority']=='urgent'"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "tasks.update",
+        "args": {
+          "task": "AUD-3",
+          "priority": "urgent"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/tasks/01a09c48-97a6-7202-b2de-e76be5553721\""
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 0.37,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

@@ -1,0 +1,26 @@
+{
+  "messages": [
+    {
+      "body_sha256": "ec1a4a1716d0ecab674c14b805a46c728ac8f474b5892754175c9b8a7542ed9f",
+      "created": "2026-09-14T09:33:21.319406025Z",
+      "from": "test@localhost",
+      "subject": "Audit list",
+      "to": [
+        "agent@example.test",
+        "qa@example.test"
+      ]
+    },
+    {
+      "body_sha256": "8552967ba615bdcfdfc2eafbff9c84c94d51505e0886deeee2bc9340a04f74e8",
+      "created": "2026-09-14T09:33:21.32426487Z",
+      "from": "test@localhost",
+      "subject": "Audit comma",
+      "to": [
+        "agent@example.test",
+        "qa@example.test"
+      ]
+    }
+  ],
+  "oracle": "mailhog-http",
+  "total": 2
+}

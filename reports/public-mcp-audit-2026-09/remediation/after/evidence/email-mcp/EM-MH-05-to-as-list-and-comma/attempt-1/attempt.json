@@ -1,0 +1,114 @@
+{
+  "case": {
+    "id": "EM-MH-05-to-as-list-and-comma",
+    "target": "email-mcp",
+    "mode": "direct",
+    "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+    "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "server": [
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "class": "BOUNDARY",
+    "truth": "EXPECTED_PASS",
+    "intent": "'to' given as a list of two and as a comma-separated pair must each deliver to exactly those two recipients",
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": [
+            "qa@example.test",
+            "agent@example.test"
+          ],
+          "subject": "Audit list",
+          "body": "x",
+          "service": "mailhog"
+        }
+      },
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test, agent@example.test",
+          "subject": "Audit comma",
+          "body": "x",
+          "service": "mailhog"
+        }
+      }
+    ],
+    "expect": "after['total']==before['total']+2 and all(sorted(m['to'])==['agent@example.test','qa@example.test'] for m in after['messages'] if m['subject'].startswith('Audit '))"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": [
+            "qa@example.test",
+            "agent@example.test"
+          ],
+          "subject": "Audit list",
+          "body": "x",
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit list' sent successfully to ['qa@example.test', 'agent@example.test'] via mailhog service\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": true,
+            "status": "sent",
+            "service": "mailhog",
+            "note": "Check web UI at http://127.0.0.1:8025",
+            "message": "Email 'Audit list' sent successfully to ['qa@example.test', 'agent@example.test'] via mailhog service"
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test, agent@example.test",
+          "subject": "Audit comma",
+          "body": "x",
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit comma' sent successfully to qa@example.test, agent@example.test via mailhog service\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": true,
+            "status": "sent",
+            "service": "mailhog",
+            "note": "Check web UI at http://127.0.0.1:8025",
+            "message": "Email 'Audit comma' sent successfully to qa@example.test, agent@example.test via mailhog service"
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 1.45,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

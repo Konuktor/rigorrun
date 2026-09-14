@@ -134,6 +134,33 @@ function totals(list) {
   };
 }
 
+// Held-out results and the final test run, reported beside the benchmark and never merged into it.
+function heldout() {
+  const one = (file) => {
+    const path = join(REMEDIATION, 'heldout', file);
+    if (!existsSync(path)) return null;
+    const data = read(path);
+    return { rigorrunCommit: data.rigorrunCommit, ...data.totals };
+  };
+  return { inprocess: one('results-inprocess.json'), external: one('results-external.json') };
+}
+
+function finalTests() {
+  const path = join(REMEDIATION, 'evidence', 'final-test.log');
+  if (!existsSync(path)) return null;
+  const text = readFileSync(path, 'utf8');
+  const files = /Test Files\s+(\d+) passed \((\d+)\)/.exec(text);
+  const tests = /Tests\s+(\d+) passed \((\d+)\)/.exec(text);
+  return {
+    log: 'remediation/evidence/final-test.log',
+    filesPassed: files ? Number(files[1]) : 0,
+    files: files ? Number(files[2]) : 0,
+    testsPassed: tests ? Number(tests[1]) : 0,
+    tests: tests ? Number(tests[2]) : 0,
+    failed: /(Tests|Test Files)\s+\d+ failed/.test(text),
+  };
+}
+
 const r1 = cases.filter((c) => c.rigorrunFindings.includes('R-1'));
 const statuses = Object.values(findingStatus).map((f) => f.status);
 const rigorrunAttemptCases = cases.filter((c) => c.mode === 'rigorrun' && c.attempts > 0);
@@ -141,10 +168,15 @@ const count = (list, key) => Object.fromEntries(uniq(list.flatMap((c) => c[key])
 
 const results = {
   generated_by: 'remediation/scripts/aggregate-after.mjs',
-  rigorrun_commit: process.env.RIGORRUN_AFTER_COMMIT ?? null,
-  baseline: { commit: manifest.rigorrun.commit, totals: manifest.originalTotals },
+  // The commit the run measured: recorded by rerun.sh in <run>/run-info.json.
+  rigorrun_commit: process.env.RIGORRUN_AFTER_COMMIT ?? (existsSync(join(AFTER, 'run-info.json')) ? read(join(AFTER, 'run-info.json')).rigorrunCommit : null),
+  baseline: { commit: manifest.rigorrun.commit, totals: manifest.originalTotals, counts: manifest.counts, tests: manifest.rigorrunTestBaseline },
   ...totals(cases),
   R1_CASES: r1.length,
+  R1_CASES_RUN: r1.filter((c) => c.attempts > 0).length,
+  R1_REPRODUCTIONS_BEFORE: r1.filter((c) => ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(c.before.classification)).length,
+  KNOWN_GOOD_BEFORE: manifest.cases.filter((m) => m.knownGoodGradedByRigorrun).length,
+  KNOWN_GOOD_CORRECT_BEFORE: manifest.cases.filter((m) => m.knownGoodGradedByRigorrun && m.classification === 'TRUE_NEGATIVE').length,
   R1_REPRODUCTIONS: r1.filter((c) => ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(c.outcomeClassification)).length,
   R1_REPRODUCTIONS_ORIGINAL_RULE: r1.filter((c) => ['FALSE_POSITIVE', 'FALSE_NEGATIVE'].includes(c.classification)).length,
   BASELINE_FALSE_POSITIVES_NOW: cases.filter((c) => c.before.classification === 'FALSE_POSITIVE').map((c) => ({ id: c.id, outcome: c.outcomeClassification, originalRule: c.classification, oracle: c.oracleVerdicts })),
@@ -168,6 +200,8 @@ const results = {
     agentFailureCases: rigorrunAttemptCases.filter((c) => c.rigorrunOutcomes.includes('AGENT_FAILURE')).map((c) => c.id),
     harnessFailureCases: rigorrunAttemptCases.filter((c) => c.rigorrunOutcomes.includes('HARNESS_FAILURE')).map((c) => c.id),
   },
+  HELDOUT: RUN === 'after' ? heldout() : null,
+  TESTS: RUN === 'after' ? finalTests() : null,
   JOURNEYS: journeys,
   cases,
 };
@@ -198,7 +232,7 @@ if (process.argv.includes('--check')) {
       }
     }
   }
-  console.log(`after-results.json verified; ${checked} numbers checked in prose, ${bad} mismatches`);
+  console.log(`${RUN}-results.json verified; ${checked} numbers checked in prose, ${bad} mismatches`);
   process.exit(bad ? 1 : 0);
 } else {
   writeFileSync(out, JSON.stringify(results, null, 2) + '\n');

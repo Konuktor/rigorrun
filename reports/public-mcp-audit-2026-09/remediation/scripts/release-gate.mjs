@@ -133,10 +133,12 @@ gate('INJECTED', 'Injected failures: every reachable injected failure correctly 
 }
 
 // Regressions
-// open-regressions.json: [{id, kind: 'regression' | 'newly_reachable_defect', serious, summary, evidence}].
-// Only a serious regression fails this gate; a newly reachable defect is reported with it and in REMAINING RISKS.
+// open-regressions.json: [{id, kind: 'regression' | 'newly_reachable_defect', serious, status: 'OPEN' | 'RESOLVED', summary, evidence}].
+// Only a serious regression that is not RESOLVED fails this gate; a resolved one is listed with the measurement
+// that shows it resolved, and a newly reachable defect is reported with it and in REMAINING RISKS.
 gate('NO_NEW_REGRESSION', 'No serious new regression discovered',
-  Array.isArray(openRegressions) && openRegressions.filter((entry) => entry.kind === 'regression' && entry.serious).length === 0,
+  Array.isArray(openRegressions) &&
+    openRegressions.filter((entry) => entry.kind === 'regression' && entry.serious && entry.status !== 'RESOLVED').length === 0,
   { file: 'remediation/open-regressions.json', present: Array.isArray(openRegressions), entries: openRegressions ?? null });
 
 // Held-out

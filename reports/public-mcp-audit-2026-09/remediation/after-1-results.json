@@ -1,6 +1,6 @@
 {
   "generated_by": "remediation/scripts/aggregate-after.mjs",
-  "rigorrun_commit": "f4145bb6",
+  "rigorrun_commit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
   "baseline": {
     "commit": "07dda8c738d6daada161ffcf2bfc046b3c874ac5",
     "totals": {
@@ -19,6 +19,23 @@
       "confirmed_upstream_findings": 10,
       "confirmed_rigorrun_findings": 8,
       "findings_total": 21
+    },
+    "counts": {
+      "cases": 58,
+      "rigorrunMode": 26,
+      "scored": 26,
+      "falsePositives": 6,
+      "falseNegatives": 10,
+      "knownGoodGraded": 6,
+      "knownGoodGradedFalsePositive": 6,
+      "injected": 3,
+      "r1Cases": 11
+    },
+    "tests": {
+      "files": 73,
+      "tests": 847,
+      "passed": 847,
+      "log": "evidence/rigorrun-test-baseline.log"
     }
   },
   "TOTAL_CASES": 58,
@@ -47,6 +64,10 @@
   "KNOWN_GOOD_TOTAL": 6,
   "KNOWN_GOOD_CORRECTLY_GRADED": 5,
   "R1_CASES": 11,
+  "R1_CASES_RUN": 11,
+  "R1_REPRODUCTIONS_BEFORE": 11,
+  "KNOWN_GOOD_BEFORE": 6,
+  "KNOWN_GOOD_CORRECT_BEFORE": 0,
   "R1_REPRODUCTIONS": 0,
   "R1_REPRODUCTIONS_ORIGINAL_RULE": 0,
   "BASELINE_FALSE_POSITIVES_NOW": [
@@ -361,6 +382,8 @@
     "agentFailureCases": [],
     "harnessFailureCases": []
   },
+  "HELDOUT": null,
+  "TESTS": null,
   "JOURNEYS": {
     "sqlite-mcp/w1": {
       "target": "sqlite-mcp",
