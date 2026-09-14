@@ -119,6 +119,6 @@
       "packages/connector/test/environment.test.ts"
     ],
     "rerunEvidence": "Worktide W2 and W3 compile and build suites in AFTER-1 and AFTER-2 (baseline: both refused at compile with \"returned text rather than structured records\").",
-    "openAfterFix": "N-1 (open-regressions.json): the newly built Worktide suites key a time-report group by its minutes value and fail their own quality check (false_positive_rate 1). The normalisation defect is fixed; verdicts on Worktide through these suites are not trustworthy."
+    "openAfterFix": "N-1 (open-regressions.json): the newly built Worktide suites key a time-report group by its minutes value and fail their own quality check. Measured on the external held-out set: EH-WT-03, an agent that creates two time entries instead of one, passes. The normalisation defect (R-8) is fixed; Worktide verdicts through these suites are not trustworthy."
   }
 }

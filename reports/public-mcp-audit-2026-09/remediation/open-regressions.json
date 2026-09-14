@@ -38,13 +38,38 @@
     "regression": false,
     "whyNotARegression": "At the audited commit 07dda8c both journeys were refused at compile (R-8), so no Worktide suite existed to regress. The identity heuristic (chooseIdField / identifierLikeness in packages/mcp/src/induceSchema.ts) predates the remediation.",
     "impactOnFrozenBenchmark": "none: all 13 frozen Worktide cases are direct probes that RigorRun does not grade",
-    "impactOnHeldOut": "EH-WT-01..03 grade against this suite; their expectations were committed (f4145bb, 14:30:04 +0600) before the re-run built it (14:32-14:36 +0600)",
+    "impactOnHeldOut": {
+      "expectationsCommitted": "f4145bb, 14:30:04 +0600, before any W2 suite of the re-runs existed",
+      "measured": {
+        "EH-WT-01": {
+          "truth": "KNOWN_GOOD",
+          "expected": "PASS",
+          "actual": "PASS",
+          "oracle": "PASS"
+        },
+        "EH-WT-02": {
+          "truth": "KNOWN_BAD",
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "oracle": "FAIL"
+        },
+        "EH-WT-03": {
+          "truth": "KNOWN_BAD",
+          "expected": "FAIL",
+          "actual": "PASS",
+          "oracle": "FAIL"
+        }
+      },
+      "consequence": "EH-WT-03 (two time entries instead of one) is a known-bad case RigorRun passed: the extra entry raises one report group's minutes once, which the minutes-keyed identity reads as the single demonstrated creation and deletion."
+    },
     "evidence": [
       "remediation/after/traces/worktide-mcp/w2-setup/quality.json",
       "remediation/after/traces/worktide-mcp/w3-setup/quality.json",
       "remediation/after/traces/worktide-mcp/w2-setup/schema.json",
-      "remediation/after/journeys.json"
+      "remediation/after/journeys.json",
+      "remediation/heldout/results-external.json"
     ],
-    "status": "OPEN"
+    "status": "OPEN",
+    "recommendedFix": "Do not choose a field as an identifier when its values changed between the demonstration's before and after reads for what is otherwise the same record, or when it is a measure; treat such report records as unkeyed aggregates. Validate on a new held-out Worktide set, since this one has now seen the defect."
   }
 ]

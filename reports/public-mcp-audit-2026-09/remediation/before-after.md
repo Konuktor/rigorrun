@@ -94,12 +94,12 @@ Both sets were built after the fixes, their expectations committed before the fi
   - Known-good cases failed: <!-- n:HELDOUT.inprocess.knownGoodIncorrectlyFailed -->0<!-- /n -->. Known-bad cases passed: <!-- n:HELDOUT.inprocess.knownBadIncorrectlyPassed -->0<!-- /n -->.
   - Undecidable cases given a verdict: <!-- n:HELDOUT.inprocess.undecidableGivenAVerdict -->0<!-- /n -->. Unfinished cases given a verdict: <!-- n:HELDOUT.inprocess.notFinishedGivenAVerdict -->0<!-- /n -->.
   - Abstentions: <!-- n:HELDOUT.inprocess.abstentions -->6<!-- /n -->.
-- **External set on the real servers (commit <!-- n:HELDOUT.external.rigorrunCommit -->694b51c32599e467fef1276fbfa0b3d9108a1784<!-- /n -->).**
-  - <!-- n:HELDOUT.external.run -->7<!-- /n --> of the 16 defined cases ran, and <!-- n:HELDOUT.external.matchingExpected -->7<!-- /n --> of the <!-- n:HELDOUT.external.cases -->7<!-- /n --> recorded matched their expectation.
-  - Known-good cases failed: <!-- n:HELDOUT.external.knownGoodIncorrectlyFailed -->0<!-- /n -->. Known-bad cases passed: <!-- n:HELDOUT.external.knownBadIncorrectlyPassed -->0<!-- /n -->.
-  - Against the oracle: <!-- n:HELDOUT.external.falsePositivesAgainstOracle -->0<!-- /n --> false positives and <!-- n:HELDOUT.external.falseNegativesAgainstOracle -->0<!-- /n --> false negatives.
+- **External set on the real servers (commit <!-- n:HELDOUT.external.rigorrunCommit -->d87abca7dc182f73873f8a30d594786f4888ecd1<!-- /n -->).**
+  - <!-- n:HELDOUT.external.run -->16<!-- /n --> of the 16 defined cases ran, and <!-- n:HELDOUT.external.matchingExpected -->15<!-- /n --> of the <!-- n:HELDOUT.external.cases -->16<!-- /n --> recorded matched their expectation.
+  - Known-good cases failed: <!-- n:HELDOUT.external.knownGoodIncorrectlyFailed -->0<!-- /n -->. Known-bad cases passed: <!-- n:HELDOUT.external.knownBadIncorrectlyPassed -->1<!-- /n -->.
+  - Against the oracle: <!-- n:HELDOUT.external.falsePositivesAgainstOracle -->0<!-- /n --> false positives and <!-- n:HELDOUT.external.falseNegativesAgainstOracle -->1<!-- /n --> false negatives.
   - Timed out: <!-- n:HELDOUT.external.timedOut -->1<!-- /n -->. Oracle contradicting a truth label: <!-- n:HELDOUT.external.oracleDisagreesWithTruthLabel -->0<!-- /n -->. Fault not landing as intended: <!-- n:HELDOUT.external.faultNotAsIntended -->0<!-- /n -->.
-  - Cases with no recorded run: `EH-EM-01`, `EH-EM-02`, `EH-EM-03`, `EH-EM-04`, `EH-EM-05`, `EH-EM-06`, `EH-WT-01`, `EH-WT-02`, `EH-WT-03`.
+  - Cases with no recorded run: none.
 
 Per-case results: `heldout/results-inprocess.json`, `heldout/results-external.json`.
 

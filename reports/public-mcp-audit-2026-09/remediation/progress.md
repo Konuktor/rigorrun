@@ -152,3 +152,32 @@ Entries are appended, never rewritten. Corrections are added as new lines under 
 - **HOST THRESHOLDS FOR THE REMAINING WORK:** 1.2 GB available, held for two readings, for workloads comparable to the single-worker test run (external held-out pieces, typecheck, lint). 3 GB for `qwen2.5:3b` cases. 5 GB for `llama3.1:8b`. These are host-safety limits and were not chosen for any result.
 - **RELEASE GATE CORRECTION (11:38Z):** evaluating the gate on the evidence present showed HELDOUT passing with 9 of the 16 external cases never recorded. The gate counted only records marked NOT_RUN and ignored defined cases with no record at all. That was too lenient. Every case in `heldout/external/cases.json` must now have a recorded run. The other gates were not changed. With the final test log and the final-commit in-process results in place, the gate then read: R1 FAIL (`SQ-LLM-02` not run in AFTER-2), every other gate PASS, overall REMEDIATION INCOMPLETE.
 - **PRODUCT DIFF REVIEW (11:38Z):** added lines under `packages`, `apps` and `fixtures` since `07dda8c` contain no `console.log`/`debug`, `debugger`, `TODO`/`FIXME`, `.only`/`.skip`, `eslint-disable` or `@ts-ignore`/`@ts-expect-error`. The release gate's target-specific scan found nothing.
+- **EXTERNAL HELD-OUT COMPLETE (11:48–11:54Z, product sources of `26d1e6a`):** 16 of 16 cases ran and 15 matched their pre-committed expectation.
+  - **GreenMail:** `EH-EM-01`…`06`, 6 of 6. Every fault landed as intended.
+  - **Worktide, as expected:** `EH-WT-01` (correct, PASS) and `EH-WT-02` (timer left running, FAIL).
+  - **Worktide mismatch:** `EH-WT-03`, two time entries instead of one, is known-bad with oracle FAIL, but RigorRun said PASS.
+
+  This is N-1 measured. The W2 suite keys a time-report group by its minutes value, so one extra entry still looks like the single demonstrated change. The HELDOUT gate fails on it, so the remediation is INCOMPLETE.
+
+  N-1 is not being fixed in this remediation. The held-out set has now seen it, so it could not validate a fix, and a third full re-run is not feasible on this host. `open-regressions.json` records a recommended fix and the need for a new held-out Worktide set.
+
+## Final verification (2026-09-14, 12:02Z)
+
+- **RELEASE GATE (`release-gate.json`):** REMEDIATION INCOMPLETE.
+  - **R1 FAIL.** 0 reproductions among the 10 R-1 cases that ran in AFTER-2, under both rules. `SQ-LLM-02` never had the host memory to start, so the gate cannot confirm all 11.
+  - **HELDOUT FAIL.** `EH-WT-03` is known-bad and RigorRun passed it (N-1).
+  - **The other nine gates pass:** FP, INJECTED, R8, TESTS_ORIGINAL, TESTS_NEW, NO_TARGET_HACKS, LABELS, METRICS, NO_NEW_REGRESSION.
+- **CHECKS:**
+  - Full suite 89 files, 969/969 (`evidence/final-test.log`).
+  - `pnpm typecheck` exit 0 (`evidence/final-typecheck.log`).
+  - ESLint exit 0 on the 68 TypeScript files changed since `07dda8c` (`evidence/final-lint.log`).
+  - `freeze-baseline.mjs --check`: 58 cases, 108 frozen files.
+  - `../scripts/aggregate-results.mjs --check`: 24 numbers, 0 mismatches.
+  - `aggregate-after.mjs --check`: 85 markers, 0 mismatches. `AFTER_RUN=after-1`: 17 markers, 0 mismatches.
+  - `redact-evidence.py --check`: 0 files carry a stored credential.
+  - `scrub-paths.py --check`: 0 machine paths.
+  - `quarantine-baseline-writes.py --check`: no tracked audit file outside `remediation/` differs.
+  - Product diff review: no debug output, skips or suppressions added.
+- **NOT RUN, BECAUSE OF HOST MEMORY:** `EM-LLM-01`, `SQ-LLM-01` and `SQ-LLM-02` in AFTER-2. They are reported as not reaching a verdict.
+- **TEARDOWN:** `teardown.sh` at 12:02Z. No audit container or relay remains, and no Ollama model is loaded.
+- **STATUS:** INCOMPLETE. Fixes DONE for R-1…R-6 and R-8, R-7 PARTIAL, P8 DONE, N-1 OPEN.

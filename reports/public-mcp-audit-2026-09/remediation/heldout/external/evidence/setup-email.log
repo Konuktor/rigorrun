@@ -1,0 +1,41 @@
+{
+  "projectId": "p_cc4bbef0c491",
+  "readsProblem": "",
+  "tools": 47,
+  "records": [
+    "Record1",
+    "Record2",
+    "Email"
+  ],
+  "rules": {
+    "total": 1,
+    "confirmed": 0,
+    "rejected": 1
+  },
+  "cases": 1,
+  "quality": null,
+  "agents": [
+    {
+      "name": "ho-em-correct",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-em-wrong-recipient",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-em-near-duplicate",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-em-retry",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---

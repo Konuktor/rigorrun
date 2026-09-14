@@ -1,0 +1,13 @@
+{
+  "messages": [
+    {
+      "body_sha256": "80f6b64c7a116d2e72e552fa8b149481b7b4bc89fad46cc616ed9ad5cc5b5e41",
+      "from": "agent@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Rota change",
+      "to": "qa@example.test"
+    }
+  ],
+  "oracle": "greenmail-imaps",
+  "total": 1
+}

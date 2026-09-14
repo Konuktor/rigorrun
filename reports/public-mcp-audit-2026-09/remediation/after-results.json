@@ -401,7 +401,7 @@
         "packages/connector/test/environment.test.ts"
       ],
       "rerunEvidence": "Worktide W2 and W3 compile and build suites in AFTER-1 and AFTER-2 (baseline: both refused at compile with \"returned text rather than structured records\").",
-      "openAfterFix": "N-1 (open-regressions.json): the newly built Worktide suites key a time-report group by its minutes value and fail their own quality check (false_positive_rate 1). The normalisation defect is fixed; verdicts on Worktide through these suites are not trustworthy."
+      "openAfterFix": "N-1 (open-regressions.json): the newly built Worktide suites key a time-report group by its minutes value and fail their own quality check. Measured on the external held-out set: EH-WT-03, an agent that creates two time entries instead of one, passes. The normalisation defect (R-8) is fixed; Worktide verdicts through these suites are not trustworthy."
     }
   },
   "PER_TARGET_BREAKDOWN": {
@@ -534,14 +534,14 @@
       "abstentions": 6
     },
     "external": {
-      "rigorrunCommit": "694b51c32599e467fef1276fbfa0b3d9108a1784",
-      "cases": 7,
-      "run": 7,
-      "matchingExpected": 7,
+      "rigorrunCommit": "d87abca7dc182f73873f8a30d594786f4888ecd1",
+      "cases": 16,
+      "run": 16,
+      "matchingExpected": 15,
       "knownGoodIncorrectlyFailed": 0,
-      "knownBadIncorrectlyPassed": 0,
+      "knownBadIncorrectlyPassed": 1,
       "falsePositivesAgainstOracle": 0,
-      "falseNegativesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 1,
       "abstentions": 0,
       "timedOut": 1,
       "oracleDisagreesWithTruthLabel": 0,
