@@ -124,3 +124,95 @@ describe('a verifier connection seen through SystemEnvironment', () => {
     expect(new SystemEnvironment(connection(answer, tools), SCHEMA, config([])).capabilities().stateReadIndependence).toBe('self-reported');
   });
 });
+
+/**
+ * Audit IO-7-mixed-a: a project nominated a verifier read and one of the
+ * system's own reads. The later answer's rows replaced the earlier's, so a
+ * connector read that misreported state, nominated after the verifier, turned a
+ * wrong world into a PASS. With a verifier nominated, the verdict reads the
+ * world through the verifier alone, whatever the order.
+ */
+describe('mixed nomination: the world comes from the verifier alone', () => {
+  const TOOLS = ['read_items', 'write_item', 'verifier:read_items'];
+  // The system's own read misreports one record and invents another.
+  const LYING = [
+    { itemId: 'I-1', label: 'forged' },
+    { itemId: 'I-9', label: 'invented' },
+  ];
+
+  function mixed(
+    reads: string[],
+    answers: { verifier: CallResult; connector: CallResult },
+    calls: string[] = [],
+  ): SystemEnvironment {
+    return new SystemEnvironment(
+      connection((name) => {
+        calls.push(name);
+        return name.startsWith('verifier:') ? answers.verifier : answers.connector;
+      }, TOOLS),
+      SCHEMA,
+      config(reads),
+    );
+  }
+
+  const truthful: CallResult = { ok: true, durationMs: 0, structured: { items: ROWS } };
+  const lying: CallResult = { ok: true, durationMs: 0, structured: { items: LYING } };
+
+  it('builds the world from the verifier when the verifier read is nominated first (IO-7-mixed-a)', async () => {
+    const state = await mixed(['verifier:read_items', 'read_items'], { verifier: truthful, connector: lying }).getState();
+    expect(state.entities['Item']).toEqual({
+      'I-1': { itemId: 'I-1', label: 'first' },
+      'I-2': { itemId: 'I-2', label: 'second' },
+    });
+  });
+
+  it('builds the world from the verifier when the connector read is nominated first (IO-7-mixed-b)', async () => {
+    const state = await mixed(['read_items', 'verifier:read_items'], { verifier: truthful, connector: lying }).getState();
+    expect(Object.keys(state.entities['Item'] ?? {})).toEqual(['I-1', 'I-2']);
+    expect(state.entities['Item']?.['I-1']?.['label']).toBe('first');
+  });
+
+  it('never calls a read through the system itself once a verifier read is nominated', async () => {
+    const calls: string[] = [];
+    await mixed(['read_items', 'verifier:read_items'], { verifier: truthful, connector: lying }, calls).getState();
+    expect(calls).toEqual(['verifier:read_items']);
+  });
+
+  it('does not abstain because a read it ignores would have failed', async () => {
+    const failing: CallResult = { ok: false, durationMs: 0, error: { code: 'call_failed', message: 'HTTP 503' } };
+    const state = await mixed(['read_items', 'verifier:read_items'], { verifier: truthful, connector: failing }).getState();
+    expect(Object.keys(state.entities['Item'] ?? {})).toEqual(['I-1', 'I-2']);
+  });
+
+  it('is an empty world when the verifier answers empty, whatever the system reports (IO-6c)', async () => {
+    const empty: CallResult = { ok: true, durationMs: 0, content: [] };
+    const state = await mixed(['verifier:read_items', 'read_items'], { verifier: empty, connector: truthful }).getState();
+    expect(state.entities['Item']).toEqual({});
+  });
+
+  it('still throws StateReadError naming the verifier read when it fails (IO-6a)', async () => {
+    const failing: CallResult = { ok: false, durationMs: 0, error: { code: 'call_failed', message: 'gone' } };
+    await expect(
+      mixed(['read_items', 'verifier:read_items'], { verifier: failing, connector: truthful }).getState(),
+    ).rejects.toThrow(/verifier:read_items did not answer: gone/);
+  });
+
+  it('reads every nominated read when none goes through a verifier', async () => {
+    const calls: string[] = [];
+    const env = new SystemEnvironment(
+      connection((name) => {
+        calls.push(name);
+        return truthful;
+      }, ['read_items', 'read_more', 'write_item']),
+      SCHEMA,
+      config(['read_items', 'read_more']),
+    );
+    await env.getState();
+    expect(calls).toEqual(['read_items', 'read_more']);
+  });
+
+  it('keeps labelling a mixed nomination self-reported, because the label follows what was nominated', () => {
+    const env = mixed(['verifier:read_items', 'read_items'], { verifier: truthful, connector: lying });
+    expect(env.capabilities().stateReadIndependence).toBe('self-reported');
+  });
+});
