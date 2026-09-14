@@ -76,6 +76,18 @@ export interface LiveWorldOptions {
   /** Make the nominated reads fail, for the n-th call onwards (1-based). */
   failReadsFrom?: number;
   failReset?: boolean;
+  /**
+   * A read that changes the world it reads, as a mailbox marks what it lists
+   * as seen. Called after each read has answered, with what it answered and
+   * its number (1-based); the world it returns replaces the system's.
+   */
+  onRead?: (answered: CanonicalState, readNumber: number) => CanonicalState | undefined;
+  /** A listing that returns only the newest records of one kind, by identifier. */
+  window?: { entity: string; newest: number };
+  /** How long every read takes. */
+  readDelayMs?: number;
+  /** Every read answers with an empty world. */
+  emptyReads?: boolean;
 }
 
 export class LiveWorld implements EnvironmentAdapter {
@@ -125,10 +137,26 @@ export class LiveWorld implements EnvironmentAdapter {
   }
   async getState() {
     this.reads += 1;
+    if (this.options.readDelayMs !== undefined) {
+      await new Promise((resolve) => setTimeout(resolve, this.options.readDelayMs));
+    }
     if (this.options.failReadsFrom !== undefined && this.reads >= this.options.failReadsFrom) {
       throw new StateReadError('list_claims', 'the read tool answered 500');
     }
-    return this.inner.getState();
+    if (this.options.emptyReads) {
+      return { entities: Object.fromEntries(this.describeEntities().entities.map((entity) => [entity.name, {}])) };
+    }
+    const world = structuredClone(await this.inner.getState());
+    const replaced = this.options.onRead?.(structuredClone(world), this.reads);
+    if (replaced) await this.inner.seed(replaced, {});
+    const window = this.options.window;
+    if (!window) return world;
+    const table = world.entities[window.entity] ?? {};
+    const newest = Object.keys(table).sort().slice(-window.newest);
+    return {
+      ...world,
+      entities: { ...world.entities, [window.entity]: Object.fromEntries(newest.map((key) => [key, table[key]!])) },
+    };
   }
   getEvents() {
     return this.inner.getEvents();

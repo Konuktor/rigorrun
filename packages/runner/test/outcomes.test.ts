@@ -115,6 +115,80 @@ describe('how a case ended', () => {
   });
 });
 
+/**
+ * Audit IO-5: a case that holds every kind of record to the demonstrated frame
+ * reads the world twice at each end, so that a field the reads themselves change
+ * is proved rather than assumed. The extra reads must neither move a failed read
+ * to the wrong end nor spend the agent's budget.
+ */
+describe('reading the world twice', () => {
+  it('ABSTAIN naming the starting world when the second starting read fails', async () => {
+    const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
+    clearEnvironments();
+    const { registerEnvironment } = await import('@rigorrun/environment');
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), failReadsFrom: 2 }));
+    const happy = await happyOf(await runBenchmark(happyOnly(benchmark), [CORRECT]));
+    expect(happy.outcome).toBe('ABSTAIN');
+    expect(happy.baseline).toBe('UNAVAILABLE');
+    expect(happy.missingEvidence).toContain('initial_state_unavailable:list_claims');
+  });
+
+  it('ABSTAIN naming the final world when only the second final read fails', async () => {
+    const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
+    clearEnvironments();
+    const { registerEnvironment } = await import('@rigorrun/environment');
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), failReadsFrom: 4 }));
+    const happy = await happyOf(await runBenchmark(happyOnly(benchmark), [CORRECT]));
+    expect(happy.outcome).toBe('ABSTAIN');
+    expect(happy.baseline).toBe('OBSERVED_AT_START');
+    expect(happy.missingEvidence).toContain('final_state_unavailable:list_claims');
+  });
+
+  it('reads twice at each end only when the case carries a frame check', async () => {
+    const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
+    const happy = happyOnly(benchmark);
+    let reads = 0;
+    const counting = () => {
+      reads += 1;
+      return undefined;
+    };
+    const { registerEnvironment } = await import('@rigorrun/environment');
+
+    clearEnvironments();
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), onRead: counting }));
+    await runBenchmark(happy, [CORRECT]);
+    expect(reads).toBe(4);
+
+    reads = 0;
+    const withoutFrame = { ...happy, cases: happy.cases.map((c) => ({ ...c, checks: c.checks.filter((check) => String(check.kind) !== 'state_frame') })) };
+    clearEnvironments();
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), onRead: counting }));
+    await runBenchmark(withoutFrame, [CORRECT]);
+    expect(reads).toBe(2);
+  });
+
+  it('keeps the extra reads out of the agent’s budget', async () => {
+    const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
+    const budgeted = { ...happyOnly(benchmark), cases: happyOnly(benchmark).cases.map((c) => ({ ...c, timeoutMs: 40 })) };
+    clearEnvironments();
+    const { registerEnvironment } = await import('@rigorrun/environment');
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), readDelayMs: 50 }));
+    const happy = await happyOf(await runBenchmark(budgeted, [CORRECT]));
+    expect(happy.outcome, happy.outcomeReason).toBe('PASS');
+    expect(happy.readStability?.baseline).toBe('double_read');
+    expect(happy.readStability?.final).toBe('double_read');
+  });
+
+  it('never passes when the reads answer an empty world', async () => {
+    const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
+    clearEnvironments();
+    const { registerEnvironment } = await import('@rigorrun/environment');
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), emptyReads: true }));
+    const happy = await happyOf(await runBenchmark(happyOnly(benchmark), [CORRECT]));
+    expect(happy.outcome).not.toBe('PASS');
+  });
+});
+
 describe('what a score does with cases that reached no verdict', () => {
   it('excludes them from the rates, counts them, and refuses to gate on them', async () => {
     const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));

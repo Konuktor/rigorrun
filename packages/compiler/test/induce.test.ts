@@ -503,3 +503,29 @@ describe('the synthesised benchmark actually discriminates', () => {
     expect(failedRules.some((id) => id?.startsWith('rule_path_agreement'))).toBe(false);
   });
 });
+
+/**
+ * Audit IO-5: the contract says what the demonstration did to every kind of
+ * record, including the kinds it never touched, so a case can hold an agent to
+ * nothing more than that.
+ */
+describe('the demonstrated frame', () => {
+  it('records created, deleted and changed counts for every record type, touched or not', async () => {
+    const { trace } = await demonstrate();
+    const { contract } = induceContract(testEnvironment.create(), trace, { contractId: 'ec_frame', createdAt: '2026-01-20T09:00:00.000Z' });
+    const frame = contract.expectedFrame;
+    expect(Object.keys(frame?.entities ?? {}).sort()).toEqual(TEST_SCHEMA.entities.map((entity) => entity.name).sort());
+    expect(frame?.entities['Claim']).toMatchObject({ created: 1, deleted: 0, updatedRows: 0, updatedFields: [], identity: 'named' });
+    expect(frame?.entities['LogEntry']).toMatchObject({ created: 1, deleted: 0, updatedRows: 0 });
+    expect(frame?.entities['Account']).toMatchObject({ created: 0, deleted: 0, updatedRows: 0, updatedFields: [] });
+  });
+
+  it('records how many records of each kind existed when the demonstration started', async () => {
+    const { trace } = await demonstrate();
+    const { contract } = induceContract(testEnvironment.create(), trace, { contractId: 'ec_frame', createdAt: '2026-01-20T09:00:00.000Z' });
+    for (const entity of TEST_SCHEMA.entities) {
+      const started = Object.keys(TEST_FIXTURE.state.entities[entity.name] ?? {}).length;
+      expect(contract.expectedFrame?.entities[entity.name]?.preExistingRows, entity.name).toBe(started);
+    }
+  });
+});
