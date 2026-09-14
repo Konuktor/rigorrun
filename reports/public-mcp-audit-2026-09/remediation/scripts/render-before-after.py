@@ -4,6 +4,7 @@
 Every number is written as a marker that aggregate-after.mjs --check verifies:
   {{KEY}}        -> <!-- n:KEY -->value<!-- /n -->                (after-results.json, AFTER-2)
   {{a1:KEY}}     -> <!-- n-after-1:KEY -->value<!-- /n-after-1 --> (after-1-results.json)
+  {{n1:KEY}}     -> <!-- n1:KEY -->value<!-- /n1 -->               (n1/results.json, N-1; checked by n1/scripts/aggregate-n1.mjs --check)
 KEY is a dotted path through the JSON, as the checker flattens it. A key that is
 missing, or that names an object or a list, stops the render: a number the
 results do not contain is never written.
@@ -43,6 +44,8 @@ after1 = json.load(open(os.path.join(REMEDIATION, "after-1-results.json")))
 manifest = json.load(open(os.path.join(REMEDIATION, "baseline-manifest.json")))
 flat = flatten(after)
 flat1 = flatten(after1)
+N1_RESULTS = os.path.join(REMEDIATION, "n1", "results.json")
+flatn1 = flatten(json.load(open(N1_RESULTS))) if os.path.exists(N1_RESULTS) else {}
 
 
 def render_value(key, table, tag):
@@ -96,6 +99,7 @@ text = re.sub(r"\{\{#if ([^}]+)\}\}(.*?)\{\{/if\}\}", lambda m: m.group(2) if pr
 text = re.sub(r"\{\{#unless ([^}]+)\}\}(.*?)\{\{/unless\}\}", lambda m: "" if present(m.group(1)) else m.group(2), text, flags=re.S)
 text = text.replace("{{CASE_TABLE}}", case_table()).replace("{{NOT_RUN}}", not_run()).replace("{{HELDOUT_EXTERNAL_MISSING}}", external_missing())
 text = re.sub(r"\{\{a1:([^}]+)\}\}", lambda m: render_value(m.group(1), flat1, "n-after-1"), text)
+text = re.sub(r"\{\{n1:([^}]+)\}\}", lambda m: render_value(m.group(1), flatn1, "n1"), text)
 text = re.sub(r"\{\{([^}]+)\}\}", lambda m: render_value(m.group(1), flat, "n"), text)
 open(os.path.join(REMEDIATION, "before-after.md"), "w").write(text)
-print(f"before-after.md rendered: {text.count('<!-- n:')} AFTER-2 markers, {text.count('<!-- n-after-1:')} AFTER-1 markers")
+print(f"before-after.md rendered: {text.count('<!-- n:')} AFTER-2 markers, {text.count('<!-- n-after-1:')} AFTER-1 markers, {text.count('<!-- n1:')} N-1 markers")

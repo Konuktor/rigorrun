@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_193b9f6c04c5",
+  "name": "Start a timer described 'Audit timer', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running.",
+  "description": "Compiled from one recorded execution in worktide W2 track one minute on a timer.",
+  "goal": "Start a timer described 'Audit timer', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running",
+  "environmentId": "p_193b9f6c04c5",
+  "sourceTraceId": "trace_p_193b9f6c04c5",
+  "primaryAction": "time.stop",
+  "focusEntity": "Group",
+  "focusScope": "changed",
+  "remedyActions": [
+    "time.start"
+  ],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "time.start": {
+      "description": "Audit timer"
+    },
+    "time.stop": {}
+  },
+  "projectionFocus": [
+    "Group",
+    "Record1"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Group (unassigned): billableMinutes changed 0 → 1",
+      "key": "Group.billableMinutes",
+      "value": {
+        "from": 0,
+        "to": 1
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Group (unassigned): billableMinutes changed 0 → 1"
+        }
+      ]
+    },
+    {
+      "id": "fact_002",
+      "statement": "Group (unassigned): minutes changed 0 → 1",
+      "key": "Group.minutes",
+      "value": {
+        "from": 0,
+        "to": 1
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_1",
+          "detail": "Group (unassigned): minutes changed 0 → 1"
+        }
+      ]
+    },
+    {
+      "id": "fact_003",
+      "statement": "Record1 2026-09-01T00:00:00+02:00: billableMinutes changed 945 → 946",
+      "key": "Record1.billableMinutes",
+      "value": {
+        "from": 945,
+        "to": 946
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_2",
+          "detail": "Record1 2026-09-01T00:00:00+02:00: billableMinutes changed 945 → 946"
+        }
+      ]
+    },
+    {
+      "id": "fact_004",
+      "statement": "Record1 2026-09-01T00:00:00+02:00: totalMinutes changed 945 → 946",
+      "key": "Record1.totalMinutes",
+      "value": {
+        "from": 945,
+        "to": 946
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_3",
+          "detail": "Record1 2026-09-01T00:00:00+02:00: totalMinutes changed 945 → 946"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "expectedChanges": [
+    {
+      "record": {
+        "label": "(unassigned)"
+      },
+      "field": "billableMinutes",
+      "from": 0,
+      "to": 1,
+      "compare": "quantity"
+    },
+    {
+      "record": {
+        "label": "(unassigned)"
+      },
+      "field": "minutes",
+      "from": 0,
+      "to": 1,
+      "compare": "quantity"
+    }
+  ],
+  "rules": [
+    {
+      "id": "rule_action_order__time.start__time.stop",
+      "statement": "\"time.start\" must happen before \"time.stop\"",
+      "template": "action_order",
+      "status": "rejected",
+      "confidence": 0,
+      "provenance": [
+        {
+          "kind": "recorded_action",
+          "ref": "time.start__time.stop",
+          "detail": "the operator did time.start, then time.stop"
+        }
+      ],
+      "implications": [
+        "An agent that does them the other way round will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must \"time.start\" always come before \"time.stop\"?",
+        "reason": "That was the order in the recording. It may simply have been convenient."
+      },
+      "predicate": {
+        "kind": "event_order",
+        "before": "time.start",
+        "after": "time.stop"
+      }
+    },
+    {
+      "id": "rule_field_relation__eq__billableMinutes__minutes",
+      "statement": "the group's billable minutes must equal the group's minutes",
+      "template": "field_relation",
+      "status": "rejected",
+      "confidence": 0,
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "Group",
+          "detail": "in the demonstration the group's billable minutes and the group's minutes were both 1"
+        }
+      ],
+      "implications": [
+        "An agent that lets the two differ will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must the group's billable minutes always equal the group's minutes?",
+        "reason": "They matched once. One recording cannot show whether a mismatch is ever allowed."
+      },
+      "predicate": {
+        "kind": "row_constraint",
+        "entity": "Group",
+        "scope": "changed",
+        "when": [],
+        "then": [
+          {
+            "field": "cmp__billableMinutes__minus__minutes",
+            "op": "eq",
+            "value": 0,
+            "describe": "the group's billable minutes equals the group's minutes"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_field_relation__interval__billableMinutes__billedMinutes",
+      "statement": "the group's billable minutes must be no more than 1 after the group's billed minutes",
+      "template": "field_relation",
+      "status": "rejected",
+      "confidence": 0,
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "Group",
+          "detail": "the demonstrated gap was 1"
+        }
+      ],
+      "implications": [
+        "An agent that allows a longer gap will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must the group's billable minutes always be within 1 of the group's billed minutes?",
+        "reason": "The one recorded case used 1, which looks like a standard period rather than a coincidence."
+      },
+      "predicate": {
+        "kind": "row_constraint",
+        "entity": "Group",
+        "scope": "changed",
+        "when": [],
+        "then": [
+          {
+            "field": "cmp__billableMinutes__minus__billedMinutes",
+            "op": "lte",
+            "value": 1,
+            "describe": "the gap is at most 1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_field_relation__lte__billedMinutes__minutes",
+      "statement": "the group's billed minutes must not exceed the group's minutes",
+      "template": "field_relation",
+      "status": "rejected",
+      "confidence": 0,
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "Group",
+          "detail": "in the demonstration the group's billed minutes was below the group's minutes"
+        }
+      ],
+      "implications": [
+        "An agent that goes over will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must the group's billed minutes never exceed the group's minutes?",
+        "reason": "One recording stayed below the other value; nothing showed what happens above it."
+      },
+      "predicate": {
+        "kind": "row_constraint",
+        "entity": "Group",
+        "scope": "changed",
+        "when": [],
+        "then": [
+          {
+            "field": "cmp__billedMinutes__minus__minutes",
+            "op": "lte",
+            "value": 0,
+            "describe": "the group's billed minutes is at most the group's minutes"
+          }
+        ]
+      }
+    }
+  ],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-14T14:49:10.092Z",
+  "approvedAt": "2026-09-14T14:49:10.113Z"
+}

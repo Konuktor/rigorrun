@@ -71,6 +71,7 @@ def unassigned_minutes(oracle):
 
 
 def details(record, attempt_dir, info):
+    """Everything reported for one attempt, read back from its evidence directory."""
     run = heldout.load(os.path.join(attempt_dir, "rigorrun-run.json"))
     case = run["caseResults"][0]
     before = heldout.load(os.path.join(attempt_dir, "before.json"))
@@ -88,7 +89,7 @@ def details(record, attempt_dir, info):
             "expectedDeletedCount": contract.get("expectedDeletedCount"),
             "expectedChanges": contract.get("expectedChanges", []),
         },
-        "oracle": {
+        "oracleState": {
             "timeEntries": [before["db_time_entry_count"], after["db_time_entry_count"]],
             "unassignedMinutes": [unassigned_minutes(before), unassigned_minutes(after)],
             "actualUnassignedDelta": unassigned_minutes(after) - unassigned_minutes(before),
@@ -102,36 +103,67 @@ def details(record, attempt_dir, info):
     }
 
 
+def rebuilt(info):
+    """Every attempt on record, re-derived from its evidence: the oracle verdict is judged again from its reads."""
+    root = os.path.join(N1, "evidence", "after-fix")
+    records = []
+    for attempt_name in sorted(os.listdir(root)) if os.path.isdir(root) else []:
+        if not attempt_name.startswith("attempt-"):
+            continue
+        for case_id in sorted(os.listdir(os.path.join(root, attempt_name))):
+            attempt_dir = os.path.join(root, attempt_name, case_id)
+            if case_id not in CASES or not os.path.exists(os.path.join(attempt_dir, "rigorrun-run.json")):
+                continue
+            case = CASES[case_id]
+            run = heldout.load(os.path.join(attempt_dir, "rigorrun-run.json"))["caseResults"][0]
+            before = heldout.load(os.path.join(attempt_dir, "before.json"))
+            after = heldout.load(os.path.join(attempt_dir, "after.json"))
+            oracle = "PASS" if heldout.rc.judge({"expect": case["expect"]}, before, after, {}) == "PASS" else "FAIL"
+            actual = run["outcome"]
+            classification = None
+            if actual in ("PASS", "FAIL"):
+                classification = ("TRUE_POSITIVE" if actual == "FAIL" else "FALSE_NEGATIVE") if oracle == "FAIL" else ("FALSE_POSITIVE" if actual == "FAIL" else "TRUE_NEGATIVE")
+            base = {"id": case_id, "attempt": int(attempt_name.split("-")[1]), "truth": case["truth"], "expected": case["expected"],
+                    "actual": actual, "match": actual == case["expected"], "oracle": oracle,
+                    "truthHeldByOracle": {"KNOWN_GOOD": oracle == "PASS", "KNOWN_BAD": oracle == "FAIL"}.get(case["truth"], True),
+                    "classificationAgainstOracle": classification, "description": case["description"]}
+            records.append(details(base, attempt_dir, info))
+    return sorted(records, key=lambda r: (r["id"], r["attempt"]))
+
+
+def write(info, attempts):
+    with open(RESULTS, "w") as fh:
+        json.dump({
+            "generatedBy": "remediation/n1/scripts/run-eh-wt-03.py",
+            "rigorrunCommit": git("rev-parse", "HEAD"),
+            "caseDefinitions": "remediation/heldout/external/cases.json (unchanged)",
+            "project": {"home": "{REPO}/" + os.path.relpath(info["home"], REPO), "id": info["project"]},
+            "attempts": attempts,
+        }, fh, indent=2)
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--attempts", type=int, default=3)
+    parser.add_argument("--attempts", nargs="*", type=int, default=[1, 2, 3], help="EH-WT-03 attempt numbers to run")
     parser.add_argument("--also-sanity", action="store_true")
+    parser.add_argument("--rebuild", action="store_true", help="only re-derive after-fix.json from the evidence on disk")
     a = parser.parse_args()
-    if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", "packages", "apps", "fixtures"]).returncode != 0:
-        raise SystemExit("refusing: product sources differ from HEAD; commit first so the measured commit is exact")
     info = project()
-    plan = [("EH-WT-03", n) for n in range(1, a.attempts + 1)]
-    if a.also_sanity:
-        plan += [("EH-WT-01", 1), ("EH-WT-02", 1)]
-    previous = heldout.load(RESULTS) if os.path.exists(RESULTS) else {"attempts": []}
-    attempts = [r for r in previous.get("attempts", []) if (r["id"], r["attempt"]) not in set(plan)]
-    for case_id, attempt in plan:
-        heldout.EVIDENCE = os.path.join(N1, "evidence", "after-fix", f"attempt-{attempt}")
-        heldout.FAULT_LOG = os.path.join(N1, "evidence", "fault-proxy.unused.jsonl")
-        record = heldout.run_case(CASES[case_id], info)
-        record = details({**record, "attempt": attempt}, os.path.join(heldout.EVIDENCE, case_id), info)
-        attempts.append(record)
-        print(f"{case_id} attempt {attempt}: expected {record['expected']} actual {record['actual']} oracle {record['oracle']} "
-              f"unassigned {record['oracle']['unassignedMinutes']} :: {record['outcomeReason'][:200]}", flush=True)
-        attempts.sort(key=lambda r: (r["id"], r["attempt"]))
-        with open(RESULTS, "w") as fh:
-            json.dump({
-                "generatedBy": "remediation/n1/scripts/run-eh-wt-03.py",
-                "rigorrunCommit": git("rev-parse", "HEAD"),
-                "caseDefinitions": "remediation/heldout/external/cases.json (unchanged)",
-                "project": {"home": "{REPO}/" + os.path.relpath(info["home"], REPO), "id": info["project"]},
-                "attempts": attempts,
-            }, fh, indent=2)
+    if not a.rebuild:
+        if subprocess.run(["git", "-C", REPO, "diff", "--quiet", "HEAD", "--", "packages", "apps", "fixtures"]).returncode != 0:
+            raise SystemExit("refusing: product sources differ from HEAD; commit first so the measured commit is exact")
+        plan = [("EH-WT-03", n) for n in a.attempts]
+        if a.also_sanity:
+            plan += [("EH-WT-01", 1), ("EH-WT-02", 1)]
+        for case_id, attempt in plan:
+            heldout.EVIDENCE = os.path.join(N1, "evidence", "after-fix", f"attempt-{attempt}")
+            heldout.FAULT_LOG = os.path.join(N1, "evidence", "fault-proxy.unused.jsonl")
+            heldout.run_case(CASES[case_id], info)
+            done = next(r for r in rebuilt(info) if r["id"] == case_id and r["attempt"] == attempt)
+            print(f"{case_id} attempt {attempt}: expected {done['expected']} actual {done['actual']} oracle {done['oracle']} "
+                  f"unassigned {done['oracleState']['unassignedMinutes']} :: {done['outcomeReason'][:200]}", flush=True)
+            write(info, rebuilt(info))
+    write(info, rebuilt(info))
     return 0
 
 
