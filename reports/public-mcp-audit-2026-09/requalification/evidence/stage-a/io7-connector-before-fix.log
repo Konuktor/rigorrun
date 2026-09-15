@@ -1,0 +1,185 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ❯ packages/connector/test/verified.test.ts (3 tests | 3 failed) 4ms
+     × uses only the verifier reads once one is nominated, in nomination order 2ms
+     × uses every read when none goes through a verifier 0ms
+     × uses nothing and ignores nothing when nothing is nominated 0ms
+ ❯ packages/connector/test/environment.test.ts (16 tests | 5 failed) 21ms
+     ✓ reads records from structured content 2ms
+     ✓ reads records from JSON inside a text block 0ms
+     ✓ throws StateReadError, naming the read, when a read fails 1ms
+     ✓ throws StateReadError when a read answers in prose, rather than reporting an empty world 0ms
+     ✓ throws StateReadError when two different records in one answer claim one identity (audit N-1) 0ms
+     ✓ reads an empty answer as an empty world 0ms
+     ✓ offers no verifier tool as an action and refuses to call one 5ms
+     ✓ labels reads independent only when every nominated read goes through the verifier 0ms
+     × builds the world from the verifier when the verifier read is nominated first (IO-7-mixed-a) 6ms
+     × builds the world from the verifier when the connector read is nominated first (IO-7-mixed-b) 1ms
+     × never calls a read through the system itself once a verifier read is nominated 1ms
+     × does not abstain because a read it ignores would have failed 1ms
+     × is an empty world when the verifier answers empty, whatever the system reports (IO-6c) 1ms
+     ✓ still throws StateReadError naming the verifier read when it fails (IO-6a) 0ms
+     ✓ reads every nominated read when none goes through a verifier 0ms
+     ✓ keeps labelling a mixed nomination self-reported, because the label follows what was nominated 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/connector/test/environment.test.ts > mixed nomination: the world comes from the verifier alone > builds the world from the verifier when the verifier read is nominated first (IO-7-mixed-a)
+AssertionError: expected { Object (I-1, I-2, ...) } to deeply equal { Object (I-1, I-2) }
+
+- Expected
++ Received
+
+  {
+    "I-1": {
+      "itemId": "I-1",
+-     "label": "first",
++     "label": "forged",
+    },
+    "I-2": {
+      "itemId": "I-2",
+      "label": "second",
++   },
++   "I-9": {
++     "itemId": "I-9",
++     "label": "invented",
+    },
+  }
+
+ ❯ packages/connector/test/environment.test.ts:163:36
+    161|   it('builds the world from the verifier when the verifier read is nom…
+    162|     const state = await mixed(['verifier:read_items', 'read_items'], {…
+    163|     expect(state.entities['Item']).toEqual({
+       |                                    ^
+    164|       'I-1': { itemId: 'I-1', label: 'first' },
+    165|       'I-2': { itemId: 'I-2', label: 'second' },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  packages/connector/test/environment.test.ts > mixed nomination: the world comes from the verifier alone > builds the world from the verifier when the connector read is nominated first (IO-7-mixed-b)
+AssertionError: expected [ 'I-1', 'I-9', 'I-2' ] to deeply equal [ 'I-1', 'I-2' ]
+
+- Expected
++ Received
+
+  [
+    "I-1",
++   "I-9",
+    "I-2",
+  ]
+
+ ❯ packages/connector/test/environment.test.ts:171:55
+    169|   it('builds the world from the verifier when the connector read is no…
+    170|     const state = await mixed(['read_items', 'verifier:read_items'], {…
+    171|     expect(Object.keys(state.entities['Item'] ?? {})).toEqual(['I-1', …
+       |                                                       ^
+    172|     expect(state.entities['Item']?.['I-1']?.['label']).toBe('first');
+    173|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  packages/connector/test/environment.test.ts > mixed nomination: the world comes from the verifier alone > never calls a read through the system itself once a verifier read is nominated
+AssertionError: expected [ 'read_items', 'verifier:read_items' ] to deeply equal [ 'verifier:read_items' ]
+
+- Expected
++ Received
+
+  [
++   "read_items",
+    "verifier:read_items",
+  ]
+
+ ❯ packages/connector/test/environment.test.ts:178:19
+    176|     const calls: string[] = [];
+    177|     await mixed(['read_items', 'verifier:read_items'], { verifier: tru…
+    178|     expect(calls).toEqual(['verifier:read_items']);
+       |                   ^
+    179|   });
+    180|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  packages/connector/test/environment.test.ts > mixed nomination: the world comes from the verifier alone > does not abstain because a read it ignores would have failed
+StateReadError: read_items did not answer: HTTP 503
+ ❯ SystemEnvironment.getState packages/connector/src/environment.ts:205:15
+    203|       // vanished.
+    204|       if (normalized.kind === 'error') {
+    205|         throw new StateReadError(read.tool, normalized.error?.message …
+       |               ^
+    206|       }
+    207|       // Prose where records were nominated is not an empty world eith…
+ ❯ packages/connector/test/environment.test.ts:183:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  packages/connector/test/environment.test.ts > mixed nomination: the world comes from the verifier alone > is an empty world when the verifier answers empty, whatever the system reports (IO-6c)
+AssertionError: expected { Object (I-1, I-2) } to deeply equal {}
+
+- Expected
++ Received
+
+- {}
++ {
++   "I-1": {
++     "itemId": "I-1",
++     "label": "first",
++   },
++   "I-2": {
++     "itemId": "I-2",
++     "label": "second",
++   },
++ }
+
+ ❯ packages/connector/test/environment.test.ts:190:36
+    188|     const empty: CallResult = { ok: true, durationMs: 0, content: [] };
+    189|     const state = await mixed(['verifier:read_items', 'read_items'], {…
+    190|     expect(state.entities['Item']).toEqual({});
+       |                                    ^
+    191|   });
+    192|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  packages/connector/test/verified.test.ts > readsForVerdict > uses only the verifier reads once one is nominated, in nomination order
+TypeError: readsForVerdict is not a function
+ ❯ packages/connector/test/verified.test.ts:19:12
+     17|       { tool: 'verifier:query_notes' },
+     18|     ];
+     19|     expect(readsForVerdict(reads)).toEqual({
+       |            ^
+     20|       used: [{ tool: 'verifier:query_tasks', args: { status: 'open' } …
+     21|       ignored: [{ tool: 'list_tasks' }, { tool: 'find_notes' }],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  packages/connector/test/verified.test.ts > readsForVerdict > uses every read when none goes through a verifier
+TypeError: readsForVerdict is not a function
+ ❯ packages/connector/test/verified.test.ts:27:12
+     25|   it('uses every read when none goes through a verifier', () => {
+     26|     const reads = [{ tool: 'list_tasks' }, { tool: 'find_notes' }];
+     27|     expect(readsForVerdict(reads)).toEqual({ used: reads, ignored: [] …
+       |            ^
+     28|   });
+     29|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+ FAIL  packages/connector/test/verified.test.ts > readsForVerdict > uses nothing and ignores nothing when nothing is nominated
+TypeError: readsForVerdict is not a function
+ ❯ packages/connector/test/verified.test.ts:31:12
+     29|
+     30|   it('uses nothing and ignores nothing when nothing is nominated', () …
+     31|     expect(readsForVerdict([])).toEqual({ used: [], ignored: [] });
+       |            ^
+     32|   });
+     33| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/8]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  8 failed | 11 passed (19)
+   Start at  02:19:53
+   Duration  426ms (transform 413ms, setup 0ms, import 596ms, tests 25ms, environment 0ms)
+

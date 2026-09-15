@@ -1,0 +1,1128 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ❯ packages/environment/test/frame.test.ts (7 tests | 7 failed) 11ms
+     × finds the fields that differ between two readings of the same record 6ms
+     × marks membership unstable when two readings disagree on which records exist 1ms
+     × sees a read-flipped value on a record with no established identity as unstable membership 1ms
+     × summarises created, deleted and changed records for every entity, including relationship fields 0ms
+     × says when the starting world was installed rather than read 0ms
+     × builds the demonstrated frame for every schema entity, touched or not 0ms
+     × counts a record once however many of its fields changed, and lists the fields 0ms
+ ❯ packages/verifier/test/stateFrame.test.ts (16 tests | 16 failed) 16ms
+     × passes changes inside the frame 7ms
+     × fails more records created than demonstrated 1ms
+     × fails more records deleted than demonstrated 1ms
+     × fails more existing records changed than demonstrated 0ms
+     × fails a field the demonstration never changed, naming the record type, the record and the field 1ms
+     × excludes a field proven volatile by reading twice, and only that field 0ms
+     × does not exclude a boolean, number or timestamp field because of its type 0ms
+     × abstains on creations and deletions of a kind whose membership was unstable, but still fails a field change on it 1ms
+     × abstains on changes to existing records of a kind the demonstration had none of, and still fails creations 1ms
+     × in a declined case holds the job’s record type to nothing, without that abstention 0ms
+     × fails an extra delete+create pair on a record with no established identity 0ms
+     × abstains on a changed kind of record the contract does not know, and ignores one that did not change 1ms
+     × abstains when the frame evidence is missing 0ms
+     × errors on a malformed expectation 0ms
+     × lets a failure on one kind of record outrank an abstention on another 0ms
+     × counts the frame as a blocking invariant: not policy-compliant on FAIL, a blocking abstention when unverifiable 0ms
+ ❯ packages/compiler/test/induce.test.ts (25 tests | 2 failed) 95ms
+     ✓ records what changed as observed fact, separately from any rule 31ms
+     ✓ proposes rules from the schema and the delta, never from a word list 2ms
+     ✓ reads a threshold out of interface text and files it as the weakest evidence 4ms
+     ✓ notices that two paths reaching the same account agreed 2ms
+     ✓ does not also demand the link a threshold rule already accounts for 3ms
+     ✓ leads the uniqueness question with the counterexample that would break it 2ms
+     ✓ asks questions a person can answer without knowing any eval vocabulary 2ms
+     ✓ refuses to compile a recording that changed nothing 1ms
+     ✓ compiles every rule into typed assertions with nothing left over 4ms
+     ✓ marks unconfirmed rules non-blocking, and confirmation makes them block 5ms
+     ✓ counts what the agent created for a scope rule, and does not gate it on itself 2ms
+     ✓ refuses a path the projection cannot answer instead of letting it pass 2ms
+     ✓ writes an outsider-authored value into a filter path only as one opaque value 3ms
+     ✓ binds record fields to the arguments that produced them, by value alone 2ms
+     ✓ uses the goal the person stated, and the tool description only as a fallback 2ms
+     ✓ ignores a call that changed nothing when deciding what the job was and what it was given 2ms
+     ✓ keeps every step when the recorder never saw anything change 1ms
+     ✓ passes an agent that repeats the demonstrated work 3ms
+     ✓ fails an agent that acts on a record belonging to somebody else 2ms
+     ✓ fails an agent that goes over the threshold without the guard 3ms
+     ✓ fails an agent that does the work but records nothing 2ms
+     ✓ reports a rule as inapplicable rather than passed when nothing exercises it 1ms
+     ✓ rejecting a rule stops it failing anyone 2ms
+     × records created, deleted and changed counts for every record type, touched or not 7ms
+     × records how many records of each kind existed when the demonstration started 2ms
+ ❯ packages/generator/test/counterfactual.test.ts (15 tests | 2 failed) 99ms
+     ✓ derives cases from mutation primitives, not from a hand-written list 63ms
+     ✓ covers many failure categories from one demonstration 1ms
+     ✓ puts a case either side of every threshold, using the declared precision 0ms
+     ✓ computes the expectation, so the boundary actually discriminates 0ms
+     ✓ expects a refusal when the request names somebody else’s record 0ms
+     ✓ asks the approver question on the world where the answer matters 0ms
+     ✓ reports no rule it could not compile and no contradictory case 0ms
+     ✓ gives every case at least one private check 0ms
+     ✓ never puts an assertion, a rule id or the expected verdict into what the agent sees 6ms
+     ✓ gives every case the same policy, so the policy carries no signal about the answer 0ms
+     ✓ tells the agent the policy, because an operator would be told it too 0ms
+     × holds every case to the demonstrated frame with one blocking invariant check 4ms
+     × zeroes the job’s own record type in a declined case and keeps the other bounds 2ms
+     ✓ never shows the frame to the agent 1ms
+     ✓ adds no frame check for a contract compiled before frames existed 20ms
+ ❯ packages/runner/test/frame.test.ts (11 tests | 10 failed) 113ms
+     × records what the demonstration did to every kind of record, touched or not 25ms
+     × fails a job that creates the record and also changes another record (create A + update B) 13ms
+     × does not ignore a field because it is a boolean: create A + pin B fails 3ms
+     × fails a job that changes the named record and also creates a record of another kind (update A + create B) 5ms
+     × fails a job that replaces a record and also changes a third (delete A + update B) 5ms
+     × fails a timed-out agent that had already changed another record, rather than calling it a timeout 44ms
+     × excludes a field the read itself changes, proven by two readings with nothing in between 4ms
+     × abstains rather than passes when records appear between two readings with nothing in between 3ms
+     × abstains when the demonstration had no record of that kind to show what the job does to existing ones 5ms
+     × holds a declined case to nothing of the job’s kind, and to the demonstration elsewhere 3ms
+     ✓ documents the windowed read: a full newest-N listing already fails a correct agent through the deletion check 2ms
+ ❯ packages/runner/test/outcomes.test.ts (16 tests | 4 failed) 941ms
+     ✓ TIMED_OUT when the agent does not finish inside the case budget  378ms
+     ✓ FAIL, not TIMED_OUT, when a check failed on what the agent did before the budget ran out  348ms
+     ✓ AGENT_FAILURE when the agent throws 9ms
+     ✓ HARNESS_FAILURE when the environment cannot be reset 6ms
+     ✓ ABSTAIN when the starting world could not be read 8ms
+     ✓ ABSTAIN when the final world could not be read 6ms
+     ✓ ABSTAIN, never PASS or FAIL, when nothing can be read back at all 7ms
+     ✓ labels a decided verdict with where its evidence came from 9ms
+     × ABSTAIN naming the starting world when the second starting read fails 9ms
+     × ABSTAIN naming the final world when only the second final read fails 5ms
+     × reads twice at each end only when the case carries a frame check 6ms
+     × keeps the extra reads out of the agent’s budget 108ms
+     ✓ never passes when the reads answer an empty world 11ms
+     ✓ excludes them from the rates, counts them, and refuses to gate on them 6ms
+     ✓ still fails an agent that got a decided case wrong 14ms
+     ✓ passes a correct agent on decided cases 8ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 41 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/compiler/test/induce.test.ts > the demonstrated frame > records created, deleted and changed counts for every record type, touched or not
+AssertionError: expected [] to deeply equal [ 'Account', 'Claim', 'Item', …(2) ]
+
+- Expected
++ Received
+
+- [
+-   "Account",
+-   "Claim",
+-   "Item",
+-   "LogEntry",
+-   "Permit",
+- ]
++ []
+
+ ❯ packages/compiler/test/induce.test.ts:517:55
+    515|     const { contract } = induceContract(testEnvironment.create(), trac…
+    516|     const frame = contract.expectedFrame;
+    517|     expect(Object.keys(frame?.entities ?? {}).sort()).toEqual(TEST_SCH…
+       |                                                       ^
+    518|     expect(frame?.entities['Claim']).toMatchObject({ created: 1, delet…
+    519|     expect(frame?.entities['LogEntry']).toMatchObject({ created: 1, de…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/41]⎯
+
+ FAIL  packages/compiler/test/induce.test.ts > the demonstrated frame > records how many records of each kind existed when the demonstration started
+AssertionError: Account: expected undefined to be 2 // Object.is equality
+
+- Expected:
+2
+
++ Received:
+undefined
+
+ ❯ packages/compiler/test/induce.test.ts:528:91
+    526|     for (const entity of TEST_SCHEMA.entities) {
+    527|       const started = Object.keys(TEST_FIXTURE.state.entities[entity.n…
+    528|       expect(contract.expectedFrame?.entities[entity.name]?.preExistin…
+       |                                                                                           ^
+    529|     }
+    530|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > readStability > finds the fields that differ between two readings of the same record
+TypeError: readStability is not a function
+ ❯ packages/environment/test/frame.test.ts:61:12
+     59|     const first = stateFromRows(SCHEMA, { Entry: [entry('E1', 1, false…
+     60|     const second = stateFromRows(SCHEMA, { Entry: [entry('E1', 1, true…
+     61|     expect(readStability(SCHEMA, first, second)['Entry']).toEqual({ vo…
+       |            ^
+     62|     expect(readStability(SCHEMA, first, second)['Note']).toEqual({ vol…
+     63|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > readStability > marks membership unstable when two readings disagree on which records exist
+TypeError: readStability is not a function
+ ❯ packages/environment/test/frame.test.ts:68:12
+     66|     const first = stateFromRows(SCHEMA, { Entry: [entry('E1')] });
+     67|     const second = stateFromRows(SCHEMA, { Entry: [entry('E1'), entry(…
+     68|     expect(readStability(SCHEMA, first, second)['Entry']).toEqual({ vo…
+       |            ^
+     69|   });
+     70|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > readStability > sees a read-flipped value on a record with no established identity as unstable membership
+TypeError: readStability is not a function
+ ❯ packages/environment/test/frame.test.ts:74:12
+     72|     const first = stateFromRows(SCHEMA, { Line: [{ label: 'a', units: …
+     73|     const second = stateFromRows(SCHEMA, { Line: [{ label: 'a', units:…
+     74|     expect(readStability(SCHEMA, first, second)['Line']?.membershipUns…
+       |            ^
+     75|   });
+     76| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > frameObservation > summarises created, deleted and changed records for every entity, including relationship fields
+TypeError: readStability is not a function
+ ❯ packages/environment/test/frame.test.ts:88:20
+     86|       Note: [{ noteId: 'N1', entryId: 'E1' }],
+     87|     });
+     88|     const stable = readStability(SCHEMA, before, before);
+       |                    ^
+     89|     const flipped = readStability(SCHEMA, after, stateFromRows(SCHEMA,…
+     90|     const observed = frameObservation(SCHEMA, diffStates(SCHEMA, befor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > frameObservation > says when the starting world was installed rather than read
+TypeError: readStability is not a function
+ ❯ packages/environment/test/frame.test.ts:112:69
+    110|   it('says when the starting world was installed rather than read', ()…
+    111|     const world = stateFromRows(SCHEMA, { Entry: [entry('E1')] });
+    112|     const observed = frameObservation(SCHEMA, [], 'installed_seed', re…
+       |                                                                     ^
+    113|     expect(observed.proof.baseline).toBe('installed_seed');
+    114|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > demonstratedFrame > builds the demonstrated frame for every schema entity, touched or not
+TypeError: demonstratedFrame is not a function
+ ❯ packages/environment/test/frame.test.ts:121:12
+    119|     const before = stateFromRows(SCHEMA, { Entry: [entry('E1', 1), ent…
+    120|     const after = stateFromRows(SCHEMA, { Entry: [entry('E1', 5), entr…
+    121|     expect(demonstratedFrame(SCHEMA, before, after)).toEqual({
+       |            ^
+    122|       entities: {
+    123|         Entry: { preExistingRows: 2, created: 1, deleted: 1, updatedRo…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/41]⎯
+
+ FAIL  packages/environment/test/frame.test.ts > demonstratedFrame > counts a record once however many of its fields changed, and lists the fields
+TypeError: demonstratedFrame is not a function
+ ❯ packages/environment/test/frame.test.ts:133:12
+    131|     const before = stateFromRows(SCHEMA, { Entry: [entry('E1', 1, fals…
+    132|     const after = stateFromRows(SCHEMA, { Entry: [entry('E1', 4, true)…
+    133|     expect(demonstratedFrame(SCHEMA, before, after).entities['Entry'])…
+       |            ^
+    134|   });
+    135| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/41]⎯
+
+ FAIL  packages/generator/test/counterfactual.test.ts > the frame every case is held to > holds every case to the demonstrated frame with one blocking invariant check
+AssertionError: case_baseline__boundary__amount__49.99: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ packages/generator/test/counterfactual.test.ts:220:35
+    218|     for (const testCase of benchmark.cases) {
+    219|       const frames = testCase.checks.filter((check) => check.id === 'f…
+    220|       expect(frames, testCase.id).toHaveLength(1);
+       |                                   ^
+    221|       expect(frames[0]).toMatchObject({ kind: 'state_frame', severity:…
+    222|       expect(frames[0]?.blocking).not.toBe(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/41]⎯
+
+ FAIL  packages/generator/test/counterfactual.test.ts > the frame every case is held to > zeroes the job’s own record type in a declined case and keeps the other bounds
+AssertionError: expected 0 to be greater than 0
+ ❯ packages/generator/test/counterfactual.test.ts:229:46
+    227|     const approved = await contract();
+    228|     const demonstrated = approved.expectedFrame?.entities ?? {};
+    229|     expect(Object.keys(demonstrated).length).toBeGreaterThan(0);
+       |                                              ^
+    230|     const { cases } = await generated();
+    231|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > the demonstrated frame > records what the demonstration did to every kind of record, touched or not
+AssertionError: expected undefined to deeply equal { Entry: { …(6) }, Trail: { …(6) } }
+
+- Expected:
+{
+  "Entry": {
+    "created": 1,
+    "deleted": 0,
+    "identity": "named",
+    "preExistingRows": 2,
+    "updatedFields": [],
+    "updatedRows": 0,
+  },
+  "Trail": {
+    "created": 0,
+    "deleted": 0,
+    "identity": "named",
+    "preExistingRows": 1,
+    "updatedFields": [],
+    "updatedRows": 0,
+  },
+}
+
++ Received:
+undefined
+
+ ❯ packages/runner/test/frame.test.ts:248:46
+    246|   it('records what the demonstration did to every kind of record, touc…
+    247|     const { contract } = await suite([post], OTHERS, 'Post the spring …
+    248|     expect(contract.expectedFrame?.entities).toEqual({
+       |                                              ^
+    249|       Entry: { preExistingRows: 2, created: 1, deleted: 0, updatedRows…
+    250|       Trail: { preExistingRows: 1, created: 0, deleted: 0, updatedRows…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > records the job never touches, of any kind > fails a job that creates the record and also changes another record (create A + update B)
+AssertionError: posts, then resizes another entry: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/frame.test.ts:241:64
+    239|   for (const [name, steps, expected] of table) {
+    240|     const result = await run(benchmark, world, scripted(name, steps), …
+    241|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    242|   }
+    243| }
+ ❯ packages/runner/test/frame.test.ts:258:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > records the job never touches, of any kind > does not ignore a field because it is a boolean: create A + pin B fails
+AssertionError: posts, then pins another entry: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/frame.test.ts:241:64
+    239|   for (const [name, steps, expected] of table) {
+    240|     const result = await run(benchmark, world, scripted(name, steps), …
+    241|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    242|   }
+    243| }
+ ❯ packages/runner/test/frame.test.ts:275:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > records the job never touches, of any kind > fails a job that changes the named record and also creates a record of another kind (update A + create B)
+AssertionError: resizes, then writes to the trail: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/frame.test.ts:241:64
+    239|   for (const [name, steps, expected] of table) {
+    240|     const result = await run(benchmark, world, scripted(name, steps), …
+    241|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    242|   }
+    243| }
+ ❯ packages/runner/test/frame.test.ts:280:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > records the job never touches, of any kind > fails a job that replaces a record and also changes a third (delete A + update B)
+AssertionError: replaces, then resizes the third entry: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/frame.test.ts:241:64
+    239|   for (const [name, steps, expected] of table) {
+    240|     const result = await run(benchmark, world, scripted(name, steps), …
+    241|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    242|   }
+    243| }
+ ❯ packages/runner/test/frame.test.ts:290:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > records the job never touches, of any kind > fails a timed-out agent that had already changed another record, rather than calling it a timeout
+AssertionError: the agent did not finish inside the 40 ms case budget; no check failed on what it had done by then: expected 'TIMED_OUT' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "TIMED_OUT"
+
+ ❯ packages/runner/test/frame.test.ts:305:50
+    303|     });
+    304|     const result = await run(budgeted, OTHERS, wrongThenHang);
+    305|     expect(result.outcome, result.outcomeReason).toBe('FAIL');
+       |                                                  ^
+    306|     expect(frameOf(result)?.status).toBe('FAIL');
+    307|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > what reading twice proves > excludes a field the read itself changes, proven by two readings with nothing in between
+AssertionError: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ packages/runner/test/frame.test.ts:320:60
+    318|     const correct = await run(benchmark, OTHERS, scripted('correct', […
+    319|     expect(correct.outcome, correct.outcomeReason).toBe('PASS');
+    320|     expect(correct.readStability?.volatileFields['Entry']).toContain('…
+       |                                                            ^
+    321|     const extra = await run(benchmark, OTHERS, scripted('extra-update'…
+    322|     expect(extra.outcome, extra.outcomeReason).toBe('FAIL');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > what reading twice proves > abstains rather than passes when records appear between two readings with nothing in between
+AssertionError: every applicable check passed on observed state: expected 'PASS' to be 'ABSTAIN' // Object.is equality
+
+Expected: "ABSTAIN"
+Received: "PASS"
+
+ ❯ packages/runner/test/frame.test.ts:333:52
+    331|     };
+    332|     const correct = await run(benchmark, OTHERS, scripted('correct', […
+    333|     expect(correct.outcome, correct.outcomeReason).toBe('ABSTAIN');
+       |                                                    ^
+    334|     expect(correct.missingEvidence).toContain('frame_membership_unstab…
+    335|     expect(correct.readStability?.membershipUnstable).toContain('Trail…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > what one demonstration cannot show > abstains when the demonstration had no record of that kind to show what the job does to existing ones
+AssertionError: posts, then resizes an entry the demonstration never had: every applicable check passed on observed state: expected 'PASS' to be 'ABSTAIN' // Object.is equality
+
+Expected: "ABSTAIN"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/frame.test.ts:241:64
+    239|   for (const [name, steps, expected] of table) {
+    240|     const result = await run(benchmark, world, scripted(name, steps), …
+    241|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    242|   }
+    243| }
+ ❯ packages/runner/test/frame.test.ts:344:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/41]⎯
+
+ FAIL  packages/runner/test/frame.test.ts > what one demonstration cannot show > holds a declined case to nothing of the job’s kind, and to the demonstration elsewhere
+AssertionError: expected undefined to be 'declined' // Object.is equality
+
+- Expected:
+"declined"
+
++ Received:
+undefined
+
+ ❯ packages/runner/test/frame.test.ts:358:81
+    356|     const nothing = await run(benchmark, OTHERS, scripted('declines', …
+    357|     expect(nothing.outcome, nothing.outcomeReason).toBe('PASS');
+    358|     expect((frameOf(nothing)?.expected as { mode?: string } | undefine…
+       |                                                                                 ^
+    359|     const noted = await run(benchmark, OTHERS, scripted('declines-nois…
+    360|     expect(noted.outcome, noted.outcomeReason).toBe('FAIL');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/41]⎯
+
+ FAIL  packages/runner/test/outcomes.test.ts > reading the world twice > ABSTAIN naming the starting world when the second starting read fails
+AssertionError: expected 'OBSERVED_AT_START' to be 'UNAVAILABLE' // Object.is equality
+
+Expected: "UNAVAILABLE"
+Received: "OBSERVED_AT_START"
+
+ ❯ packages/runner/test/outcomes.test.ts:132:28
+    130|     const happy = await happyOf(await runBenchmark(happyOnly(benchmark…
+    131|     expect(happy.outcome).toBe('ABSTAIN');
+    132|     expect(happy.baseline).toBe('UNAVAILABLE');
+       |                            ^
+    133|     expect(happy.missingEvidence).toContain('initial_state_unavailable…
+    134|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/41]⎯
+
+ FAIL  packages/runner/test/outcomes.test.ts > reading the world twice > ABSTAIN naming the final world when only the second final read fails
+AssertionError: expected 'PASS' to be 'ABSTAIN' // Object.is equality
+
+Expected: "ABSTAIN"
+Received: "PASS"
+
+ ❯ packages/runner/test/outcomes.test.ts:142:27
+    140|     registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS),…
+    141|     const happy = await happyOf(await runBenchmark(happyOnly(benchmark…
+    142|     expect(happy.outcome).toBe('ABSTAIN');
+       |                           ^
+    143|     expect(happy.baseline).toBe('OBSERVED_AT_START');
+    144|     expect(happy.missingEvidence).toContain('final_state_unavailable:l…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/41]⎯
+
+ FAIL  packages/runner/test/outcomes.test.ts > reading the world twice > reads twice at each end only when the case carries a frame check
+AssertionError: expected 2 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 2
+
+ ❯ packages/runner/test/outcomes.test.ts:160:19
+    158|     registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS),…
+    159|     await runBenchmark(happy, [CORRECT]);
+    160|     expect(reads).toBe(4);
+       |                   ^
+    161|
+    162|     reads = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/41]⎯
+
+ FAIL  packages/runner/test/outcomes.test.ts > reading the world twice > keeps the extra reads out of the agent’s budget
+AssertionError: expected undefined to be 'double_read' // Object.is equality
+
+- Expected:
+"double_read"
+
++ Received:
+undefined
+
+ ❯ packages/runner/test/outcomes.test.ts:178:43
+    176|     const happy = await happyOf(await runBenchmark(budgeted, [CORRECT]…
+    177|     expect(happy.outcome, happy.outcomeReason).toBe('PASS');
+    178|     expect(happy.readStability?.baseline).toBe('double_read');
+       |                                           ^
+    179|     expect(happy.readStability?.final).toBe('double_read');
+    180|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > changes inside and outside the demonstrated frame > passes changes inside the frame
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:75:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > changes inside and outside the demonstrated frame > fails more records created than demonstrated
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:82:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > changes inside and outside the demonstrated frame > fails more records deleted than demonstrated
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:88:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > changes inside and outside the demonstrated frame > fails more existing records changed than demonstrated
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:95:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > changes inside and outside the demonstrated frame > fails a field the demonstration never changed, naming the record type, the record and the field
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:104:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what two readings prove about the reads > excludes a field proven volatile by reading twice, and only that field
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:117:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what two readings prove about the reads > does not exclude a boolean, number or timestamp field because of its type
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:130:40
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what two readings prove about the reads > abstains on creations and deletions of a kind whose membership was unstable, but still fails a field change on it
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:136:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > abstains on changes to existing records of a kind the demonstration had none of, and still fails creations
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:150:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > in a declined case holds the job’s record type to nothing, without that abstention
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:159:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > fails an extra delete+create pair on a record with no established identity
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:165:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > abstains on a changed kind of record the contract does not know, and ignores one that did not change
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:170:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > abstains when the frame evidence is missing
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:178:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > errors on a malformed expectation
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ packages/verifier/test/stateFrame.test.ts:184:39
+    182|
+    183|   it('errors on a malformed expectation', () => {
+    184|     const malformed = AssertionSchema.parse({
+       |                                       ^
+    185|       id: 'frame__nothing_else_changed',
+    186|       kind: 'state_frame',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what one demonstration cannot show > lets a failure on one kind of record outrank an abstention on another
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:197:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/41]⎯
+
+ FAIL  packages/verifier/test/stateFrame.test.ts > what verify makes of it > counts the frame as a blocking invariant: not policy-compliant on FAIL, a blocking abstention when unverifiable
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred",
+      "state_change"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\"|\"state_change\""
+  }
+]
+ ❯ frame packages/verifier/test/stateFrame.test.ts:48:19
+     46|
+     47| const frame = (entities: Record<string, Bound>, mode: 'performed' | 'd…
+     48|   AssertionSchema.parse({
+       |                   ^
+     49|     id: 'frame__nothing_else_changed',
+     50|     kind: 'state_frame',
+ ❯ packages/verifier/test/stateFrame.test.ts:206:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/41]⎯
+
+
+ Test Files  6 failed (6)
+      Tests  41 failed | 49 passed (90)
+   Start at  02:30:34
+   Duration  1.44s (transform 1.16s, setup 0ms, import 2.03s, tests 1.28s, environment 0ms)
+

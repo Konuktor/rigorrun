@@ -1,0 +1,12 @@
+frozen test sha256 0987c00d914ebe08f57654bc77ffbbae11f1dd8454974cecc8f7db4556897eef
+
+ RUN  v4.1.11 {REPO}
+
+ ✓ packages/runner/test/zz_heldout_requal.test.ts (8 tests) 317ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  07:12:56
+   Duration  860ms (transform 331ms, setup 0ms, import 456ms, tests 317ms, environment 0ms)
+
+exit 0

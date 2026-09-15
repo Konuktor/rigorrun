@@ -1,0 +1,189 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ✓ packages/connector/test/verified.test.ts (3 tests) 5ms
+ ✓ packages/connector/test/environment.test.ts (16 tests) 26ms
+
+    time to first real verdict: 1.5s (project created -> own agent graded against own system)
+
+    regression: policy compliance 60.0% -> 40.0%, unsafe 3 -> 7, 1 case(s) regressed: case_desk__happy_path
+ ✓ packages/daemon/test/durability.test.ts (17 tests) 4149ms
+     ✓ keeps what the system published, so a fresh page can show it  917ms
+     ✓ resumes a recording that was half done  1363ms
+     ✓ opens the session again and reports that nothing moved  996ms
+     ✓ reports itself as in progress before anything has been written  817ms
+ ✓ packages/daemon/test/processAgent.test.ts (5 tests) 4363ms
+     ✓ probes a real one, and gets its name from the answer  707ms
+     ✓ grades it exactly as it grades an agent behind a URL  2517ms
+ ✓ packages/cli/test/doctor.test.ts (5 tests) 3845ms
+     ✓ reaches a system that is there, and says what it found  722ms
+     ✓ names the credential a project needs and this machine does not have  618ms
+     ✓ says an agent is not answering rather than leaving it looking fine  511ms
+     ✓ exits 2, because a configuration problem is never an agent failing  510ms
+     ✓ names secrets and never prints one  659ms
+ ✓ packages/daemon/test/docs.test.ts (14 tests) 413ms
+     ✓ never tell anybody to run an agent id that no longer exists  401ms
+ ✓ packages/daemon/test/mixedReads.test.ts (3 tests) 5359ms
+     ✓ names the reads it will ignore, in either order, and says why  2756ms
+     ✓ has nothing to say about ignored reads when every read goes through the verifier  895ms
+     ✓ records the demonstration from the verifier reads alone  1616ms
+ ✓ packages/daemon/test/jsonInText.test.ts (4 tests) 5394ms
+     ✓ passes the read probe, for the right reason  788ms
+     ✓ reaches a verdict against it  346ms
+     ✓ warns before anybody records a job  647ms
+ ✓ packages/cli/test/cli.test.ts (25 tests) 641ms
+ ✓ packages/daemon/test/runner.test.ts (8 tests) 5658ms
+     ✓ connects the system and reports the tools with their risk  892ms
+     ✓ walks the rest of the way to a verdict  701ms
+
+  suite quality: 100% of injected defects caught, 100% of the independent ones
+ ✓ packages/daemon/test/drivenAgent.test.ts (9 tests) 5708ms
+     ✓ runs the whole suite against it, and grades it the same way  420ms
+ ✓ packages/daemon/test/suiteQuality.test.ts (4 tests) 981ms
+     ✓ reports how many injected defects it caught  305ms
+ ✓ packages/daemon/test/freshUser.test.ts (15 tests) 5723ms
+     ✓ connects a system nobody at RigorRun wrote, and sees what is there  785ms
+     ✓ runs the customer’s own agent and reads the desk back to grade it  380ms
+ ✓ packages/daemon/test/externalAgent.test.ts (4 tests) 5815ms
+     ✓ is caught by comparing two runs, without being told what changed  334ms
+ ✓ packages/daemon/test/stepChange.test.ts (2 tests) 834ms
+     ✓ records which calls changed the system  608ms
+ ✓ packages/daemon/test/independentVerifier.test.ts (3 tests) 6102ms
+     ✓ connects to both, and says so  1503ms
+     ✓ builds a suite whose reads all go through the verifier, and offers the agent none of its tools  350ms
+
+  induced from a public server: Entitie(name,entityType,observations) Relation(from,to,relationType)
+ ✓ packages/cli/test/security.test.ts (11 tests) 319ms
+ ✓ packages/daemon/test/publicServerJourney.test.ts (5 tests) 601ms
+     ✓ connects to it, unmodified, from npm  378ms
+ ✓ packages/daemon/test/traceImport.test.ts (4 tests) 1206ms
+ ✓ packages/daemon/test/thirdParty.test.ts (4 tests) 441ms
+     ✓ connects, and finds everything the server publishes  335ms
+ ✓ packages/daemon/test/openapiProject.test.ts (7 tests) 416ms
+ ✓ packages/cli/test/setup.test.ts (3 tests) 1072ms
+     ✓ creates, teaches, compiles and builds a project from a spec  1057ms
+ ✓ packages/daemon/test/browserProject.test.ts (4 tests) 1118ms
+     ✓ connects, and publishes the actions a browser has  840ms
+ ✓ packages/daemon/test/mismatch.test.ts (5 tests) 1024ms
+ ✓ packages/daemon/test/migration.test.ts (5 tests) 47ms
+ ✓ packages/daemon/test/budgets.test.ts (5 tests) 1316ms
+     ✓ saves budgets that work and refuses ones that do not  953ms
+ ✓ packages/daemon/test/secrets.test.ts (6 tests) 30ms
+ ✓ packages/daemon/test/orphans.test.ts (4 tests) 81ms
+ ✓ packages/cli/test/package.test.ts (14 tests) 43ms
+ ✓ packages/daemon/test/pythonAgent.test.ts (2 tests) 1944ms
+     ✓ does the job through the MCP endpoint it was handed  700ms
+ ✓ packages/daemon/test/pairing.test.ts (12 tests) 16ms
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-aRmko2/bundle.json
+
+  No credential values. The 1 name(s) it needs travel with it:
+    DESK_TOKEN
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-NeyBEv/with-secrets.json
+
+  This file contains credential values:
+    DESK_TOKEN
+  Written 0600. Do not attach it to anything.
+ ✓ packages/daemon/test/csrf.test.ts (7 tests) 97ms
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-utUPmJ/everything.json
+
+  This file contains credential values:
+    DESK_TOKEN
+  Written 0600. Do not attach it to anything.
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-WZtiNW/oauth.json
+
+  No credential values. The 2 name(s) it needs travel with it:
+    REGISTRY_CLIENT_ID
+    REGISTRY_CLIENT_SECRET
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-RXAuqD/bundle.json
+
+  No credential values. The 1 name(s) it needs travel with it:
+    DESK_TOKEN
+
+Imported as Desk agent (imported)
+  p_fsvrhn5z
+
+  Its connector, which came from this file rather than from you:
+    run `/usr/local/bin/desk-mcp --staging`
+
+  RigorRun will not open it until you have read that line and said yes,
+  in the interface or with `rigorrun trust p_fsvrhn5z`.
+
+  Credentials it needs and this machine does not have:
+    DESK_TOKEN
+
+Exported Desk agent
+  /tmp/rigorrun-bundle-5Ag1CD/bundle.json
+
+  No credential values. The 1 name(s) it needs travel with it:
+    DESK_TOKEN
+
+Imported as Desk agent (imported)
+  p_uryeajcz
+
+  Its connector, which came from this file rather than from you:
+    run `/usr/local/bin/desk-mcp --staging`
+
+  RigorRun will not open it until you have read that line and said yes,
+  in the interface or with `rigorrun trust p_uryeajcz`.
+
+  Credentials it needs and this machine does not have:
+    DESK_TOKEN
+
+Opening Desk agent (imported) would
+  run `/usr/local/bin/desk-mcp --staging`
+
+  Read that line. If it is what you expect, run this again with --yes.
+
+Opening Desk agent (imported) would
+  run `/usr/local/bin/desk-mcp --staging`
+
+  Trusted. RigorRun will open it from now on.
+
+Backed up
+  /tmp/rigorrun-bundle-8ANCSC/backup
+
+  1 project(s), and the names of your credentials.
+  Not your credentials themselves — those stay where they are.
+
+Backed up
+  /tmp/rigorrun-bundle-BjgvVR/backup
+
+  1 project(s), and the names of your credentials.
+  Not your credentials themselves — those stay where they are.
+
+Restored
+id   name      
+---  ----------
+p_1  Desk agent
+
+  Credentials are not in a backup. Set them again with `rigorrun secrets set`.
+ ✓ packages/cli/test/backup.test.ts (8 tests) 113ms
+ ✓ packages/daemon/test/compare.test.ts (7 tests) 6ms
+ ✓ packages/daemon/test/store.test.ts (22 tests) 79ms
+ ✓ packages/connector/test/rows.test.ts (9 tests) 11ms
+ ✓ packages/connector/test/result.test.ts (19 tests) 11ms
+ ✓ packages/cli/test/budgets.test.ts (3 tests) 272ms
+ ✓ packages/daemon/test/activation.test.ts (11 tests) 23ms
+ ✓ packages/daemon/test/suiteQualityOnRun.test.ts (3 tests) 3ms
+ ✓ packages/cli/test/verifyFlags.test.ts (2 tests) 5ms
+ ✓ packages/cli/test/project.test.ts (8 tests) 19888ms
+     ✓ runs the suite and reports how the verdict was reached  4692ms
+     ✓ gates, and says which threshold it missed  4911ms
+     ✓ passes when the bar is one the agent clears  4387ms
+     ✓ names the case that broke and exits non-zero  4354ms
+
+ Test Files  42 passed (42)
+      Tests  327 passed (327)
+   Start at  02:22:17
+   Duration  21.62s (transform 6.01s, setup 0ms, import 21.73s, tests 85.20s, environment 5ms)
+

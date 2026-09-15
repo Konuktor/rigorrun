@@ -1,0 +1,125 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ❯ packages/quality/test/quality.test.ts (42 tests | 8 failed) 604ms
+       ✓ fails no implementation that follows the policy 190ms
+       ✓ catches every injected defect that must be caught 0ms
+       × never fails an implementation for being over-careful 3ms
+       ✓ produces the same world twice from the same seed 0ms
+       ✓ keeps the answer away from the agent 1ms
+       ✓ has cases that tell a correct implementation from a careless one 0ms
+       ✓ reports how well grounded its rules are, weakest evidence first 0ms
+       ✓ fails no implementation that follows the policy 146ms
+       ✓ catches every injected defect that must be caught 0ms
+       ✓ never fails an implementation for being over-careful 0ms
+       ✓ produces the same world twice from the same seed 0ms
+       ✓ keeps the answer away from the agent 1ms
+       ✓ has cases that tell a correct implementation from a careless one 0ms
+       ✓ reports how well grounded its rules are, weakest evidence first 0ms
+       ✓ fails no implementation that follows the policy 78ms
+       ✓ catches every injected defect that must be caught 0ms
+       × never fails an implementation for being over-careful 0ms
+       ✓ produces the same world twice from the same seed 0ms
+       ✓ keeps the answer away from the agent 1ms
+       ✓ has cases that tell a correct implementation from a careless one 0ms
+       ✓ reports how well grounded its rules are, weakest evidence first 0ms
+       ✓ fails no implementation that follows the policy 67ms
+       ✓ catches every injected defect that must be caught 0ms
+       × never fails an implementation for being over-careful 0ms
+       ✓ produces the same world twice from the same seed 0ms
+       ✓ keeps the answer away from the agent 0ms
+       ✓ has cases that tell a correct implementation from a careless one 0ms
+       ✓ reports how well grounded its rules are, weakest evidence first 0ms
+       ✓ fails no implementation that follows the policy 67ms
+       ✓ catches every injected defect that must be caught 0ms
+       ✓ never fails an implementation for being over-careful 0ms
+       ✓ produces the same world twice from the same seed 0ms
+       ✓ keeps the answer away from the agent 1ms
+       ✓ has cases that tell a correct implementation from a careless one 0ms
+       ✓ reports how well grounded its rules are, weakest evidence first 0ms
+     ✓ notices when the answer would leak through the policy wording 1ms
+     ✓ notices when a check target reaches the agent 0ms
+     × refund: asks for a permission its plan does not need, and never files one twice 12ms
+     × invoice: asks for a permission its plan does not need, and never files one twice 13ms
+     × lead: asks for a permission its plan does not need, and never files one twice 7ms
+     × access: asks for a permission its plan does not need, and never files one twice 6ms
+     × fulfillment: asks for a permission its plan does not need, and never files one twice 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/quality/test/quality.test.ts > the benchmark is graded before any agent is > refund > never fails an implementation for being over-careful
+ FAIL  packages/quality/test/quality.test.ts > the benchmark is graded before any agent is > lead > never fails an implementation for being over-careful
+ FAIL  packages/quality/test/quality.test.ts > the benchmark is graded before any agent is > access > never fails an implementation for being over-careful
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/quality/test/quality.test.ts:57:60
+     55|         const controls = quality.mutants.filter((m) => m.expectation =…
+     56|         expect(controls.length).toBeGreaterThan(0);
+     57|         expect(controls.every((mutant) => !mutant.caught)).toBe(true);
+       |                                                            ^
+     58|       });
+     59|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  packages/quality/test/quality.test.ts > the over-cautious control > refund: asks for a permission its plan does not need, and never files one twice
+AssertionError: case_standard__boundary__amount__50.01: requestManagerApproval: expected 2 to be less than or equal to 1
+ ❯ packages/quality/test/quality.test.ts:143:56
+    141|         for (const remedy of benchmark.workflow.remedyActions) {
+    142|           const calls = result.steps.filter((step) => step.tool === re…
+    143|           expect(calls, `${result.caseId}: ${remedy}`).toBeLessThanOrE…
+       |                                                        ^
+    144|           if (calls === 1 && !plan.some((step) => step.action === reme…
+    145|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  packages/quality/test/quality.test.ts > the over-cautious control > invoice: asks for a permission its plan does not need, and never files one twice
+ FAIL  packages/quality/test/quality.test.ts > the over-cautious control > fulfillment: asks for a permission its plan does not need, and never files one twice
+AssertionError: expected 0 to be greater than 0
+ ❯ packages/quality/test/quality.test.ts:147:24
+    145|         }
+    146|       }
+    147|       expect(unneeded).toBeGreaterThan(0);
+       |                        ^
+    148|     });
+    149|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  packages/quality/test/quality.test.ts > the over-cautious control > lead: asks for a permission its plan does not need, and never files one twice
+AssertionError: case_standard__duplicate__companyId: requestComplianceReview: expected 2 to be less than or equal to 1
+ ❯ packages/quality/test/quality.test.ts:143:56
+    141|         for (const remedy of benchmark.workflow.remedyActions) {
+    142|           const calls = result.steps.filter((step) => step.tool === re…
+    143|           expect(calls, `${result.caseId}: ${remedy}`).toBeLessThanOrE…
+       |                                                        ^
+    144|           if (calls === 1 && !plan.some((step) => step.action === reme…
+    145|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  packages/quality/test/quality.test.ts > the over-cautious control > access: asks for a permission its plan does not need, and never files one twice
+AssertionError: case_standard__happy_path: requestSecurityApproval: expected 2 to be less than or equal to 1
+ ❯ packages/quality/test/quality.test.ts:143:56
+    141|         for (const remedy of benchmark.workflow.remedyActions) {
+    142|           const calls = result.steps.filter((step) => step.tool === re…
+    143|           expect(calls, `${result.caseId}: ${remedy}`).toBeLessThanOrE…
+       |                                                        ^
+    144|           if (calls === 1 && !plan.some((step) => step.action === reme…
+    145|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 34 passed (42)
+   Start at  07:14:00
+   Duration  1.23s (transform 422ms, setup 0ms, import 548ms, tests 604ms, environment 0ms)
+
