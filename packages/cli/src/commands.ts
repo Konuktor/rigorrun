@@ -32,6 +32,7 @@ import { pct } from '@rigorrun/scoring';
 import { CliError, readJson, writeJson, writeText, workspaceDir } from './io.ts';
 import { c, fmtMs, heading, line, ruleTag, statusTag, table } from './ui.ts';
 import { VERSION } from './help.ts';
+import { afterCaseHook } from './afterCase.ts';
 
 export interface Flags {
   out?: string | undefined;
@@ -52,6 +53,8 @@ export interface Flags {
   maxInconclusive?: number | undefined;
   /** Wall-clock budget per case for this run, overriding the suite's. */
   caseTimeoutMs?: number | undefined;
+  /** A command run after each case has finished and before the next starts. */
+  afterCase?: string | undefined;
   /** Which project to act on. The product path, as against a benchmark file. */
   project?: string | undefined;
   /** Where the store lives. Overridden in tests and in CI. */
@@ -493,10 +496,12 @@ async function executeRun(
 ): Promise<RunResult> {
   const total = benchmark.cases.length * agents.length * Math.max(1, flags.repeats ?? 1);
   let done = 0;
+  const afterCase = flags.afterCase !== undefined ? afterCaseHook(flags.afterCase) : undefined;
+  let finished = 0;
 
-  const onProgress = (event: RunProgress) => {
-    if (flags.quiet || flags.json) return;
-    if (event.type === 'case_finished') {
+  const onProgress = async (event: RunProgress) => {
+    if (event.type !== 'case_finished') return;
+    if (!flags.quiet && !flags.json) {
       done += 1;
       const { result } = event;
       const mark = outcomeMark(result);
@@ -504,6 +509,12 @@ async function executeRun(
         `  ${c.grey(String(done).padStart(String(total).length))}/${total}  ${mark}  ` +
           `${c.grey(result.agentId.padEnd(12))} ${result.caseId.replace(/^case_/, '').padEnd(22)} ${c.grey(fmtMs(result.durationMs))}`,
       );
+    }
+    // After the case has finished, and before the next one starts.
+    if (afterCase) {
+      const index = finished;
+      finished += 1;
+      await afterCase(event.result, index);
     }
   };
 

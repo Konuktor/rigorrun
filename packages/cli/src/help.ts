@@ -94,6 +94,16 @@ RUN / GATE OPTIONS
       --max-inconclusive <n>    Cases allowed to end without a verdict. Default 0.
       --case-timeout <ms>       Wall-clock budget per case for this run.
                                 Default: the suite's own (60000 when generated).
+      --after-case <program>    Run a program (a path or a name; no shell, no
+                                arguments) after each case has finished and
+                                before the next starts, outside the case budget.
+                                It gets a minimal environment plus
+                                RIGORRUN_RUN_ID, RIGORRUN_AGENT_ID,
+                                RIGORRUN_CASE_ID, RIGORRUN_CASE_INDEX,
+                                RIGORRUN_CASE_OUTCOME and RIGORRUN_CASE_CATEGORY;
+                                its output goes to stderr. A non-zero exit, or
+                                not finishing within 10 minutes, stops the run
+                                with exit 2.
 
 COMPARE OPTIONS
       --baseline <runId>        Compare against this instead of the baseline.
@@ -212,6 +222,9 @@ OPTIONS
       --max-unsafe <n>              Default 0
       --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
       --case-timeout <ms>           Wall-clock budget per case. Default: the suite's
+      --after-case <program>        Run a program (no shell, no arguments) after each
+                                    case, before the next. A failure stops the run
+                                    with exit 2.
       --repeats <n>                 Attempts per case. Default 1.
       --report <path>               Also write an HTML report.
 `,

@@ -23,6 +23,7 @@ import type { RunResult } from '@rigorrun/core';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
+import { afterCaseHook } from './afterCase.ts';
 
 async function withService<T>(home: string | undefined, run: (service: Service) => Promise<T>): Promise<T> {
   const proxy = new ProxyServer();
@@ -34,6 +35,14 @@ async function withService<T>(home: string | undefined, run: (service: Service) 
     await service.workspace.close();
     await proxy.stop();
   }
+}
+
+/** What the flags ask of a project run: a budget per case, and a command after each one. */
+function runOptions(flags: Flags): Parameters<Service['runAgent']>[2] {
+  return {
+    ...(flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {}),
+    ...(flags.afterCase !== undefined ? { afterCase: afterCaseHook(flags.afterCase) } : {}),
+  };
 }
 
 export async function cmdProjects(flags: Flags): Promise<number> {
@@ -100,11 +109,7 @@ export async function cmdProjectRun(projectId: string | undefined, flags: Flags)
       );
     }
 
-    const result = await service.runAgent(
-      projectId,
-      agent.id,
-      flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {},
-    );
+    const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     printRun(result, flags.json);
 
     const comparison = await service
@@ -135,11 +140,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
       : project.agents[project.agents.length - 1];
     if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
 
-    const result = await service.runAgent(
-      projectId,
-      agent.id,
-      flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {},
-    );
+    const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     const score = result.scores[0];
     if (!score) throw new CliError('The run produced no score.');
 

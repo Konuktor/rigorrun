@@ -798,7 +798,15 @@ export class Service {
   async runAgent(
     projectId: string,
     agentId: string,
-    options: { caseTimeoutMs?: number } = {},
+    options: {
+      caseTimeoutMs?: number;
+      /**
+       * Called after each case has finished, final state read included, and
+       * awaited before the next case starts — the point a harness takes its own
+       * reading of the system. If it throws, the run stops.
+       */
+      afterCase?: (result: RunResult['caseResults'][number], index: number) => Promise<void>;
+    } = {},
   ): Promise<RunResult> {
     const project = await this.store.read(projectId);
     if (options.caseTimeoutMs !== undefined) {
@@ -829,12 +837,24 @@ export class Service {
       const longestCaseMs = Math.max(
         ...benchmark.cases.map((entry) => options.caseTimeoutMs ?? entry.timeoutMs),
       );
+      const afterCase = options.afterCase;
+      let finishedCases = 0;
       result = await runBenchmark(
         benchmark,
         [this.adapterFor(config, { total: benchmark.cases.length, caseBudgetMs: longestCaseMs })],
         {
           runId: `run_${randomBytes(6).toString('hex')}`,
           ...(options.caseTimeoutMs !== undefined ? { caseTimeoutMs: options.caseTimeoutMs } : {}),
+          ...(afterCase
+            ? {
+                onProgress: async (event) => {
+                  if (event.type !== 'case_finished') return;
+                  const index = finishedCases;
+                  finishedCases += 1;
+                  await afterCase(event.result, index);
+                },
+              }
+            : {}),
           suiteQuality: suiteQualityOf(await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality')),
         },
       );
