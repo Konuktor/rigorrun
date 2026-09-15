@@ -99,6 +99,19 @@ export const CaseResultSchema = z.object({
   outcomeReason: z.string().default(''),
   /** Evidence the verdict wanted and did not have, as stable identifiers. */
   missingEvidence: z.array(z.string()).default([]),
+  /**
+   * What reading the world twice at each end proved about the reads themselves
+   * (audit IO-5): fields they changed, and kinds of record whose membership
+   * moved with nothing in between. Present only on cases held to the frame.
+   */
+  readStability: z
+    .object({
+      baseline: z.enum(['double_read', 'installed_seed', 'unavailable']),
+      final: z.enum(['double_read', 'unavailable']),
+      volatileFields: z.record(z.string(), z.array(z.string())).default({}),
+      membershipUnstable: z.array(z.string()).default([]),
+    })
+    .optional(),
   /** The run-level strength, carried per case so a verdict stands alone. */
   verification: z.enum(['AUTHORITATIVE', 'PARTIAL', 'OBSERVATIONAL']).optional(),
   evidenceIndependence: z.enum(EVIDENCE_INDEPENDENCE).optional(),

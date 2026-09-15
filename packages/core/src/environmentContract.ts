@@ -18,6 +18,7 @@
  */
 import { z } from 'zod';
 import { ENVIRONMENT_CONTRACT_SCHEMA_VERSION } from './versions.ts';
+import { DemonstratedFrameSchema } from './frame.ts';
 import { AssertionSchema } from './assertion.ts';
 import { LiteralSchema, RulePredicateSchema } from './predicate.ts';
 
@@ -256,6 +257,14 @@ export const EnvironmentContractSchema = z.object({
    * tells them apart.
    */
   expectedChanges: z.array(ExpectedChangeSchema).optional(),
+  /**
+   * What the demonstration did to every kind of record, touched or not — the
+   * `expected*` fields above describe only the record the job is about (audit
+   * IO-5). An upper bound per kind: an agent that creates, deletes or changes
+   * more than this has done something the job does not. Absent on contracts
+   * compiled before it existed, whose cases carry no frame check.
+   */
+  expectedFrame: DemonstratedFrameSchema.optional(),
   rules: z.array(ContractRuleSchema).default([]),
   successAssertions: z.array(AssertionSchema).default([]),
   policyAssertions: z.array(AssertionSchema).default([]),

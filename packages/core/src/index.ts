@@ -10,6 +10,7 @@ export * from './canonicalTrace.ts';
 export * from './traceNormalize.ts';
 export * from './predicate.ts';
 export * from './selector.ts';
+export * from './frame.ts';
 export * from './environmentContract.ts';
 export * from './budgets.ts';
 export * from './benchmark.ts';

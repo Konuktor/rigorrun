@@ -30,6 +30,13 @@ export const ASSERTION_KINDS = [
    * the job created). See the verifier for how a different start is judged.
    */
   'state_change',
+  /**
+   * Nothing changed beyond what the demonstration changed, for every kind of
+   * record (audit IO-5). `target` is `derived.frame`, the runner's summary of
+   * two readings at each end of the case; `expected` is `{mode, focusEntity,
+   * entities}` — see StateFrameExpectationSchema and the verifier.
+   */
+  'state_frame',
 ] as const;
 
 export const AssertionKindSchema = z.enum(ASSERTION_KINDS);
