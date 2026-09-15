@@ -1,0 +1,103 @@
+/**
+ * `--after-case <command>`: a generic hook that runs after each case has
+ * finished and before the next one starts.
+ *
+ * It exists so a harness can take its own reading of a system between cases —
+ * an oracle that must judge each case on its own, on a system that is not reset
+ * between them. A reading that failed must never be scored as if it had been
+ * taken, so a failing command stops the run.
+ */
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import type { CaseResult } from '@rigorrun/core';
+import { afterCaseHook } from '../src/afterCase.ts';
+import { main } from '../src/main.ts';
+
+let dir: string;
+let recorder: string;
+
+beforeAll(async () => {
+  dir = await mkdtemp(join(tmpdir(), 'rigorrun-after-case-'));
+  recorder = join(dir, 'record.cjs');
+  await writeFile(
+    recorder,
+    [
+      "const fs = require('node:fs');",
+      'const keys = ["RIGORRUN_RUN_ID", "RIGORRUN_AGENT_ID", "RIGORRUN_CASE_ID", "RIGORRUN_CASE_INDEX", "RIGORRUN_CASE_OUTCOME", "RIGORRUN_CASE_CATEGORY"];',
+      'fs.appendFileSync(process.argv[2], JSON.stringify(Object.fromEntries(keys.map((k) => [k, process.env[k]]))) + "\\n");',
+    ].join('\n'),
+  );
+});
+
+afterAll(async () => {
+  await rm(dir, { recursive: true, force: true });
+});
+
+const finished = (over: Partial<CaseResult>): CaseResult =>
+  ({
+    runId: 'run_1',
+    agentId: 'agent_1',
+    caseId: 'case_live__happy_path',
+    category: 'happy_path',
+    outcome: 'PASS',
+    ...over,
+  }) as CaseResult;
+
+describe('afterCaseHook', () => {
+  it('runs the command after each case with what identifies the case in its environment', async () => {
+    const out = join(dir, 'seen.jsonl');
+    const hook = afterCaseHook(`node "${recorder}" "${out}"`);
+    await hook(finished({ caseId: 'case_a' }), 0);
+    await hook(finished({ caseId: 'case_b', category: 'missing_precondition', outcome: 'FAIL' }), 1);
+    const lines = (await readFile(out, 'utf8')).trim().split('\n').map((entry) => JSON.parse(entry) as Record<string, string>);
+    expect(lines).toEqual([
+      { RIGORRUN_RUN_ID: 'run_1', RIGORRUN_AGENT_ID: 'agent_1', RIGORRUN_CASE_ID: 'case_a', RIGORRUN_CASE_INDEX: '0', RIGORRUN_CASE_OUTCOME: 'PASS', RIGORRUN_CASE_CATEGORY: 'happy_path' },
+      { RIGORRUN_RUN_ID: 'run_1', RIGORRUN_AGENT_ID: 'agent_1', RIGORRUN_CASE_ID: 'case_b', RIGORRUN_CASE_INDEX: '1', RIGORRUN_CASE_OUTCOME: 'FAIL', RIGORRUN_CASE_CATEGORY: 'missing_precondition' },
+    ]);
+  });
+
+  it('stops the run with exit code 2, naming the case, when the command fails', async () => {
+    const hook = afterCaseHook('node -e "process.exit(3)"');
+    await expect(hook(finished({ caseId: 'case_a' }), 0)).rejects.toMatchObject({
+      exitCode: 2,
+      message: expect.stringContaining('case_a'),
+    });
+  });
+
+  it('sends what the command prints to stderr, so --json output stays parseable', async () => {
+    const written: string[] = [];
+    const spy = vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      written.push(String(chunk));
+      return true;
+    });
+    try {
+      await afterCaseHook('node -e "console.log(\'reading taken\')"')(finished({}), 0);
+    } finally {
+      spy.mockRestore();
+    }
+    expect(written.join('')).toContain('reading taken');
+  });
+});
+
+describe('the --after-case flag', () => {
+  it('is accepted by the command line', async () => {
+    let out = '';
+    const spy = vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+      out += String(chunk);
+      return true;
+    });
+    const errSpy = vi.spyOn(process.stderr, 'write').mockImplementation((chunk) => {
+      out += String(chunk);
+      return true;
+    });
+    try {
+      await main(['run', '--project', 'p_does_not_exist', '--home', dir, '--after-case', 'true']);
+    } finally {
+      spy.mockRestore();
+      errSpy.mockRestore();
+    }
+    expect(out).not.toMatch(/Unknown option/i);
+  });
+});
