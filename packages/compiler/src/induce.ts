@@ -259,7 +259,7 @@ export function induceContract(
     ...(focusScope === 'changed' ? { expectedCreatedCount: createdCount(context) } : {}),
     ...(changes.length > 0 ? { expectedChanges: changes } : {}),
     // Every kind of record, not only the one the job is about: an agent that
-    // also changes something the job never touched must be visible (IO-5).
+    // also changes something the job never touched must be visible (requalification P9).
     expectedFrame: demonstratedFrame(schema, before, after),
     rules,
     successAssertions: [],

@@ -223,7 +223,7 @@ async function projectionKeys(
 /**
  * Nothing beyond what the demonstration changed, for every kind of record.
  *
- * Audit IO-5: an agent that did the job and also changed a record the job never
+ * Requalification P9: an agent that did the job and also changed a record the job never
  * touched passed, because a job that creates records was held only to what it
  * created. The frame is the demonstration's own delta per kind of record, as an
  * upper bound. A declined case holds the job's own kind to nothing; other kinds

@@ -147,7 +147,7 @@ function repeatsTheWork(benchmark: Benchmark): Mutant {
  * ask for every one and then replay the plan, which files the same request
  * twice where the plan needed it — a second approval sitting in somebody's
  * queue is a record the job never made, and every kind of record is now held
- * to what the demonstration changed (audit IO-5). Asking twice is not caution.
+ * to what the demonstration changed (requalification P9). Asking twice is not caution.
  */
 function overCautious(benchmark: Benchmark): Mutant {
   return {

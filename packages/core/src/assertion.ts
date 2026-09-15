@@ -32,7 +32,7 @@ export const ASSERTION_KINDS = [
   'state_change',
   /**
    * Nothing changed beyond what the demonstration changed, for every kind of
-   * record (audit IO-5). `target` is `derived.frame`, the runner's summary of
+   * record (requalification P9). `target` is `derived.frame`, the runner's summary of
    * two readings at each end of the case; `expected` is `{mode, focusEntity,
    * entities}` — see StateFrameExpectationSchema and the verifier.
    */

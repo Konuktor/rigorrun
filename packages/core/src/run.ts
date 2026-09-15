@@ -101,7 +101,7 @@ export const CaseResultSchema = z.object({
   missingEvidence: z.array(z.string()).default([]),
   /**
    * What reading the world twice at each end proved about the reads themselves
-   * (audit IO-5): fields they changed, and kinds of record whose membership
+   * (requalification P9): fields they changed, and kinds of record whose membership
    * moved with nothing in between. Present only on cases held to the frame.
    */
   readStability: z

@@ -24,7 +24,7 @@ export function isVerifierTool(name: string): boolean {
 /**
  * The nominated reads a verdict rests on, and the ones it sets aside.
  *
- * Audit IO-7-mixed-a: a project nominated a verifier read and one of the
+ * Requalification P10: a project nominated a verifier read and one of the
  * system's own reads, and the later answer's rows replaced the earlier's — so a
  * system that misreported its own state, read after the verifier, decided the
  * verdict. Once a witness the agent cannot reach is nominated, a read through

@@ -1,6 +1,6 @@
 /**
  * `state_frame`: nothing changed beyond what the demonstration changed, for
- * every kind of record (audit IO-5).
+ * every kind of record (requalification P9).
  *
  * The frame is an upper bound per kind of record — how many were created,
  * deleted and changed, and which fields changed. More than that fails, whatever

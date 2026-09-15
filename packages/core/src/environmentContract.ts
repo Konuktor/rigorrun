@@ -259,8 +259,8 @@ export const EnvironmentContractSchema = z.object({
   expectedChanges: z.array(ExpectedChangeSchema).optional(),
   /**
    * What the demonstration did to every kind of record, touched or not — the
-   * `expected*` fields above describe only the record the job is about (audit
-   * IO-5). An upper bound per kind: an agent that creates, deletes or changes
+   * `expected*` fields above describe only the record the job is about
+   * (requalification P9). An upper bound per kind: an agent that creates, deletes or changes
    * more than this has done something the job does not. Absent on contracts
    * compiled before it existed, whose cases carry no frame check.
    */

@@ -1,6 +1,6 @@
 /**
  * What a job changed, for every kind of record, and what reading the world
- * twice proves about the reads themselves (audit IO-5).
+ * twice proves about the reads themselves (requalification P9).
  *
  * Both are built on `diffStates`, the one definition of what changed. A field
  * is only ever set aside because two readings with nothing in between showed it

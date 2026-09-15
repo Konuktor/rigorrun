@@ -216,7 +216,7 @@ class AgentTimeoutError extends Error {
  *   check that needs it is unverifiable and the case abstains.
  *
  * A case held to the demonstrated frame reads the starting world twice, with
- * nothing in between (audit IO-5). A field that differs was changed by the
+ * nothing in between (requalification P9). A field that differs was changed by the
  * reading itself, and the second reading is the world the agent starts from, so
  * whatever the reads change before the agent acts is never counted as its work.
  */

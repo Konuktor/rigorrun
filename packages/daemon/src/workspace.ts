@@ -391,7 +391,7 @@ export class Workspace {
     if (live.connection.canReadState === false) return [];
     const answers: { read: string; payload: unknown }[] = [];
     // Once a verifier read is nominated, the demonstration is recorded through
-    // it alone, exactly as verdicts are read (audit IO-7-mixed-a). The label
+    // it alone, exactly as verdicts are read (requalification P10). The label
     // keeps each read's place in the nomination, so a reading is named the same
     // way however many reads are set aside.
     const { used } = readsForVerdict(project.verifierReads);

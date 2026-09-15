@@ -187,7 +187,7 @@ export class SystemEnvironment implements EnvironmentAdapter {
    * The world, as far as the reads a verdict uses can see it.
    *
    * Once a verifier read is nominated, those are the verifier's alone, and the
-   * system's own reads are not called (audit IO-7-mixed-a; see readsForVerdict).
+   * system's own reads are not called (requalification P10; see readsForVerdict).
    *
    * A read that fails, or answers in prose, leaves the world unknown and throws
    * StateReadError; an unknown world is never handed back as an empty one.
