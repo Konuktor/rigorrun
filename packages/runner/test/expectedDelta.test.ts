@@ -430,9 +430,10 @@ describe('a job that changes an existing record, named by its identifier', () =>
  * expected final state is the starting world plus the demonstrated delta, and a
  * record the demonstration did not delete is part of that world.
  *
- * Deletions are held to the demonstration exactly. Changes to other records are
- * deliberately not: real reads flip flags and counters (a message marked read by
- * the read itself), and a check on those would fail correct agents.
+ * Deletions of this kind are held to the demonstration exactly here. Changes to
+ * other records, of this kind and every other, are held by the frame check
+ * (frame.test.ts, audit IO-5): a field the reads themselves change is set aside
+ * only when two readings with nothing in between prove it.
  */
 describe('records the job never deletes', () => {
   const POST = { target: 'north-desk', heading: 'Spring plan' };

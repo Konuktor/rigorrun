@@ -83,7 +83,9 @@ describe('how a case ended', () => {
     const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
     clearEnvironments();
     const { registerEnvironment } = await import('@rigorrun/environment');
-    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), failReadsFrom: 2 }));
+    // A case held to the demonstrated frame reads the starting world twice, so
+    // the first read that fails after the agent acted is the third.
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), failReadsFrom: 3 }));
     const happy = await happyOf(await runBenchmark(benchmark, [CORRECT]));
     expect(happy.outcome).toBe('ABSTAIN');
     expect(happy.baseline).toBe('OBSERVED_AT_START');

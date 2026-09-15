@@ -15,6 +15,7 @@ import type {
   ObservedEvent,
 } from '@rigorrun/core';
 import { failureSeverityOf, isBlocking, verificationSourceOf } from '@rigorrun/core';
+import { stateFrame } from './frame.ts';
 import { resolvePath } from './path.ts';
 
 interface Outcome {
@@ -123,6 +124,8 @@ function evaluateKind(
         return eventPresence(kind, target, expected, observation);
       case 'state_change':
         return stateChange(target, expected, observation);
+      case 'state_frame':
+        return stateFrame(expected, observation);
     }
   } catch (error) {
     return {

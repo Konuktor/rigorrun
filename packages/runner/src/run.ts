@@ -25,6 +25,7 @@ import {
   type BenchmarkCase,
   type CaseOutcome,
   type CaseResult,
+  type EntityReadStability,
   type EvidenceIndependence,
   type ObservedEvent,
   type RunResult,
@@ -35,9 +36,11 @@ import {
   buildProjection,
   capabilityLimits,
   createEnvironment,
+  frameObservation,
   isolationLevel,
   mayMutateAtAll,
   mayRepeatMutatingCases,
+  readStability,
   verificationStrength,
   type CanonicalState,
   type EnvironmentAdapter,
@@ -211,16 +214,24 @@ class AgentTimeoutError extends Error {
  *   it did nothing, and any drift since looks like the agent's work.
  * - UNAVAILABLE: nothing could be read. The delta cannot be computed, so any
  *   check that needs it is unverifiable and the case abstains.
+ *
+ * A case held to the demonstrated frame reads the starting world twice, with
+ * nothing in between (audit IO-5). A field that differs was changed by the
+ * reading itself, and the second reading is the world the agent starts from, so
+ * whatever the reads change before the agent acts is never counted as its work.
  */
 interface Baseline {
   state: CanonicalState;
   source: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
   missing: string[];
+  /** What the two starting readings proved, when the case reads twice. */
+  stability?: Record<string, EntityReadStability>;
 }
 
 async function establishBaseline(
   adapter: EnvironmentAdapter,
   testCase: BenchmarkCase,
+  readTwice: boolean,
 ): Promise<Baseline> {
   const capabilities = adapter.capabilities();
   const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
@@ -232,7 +243,15 @@ async function establishBaseline(
     return { state: { entities: {} }, source: 'UNAVAILABLE', missing: ['no_state_read'] };
   }
   try {
-    return { state: await adapter.getState(), source: 'OBSERVED_AT_START', missing: [] };
+    const first = await adapter.getState();
+    if (!readTwice) return { state: first, source: 'OBSERVED_AT_START', missing: [] };
+    const second = await adapter.getState();
+    return {
+      state: second,
+      source: 'OBSERVED_AT_START',
+      missing: [],
+      stability: readStability(adapter.describeEntities(), first, second),
+    };
   } catch (error) {
     if (error instanceof StateReadError) {
       return {
@@ -266,6 +285,11 @@ async function executeCase(
 
   const startedAt = now().toISOString();
   const startedMs = performanceNow();
+  // A case held to the demonstrated frame reads the world twice at each end,
+  // so a field the reads themselves change is proved rather than assumed. Only
+  // such a case: a benchmark compiled before frames keeps its exact reads.
+  const readTwice =
+    capabilities.stateRead !== 'none' && testCase.checks.some((check) => check.kind === 'state_frame');
   const skeleton = {
     runId,
     caseId: testCase.id,
@@ -313,7 +337,7 @@ async function executeCase(
 
   let baseline: Baseline;
   try {
-    baseline = await establishBaseline(adapter, testCase);
+    baseline = await establishBaseline(adapter, testCase, readTwice);
   } catch (error) {
     return harnessFailure('establish the starting world', error);
   }
@@ -425,11 +449,20 @@ async function executeCase(
   const durationMs = Math.max(0, performanceNow() - startedMs);
   const finishedAt = now().toISOString();
 
-  // observe: authoritative state, projected the same way for every agent.
-  let finalState: CanonicalState;
+  // observe: authoritative state, projected the same way for every agent. A
+  // case held to the frame reads it twice: the first reading is the final
+  // world, and the second only proves what reading changes. The agent's budget
+  // ended above, so neither reading spends it.
+  let finalState: CanonicalState = { entities: {} };
   let finalReadable = true;
+  let finalStability: Record<string, EntityReadStability> | undefined;
   try {
-    finalState = capabilities.stateRead === 'none' ? { entities: {} } : await adapter.getState();
+    if (capabilities.stateRead !== 'none') {
+      finalState = await adapter.getState();
+      if (readTwice) {
+        finalStability = readStability(adapter.describeEntities(), finalState, await adapter.getState());
+      }
+    }
   } catch (error) {
     if (!(error instanceof StateReadError)) return harnessFailure('read the final state', error);
     finalState = { entities: {} };
@@ -437,7 +470,7 @@ async function executeCase(
     missingEvidence.push(`final_state_unavailable:${error.read}`);
   }
   const events = await adapter.getEvents();
-  const { derived } = buildProjection(adapter.describeEntities(), {
+  const { derived, deltas } = buildProjection(adapter.describeEntities(), {
     seed: initialState,
     final: finalState,
     events,
@@ -449,9 +482,20 @@ async function executeCase(
   // were read. Otherwise it is not a pass and not a failure: it is a check
   // RigorRun could not make, and the verdict says so.
   const stateUnverifiable = baseline.source === 'UNAVAILABLE' || !finalReadable;
+  // What the case changed for every kind of record, with what the readings at
+  // each end proved about themselves: the evidence a frame check reads.
+  const frame =
+    readTwice && !stateUnverifiable && finalStability
+      ? frameObservation(
+          adapter.describeEntities(),
+          deltas,
+          baseline.source === 'INSTALLED_SEED' ? 'installed_seed' : (baseline.stability ?? {}),
+          finalStability,
+        )
+      : undefined;
   const summary = verify(
     testCase.checks,
-    { state: finalState, derived, events: [], agentReport: report },
+    { state: finalState, derived: frame ? { ...derived, frame } : derived, events: [], agentReport: report },
     stateUnverifiable
       ? {
           unverifiableSources: ['STATE'],
@@ -466,6 +510,16 @@ async function executeCase(
   );
 
   const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, budgetMs);
+
+  // A frame check that could not rule says why, in the same stable terms as
+  // every other piece of missing evidence.
+  const frameResult = summary.results.find((result) => result.kind === 'state_frame');
+  if (frameResult?.status === 'UNVERIFIABLE') {
+    const detail = frameResult.observed as { unverifiable?: { id: string }[] } | null;
+    for (const id of detail?.unverifiable?.map((entry) => entry.id) ?? []) {
+      if (!missingEvidence.includes(id)) missingEvidence.push(id);
+    }
+  }
 
   return {
     ...skeleton,
@@ -491,6 +545,27 @@ async function executeCase(
     outcomeReason,
     missingEvidence,
     baseline: baseline.source,
+    ...(readTwice
+      ? {
+          readStability: {
+            baseline:
+              baseline.source === 'INSTALLED_SEED'
+                ? ('installed_seed' as const)
+                : baseline.source === 'UNAVAILABLE'
+                  ? ('unavailable' as const)
+                  : ('double_read' as const),
+            final: finalStability ? ('double_read' as const) : ('unavailable' as const),
+            volatileFields: Object.fromEntries(
+              Object.entries(frame?.entities ?? {})
+                .filter(([, entity]) => entity.volatileFields.length > 0)
+                .map(([name, entity]) => [name, entity.volatileFields]),
+            ),
+            membershipUnstable: Object.entries(frame?.entities ?? {})
+              .filter(([, entity]) => entity.membershipUnstable)
+              .map(([name]) => name),
+          },
+        }
+      : {}),
     initialStateHash: await hashValue(initialState),
     ...(usage ? { usage } : {}),
     costUsd,
