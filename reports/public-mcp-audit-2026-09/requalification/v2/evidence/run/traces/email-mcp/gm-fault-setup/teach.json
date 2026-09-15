@@ -1,0 +1,42 @@
+[
+  {
+    "step": {
+      "tool": "check_inbox",
+      "args": {
+        "service": "default",
+        "limit": 50
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": {
+        "success": true,
+        "emails": [],
+        "count": 0,
+        "service": "default",
+        "message": "Found 0 emails in INBOX via default service",
+        "folder": "INBOX"
+      }
+    }
+  },
+  {
+    "step": {
+      "tool": "send_email",
+      "args": {
+        "to": "qa@example.test",
+        "subject": "Audit 17",
+        "body": "Audit message 17. This is a synthetic test email captured by a local fake mail server.",
+        "service": "default"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": {
+        "success": true,
+        "status": "sent",
+        "service": "default",
+        "message": "Email 'Audit 17' sent successfully to qa@example.test via default service"
+      }
+    }
+  }
+]

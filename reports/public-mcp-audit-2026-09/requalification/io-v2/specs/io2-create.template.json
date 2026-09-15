@@ -1,0 +1,38 @@
+{
+  "name": "taskdesk2: create one task, verified independently over tasks and notes",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "{PYTHON}",
+    "args": ["{IO}/taskdesk2_server.py", "--db", "{STATE}/desk.db", "--faults", "{STATE}/faults.json", "--shadow", "{STATE}/shadow.json", "--calls-log", "{STATE}/calls.log"],
+    "url": "",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "{PYTHON}",
+      "args": ["{IO}/taskdesk2_oracle_server.py", "--db", "{STATE}/desk.db", "--down-flag", "{STATE}/oracle-down.flag", "--empty-flag", "{STATE}/oracle-empty.flag", "--calls-log", "{STATE}/calls.log"],
+      "url": "",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": ["list_tasks", "list_notes", "verifier:query_tasks", "verifier:query_notes"],
+  "verifierReads": [
+    { "tool": "verifier:query_tasks", "args": {} },
+    { "tool": "verifier:query_notes", "args": {} }
+  ],
+  "reset": { "kind": "none" },
+  "teach": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } }
+  ],
+  "answers": {},
+  "review": { "confirm": [], "reject": [] },
+  "quality": false,
+  "agents": [
+    { "name": "io2-create-correct", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io2-create-correct.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io2-create-extra-note-edit", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io2-create-extra-note-edit.json", "{TRACES}"], "cwd": "{STATE}" }
+  ]
+}

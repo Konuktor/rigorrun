@@ -1,0 +1,17 @@
+{
+  "note": "Every file that defines benchmark-v2 (pre-registration, labels, harness), hashed before any benchmark-v2 attempt ran. run-v2.py refuses to run without it, and product-under-test.mjs --check verifies it.",
+  "frozenAt": "2026-09-15T02:19:08.153648+00:00",
+  "headAtFreeze": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "files": {
+    "PREREGISTRATION.md": "568409d089a9bafe682d481dc1b4ed4ffb39446abe8cb0e71d1143b43169b73d",
+    "labels.json": "5f0b2c36cc0c31604074db105f7d6bbdea7801bedde33a948e9f6ee8a7df9f3f",
+    "scripts/aggregate-v2.mjs": "1868e38ffc8800b500e1fbe03c26990d20610714dc52deb8d6a4ae0cf6d371a2",
+    "scripts/freeze-v2.py": "ed4d289caf72dd4432572a6bfbc658f4bb7a03d636bac05d95e8805286330730",
+    "scripts/n1-cross-regression-v2.mjs": "f70346d59fc85424984ba1318cb849af0e11e5802aa3f1cdc8422b855be68a1d",
+    "scripts/oracle-reading.py": "98222a576f5e4d96e3fd33227f1b632830907f5b1787c91804c6c00486384683",
+    "scripts/release-gate-v2.mjs": "2eca437943ad28e87cc748843447ca8eac878b558d7397a4ca41685905de72c3",
+    "scripts/run-local-model-v2.sh": "c174f710ade1fcb621d350f42dbd727fb4f0401d1be98d9dc80f978517c05e9e",
+    "scripts/run-v2.py": "7009038af46b3da2dadcdea834746ce4d9121ffc7a75c44e9e20c8bf793c39f4",
+    "scripts/setup-v2.py": "3a20eae2d74b28d8cd5bc043ea7b97fc8bad836eb2b4e5e6da65132785b313f4"
+  }
+}

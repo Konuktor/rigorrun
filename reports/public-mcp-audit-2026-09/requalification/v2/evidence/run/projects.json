@@ -1,0 +1,18 @@
+{
+  "home-sqlite-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1",
+    "project": "p_b0ae35317e1a"
+  },
+  "home-sqlite-w1b": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1b",
+    "project": "p_b93b3056113c"
+  },
+  "home-email-gm-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-email-gm-w1",
+    "project": "p_6a8b484c8e96"
+  },
+  "home-email-gm-fault": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-email-gm-fault",
+    "project": "p_bc358a9905a8"
+  }
+}

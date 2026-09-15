@@ -1,0 +1,9 @@
+{
+  "name": "io2-update-extra-note-create",
+  "steps": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "update_task", "args": { "id": 2, "status": "done" } },
+    { "tool": "create_note", "args": { "task_id": 2, "body": "Deposit paid for the river hall" } }
+  ],
+  "report": "Marked task 2, Book venue, as done."
+}

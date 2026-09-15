@@ -1,0 +1,8 @@
+{
+  "name": "io2-update-correct",
+  "steps": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "update_task", "args": { "id": 2, "status": "done" } }
+  ],
+  "report": "Marked task 2, Book venue, as done."
+}

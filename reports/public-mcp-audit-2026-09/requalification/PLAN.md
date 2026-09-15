@@ -103,6 +103,45 @@ Every number below was read from a log in `evidence/stage-a/`.
 | Original defects (inline copy of `remediation/repro/run-repro.sh after`, log redirected) | 10/10 defect assertions fail, so all 10 defects remain absent | `repro-after.log` |
 | e2e (`pnpm e2e`) | 56 passed | `e2e.log` |
 
+## P13 — Product comments named frozen cases (found before any run)
+
+- **Finding.** A dry run of `v2/scripts/release-gate-v2.mjs` with no evidence was made before any requalification run. It showed that GATE 12 (no target-specific special casing) would fail on the product itself.
+- **Cause.** 13 comments added in stage A named frozen independent-oracle cases ("IO-5", "audit IO-7-mixed-a"). The gate's scan covers every line added to `packages/*/src` and `apps/*/src` since the audited commit, comments included.
+- **Fix.** The comments now cite P9 and P10, defined above. The change is comment-only: 13 files, 14 lines. The scan finds 0 hits; typecheck and lint pass.
+- **Consequence.** The product under test was recorded again at the new commit, before any run.
+
+## Product limitation found while pre-registering IO-v2 (not fixed)
+
+- **What.** A job whose demonstration only deletes records cannot be compiled.
+- **Why.** `induceContract` (`packages/compiler/src/induce.ts:155-159`) treats a job that creates nothing as one that changes records, then requires a changed focus row. A deleted row is not a changed row.
+- **Found before any run.** The IO-v2 fixture builder found this while writing a delete-only project; it was confirmed from code before anything ran.
+- **Consequence for IO-v2.** The delete project was replaced by a replace project (delete task 3, create one task). Its reset is the connector's `reset_desk` tool, so setup generates cases from the seeded world. The "delete A + update B" combination is still exercised (IO2-6).
+- **Status.** This limitation is outside the requalification's scope. It is reported, not fixed.
+
+## Stage B record: pre-registration (before any IO-v2 or benchmark-v2 run)
+
+- **IO-v2 changes before its freeze.** Besides the replace project:
+  - the fixture gained `reset_desk`;
+  - both tables now use `AUTOINCREMENT`, so a deleted id is never reused;
+  - the runner's aggregate emits `abstentionGate` in IO-v1's shape, which GATE 8 reads. IO-v2 has no abstention case, so the list is empty.
+- **One fixture check before the IO-v2 freeze.** It ran against a scratch copy of the seed, outside `rq-io2-state`, without RigorRun. It confirmed three things:
+  - `reset_desk` restores the seed;
+  - ids restart after a reset;
+  - IO2-5's `expect` holds on a correct replacement.
+
+  It is disclosed in `io-v2/cases.json`. No IO-v2 setup or case has run.
+- **Product reset path, read before freezing.** RigorRun calls a tool reset before the demonstration (`packages/daemon/src/workspace.ts:355`), before capturing the generation fixture (`packages/daemon/src/service.ts:1078`), and before every case (`packages/runner/src/run.ts:333`).
+- **GATE 12.** `reset_desk` was added to the forbidden names before the benchmark-v2 freeze. Since the audited commit, the name appears only in product tests (8 added lines in `packages/*/test/`), never in `*/src/`, which is all the gate scans.
+- **Evidence hygiene before the commit.**
+  - The 9 benchmark-v2 setup evidence files had their machine paths scrubbed (`scripts/rq_hygiene.py scrub`). No run script reads them back.
+  - `redact --check`: 0 files carry a credential.
+  - `quarantine-check`: 0 frozen audit files differ from HEAD.
+- **Freezes.** Written in this order, each before its first run:
+  1. `io-v2/freeze.json`
+  2. `v2/freeze.json`
+
+  The product under test was then recorded again, so `product-under-test.mjs --check` verifies both freezes.
+
 ## Residual risks carried into the qualification
 
 1. **Windowed reads.** A count-preserving delete plus create fails rather than abstains, so a correct agent against a full newest-N listing fails. The focus-deletion check already did this. The follow-up is per-read coverage metadata.

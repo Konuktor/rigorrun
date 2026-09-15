@@ -1,7 +1,7 @@
 {
   "generatedBy": "requalification/scripts/product-under-test.mjs",
-  "recordedAt": "2026-09-15T01:36:44.505Z",
-  "productCommit": "95acc3d6e0380c0539d4eb68ff6d246f823ec24d",
+  "recordedAt": "2026-09-15T02:19:28.407Z",
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
   "branch": "redesign/brand-site-product",
   "packageVersion": "0.2.0",
   "productPathspec": [
@@ -65,7 +65,7 @@
       "8336fd3": true
     }
   },
-  "lastProductCommit": "94d723091ad4e95a0b7e5d4a7fb0febe42a04ae1 feat(daemon,cli): --after-case, a program run after each case and before the next",
+  "lastProductCommit": "89fd4c165f9d5526214f0379dc5e7d16c6836e33 docs(core,connector,compiler,generator,verifier,runner,daemon,environment,quality): cite requalification findings, not frozen case ids",
   "previousMeasurements": {
     "finalQualification": {
       "productCommit": "a9edbec98ea9056bf1b6a3773cc3fa9ba2692d01",
@@ -176,10 +176,18 @@
     },
     "laterFreezes": {
       "benchmarkV2": {
-        "present": false
+        "present": true,
+        "freezeJsonSha256": "65d6cc59e87e89f61304cec7ab21d2b7367a55c437a1b34bd62c2a5bac079900",
+        "frozenAt": "2026-09-15T02:19:08.153648+00:00",
+        "filesVerified": 10,
+        "mismatches": []
       },
       "ioV2": {
-        "present": false
+        "present": true,
+        "freezeJsonSha256": "0a1552dd039cbd3f73f0e6108eef6911b06652b965d3adb6e82fc11fd93532d3",
+        "frozenAt": "2026-09-15T02:18:12+00:00",
+        "filesVerified": 19,
+        "mismatches": []
       }
     },
     "pinnedTargets": {
