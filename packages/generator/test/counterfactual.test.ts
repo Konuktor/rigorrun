@@ -192,6 +192,31 @@ describe('hidden answer isolation', () => {
     expect(refuse.length).toBeGreaterThan(0);
   });
 
+  /**
+   * Requalification A3: a case whose inputs differ from the demonstration kept
+   * the demonstrated goal text, so an agent read "through the default service"
+   * next to a work order naming another service. The instruction now says, in
+   * the same words for every case, that the work order wins — and names no
+   * value, so it still carries nothing about any one case.
+   */
+  it('tells every case, in the same words, that the work order wins over values the goal names', async () => {
+    const { cases } = await generated();
+    const instructions = cases.map((entry) => entry.testCase.task.instruction);
+    expect(new Set(instructions).size).toBe(1);
+    const [instruction] = instructions;
+    expect(instruction).toMatch(/work order/i);
+    expect(instruction).toMatch(/takes precedence/i);
+    const perCaseValues = new Set(
+      cases.flatMap((entry) => Object.values(entry.testCase.task.inputs).filter((value): value is string => typeof value === 'string' && value.length > 3)),
+    );
+    const demonstrated = new Set(
+      Object.values((await contract()).demonstratedArgs).flatMap((args) => Object.values(args)).map(String),
+    );
+    for (const value of perCaseValues) {
+      if (!demonstrated.has(value)) expect(instruction, value).not.toContain(value);
+    }
+  });
+
   it('tells the agent the policy, because an operator would be told it too', async () => {
     const { cases } = await generated();
     const brief = cases[0]?.testCase.task.policyBrief ?? '';
