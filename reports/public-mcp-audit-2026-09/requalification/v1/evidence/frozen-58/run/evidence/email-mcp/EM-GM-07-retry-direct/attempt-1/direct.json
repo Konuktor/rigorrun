@@ -1,0 +1,55 @@
+{
+  "command": [
+    "node",
+    "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+    "--",
+    "uv",
+    "--directory",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+    "run",
+    "email-mcp"
+  ],
+  "calls": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "qa@example.test",
+        "subject": "Audit 17",
+        "body": "Audit message 17 (retry probe)",
+        "service": "default"
+      },
+      "result": {
+        "message": "transport timeout after 5.0s (no response)",
+        "timeout": true
+      }
+    },
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "qa@example.test",
+        "subject": "Audit 17",
+        "body": "Audit message 17 (retry probe)",
+        "service": "default"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"default\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via default service\"}"
+          }
+        ],
+        "structuredContent": {
+          "success": true,
+          "status": "sent",
+          "service": "default",
+          "message": "Email 'Audit 17' sent successfully to qa@example.test via default service"
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "Email-MCP",
+    "version": "0.5.0"
+  }
+}

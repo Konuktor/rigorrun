@@ -1,0 +1,37 @@
+{
+  "command": [
+    "uv",
+    "--directory",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+    "run",
+    "email-mcp"
+  ],
+  "calls": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "qa@example.test",
+        "subject": "Audit ghost",
+        "body": "x",
+        "service": "ghost"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"success\":false,\"error\":\"Service 'ghost' not available. Available services: ['mailhog']\"}"
+          }
+        ],
+        "structuredContent": {
+          "success": false,
+          "error": "Service 'ghost' not available. Available services: ['mailhog']"
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "Email-MCP",
+    "version": "0.5.0"
+  }
+}

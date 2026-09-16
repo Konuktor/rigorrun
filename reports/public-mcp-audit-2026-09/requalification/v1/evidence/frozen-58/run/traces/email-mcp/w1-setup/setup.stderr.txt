@@ -1,0 +1,1 @@
+journey: POST /api/projects/p_8aca1d56ca88/compile → 400: {"error":"The recording performed \"send_email\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled."}

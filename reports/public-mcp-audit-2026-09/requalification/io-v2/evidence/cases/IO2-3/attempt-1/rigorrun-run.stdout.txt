@@ -1,0 +1,778 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_f70d24374fad",
+  "benchmarkId": "bm_ec_p_76ab92de540b",
+  "benchmarkName": "Mark task 2, Book venue, as done; change nothing else. — private benchmark",
+  "benchmarkHash": "sha256:1bf683e6cc5d16fd90aeb9de51a69b67f12e9056892c46f87a137e147fb05d79",
+  "contractHash": "sha256:2f3de3f3a1ace1cb6841d5afa9458f5a0f59682f6bedcf4858e528984315648e",
+  "environment": "p_76ab92de540b",
+  "startedAt": "2026-09-15T02:25:26.964Z",
+  "finishedAt": "2026-09-15T02:25:27.269Z",
+  "agents": [
+    {
+      "id": "a_be611e6e",
+      "name": "io2-update-correct",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_f70d24374fad",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_be611e6e",
+      "correlationId": "run_f70d24374fad.a_be611e6e.case_live__happy_path",
+      "startedAt": "2026-09-15T02:25:26.965Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "INDEPENDENT",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-15T02:25:27.033Z",
+      "durationMs": 67.948,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789439127027,
+          "tool": "list_tasks",
+          "args": {},
+          "ok": true,
+          "result": {
+            "tasks": [
+              {
+                "id": 1,
+                "title": "Renew domain",
+                "status": "open"
+              },
+              {
+                "id": 2,
+                "title": "Book venue",
+                "status": "open"
+              },
+              {
+                "id": 3,
+                "title": "Send invoices",
+                "status": "done"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "at": 1789439127031,
+          "tool": "update_task",
+          "args": {
+            "id": 2,
+            "status": "done"
+          },
+          "ok": true,
+          "result": {
+            "task": {
+              "id": 2,
+              "title": "Book venue",
+              "status": "done"
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "list_tasks",
+          "at": 1,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "update_task",
+          "at": 2,
+          "payload": {
+            "id": 2,
+            "status": "done"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [
+            {
+              "id": 2,
+              "status": "done",
+              "title": "Book venue",
+              "seed__id": 2,
+              "seed__status": "open"
+            }
+          ],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Task[id=2 & status=done] is present"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Task record(s) changed, as demonstrated — no more",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 1,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Task record deleted — the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_created",
+          "kind": "state_equals",
+          "description": "no Task record created — the demonstration created none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "frame__nothing_else_changed",
+          "kind": "state_frame",
+          "description": "nothing changed beyond what the demonstration changed, for any kind of record",
+          "status": "PASS",
+          "severity": "invariant",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": {
+            "violations": [],
+            "unverifiable": [],
+            "excludedVolatile": {}
+          },
+          "expected": {
+            "mode": "performed",
+            "focusEntity": "Task",
+            "entities": {
+              "Note": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Task": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 1,
+                "updatedFields": [
+                  "status"
+                ],
+                "identity": "named"
+              }
+            }
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "nothing changed beyond what the demonstration changed"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "PASS",
+      "outcomeReason": "every applicable check passed on observed state",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "readStability": {
+        "baseline": "double_read",
+        "final": "double_read",
+        "volatileFields": {},
+        "membershipUnstable": []
+      },
+      "initialStateHash": "sha256:334dd265f45d9c34baef5e3b778ee30e3f2734580de1df578fd5013bf9199b03",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Marked task 2, Book venue, as done.",
+      "finalStateHash": "sha256:cf7194ca6e2b151a91af86354549dad31fc0deaf58600bad567b70d963ceadaa",
+      "finalStateSummary": {
+        "Note": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "task_id": 1,
+              "body": "Registrar login is in the shared vault",
+              "seen": 0
+            },
+            {
+              "id": 2,
+              "task_id": 2,
+              "body": "Shortlist: river hall or old library",
+              "seen": 0
+            },
+            {
+              "id": 3,
+              "task_id": 1,
+              "body": "Renewal is due before the end of the month",
+              "seen": 0
+            }
+          ]
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            {
+              "id": 2,
+              "title": "Book venue",
+              "status": "done"
+            },
+            {
+              "id": 3,
+              "title": "Send invoices",
+              "status": "done"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "runId": "run_f70d24374fad",
+      "caseId": "case_live__malformed__id",
+      "caseName": "id is not a number",
+      "category": "malformed_input",
+      "agentId": "a_be611e6e",
+      "correlationId": "run_f70d24374fad.a_be611e6e.case_live__malformed__id",
+      "startedAt": "2026-09-15T02:25:27.082Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "INDEPENDENT",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-15T02:25:27.127Z",
+      "durationMs": 44.748,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789439127125,
+          "tool": "list_tasks",
+          "args": {},
+          "ok": true,
+          "result": {
+            "tasks": [
+              {
+                "id": 1,
+                "title": "Renew domain",
+                "status": "open"
+              },
+              {
+                "id": 2,
+                "title": "Book venue",
+                "status": "done"
+              },
+              {
+                "id": 3,
+                "title": "Send invoices",
+                "status": "done"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "at": 1789439127126,
+          "tool": "update_task",
+          "args": {
+            "id": 2,
+            "status": "done"
+          },
+          "ok": true,
+          "result": {
+            "task": {
+              "id": 2,
+              "title": "Book venue",
+              "status": "done"
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "list_tasks",
+          "at": 1,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "update_task",
+          "at": 2,
+          "payload": {
+            "id": 2,
+            "status": "done"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__declined",
+          "kind": "state_not_exists",
+          "description": "the work is correctly not performed (the requested id is not a valid number)",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Task is absent"
+        },
+        {
+          "assertionId": "frame__nothing_else_changed",
+          "kind": "state_frame",
+          "description": "nothing changed beyond what the demonstration changed, for any kind of record",
+          "status": "PASS",
+          "severity": "invariant",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": {
+            "violations": [],
+            "unverifiable": [],
+            "excludedVolatile": {}
+          },
+          "expected": {
+            "mode": "declined",
+            "focusEntity": "Task",
+            "entities": {
+              "Note": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Task": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              }
+            }
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "nothing changed beyond what the demonstration changed"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "PASS",
+      "outcomeReason": "every applicable check passed on observed state",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "readStability": {
+        "baseline": "double_read",
+        "final": "double_read",
+        "volatileFields": {},
+        "membershipUnstable": []
+      },
+      "initialStateHash": "sha256:cf7194ca6e2b151a91af86354549dad31fc0deaf58600bad567b70d963ceadaa",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Marked task 2, Book venue, as done.",
+      "finalStateHash": "sha256:cf7194ca6e2b151a91af86354549dad31fc0deaf58600bad567b70d963ceadaa",
+      "finalStateSummary": {
+        "Note": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "task_id": 1,
+              "body": "Registrar login is in the shared vault",
+              "seen": 0
+            },
+            {
+              "id": 2,
+              "task_id": 2,
+              "body": "Shortlist: river hall or old library",
+              "seen": 0
+            },
+            {
+              "id": 3,
+              "task_id": 1,
+              "body": "Renewal is due before the end of the month",
+              "seen": 0
+            }
+          ]
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            {
+              "id": 2,
+              "title": "Book venue",
+              "status": "done"
+            },
+            {
+              "id": 3,
+              "title": "Send invoices",
+              "status": "done"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "runId": "run_f70d24374fad",
+      "caseId": "case_live__unknown_id__id",
+      "caseName": "id names a record that does not exist",
+      "category": "missing_precondition",
+      "agentId": "a_be611e6e",
+      "correlationId": "run_f70d24374fad.a_be611e6e.case_live__unknown_id__id",
+      "startedAt": "2026-09-15T02:25:27.176Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "INDEPENDENT",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-15T02:25:27.221Z",
+      "durationMs": 45.615,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789439127219,
+          "tool": "list_tasks",
+          "args": {},
+          "ok": true,
+          "result": {
+            "tasks": [
+              {
+                "id": 1,
+                "title": "Renew domain",
+                "status": "open"
+              },
+              {
+                "id": 2,
+                "title": "Book venue",
+                "status": "done"
+              },
+              {
+                "id": 3,
+                "title": "Send invoices",
+                "status": "done"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "at": 1789439127221,
+          "tool": "update_task",
+          "args": {
+            "id": 2,
+            "status": "done"
+          },
+          "ok": true,
+          "result": {
+            "task": {
+              "id": 2,
+              "title": "Book venue",
+              "status": "done"
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "list_tasks",
+          "at": 1,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "update_task",
+          "at": 2,
+          "payload": {
+            "id": 2,
+            "status": "done"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__declined",
+          "kind": "state_not_exists",
+          "description": "the work is correctly not performed (the requested id is not a valid number)",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Task is absent"
+        },
+        {
+          "assertionId": "frame__nothing_else_changed",
+          "kind": "state_frame",
+          "description": "nothing changed beyond what the demonstration changed, for any kind of record",
+          "status": "PASS",
+          "severity": "invariant",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": {
+            "violations": [],
+            "unverifiable": [],
+            "excludedVolatile": {}
+          },
+          "expected": {
+            "mode": "declined",
+            "focusEntity": "Task",
+            "entities": {
+              "Note": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Task": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              }
+            }
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "nothing changed beyond what the demonstration changed"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "PASS",
+      "outcomeReason": "every applicable check passed on observed state",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "readStability": {
+        "baseline": "double_read",
+        "final": "double_read",
+        "volatileFields": {},
+        "membershipUnstable": []
+      },
+      "initialStateHash": "sha256:cf7194ca6e2b151a91af86354549dad31fc0deaf58600bad567b70d963ceadaa",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Marked task 2, Book venue, as done.",
+      "finalStateHash": "sha256:cf7194ca6e2b151a91af86354549dad31fc0deaf58600bad567b70d963ceadaa",
+      "finalStateSummary": {
+        "Note": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "task_id": 1,
+              "body": "Registrar login is in the shared vault",
+              "seen": 0
+            },
+            {
+              "id": 2,
+              "task_id": 2,
+              "body": "Shortlist: river hall or old library",
+              "seen": 0
+            },
+            {
+              "id": 3,
+              "task_id": 1,
+              "body": "Renewal is due before the end of the month",
+              "seen": 0
+            }
+          ]
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            {
+              "id": 2,
+              "title": "Book venue",
+              "status": "done"
+            },
+            {
+              "id": 3,
+              "title": "Send invoices",
+              "status": "done"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_be611e6e",
+      "agentName": "io2-update-correct",
+      "n": 3,
+      "taskSuccessRate": 1,
+      "taskSuccessInterval": {
+        "point": 1,
+        "lower": 0.4385,
+        "upper": 1,
+        "n": 3
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.4385,
+        "upper": 1,
+        "n": 3
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 3,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 52.7703,
+      "medianLatencyMs": 45.615,
+      "p95LatencyMs": 67.948,
+      "avgSteps": 2,
+      "passAtK": {
+        "pass@1": 1
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": true,
+      "failedThresholds": []
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": "a_be611e6e",
+    "outcome": "PASS",
+    "summary": "io2-update-correct wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 3 decided cases.",
+    "rationale": [
+      "io2-update-correct meets the configured release thresholds.",
+      "With n=3, the 95% Wilson interval for task success is 43.9%–100.0%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": false,
+    "mutantKillRate": null,
+    "independentKillRate": null,
+    "falsePositiveRate": null,
+    "replayStable": null,
+    "hiddenAnswerIsolated": null,
+    "deadRules": 0,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "resultHash": "sha256:abbca1a9842ebd4059a42286fef60dc69132db4e79968e592f519b564389ce9f",
+  "rigorrunVersion": "0.1.0"
+}
+
+--- stderr ---

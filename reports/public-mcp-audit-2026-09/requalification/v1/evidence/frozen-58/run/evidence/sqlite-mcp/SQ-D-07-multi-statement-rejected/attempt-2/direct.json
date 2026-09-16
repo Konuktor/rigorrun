@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-write"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (title) VALUES ('a'); INSERT INTO tasks (title) VALUES ('b')"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "failed to prepare statement: Multiple statements provided"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

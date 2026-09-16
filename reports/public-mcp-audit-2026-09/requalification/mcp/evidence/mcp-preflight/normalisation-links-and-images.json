@@ -1,0 +1,20 @@
+{
+  "id": "normalisation-links-and-images",
+  "target": "RigorRun normaliser",
+  "check": "resource_link and image-only results",
+  "status": "LIMIT",
+  "observed": {
+    "resourceLink": {
+      "ok": true,
+      "kind": "empty",
+      "error": null
+    },
+    "imageOnly": {
+      "ok": true,
+      "kind": "empty",
+      "error": null
+    }
+  },
+  "expected": "recorded",
+  "impact": "A result made only of a resource_link or an image normalises to empty: it is neither followed nor read. A read that returns state only as a link cannot serve as a verifier read."
+}

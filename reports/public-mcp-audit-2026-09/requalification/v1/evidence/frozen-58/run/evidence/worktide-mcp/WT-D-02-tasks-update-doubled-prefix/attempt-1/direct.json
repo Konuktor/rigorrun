@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "tasks.update",
+      "args": {
+        "task": "AUD-3",
+        "priority": "urgent"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/tasks/01a09c48-97a6-7202-b2de-e76be5553721\""
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

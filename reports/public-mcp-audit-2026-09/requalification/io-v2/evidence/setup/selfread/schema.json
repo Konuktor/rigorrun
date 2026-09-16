@@ -1,0 +1,90 @@
+{
+  "entities": [
+    {
+      "name": "Task",
+      "idField": "id",
+      "fields": [
+        {
+          "name": "id",
+          "type": "number",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "nullable": false,
+          "role": "status",
+          "enumValues": [
+            "done",
+            "open"
+          ]
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Note",
+      "idField": "id",
+      "fields": [
+        {
+          "name": "id",
+          "type": "number",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "task_id",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "seen",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    }
+  ],
+  "relationships": [
+    {
+      "name": "note_task",
+      "from": "Note",
+      "to": "Task",
+      "via": {
+        "kind": "fk",
+        "field": "task_id"
+      },
+      "cardinality": "one",
+      "required": false
+    },
+    {
+      "name": "note_task",
+      "from": "Note",
+      "to": "Task",
+      "via": {
+        "kind": "fk",
+        "field": "seen"
+      },
+      "cardinality": "one",
+      "required": false
+    }
+  ]
+}

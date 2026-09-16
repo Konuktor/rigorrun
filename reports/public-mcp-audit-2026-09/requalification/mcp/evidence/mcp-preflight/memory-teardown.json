@@ -1,0 +1,14 @@
+{
+  "id": "memory-teardown",
+  "target": "@modelcontextprotocol/server-memory 2026.8.31",
+  "check": "close() ends the stdio child",
+  "status": "PASS",
+  "observed": {
+    "pid": 2791767,
+    "closeSettled": true,
+    "aliveAfterClose": false,
+    "waitedMs": 3,
+    "killedByPreflight": false
+  },
+  "expected": "child gone within 5 s"
+}

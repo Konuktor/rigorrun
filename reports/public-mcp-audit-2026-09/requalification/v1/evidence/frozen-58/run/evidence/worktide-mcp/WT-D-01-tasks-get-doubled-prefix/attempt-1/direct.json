@@ -1,0 +1,27 @@
+{
+  "command": [
+    "node",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "tasks.get",
+      "args": {
+        "task": "AUD-1"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

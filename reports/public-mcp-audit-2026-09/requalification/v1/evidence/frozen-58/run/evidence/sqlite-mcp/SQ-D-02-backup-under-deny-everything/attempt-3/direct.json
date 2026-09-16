@@ -1,0 +1,47 @@
+{
+  "command": [
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "deny-everything"
+  ],
+  "calls": [
+    {
+      "tool": "backup",
+      "args": {
+        "destination": "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"destination\":\"/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+          }
+        ],
+        "structuredContent": {
+          "destination": "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+          "pages_copied": 3
+        },
+        "isError": false
+      }
+    },
+    {
+      "tool": "vacuum",
+      "args": {},
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "failed to vacuum database: authorization denied"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

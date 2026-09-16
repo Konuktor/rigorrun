@@ -1,0 +1,15 @@
+{
+  "id": "teardown-local",
+  "target": "RigorRun client",
+  "check": "close() settles and ends the stdio child after a blocked call",
+  "status": "PASS",
+  "observed": {
+    "pid": 2792236,
+    "closeSettled": true,
+    "aliveAfterClose": false,
+    "waitedMs": 4004,
+    "killedByPreflight": false
+  },
+  "expected": "close settles and the child is gone within 8 s",
+  "impact": "When a server is blocked writing to stderr, close() may not settle; the child is still ended by the transport or by this preflight."
+}

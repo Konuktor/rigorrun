@@ -1,0 +1,34 @@
+== init 02:27:37
+product under test verified: product sources equal 7209dca; frozen inputs unchanged
+run-info.json written for 7209dcad62ba4d7a26f79950116aa60e5840419f
+exit 0
+== stacks 02:27:38
+product under test verified: product sources equal 7209dca; frozen inputs unchanged
+2026-09-15T02:27:38Z recreate stacks; available MiB 5725
+== recreate: sqlite
+reset-sqlite: /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks
+== oracles read the starting state
+  sqlite: tasks 3 audit_log 1
+  mailhog: total 0
+  greenmail: total 0
+  worktide: tasks 3 running timers 0 time entries 10 projects ['AUD', 'KA', 'PORT', 'WIKI', 'WORK']
+recreate done
+exit 0
+== setup 02:30:13
+product under test verified: product sources equal 7209dca; frozen inputs unchanged
+2026-09-15T02:30:13Z setup; available MiB 5880
+sqlite-mcp/w1: ok=True compiled=True suite=True project=p_17d1c9eea920 agents=6  
+sqlite-mcp/w1b: ok=True compiled=True suite=True project=p_9a2d612ce8d3 agents=8  
+email-mcp/w1: ok=False compiled=False suite=False project=p_8aca1d56ca88 agents=0 compile journey: POST /api/projects/p_8aca1d56ca88/compile → 400: {"error":"The recording performed \"send_email\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job th
+email-mcp/gm-w1: ok=True compiled=True suite=True project=p_959de8761d07 agents=6  
+email-mcp/gm-fault: ok=True compiled=True suite=True project=p_bd76eb77b1e9 agents=1  
+worktide-mcp/w2: ok=True compiled=True suite=True project=p_29f786b90af6 agents=0  
+worktide-mcp/w3: ok=True compiled=True suite=True project=p_e73a73746846 agents=0  
+refusing to score: ['home-email-gm-fault', 'home-email-gm-w1'] are not the single demonstrated case the frozen labels describe
+  home-email-gm-fault: 2 case(s) ['happy_path', 'missing_precondition'] budget=[60000]
+  home-email-gm-w1: 2 case(s) ['happy_path', 'missing_precondition'] budget=[60000]
+  home-sqlite-w1: 1 case(s) ['happy_path'] budget=[60000]
+  home-sqlite-w1b: 1 case(s) ['happy_path'] budget=[60000]
+  home-worktide-w2: 1 case(s) ['happy_path'] budget=[60000]
+  home-worktide-w3: 1 case(s) ['happy_path'] budget=[60000]
+exit 3

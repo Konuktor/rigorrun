@@ -1,0 +1,358 @@
+[
+  {
+    "id": "q_name_Row",
+    "kind": "entity_name",
+    "entity": "Row",
+    "text": "Is \"Row\" the right name for this kind of record?",
+    "evidence": "4 distinct record(s) seen, with fields: amount, id, owner, status, title.",
+    "proposed": "Row",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Row",
+    "kind": "id_field",
+    "entity": "Row",
+    "options": [
+      "amount",
+      "id",
+      "owner",
+      "status",
+      "title"
+    ],
+    "text": "Does \"id\" identify one Row?",
+    "evidence": "Its value was different for every Row in each list the server returned, and it stayed the same between the readings before and after the job.",
+    "proposed": "id",
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_unit_Row_amount",
+    "kind": "unit",
+    "entity": "Row",
+    "field": "amount",
+    "text": "What is \"amount\" measured in?",
+    "evidence": "Values seen: 120.5, 80, 0, 45.5. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Row_amount",
+    "kind": "field_role",
+    "entity": "Row",
+    "field": "amount",
+    "text": "What kind of thing is \"amount\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 120.5, 80, 0, 45.5.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Row_owner",
+    "kind": "field_role",
+    "entity": "Row",
+    "field": "owner",
+    "text": "What kind of thing is \"owner\"?",
+    "evidence": "A small, repeated set of values, though none was seen changing. Values seen: ada, bo, cy.",
+    "proposed": "status",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Row_status",
+    "kind": "field_role",
+    "entity": "Row",
+    "field": "status",
+    "text": "What kind of thing is \"status\"?",
+    "evidence": "A small, repeated set of values, though none was seen changing. Values seen: open, done.",
+    "proposed": "status",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Row_title",
+    "kind": "field_role",
+    "entity": "Row",
+    "field": "title",
+    "text": "What kind of thing is \"title\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Prepare invoice, Review contract, Archive old files, Quarterly report.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Row_title",
+    "kind": "untrusted",
+    "entity": "Row",
+    "field": "title",
+    "text": "Can somebody outside your organisation write \"title\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_name_Row2",
+    "kind": "entity_name",
+    "entity": "Row2",
+    "text": "Is \"Row2\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: action, id, note, task_id.",
+    "proposed": "Row2",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Row2",
+    "kind": "id_field",
+    "entity": "Row2",
+    "options": [
+      "action",
+      "id",
+      "note",
+      "task_id"
+    ],
+    "text": "Does \"action\" identify one Row2?",
+    "evidence": "Its value was different for every Row2 in each list the server returned, and it stayed the same between the readings before and after the job.",
+    "proposed": "action",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Row2_id",
+    "kind": "unit",
+    "entity": "Row2",
+    "field": "id",
+    "text": "What is \"id\" measured in?",
+    "evidence": "Values seen: 1. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Row2_id",
+    "kind": "field_role",
+    "entity": "Row2",
+    "field": "id",
+    "text": "What kind of thing is \"id\"?",
+    "evidence": "Every value of \"id\" is an identifier that a Row has, so this names another record rather than describing this one.",
+    "proposed": "identifier",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Row2_note",
+    "kind": "field_role",
+    "entity": "Row2",
+    "field": "note",
+    "text": "What kind of thing is \"note\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: seed.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Row2_note",
+    "kind": "untrusted",
+    "entity": "Row2",
+    "field": "note",
+    "text": "Can somebody outside your organisation write \"note\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Row2_task_id",
+    "kind": "unit",
+    "entity": "Row2",
+    "field": "task_id",
+    "text": "What is \"task_id\" measured in?",
+    "evidence": "Values seen: 3. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Row2_task_id",
+    "kind": "field_role",
+    "entity": "Row2",
+    "field": "task_id",
+    "text": "What kind of thing is \"task_id\"?",
+    "evidence": "Every value of \"task_id\" is an identifier that a Row has, so this names another record rather than describing this one.",
+    "proposed": "identifier",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_name_Table",
+    "kind": "entity_name",
+    "entity": "Table",
+    "text": "Is \"Table\" the right name for this kind of record?",
+    "evidence": "2 distinct record(s) seen, with fields: name, sql.",
+    "proposed": "Table",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Table",
+    "kind": "id_field",
+    "entity": "Table",
+    "options": [
+      "name",
+      "sql"
+    ],
+    "text": "Does \"name\" identify one Table?",
+    "evidence": "Its value was different for every Table in each list the server returned, and nothing showed it changing for the same one.",
+    "proposed": "name",
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Table_sql",
+    "kind": "field_role",
+    "entity": "Table",
+    "field": "sql",
+    "text": "What kind of thing is \"sql\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: CREATE TABLE audit_log (\n  id INTEGER PR…, CREATE TABLE tasks (\n  id INTEGER PRIMAR….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Table_sql",
+    "kind": "untrusted",
+    "entity": "Table",
+    "field": "sql",
+    "text": "Can somebody outside your organisation write \"sql\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_rel_Row2_id",
+    "kind": "relationship",
+    "entity": "Row2",
+    "field": "id",
+    "text": "Does every Row2 have to name a Row?",
+    "evidence": "Every value of \"id\" was an identifier a Row actually has (1).",
+    "proposed": "optional",
+    "options": [
+      "optional",
+      "required"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_rel_Row2_task_id",
+    "kind": "relationship",
+    "entity": "Row2",
+    "field": "task_id",
+    "text": "Does every Row2 have to name a Row?",
+    "evidence": "Every value of \"task_id\" was an identifier a Row actually has (3).",
+    "proposed": "optional",
+    "options": [
+      "optional",
+      "required"
+    ],
+    "confidence": "moderate"
+  }
+]

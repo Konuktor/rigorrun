@@ -1,0 +1,42 @@
+{
+  "command": [
+    "node",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "projects.get",
+      "args": {
+        "project": "AUD"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "projects.archive",
+      "args": {
+        "project": "AUD"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

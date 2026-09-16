@@ -1,0 +1,33 @@
+{
+  "case": "SQ-LLM-01-llama3.1-8b",
+  "model": "llama3.1:8b",
+  "modelId": "46e0c10c039e",
+  "hostGuard": {
+    "requiredAvailableMiB": 5000,
+    "requiredSwapFreeMiB": 1000,
+    "availableMiBBeforePreload": 10248,
+    "availableMiBAfterRun": 10906
+  },
+  "preload": {
+    "command": "ollama run llama3.1:8b \"\"",
+    "seconds": 4.53,
+    "ollamaPs": [
+      "NAME           ID              SIZE      PROCESSOR          CONTEXT    UNTIL              ",
+      "llama3.1:8b    46e0c10c039e    5.9 GB    43%/57% CPU/GPU    4096       4 minutes from now    "
+    ]
+  },
+  "unchanged": [
+    "model",
+    "agent command and prompt (scripts/agents/ollama-agent.py)",
+    "60 s case budget (project default)",
+    "attempt count (baseline-manifest.json)",
+    "reset and oracle",
+    "expect predicate"
+  ],
+  "exit": 0,
+  "attemptLines": [
+    "SQ-LLM-01-llama3.1-8b attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (42.34s)"
+  ],
+  "log": "evidence/frozen-58/logs/run-cases.llm-SQ-LLM-01-llama3.1-8b.log",
+  "at": "2026-09-16T03:57:14.647621+00:00"
+}

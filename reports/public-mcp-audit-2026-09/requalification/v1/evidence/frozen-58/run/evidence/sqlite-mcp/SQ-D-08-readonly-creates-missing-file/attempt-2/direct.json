@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/missing.db",
+    "--preset",
+    "read-only"
+  ],
+  "calls": [
+    {
+      "tool": "list_tables",
+      "args": {},
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"tables\":[]}"
+          }
+        ],
+        "structuredContent": {
+          "tables": []
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

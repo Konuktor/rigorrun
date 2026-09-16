@@ -1,0 +1,20 @@
+{
+  "at": "2026-09-16T04:13:56+00:00",
+  "why": "v1 setup could not register sq-w1-wrong-value on sqlite-mcp/w1b: sk_queues:89:21)\nEmitted 'error' event on Server instance at:\n    at emitErrorNT (node:net:1976:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {\n  code: 'EADDRINUSE',\n  errno: -98,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 42878\n}\n\nNode.js v22.22.2\n\n",
+  "caseAffected": "SQ-W1B-04-wrong-value",
+  "notRunAttemptsKeptAt": "v1/evidence/frozen-58/run/evidence-not-run-agent-unregistered/sqlite-mcp/SQ-W1B-04-wrong-value",
+  "project": "p_9a2d612ce8d3",
+  "exit": 0,
+  "stderrTail": "",
+  "agentsRegisteredAfter": [
+    "ollama-llama3.1-8b",
+    "ollama-qwen2.5-3b",
+    "sq-w1-correct",
+    "sq-w1-duplicate",
+    "sq-w1-forbidden-extra",
+    "sq-w1-missing-action",
+    "sq-w1-wrong-entity",
+    "sq-w1-wrong-value"
+  ],
+  "ok": true
+}

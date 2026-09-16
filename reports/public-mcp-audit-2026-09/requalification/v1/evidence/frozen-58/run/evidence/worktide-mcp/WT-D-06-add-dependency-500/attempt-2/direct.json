@@ -1,0 +1,28 @@
+{
+  "command": [
+    "node",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "tasks.addDependency",
+      "args": {
+        "predecessor": "AUD-1",
+        "successor": "AUD-2"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[500] Typed property App\\Entity\\TaskDependency::$workspace must not be accessed before initialization"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

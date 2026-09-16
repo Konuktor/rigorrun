@@ -1,0 +1,103 @@
+{
+  "command": [
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-only",
+    "--deny",
+    "Read(tasks.amount)"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT * FROM tasks"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "access denied: the configured access control policy denied this statement: SELECT * FROM tasks"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT id,title FROM tasks"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[{\"columns\":{\"id\":{\"kind\":\"Integer\",\"value\":1},\"title\":{\"kind\":\"Text\",\"value\":\"Prepare invoice\"}}},{\"columns\":{\"id\":{\"kind\":\"Integer\",\"value\":2},\"title\":{\"kind\":\"Text\",\"value\":\"Review contract\"}}},{\"columns\":{\"id\":{\"kind\":\"Integer\",\"value\":3},\"title\":{\"kind\":\"Text\",\"value\":\"Archive old files\"}}}],\"rows_changed\":0}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [
+            {
+              "columns": {
+                "id": {
+                  "kind": "Integer",
+                  "value": 1
+                },
+                "title": {
+                  "kind": "Text",
+                  "value": "Prepare invoice"
+                }
+              }
+            },
+            {
+              "columns": {
+                "id": {
+                  "kind": "Integer",
+                  "value": 2
+                },
+                "title": {
+                  "kind": "Text",
+                  "value": "Review contract"
+                }
+              }
+            },
+            {
+              "columns": {
+                "id": {
+                  "kind": "Integer",
+                  "value": 3
+                },
+                "title": {
+                  "kind": "Text",
+                  "value": "Archive old files"
+                }
+              }
+            }
+          ],
+          "rows_changed": 0
+        },
+        "isError": false
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT sum(amount) FROM tasks"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "access denied: the configured access control policy denied this statement: SELECT sum(amount) FROM tasks"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

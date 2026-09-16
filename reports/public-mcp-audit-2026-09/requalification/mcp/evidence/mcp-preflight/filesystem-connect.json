@@ -1,0 +1,14 @@
+{
+  "id": "filesystem-connect",
+  "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+  "check": "connection, identity and negotiated version",
+  "status": "PASS",
+  "observed": {
+    "serverName": "secure-filesystem-server",
+    "serverVersion": "0.2.0",
+    "recordedProtocolVersion": "negotiated",
+    "rawNegotiated": "2025-11-25",
+    "latencyMs": 117
+  },
+  "expected": "connects over stdio with the legacy handshake"
+}

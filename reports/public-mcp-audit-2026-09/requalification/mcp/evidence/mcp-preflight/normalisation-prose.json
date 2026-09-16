@@ -1,0 +1,12 @@
+{
+  "id": "normalisation-prose",
+  "target": "RigorRun normaliser",
+  "check": "prose is never records",
+  "status": "PASS",
+  "observed": {
+    "ok": true,
+    "kind": "text",
+    "error": null
+  },
+  "expected": "text"
+}

@@ -1,0 +1,86 @@
+{
+  "case": {
+    "id": "SQ-D-09-retry-direct",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+    "truth": "EXPECTED_FAIL",
+    "injected": true,
+    "intent": "Insert exactly one row. The response to the first INSERT is swallowed (INJECTED FAULT); the client times out and retries once.",
+    "initialState": "seed: tasks 1-3",
+    "expectedFinalState": "exactly one new row",
+    "oracle": "oracle-sqlite.py",
+    "injectedFault": "fault-proxy.mjs drops the response of the 1st execute tools/call; the INSERT is untouched",
+    "env": {
+      "FAULT_DROP_TOOL": "execute",
+      "FAULT_DROP_NTH": "1",
+      "FAULT_LOG": "{REPO}/reports/public-mcp-audit-2026-09/traces/sqlite-mcp/fault-proxy-direct.jsonl"
+    },
+    "server": [
+      "node",
+      "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+      "--",
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "read-write"
+    ],
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+        }
+      }
+    ],
+    "expect": "after['tables']['tasks']['count']==before['tables']['tasks']['count']+1"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+        },
+        "result": {
+          "message": "transport timeout after 5.0s (no response)",
+          "timeout": true
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[],\"rows_changed\":1}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [],
+            "rows_changed": 1
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 5.1,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

@@ -1,0 +1,454 @@
+[
+  {
+    "id": "q_name_Record1",
+    "kind": "entity_name",
+    "entity": "Record1",
+    "text": "Is \"Record1\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: count, emails, folder, message, service, success.",
+    "proposed": "Record1",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record1",
+    "kind": "id_field",
+    "entity": "Record1",
+    "options": [
+      "success",
+      "emails",
+      "count",
+      "service",
+      "message",
+      "folder"
+    ],
+    "text": "Does \"service\" identify one Record1?",
+    "evidence": "Its value was different for every Record1 in each list the server returned, and it stayed the same between the readings before and after the job. Between the readings before and after the job, \"count\" and \"message\" changed for the same Record1, so they describe a Record1 rather than name one.",
+    "proposed": "service",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_success",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "success",
+    "text": "What kind of thing is \"success\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Record1_emails",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "emails",
+    "text": "What kind of thing is \"emails\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: , [object Object].",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_emails",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "emails",
+    "text": "Can somebody outside your organisation write \"emails\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Record1_count",
+    "kind": "unit",
+    "entity": "Record1",
+    "field": "count",
+    "text": "What is \"count\" measured in?",
+    "evidence": "Values seen: 0, 1. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_count",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "count",
+    "text": "What kind of thing is \"count\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 0, 1.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Record1_message",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "message",
+    "text": "What kind of thing is \"message\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Found 0 emails in INBOX via default serv…, Found 1 emails in INBOX via default serv….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_message",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "message",
+    "text": "Can somebody outside your organisation write \"message\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_folder",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "folder",
+    "text": "What kind of thing is \"folder\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: INBOX.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_folder",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "folder",
+    "text": "Can somebody outside your organisation write \"folder\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_name_Record2",
+    "kind": "entity_name",
+    "entity": "Record2",
+    "text": "Is \"Record2\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: message, service, status, success.",
+    "proposed": "Record2",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record2",
+    "kind": "id_field",
+    "entity": "Record2",
+    "options": [
+      "success",
+      "status",
+      "service",
+      "message"
+    ],
+    "text": "Does \"status\" identify one Record2?",
+    "evidence": "Its value was different for every Record2 in each list the server returned, and nothing showed it changing for the same one.",
+    "proposed": "status",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record2_success",
+    "kind": "field_role",
+    "entity": "Record2",
+    "field": "success",
+    "text": "What kind of thing is \"success\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Record2_service",
+    "kind": "field_role",
+    "entity": "Record2",
+    "field": "service",
+    "text": "What kind of thing is \"service\"?",
+    "evidence": "Every value of \"service\" is an identifier that a Record1 has, so this names another record rather than describing this one.",
+    "proposed": "identifier",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_untrusted_Record2_service",
+    "kind": "untrusted",
+    "entity": "Record2",
+    "field": "service",
+    "text": "Can somebody outside your organisation write \"service\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record2_message",
+    "kind": "field_role",
+    "entity": "Record2",
+    "field": "message",
+    "text": "What kind of thing is \"message\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Email 'Audit 17' sent successfully to qa….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record2_message",
+    "kind": "untrusted",
+    "entity": "Record2",
+    "field": "message",
+    "text": "Can somebody outside your organisation write \"message\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_name_Email",
+    "kind": "entity_name",
+    "entity": "Email",
+    "text": "Is \"Email\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: date, from, id, read, subject.",
+    "proposed": "Email",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Email",
+    "kind": "id_field",
+    "entity": "Email",
+    "options": [
+      "id",
+      "subject",
+      "from",
+      "date",
+      "read"
+    ],
+    "text": "Does \"id\" identify one Email?",
+    "evidence": "Its value was different for every Email in each list the server returned, and nothing showed it changing for the same one.",
+    "proposed": "id",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Email_subject",
+    "kind": "field_role",
+    "entity": "Email",
+    "field": "subject",
+    "text": "What kind of thing is \"subject\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: <<< UNTRUSTED EXTERNAL DATA | EMAIL INBO….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Email_subject",
+    "kind": "untrusted",
+    "entity": "Email",
+    "field": "subject",
+    "text": "Can somebody outside your organisation write \"subject\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Email_from",
+    "kind": "field_role",
+    "entity": "Email",
+    "field": "from",
+    "text": "What kind of thing is \"from\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: <<< UNTRUSTED EXTERNAL DATA | EMAIL INBO….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Email_from",
+    "kind": "untrusted",
+    "entity": "Email",
+    "field": "from",
+    "text": "Can somebody outside your organisation write \"from\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Email_date",
+    "kind": "field_role",
+    "entity": "Email",
+    "field": "date",
+    "text": "What kind of thing is \"date\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Unknown.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Email_date",
+    "kind": "untrusted",
+    "entity": "Email",
+    "field": "date",
+    "text": "Can somebody outside your organisation write \"date\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Email_read",
+    "kind": "field_role",
+    "entity": "Email",
+    "field": "read",
+    "text": "What kind of thing is \"read\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_rel_Record2_service",
+    "kind": "relationship",
+    "entity": "Record2",
+    "field": "service",
+    "text": "Does every Record2 have to name a Record1?",
+    "evidence": "Every value of \"service\" was an identifier a Record1 actually has (default).",
+    "proposed": "optional",
+    "options": [
+      "optional",
+      "required"
+    ],
+    "confidence": "moderate"
+  }
+]

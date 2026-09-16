@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "id": "p_76ab92de540b",
+  "name": "taskdesk2: complete one task, verified independently over tasks and notes",
+  "goal": "Mark task 2, Book venue, as done; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification/io-v2/taskdesk2_server.py",
+      "--db",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/desk.db",
+      "--faults",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/faults.json",
+      "--shadow",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/shadow.json",
+      "--calls-log",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/calls.log"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification/io-v2/taskdesk2_oracle_server.py",
+        "--db",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/desk.db",
+        "--down-flag",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/oracle-down.flag",
+        "--empty-flag",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/oracle-empty.flag",
+        "--calls-log",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/calls.log"
+      ],
+      "url": "",
+      "auth": "header",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "list_notes",
+    "verifier:query_tasks",
+    "verifier:query_notes"
+  ],
+  "verifierReads": [
+    {
+      "tool": "verifier:query_tasks",
+      "args": {}
+    },
+    {
+      "tool": "verifier:query_notes",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    },
+    {
+      "questionId": "q_name_Note",
+      "value": "Note"
+    },
+    {
+      "questionId": "q_id_Note",
+      "value": "id"
+    },
+    {
+      "questionId": "q_unit_Note_task_id",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_task_id",
+      "value": "identifier"
+    },
+    {
+      "questionId": "q_role_Note_body",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Note_body",
+      "value": "no"
+    },
+    {
+      "questionId": "q_unit_Note_seen",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_seen",
+      "value": "quantity"
+    },
+    {
+      "questionId": "q_rel_Note_task_id",
+      "value": "optional"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_be611e6e",
+      "name": "io2-update-correct",
+      "lastProbeAt": "2026-09-15T02:25:20.485Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification/io-v2/playbooks/io2-update-correct.json",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/traces/update"
+      ],
+      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state",
+      "confirmedByOperatorAt": "2026-09-15T02:25:20.485Z"
+    },
+    {
+      "id": "a_5bdee208",
+      "name": "io2-update-extra-note-create",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification/io-v2/playbooks/io2-update-extra-note-create.json",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/traces/update"
+      ],
+      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state",
+      "confirmedByOperatorAt": "2026-09-15T02:25:20.521Z",
+      "lastProbeAt": "2026-09-15T02:25:20.521Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-09-15T02:25:20.343Z",
+    "environmentConnectedAt": "2026-09-15T02:25:20.415Z",
+    "workflowRecordedAt": "2026-09-15T02:25:20.447Z",
+    "benchmarkGeneratedAt": "2026-09-15T02:25:20.483Z",
+    "agentConnectedAt": "2026-09-15T02:25:20.517Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}

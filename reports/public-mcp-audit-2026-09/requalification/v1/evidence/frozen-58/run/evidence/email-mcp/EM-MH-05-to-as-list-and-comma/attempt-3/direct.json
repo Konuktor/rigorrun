@@ -1,0 +1,68 @@
+{
+  "command": [
+    "uv",
+    "--directory",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+    "run",
+    "email-mcp"
+  ],
+  "calls": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": [
+          "qa@example.test",
+          "agent@example.test"
+        ],
+        "subject": "Audit list",
+        "body": "x",
+        "service": "mailhog"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit list' sent successfully to ['qa@example.test', 'agent@example.test'] via mailhog service\"}"
+          }
+        ],
+        "structuredContent": {
+          "success": true,
+          "status": "sent",
+          "service": "mailhog",
+          "note": "Check web UI at http://127.0.0.1:8025",
+          "message": "Email 'Audit list' sent successfully to ['qa@example.test', 'agent@example.test'] via mailhog service"
+        },
+        "isError": false
+      }
+    },
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "qa@example.test, agent@example.test",
+        "subject": "Audit comma",
+        "body": "x",
+        "service": "mailhog"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit comma' sent successfully to qa@example.test, agent@example.test via mailhog service\"}"
+          }
+        ],
+        "structuredContent": {
+          "success": true,
+          "status": "sent",
+          "service": "mailhog",
+          "note": "Check web UI at http://127.0.0.1:8025",
+          "message": "Email 'Audit comma' sent successfully to qa@example.test, agent@example.test via mailhog service"
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "Email-MCP",
+    "version": "0.5.0"
+  }
+}

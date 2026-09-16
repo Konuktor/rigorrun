@@ -1,0 +1,44 @@
+{
+  "create": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io2-homes/create",
+    "project": "p_7b97766d348c",
+    "happyPathCaseId": "case_live__happy_path",
+    "suiteShape": [
+      "happy_path"
+    ]
+  },
+  "update": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io2-homes/update",
+    "project": "p_76ab92de540b",
+    "happyPathCaseId": "case_live__happy_path",
+    "suiteShape": [
+      "happy_path",
+      "malformed_input",
+      "missing_precondition"
+    ]
+  },
+  "replace": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io2-homes/replace",
+    "project": "p_833acb9aa1b1",
+    "happyPathCaseId": "case_live__happy_path",
+    "suiteShape": [
+      "happy_path"
+    ]
+  },
+  "selfread": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io2-homes/selfread",
+    "project": "p_e34ed1309739",
+    "happyPathCaseId": "case_live__happy_path",
+    "suiteShape": [
+      "happy_path"
+    ]
+  },
+  "mixed": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io2-homes/mixed",
+    "project": "p_a71bd5e70be5",
+    "happyPathCaseId": "case_live__happy_path",
+    "suiteShape": [
+      "happy_path"
+    ]
+  }
+}

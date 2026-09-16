@@ -1,0 +1,2 @@
+2026-09-16T03:56:29Z SQ-LLM-01-llama3.1-8b: llama3.1:8b preloaded in 4.53 s; available 10248 MiB before preload, 11130 MiB after
+SQ-LLM-01-llama3.1-8b attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (42.34s)

@@ -1,0 +1,50 @@
+{
+  "projectId": "p_74f53c819434",
+  "readsProblem": "",
+  "readsIgnored": [],
+  "tools": 5,
+  "records": [
+    "Task"
+  ],
+  "rules": {
+    "total": 0,
+    "confirmed": 0,
+    "rejected": 0
+  },
+  "cases": 1,
+  "quality": null,
+  "agents": [
+    {
+      "name": "io-correct",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io-claim-only",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io-duplicate",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io-extra-update",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io-correct-oracle-down",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io-readback",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---

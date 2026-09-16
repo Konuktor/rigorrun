@@ -1,0 +1,51 @@
+{
+  "command": [
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-only",
+    "--deny",
+    "Read(tasks.amount)"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT amount FROM tasks"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "access denied: the configured access control policy denied this statement: SELECT amount FROM tasks"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "tool": "backup",
+      "args": {
+        "destination": "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"destination\":\"/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+          }
+        ],
+        "structuredContent": {
+          "destination": "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+          "pages_copied": 3
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

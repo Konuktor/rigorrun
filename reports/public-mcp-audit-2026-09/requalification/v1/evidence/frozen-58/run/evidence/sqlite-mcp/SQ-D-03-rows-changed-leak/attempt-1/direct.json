@@ -1,0 +1,62 @@
+{
+  "command": [
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-write"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (title) VALUES ('leak')"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[],\"rows_changed\":1}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [],
+          "rows_changed": 1
+        },
+        "isError": false
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "SELECT count(*) AS n FROM tasks"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[{\"columns\":{\"n\":{\"kind\":\"Integer\",\"value\":4}}}],\"rows_changed\":1}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [
+            {
+              "columns": {
+                "n": {
+                  "kind": "Integer",
+                  "value": 4
+                }
+              }
+            }
+          ],
+          "rows_changed": 1
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}
