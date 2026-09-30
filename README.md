@@ -12,9 +12,10 @@ executable acceptance suite and verifies your agent against the state of the sys
 </div>
 
 ```bash
-npx rigorrun demo    # a real recorded run, replayed offline in a second
-npx rigorrun         # your own system and agent
+npx rigorrun
 ```
+
+To see what it catches first: `npx rigorrun demo` replays a real recorded run, offline, in a second.
 
 ---
 
