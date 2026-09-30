@@ -16,6 +16,7 @@ import {
 } from '@rigorrun/core';
 import { pct } from '@rigorrun/scoring';
 import { esc, escJson } from './escape.ts';
+import { explainCase } from './explain.ts';
 import { REPORT_CSS } from './styles.ts';
 import { sanitizeRunResult, SANITIZATION_NOTES } from './sanitize.ts';
 
@@ -246,6 +247,7 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
     <div>${result.unsafeActions > 0 ? `<span class="tag fail">${result.unsafeActions} unsafe</span>` : `<span class="tag ${caseOutcome(result) === 'FAIL' ? 'fail' : 'error'}">${esc(caseOutcome(result))}</span>`}</div>
   </div>
   <div class="body">
+    ${claimVersusReality(result)}
     ${result.outcomeReason ? `<p class="mono dim">${esc(result.outcomeReason)}</p>` : ''}
     ${result.missingEvidence.length > 0 ? `<p class="mono dim">Missing evidence: ${result.missingEvidence.map(esc).join(', ')}</p>` : ''}
     <div class="grid cols-2">
@@ -286,6 +288,20 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
     </table>
   </div>
 </div>`;
+}
+
+/** What the agent said, beside what RigorRun saw — the first thing a reader needs. */
+function claimVersusReality(result: CaseResult): string {
+  const explanation = explainCase(result);
+  if (explanation.saw.length === 0 && explanation.notChecked.length === 0) return '';
+  return `<div class="grid cols-2" style="margin-bottom:12px">
+      <div><h3>The agent said</h3><blockquote>${esc(explanation.claim)}</blockquote></div>
+      <div><h3>RigorRun saw</h3>
+        ${explanation.saw.length > 0 ? `<ul>${explanation.saw.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>` : '<p class="dim">No check failed.</p>'}
+        ${explanation.notChecked.length > 0 ? `<p class="dim">Not checked: ${explanation.notChecked.map(esc).join('; ')}</p>` : ''}
+        ${explanation.evidence ? `<p class="dim mono">${esc(explanation.evidence)}</p>` : ''}
+      </div>
+    </div>`;
 }
 
 function timeline(result: CaseResult): string {

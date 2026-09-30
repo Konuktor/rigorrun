@@ -92,6 +92,8 @@ RUN / GATE OPTIONS
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
       --max-inconclusive <n>    Cases allowed to end without a verdict. Default 0.
+      --report <path>           Also write the run as one self-contained HTML page.
+      --published               With --report: mask values read from the system.
       --case-timeout <ms>       Wall-clock budget per case for this run.
                                 Default: the suite's own (60000 when generated).
       --after-case <program>    Run a program (a path or a name; no shell, no

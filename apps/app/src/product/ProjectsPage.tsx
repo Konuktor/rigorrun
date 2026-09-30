@@ -97,6 +97,38 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
         </section>
       ) : null}
 
+      {projects.length === 0 ? (
+        <section className="grid gap-3 sm:grid-cols-2" data-testid="first-screen">
+          <Panel>
+            <div className="flex h-full flex-col gap-2">
+              <span className="text-section font-semibold text-fg">See it catch a failure</span>
+              <p className="text-meta text-secondary">
+                A worked example, offline, in about a minute: an agent reports work as done, and
+                RigorRun reads the system to see whether it was. Nothing of yours is touched.
+              </p>
+              <a
+                className="mt-auto inline-flex w-fit items-center rounded-control border border-line px-3 py-1.5 text-meta font-medium text-fg hover:border-accent"
+                href="#/demo"
+                data-testid="first-screen-demo"
+              >
+                Open the example
+              </a>
+            </div>
+          </Panel>
+          <Panel>
+            <div className="flex h-full flex-col gap-2">
+              <span className="text-section font-semibold text-fg">Test your own agent</span>
+              <p className="text-meta text-secondary">
+                Connect a staging copy of your system, show RigorRun the job once, then send your
+                agent the work — wherever it runs, unchanged. RigorRun reads the system afterwards
+                and says what actually happened.
+              </p>
+              <span className="mt-auto text-meta text-muted">Start below: name the project and the job.</span>
+            </div>
+          </Panel>
+        </section>
+      ) : null}
+
       <section className="flex flex-col gap-4">
         <SectionLabel>{projects.length > 0 ? 'New project' : 'Start here'}</SectionLabel>
         <Panel>
@@ -141,15 +173,6 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
         </Panel>
       </section>
 
-      {projects.length === 0 ? (
-        <p className="text-meta text-muted">
-          Not ready to connect anything?{' '}
-          <a className="text-accent underline underline-offset-2" href="#/demo">
-            Walk through the bundled example
-          </a>{' '}
-          instead. It runs entirely offline and touches nothing of yours.
-        </p>
-      ) : null}
     </div>
   );
 }
