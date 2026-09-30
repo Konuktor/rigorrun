@@ -1,0 +1,314 @@
+{
+  "schema": {
+    "entities": [
+      {
+        "name": "Task",
+        "idField": "id",
+        "fields": [
+          {
+            "name": "id",
+            "type": "number",
+            "nullable": false,
+            "role": "identifier"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "nullable": false,
+            "role": "freetext"
+          },
+          {
+            "name": "status",
+            "type": "enum",
+            "nullable": false,
+            "role": "status",
+            "enumValues": [
+              "done",
+              "open"
+            ]
+          }
+        ],
+        "mutable": true,
+        "appendOnly": false
+      },
+      {
+        "name": "Note",
+        "idField": "id",
+        "fields": [
+          {
+            "name": "id",
+            "type": "number",
+            "nullable": false,
+            "role": "identifier"
+          },
+          {
+            "name": "task_id",
+            "type": "string",
+            "nullable": false,
+            "role": "identifier",
+            "precision": 1,
+            "unit": "count"
+          },
+          {
+            "name": "body",
+            "type": "string",
+            "nullable": false,
+            "role": "freetext"
+          },
+          {
+            "name": "seen",
+            "type": "number",
+            "nullable": false,
+            "role": "quantity",
+            "precision": 1,
+            "unit": "count"
+          }
+        ],
+        "mutable": true,
+        "appendOnly": false
+      }
+    ],
+    "relationships": [
+      {
+        "name": "note_task",
+        "from": "Note",
+        "to": "Task",
+        "via": {
+          "kind": "fk",
+          "field": "task_id"
+        },
+        "cardinality": "one",
+        "required": false
+      }
+    ]
+  },
+  "questions": [
+    {
+      "id": "q_name_Task",
+      "kind": "entity_name",
+      "entity": "Task",
+      "text": "Is \"Task\" the right name for this kind of record?",
+      "evidence": "4 distinct record(s) seen, with fields: id, status, title.",
+      "proposed": "Task",
+      "options": [],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_id_Task",
+      "kind": "id_field",
+      "entity": "Task",
+      "options": [
+        "id",
+        "title",
+        "status"
+      ],
+      "text": "Does \"id\" identify one Task?",
+      "evidence": "Its value was different for every Task in each list the server returned, and it stayed the same between the readings before and after the job.",
+      "proposed": "id",
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_role_Task_title",
+      "kind": "field_role",
+      "entity": "Task",
+      "field": "title",
+      "text": "What kind of thing is \"title\"?",
+      "evidence": "Free text as far as RigorRun can tell. Values seen: Renew domain, Book venue, Send invoices, Quarterly report.",
+      "proposed": "freetext",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_untrusted_Task_title",
+      "kind": "untrusted",
+      "entity": "Task",
+      "field": "title",
+      "text": "Can somebody outside your organisation write \"title\"?",
+      "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+      "proposed": "no",
+      "options": [
+        "no",
+        "yes"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Task_status",
+      "kind": "field_role",
+      "entity": "Task",
+      "field": "status",
+      "text": "What kind of thing is \"status\"?",
+      "evidence": "A small, repeated set of values, though none was seen changing. Values seen: open, done.",
+      "proposed": "status",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_name_Note",
+      "kind": "entity_name",
+      "entity": "Note",
+      "text": "Is \"Note\" the right name for this kind of record?",
+      "evidence": "3 distinct record(s) seen, with fields: body, id, seen, task_id.",
+      "proposed": "Note",
+      "options": [],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_id_Note",
+      "kind": "id_field",
+      "entity": "Note",
+      "options": [
+        "id",
+        "task_id",
+        "body",
+        "seen"
+      ],
+      "text": "Does \"id\" identify one Note?",
+      "evidence": "Its value was different for every Note in each list the server returned, and it stayed the same between the readings before and after the job.",
+      "proposed": "id",
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_unit_Note_task_id",
+      "kind": "unit",
+      "entity": "Note",
+      "field": "task_id",
+      "text": "What is \"task_id\" measured in?",
+      "evidence": "Values seen: 1, 2. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+      "proposed": "count",
+      "options": [
+        "currency",
+        "count",
+        "duration_days",
+        "duration_hours",
+        "duration_ms",
+        "score",
+        "mass_kg",
+        "percent"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Note_task_id",
+      "kind": "field_role",
+      "entity": "Note",
+      "field": "task_id",
+      "text": "What kind of thing is \"task_id\"?",
+      "evidence": "Every value of \"task_id\" is an identifier that a Task has, so this names another record rather than describing this one.",
+      "proposed": "identifier",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "strong"
+    },
+    {
+      "id": "q_role_Note_body",
+      "kind": "field_role",
+      "entity": "Note",
+      "field": "body",
+      "text": "What kind of thing is \"body\"?",
+      "evidence": "Free text as far as RigorRun can tell. Values seen: Registrar login is in the shared vault, Shortlist: river hall or old library, Renewal is due before the end of the mon….",
+      "proposed": "freetext",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_untrusted_Note_body",
+      "kind": "untrusted",
+      "entity": "Note",
+      "field": "body",
+      "text": "Can somebody outside your organisation write \"body\"?",
+      "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+      "proposed": "no",
+      "options": [
+        "no",
+        "yes"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_unit_Note_seen",
+      "kind": "unit",
+      "entity": "Note",
+      "field": "seen",
+      "text": "What is \"seen\" measured in?",
+      "evidence": "Values seen: 0. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+      "proposed": "count",
+      "options": [
+        "currency",
+        "count",
+        "duration_days",
+        "duration_hours",
+        "duration_ms",
+        "score",
+        "mass_kg",
+        "percent"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Note_seen",
+      "kind": "field_role",
+      "entity": "Note",
+      "field": "seen",
+      "text": "What kind of thing is \"seen\"?",
+      "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 0.",
+      "proposed": "quantity",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_rel_Note_task_id",
+      "kind": "relationship",
+      "entity": "Note",
+      "field": "task_id",
+      "text": "Does every Note have to name a Task?",
+      "evidence": "Every value of \"task_id\" was an identifier a Task actually has (1, 2).",
+      "proposed": "optional",
+      "options": [
+        "optional",
+        "required"
+      ],
+      "confidence": "moderate"
+    }
+  ],
+  "ignored": []
+}

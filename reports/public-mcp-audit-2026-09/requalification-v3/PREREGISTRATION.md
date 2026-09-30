@@ -61,3 +61,17 @@ beside this one.
 
 A result is never re-run to change it. A harness failure that produced no verdict may be
 re-run once, recorded with its timing. A NO_GO is recorded as the verdict.
+
+## Setup facts, recorded 2026-09-30T20:11:10Z, before any case ran
+
+- A first launch of the batches (20:07:50–20:08:23Z) exited at `load(projects.json)`: `v2/scripts/setup-v2.py`
+  had not been run for v3. No case or attempt directory was created and no verdict produced; its logs are in
+  `evidence/failed-launch-1/`.
+- `setup-v2.py --fresh` then created the four projects at `28e8ec3` (`evidence/setup-v2.log`).
+- The generated suites have the pre-registered shape and case ids: `home-email-gm-w1` and `home-email-gm-fault`
+  → `case_live__happy_path`, `case_live__unknown_id__service`; `home-sqlite-w1` and `home-sqlite-w1b` →
+  `case_live__happy_path`.
+- Their checks differ from v2's in one place only, the fix: `case_live__unknown_id__service` carries
+  `success__declined__action_not_performed` in addition to v2's checks. The happy-path suites carry exactly v2's
+  checks. The new suite hashes are in `evidence/generated-suites-v3.json`; `v2/labels.json` is unchanged, and
+  its `benchmarkSha256` values describe v2's suites.

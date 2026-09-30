@@ -1,0 +1,12 @@
+frozen test sha256 0987c00d914ebe08f57654bc77ffbbae11f1dd8454974cecc8f7db4556897eef
+
+ RUN  v4.1.11 /home/erbol/RigorRun
+
+ ✓ packages/runner/test/zz_heldout_rq.test.ts (8 tests) 299ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  02:04:02
+   Duration  728ms (transform 254ms, setup 0ms, import 352ms, tests 299ms, environment 0ms)
+
+exit 0

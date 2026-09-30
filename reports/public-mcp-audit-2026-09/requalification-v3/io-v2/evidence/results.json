@@ -1,0 +1,1153 @@
+{
+  "generatedBy": "requalification/io-v2/run-io-v2.py aggregate",
+  "summary": {
+    "cases": 9,
+    "attemptsRun": 27,
+    "independentOracleGate": {
+      "cases": [
+        "IO2-1",
+        "IO2-2",
+        "IO2-3",
+        "IO2-4",
+        "IO2-5",
+        "IO2-6",
+        "IO2-7",
+        "IO2-8",
+        "IO2-9"
+      ],
+      "failing": [],
+      "guardViolations": []
+    },
+    "abstentionGate": {
+      "cases": [],
+      "failing": []
+    },
+    "otherGates": {},
+    "unresolvedBeforeRun": [],
+    "casesNotRun": [],
+    "setups": {
+      "create": {
+        "exit": 0,
+        "ok": true,
+        "suiteShape": [
+          "happy_path"
+        ],
+        "predictedSuiteShape": [
+          "happy_path"
+        ],
+        "suiteShapeAsPredicted": true,
+        "singleHappyPath": true,
+        "frameModes": {
+          "case_live__happy_path": [
+            "performed"
+          ]
+        },
+        "errorTail": []
+      },
+      "update": {
+        "exit": 0,
+        "ok": true,
+        "suiteShape": [
+          "happy_path",
+          "malformed_input",
+          "missing_precondition"
+        ],
+        "predictedSuiteShape": [
+          "happy_path",
+          "malformed_input",
+          "missing_precondition"
+        ],
+        "suiteShapeAsPredicted": true,
+        "singleHappyPath": false,
+        "frameModes": {
+          "case_live__happy_path": [
+            "performed"
+          ],
+          "case_live__malformed__id": [
+            "declined"
+          ],
+          "case_live__unknown_id__id": [
+            "declined"
+          ]
+        },
+        "errorTail": []
+      },
+      "replace": {
+        "exit": 0,
+        "ok": true,
+        "suiteShape": [
+          "happy_path"
+        ],
+        "predictedSuiteShape": null,
+        "suiteShapeAsPredicted": false,
+        "singleHappyPath": true,
+        "frameModes": {
+          "case_live__happy_path": [
+            "performed"
+          ]
+        },
+        "errorTail": []
+      },
+      "selfread": {
+        "exit": 0,
+        "ok": true,
+        "suiteShape": [
+          "happy_path"
+        ],
+        "predictedSuiteShape": [
+          "happy_path"
+        ],
+        "suiteShapeAsPredicted": true,
+        "singleHappyPath": true,
+        "frameModes": {
+          "case_live__happy_path": [
+            "performed"
+          ]
+        },
+        "errorTail": []
+      },
+      "mixed": {
+        "exit": 0,
+        "ok": true,
+        "suiteShape": [
+          "happy_path"
+        ],
+        "predictedSuiteShape": [
+          "happy_path"
+        ],
+        "suiteShapeAsPredicted": true,
+        "singleHappyPath": true,
+        "frameModes": {
+          "case_live__happy_path": [
+            "performed"
+          ]
+        },
+        "errorTail": []
+      }
+    },
+    "perCase": {
+      "IO2-1": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      },
+      "IO2-2": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      },
+      "IO2-3": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      },
+      "IO2-4": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      },
+      "IO2-5": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      },
+      "IO2-6": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      },
+      "IO2-7": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "False"
+        ]
+      },
+      "IO2-8": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "False"
+        ]
+      },
+      "IO2-9": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true,
+        "diagnostic": [
+          "True"
+        ]
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "IO2-1",
+      "title": "create: correct action",
+      "project": "create",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.59
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.59
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.61
+        }
+      ]
+    },
+    {
+      "id": "IO2-2",
+      "title": "create: correct task plus an edit to an existing note",
+      "project": "create",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.6
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.6
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.59
+        }
+      ]
+    },
+    {
+      "id": "IO2-3",
+      "title": "update: correct action",
+      "project": "update",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path",
+            "malformed_input",
+            "missing_precondition"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 26,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.83
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path",
+            "malformed_input",
+            "missing_precondition"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 26,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.8
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path",
+            "malformed_input",
+            "missing_precondition"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 26,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.81
+        }
+      ]
+    },
+    {
+      "id": "IO2-4",
+      "title": "update: correct change plus a new note",
+      "project": "update",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path",
+            "malformed_input",
+            "missing_precondition"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 26,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.83
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path",
+            "malformed_input",
+            "missing_precondition"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 26,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.84
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path",
+            "malformed_input",
+            "missing_precondition"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 26,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.85
+        }
+      ]
+    },
+    {
+      "id": "IO2-5",
+      "title": "replace: correct action",
+      "project": "replace",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.62
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.62
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.61
+        }
+      ]
+    },
+    {
+      "id": "IO2-6",
+      "title": "replace: correct replacement plus an edit to an existing note (delete A + update B)",
+      "project": "replace",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.62
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.62
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.62
+        }
+      ]
+    },
+    {
+      "id": "IO2-7",
+      "title": "selfread: correct action, the nominated list_notes flips seen",
+      "project": "selfread",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "False"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 0,
+          "connectorReadsBeyondAgent": 10,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": false,
+          "seconds": 0.56
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 0,
+          "connectorReadsBeyondAgent": 10,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": false,
+          "seconds": 0.58
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "PASS",
+          "wholeRunOracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 0,
+          "connectorReadsBeyondAgent": 10,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": false,
+          "seconds": 0.57
+        }
+      ]
+    },
+    {
+      "id": "IO2-8",
+      "title": "selfread: correct task plus an edit to an existing note",
+      "project": "selfread",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "False"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 0,
+          "connectorReadsBeyondAgent": 10,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": false,
+          "seconds": 0.56
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 0,
+          "connectorReadsBeyondAgent": 10,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": false,
+          "seconds": 0.58
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 0,
+          "connectorReadsBeyondAgent": 10,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": false,
+          "seconds": 0.59
+        }
+      ]
+    },
+    {
+      "id": "IO2-9",
+      "title": "mixed: the verifier answers no records, the connector stores a wrong title and lies on list_tasks",
+      "project": "mixed",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "notOutcome": "PASS",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "unresolvedBeforeRun": null,
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "attemptsNotRun": 0,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "diagnosticHolds": [
+        "True"
+      ],
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.59
+        },
+        {
+          "attempt": 2,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.58
+        },
+        {
+          "attempt": 3,
+          "notRun": null,
+          "oracleVerdict": "FAIL",
+          "wholeRunOracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "suiteShape": [
+            "happy_path"
+          ],
+          "selectedCaseId": "case_live__happy_path",
+          "answeredVerifierReads": 10,
+          "connectorReadsBeyondAgent": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "diagnosticHolds": true,
+          "seconds": 0.61
+        }
+      ]
+    }
+  ]
+}

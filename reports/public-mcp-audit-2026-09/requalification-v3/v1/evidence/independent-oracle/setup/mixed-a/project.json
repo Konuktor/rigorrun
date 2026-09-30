@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "id": "p_095ce8aedfbc",
+  "name": "taskdesk: create one task, verifier read then connector read",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_server.py",
+      "--db",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/tasks.db",
+      "--faults",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/faults.json",
+      "--shadow",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/shadow.json",
+      "--calls-log",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/calls.log"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_oracle_server.py",
+        "--db",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/tasks.db",
+        "--down-flag",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/oracle-down.flag",
+        "--empty-flag",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/oracle-empty.flag",
+        "--calls-log",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/calls.log"
+      ],
+      "url": "",
+      "auth": "header",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "verifier:query_tasks"
+  ],
+  "verifierReads": [
+    {
+      "tool": "verifier:query_tasks",
+      "args": {}
+    },
+    {
+      "tool": "list_tasks",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_6837cfc5",
+      "name": "io-readback",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-readback.json",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/mixed-a"
+      ],
+      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T20:04:05.030Z",
+      "lastProbeAt": "2026-09-30T20:04:05.030Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-09-30T20:04:04.879Z",
+    "environmentConnectedAt": "2026-09-30T20:04:04.971Z",
+    "workflowRecordedAt": "2026-09-30T20:04:04.998Z",
+    "benchmarkGeneratedAt": "2026-09-30T20:04:05.028Z",
+    "agentConnectedAt": "2026-09-30T20:04:05.065Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "id": "p_69386fbf4ccc",
+  "name": "taskdesk2: create one task, self-reported through a read that marks notes seen (no verifier)",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_server.py",
+      "--db",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/desk.db",
+      "--faults",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/faults.json",
+      "--shadow",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/shadow.json",
+      "--calls-log",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/calls.log",
+      "--mark-seen-on-read"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": []
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "list_notes"
+  ],
+  "verifierReads": [
+    {
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "tool": "list_notes",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    },
+    {
+      "questionId": "q_name_Note",
+      "value": "Note"
+    },
+    {
+      "questionId": "q_id_Note",
+      "value": "id"
+    },
+    {
+      "questionId": "q_unit_Note_task_id",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_task_id",
+      "value": "identifier"
+    },
+    {
+      "questionId": "q_role_Note_body",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Note_body",
+      "value": "no"
+    },
+    {
+      "questionId": "q_unit_Note_seen",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_seen",
+      "value": "identifier"
+    },
+    {
+      "questionId": "q_rel_Note_task_id",
+      "value": "optional"
+    },
+    {
+      "questionId": "q_rel_Note_seen",
+      "value": "optional"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_b69db4f0",
+      "name": "io2-create-correct",
+      "lastProbeAt": "2026-09-30T20:04:31.514Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/playbooks/io2-create-correct.json",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/traces/selfread"
+      ],
+      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state",
+      "confirmedByOperatorAt": "2026-09-30T20:04:31.514Z"
+    },
+    {
+      "id": "a_9fc3b61f",
+      "name": "io2-create-extra-note-edit",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/playbooks/io2-create-extra-note-edit.json",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state/traces/selfread"
+      ],
+      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/rq-io2-state",
+      "confirmedByOperatorAt": "2026-09-30T20:04:31.553Z",
+      "lastProbeAt": "2026-09-30T20:04:31.553Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-09-30T20:04:31.399Z",
+    "environmentConnectedAt": "2026-09-30T20:04:31.447Z",
+    "workflowRecordedAt": "2026-09-30T20:04:31.481Z",
+    "benchmarkGeneratedAt": "2026-09-30T20:04:31.512Z",
+    "agentConnectedAt": "2026-09-30T20:04:31.549Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}

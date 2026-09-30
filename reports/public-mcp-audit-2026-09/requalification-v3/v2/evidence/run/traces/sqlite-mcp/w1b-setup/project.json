@@ -1,0 +1,1863 @@
+{
+  "project": {
+    "schemaVersion": 1,
+    "id": "p_34c1d275feb0",
+    "name": "sqlite W1b insert a task (insert demonstrated last)",
+    "goal": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back.",
+    "connector": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "args": [
+        "--database",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+        "--preset",
+        "read-write"
+      ],
+      "url": "",
+      "auth": "header",
+      "secretNames": []
+    },
+    "safety": "local",
+    "readOnlyTools": [
+      "list_tables",
+      "describe_table",
+      "list_indexes",
+      "list_foreign_keys",
+      "list_views",
+      "list_triggers",
+      "explain_query",
+      "database_info",
+      "search_fts"
+    ],
+    "verifierReads": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT * FROM tasks ORDER BY id"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT * FROM audit_log ORDER BY id"
+        }
+      }
+    ],
+    "budgets": {
+      "toolCallMs": 20000,
+      "caseMs": 60000
+    },
+    "reset": {
+      "kind": "none",
+      "tool": ""
+    },
+    "schemaAnswers": [
+      {
+        "questionId": "q_name_Row",
+        "value": "Row"
+      },
+      {
+        "questionId": "q_id_Row",
+        "value": "id"
+      },
+      {
+        "questionId": "q_unit_Row_amount",
+        "value": "count"
+      },
+      {
+        "questionId": "q_role_Row_amount",
+        "value": "quantity"
+      },
+      {
+        "questionId": "q_role_Row_owner",
+        "value": "status"
+      },
+      {
+        "questionId": "q_role_Row_status",
+        "value": "status"
+      },
+      {
+        "questionId": "q_role_Row_title",
+        "value": "freetext"
+      },
+      {
+        "questionId": "q_untrusted_Row_title",
+        "value": "no"
+      },
+      {
+        "questionId": "q_name_Row2",
+        "value": "Row2"
+      },
+      {
+        "questionId": "q_id_Row2",
+        "value": "action"
+      },
+      {
+        "questionId": "q_unit_Row2_id",
+        "value": "count"
+      },
+      {
+        "questionId": "q_role_Row2_id",
+        "value": "identifier"
+      },
+      {
+        "questionId": "q_role_Row2_note",
+        "value": "freetext"
+      },
+      {
+        "questionId": "q_untrusted_Row2_note",
+        "value": "no"
+      },
+      {
+        "questionId": "q_unit_Row2_task_id",
+        "value": "count"
+      },
+      {
+        "questionId": "q_role_Row2_task_id",
+        "value": "identifier"
+      },
+      {
+        "questionId": "q_name_Table",
+        "value": "Table"
+      },
+      {
+        "questionId": "q_id_Table",
+        "value": "name"
+      },
+      {
+        "questionId": "q_role_Table_sql",
+        "value": "freetext"
+      },
+      {
+        "questionId": "q_untrusted_Table_sql",
+        "value": "no"
+      },
+      {
+        "questionId": "q_rel_Row2_id",
+        "value": "optional"
+      },
+      {
+        "questionId": "q_rel_Row2_task_id",
+        "value": "optional"
+      }
+    ],
+    "agents": [],
+    "runs": [],
+    "timings": {
+      "createdAt": "2026-09-30T20:09:28.005Z",
+      "environmentConnectedAt": "2026-09-30T20:09:28.070Z",
+      "workflowRecordedAt": "2026-09-30T20:09:28.218Z",
+      "benchmarkGeneratedAt": "2026-09-30T20:09:28.351Z",
+      "agentConnectedAt": null,
+      "firstVerdictAt": null
+    },
+    "baselineRunId": null,
+    "connectorTrust": {
+      "origin": "typed",
+      "confirmedAt": null
+    },
+    "nextSteps": [
+      {
+        "id": "connect_agent",
+        "what": "Connect the agent you want to test.",
+        "why": "Your tests are ready and nothing is missing except something to run them against."
+      }
+    ],
+    "timeToFirstVerdictMs": null
+  },
+  "contract": {
+    "schemaVersion": 1,
+    "id": "ec_p_34c1d275feb0",
+    "name": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back.",
+    "description": "Compiled from one recorded execution in sqlite W1b insert a task (insert demonstrated last).",
+    "goal": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back",
+    "environmentId": "p_34c1d275feb0",
+    "sourceTraceId": "trace_p_34c1d275feb0",
+    "primaryAction": "execute",
+    "focusEntity": "Row",
+    "focusScope": "created",
+    "remedyActions": [],
+    "completionActions": [],
+    "demonstratedArgs": {
+      "execute": {
+        "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+      }
+    },
+    "projectionFocus": [
+      "Row"
+    ],
+    "observedFacts": [
+      {
+        "id": "fact_001",
+        "statement": "Row 4 was created",
+        "key": "Row.4",
+        "value": {
+          "amount": 45.5,
+          "id": 4,
+          "owner": "cy",
+          "status": "open",
+          "title": "Quarterly report"
+        },
+        "provenance": [
+          {
+            "kind": "state_delta",
+            "ref": "delta_0",
+            "detail": "Row 4 was created"
+          }
+        ]
+      }
+    ],
+    "argumentBindings": [
+      {
+        "field": "amount",
+        "param": "query",
+        "mode": "param_contains_field",
+        "demonstrated": 45.5
+      },
+      {
+        "field": "owner",
+        "param": "query",
+        "mode": "param_contains_field",
+        "demonstrated": "cy"
+      },
+      {
+        "field": "status",
+        "param": "query",
+        "mode": "param_contains_field",
+        "demonstrated": "open"
+      },
+      {
+        "field": "title",
+        "param": "query",
+        "mode": "param_contains_field",
+        "demonstrated": "Quarterly report"
+      }
+    ],
+    "expectedDeltaCount": 1,
+    "expectedDeletedCount": 0,
+    "expectedFrame": {
+      "entities": {
+        "Row": {
+          "preExistingRows": 3,
+          "created": 1,
+          "deleted": 0,
+          "updatedRows": 0,
+          "updatedFields": [],
+          "identity": "named"
+        },
+        "Row2": {
+          "preExistingRows": 1,
+          "created": 0,
+          "deleted": 0,
+          "updatedRows": 0,
+          "updatedFields": [],
+          "identity": "named"
+        },
+        "Table": {
+          "preExistingRows": 0,
+          "created": 0,
+          "deleted": 0,
+          "updatedRows": 0,
+          "updatedFields": [],
+          "identity": "named"
+        }
+      }
+    },
+    "rules": [],
+    "successAssertions": [],
+    "policyAssertions": [],
+    "createdAt": "2026-09-30T20:09:28.259Z",
+    "approvedAt": "2026-09-30T20:09:28.283Z"
+  },
+  "benchmark": {
+    "cases": [
+      {
+        "id": "case_live__happy_path",
+        "name": "The job as demonstrated",
+        "category": "happy_path"
+      }
+    ],
+    "notTestable": [
+      {
+        "rule": "partial_state_read",
+        "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+      },
+      {
+        "rule": "no_reset",
+        "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+      },
+      {
+        "rule": "no_seed",
+        "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+      },
+      {
+        "rule": "induced_schema",
+        "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+      }
+    ]
+  },
+  "environment": {
+    "connected": true,
+    "discovery": {
+      "serverName": "mcp-server-sqlite",
+      "serverVersion": "1.0.0",
+      "protocolVersion": "negotiated",
+      "discoveredAt": "2026-09-30T20:09:28.079Z",
+      "latencyMs": 8,
+      "tools": [
+        {
+          "name": "backup",
+          "description": "Back up the entire database to a file. Creates a consistent snapshot of all\ntables, indexes, triggers, and views at the destination path. The backup\nruns incrementally in pages so it does not block other operations for long.",
+          "params": [
+            {
+              "name": "destination",
+              "type": "string",
+              "required": true,
+              "description": "The file path to write the backup to"
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "destination": {
+                "description": "The file path to write the backup to",
+                "type": "string"
+              }
+            },
+            "required": [
+              "destination"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `backup` tool.",
+            "title": "BackupInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "destination": {
+                "description": "The file path the backup was written to.",
+                "type": "string"
+              },
+              "pages_copied": {
+                "description": "The total number of pages copied during the backup.",
+                "format": "int32",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "pages_copied",
+              "destination"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of a successful database backup.",
+            "title": "BackupOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "create_fts_index",
+          "description": "Create a full-text search index on an existing table using SQLite's FTS5\nmodule. Specify the source table and the columns to index. The virtual table\nis named `{table}_fts` by default and can be queried with the MATCH\noperator.",
+          "params": [
+            {
+              "name": "fts_table_name",
+              "type": "string",
+              "required": false,
+              "description": "Optional name for the FTS virtual table (defaults to {table}_fts)"
+            },
+            {
+              "name": "table_name",
+              "type": "string",
+              "required": true,
+              "description": "The source table to create an FTS index over"
+            }
+          ],
+          "unsupported": [
+            {
+              "name": "columns",
+              "reason": "it is a list, which RigorRun cannot compare against yet"
+            }
+          ],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "columns": {
+                "description": "The columns to include in the full-text index",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "fts_table_name": {
+                "description": "Optional name for the FTS virtual table (defaults to {table}_fts)",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "table_name": {
+                "description": "The source table to create an FTS index over",
+                "type": "string"
+              }
+            },
+            "required": [
+              "table_name",
+              "columns"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `create_fts_index` tool.",
+            "title": "CreateFtsIndexInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "fts_table_name": {
+                "description": "The name of the created FTS virtual table.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "fts_table_name"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of creating an FTS index.",
+            "title": "CreateFtsIndexOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "database_info",
+          "description": "Return metadata about the database: SQLite version, page size, page count,\njournal mode, WAL checkpoint status, total size in bytes, freelist (unused)\npage count, and the number of tables and indexes. Useful for monitoring\ndatabase health and understanding storage characteristics.",
+          "params": [],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `database_info` tool.",
+            "title": "DatabaseInfoInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "database_size_bytes": {
+                "description": "The total database size in bytes, computed as `page_size * page_count`.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "freelist_count": {
+                "description": "The number of unused pages on the freelist, as reported by `PRAGMA\nfreelist_count`.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "index_count": {
+                "description": "The number of indexes in the database, counted from `sqlite_master`.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "journal_mode": {
+                "description": "The active journal mode (e.g. `\"delete\"`, `\"wal\"`, `\"memory\"`).",
+                "type": "string"
+              },
+              "page_count": {
+                "description": "The total number of pages in the database file, as reported by `PRAGMA\npage_count`.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "page_size": {
+                "description": "The database page size in bytes, as configured by `PRAGMA page_size`.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "sqlite_version": {
+                "description": "The SQLite library version string (e.g. `\"3.45.1\"`).",
+                "type": "string"
+              },
+              "table_count": {
+                "description": "The number of tables in the database, counted from `sqlite_master`.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "wal_checkpoint": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/WalCheckpointInfo"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "WAL checkpoint information, present only when the journal mode is\n`\"wal\"`. Contains the result of `PRAGMA wal_checkpoint(PASSIVE)`."
+              }
+            },
+            "required": [
+              "sqlite_version",
+              "page_size",
+              "page_count",
+              "journal_mode",
+              "database_size_bytes",
+              "freelist_count",
+              "table_count",
+              "index_count"
+            ],
+            "$defs": {
+              "WalCheckpointInfo": {
+                "description": "Information from a passive WAL checkpoint, as returned by `PRAGMA\nwal_checkpoint(PASSIVE)`.",
+                "properties": {
+                  "busy": {
+                    "description": "Non-zero if the checkpoint was blocked by a concurrent reader or writer.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "checkpointed_pages": {
+                    "description": "The number of pages successfully checkpointed back to the main database\nfile.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "log_pages": {
+                    "description": "The number of pages in the WAL log file.",
+                    "format": "int64",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "busy",
+                  "log_pages",
+                  "checkpointed_pages"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of querying database metadata.",
+            "title": "DatabaseInfoOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "describe_table",
+          "description": "Describe the columns of a table. Returns each column's name, type, whether\nit is NOT NULL, its default value, and whether it is part of the primary\nkey. Useful for inspecting a table's schema before writing queries.",
+          "params": [
+            {
+              "name": "table_name",
+              "type": "string",
+              "required": true,
+              "description": "The name of the table to describe"
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "table_name": {
+                "description": "The name of the table to describe",
+                "type": "string"
+              }
+            },
+            "required": [
+              "table_name"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `describe_table` tool.",
+            "title": "DescribeTableInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "columns": {
+                "description": "The columns of the table, each with its name, type, nullability, default\nvalue, and primary key status.",
+                "items": {
+                  "$ref": "#/$defs/ColumnInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "columns"
+            ],
+            "$defs": {
+              "ColumnInfo": {
+                "description": "Metadata for a single column in a table, as reported by SQLite's `PRAGMA\ntable_info`.",
+                "properties": {
+                  "column_type": {
+                    "description": "The declared type of the column (e.g. `TEXT`, `INTEGER`). May be empty\nif the column was declared without a type.",
+                    "type": "string"
+                  },
+                  "default_value": {
+                    "description": "The default value expression, if one was specified in the column\ndefinition.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "description": "The column name.",
+                    "type": "string"
+                  },
+                  "not_null": {
+                    "description": "Whether the column has a `NOT NULL` constraint.",
+                    "type": "boolean"
+                  },
+                  "primary_key": {
+                    "description": "Whether this column is part of the table's primary key.",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "column_type",
+                  "not_null",
+                  "primary_key"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of describing a table's columns.",
+            "title": "DescribeTableOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "execute",
+          "description": "Marker type for the `execute` tool. Implements `SqliteServerTool` to wire up\nthe tool's schema, handler, and routing. Stateless — all context comes from\n`McpServerSqlite`.",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": "The SQL query to execute"
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "description": "The SQL query to execute",
+                "type": "string"
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `execute` tool.",
+            "title": "ExecuteInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "rows": {
+                "description": "The rows returned by the query. Empty for statements that do not produce\noutput (e.g. INSERT, CREATE TABLE).",
+                "items": {
+                  "$ref": "#/$defs/Row"
+                },
+                "type": "array"
+              },
+              "rows_changed": {
+                "description": "The number of rows changed by the statement. Zero for queries that only\nread data.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "rows",
+              "rows_changed"
+            ],
+            "$defs": {
+              "Row": {
+                "description": "A single row returned from a query, represented as a mapping of column names\nto their typed values.",
+                "properties": {
+                  "columns": {
+                    "additionalProperties": {
+                      "$ref": "#/$defs/Value"
+                    },
+                    "description": "The column-value pairs for this row. Each key is the column name and\neach value preserves the original SQLite type.",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "columns"
+                ],
+                "type": "object"
+              },
+              "Value": {
+                "description": "A dynamically-typed SQLite value preserving the original column type.\nSerialized as a tagged enum with `kind` and `value` fields so that consumers\ncan distinguish between types unambiguously.",
+                "oneOf": [
+                  {
+                    "description": "A SQL NULL.",
+                    "properties": {
+                      "kind": {
+                        "const": "Null",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "description": "A 64-bit signed integer.",
+                    "properties": {
+                      "kind": {
+                        "const": "Integer",
+                        "type": "string"
+                      },
+                      "value": {
+                        "format": "int64",
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "description": "A 64-bit IEEE 754 floating-point number.",
+                    "properties": {
+                      "kind": {
+                        "const": "Real",
+                        "type": "string"
+                      },
+                      "value": {
+                        "format": "double",
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "description": "A UTF-8 string.",
+                    "properties": {
+                      "kind": {
+                        "const": "Text",
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "description": "Raw binary data, hex-encoded for JSON transport.",
+                    "properties": {
+                      "kind": {
+                        "const": "Blob",
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of executing a SQL query.",
+            "title": "ExecuteOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "explain_query",
+          "description": "Show the query execution plan for a SQL statement. Returns the EXPLAIN QUERY\nPLAN output showing how SQLite will scan tables, use indexes, and join data.",
+          "params": [
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": "The SQL query to explain"
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "description": "The SQL query to explain",
+                "type": "string"
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `explain_query` tool.",
+            "title": "ExplainQueryInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "plan": {
+                "description": "The nodes of the query plan tree. Each node describes one step in\nSQLite's execution strategy.",
+                "items": {
+                  "$ref": "#/$defs/PlanNode"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "plan"
+            ],
+            "$defs": {
+              "PlanNode": {
+                "description": "A single node in the EXPLAIN QUERY PLAN output tree.",
+                "properties": {
+                  "detail": {
+                    "description": "A human-readable description of the operation performed at this step\n(e.g. \"SCAN users\", \"SEARCH users USING INDEX idx_email\").",
+                    "type": "string"
+                  },
+                  "id": {
+                    "description": "The unique identifier for this plan node.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "parent": {
+                    "description": "The identifier of this node's parent, or zero if this is a root node.",
+                    "format": "int64",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id",
+                  "parent",
+                  "detail"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of explaining a SQL query's execution plan.",
+            "title": "ExplainQueryOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "list_foreign_keys",
+          "description": "List all foreign key constraints for a given table. Returns one entry per\ncolumn mapping, including the referenced table, the local and remote\ncolumns, and the ON UPDATE / ON DELETE actions. Composite foreign keys\nproduce multiple entries that share the same id.",
+          "params": [
+            {
+              "name": "table_name",
+              "type": "string",
+              "required": true,
+              "description": "The name of the table to list foreign keys for"
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "table_name": {
+                "description": "The name of the table to list foreign keys for",
+                "type": "string"
+              }
+            },
+            "required": [
+              "table_name"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `list_foreign_keys` tool.",
+            "title": "ListForeignKeysInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "foreign_keys": {
+                "description": "The foreign key constraints found on the table. Each entry represents\none column mapping within a foreign key. Composite keys produce multiple\nentries sharing the same `id`.",
+                "items": {
+                  "$ref": "#/$defs/ForeignKeyInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "foreign_keys"
+            ],
+            "$defs": {
+              "ForeignKeyInfo": {
+                "description": "A single column mapping within a foreign key constraint. Multiple rows with\nthe same `id` indicate a composite foreign key that spans more than one\ncolumn.",
+                "properties": {
+                  "from_column": {
+                    "description": "The column in the local table that participates in the foreign key.",
+                    "type": "string"
+                  },
+                  "id": {
+                    "description": "The foreign key constraint identifier. All column mappings belonging to\nthe same composite key share this value.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "on_delete": {
+                    "description": "The action taken on deletion of the referenced row (e.g. `\"NO ACTION\"`,\n`\"CASCADE\"`, `\"SET NULL\"`, `\"SET DEFAULT\"`, `\"RESTRICT\"`).",
+                    "type": "string"
+                  },
+                  "on_update": {
+                    "description": "The action taken on update of the referenced row (e.g. `\"NO ACTION\"`,\n`\"CASCADE\"`, `\"SET NULL\"`, `\"SET DEFAULT\"`, `\"RESTRICT\"`).",
+                    "type": "string"
+                  },
+                  "to_column": {
+                    "description": "The referenced column in the parent table.",
+                    "type": "string"
+                  },
+                  "to_table": {
+                    "description": "The referenced (parent) table.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "from_column",
+                  "to_table",
+                  "to_column",
+                  "on_update",
+                  "on_delete"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of listing foreign keys for a table.",
+            "title": "ListForeignKeysOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "list_indexes",
+          "description": "List indexes in the database. When a table name is provided, only indexes\nbelonging to that table are returned. Otherwise all indexes across every\ntable are listed. Each index entry includes its name, the table it belongs\nto, whether it enforces uniqueness, the ordered list of indexed columns, and\nthe WHERE predicate for partial indexes.",
+          "params": [
+            {
+              "name": "table_name",
+              "type": "string",
+              "required": false,
+              "description": "Filter indexes to this table. Omit for all tables."
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "table_name": {
+                "description": "Filter indexes to this table. Omit for all tables.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `list_indexes` tool.",
+            "title": "ListIndexesInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "indexes": {
+                "description": "The indexes found, each with its metadata and column list.",
+                "items": {
+                  "$ref": "#/$defs/IndexInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "indexes"
+            ],
+            "$defs": {
+              "IndexInfo": {
+                "description": "Metadata for a single index in the database.",
+                "properties": {
+                  "columns": {
+                    "description": "The ordered list of column names covered by this index.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "name": {
+                    "description": "The index name as recorded in `sqlite_master`.",
+                    "type": "string"
+                  },
+                  "partial_predicate": {
+                    "description": "The WHERE-clause predicate for partial indexes, or `None` for full\nindexes.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "table_name": {
+                    "description": "The table this index belongs to.",
+                    "type": "string"
+                  },
+                  "unique": {
+                    "description": "Whether this index enforces a uniqueness constraint.",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "table_name",
+                  "unique",
+                  "columns"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of listing indexes in the database.",
+            "title": "ListIndexesOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "list_tables",
+          "description": "List all tables in the database with their names and CREATE TABLE schemas.\nReturns an empty list if no tables exist. Useful for discovering the\ndatabase structure before writing queries.",
+          "params": [],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `list_tables` tool.",
+            "title": "ListTablesInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "tables": {
+                "description": "The tables found in the database, each with its name and creation SQL.",
+                "items": {
+                  "$ref": "#/$defs/TableInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "tables"
+            ],
+            "$defs": {
+              "TableInfo": {
+                "description": "Metadata for a single table in the database.",
+                "properties": {
+                  "name": {
+                    "description": "The table name.",
+                    "type": "string"
+                  },
+                  "sql": {
+                    "description": "The `CREATE TABLE` SQL statement that defines this table's schema.\n`None` for internal SQLite tables that have no user-visible DDL.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of listing tables in the database.",
+            "title": "ListTablesOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "list_triggers",
+          "description": "List all triggers in the database, or only those for a given table. Returns\neach trigger's name, table, event, timing, and full SQL. Useful for\nunderstanding data-change side effects before issuing write queries.",
+          "params": [
+            {
+              "name": "table_name",
+              "type": "string",
+              "required": false,
+              "description": "Optional table name to filter triggers by. Omit to list all triggers."
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "table_name": {
+                "description": "Optional table name to filter triggers by. Omit to list all triggers.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `list_triggers` tool.",
+            "title": "ListTriggersInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "triggers": {
+                "description": "The triggers found, each with full metadata and SQL.",
+                "items": {
+                  "$ref": "#/$defs/TriggerInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "triggers"
+            ],
+            "$defs": {
+              "TriggerInfo": {
+                "description": "Metadata for a single trigger in the database.",
+                "properties": {
+                  "event": {
+                    "description": "The DML event that fires the trigger: `INSERT`, `UPDATE`, or `DELETE`.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The trigger name as declared in `CREATE TRIGGER`.",
+                    "type": "string"
+                  },
+                  "sql": {
+                    "description": "The full `CREATE TRIGGER` SQL statement that defines this trigger.",
+                    "type": "string"
+                  },
+                  "table_name": {
+                    "description": "The table this trigger is attached to.",
+                    "type": "string"
+                  },
+                  "timing": {
+                    "description": "When the trigger fires relative to the event: `BEFORE`, `AFTER`, or\n`INSTEAD OF`.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "table_name",
+                  "event",
+                  "timing",
+                  "sql"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of listing triggers in the database.",
+            "title": "ListTriggersOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "list_views",
+          "description": "List all views in the database with their names and defining SQL statements.",
+          "params": [],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `list_views` tool.",
+            "title": "ListViewsInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "views": {
+                "description": "The views found in the database, each with its name and defining SQL.",
+                "items": {
+                  "$ref": "#/$defs/ViewInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "views"
+            ],
+            "$defs": {
+              "ViewInfo": {
+                "description": "Metadata for a single view in the database.",
+                "properties": {
+                  "name": {
+                    "description": "The view name.",
+                    "type": "string"
+                  },
+                  "sql": {
+                    "description": "The `CREATE VIEW` SQL statement that defines this view.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "sql"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of listing views in the database.",
+            "title": "ListViewsOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "search_fts",
+          "description": "Search a full-text search index using SQLite's FTS5 MATCH syntax. Returns\nresults ranked by BM25 relevance with highlighted snippets showing where the\nquery matched. The FTS table must have been created previously (e.g. via\n`create_fts_index`).",
+          "params": [
+            {
+              "name": "fts_table",
+              "type": "string",
+              "required": true,
+              "description": "The FTS5 virtual table to search"
+            },
+            {
+              "name": "highlight_end",
+              "type": "string",
+              "required": false,
+              "description": "String after matched terms in snippets (default </b>)"
+            },
+            {
+              "name": "highlight_start",
+              "type": "string",
+              "required": false,
+              "description": "String before matched terms in snippets (default <b>)"
+            },
+            {
+              "name": "limit",
+              "type": "number",
+              "required": false,
+              "description": "Maximum number of results (default 10)"
+            },
+            {
+              "name": "query",
+              "type": "string",
+              "required": true,
+              "description": "The FTS5 MATCH query string"
+            },
+            {
+              "name": "snippet_tokens",
+              "type": "number",
+              "required": false,
+              "description": "Max tokens per snippet (default 32)"
+            }
+          ],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fts_table": {
+                "description": "The FTS5 virtual table to search",
+                "type": "string"
+              },
+              "highlight_end": {
+                "description": "String after matched terms in snippets (default </b>)",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "highlight_start": {
+                "description": "String before matched terms in snippets (default <b>)",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "limit": {
+                "description": "Maximum number of results (default 10)",
+                "format": "int64",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "query": {
+                "description": "The FTS5 MATCH query string",
+                "type": "string"
+              },
+              "snippet_tokens": {
+                "description": "Max tokens per snippet (default 32)",
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "fts_table",
+              "query"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `search_fts` tool.",
+            "title": "SearchFtsInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "results": {
+                "description": "The matching rows, ranked by BM25 relevance (best first).",
+                "items": {
+                  "$ref": "#/$defs/FtsMatch"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "results"
+            ],
+            "$defs": {
+              "FtsMatch": {
+                "description": "A single full-text search result.",
+                "properties": {
+                  "rank": {
+                    "description": "The BM25 relevance score. Lower (more negative) is more relevant.",
+                    "format": "double",
+                    "type": "number"
+                  },
+                  "rowid": {
+                    "description": "The rowid of the matching row in the FTS table.",
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "snippets": {
+                    "description": "Highlighted text snippets for each indexed column, in the order the\ncolumns were defined in the FTS table.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "rowid",
+                  "rank",
+                  "snippets"
+                ],
+                "type": "object"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The results of a full-text search query.",
+            "title": "SearchFtsOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        },
+        {
+          "name": "vacuum",
+          "description": "Reclaim unused space and defragment the database file by running SQLite's\nVACUUM command. This rebuilds the entire database into a compact, contiguous\nfile. The operation may take a while on large databases.",
+          "params": [],
+          "unsupported": [],
+          "schemaTruncated": false,
+          "inputSchema": {
+            "type": "object",
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The input parameters for the `vacuum` tool.",
+            "title": "VacuumInput"
+          },
+          "outputSchema": {
+            "type": "object",
+            "properties": {
+              "success": {
+                "description": "Whether the VACUUM operation completed successfully.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "success"
+            ],
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "description": "The result of running the VACUUM command.",
+            "title": "VacuumOutput"
+          },
+          "hints": {},
+          "risk": {
+            "level": "unknown",
+            "source": "default",
+            "rationale": "The server published no hint. Treated as writing until shown otherwise."
+          }
+        }
+      ]
+    }
+  },
+  "questions": [
+    {
+      "id": "q_name_Row",
+      "kind": "entity_name",
+      "entity": "Row",
+      "text": "Is \"Row\" the right name for this kind of record?",
+      "evidence": "4 distinct record(s) seen, with fields: amount, id, owner, status, title.",
+      "proposed": "Row",
+      "options": [],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_id_Row",
+      "kind": "id_field",
+      "entity": "Row",
+      "options": [
+        "amount",
+        "id",
+        "owner",
+        "status",
+        "title"
+      ],
+      "text": "Does \"id\" identify one Row?",
+      "evidence": "Its value was different for every Row in each list the server returned, and it stayed the same between the readings before and after the job.",
+      "proposed": "id",
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_unit_Row_amount",
+      "kind": "unit",
+      "entity": "Row",
+      "field": "amount",
+      "text": "What is \"amount\" measured in?",
+      "evidence": "Values seen: 120.5, 80, 0, 45.5. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+      "proposed": "count",
+      "options": [
+        "currency",
+        "count",
+        "duration_days",
+        "duration_hours",
+        "duration_ms",
+        "score",
+        "mass_kg",
+        "percent"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Row_amount",
+      "kind": "field_role",
+      "entity": "Row",
+      "field": "amount",
+      "text": "What kind of thing is \"amount\"?",
+      "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 120.5, 80, 0, 45.5.",
+      "proposed": "quantity",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_role_Row_owner",
+      "kind": "field_role",
+      "entity": "Row",
+      "field": "owner",
+      "text": "What kind of thing is \"owner\"?",
+      "evidence": "A small, repeated set of values, though none was seen changing. Values seen: ada, bo, cy.",
+      "proposed": "status",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_role_Row_status",
+      "kind": "field_role",
+      "entity": "Row",
+      "field": "status",
+      "text": "What kind of thing is \"status\"?",
+      "evidence": "A small, repeated set of values, though none was seen changing. Values seen: open, done.",
+      "proposed": "status",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_role_Row_title",
+      "kind": "field_role",
+      "entity": "Row",
+      "field": "title",
+      "text": "What kind of thing is \"title\"?",
+      "evidence": "Free text as far as RigorRun can tell. Values seen: Prepare invoice, Review contract, Archive old files, Quarterly report.",
+      "proposed": "freetext",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_untrusted_Row_title",
+      "kind": "untrusted",
+      "entity": "Row",
+      "field": "title",
+      "text": "Can somebody outside your organisation write \"title\"?",
+      "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+      "proposed": "no",
+      "options": [
+        "no",
+        "yes"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_name_Row2",
+      "kind": "entity_name",
+      "entity": "Row2",
+      "text": "Is \"Row2\" the right name for this kind of record?",
+      "evidence": "1 distinct record(s) seen, with fields: action, id, note, task_id.",
+      "proposed": "Row2",
+      "options": [],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_id_Row2",
+      "kind": "id_field",
+      "entity": "Row2",
+      "options": [
+        "action",
+        "id",
+        "note",
+        "task_id"
+      ],
+      "text": "Does \"action\" identify one Row2?",
+      "evidence": "Its value was different for every Row2 in each list the server returned, and it stayed the same between the readings before and after the job.",
+      "proposed": "action",
+      "confidence": "weak"
+    },
+    {
+      "id": "q_unit_Row2_id",
+      "kind": "unit",
+      "entity": "Row2",
+      "field": "id",
+      "text": "What is \"id\" measured in?",
+      "evidence": "Values seen: 1. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+      "proposed": "count",
+      "options": [
+        "currency",
+        "count",
+        "duration_days",
+        "duration_hours",
+        "duration_ms",
+        "score",
+        "mass_kg",
+        "percent"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Row2_id",
+      "kind": "field_role",
+      "entity": "Row2",
+      "field": "id",
+      "text": "What kind of thing is \"id\"?",
+      "evidence": "Every value of \"id\" is an identifier that a Row has, so this names another record rather than describing this one.",
+      "proposed": "identifier",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "strong"
+    },
+    {
+      "id": "q_role_Row2_note",
+      "kind": "field_role",
+      "entity": "Row2",
+      "field": "note",
+      "text": "What kind of thing is \"note\"?",
+      "evidence": "Free text as far as RigorRun can tell. Values seen: seed.",
+      "proposed": "freetext",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_untrusted_Row2_note",
+      "kind": "untrusted",
+      "entity": "Row2",
+      "field": "note",
+      "text": "Can somebody outside your organisation write \"note\"?",
+      "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+      "proposed": "no",
+      "options": [
+        "no",
+        "yes"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_unit_Row2_task_id",
+      "kind": "unit",
+      "entity": "Row2",
+      "field": "task_id",
+      "text": "What is \"task_id\" measured in?",
+      "evidence": "Values seen: 3. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+      "proposed": "count",
+      "options": [
+        "currency",
+        "count",
+        "duration_days",
+        "duration_hours",
+        "duration_ms",
+        "score",
+        "mass_kg",
+        "percent"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Row2_task_id",
+      "kind": "field_role",
+      "entity": "Row2",
+      "field": "task_id",
+      "text": "What kind of thing is \"task_id\"?",
+      "evidence": "Every value of \"task_id\" is an identifier that a Row has, so this names another record rather than describing this one.",
+      "proposed": "identifier",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "strong"
+    },
+    {
+      "id": "q_name_Table",
+      "kind": "entity_name",
+      "entity": "Table",
+      "text": "Is \"Table\" the right name for this kind of record?",
+      "evidence": "2 distinct record(s) seen, with fields: name, sql.",
+      "proposed": "Table",
+      "options": [],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_id_Table",
+      "kind": "id_field",
+      "entity": "Table",
+      "options": [
+        "name",
+        "sql"
+      ],
+      "text": "Does \"name\" identify one Table?",
+      "evidence": "Its value was different for every Table in each list the server returned, and nothing showed it changing for the same one.",
+      "proposed": "name",
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_role_Table_sql",
+      "kind": "field_role",
+      "entity": "Table",
+      "field": "sql",
+      "text": "What kind of thing is \"sql\"?",
+      "evidence": "Free text as far as RigorRun can tell. Values seen: CREATE TABLE audit_log (\n  id INTEGER PR…, CREATE TABLE tasks (\n  id INTEGER PRIMAR….",
+      "proposed": "freetext",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_untrusted_Table_sql",
+      "kind": "untrusted",
+      "entity": "Table",
+      "field": "sql",
+      "text": "Can somebody outside your organisation write \"sql\"?",
+      "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+      "proposed": "no",
+      "options": [
+        "no",
+        "yes"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_rel_Row2_id",
+      "kind": "relationship",
+      "entity": "Row2",
+      "field": "id",
+      "text": "Does every Row2 have to name a Row?",
+      "evidence": "Every value of \"id\" was an identifier a Row actually has (1).",
+      "proposed": "optional",
+      "options": [
+        "optional",
+        "required"
+      ],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_rel_Row2_task_id",
+      "kind": "relationship",
+      "entity": "Row2",
+      "field": "task_id",
+      "text": "Does every Row2 have to name a Row?",
+      "evidence": "Every value of \"task_id\" was an identifier a Row actually has (3).",
+      "proposed": "optional",
+      "options": [
+        "optional",
+        "required"
+      ],
+      "confidence": "moderate"
+    }
+  ],
+  "recording": {
+    "inProgress": false,
+    "steps": []
+  },
+  "activation": {
+    "reached": "benchmark_built",
+    "reachedIndex": 6,
+    "stages": [
+      {
+        "stage": "project_created",
+        "code": "A2",
+        "at": "2026-09-30T20:09:28.016Z"
+      },
+      {
+        "stage": "environment_connected",
+        "code": "A3",
+        "at": "2026-09-30T20:09:28.087Z"
+      },
+      {
+        "stage": "workflow_recorded",
+        "code": "A4",
+        "at": "2026-09-30T20:09:28.229Z"
+      },
+      {
+        "stage": "contract_confirmed",
+        "code": "A5",
+        "at": "2026-09-30T20:09:28.291Z"
+      },
+      {
+        "stage": "benchmark_built",
+        "code": "A6",
+        "at": "2026-09-30T20:09:28.362Z"
+      }
+    ],
+    "humanMsToFirstVerdict": null,
+    "attempts": {}
+  },
+  "quality": null
+}

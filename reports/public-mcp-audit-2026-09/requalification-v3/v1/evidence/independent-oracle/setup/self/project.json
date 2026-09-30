@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "id": "p_a45e22adae29",
+  "name": "taskdesk: create one task, self-reported (control, no verifier)",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_server.py",
+      "--db",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/tasks.db",
+      "--faults",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/faults.json",
+      "--shadow",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/shadow.json",
+      "--calls-log",
+      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/calls.log"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": []
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks"
+  ],
+  "verifierReads": [
+    {
+      "tool": "list_tasks",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_5a7133e6",
+      "name": "io-readback",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-readback.json",
+        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/self"
+      ],
+      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T20:04:06.166Z",
+      "lastProbeAt": "2026-09-30T20:04:06.166Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-09-30T20:04:06.039Z",
+    "environmentConnectedAt": "2026-09-30T20:04:06.096Z",
+    "workflowRecordedAt": "2026-09-30T20:04:06.127Z",
+    "benchmarkGeneratedAt": "2026-09-30T20:04:06.163Z",
+    "agentConnectedAt": "2026-09-30T20:04:06.202Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}

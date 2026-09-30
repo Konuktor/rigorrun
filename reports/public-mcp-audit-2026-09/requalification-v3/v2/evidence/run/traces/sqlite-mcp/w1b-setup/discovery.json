@@ -1,0 +1,279 @@
+{
+  "serverName": "mcp-server-sqlite",
+  "latencyMs": 8,
+  "tools": [
+    {
+      "name": "backup",
+      "description": "Back up the entire database to a file. Creates a consistent snapshot of all\ntables, indexes, triggers, and views at the destination path. The backup\nruns incrementally in pages so it does not block other operations for long.",
+      "params": [
+        {
+          "name": "destination",
+          "type": "string",
+          "required": true,
+          "description": "The file path to write the backup to"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "create_fts_index",
+      "description": "Create a full-text search index on an existing table using SQLite's FTS5\nmodule. Specify the source table and the columns to index. The virtual table\nis named `{table}_fts` by default and can be queried with the MATCH\noperator.",
+      "params": [
+        {
+          "name": "fts_table_name",
+          "type": "string",
+          "required": false,
+          "description": "Optional name for the FTS virtual table (defaults to {table}_fts)"
+        },
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": true,
+          "description": "The source table to create an FTS index over"
+        }
+      ],
+      "unsupported": [
+        {
+          "name": "columns",
+          "reason": "it is a list, which RigorRun cannot compare against yet"
+        }
+      ],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "database_info",
+      "description": "Return metadata about the database: SQLite version, page size, page count,\njournal mode, WAL checkpoint status, total size in bytes, freelist (unused)\npage count, and the number of tables and indexes. Useful for monitoring\ndatabase health and understanding storage characteristics.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "describe_table",
+      "description": "Describe the columns of a table. Returns each column's name, type, whether\nit is NOT NULL, its default value, and whether it is part of the primary\nkey. Useful for inspecting a table's schema before writing queries.",
+      "params": [
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the table to describe"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "execute",
+      "description": "Marker type for the `execute` tool. Implements `SqliteServerTool` to wire up\nthe tool's schema, handler, and routing. Stateless — all context comes from\n`McpServerSqlite`.",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The SQL query to execute"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "explain_query",
+      "description": "Show the query execution plan for a SQL statement. Returns the EXPLAIN QUERY\nPLAN output showing how SQLite will scan tables, use indexes, and join data.",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The SQL query to explain"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_foreign_keys",
+      "description": "List all foreign key constraints for a given table. Returns one entry per\ncolumn mapping, including the referenced table, the local and remote\ncolumns, and the ON UPDATE / ON DELETE actions. Composite foreign keys\nproduce multiple entries that share the same id.",
+      "params": [
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the table to list foreign keys for"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_indexes",
+      "description": "List indexes in the database. When a table name is provided, only indexes\nbelonging to that table are returned. Otherwise all indexes across every\ntable are listed. Each index entry includes its name, the table it belongs\nto, whether it enforces uniqueness, the ordered list of indexed columns, and\nthe WHERE predicate for partial indexes.",
+      "params": [
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": false,
+          "description": "Filter indexes to this table. Omit for all tables."
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_tables",
+      "description": "List all tables in the database with their names and CREATE TABLE schemas.\nReturns an empty list if no tables exist. Useful for discovering the\ndatabase structure before writing queries.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_triggers",
+      "description": "List all triggers in the database, or only those for a given table. Returns\neach trigger's name, table, event, timing, and full SQL. Useful for\nunderstanding data-change side effects before issuing write queries.",
+      "params": [
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": false,
+          "description": "Optional table name to filter triggers by. Omit to list all triggers."
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_views",
+      "description": "List all views in the database with their names and defining SQL statements.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "search_fts",
+      "description": "Search a full-text search index using SQLite's FTS5 MATCH syntax. Returns\nresults ranked by BM25 relevance with highlighted snippets showing where the\nquery matched. The FTS table must have been created previously (e.g. via\n`create_fts_index`).",
+      "params": [
+        {
+          "name": "fts_table",
+          "type": "string",
+          "required": true,
+          "description": "The FTS5 virtual table to search"
+        },
+        {
+          "name": "highlight_end",
+          "type": "string",
+          "required": false,
+          "description": "String after matched terms in snippets (default </b>)"
+        },
+        {
+          "name": "highlight_start",
+          "type": "string",
+          "required": false,
+          "description": "String before matched terms in snippets (default <b>)"
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Maximum number of results (default 10)"
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The FTS5 MATCH query string"
+        },
+        {
+          "name": "snippet_tokens",
+          "type": "number",
+          "required": false,
+          "description": "Max tokens per snippet (default 32)"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "vacuum",
+      "description": "Reclaim unused space and defragment the database file by running SQLite's\nVACUUM command. This rebuilds the entire database into a compact, contiguous\nfile. The operation may take a while on large databases.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    }
+  ]
+}

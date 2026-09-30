@@ -1,0 +1,11 @@
+2026-09-30T20:08:20Z SQ-LLM-02-qwen2.5-3b: qwen2.5:3b preloaded in 4.13 s; available 12285 MiB before preload, 13319 MiB after
+Traceback (most recent call last):
+  File "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 252, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 199, in main
+    projects = load(os.path.join(RUN, "projects.json"))
+  File "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 65, in load
+    with open(path) as fh:
+         ~~~~^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/projects.json'
