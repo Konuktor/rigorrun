@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "id": "p_2883d840c013",
+  "name": "taskdesk2: create one task, verified independently over tasks and notes",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_server.py",
+      "--db",
+      "{REPO}/tmp/rigorrun-audit/rq-io2-state/desk.db",
+      "--faults",
+      "{REPO}/tmp/rigorrun-audit/rq-io2-state/faults.json",
+      "--shadow",
+      "{REPO}/tmp/rigorrun-audit/rq-io2-state/shadow.json",
+      "--calls-log",
+      "{REPO}/tmp/rigorrun-audit/rq-io2-state/calls.log"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_oracle_server.py",
+        "--db",
+        "{REPO}/tmp/rigorrun-audit/rq-io2-state/desk.db",
+        "--down-flag",
+        "{REPO}/tmp/rigorrun-audit/rq-io2-state/oracle-down.flag",
+        "--empty-flag",
+        "{REPO}/tmp/rigorrun-audit/rq-io2-state/oracle-empty.flag",
+        "--calls-log",
+        "{REPO}/tmp/rigorrun-audit/rq-io2-state/calls.log"
+      ],
+      "url": "",
+      "auth": "header",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "list_notes",
+    "verifier:query_tasks",
+    "verifier:query_notes"
+  ],
+  "verifierReads": [
+    {
+      "tool": "verifier:query_tasks",
+      "args": {}
+    },
+    {
+      "tool": "verifier:query_notes",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    },
+    {
+      "questionId": "q_name_Note",
+      "value": "Note"
+    },
+    {
+      "questionId": "q_id_Note",
+      "value": "id"
+    },
+    {
+      "questionId": "q_unit_Note_task_id",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_task_id",
+      "value": "identifier"
+    },
+    {
+      "questionId": "q_role_Note_body",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Note_body",
+      "value": "no"
+    },
+    {
+      "questionId": "q_unit_Note_seen",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_seen",
+      "value": "quantity"
+    },
+    {
+      "questionId": "q_rel_Note_task_id",
+      "value": "optional"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_ef436ea2",
+      "name": "io2-create-correct",
+      "lastProbeAt": "2026-09-30T23:17:45.178Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/playbooks/io2-create-correct.json",
+        "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/create"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:45.178Z"
+    },
+    {
+      "id": "a_958e35ed",
+      "name": "io2-create-extra-note-edit",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/playbooks/io2-create-extra-note-edit.json",
+        "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/create"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:45.218Z",
+      "lastProbeAt": "2026-09-30T23:17:45.218Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-09-30T23:17:45.010Z",
+    "environmentConnectedAt": "2026-09-30T23:17:45.103Z",
+    "workflowRecordedAt": "2026-09-30T23:17:45.137Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:17:45.175Z",
+    "agentConnectedAt": "2026-09-30T23:17:45.213Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}

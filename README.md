@@ -15,6 +15,8 @@ executable acceptance suite and verifies your agent against the state of the sys
 npx rigorrun
 ```
 
+To see what it catches first: `npx rigorrun demo` replays a real recorded run, offline, in a second.
+
 ---
 
 This is the development repository. If you want to *use* RigorRun, the command above is the whole

@@ -29,7 +29,7 @@ ${dim('Running the full pipeline offline: trace → contract → benchmark → a
 `);
 
 const tsx = join(root, 'node_modules', '.bin', 'tsx');
-const cliExit = await run(tsx, [join(root, 'packages', 'cli', 'src', 'bin.ts'), 'demo', '--quiet']);
+const cliExit = await run(tsx, [join(root, 'packages', 'cli', 'src', 'bin.ts'), 'demo', '--live', '--quiet']);
 
 if (cliExit !== 0) {
   console.error('\nThe offline demo did not complete. See the error above.');

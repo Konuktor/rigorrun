@@ -1,0 +1,274 @@
+{
+  "project": "create",
+  "spec": "specs/io2-create.template.json",
+  "exit": 0,
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
+  "predictedSuiteShape": [
+    "happy_path"
+  ],
+  "predictedSetup": null,
+  "callsDuringSetup": [
+    {
+      "at": 1790810265.1118798,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1130805,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1170416,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1174603,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1197574,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1202152,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1205132,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1790810265.1210914,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1212974,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1238024,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1240623,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.124285,
+      "server": "taskdesk2",
+      "tool": "create_task",
+      "args": {
+        "title": "Quarterly report"
+      }
+    },
+    {
+      "at": 1790810265.12594,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810265.126133,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1285717,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810265.128817,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1577702,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810265.1582537,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1644714,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810265.1649237,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1656883,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810265.1660666,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1665795,
+      "server": "taskdesk2",
+      "tool": "create_task",
+      "args": {
+        "title": "Quarterly report"
+      }
+    },
+    {
+      "at": 1790810265.168785,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1790810265.169117,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1697118,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1790810265.1700597,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810265.1711972,
+      "server": "taskdesk2-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1790810265.1715455,
+      "server": "taskdesk2-oracle",
+      "tool": "query_notes",
+      "answered": true,
+      "rows": 3
+    }
+  ],
+  "errorTail": [],
+  "summary": {
+    "projectId": "p_2883d840c013",
+    "readsProblem": "",
+    "readsIgnored": [],
+    "tools": 10,
+    "records": [
+      "Task",
+      "Note"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "io2-create-correct",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io2-create-extra-note-edit",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "projectDirs": [
+    "p_2883d840c013"
+  ],
+  "suiteShape": [
+    "happy_path"
+  ],
+  "caseIds": [
+    "case_live__happy_path"
+  ],
+  "singleHappyPath": true,
+  "suiteShapeAsPredicted": true,
+  "budgetsMs": [
+    60000
+  ],
+  "checks": {
+    "case_live__happy_path": [
+      "success__performed",
+      "success__exactly_as_demonstrated",
+      "success__nothing_else_deleted",
+      "frame__nothing_else_changed"
+    ]
+  },
+  "frameModes": {
+    "case_live__happy_path": [
+      "performed"
+    ]
+  },
+  "ok": true
+}

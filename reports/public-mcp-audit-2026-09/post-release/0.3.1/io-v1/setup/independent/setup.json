@@ -1,0 +1,168 @@
+{
+  "project": "independent",
+  "exit": 0,
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
+  "callsDuringSetup": [
+    {
+      "at": 1790810239.8322644,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810239.8360527,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810239.8393042,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810239.8398256,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1790810239.8404973,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810239.8434527,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1790810239.8437724,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1790810239.8455753,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810239.848836,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810239.8771265,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810239.8808177,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810239.8815444,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1790810239.881987,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1790810239.883756,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1790810239.884372,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1790810239.8854427,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    }
+  ],
+  "summary": {
+    "projectId": "p_7c86357c69f7",
+    "readsProblem": "",
+    "readsIgnored": [],
+    "tools": 5,
+    "records": [
+      "Task"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "io-correct",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io-claim-only",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io-duplicate",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io-extra-update",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io-correct-oracle-down",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io-readback",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "suiteShape": [
+    "happy_path"
+  ],
+  "budgetsMs": [
+    60000
+  ],
+  "ok": true
+}

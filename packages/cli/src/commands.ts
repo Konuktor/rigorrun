@@ -33,11 +33,14 @@ import { CliError, readJson, writeJson, writeText, workspaceDir } from './io.ts'
 import { c, fmtMs, heading, line, ruleTag, statusTag, table } from './ui.ts';
 import { VERSION } from './help.ts';
 import { afterCaseHook } from './afterCase.ts';
+import { bundledReplay, printReplay, verifyReplay } from './replay.ts';
 
 export interface Flags {
   out?: string | undefined;
   /** Which demo job to run, for `rigorrun demo`. */
   workflow?: string | undefined;
+  /** `rigorrun demo --live`: run the pipeline now instead of replaying the recorded run. */
+  live?: boolean | undefined;
   agent: string[];
   repeats?: number | undefined;
   report?: string | undefined;
@@ -75,6 +78,9 @@ const RUNS_DIR = () => join(workspaceDir(), 'runs');
 // --------------------------------------------------------------------- demo
 
 export async function cmdDemo(flags: Flags): Promise<number> {
+  // A job or an agent only means something to a run made now, so naming
+  // either is asking for one.
+  if (!flags.live && !flags.workflow && flags.agent.length === 0) return cmdDemoReplay(flags);
   const outDir = flags.out ?? '.rigorrun';
   // The first registered example rather than a named one. A default that
   // names a business is a default that has to be edited when the examples
@@ -149,6 +155,33 @@ export async function cmdDemo(flags: Flags): Promise<number> {
   line(c.grey(`Artefacts in ${outDir}/ · run .rigorrun/runs/${result.runId}.json`));
   if (flags.json) line(JSON.stringify(result, null, 2));
   return result.verdict.winnerAgentId ? 0 : 1;
+}
+
+/**
+ * `rigorrun demo`: the recorded run, replayed. No key, no network, no model,
+ * and a verdict on the screen in the time it takes to read one.
+ */
+async function cmdDemoReplay(flags: Flags): Promise<number> {
+  const replay = bundledReplay();
+  if (flags.json) {
+    verifyReplay(replay);
+    line(JSON.stringify(replay, null, 2));
+    return 0;
+  }
+  printReplay(replay);
+  if (flags.report) {
+    await writeText(
+      flags.report,
+      renderReportHtml(replay.run, {
+        generatedAt: replay.recordedAt,
+        syntheticEnvironment: true,
+        ...(flags.published ? { mode: 'published' as const } : {}),
+      }),
+    );
+    line();
+    line(`${c.bold('Report')}  ${flags.report}`);
+  }
+  return 0;
 }
 
 /** `rigorrun environments` — what this installation can point at. */
@@ -583,6 +616,20 @@ function printComparison(result: RunResult): void {
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
   for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
   line();
+  // The reference implementation is handed the answer: a control that shows
+  // the suite can be passed, never the headline about the agents.
+  if (result.verdict.winnerAgentId === REFERENCE_AGENT_ID) {
+    const contenders = result.scores.filter((s) => s.agentId !== REFERENCE_AGENT_ID);
+    const passed = contenders.filter((s) => s.thresholdsPassed);
+    line(
+      `${c.bold('Verdict')}  ` +
+        (passed.length > 0
+          ? `${passed.map((s) => s.agentName).join(' and ')} met the release thresholds.`
+          : `No agent met the release thresholds.`),
+    );
+    line(`  ${c.grey('-')} ${c.grey('The reference implementation passed: the suite can be passed. It is a control, given the answer, not a contender.')}`);
+    return;
+  }
   line(`${c.bold('Verdict')}  ${result.verdict.outcome ?? ''} ${result.verdict.summary}`);
   for (const reason of result.verdict.rationale) line(`  ${c.grey('-')} ${c.grey(reason)}`);
 }

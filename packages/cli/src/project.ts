@@ -20,7 +20,9 @@ import {
   timeToFirstVerdictMs,
 } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
-import type { RunResult } from '@rigorrun/core';
+import { writeFile } from 'node:fs/promises';
+import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
+import { explainCase, renderReportHtml } from '@rigorrun/report';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
@@ -112,6 +114,7 @@ export async function cmdProjectRun(projectId: string | undefined, flags: Flags)
 
     const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     printRun(result, flags.json);
+    await writeProjectReport(projectId, result, flags);
 
     const comparison = await service
       .compare(projectId, result.runId)
@@ -142,6 +145,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
 
     const result = await service.runAgent(projectId, agent.id, runOptions(flags));
+    await writeProjectReport(projectId, result, flags);
     const score = result.scores[0];
     if (!score) throw new CliError('The run produced no score.');
 
@@ -359,7 +363,41 @@ function printRun(result: RunResult, json: boolean): void {
   line();
   line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
+  // The cases that did not pass, as a person reads them: the agent's words
+  // beside what the system showed. Five at most; the report has the rest.
+  const notPassed = result.caseResults.filter((entry) => caseOutcome(entry) !== 'PASS');
+  for (const entry of notPassed.slice(0, 5)) {
+    const explained = explainCase(entry);
+    line();
+    line(`${c.red(explained.outcome)}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`);
+    line(`  ${c.grey('agent said')}  ${explained.claim.split('\n')[0]!.slice(0, 160)}`);
+    for (const [index, seen] of explained.saw.entries()) line(`  ${c.grey(index === 0 ? 'RigorRun saw' : '            ')}  ${seen}`);
+    for (const skipped of explained.notChecked.slice(0, 2)) line(`  ${c.grey('not checked ')}  ${skipped}`);
+  }
+  if (notPassed.length > 5) line(c.grey(`\n…and ${notPassed.length - 5} more; see the report.`));
   for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
+}
+
+/**
+ * `--report <file>`: the run as one self-contained HTML page, to hand to
+ * somebody who was not at the terminal. It carries the run's evidence, which
+ * can include values read from the system — `--published` masks them first.
+ */
+async function writeProjectReport(projectId: string, result: RunResult, flags: Flags): Promise<void> {
+  if (!flags.report) return;
+  const store = new ProjectStore(storeRoot(flags.home));
+  const [contract, benchmark] = await Promise.all([
+    store.readArtefact<EnvironmentContract>(projectId, 'contract'),
+    store.readArtefact<Benchmark>(projectId, 'benchmark'),
+  ]);
+  const html = renderReportHtml(result, {
+    ...(contract ? { contract } : {}),
+    ...(benchmark ? { benchmark } : {}),
+    generatedAt: result.finishedAt,
+    ...(flags.published ? { mode: 'published' as const } : {}),
+  });
+  await writeFile(flags.report, html, 'utf8');
+  if (!flags.json) line(c.grey(`Report written to ${flags.report}${flags.published ? ' (values masked)' : ''}`));
 }
 
 function pct(value: number): string {

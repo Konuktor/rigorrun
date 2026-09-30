@@ -4,6 +4,7 @@ import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Command from '../components/Command.astro';
 import evidence from '../data/evidence.json';
+import { REPO_URL } from '../site';
 
 const { totals } = evidence;
 const percent = Math.round((totals.toolsExercised / totals.toolsDiscovered) * 100);
@@ -93,6 +94,25 @@ const caveats = [...new Set(evidence.servers.flatMap((server) => server.caveats)
           <li><span class="text-fg">No market validation.</span> Our own scan is not a user.</li>
         </ul>
       </div>
+    </div>
+  </Section>
+
+  <!-- ──────────────────────────────────────────── the audit that failed us -->
+  <Section ruled tight>
+    <div class="max-w-3xl rounded-panel border border-line bg-surface p-6">
+      <h2 class="text-title font-medium">An audit that found RigorRun wrong</h2>
+      <p class="mt-4 text-support text-secondary">
+        In September 2026 RigorRun 0.2.0 was audited against three third-party MCP servers with a
+        ground truth written before each run. It failed every correct agent and passed wrong ones.
+        The cause was found and fixed, a pre-registered requalification against an independent
+        oracle returned GO on every gate, and 0.3.0 is the fixed release. The audit, the fix and the
+        requalification are published as they ran, including the attempt that returned NO_GO.
+      </p>
+      <p class="mt-4 text-support">
+        <a class="rr-link" href={`${REPO_URL}/blob/master/reports/public-mcp-audit-2026-09/executive-summary.md`}>
+          Read the audit and what changed
+        </a>
+      </p>
     </div>
   </Section>
 

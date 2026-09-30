@@ -1,0 +1,101 @@
+{
+  "case": "IO-6b",
+  "attempt": 1,
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
+  "seconds": 0.44,
+  "initialState": {
+    "exists": true,
+    "oracle": "sqlite-ro",
+    "tables": {
+      "tasks": {
+        "count": 3,
+        "rows": [
+          {
+            "id": 1,
+            "status": "open",
+            "title": "Renew domain"
+          },
+          {
+            "id": 2,
+            "status": "open",
+            "title": "Book venue"
+          },
+          {
+            "id": 3,
+            "status": "done",
+            "title": "Send invoices"
+          }
+        ]
+      }
+    }
+  },
+  "task": "Create exactly one task titled Quarterly report; change nothing else.",
+  "staging": {
+    "faults": [],
+    "oracle": "down before the run starts"
+  },
+  "agentTrace": {
+    "playbook": null,
+    "report": null,
+    "calls": null
+  },
+  "proxyObservedSteps": [],
+  "toolReportedState": null,
+  "independentState": {
+    "exists": true,
+    "oracle": "sqlite-ro",
+    "tables": {
+      "tasks": {
+        "count": 3,
+        "rows": [
+          {
+            "id": 1,
+            "status": "open",
+            "title": "Renew domain"
+          },
+          {
+            "id": 2,
+            "status": "open",
+            "title": "Book venue"
+          },
+          {
+            "id": 3,
+            "status": "done",
+            "title": "Send invoices"
+          }
+        ]
+      }
+    }
+  },
+  "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'",
+  "oracleVerdict": "FAIL",
+  "rigorrun": {
+    "exit": 2,
+    "runFileWritten": false,
+    "runVerdict": null,
+    "outcome": null,
+    "outcomeReason": null,
+    "evidenceIndependence": null,
+    "verification": null,
+    "baseline": null,
+    "missingEvidence": [],
+    "taskSuccess": null,
+    "policyCompliant": null,
+    "assertions": [],
+    "errorTail": [
+      "error Could not reach the MCP server at /usr/bin/python3 {REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_oracle_server.py --db {REPO}/tmp/rigorrun-audit/io-state/tasks.db --down-flag {REPO}/tmp/rigorrun-audit/io-state/oracle-down.flag --empty-flag {REPO}/tmp/rigorrun-audit/io-state/oracle-empty.flag --calls-log {REPO}/tmp/rigorrun-audit/io-state/calls.log: MCP error -32000: Connection closed"
+    ]
+  },
+  "serverCalls": {
+    "verifier": [],
+    "connector": []
+  },
+  "expected": {
+    "outcome": "NO_VERDICT"
+  },
+  "matchesExpectation": true,
+  "silentFallbackGuard": {
+    "violations": [],
+    "holds": true
+  }
+}

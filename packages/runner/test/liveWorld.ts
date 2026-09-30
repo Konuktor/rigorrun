@@ -82,8 +82,12 @@ export interface LiveWorldOptions {
    * its number (1-based); the world it returns replaces the system's.
    */
   onRead?: (answered: CanonicalState, readNumber: number) => CanonicalState | undefined;
-  /** A listing that returns only the newest records of one kind, by identifier. */
-  window?: { entity: string; newest: number };
+  /**
+   * A listing that returns only the newest records of one kind, by identifier.
+   * `admitted`: the answer says there is more, as a real read's `has_more`
+   * does, and the state is marked windowed the way the connector marks it.
+   */
+  window?: { entity: string; newest: number; admitted?: boolean };
   /** How long every read takes. */
   readDelayMs?: number;
   /** Every read answers with an empty world. */
@@ -153,9 +157,13 @@ export class LiveWorld implements EnvironmentAdapter {
     if (!window) return world;
     const table = world.entities[window.entity] ?? {};
     const newest = Object.keys(table).sort().slice(-window.newest);
+    const cut = Object.keys(table).length > newest.length;
     return {
       ...world,
       entities: { ...world.entities, [window.entity]: Object.fromEntries(newest.map((key) => [key, table[key]!])) },
+      ...(cut && window.admitted
+        ? { windowed: { [window.entity]: 'list_entries returned one page of a longer list: has_more is true' } }
+        : {}),
     };
   }
   getEvents() {

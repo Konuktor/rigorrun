@@ -23,6 +23,7 @@ interface Seen {
   updated: { key: string; fields: string[] }[];
   volatileFields: string[];
   membershipUnstable: boolean;
+  windowed?: boolean;
 }
 
 const bound = (over: Partial<Bound> = {}): Bound => ({
@@ -209,5 +210,25 @@ describe('what verify makes of it', () => {
 
     const unknown = verify([frame({ Entry: bound() })], { state: {}, derived: {}, events: [] });
     expect(unknown.blockingUnverifiable).toBe(1);
+  });
+});
+
+describe('a kind of record read one page at a time', () => {
+  it('does not count records that slid out of the page as deleted, or into it as created', () => {
+    const result = evaluateAssertion(
+      frame({ Entry: bound({ created: 1 }) }),
+      observed({ Entry: seen({ created: ['E8', 'E9'], deleted: ['E1'], windowed: true }) }),
+    );
+    expect(result.status).toBe('UNVERIFIABLE');
+    expect(result.message).toContain('one page');
+    expect(detail(result).unverifiable.map((entry) => entry.kind).sort()).toEqual(['created', 'deleted']);
+  });
+
+  it('still fails a field changed on a record seen at both ends', () => {
+    const result = evaluateAssertion(
+      frame({ Entry: bound() }),
+      observed({ Entry: seen({ updated: [{ key: 'E1', fields: ['status'] }], windowed: true }) }),
+    );
+    expect(result.status).toBe('FAIL');
   });
 });

@@ -89,9 +89,17 @@ export function rowsFromPayload(payload: unknown, entity: EntitySchema): EntityR
 export function stateFromPayloads(
   payloads: readonly unknown[],
   schema: EnvironmentSchema,
+  reads: readonly ReadCall[] = [],
 ): CanonicalState {
   const state = emptyState(schema);
+  const windowed: Record<string, string> = {};
   payloads.forEach((payload, payloadIndex) => {
+    const counts = new Map<string, number>();
+    for (const entity of schema.entities) counts.set(entity.name, rowsFromPayload(payload, entity).length);
+    const page = pageSignal(payload, schema, reads[payloadIndex], Math.max(0, ...counts.values()));
+    if (page) {
+      for (const [name, count] of counts) if (count > 0 && !windowed[name]) windowed[name] = page;
+    }
     for (const entity of schema.entities) {
       const table = state.entities[entity.name] ?? {};
       // Within one answer a record seen twice must be the same record. Across
@@ -108,7 +116,71 @@ export function stateFromPayloads(
       state.entities[entity.name] = table;
     }
   });
-  return state;
+  return Object.keys(windowed).length > 0 ? { ...state, windowed } : state;
+}
+
+/** A nominated read as it was called, so a full page can be told from a complete list. */
+export interface ReadCall {
+  tool: string;
+  args?: Record<string, unknown> | undefined;
+}
+
+// Keys compared lower-case with `_`, `-`, `$` and `@` removed, so `has_more`,
+// `hasMore` and `@odata.nextLink` read alike.
+const MORE_FLAGS = new Set(['hasmore', 'hasnextpage', 'moreavailable', 'moreresults', 'truncated', 'incomplete']);
+const NEXT_MARKERS = new Set([
+  'nextcursor',
+  'nextpagetoken',
+  'nextpage',
+  'next',
+  'nextlink',
+  'odata.nextlink',
+  'nexturl',
+  'nextpageurl',
+  'continuationtoken',
+]);
+const TOTALS = new Set(['total', 'totalcount', 'totalresults', 'totalsize', 'totalitems', 'totalrecords']);
+const LIMIT_ARGS = new Set(['limit', 'pagesize', 'perpage', 'maxresults', 'first', 'top', 'size', 'maxitems']);
+const normal = (key: string) => key.toLowerCase().replace(/[_$@-]/g, '');
+
+/**
+ * Why a read's answer is one page of something longer, or undefined when
+ * nothing says so. Only the wrapper around the records is read: a record's own
+ * `total` or `next` is its data, not a page marker.
+ */
+function pageSignal(
+  payload: unknown,
+  schema: EnvironmentSchema,
+  read: ReadCall | undefined,
+  rows: number,
+): string | undefined {
+  const name = read?.tool ?? 'a nominated read';
+  const isRecord = (value: unknown) => schema.entities.some((entity) => looksLike(value, entity));
+  let found: string | undefined;
+  const walk = (value: unknown, depth: number): void => {
+    if (found || depth > 3 || value === null || typeof value !== 'object' || Array.isArray(value) || isRecord(value)) return;
+    for (const [key, entry] of Object.entries(value)) {
+      const k = normal(key);
+      if (MORE_FLAGS.has(k) && entry === true) found = `${key} is true`;
+      else if (NEXT_MARKERS.has(k) && (typeof entry === 'number' || (typeof entry === 'string' && entry !== '')))
+        found = `${key} names a next page`;
+      // An integer only: a `total` of 1234.56 is an amount, not a count of records.
+      else if (TOTALS.has(k) && Number.isInteger(entry) && (entry as number) > rows)
+        found = `${key} is ${entry}, and ${rows} came back`;
+      if (found) return;
+    }
+    for (const entry of Object.values(value)) walk(entry, depth + 1);
+  };
+  walk(canonicalisePayload(payload), 0);
+  if (!found) {
+    for (const [key, value] of Object.entries(read?.args ?? {})) {
+      if (LIMIT_ARGS.has(normal(key)) && typeof value === 'number' && rows > 0 && rows >= value) {
+        found = `it was called with ${key} ${value} and ${rows} came back`;
+        break;
+      }
+    }
+  }
+  return found ? `${name} returned one page of a longer list: ${found}` : undefined;
 }
 
 /**

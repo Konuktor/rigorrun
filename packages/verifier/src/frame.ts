@@ -99,7 +99,14 @@ export function stateFrame(expected: unknown, observation: Observation): Outcome
     const undemonstrated = bound.preExistingRows === 0 && (mode === 'performed' || name !== focusEntity)
       ? `frame_existing_rows_undemonstrated:${name}`
       : undefined;
-    const unstable = now.membershipUnstable ? `frame_membership_unstable:${name}` : undefined;
+    // One page of a longer list, or readings that disagreed on which records
+    // exist: either way a record missing or new here is not one the agent
+    // created or deleted as far as anything can show.
+    const unstable = now.windowed
+      ? `frame_read_windowed:${name}`
+      : now.membershipUnstable
+        ? `frame_membership_unstable:${name}`
+        : undefined;
 
     if (created.length > bound.created) {
       if (unstable) unverifiable.push({ entity: name, kind: 'created', id: unstable });
@@ -162,6 +169,8 @@ function describe(violation: Violation): string {
 function reason(id: string): string {
   const [kind, entity] = [id.slice(0, id.indexOf(':') < 0 ? id.length : id.indexOf(':')), id.slice(id.indexOf(':') + 1)];
   switch (kind) {
+    case 'frame_read_windowed':
+      return `the reads of ${entity} records returned one page of a longer list, so which were created or deleted cannot be told`;
     case 'frame_membership_unstable':
       return `${entity} records appeared or disappeared between two readings with nothing in between, so which were created or deleted by the agent cannot be told`;
     case 'frame_existing_rows_undemonstrated':

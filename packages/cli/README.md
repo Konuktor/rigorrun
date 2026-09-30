@@ -7,18 +7,22 @@
 Show RigorRun a job once. It turns that into a repeatable acceptance suite and decides whether your
 agent is safe to ship by reading the system it changed — never by trusting what it says about itself.
 
-**Early Access · v0.2** — parts of it are honestly unfinished, and they are listed rather than hidden.
+**Early Access · v0.3** — parts of it are honestly unfinished, and they are listed rather than hidden.
 
 [rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [Evidence](https://rigorrun.xyz/evidence) · [What is and is not built](https://rigorrun.xyz/what-is-built)
 
 </div>
 
 ```bash
-npx rigorrun
+npx rigorrun demo    # a real recorded run, replayed offline in a second
+npx rigorrun         # your own system and agent, in the local interface
 ```
 
-Open the URL it prints. Everything runs on your machine: there is no account, and no hosted
-component to send your systems to.
+`demo` replays a real model working a bundled support desk: what it said beside what the system held
+afterwards. The same run, case by case, is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
+
+`npx rigorrun` opens a local interface. Everything runs on your machine: there is no account, and no
+hosted component to send your systems to.
 
 ---
 
@@ -45,7 +49,9 @@ most tools:   you write the tests   →  the tool runs them
    be.
 3. **Rule on what it worked out.** It shows the evidence behind each proposed rule. A rule you
    reject cannot fail your agent.
-4. **Connect your agent** — an HTTP endpoint, a local command, or your own loop pulling work.
+4. **Connect your agent** — unchanged, wherever it runs: RigorRun sends each case's work to a URL it
+   already serves and reads the result from your system (a black box). Or an HTTP endpoint, a local
+   command, or your own loop pulling work.
 5. **Run it.** A verdict, with how strongly each answer could be verified.
 6. **Gate the next change** in CI.
 

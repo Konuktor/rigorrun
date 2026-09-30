@@ -1,0 +1,65 @@
+[
+  {
+    "agentId": "a_ef436ea2",
+    "at": 1790810268.4887161,
+    "caseId": "case_live__happy_path",
+    "caseIndex": 0,
+    "category": "happy_path",
+    "outcome": "PASS",
+    "runId": "run_9d8b59238039",
+    "snapshot": {
+      "exists": true,
+      "oracle": "sqlite-ro",
+      "tables": {
+        "notes": {
+          "count": 3,
+          "rows": [
+            {
+              "body": "Registrar login is in the shared vault",
+              "id": 1,
+              "seen": 0,
+              "task_id": 1
+            },
+            {
+              "body": "Shortlist: river hall or old library",
+              "id": 2,
+              "seen": 0,
+              "task_id": 2
+            },
+            {
+              "body": "Renewal is due before the end of the month",
+              "id": 3,
+              "seen": 0,
+              "task_id": 1
+            }
+          ]
+        },
+        "tasks": {
+          "count": 4,
+          "rows": [
+            {
+              "id": 1,
+              "status": "open",
+              "title": "Renew domain"
+            },
+            {
+              "id": 2,
+              "status": "open",
+              "title": "Book venue"
+            },
+            {
+              "id": 3,
+              "status": "done",
+              "title": "Send invoices"
+            },
+            {
+              "id": 4,
+              "status": "open",
+              "title": "Quarterly report"
+            }
+          ]
+        }
+      }
+    }
+  }
+]

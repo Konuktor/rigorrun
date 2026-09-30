@@ -100,7 +100,7 @@ export function ConnectAgent({
 
   return (
     <div className="flex flex-col gap-5">
-      <Panel>
+      <Panel padded>
         <div className="flex max-w-2xl flex-col gap-4">
           <p className="text-body text-secondary">
             RigorRun gives your agent one task at a time, and a URL to work through. Your agent
@@ -310,7 +310,7 @@ export function ConnectAgent({
         <section className="flex flex-col gap-2">
           <SectionLabel>Connected</SectionLabel>
           {project.agents.map((agent) => (
-            <Panel key={agent.id}>
+            <Panel padded key={agent.id}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-body text-fg">{agent.name}</span>
@@ -377,7 +377,7 @@ function Waiting({ projectId, agentId }: { projectId: string; agentId: string })
   }, [projectId, agentId]);
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-col gap-1" data-testid="waiting-for-agent" aria-live="polite">
         <p className="text-body text-fg">
           {waiting
@@ -473,14 +473,14 @@ export function RunAndVerdict({
     <div className="flex flex-col gap-5">
       {driven && busy ? <Waiting projectId={project.id} agentId={driven.id} /> : null}
       {ready.length === 0 ? (
-        <Panel>
+        <Panel padded>
           <p className="text-body text-secondary">
             Your tests are ready and nothing is missing except an agent that answers. Go back a step
             to connect one.
           </p>
         </Panel>
       ) : (
-        <Panel>
+        <Panel padded>
           <div className="flex flex-wrap items-center gap-3">
             {ready.map((agent) => (
               <Button
@@ -667,7 +667,7 @@ function Verdict({ run }: { run: RunView }) {
         <section className="flex flex-col gap-2" data-testid="suite-quality">
           <SectionLabel>What the suite’s own check said</SectionLabel>
           {run.suiteQuality.warnings.map((warning) => (
-            <Panel key={warning}>
+            <Panel padded key={warning}>
               <p className="text-body text-secondary">{warning}</p>
             </Panel>
           ))}
@@ -678,7 +678,7 @@ function Verdict({ run }: { run: RunView }) {
         <section className="flex flex-col gap-2">
           <SectionLabel>What this system stopped RigorRun doing</SectionLabel>
           {run.limits.map((limit) => (
-            <Panel key={limit.id}>
+            <Panel padded key={limit.id}>
               <p className="text-body text-secondary">{limit.limit}</p>
               {limit.remedy ? <p className="mt-1 text-meta text-muted">{limit.remedy}</p> : null}
             </Panel>
@@ -716,7 +716,7 @@ function Verdict({ run }: { run: RunView }) {
 function Comparison({ comparison }: { comparison: ComparisonView }) {
   if (!comparison.comparable) {
     return (
-      <Panel>
+      <Panel padded>
         <p className="text-body text-secondary">{comparison.incomparableReason}</p>
       </Panel>
     );
@@ -724,7 +724,7 @@ function Comparison({ comparison }: { comparison: ComparisonView }) {
   return (
     <section className="flex flex-col gap-2">
       <SectionLabel>Against the last run</SectionLabel>
-      <Panel>
+      <Panel padded>
         <p className="text-body text-fg" data-testid="comparison-headline">
           {comparison.headline}
         </p>
@@ -765,7 +765,7 @@ function TimeToFirstVerdict({ activation }: { activation: ActivationView }) {
   const retries = Object.values(activation.attempts).reduce((total, count) => total + count, 0);
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
           <p className="text-meta text-muted">First real verdict</p>
@@ -1046,7 +1046,7 @@ export function AddAFailure({ project, onAdded }: { project: ProjectView; onAdde
   }
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex max-w-3xl flex-col gap-4" data-testid="add-failure">
         <div className="flex flex-col gap-1">
           <SectionLabel>Add a failure to this suite</SectionLabel>

@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.3.0';
+export const VERSION = '0.3.1';
 
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
@@ -57,7 +57,7 @@ THE BUNDLED EXAMPLE
   These work on material that ships inside RigorRun. They are how you see the
   shape of the thing without connecting anything; they are not the product.
 
-  demo                     Run the example pipeline offline, end to end.
+  demo                     A real recorded run, replayed offline. --live runs one now.
   workflows                List the example jobs.
   environments             List the environments registered in this build.
   inspect-environment <id> Show the records, links and actions an adapter has.
@@ -92,6 +92,8 @@ RUN / GATE OPTIONS
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
       --max-inconclusive <n>    Cases allowed to end without a verdict. Default 0.
+      --report <path>           Also write the run as one self-contained HTML page.
+      --published               With --report: mask values read from the system.
       --case-timeout <ms>       Wall-clock budget per case for this run.
                                 Default: the suite's own (60000 when generated).
       --after-case <program>    Run a program (a path or a name; no shell, no
@@ -134,7 +136,8 @@ EXAMPLES
 
   rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
 
-  rigorrun demo                                the bundled example
+  rigorrun demo                                a recorded run, replayed
+  rigorrun demo --live                         the bundled pipeline, run now
   rigorrun run examples/refund-workflow/benchmark.json --agent naive
 
 Your systems, your credentials and your recordings stay on this machine. There
@@ -177,18 +180,26 @@ EXIT CODES
 REQUIRES
   A container runtime. Run \`rigorrun doctor\` to see whether you have one.`,
 
-  demo: `rigorrun demo - run the complete offline demo
+  demo: `rigorrun demo - see what RigorRun catches, in a few seconds
 
-Compiles the bundled recorded refund workflow into a contract, generates the
-benchmark from it, runs Agent A and Agent B against it, and prints the
-head-to-head comparison. Writes artefacts to .rigorrun/.
+By default, replays a real recorded run: a real model, working the bundled
+synthetic support system, with its own report beside what the system showed
+afterwards. Offline, no key, no model. The recording carries a hash of the run
+it holds and is refused if it does not match. It says which model, when and at
+which commit.
+
+--live runs the whole pipeline now instead: compiles the bundled recorded
+workflow into a contract, generates the benchmark, runs the demo agents and the
+reference implementation against it, and writes artefacts to .rigorrun/.
 
 OPTIONS
-  -o, --out <dir>    Artefact directory. Default .rigorrun
-      --report <path>  Also write an HTML report.
-      --json         Print the run result as JSON.
-      --quiet        Suppress per-case progress.
-`,
+      --live           Run the pipeline now rather than replay the recording.
+      --report <path>  Also write an HTML report of every case.
+      --published      With --report: a copy with identifiers masked.
+      --json           Print the recording (or, with --live, the run) as JSON.
+  -o, --out <dir>      With --live: artefact directory. Default .rigorrun
+      --workflow <key> With --live: which bundled job. Implies --live.
+      --agent <id>     With --live: which agents. Implies --live.`,
   setup: `rigorrun setup <spec.json> - create a project with no interface
 
 Drives the same steps the interface does, from a JSON spec: connect, nominate

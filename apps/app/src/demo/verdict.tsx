@@ -57,8 +57,15 @@ export function VerdictStep({
   const [publishOpen, setPublishOpen] = useState(false);
   const caseIds = useMemo(() => [...new Set(result.caseResults.map((r) => r.caseId))], [result]);
 
-  const winner = result.scores.find((s) => s.agentId === result.verdict.winnerAgentId);
-  const others = result.scores.filter((s) => s.agentId !== result.verdict.winnerAgentId);
+  // The reference implementation is handed the answer. It stays on the screen
+  // as a control — the proof that the suite can be passed at all — and is never
+  // the headline, which is about the agents.
+  const contenders = result.scores.filter((s) => s.agentId !== REFERENCE_AGENT_ID);
+  const control = result.scores.find((s) => s.agentId === REFERENCE_AGENT_ID);
+  const winner =
+    contenders.find((s) => s.agentId === result.verdict.winnerAgentId) ??
+    contenders.find((s) => s.thresholdsPassed);
+  const others = contenders.filter((s) => s !== winner);
 
   const download = (published: boolean) => {
     const payload = published ? sanitizeRunResult(result) : result;
@@ -101,25 +108,28 @@ export function VerdictStep({
             {winner ? `${winner.agentName} wins` : 'No agent met the release thresholds'}
           </h2>
           <p className="mt-1 max-w-3xl text-support text-secondary">
-            {result.verdict.rationale[0] ?? result.verdict.summary}
+            {result.verdict.winnerAgentId === REFERENCE_AGENT_ID && !winner
+              ? `${contenders.map((s) => s.agentName).join(' and ')} did not meet the release thresholds.`
+              : (result.verdict.rationale[0] ?? result.verdict.summary)}
           </p>
-          {/* The oracle is given the answer. The evidence page has always said
-              so; the screen announcing it as the winner did not. */}
-          {winner?.agentId === REFERENCE_AGENT_ID && (
+          {control && (
             <p className="mt-2 max-w-3xl text-meta text-secondary" data-testid="oracle-caveat">
-              The reference implementation replays the plan the expectation engine derived. It is
-              given the answer, so this says the suite is satisfiable — and nothing at all about
-              agent quality.
+              {control.agentName} is a control, not a contender: it replays the plan the expectation
+              engine derived, so it is given the answer.{' '}
+              {control.thresholdsPassed
+                ? 'It passed, which says the suite can be passed — and nothing about agent quality.'
+                : 'It did not pass, so read these results as a question about the suite before the agents.'}
             </p>
           )}
         </div>
 
         <div className="grid gap-px bg-line sm:grid-cols-2">
-          {(winner ? [winner, ...others] : result.scores).map((score, index) => (
+          {[...(winner ? [winner] : []), ...others, ...(control ? [control] : [])].map((score) => (
             <AgentCard
               key={score.agentId}
               score={score}
-              isWinner={Boolean(winner) && index === 0}
+              isWinner={score === winner}
+              isControl={score === control}
             />
           ))}
         </div>
@@ -178,13 +188,22 @@ export function VerdictStep({
   );
 }
 
-function AgentCard({ score, isWinner }: { score: AgentScore; isWinner: boolean }) {
+function AgentCard({
+  score,
+  isWinner,
+  isControl,
+}: {
+  score: AgentScore;
+  isWinner: boolean;
+  isControl: boolean;
+}) {
   const safe = score.unsafeActions === 0;
   return (
     <div className="bg-surface px-4 py-4 sm:px-5" data-testid={`score-${score.agentId}`}>
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="text-section font-semibold">{score.agentName}</h3>
         {isWinner ? <Tag tone="pass">Winner</Tag> : null}
+        {isControl ? <Tag tone="neutral">Control · given the answer</Tag> : null}
         {score.thresholdsPassed ? (
           <Tag tone="pass">Gate passed</Tag>
         ) : (

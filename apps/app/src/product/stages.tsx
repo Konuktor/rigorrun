@@ -279,7 +279,7 @@ export function ConnectEnvironment({
   }
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex max-w-2xl flex-col gap-5">
         <p className="text-body text-secondary">
           Point RigorRun at the system your agent works in. It looks at that system before and after
@@ -701,7 +701,7 @@ export function ToolCatalogue({
 
   return (
     <div className="flex flex-col gap-5">
-      <Panel>
+      <Panel padded>
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
           <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
             <span className="text-section font-semibold" data-testid="server-name">
@@ -760,7 +760,7 @@ export function ToolCatalogue({
         </ul>
       </section>
 
-      <Panel>
+      <Panel padded>
         <div className="flex max-w-2xl flex-col gap-4">
           <Field
             label="Which one puts your system back the way it was?"
@@ -847,7 +847,7 @@ function ToolRow({
           : 'info';
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -1010,7 +1010,7 @@ export function TeachJob({
 
   return (
     <div className="flex flex-col gap-5">
-      <Panel>
+      <Panel padded>
         <div className="flex flex-col gap-3">
           <p className="max-w-2xl text-body text-secondary">
             Do the job once, using this system&rsquo;s own tools. RigorRun reads the system before
@@ -1074,7 +1074,7 @@ export function TeachJob({
       </Panel>
 
       {recording ? (
-        <Panel>
+        <Panel padded>
           <div className="flex max-w-2xl flex-col gap-4">
             <Field label="Do something">
               {({ id }) => (
@@ -1231,7 +1231,7 @@ export function ReviewLearned({
         <section className="flex flex-col gap-2" data-testid="annotation-mismatches">
           <SectionLabel>What your system said about itself, and did not do</SectionLabel>
           {mismatches.map((mismatch) => (
-            <Panel key={mismatch.tool}>
+            <Panel padded key={mismatch.tool}>
               <p className="text-body text-fg">
                 <span className="font-mono">{mismatch.tool}</span> — {mismatch.claimed}
               </p>
@@ -1262,7 +1262,7 @@ export function ReviewLearned({
       </div>
 
       {ordered.map((question) => (
-        <Panel key={question.id}>
+        <Panel padded key={question.id}>
           <div className="flex max-w-2xl flex-col gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-body font-medium text-fg">{question.text}</span>
@@ -1375,7 +1375,7 @@ export function RuleOnRules({
 
   if (rules === null) {
     return (
-      <Panel>
+      <Panel padded>
         <div className="flex flex-col gap-3">
           <p className="max-w-2xl text-body text-secondary">
             RigorRun will now turn what it watched into rules about how the job should be done. None
@@ -1415,7 +1415,7 @@ export function RuleOnRules({
           a real rule is far worse than proposing one you do not want.
         </p>
         {rules.map((rule) => (
-          <Panel key={rule.id}>
+          <Panel padded key={rule.id}>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex min-w-0 flex-col gap-1">
                 <span className="text-body text-fg">{rule.statement}</span>

@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "id": "p_7c86357c69f7",
+  "name": "taskdesk: create one task, verified independently",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_server.py",
+      "--db",
+      "{REPO}/tmp/rigorrun-audit/io-state/tasks.db",
+      "--faults",
+      "{REPO}/tmp/rigorrun-audit/io-state/faults.json",
+      "--shadow",
+      "{REPO}/tmp/rigorrun-audit/io-state/shadow.json",
+      "--calls-log",
+      "{REPO}/tmp/rigorrun-audit/io-state/calls.log"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_oracle_server.py",
+        "--db",
+        "{REPO}/tmp/rigorrun-audit/io-state/tasks.db",
+        "--down-flag",
+        "{REPO}/tmp/rigorrun-audit/io-state/oracle-down.flag",
+        "--empty-flag",
+        "{REPO}/tmp/rigorrun-audit/io-state/oracle-empty.flag",
+        "--calls-log",
+        "{REPO}/tmp/rigorrun-audit/io-state/calls.log"
+      ],
+      "url": "",
+      "auth": "header",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "verifier:query_tasks"
+  ],
+  "verifierReads": [
+    {
+      "tool": "verifier:query_tasks",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_67d574e1",
+      "name": "io-correct",
+      "lastProbeAt": "2026-09-30T23:17:19.892Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-correct.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:19.892Z"
+    },
+    {
+      "id": "a_b406c643",
+      "name": "io-claim-only",
+      "lastProbeAt": "2026-09-30T23:17:19.934Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-claim-only.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:19.934Z"
+    },
+    {
+      "id": "a_b0777314",
+      "name": "io-duplicate",
+      "lastProbeAt": "2026-09-30T23:17:19.975Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-duplicate.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:19.975Z"
+    },
+    {
+      "id": "a_8d34fe5d",
+      "name": "io-extra-update",
+      "lastProbeAt": "2026-09-30T23:17:20.014Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-extra-update.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:20.014Z"
+    },
+    {
+      "id": "a_0f2ee6a3",
+      "name": "io-correct-oracle-down",
+      "lastProbeAt": "2026-09-30T23:17:20.052Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-correct-oracle-down.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:20.052Z"
+    },
+    {
+      "id": "a_5639a399",
+      "name": "io-readback",
+      "kind": "process",
+      "command": "/usr/bin/python3",
+      "args": [
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-readback.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
+      ],
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
+      "confirmedByOperatorAt": "2026-09-30T23:17:20.093Z",
+      "lastProbeAt": "2026-09-30T23:17:20.093Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-09-30T23:17:19.729Z",
+    "environmentConnectedAt": "2026-09-30T23:17:19.823Z",
+    "workflowRecordedAt": "2026-09-30T23:17:19.857Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:17:19.889Z",
+    "agentConnectedAt": "2026-09-30T23:17:19.928Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}
