@@ -12,6 +12,12 @@ export type EntityRow = Record<string, unknown>;
 
 export interface CanonicalState {
   entities: Record<string, Record<string, EntityRow>>;
+  /**
+   * Kinds of record a read answered with one page of a longer list, and why
+   * that is known. Records outside the page are not absent, so which of these
+   * exist cannot be read from this state. Absent when every read was complete.
+   */
+  windowed?: Record<string, string>;
 }
 
 /** An action the environment recorded actually happening, in order. */

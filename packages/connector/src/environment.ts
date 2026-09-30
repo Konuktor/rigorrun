@@ -50,7 +50,7 @@ import type { SystemConnection } from './types.ts';
 import type { SystemEnvironmentConfig } from './environmentConfig.ts';
 import { hasPayload, normalizeCallResult } from './result.ts';
 import { isVerifierTool, readsForVerdict } from './verified.ts';
-import { IdentityConflictError, stateFromPayloads } from './rows.ts';
+import { IdentityConflictError, stateFromPayloads, type ReadCall } from './rows.ts';
 
 /**
  * RigorRun was about to write to a system somebody marked production.
@@ -225,6 +225,7 @@ export class SystemEnvironment implements EnvironmentAdapter {
   async getState(): Promise<CanonicalState> {
     const payloads: unknown[] = [];
     const answeredBy: string[] = [];
+    const calls: ReadCall[] = [];
     for (const read of readsForVerdict(this.config.verifierReads).used) {
       const normalized = normalizeCallResult(
         await this.connection.call(read.tool, read.args ?? {}, this.config.toolCallMs),
@@ -245,10 +246,11 @@ export class SystemEnvironment implements EnvironmentAdapter {
       if (hasPayload(normalized)) {
         payloads.push(normalized.payload);
         answeredBy.push(read.tool);
+        calls.push({ tool: read.tool, args: read.args });
       }
     }
     try {
-      return stateFromPayloads(payloads, this.schema);
+      return stateFromPayloads(payloads, this.schema, calls);
     } catch (error) {
       // Two different records under one identity: keeping either would invent
       // a world, so the world is unknown for this case.

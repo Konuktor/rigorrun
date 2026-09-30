@@ -107,3 +107,51 @@ describe('record keys', () => {
     expect(recordKey(ROW, { id: 7, title: 'x' })).toBe('7');
   });
 });
+
+/**
+ * A read that answered with one page of a longer list. What is outside the
+ * page is not absent, so the kinds of record it returned are marked windowed
+ * and every check on which of them exist is not made (requalification PLAN §147).
+ */
+describe('a read that returned one page of a longer list', () => {
+  const schema: EnvironmentSchema = { entities: [ROW], relationships: [] };
+  const row = (id: number) => ({ id, title: 't', status: 'open', amount: 1, owner: 'ada' });
+
+  it('is marked windowed when the answer says there is more', () => {
+    expect(stateFromPayloads([{ data: [row(1)], has_more: true }], schema).windowed?.['Row']).toMatch(/has_more/);
+    expect(
+      stateFromPayloads([{ items: [row(1)], pagination: { next_cursor: 'abc' } }], schema).windowed?.['Row'],
+    ).toMatch(/next_cursor/);
+    expect(stateFromPayloads([{ results: [row(1)], total: 40 }], schema).windowed?.['Row']).toMatch(/40/);
+  });
+
+  it('is marked windowed when a read called with a limit came back full', () => {
+    const state = stateFromPayloads([{ rows: [row(1), row(2)] }], schema, [{ tool: 'list_rows', args: { limit: 2 } }]);
+    expect(state.windowed?.['Row']).toMatch(/list_rows.*limit/);
+  });
+
+  it('leaves a complete answer alone', () => {
+    expect(
+      stateFromPayloads([{ data: [row(1)], has_more: false, next_cursor: null, total: 1 }], schema).windowed,
+    ).toBeUndefined();
+    expect(
+      stateFromPayloads([{ rows: [row(1)] }], schema, [{ tool: 'list_rows', args: { limit: 2 } }]).windowed,
+    ).toBeUndefined();
+  });
+
+  it('never reads a record’s own fields as a page marker', () => {
+    const ORDER: EntitySchema = {
+      name: 'Order',
+      idField: 'id',
+      fields: [
+        { name: 'id', type: 'number', nullable: false, role: 'identifier' },
+        { name: 'total', type: 'number', nullable: false, role: 'quantity', unit: 'count', precision: 1 },
+        { name: 'next', type: 'string', nullable: true, role: 'freetext' },
+      ],
+      mutable: true,
+      appendOnly: false,
+    };
+    const orders: EnvironmentSchema = { entities: [ORDER], relationships: [] };
+    expect(stateFromPayloads([{ orders: [{ id: 1, total: 500, next: 'ship' }] }], orders).windowed).toBeUndefined();
+  });
+});

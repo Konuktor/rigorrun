@@ -64,6 +64,8 @@ export interface FrameEntityObservation {
   updated: { key: string; fields: string[] }[];
   volatileFields: string[];
   membershipUnstable: boolean;
+  /** A read answered with one page of a longer list at either end. */
+  windowed?: boolean;
 }
 
 /** The evidence a `state_frame` check reads, at `derived.frame`. */

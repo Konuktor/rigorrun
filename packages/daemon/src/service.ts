@@ -41,7 +41,8 @@ import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
-import { hasPayload, normalizeCallResult, readsForVerdict } from '@rigorrun/connector';
+import { hasPayload, normalizeCallResult, readsForVerdict, type ReadCall } from '@rigorrun/connector';
+import { pagedReadAdvice } from './pagedReads.ts';
 import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
   BudgetsSchema,
@@ -346,6 +347,7 @@ export class Service {
     // block passed here and produced nothing later — after the person had
     // done the whole job. Whatever this says now is what capture will see.
     const observations: PayloadObservation[] = [];
+    const calls: ReadCall[] = [];
     const failed: string[] = [];
     const prose: string[] = [];
     let sawEmpty = false;
@@ -358,14 +360,26 @@ export class Service {
         continue;
       }
       const normalized = normalizeCallResult(result);
-      if (hasPayload(normalized)) observations.push({ tool: read.tool, payload: normalized.payload });
+      if (hasPayload(normalized)) {
+        observations.push({ tool: read.tool, payload: normalized.payload });
+        calls.push({ tool: read.tool, args: read.args });
+      }
       else if (normalized.kind === 'text') prose.push(read.tool);
       else sawEmpty = true;
     }
     if (failed.length > 0) {
       return `These reads did not answer: ${failed.join(', ')}. RigorRun will not be able to verify what they cover.`;
     }
-    if (observations.length > 0 && induceSchema(observations).schema.entities.length !== 0) return '';
+    if (observations.length > 0) {
+      const { schema } = induceSchema(observations);
+      if (schema.entities.length !== 0) {
+        return pagedReadAdvice(
+          observations.map((entry) => entry.payload),
+          calls,
+          schema,
+        );
+      }
+    }
 
     // Nothing was induced, and there are two very different reasons for that.
     // A system that answers in prose can never be verified. A system that is

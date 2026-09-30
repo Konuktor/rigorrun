@@ -360,7 +360,18 @@ describe('what one demonstration cannot show', () => {
     expect(noted.outcome, noted.outcomeReason).toBe('FAIL');
   });
 
-  it('documents the windowed read: a full newest-N listing already fails a correct agent through the deletion check', async () => {
+  it('does not fail a correct agent on a listing that says it returned one page', async () => {
+    const { benchmark } = await suite([post], OTHERS, 'Post the spring plan');
+    const result = await run(benchmark, OTHERS, scripted('correct', [post]), {
+      window: { entity: 'Entry', newest: 2, admitted: true },
+    });
+    expect(result.outcome, result.outcomeReason).not.toBe('FAIL');
+    expect(statusOf(result, 'success__nothing_else_deleted')).toBe('UNVERIFIABLE');
+    const deleted = result.assertions.find((a) => a.assertionId === 'success__nothing_else_deleted');
+    expect(deleted?.message).toContain('one page of a longer list');
+  });
+
+  it('documents the silent window: a listing that truncates without saying so still fails a correct agent', async () => {
     const { benchmark } = await suite([post], OTHERS, 'Post the spring plan');
     const result = await run(benchmark, OTHERS, scripted('correct', [post]), { window: { entity: 'Entry', newest: 2 } });
     expect(result.outcome).toBe('FAIL');

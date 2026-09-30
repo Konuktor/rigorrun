@@ -36,6 +36,9 @@ export function evaluateAssertion(assertion: Assertion, observation: Observation
       assertion.applicableWhen.expected,
       observation,
     );
+    // A gate that could not be checked leaves the rule's reach unknown: not
+    // exercised is a claim about the case, and nothing supports it.
+    if (gate.status === 'UNVERIFIABLE') return finalise(assertion, gate);
     if (gate.status !== 'PASS') {
       return finalise(assertion, {
         status: 'INAPPLICABLE',
@@ -60,6 +63,15 @@ export function evaluateAssertion(assertion: Assertion, observation: Observation
         status: 'PASS',
         observed: alternative.observed,
         message: `satisfied by the alternative condition (${assertion.orElse.kind} ${assertion.orElse.target})`,
+      };
+    } else if (outcome.status === 'UNVERIFIABLE' || alternative.status === 'UNVERIFIABLE') {
+      // "A or B" with one side unknown and the other not holding is unknown,
+      // never a failure: the unknown side may be the one that held.
+      const unknown = outcome.status === 'UNVERIFIABLE' ? outcome : alternative;
+      outcome = {
+        status: 'UNVERIFIABLE',
+        observed: { primary: outcome.observed, alternative: alternative.observed },
+        message: unknown.message,
       };
     } else {
       outcome = {
@@ -99,6 +111,8 @@ function evaluateKind(
   expected: unknown,
   observation: Observation,
 ): Outcome {
+  const window = windowedMembership(target, observation);
+  if (window) return { status: 'UNVERIFIABLE', observed: null, message: `not checked: ${window}` };
   try {
     switch (kind) {
       case 'state_exists':
@@ -135,6 +149,23 @@ function evaluateKind(
       message: `assertion could not be evaluated: ${(error as Error).message}`,
     };
   }
+}
+
+/**
+ * Why which records of the kind a target reads cannot be known, or undefined.
+ *
+ * A read that answered with one page of a longer list leaves every record
+ * outside the page unseen, not absent: one that slid out looks deleted, one
+ * that slid in looks created, and anything the agent did outside the page is
+ * invisible. So nothing that rests on which of those records exist is checked.
+ */
+function windowedMembership(target: string, observation: Observation): string | undefined {
+  const match = /^derived\.(?:created|deleted|all|changed)\.([A-Za-z_][\w]*)/.exec(target);
+  if (!match) return undefined;
+  const windowed = resolvePath(observation, 'derived.windowed');
+  if (!windowed.found || typeof windowed.value !== 'object' || windowed.value === null) return undefined;
+  const reason = (windowed.value as Record<string, unknown>)[match[1]!];
+  return typeof reason === 'string' ? reason : undefined;
 }
 
 /** A value counts as present when it exists, is not null, and is not an empty list. */

@@ -266,7 +266,7 @@ async function establishBaseline(
     if (!readTwice) return { state: first, source: 'OBSERVED_AT_START', missing: [] };
     const second = await adapter.getState();
     return {
-      state: second,
+      state: withWindows(second, first),
       source: 'OBSERVED_AT_START',
       missing: [],
       stability: readStability(adapter.describeEntities(), first, second),
@@ -479,7 +479,9 @@ async function executeCase(
     if (capabilities.stateRead !== 'none') {
       finalState = await adapter.getState();
       if (readTwice) {
-        finalStability = readStability(adapter.describeEntities(), finalState, await adapter.getState());
+        const again = await adapter.getState();
+        finalStability = readStability(adapter.describeEntities(), finalState, again);
+        finalState = withWindows(finalState, again);
       }
     }
   } catch (error) {
@@ -503,6 +505,9 @@ async function executeCase(
   const stateUnverifiable = baseline.source === 'UNAVAILABLE' || !finalReadable;
   // What the case changed for every kind of record, with what the readings at
   // each end proved about themselves: the evidence a frame check reads.
+  // Kinds of record a read answered with one page of, at either end. Which of
+  // them exist cannot be read, so every check on that is not made.
+  const windowed = { ...initialState.windowed, ...finalState.windowed };
   const frame =
     readTwice && !stateUnverifiable && finalStability
       ? frameObservation(
@@ -510,6 +515,7 @@ async function executeCase(
           deltas,
           baseline.source === 'INSTALLED_SEED' ? 'installed_seed' : (baseline.stability ?? {}),
           finalStability,
+          windowed,
         )
       : undefined;
   // A black-box agent's calls were never visible: checks resting on them are
@@ -517,7 +523,16 @@ async function executeCase(
   const blackBox = agent.kind === 'blackbox';
   const summary = verify(
     testCase.checks,
-    { state: finalState, derived: frame ? { ...derived, frame } : derived, events: [], agentReport: report },
+    {
+      state: finalState,
+      derived: {
+        ...derived,
+        ...(Object.keys(windowed).length > 0 ? { windowed } : {}),
+        ...(frame ? { frame } : {}),
+      },
+      events: [],
+      agentReport: report,
+    },
     {
       ...(stateUnverifiable
         ? {
@@ -719,4 +734,10 @@ function performanceNow(): number {
 
 function round3(value: number): number {
   return Math.round(value * 1000) / 1000;
+}
+
+/** Both readings of one end: a kind read one page at a time in either is windowed. */
+function withWindows(state: CanonicalState, other: CanonicalState): CanonicalState {
+  const windowed = { ...other.windowed, ...state.windowed };
+  return Object.keys(windowed).length > 0 ? { ...state, windowed } : state;
 }

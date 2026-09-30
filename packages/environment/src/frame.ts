@@ -74,6 +74,7 @@ export function frameObservation(
   deltas: readonly StateDelta[],
   baseline: Record<string, EntityReadStability> | 'installed_seed',
   final: Record<string, EntityReadStability>,
+  windowed: Readonly<Record<string, string>> = {},
 ): FrameObservation {
   const summary = summarise(schema, deltas);
   const entities: Record<string, FrameEntityObservation> = {};
@@ -84,6 +85,7 @@ export function frameObservation(
       ...changed,
       volatileFields: [...new Set([...(atStart?.volatileFields ?? []), ...(atEnd?.volatileFields ?? [])])].sort(),
       membershipUnstable: (atStart?.membershipUnstable ?? false) || (atEnd?.membershipUnstable ?? false),
+      ...(windowed[name] ? { windowed: true } : {}),
     };
   }
   return {
