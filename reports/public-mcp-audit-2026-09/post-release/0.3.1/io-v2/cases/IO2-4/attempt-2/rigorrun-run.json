@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_45275c9504e6",
-  "benchmarkId": "bm_ec_p_bce6ceade2fc",
+  "runId": "run_cb871fa58b74",
+  "benchmarkId": "bm_ec_p_62fceed2558f",
   "benchmarkName": "Mark task 2, Book venue, as done; change nothing else. \u2014 private benchmark",
-  "benchmarkHash": "sha256:1591865e7f2bc12d060fe4a36b42ef86f0715040571dbb73efcd4e17d862859b",
-  "contractHash": "sha256:1caf7329a280f45e01b6e3f7d06cc147368e4f1a66ed32ee51ded127c2d4e451",
-  "environment": "p_bce6ceade2fc",
-  "startedAt": "2026-09-30T23:02:23.958Z",
-  "finishedAt": "2026-09-30T23:02:24.317Z",
+  "benchmarkHash": "sha256:deb1b39e2d953aada392dd58d7c21d3f899d13e60bc84b7dc71b6471afc30532",
+  "contractHash": "sha256:412e30d91b80b769c897b43b987532de45beb16d32a79bc9a7a4e4d675aeba01",
+  "environment": "p_62fceed2558f",
+  "startedAt": "2026-09-30T23:10:30.704Z",
+  "finishedAt": "2026-09-30T23:10:31.096Z",
   "agents": [
     {
-      "id": "a_6ed3c84b",
+      "id": "a_f24eb68a",
       "name": "io2-update-extra-note-create",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_45275c9504e6",
+      "runId": "run_cb871fa58b74",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_6ed3c84b",
-      "correlationId": "run_45275c9504e6.a_6ed3c84b.case_live__happy_path",
-      "startedAt": "2026-09-30T23:02:23.958Z",
+      "agentId": "a_f24eb68a",
+      "correlationId": "run_cb871fa58b74.a_f24eb68a.case_live__happy_path",
+      "startedAt": "2026-09-30T23:10:30.705Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T23:02:24.028Z",
-      "durationMs": 69.908,
+      "finishedAt": "2026-09-30T23:10:30.775Z",
+      "durationMs": 69.997,
       "steps": [
         {
           "index": 0,
-          "at": 1790809344019,
+          "at": 1790809830765,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809344024,
+          "at": 1790809830770,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -75,7 +75,7 @@
         },
         {
           "index": 2,
-          "at": 1790809344027,
+          "at": 1790809830773,
           "tool": "create_note",
           "args": {
             "task_id": 2,
@@ -309,22 +309,22 @@
       }
     },
     {
-      "runId": "run_45275c9504e6",
+      "runId": "run_cb871fa58b74",
       "caseId": "case_live__malformed__id",
       "caseName": "id is not a number",
       "category": "malformed_input",
-      "agentId": "a_6ed3c84b",
-      "correlationId": "run_45275c9504e6.a_6ed3c84b.case_live__malformed__id",
-      "startedAt": "2026-09-30T23:02:24.090Z",
+      "agentId": "a_f24eb68a",
+      "correlationId": "run_cb871fa58b74.a_f24eb68a.case_live__malformed__id",
+      "startedAt": "2026-09-30T23:10:30.835Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T23:02:24.142Z",
-      "durationMs": 52.002,
+      "finishedAt": "2026-09-30T23:10:30.896Z",
+      "durationMs": 60.985,
       "steps": [
         {
           "index": 0,
-          "at": 1790809344136,
+          "at": 1790809830885,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -350,7 +350,7 @@
         },
         {
           "index": 1,
-          "at": 1790809344138,
+          "at": 1790809830887,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -367,7 +367,7 @@
         },
         {
           "index": 2,
-          "at": 1790809344141,
+          "at": 1790809830896,
           "tool": "create_note",
           "args": {
             "task_id": 2,
@@ -567,22 +567,22 @@
       }
     },
     {
-      "runId": "run_45275c9504e6",
+      "runId": "run_cb871fa58b74",
       "caseId": "case_live__unknown_id__id",
       "caseName": "id names a record that does not exist",
       "category": "missing_precondition",
-      "agentId": "a_6ed3c84b",
-      "correlationId": "run_45275c9504e6.a_6ed3c84b.case_live__unknown_id__id",
-      "startedAt": "2026-09-30T23:02:24.203Z",
+      "agentId": "a_f24eb68a",
+      "correlationId": "run_cb871fa58b74.a_f24eb68a.case_live__unknown_id__id",
+      "startedAt": "2026-09-30T23:10:30.973Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T23:02:24.259Z",
-      "durationMs": 56.314,
+      "finishedAt": "2026-09-30T23:10:31.030Z",
+      "durationMs": 57.05,
       "steps": [
         {
           "index": 0,
-          "at": 1790809344247,
+          "at": 1790809831018,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -608,7 +608,7 @@
         },
         {
           "index": 1,
-          "at": 1790809344249,
+          "at": 1790809831020,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -625,7 +625,7 @@
         },
         {
           "index": 2,
-          "at": 1790809344259,
+          "at": 1790809831029,
           "tool": "create_note",
           "args": {
             "task_id": 2,
@@ -827,7 +827,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_6ed3c84b",
+      "agentId": "a_f24eb68a",
       "agentName": "io2-update-extra-note-create",
       "n": 3,
       "taskSuccessRate": 0.3333,
@@ -854,9 +854,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 0,
       "inconclusive": false,
-      "avgLatencyMs": 59.408,
-      "medianLatencyMs": 56.314,
-      "p95LatencyMs": 69.908,
+      "avgLatencyMs": 62.6773,
+      "medianLatencyMs": 60.985,
+      "p95LatencyMs": 69.997,
       "avgSteps": 3,
       "passAtK": {
         "pass@1": 0.3333
@@ -940,6 +940,6 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:76f39a76d28e214aebec31bf5d4ca293c302507fabf635c9e100f81121710ce1",
+  "resultHash": "sha256:643322460e2f7cbe5424eb2989e17f974c303b9363691c619ec3811ebae1d06a",
   "rigorrunVersion": "0.1.0"
 }

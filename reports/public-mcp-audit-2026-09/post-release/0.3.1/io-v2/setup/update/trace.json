@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "trace_p_bce6ceade2fc",
+  "id": "trace_p_62fceed2558f",
   "name": "Mark task 2, Book venue, as done; change nothing else.",
-  "environmentId": "p_bce6ceade2fc",
+  "environmentId": "p_62fceed2558f",
   "recordedAt": "1970-01-01T00:00:00.000Z",
-  "durationMs": 9,
+  "durationMs": 10,
   "actor": {
     "id": "operator",
     "kind": "human",
@@ -97,7 +97,7 @@
     {
       "id": "step_001",
       "ordinal": 0,
-      "at": 9,
+      "at": 10,
       "kind": "action",
       "action": {
         "name": "update_task",

@@ -30,4 +30,4 @@ A release whose comparison is not `UNCHANGED` either explains each changed case 
 
 | Release | Commit | IO-v1 | IO-v2 | Held-out | Against v3 |
 | --- | --- | --- | --- | --- | --- |
-| 0.3.1 | `5eb0ee1` | 12 cases, 36 attempts, no gate failing | 9 cases, 27 attempts, no gate failing | 23/23 as expected, 6 abstentions | UNCHANGED (`0.3.1/comparison.json`) |
+| 0.3.1 | `1dbcf67` | 12 cases, 36 attempts, no gate failing | 9 cases, 27 attempts, no gate failing | 23/23 as expected, 6 abstentions | UNCHANGED (`0.3.1/comparison.json`) |

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "p_d53244aa3653",
+  "id": "p_6a4fb61fe6f9",
   "name": "taskdesk: create one task, verifier read then connector read",
   "goal": "Create exactly one task titled Quarterly report; change nothing else.",
   "connector": {
@@ -88,7 +88,7 @@
   ],
   "agents": [
     {
-      "id": "a_536e27b0",
+      "id": "a_03f11a4c",
       "name": "io-readback",
       "kind": "process",
       "command": "/usr/bin/python3",
@@ -98,19 +98,19 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/mixed-a"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:01:48.609Z",
-      "lastProbeAt": "2026-09-30T23:01:48.609Z",
+      "confirmedByOperatorAt": "2026-09-30T23:09:54.803Z",
+      "lastProbeAt": "2026-09-30T23:09:54.803Z",
       "lastProbeOk": true,
       "lastProbeProblem": ""
     }
   ],
   "runs": [],
   "timings": {
-    "createdAt": "2026-09-30T23:01:48.469Z",
-    "environmentConnectedAt": "2026-09-30T23:01:48.549Z",
-    "workflowRecordedAt": "2026-09-30T23:01:48.578Z",
-    "benchmarkGeneratedAt": "2026-09-30T23:01:48.607Z",
-    "agentConnectedAt": "2026-09-30T23:01:48.648Z",
+    "createdAt": "2026-09-30T23:09:54.645Z",
+    "environmentConnectedAt": "2026-09-30T23:09:54.737Z",
+    "workflowRecordedAt": "2026-09-30T23:09:54.766Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:09:54.800Z",
+    "agentConnectedAt": "2026-09-30T23:09:54.842Z",
     "firstVerdictAt": null
   },
   "baselineRunId": null,

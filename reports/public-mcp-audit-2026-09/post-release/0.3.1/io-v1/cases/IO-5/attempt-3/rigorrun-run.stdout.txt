@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_b854e2ed0deb",
-  "benchmarkId": "bm_ec_p_cb983a1f3477",
+  "runId": "run_60b396d5bc6f",
+  "benchmarkId": "bm_ec_p_60706460342f",
   "benchmarkName": "Create exactly one task titled Quarterly report; change nothing else. — private benchmark",
-  "benchmarkHash": "sha256:21c79f607a51aa44d78e8068bcf2b3292136671ed6d6c5c7e733422876c2688f",
-  "contractHash": "sha256:80d5fecd1334f3ece6003856b5338c90c31f87e475e815014b8d7f1735b08e5b",
-  "environment": "p_cb983a1f3477",
-  "startedAt": "2026-09-30T23:01:59.270Z",
-  "finishedAt": "2026-09-30T23:01:59.346Z",
+  "benchmarkHash": "sha256:600268ac9778ee230b5739fea531a5d83947dbe761e2145c28b1cb8ab69bb861",
+  "contractHash": "sha256:b003fde1baf738a99a4ba9c62714d54df819b91cfaf29bc5adfbd3c2572aceb3",
+  "environment": "p_60706460342f",
+  "startedAt": "2026-09-30T23:10:05.626Z",
+  "finishedAt": "2026-09-30T23:10:05.706Z",
   "agents": [
     {
-      "id": "a_b52c8483",
+      "id": "a_17b82bd9",
       "name": "io-extra-update",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_b854e2ed0deb",
+      "runId": "run_60b396d5bc6f",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_b52c8483",
-      "correlationId": "run_b854e2ed0deb.a_b52c8483.case_live__happy_path",
-      "startedAt": "2026-09-30T23:01:59.271Z",
+      "agentId": "a_17b82bd9",
+      "correlationId": "run_60b396d5bc6f.a_17b82bd9.case_live__happy_path",
+      "startedAt": "2026-09-30T23:10:05.626Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T23:01:59.335Z",
-      "durationMs": 63.793,
+      "finishedAt": "2026-09-30T23:10:05.694Z",
+      "durationMs": 67.412,
       "steps": [
         {
           "index": 0,
-          "at": 1790809319325,
+          "at": 1790809805684,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809319329,
+          "at": 1790809805689,
           "tool": "create_task",
           "args": {
             "title": "Quarterly report"
@@ -74,7 +74,7 @@
         },
         {
           "index": 2,
-          "at": 1790809319333,
+          "at": 1790809805692,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -267,7 +267,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_b52c8483",
+      "agentId": "a_17b82bd9",
       "agentName": "io-extra-update",
       "n": 1,
       "taskSuccessRate": 1,
@@ -294,9 +294,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 0,
       "inconclusive": false,
-      "avgLatencyMs": 63.793,
-      "medianLatencyMs": 63.793,
-      "p95LatencyMs": 63.793,
+      "avgLatencyMs": 67.412,
+      "medianLatencyMs": 67.412,
+      "p95LatencyMs": 67.412,
       "avgSteps": 3,
       "passAtK": {
         "pass@1": 1
@@ -379,7 +379,7 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:0c2df701caa2ed9b5aa486b2ba6240a6c32b4289cc07d72c417e61d1bd071393",
+  "resultHash": "sha256:2e4373a8eb813bf8300c4da15f4299fe625696fe77c2a0a5d46a521e4f2c3839",
   "rigorrunVersion": "0.1.0"
 }
 

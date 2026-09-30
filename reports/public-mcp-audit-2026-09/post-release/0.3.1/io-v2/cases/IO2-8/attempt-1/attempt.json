@@ -1,7 +1,7 @@
 {
   "case": "IO2-8",
   "attempt": 1,
-  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
+  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
   "seconds": 0.56,
   "project": "selfread",
   "agent": "io2-create-extra-note-edit",

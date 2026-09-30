@@ -1,8 +1,8 @@
 {
   "case": "IO2-6",
   "attempt": 1,
-  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
-  "seconds": 0.61,
+  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
+  "seconds": 0.62,
   "project": "replace",
   "agent": "io2-replace-extra-note-edit",
   "task": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
@@ -538,70 +538,70 @@
   "serverCalls": {
     "verifier": [
       {
-        "at": 1790809347.9598854,
+        "at": 1790809834.7348652,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809347.9607189,
+        "at": 1790809834.7356377,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809347.9693356,
+        "at": 1790809834.7459197,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809347.970032,
+        "at": 1790809834.7469878,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809347.970764,
+        "at": 1790809834.7480595,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809347.9710884,
+        "at": 1790809834.7488317,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809348.039783,
+        "at": 1790809834.8186438,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809348.0401492,
+        "at": 1790809834.819048,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809348.0406165,
+        "at": 1790809834.8196023,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809348.040948,
+        "at": 1790809834.8199897,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,

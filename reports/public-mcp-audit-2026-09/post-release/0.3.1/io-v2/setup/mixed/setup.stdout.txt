@@ -1,5 +1,5 @@
 {
-  "projectId": "p_d938caf3506c",
+  "projectId": "p_82c02649b0ba",
   "readsProblem": "A verifier read is nominated, so RigorRun reads the result only through the verifier. These reads go through the system's own connection and will be ignored: list_tasks. Verdicts stay labelled SELF_REPORTED while they are nominated; remove them to have verdicts labelled INDEPENDENT.",
   "readsIgnored": [
     "list_tasks"

@@ -1,7 +1,7 @@
 {
   "create": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io2-homes/create",
-    "project": "p_3a05d1e4001e",
+    "project": "p_b2885bfc557e",
     "happyPathCaseId": "case_live__happy_path",
     "suiteShape": [
       "happy_path"
@@ -9,7 +9,7 @@
   },
   "update": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io2-homes/update",
-    "project": "p_bce6ceade2fc",
+    "project": "p_62fceed2558f",
     "happyPathCaseId": "case_live__happy_path",
     "suiteShape": [
       "happy_path",
@@ -19,7 +19,7 @@
   },
   "replace": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io2-homes/replace",
-    "project": "p_99f28162999b",
+    "project": "p_a3c5df62e347",
     "happyPathCaseId": "case_live__happy_path",
     "suiteShape": [
       "happy_path"
@@ -27,7 +27,7 @@
   },
   "selfread": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io2-homes/selfread",
-    "project": "p_f1803487b839",
+    "project": "p_aa5ad31995bc",
     "happyPathCaseId": "case_live__happy_path",
     "suiteShape": [
       "happy_path"
@@ -35,7 +35,7 @@
   },
   "mixed": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io2-homes/mixed",
-    "project": "p_d938caf3506c",
+    "project": "p_82c02649b0ba",
     "happyPathCaseId": "case_live__happy_path",
     "suiteShape": [
       "happy_path"

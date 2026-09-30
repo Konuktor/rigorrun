@@ -2,8 +2,8 @@
   "serverName": "taskdesk",
   "serverVersion": "1.0.0",
   "protocolVersion": "negotiated",
-  "discoveredAt": "2026-09-30T23:01:48.550Z",
-  "latencyMs": 35,
+  "discoveredAt": "2026-09-30T23:09:54.740Z",
+  "latencyMs": 33,
   "tools": [
     {
       "name": "create_task",

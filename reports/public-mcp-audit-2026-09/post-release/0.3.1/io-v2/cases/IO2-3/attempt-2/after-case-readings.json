@@ -1,12 +1,12 @@
 [
   {
-    "agentId": "a_ec19b9c8",
-    "at": 1790809341.3370366,
+    "agentId": "a_e39c51bf",
+    "at": 1790809827.9041595,
     "caseId": "case_live__happy_path",
     "caseIndex": 0,
     "category": "happy_path",
     "outcome": "PASS",
-    "runId": "run_122e8b2b6a6e",
+    "runId": "run_e0e5a84dc131",
     "snapshot": {
       "exists": true,
       "oracle": "sqlite-ro",
@@ -58,13 +58,13 @@
     }
   },
   {
-    "agentId": "a_ec19b9c8",
-    "at": 1790809341.451297,
+    "agentId": "a_e39c51bf",
+    "at": 1790809828.018473,
     "caseId": "case_live__malformed__id",
     "caseIndex": 1,
     "category": "malformed_input",
     "outcome": "FAIL",
-    "runId": "run_122e8b2b6a6e",
+    "runId": "run_e0e5a84dc131",
     "snapshot": {
       "exists": true,
       "oracle": "sqlite-ro",
@@ -116,13 +116,13 @@
     }
   },
   {
-    "agentId": "a_ec19b9c8",
-    "at": 1790809341.5609539,
+    "agentId": "a_e39c51bf",
+    "at": 1790809828.131013,
     "caseId": "case_live__unknown_id__id",
     "caseIndex": 2,
     "category": "missing_precondition",
     "outcome": "FAIL",
-    "runId": "run_122e8b2b6a6e",
+    "runId": "run_e0e5a84dc131",
     "snapshot": {
       "exists": true,
       "oracle": "sqlite-ro",

@@ -1,8 +1,8 @@
 {
   "case": "IO-7-self",
   "attempt": 1,
-  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
-  "seconds": 0.51,
+  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
+  "seconds": 0.52,
   "initialState": {
     "exists": true,
     "oracle": "sqlite-ro",
@@ -278,7 +278,7 @@
     "exit": 0,
     "runFileWritten": true,
     "runVerdict": {
-      "winnerAgentId": "a_7ac6a310",
+      "winnerAgentId": "a_bd15bad7",
       "outcome": "PASS",
       "summary": "io-readback wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 decided cases.",
       "rationale": [

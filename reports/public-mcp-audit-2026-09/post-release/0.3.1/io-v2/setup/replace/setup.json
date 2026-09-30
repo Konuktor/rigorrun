@@ -2,94 +2,94 @@
   "project": "replace",
   "spec": "specs/io2-replace.template.json",
   "exit": 0,
-  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
+  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
   "predictedSuiteShape": null,
   "predictedSetup": "compiles (the demonstration creates a Task); the suite shape is not predicted and is recorded at setup",
   "callsDuringSetup": [
     {
-      "at": 1790809334.145251,
+      "at": 1790809820.6913786,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1464329,
+      "at": 1790809820.6927776,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1502266,
+      "at": 1790809820.696553,
       "server": "taskdesk2",
       "tool": "reset_desk",
       "args": {}
     },
     {
-      "at": 1790809334.1526423,
+      "at": 1790809820.6988451,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.153172,
+      "at": 1790809820.699377,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1564353,
+      "at": 1790809820.702061,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1568244,
+      "at": 1790809820.7024086,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1572556,
+      "at": 1790809820.7026343,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809334.1578882,
+      "at": 1790809820.703027,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1583512,
+      "at": 1790809820.7034643,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1609309,
+      "at": 1790809820.7057192,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1611538,
+      "at": 1790809820.7060945,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1614685,
+      "at": 1790809820.7063608,
       "server": "taskdesk2",
       "tool": "delete_task",
       "args": {
@@ -97,35 +97,35 @@
       }
     },
     {
-      "at": 1790809334.1632717,
+      "at": 1790809820.707915,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 2
     },
     {
-      "at": 1790809334.1634576,
+      "at": 1790809820.7082465,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1656709,
+      "at": 1790809820.7101927,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 2
     },
     {
-      "at": 1790809334.165876,
+      "at": 1790809820.7104647,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1661136,
+      "at": 1790809820.710641,
       "server": "taskdesk2",
       "tool": "create_task",
       "args": {
@@ -133,95 +133,95 @@
       }
     },
     {
-      "at": 1790809334.16777,
+      "at": 1790809820.7121665,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1679406,
+      "at": 1790809820.7125022,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.170387,
+      "at": 1790809820.7146096,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1706038,
+      "at": 1790809820.7149045,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.1981933,
+      "at": 1790809820.7388997,
       "server": "taskdesk2",
       "tool": "reset_desk",
       "args": {}
     },
     {
-      "at": 1790809334.20046,
+      "at": 1790809820.7411754,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2007303,
+      "at": 1790809820.7415426,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2042577,
+      "at": 1790809820.7448728,
       "server": "taskdesk2",
       "tool": "reset_desk",
       "args": {}
     },
     {
-      "at": 1790809334.2063723,
+      "at": 1790809820.7467253,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2066002,
+      "at": 1790809820.7469654,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2070484,
+      "at": 1790809820.747428,
       "server": "taskdesk2",
       "tool": "reset_desk",
       "args": {}
     },
     {
-      "at": 1790809334.2091415,
+      "at": 1790809820.7493742,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2093794,
+      "at": 1790809820.749608,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2098358,
+      "at": 1790809820.7500305,
       "server": "taskdesk2",
       "tool": "create_task",
       "args": {
@@ -229,54 +229,54 @@
       }
     },
     {
-      "at": 1790809334.2115815,
+      "at": 1790809820.7515988,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809334.211901,
+      "at": 1790809820.7517972,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2125523,
+      "at": 1790809820.752263,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809334.2129245,
+      "at": 1790809820.752471,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2138655,
+      "at": 1790809820.7533414,
       "server": "taskdesk2",
       "tool": "reset_desk",
       "args": {}
     },
     {
-      "at": 1790809334.2153862,
+      "at": 1790809820.754932,
       "server": "taskdesk2",
       "tool": "reset_desk",
       "args": {}
     },
     {
-      "at": 1790809334.2176545,
+      "at": 1790809820.7564647,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809334.2179148,
+      "at": 1790809820.7566705,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
@@ -285,7 +285,7 @@
   ],
   "errorTail": [],
   "summary": {
-    "projectId": "p_99f28162999b",
+    "projectId": "p_a3c5df62e347",
     "readsProblem": "",
     "readsIgnored": [],
     "tools": 10,
@@ -314,7 +314,7 @@
     ]
   },
   "projectDirs": [
-    "p_99f28162999b"
+    "p_a3c5df62e347"
   ],
   "suiteShape": [
     "happy_path"

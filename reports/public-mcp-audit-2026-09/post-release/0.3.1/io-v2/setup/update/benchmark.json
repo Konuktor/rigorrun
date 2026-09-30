@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "bm_ec_p_bce6ceade2fc",
+  "id": "bm_ec_p_62fceed2558f",
   "name": "Mark task 2, Book venue, as done; change nothing else. — private benchmark",
-  "description": "Generated from contract ec_p_bce6ceade2fc. 3 cases across 3 categories.",
-  "environment": "p_bce6ceade2fc",
-  "contractId": "ec_p_bce6ceade2fc",
-  "contractHash": "sha256:1caf7329a280f45e01b6e3f7d06cc147368e4f1a66ed32ee51ded127c2d4e451",
+  "description": "Generated from contract ec_p_62fceed2558f. 3 cases across 3 categories.",
+  "environment": "p_62fceed2558f",
+  "contractId": "ec_p_62fceed2558f",
+  "contractHash": "sha256:412e30d91b80b769c897b43b987532de45beb16d32a79bc9a7a4e4d675aeba01",
   "generator": "deterministic",
-  "createdAt": "2026-09-30T23:02:13.572Z",
+  "createdAt": "2026-09-30T23:10:20.095Z",
   "notTestable": [
     {
       "rule": "partial_state_read",

@@ -224,7 +224,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.54
         },
         {
           "attempt": 2,
@@ -237,7 +237,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.58
         },
         {
           "attempt": 3,
@@ -250,7 +250,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.54
         }
       ]
     },
@@ -291,7 +291,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.54
         },
         {
           "attempt": 2,
@@ -304,7 +304,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         },
         {
           "attempt": 3,
@@ -317,7 +317,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.56
         }
       ]
     },
@@ -358,7 +358,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         },
         {
           "attempt": 2,
@@ -371,7 +371,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         },
         {
           "attempt": 3,
@@ -384,7 +384,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.55
         }
       ]
     },
@@ -451,7 +451,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.57
         }
       ]
     },
@@ -492,7 +492,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         },
         {
           "attempt": 2,
@@ -505,7 +505,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.57
         },
         {
           "attempt": 3,
@@ -563,7 +563,7 @@
           "answeredVerifierReads": 3,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.56
         },
         {
           "attempt": 2,
@@ -578,7 +578,7 @@
           "answeredVerifierReads": 3,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.56
         },
         {
           "attempt": 3,
@@ -593,7 +593,7 @@
           "answeredVerifierReads": 3,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.55
         }
       ]
     },
@@ -634,7 +634,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.44
+          "seconds": 0.46
         },
         {
           "attempt": 2,
@@ -647,7 +647,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.46
+          "seconds": 0.44
         },
         {
           "attempt": 3,
@@ -660,7 +660,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.44
+          "seconds": 0.45
         }
       ]
     },
@@ -701,7 +701,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.54
         },
         {
           "attempt": 2,
@@ -714,7 +714,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.58
         },
         {
           "attempt": 3,
@@ -727,7 +727,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.52
         }
       ]
     },
@@ -768,7 +768,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.53
         },
         {
           "attempt": 2,
@@ -781,7 +781,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.56
         },
         {
           "attempt": 3,
@@ -794,7 +794,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.54
         }
       ]
     },
@@ -835,7 +835,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.53
         },
         {
           "attempt": 2,
@@ -902,7 +902,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.56
         },
         {
           "attempt": 2,
@@ -928,7 +928,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.53
         }
       ]
     },
@@ -966,7 +966,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": null,
           "silentFallbackGuard": true,
-          "seconds": 0.51
+          "seconds": 0.52
         },
         {
           "attempt": 2,
@@ -979,7 +979,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": null,
           "silentFallbackGuard": true,
-          "seconds": 0.51
+          "seconds": 0.52
         },
         {
           "attempt": 3,
@@ -992,7 +992,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": null,
           "silentFallbackGuard": true,
-          "seconds": 0.51
+          "seconds": 0.5
         }
       ]
     }
