@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_d608edf309d5",
-  "benchmarkId": "bm_ec_p_101776846d98",
+  "runId": "run_122e8b2b6a6e",
+  "benchmarkId": "bm_ec_p_bce6ceade2fc",
   "benchmarkName": "Mark task 2, Book venue, as done; change nothing else. \u2014 private benchmark",
-  "benchmarkHash": "sha256:3577c1da149d0c45f5711dbe1dcd99b628561fdac1e69cde97ed6ea3626ebd92",
-  "contractHash": "sha256:8d197a1f31138fc9abc5a55ac4f6ee9a0d35b8e510dc9292338a425a2b39598a",
-  "environment": "p_101776846d98",
-  "startedAt": "2026-09-30T22:59:02.433Z",
-  "finishedAt": "2026-09-30T22:59:02.773Z",
+  "benchmarkHash": "sha256:1591865e7f2bc12d060fe4a36b42ef86f0715040571dbb73efcd4e17d862859b",
+  "contractHash": "sha256:1caf7329a280f45e01b6e3f7d06cc147368e4f1a66ed32ee51ded127c2d4e451",
+  "environment": "p_bce6ceade2fc",
+  "startedAt": "2026-09-30T23:02:21.205Z",
+  "finishedAt": "2026-09-30T23:02:21.565Z",
   "agents": [
     {
-      "id": "a_7d4030c6",
+      "id": "a_ec19b9c8",
       "name": "io2-update-correct",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_d608edf309d5",
+      "runId": "run_122e8b2b6a6e",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_7d4030c6",
-      "correlationId": "run_d608edf309d5.a_7d4030c6.case_live__happy_path",
-      "startedAt": "2026-09-30T22:59:02.434Z",
+      "agentId": "a_ec19b9c8",
+      "correlationId": "run_122e8b2b6a6e.a_ec19b9c8.case_live__happy_path",
+      "startedAt": "2026-09-30T23:02:21.205Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T22:59:02.502Z",
-      "durationMs": 67.96,
+      "finishedAt": "2026-09-30T23:02:21.276Z",
+      "durationMs": 70.792,
       "steps": [
         {
           "index": 0,
-          "at": 1790809142496,
+          "at": 1790809341270,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809142501,
+          "at": 1790809341274,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -269,22 +269,22 @@
       }
     },
     {
-      "runId": "run_d608edf309d5",
+      "runId": "run_122e8b2b6a6e",
       "caseId": "case_live__malformed__id",
       "caseName": "id is not a number",
       "category": "malformed_input",
-      "agentId": "a_7d4030c6",
-      "correlationId": "run_d608edf309d5.a_7d4030c6.case_live__malformed__id",
-      "startedAt": "2026-09-30T22:59:02.560Z",
+      "agentId": "a_ec19b9c8",
+      "correlationId": "run_122e8b2b6a6e.a_ec19b9c8.case_live__malformed__id",
+      "startedAt": "2026-09-30T23:02:21.340Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T22:59:02.606Z",
-      "durationMs": 46.443,
+      "finishedAt": "2026-09-30T23:02:21.395Z",
+      "durationMs": 54.083,
       "steps": [
         {
           "index": 0,
-          "at": 1790809142604,
+          "at": 1790809341392,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -310,7 +310,7 @@
         },
         {
           "index": 1,
-          "at": 1790809142606,
+          "at": 1790809341394,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -481,22 +481,22 @@
       }
     },
     {
-      "runId": "run_d608edf309d5",
+      "runId": "run_122e8b2b6a6e",
       "caseId": "case_live__unknown_id__id",
       "caseName": "id names a record that does not exist",
       "category": "missing_precondition",
-      "agentId": "a_7d4030c6",
-      "correlationId": "run_d608edf309d5.a_7d4030c6.case_live__unknown_id__id",
-      "startedAt": "2026-09-30T22:59:02.668Z",
+      "agentId": "a_ec19b9c8",
+      "correlationId": "run_122e8b2b6a6e.a_ec19b9c8.case_live__unknown_id__id",
+      "startedAt": "2026-09-30T23:02:21.456Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T22:59:02.716Z",
-      "durationMs": 47.701,
+      "finishedAt": "2026-09-30T23:02:21.506Z",
+      "durationMs": 50.369,
       "steps": [
         {
           "index": 0,
-          "at": 1790809142713,
+          "at": 1790809341504,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -522,7 +522,7 @@
         },
         {
           "index": 1,
-          "at": 1790809142715,
+          "at": 1790809341506,
           "tool": "update_task",
           "args": {
             "id": 2,
@@ -695,7 +695,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_7d4030c6",
+      "agentId": "a_ec19b9c8",
       "agentName": "io2-update-correct",
       "n": 3,
       "taskSuccessRate": 0.3333,
@@ -722,9 +722,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 0,
       "inconclusive": false,
-      "avgLatencyMs": 54.0347,
-      "medianLatencyMs": 47.701,
-      "p95LatencyMs": 67.96,
+      "avgLatencyMs": 58.4147,
+      "medianLatencyMs": 54.083,
+      "p95LatencyMs": 70.792,
       "avgSteps": 2,
       "passAtK": {
         "pass@1": 0.3333
@@ -806,6 +806,6 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:4d8d4e2e3847cfbe8bfd1f714db9f2b88877b16c3b26502f4c0dee6e419117dd",
+  "resultHash": "sha256:09d039800b3c53abd45307bbab2ceaaeb94111f77c0aad13acf37916d9945d81",
   "rigorrunVersion": "0.1.0"
 }

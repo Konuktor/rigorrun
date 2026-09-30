@@ -1,18 +1,18 @@
 {
   "independent": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io-homes/independent",
-    "project": "p_be5d4420e98e"
+    "project": "p_cb983a1f3477"
   },
   "mixed-a": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io-homes/mixed-a",
-    "project": "p_6eb079a1361f"
+    "project": "p_d53244aa3653"
   },
   "mixed-b": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io-homes/mixed-b",
-    "project": "p_ca9c9c13663a"
+    "project": "p_c6efc6bdfcea"
   },
   "self": {
     "home": "{REPO}/tmp/rigorrun-audit/pr-0.3.1-io-homes/self",
-    "project": "p_393a1f1e6497"
+    "project": "p_a7c7e81fa5ec"
   }
 }

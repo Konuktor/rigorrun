@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "p_101776846d98",
+  "id": "p_bce6ceade2fc",
   "name": "taskdesk2: complete one task, verified independently over tasks and notes",
   "goal": "Mark task 2, Book venue, as done; change nothing else.",
   "connector": {
@@ -126,9 +126,9 @@
   ],
   "agents": [
     {
-      "id": "a_7d4030c6",
+      "id": "a_ec19b9c8",
       "name": "io2-update-correct",
-      "lastProbeAt": "2026-09-30T22:58:54.700Z",
+      "lastProbeAt": "2026-09-30T23:02:13.577Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -139,10 +139,10 @@
         "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/update"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
-      "confirmedByOperatorAt": "2026-09-30T22:58:54.700Z"
+      "confirmedByOperatorAt": "2026-09-30T23:02:13.577Z"
     },
     {
-      "id": "a_6eccc571",
+      "id": "a_6ed3c84b",
       "name": "io2-update-extra-note-create",
       "kind": "process",
       "command": "/usr/bin/python3",
@@ -152,19 +152,19 @@
         "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/update"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
-      "confirmedByOperatorAt": "2026-09-30T22:58:54.739Z",
-      "lastProbeAt": "2026-09-30T22:58:54.739Z",
+      "confirmedByOperatorAt": "2026-09-30T23:02:13.618Z",
+      "lastProbeAt": "2026-09-30T23:02:13.618Z",
       "lastProbeOk": true,
       "lastProbeProblem": ""
     }
   ],
   "runs": [],
   "timings": {
-    "createdAt": "2026-09-30T22:58:54.530Z",
-    "environmentConnectedAt": "2026-09-30T22:58:54.614Z",
-    "workflowRecordedAt": "2026-09-30T22:58:54.656Z",
-    "benchmarkGeneratedAt": "2026-09-30T22:58:54.698Z",
-    "agentConnectedAt": "2026-09-30T22:58:54.733Z",
+    "createdAt": "2026-09-30T23:02:13.418Z",
+    "environmentConnectedAt": "2026-09-30T23:02:13.505Z",
+    "workflowRecordedAt": "2026-09-30T23:02:13.538Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:02:13.575Z",
+    "agentConnectedAt": "2026-09-30T23:02:13.613Z",
     "firstVerdictAt": null
   },
   "baselineRunId": null,

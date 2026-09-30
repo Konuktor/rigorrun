@@ -224,7 +224,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.56
         },
         {
           "attempt": 2,
@@ -237,7 +237,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         },
         {
           "attempt": 3,
@@ -250,7 +250,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.59
+          "seconds": 0.56
         }
       ]
     },
@@ -291,7 +291,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.55
         },
         {
           "attempt": 2,
@@ -304,7 +304,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.54
         },
         {
           "attempt": 3,
@@ -317,7 +317,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.53
         }
       ]
     },
@@ -371,7 +371,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.54
         },
         {
           "attempt": 3,
@@ -384,7 +384,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.53
         }
       ]
     },
@@ -451,7 +451,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.54
         }
       ]
     },
@@ -492,7 +492,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.67
+          "seconds": 0.54
         },
         {
           "attempt": 2,
@@ -518,7 +518,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.55
         }
       ]
     },
@@ -578,7 +578,7 @@
           "answeredVerifierReads": 3,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.54
         },
         {
           "attempt": 3,
@@ -634,7 +634,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.47
+          "seconds": 0.44
         },
         {
           "attempt": 2,
@@ -647,7 +647,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.46
         },
         {
           "attempt": 3,
@@ -660,7 +660,7 @@
           "answeredVerifierReads": 0,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.62
+          "seconds": 0.44
         }
       ]
     },
@@ -701,7 +701,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.6
+          "seconds": 0.53
         },
         {
           "attempt": 2,
@@ -714,7 +714,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.55
         },
         {
           "attempt": 3,
@@ -727,7 +727,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         }
       ]
     },
@@ -768,7 +768,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.54
         },
         {
           "attempt": 2,
@@ -781,7 +781,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.55
+          "seconds": 0.53
         },
         {
           "attempt": 3,
@@ -848,7 +848,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         },
         {
           "attempt": 3,
@@ -902,7 +902,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.56
+          "seconds": 0.55
         },
         {
           "attempt": 2,
@@ -915,7 +915,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.53
+          "seconds": 0.54
         },
         {
           "attempt": 3,
@@ -928,7 +928,7 @@
           "answeredVerifierReads": 5,
           "matchesExpectation": true,
           "silentFallbackGuard": true,
-          "seconds": 0.54
+          "seconds": 0.55
         }
       ]
     },

@@ -15,7 +15,7 @@
         "tool": "list_tasks",
         "args": {},
         "attempt": 1,
-        "ms": 3,
+        "ms": 2,
         "result": {
           "content": [
             {
@@ -50,7 +50,7 @@
           "id": 3
         },
         "attempt": 1,
-        "ms": 5,
+        "ms": 4,
         "result": {
           "content": [
             {
@@ -73,7 +73,7 @@
           "title": "Quarterly report"
         },
         "attempt": 1,
-        "ms": 4,
+        "ms": 3,
         "result": {
           "content": [
             {
@@ -97,7 +97,7 @@
           "body": "Shortlist narrowed to the river hall"
         },
         "attempt": 1,
-        "ms": 4,
+        "ms": 2,
         "result": {
           "content": [
             {

@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_6740172ede22",
-  "benchmarkId": "bm_ec_p_6c9fafd98dc3",
+  "runId": "run_ce5134e2076a",
+  "benchmarkId": "bm_ec_p_3a05d1e4001e",
   "benchmarkName": "Create exactly one task titled Quarterly report; change nothing else. \u2014 private benchmark",
-  "benchmarkHash": "sha256:a50c3d4b90ac3bd6825248aa23bf7f67b9ceda6943ed8b9f1c7287c5cde830fa",
-  "contractHash": "sha256:c0093e30dcc232c818a97de32a4b4d98be4cd3ce58dffc76318c10333ad652f1",
-  "environment": "p_6c9fafd98dc3",
-  "startedAt": "2026-09-30T22:58:59.411Z",
-  "finishedAt": "2026-09-30T22:58:59.545Z",
+  "benchmarkHash": "sha256:fba9d1e21a22b5c3ae007aadcf0e852ac624c00bfa2d0faa852853943de837a4",
+  "contractHash": "sha256:9d584cdfffaec8e766ab5676f6ff864b8053d66ade2bc8de39093a1118c64809",
+  "environment": "p_3a05d1e4001e",
+  "startedAt": "2026-09-30T23:02:18.160Z",
+  "finishedAt": "2026-09-30T23:02:18.288Z",
   "agents": [
     {
-      "id": "a_213d56ac",
+      "id": "a_53dc1f6f",
       "name": "io2-create-extra-note-edit",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_6740172ede22",
+      "runId": "run_ce5134e2076a",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_213d56ac",
-      "correlationId": "run_6740172ede22.a_213d56ac.case_live__happy_path",
-      "startedAt": "2026-09-30T22:58:59.411Z",
+      "agentId": "a_53dc1f6f",
+      "correlationId": "run_ce5134e2076a.a_53dc1f6f.case_live__happy_path",
+      "startedAt": "2026-09-30T23:02:18.161Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T22:58:59.480Z",
-      "durationMs": 68.178,
+      "finishedAt": "2026-09-30T23:02:18.228Z",
+      "durationMs": 66.941,
       "steps": [
         {
           "index": 0,
-          "at": 1790809139471,
+          "at": 1790809338219,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809139476,
+          "at": 1790809338223,
           "tool": "create_task",
           "args": {
             "title": "Quarterly report"
@@ -74,7 +74,7 @@
         },
         {
           "index": 2,
-          "at": 1790809139478,
+          "at": 1790809338227,
           "tool": "update_note",
           "args": {
             "id": 1,
@@ -299,7 +299,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_213d56ac",
+      "agentId": "a_53dc1f6f",
       "agentName": "io2-create-extra-note-edit",
       "n": 1,
       "taskSuccessRate": 1,
@@ -326,9 +326,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 0,
       "inconclusive": false,
-      "avgLatencyMs": 68.178,
-      "medianLatencyMs": 68.178,
-      "p95LatencyMs": 68.178,
+      "avgLatencyMs": 66.941,
+      "medianLatencyMs": 66.941,
+      "p95LatencyMs": 66.941,
       "avgSteps": 3,
       "passAtK": {
         "pass@1": 1
@@ -411,6 +411,6 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:53a8c4f4ac056b6262825aff3305dcb6904088ef9bf5bf0cdf32a4776ea11f7d",
+  "resultHash": "sha256:06be864b7f6e27c195c5ef3b30f5f7762424470676d965f7da1a8b48cf62181a",
   "rigorrunVersion": "0.1.0"
 }

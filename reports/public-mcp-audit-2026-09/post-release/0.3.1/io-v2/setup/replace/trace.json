@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "trace_p_1e9893b333c8",
+  "id": "trace_p_99f28162999b",
   "name": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
-  "environmentId": "p_1e9893b333c8",
+  "environmentId": "p_99f28162999b",
   "recordedAt": "1970-01-01T00:00:00.000Z",
-  "durationMs": 19,
+  "durationMs": 15,
   "actor": {
     "id": "operator",
     "kind": "human",
@@ -97,7 +97,7 @@
     {
       "id": "step_001",
       "ordinal": 0,
-      "at": 13,
+      "at": 10,
       "kind": "action",
       "action": {
         "name": "delete_task",
@@ -112,7 +112,7 @@
     {
       "id": "step_002",
       "ordinal": 1,
-      "at": 19,
+      "at": 15,
       "kind": "action",
       "action": {
         "name": "create_task",

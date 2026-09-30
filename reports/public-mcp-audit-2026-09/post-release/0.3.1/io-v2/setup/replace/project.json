@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "p_1e9893b333c8",
+  "id": "p_99f28162999b",
   "name": "taskdesk2: replace one task, verified independently over tasks and notes",
   "goal": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
   "connector": {
@@ -126,9 +126,9 @@
   ],
   "agents": [
     {
-      "id": "a_126ff2b9",
+      "id": "a_7f9fe23f",
       "name": "io2-replace-correct",
-      "lastProbeAt": "2026-09-30T22:58:55.381Z",
+      "lastProbeAt": "2026-09-30T23:02:14.227Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -139,10 +139,10 @@
         "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/replace"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
-      "confirmedByOperatorAt": "2026-09-30T22:58:55.381Z"
+      "confirmedByOperatorAt": "2026-09-30T23:02:14.227Z"
     },
     {
-      "id": "a_b1a9ebd7",
+      "id": "a_f4f91e37",
       "name": "io2-replace-extra-note-edit",
       "kind": "process",
       "command": "/usr/bin/python3",
@@ -152,19 +152,19 @@
         "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/replace"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
-      "confirmedByOperatorAt": "2026-09-30T22:58:55.419Z",
-      "lastProbeAt": "2026-09-30T22:58:55.419Z",
+      "confirmedByOperatorAt": "2026-09-30T23:02:14.265Z",
+      "lastProbeAt": "2026-09-30T23:02:14.265Z",
       "lastProbeOk": true,
       "lastProbeProblem": ""
     }
   ],
   "runs": [],
   "timings": {
-    "createdAt": "2026-09-30T22:58:55.190Z",
-    "environmentConnectedAt": "2026-09-30T22:58:55.282Z",
-    "workflowRecordedAt": "2026-09-30T22:58:55.331Z",
-    "benchmarkGeneratedAt": "2026-09-30T22:58:55.379Z",
-    "agentConnectedAt": "2026-09-30T22:58:55.415Z",
+    "createdAt": "2026-09-30T23:02:14.052Z",
+    "environmentConnectedAt": "2026-09-30T23:02:14.138Z",
+    "workflowRecordedAt": "2026-09-30T23:02:14.179Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:02:14.224Z",
+    "agentConnectedAt": "2026-09-30T23:02:14.261Z",
     "firstVerdictAt": null
   },
   "baselineRunId": null,

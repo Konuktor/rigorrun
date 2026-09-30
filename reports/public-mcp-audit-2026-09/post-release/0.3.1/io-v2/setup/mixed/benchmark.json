@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "bm_ec_p_f432b9d810df",
+  "id": "bm_ec_p_d938caf3506c",
   "name": "Create exactly one task titled Quarterly report; change nothing else. — private benchmark",
-  "description": "Generated from contract ec_p_f432b9d810df. 1 cases across 1 categories.",
-  "environment": "p_f432b9d810df",
-  "contractId": "ec_p_f432b9d810df",
-  "contractHash": "sha256:e3f562bc92f6988e3cbb93efa12ce575e5bb25f281ae2063c6fe5acc494f7676",
+  "description": "Generated from contract ec_p_d938caf3506c. 1 cases across 1 categories.",
+  "environment": "p_d938caf3506c",
+  "contractId": "ec_p_d938caf3506c",
+  "contractHash": "sha256:eabfaafca6dd7505542faf3a435e82fbdccf90a5e0d878f5449857a0885d1a77",
   "generator": "deterministic",
-  "createdAt": "2026-09-30T22:58:56.696Z",
+  "createdAt": "2026-09-30T23:02:15.460Z",
   "notTestable": [
     {
       "rule": "partial_state_read",

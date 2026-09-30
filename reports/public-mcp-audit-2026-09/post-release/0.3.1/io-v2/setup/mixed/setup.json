@@ -2,90 +2,90 @@
   "project": "mixed",
   "spec": "specs/io2-mixed.template.json",
   "exit": 0,
-  "productCommit": "ba9bd6089c676ab3d668adc052a55ccc69fedc37",
+  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
   "predictedSuiteShape": [
     "happy_path"
   ],
   "predictedSetup": null,
   "callsDuringSetup": [
     {
-      "at": 1790809136.6346405,
+      "at": 1790809335.4030168,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6358628,
+      "at": 1790809335.4042892,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.639746,
+      "at": 1790809335.4080436,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6403913,
+      "at": 1790809335.408614,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.644701,
+      "at": 1790809335.4112506,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.645341,
+      "at": 1790809335.4118216,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6456776,
+      "at": 1790809335.4121804,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.646222,
+      "at": 1790809335.4127226,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6465073,
+      "at": 1790809335.4130304,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.649129,
+      "at": 1790809335.4153948,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6495042,
+      "at": 1790809335.4157658,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6497045,
+      "at": 1790809335.4159787,
       "server": "taskdesk2",
       "tool": "create_task",
       "args": {
@@ -93,77 +93,77 @@
       }
     },
     {
-      "at": 1790809136.6515172,
+      "at": 1790809335.4179835,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809136.6518092,
+      "at": 1790809335.4181933,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6548555,
+      "at": 1790809335.4203718,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809136.65539,
+      "at": 1790809335.420641,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6842883,
+      "at": 1790809335.445372,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809136.6847184,
+      "at": 1790809335.445833,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6883638,
+      "at": 1790809335.4491005,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809136.6887517,
+      "at": 1790809335.449492,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6894922,
+      "at": 1790809335.4502301,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 4
     },
     {
-      "at": 1790809136.6898365,
+      "at": 1790809335.4505708,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6903205,
+      "at": 1790809335.451147,
       "server": "taskdesk2",
       "tool": "create_task",
       "args": {
@@ -171,42 +171,42 @@
       }
     },
     {
-      "at": 1790809136.692273,
+      "at": 1790809335.4532819,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 5
     },
     {
-      "at": 1790809136.6924953,
+      "at": 1790809335.4536045,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6929631,
+      "at": 1790809335.4542367,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 5
     },
     {
-      "at": 1790809136.6931562,
+      "at": 1790809335.4544957,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
       "rows": 3
     },
     {
-      "at": 1790809136.6941097,
+      "at": 1790809335.4557002,
       "server": "taskdesk2-oracle",
       "tool": "query_tasks",
       "answered": true,
       "rows": 5
     },
     {
-      "at": 1790809136.6943283,
+      "at": 1790809335.4560673,
       "server": "taskdesk2-oracle",
       "tool": "query_notes",
       "answered": true,
@@ -215,7 +215,7 @@
   ],
   "errorTail": [],
   "summary": {
-    "projectId": "p_f432b9d810df",
+    "projectId": "p_d938caf3506c",
     "readsProblem": "A verifier read is nominated, so RigorRun reads the result only through the verifier. These reads go through the system's own connection and will be ignored: list_tasks. Verdicts stay labelled SELF_REPORTED while they are nominated; remove them to have verdicts labelled INDEPENDENT.",
     "readsIgnored": [
       "list_tasks"
@@ -241,7 +241,7 @@
     ]
   },
   "projectDirs": [
-    "p_f432b9d810df"
+    "p_d938caf3506c"
   ],
   "suiteShape": [
     "happy_path"

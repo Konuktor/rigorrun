@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "trace_p_be5d4420e98e",
+  "id": "trace_p_cb983a1f3477",
   "name": "Create exactly one task titled Quarterly report; change nothing else.",
-  "environmentId": "p_be5d4420e98e",
+  "environmentId": "p_cb983a1f3477",
   "recordedAt": "1970-01-01T00:00:00.000Z",
   "durationMs": 10,
   "actor": {

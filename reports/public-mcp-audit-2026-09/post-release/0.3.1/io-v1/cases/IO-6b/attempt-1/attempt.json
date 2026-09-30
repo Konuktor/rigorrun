@@ -1,8 +1,8 @@
 {
   "case": "IO-6b",
   "attempt": 1,
-  "productCommit": "ba9bd6089c676ab3d668adc052a55ccc69fedc37",
-  "seconds": 0.47,
+  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
+  "seconds": 0.44,
   "initialState": {
     "exists": true,
     "oracle": "sqlite-ro",

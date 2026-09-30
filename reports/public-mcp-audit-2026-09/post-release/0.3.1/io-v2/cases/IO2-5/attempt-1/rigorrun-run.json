@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_6bb845a8f397",
-  "benchmarkId": "bm_ec_p_1e9893b333c8",
+  "runId": "run_6137077e6b1d",
+  "benchmarkId": "bm_ec_p_99f28162999b",
   "benchmarkName": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else. \u2014 private benchmark",
-  "benchmarkHash": "sha256:4408c41c9a71dfdd7d543afe08ea0c35a31e6163a665b1ef9a3e25ee67ad0f36",
-  "contractHash": "sha256:466a7ffc35ec428225ff2d9b0a4188a5801a4597cfb25542a65a6c35675e4457",
-  "environment": "p_1e9893b333c8",
-  "startedAt": "2026-09-30T22:59:07.067Z",
-  "finishedAt": "2026-09-30T22:59:07.225Z",
+  "benchmarkHash": "sha256:a3a25354e7dcd26dc1b6020c328bf305363120a3401f66b7b4be041ac6726f4f",
+  "contractHash": "sha256:95492d55c227f15221f2976b6a1cfd0941b5734de0e7ed912c32b630429121a5",
+  "environment": "p_99f28162999b",
+  "startedAt": "2026-09-30T23:02:25.824Z",
+  "finishedAt": "2026-09-30T23:02:25.960Z",
   "agents": [
     {
-      "id": "a_126ff2b9",
+      "id": "a_7f9fe23f",
       "name": "io2-replace-correct",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_6bb845a8f397",
+      "runId": "run_6137077e6b1d",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_126ff2b9",
-      "correlationId": "run_6bb845a8f397.a_126ff2b9.case_live__happy_path",
-      "startedAt": "2026-09-30T22:59:07.068Z",
+      "agentId": "a_7f9fe23f",
+      "correlationId": "run_6137077e6b1d.a_7f9fe23f.case_live__happy_path",
+      "startedAt": "2026-09-30T23:02:25.825Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T22:59:07.157Z",
-      "durationMs": 89.678,
+      "finishedAt": "2026-09-30T23:02:25.901Z",
+      "durationMs": 75.833,
       "steps": [
         {
           "index": 0,
-          "at": 1790809147147,
+          "at": 1790809345892,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809147152,
+          "at": 1790809345896,
           "tool": "delete_task",
           "args": {
             "id": 3
@@ -74,7 +74,7 @@
         },
         {
           "index": 2,
-          "at": 1790809147156,
+          "at": 1790809345900,
           "tool": "create_task",
           "args": {
             "title": "Quarterly report"
@@ -276,7 +276,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_126ff2b9",
+      "agentId": "a_7f9fe23f",
       "agentName": "io2-replace-correct",
       "n": 1,
       "taskSuccessRate": 1,
@@ -303,9 +303,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 0,
       "inconclusive": false,
-      "avgLatencyMs": 89.678,
-      "medianLatencyMs": 89.678,
-      "p95LatencyMs": 89.678,
+      "avgLatencyMs": 75.833,
+      "medianLatencyMs": 75.833,
+      "p95LatencyMs": 75.833,
       "avgSteps": 3,
       "passAtK": {
         "pass@1": 1
@@ -317,7 +317,7 @@
     }
   ],
   "verdict": {
-    "winnerAgentId": "a_126ff2b9",
+    "winnerAgentId": "a_7f9fe23f",
     "outcome": "PASS",
     "summary": "io2-replace-correct wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 decided cases.",
     "rationale": [
@@ -376,6 +376,6 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:c961fd6392112354271b065ae281d285b644202e427af9980cda426b4e2a16e1",
+  "resultHash": "sha256:b8ade2f71e79fb0e98dc7a39e0b6cd4820a1cfe9144e1b35d56ff087bebec85d",
   "rigorrunVersion": "0.1.0"
 }

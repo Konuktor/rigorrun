@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "trace_p_6c9fafd98dc3",
+  "id": "trace_p_3a05d1e4001e",
   "name": "Create exactly one task titled Quarterly report; change nothing else.",
-  "environmentId": "p_6c9fafd98dc3",
+  "environmentId": "p_3a05d1e4001e",
   "recordedAt": "1970-01-01T00:00:00.000Z",
-  "durationMs": 12,
+  "durationMs": 9,
   "actor": {
     "id": "operator",
     "kind": "human",
@@ -102,7 +102,7 @@
     {
       "id": "step_001",
       "ordinal": 0,
-      "at": 12,
+      "at": 9,
       "kind": "action",
       "action": {
         "name": "create_task",

@@ -2,80 +2,80 @@
   "project": "selfread",
   "spec": "specs/io2-selfread.template.json",
   "exit": 0,
-  "productCommit": "ba9bd6089c676ab3d668adc052a55ccc69fedc37",
+  "productCommit": "5eb0ee1aa27ff95be9772c1d332c8909f387ac8c",
   "predictedSuiteShape": [
     "happy_path"
   ],
   "predictedSetup": null,
   "callsDuringSetup": [
     {
-      "at": 1790809135.9547408,
+      "at": 1790809334.7715716,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9561799,
+      "at": 1790809334.77294,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809135.961459,
+      "at": 1790809334.778081,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9618962,
+      "at": 1790809334.7786012,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809135.9644432,
+      "at": 1790809334.7818768,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9650657,
+      "at": 1790809334.782351,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809135.9656765,
+      "at": 1790809334.7827282,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9662297,
+      "at": 1790809334.7831063,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9665096,
+      "at": 1790809334.7834375,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809135.96953,
+      "at": 1790809334.7863128,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9699104,
+      "at": 1790809334.7866716,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809135.9702172,
+      "at": 1790809334.786968,
       "server": "taskdesk2",
       "tool": "create_task",
       "args": {
@@ -83,67 +83,67 @@
       }
     },
     {
-      "at": 1790809135.9720323,
+      "at": 1790809334.78869,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.9723752,
+      "at": 1790809334.7889369,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809135.9748359,
+      "at": 1790809334.7915347,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809135.975098,
+      "at": 1790809334.7918892,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809136.004361,
+      "at": 1790809334.8184493,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.0050774,
+      "at": 1790809334.818952,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809136.0104978,
+      "at": 1790809334.8227317,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.011158,
+      "at": 1790809334.823151,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809136.0128016,
+      "at": 1790809334.8239934,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.013627,
+      "at": 1790809334.8243878,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809136.015068,
+      "at": 1790809334.8250706,
       "server": "taskdesk2",
       "tool": "create_task",
       "args": {
@@ -151,37 +151,37 @@
       }
     },
     {
-      "at": 1790809136.0186152,
+      "at": 1790809334.8270912,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.019778,
+      "at": 1790809334.8274019,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809136.0214365,
+      "at": 1790809334.8280675,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.0223148,
+      "at": 1790809334.8284414,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
     },
     {
-      "at": 1790809136.025133,
+      "at": 1790809334.8296754,
       "server": "taskdesk2",
       "tool": "list_tasks",
       "args": {}
     },
     {
-      "at": 1790809136.0258358,
+      "at": 1790809334.8300185,
       "server": "taskdesk2",
       "tool": "list_notes",
       "args": {}
@@ -189,7 +189,7 @@
   ],
   "errorTail": [],
   "summary": {
-    "projectId": "p_ef340d9d94ad",
+    "projectId": "p_f1803487b839",
     "readsProblem": "",
     "readsIgnored": [],
     "tools": 8,
@@ -218,7 +218,7 @@
     ]
   },
   "projectDirs": [
-    "p_ef340d9d94ad"
+    "p_f1803487b839"
   ],
   "suiteShape": [
     "happy_path"

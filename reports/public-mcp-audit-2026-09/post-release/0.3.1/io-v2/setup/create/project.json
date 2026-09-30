@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "p_6c9fafd98dc3",
+  "id": "p_3a05d1e4001e",
   "name": "taskdesk2: create one task, verified independently over tasks and notes",
   "goal": "Create exactly one task titled Quarterly report; change nothing else.",
   "connector": {
@@ -126,9 +126,9 @@
   ],
   "agents": [
     {
-      "id": "a_5ebe8c34",
+      "id": "a_413aa924",
       "name": "io2-create-correct",
-      "lastProbeAt": "2026-09-30T22:58:54.061Z",
+      "lastProbeAt": "2026-09-30T23:02:12.945Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -139,10 +139,10 @@
         "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/create"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
-      "confirmedByOperatorAt": "2026-09-30T22:58:54.061Z"
+      "confirmedByOperatorAt": "2026-09-30T23:02:12.945Z"
     },
     {
-      "id": "a_213d56ac",
+      "id": "a_53dc1f6f",
       "name": "io2-create-extra-note-edit",
       "kind": "process",
       "command": "/usr/bin/python3",
@@ -152,19 +152,19 @@
         "{REPO}/tmp/rigorrun-audit/rq-io2-state/traces/create"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/rq-io2-state",
-      "confirmedByOperatorAt": "2026-09-30T22:58:54.099Z",
-      "lastProbeAt": "2026-09-30T22:58:54.099Z",
+      "confirmedByOperatorAt": "2026-09-30T23:02:12.984Z",
+      "lastProbeAt": "2026-09-30T23:02:12.984Z",
       "lastProbeOk": true,
       "lastProbeProblem": ""
     }
   ],
   "runs": [],
   "timings": {
-    "createdAt": "2026-09-30T22:58:53.901Z",
-    "environmentConnectedAt": "2026-09-30T22:58:53.990Z",
-    "workflowRecordedAt": "2026-09-30T22:58:54.030Z",
-    "benchmarkGeneratedAt": "2026-09-30T22:58:54.060Z",
-    "agentConnectedAt": "2026-09-30T22:58:54.096Z",
+    "createdAt": "2026-09-30T23:02:12.797Z",
+    "environmentConnectedAt": "2026-09-30T23:02:12.882Z",
+    "workflowRecordedAt": "2026-09-30T23:02:12.912Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:02:12.943Z",
+    "agentConnectedAt": "2026-09-30T23:02:12.980Z",
     "firstVerdictAt": null
   },
   "baselineRunId": null,
