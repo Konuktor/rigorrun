@@ -38,6 +38,9 @@ export interface LlmAgentConfig {
   provider: LlmProvider;
 }
 
+/** The report written for a model that used every step without giving one. */
+export const STEP_BUDGET_REPORT = 'The model ran out of its step budget before reporting a result.';
+
 export function createLlmAgent(config: LlmAgentConfig): AgentAdapter {
   return {
     id: config.id,
@@ -139,7 +142,7 @@ export function createLlmAgent(config: LlmAgentConfig): AgentAdapter {
       }
 
       return {
-        report: 'The model ran out of its step budget before reporting a result.',
+        report: STEP_BUDGET_REPORT,
         usage: usage.promptTokens > 0 ? usage : null,
         costUsd: null,
         costNote,

@@ -12,8 +12,12 @@
  * shown, so an edited fixture cannot pass itself off as a measurement.
  */
 import { createHash } from 'node:crypto';
-import { caseOutcome, type RunResult } from '@rigorrun/core';
+import { caseOutcome, type CaseResult, type RunResult } from '@rigorrun/core';
+import { STEP_BUDGET_REPORT } from '@rigorrun/agents';
 import { explainCase } from '@rigorrun/report';
+// Bundled into the published CLI by esbuild, so the default demo needs no file,
+// no network and no model at the other end.
+import recorded from '../../../fixtures/replays/demo-replay.json' with { type: 'json' };
 import { CliError } from './io.ts';
 import { c, heading, line } from './ui.ts';
 
@@ -34,6 +38,11 @@ export interface Replay {
   run: RunResult;
 }
 
+/** The recording `rigorrun demo` replays. */
+export function bundledReplay(): Replay {
+  return recorded as unknown as Replay;
+}
+
 export function hashRun(run: RunResult): string {
   return createHash('sha256').update(JSON.stringify(run)).digest('hex');
 }
@@ -46,13 +55,14 @@ export function verifyReplay(replay: Replay): void {
 }
 
 /** The replay, as a person reads it: which cases, and the agent's words beside what the system showed. */
-export function printReplay(replay: Replay, options: { show?: number } = {}): void {
+export function printReplay(replay: Replay, options: { show?: number; list?: number } = {}): void {
   verifyReplay(replay);
   const run = replay.run;
   const agentId = run.agents[0]?.id;
   const cases = run.caseResults.filter((entry) => entry.agentId === agentId);
   const outcomes = cases.map((entry) => caseOutcome(entry));
   const count = (outcome: string) => outcomes.filter((value) => value === outcome).length;
+  const unsafe = cases.reduce((sum, entry) => sum + entry.unsafeActions, 0);
 
   heading('RigorRun — a recorded run, replayed');
   line(c.grey(`${replay.model} (${replay.provider}) against ${replay.system}, recorded ${replay.recordedAt.slice(0, 10)} at ${replay.commit.slice(0, 7)}.`));
@@ -60,25 +70,69 @@ export function printReplay(replay: Replay, options: { show?: number } = {}): vo
   line();
   line(
     `${cases.length} cases   ${c.green(`${count('PASS')} passed`)}   ${c.red(`${count('FAIL')} failed`)}` +
-      (count('ABSTAIN') ? `   ${c.yellow(`${count('ABSTAIN')} undecided`)}` : ''),
+      (count('ABSTAIN') ? `   ${c.yellow(`${count('ABSTAIN')} undecided`)}` : '') +
+      (unsafe ? `   ${c.red(`${unsafe} unsafe actions`)}` : ''),
   );
 
-  // The failures a reader should see first: unsafe ones, then the rest, each
-  // with the agent's own words beside what the system showed afterwards.
-  const failed = cases
-    .filter((entry) => caseOutcome(entry) === 'FAIL')
-    .sort((a, b) => b.unsafeActions - a.unsafeActions);
-  for (const entry of failed.slice(0, options.show ?? 3)) {
+  // In full, the cases where the agent gave its own account of what it did:
+  // the distance between that account and the system is the point. The worst
+  // of each kind, so three are three different ways of going wrong.
+  const failed = cases.filter((entry) => caseOutcome(entry) === 'FAIL');
+  const ordered = worstOfEachKind(failed);
+  const inFull = ordered.filter(ownAccount).slice(0, options.show ?? 3);
+  for (const entry of inFull) {
     const explained = explainCase(entry);
     line();
     line(`${c.red('FAIL')}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`);
-    line(`  ${c.grey('agent said  ')}  ${explained.claim.split('\n')[0]!.slice(0, 200)}`);
-    for (const [index, seen] of explained.saw.entries()) {
+    line(`  ${c.grey('agent said  ')}  ${clip(explained.claim.split('\n')[0]!, 220)}`);
+    for (const [index, seen] of explained.saw.slice(0, SAW_LINES).entries()) {
       line(`  ${c.grey(index === 0 ? 'RigorRun saw' : '            ')}  ${seen}`);
     }
+    if (explained.saw.length > SAW_LINES) line(`  ${' '.repeat(12)}  ${c.grey(`and ${explained.saw.length - SAW_LINES} more`)}`);
   }
+
+  // The rest, a line each: the first thing that went wrong, as the check put it.
+  const rest = failed.filter((entry) => !inFull.includes(entry));
+  const listed = rest.slice(0, options.list ?? 10);
+  if (listed.length > 0) {
+    line();
+    line(c.bold('The other failures'));
+    for (const entry of listed) {
+      const failing = entry.assertions.filter((a) => a.status === 'FAIL' || a.status === 'ERROR');
+      const first = failing.find((a) => a.unsafe) ?? failing[0];
+      line(`  ${c.red('x')} ${entry.caseName}${first ? c.grey(`  ${clip(first.message, 110)}`) : ''}`);
+    }
+  }
+  if (rest.length > listed.length) line(c.grey(`  and ${rest.length - listed.length} more.`));
   line();
+  line(c.grey('`rigorrun demo --report demo.html` writes every case, with its evidence, to one page.'));
   line(c.grey(`Verification ${run.verification}. The agent's words are shown beside the evidence and never scored.`));
   line();
   line(`${c.bold('Your own agent')}  npx rigorrun   — connect a system, show it the job once, send your agent the work.`);
+}
+
+const SAW_LINES = 2;
+
+/**
+ * Whether the report is the agent's own. An LLM agent that runs out of steps
+ * has its report written for it by the adapter, and that sentence is not a
+ * claim anybody made about the work.
+ */
+function ownAccount(entry: CaseResult): boolean {
+  const report = entry.agentReport.trim();
+  return report.length > 0 && report !== STEP_BUDGET_REPORT;
+}
+
+function clip(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
+}
+
+function worstOfEachKind(failed: readonly CaseResult[]): CaseResult[] {
+  const byUnsafe = [...failed].sort((a, b) => b.unsafeActions - a.unsafeActions);
+  const seen = new Set<string>();
+  return byUnsafe.filter((entry) => {
+    if (seen.has(entry.category)) return false;
+    seen.add(entry.category);
+    return true;
+  });
 }

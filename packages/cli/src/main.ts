@@ -103,6 +103,8 @@ async function dispatch(argv: string[]): Promise<number> {
         // A gate on the reference implementation passes by construction. It
         // stays reachable for "is this suite satisfiable at all", by name.
         'allow-reference': { type: 'boolean', default: false },
+        // demo only: run the pipeline now rather than replay the recorded run.
+        live: { type: 'boolean', default: false },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
@@ -145,6 +147,7 @@ async function dispatch(argv: string[]): Promise<number> {
   const flags: Flags = {
     out: values.out,
     workflow: values.workflow,
+    live: values.live ?? false,
     agent: values.agent ?? [],
     repeats: numberFlag(values.repeats, 'repeats'),
     report: values.report,

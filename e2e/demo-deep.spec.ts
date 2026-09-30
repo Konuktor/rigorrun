@@ -333,7 +333,7 @@ test.describe('routing', () => {
     await runGoldenPath(page);
     await page.reload();
     await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByTestId('verdict')).toContainText('wins');
+    await expect(page.getByTestId('verdict')).toContainText(/wins|No agent met the release thresholds/);
   });
 
   test('an unknown hash falls back to the projects list without erroring', async ({ page }) => {

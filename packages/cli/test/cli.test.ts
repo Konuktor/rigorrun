@@ -84,9 +84,29 @@ describe('help and version', () => {
   });
 });
 
+describe('the default demo', () => {
+  it('replays the bundled recording offline, and says where it came from', async () => {
+    const { code, out } = await cli('demo');
+    expect(code).toBe(0);
+    expect(out).toContain('a recorded run, replayed');
+    expect(out).toMatch(/recorded \d{4}-\d{2}-\d{2} at [0-9a-f]{7}/);
+    expect(out).toContain('agent said');
+    expect(out).toContain('RigorRun saw');
+    // The headline is never the reference implementation.
+    expect(out).not.toContain('wins');
+  });
+
+  it('writes every case of the recording to one page when asked', async () => {
+    const { code } = await cli('demo', '--report', 'demo.html');
+    expect(code).toBe(0);
+    const html = await readFile(join(workDir, 'demo.html'), 'utf8');
+    expect(html).toContain('<!doctype html>');
+  });
+});
+
 describe('the full pipeline through the CLI', () => {
   it('runs the demo and writes every artefact', async () => {
-    const { code, out } = await cli('demo', '--quiet');
+    const { code, out } = await cli('demo', '--live', '--quiet');
     expect(code).toBe(0);
     expect(out).toContain('Head to head');
     expect(out).toContain('Time from "start recording"');
@@ -210,7 +230,7 @@ describe('reports', () => {
     const runs = JSON.parse(await readFile(join(workDir, 'benchmark.json'), 'utf8'));
     expect(runs).toBeTruthy();
 
-    const { out } = await cli('demo', '--quiet');
+    const { out } = await cli('demo', '--live', '--quiet');
     const runId = /runs\/(run_[a-z0-9]+)\.json/.exec(out)?.[1];
     expect(runId).toBeDefined();
 

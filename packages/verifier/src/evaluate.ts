@@ -17,6 +17,7 @@ import type {
 import { failureSeverityOf, isBlocking, verificationSourceOf } from '@rigorrun/core';
 import { stateFrame } from './frame.ts';
 import { resolvePath } from './path.ts';
+import { countOf, oneOf, plainTarget } from './plain.ts';
 
 interface Outcome {
   status: AssertionStatus;
@@ -156,10 +157,19 @@ function existence(
   return {
     status: present === wantPresent ? 'PASS' : 'FAIL',
     observed: summarise(resolution.value),
-    message: present
-      ? `${target} is present${wantPresent ? '' : ' but must not be'}`
-      : `${target} is absent${wantPresent ? ' but was required' : ''}`,
+    message: existenceMessage(target, present, wantPresent),
   };
+}
+
+function existenceMessage(target: string, present: boolean, wantPresent: boolean): string {
+  const plain = plainTarget(target);
+  if (plain?.kind === 'records') {
+    if (present === wantPresent) return `${oneOf(plain)} ${present ? 'exists' : 'does not exist'}, as required`;
+    return present ? `${oneOf(plain)} exists; there must be none` : `no ${oneOf(plain).slice(2)}; one was required`;
+  }
+  return present
+    ? `${target} is present${wantPresent ? '' : ' but must not be'}`
+    : `${target} is absent${wantPresent ? ' but was required' : ''}`;
 }
 
 function equality(target: string, expected: unknown, observation: Observation): Outcome {
@@ -170,8 +180,24 @@ function equality(target: string, expected: unknown, observation: Observation): 
     observed: summarise(resolution.value),
     message: equal
       ? `${target} equals the expected value`
-      : `${target} was ${JSON.stringify(summarise(resolution.value))}, expected ${JSON.stringify(expected)}`,
+      : (plainInequality(target, resolution.value, expected) ??
+        `${target} was ${JSON.stringify(summarise(resolution.value))}, expected ${JSON.stringify(expected)}`),
   };
+}
+
+/** A failed equality on a count, an action or an order, in words; undefined for anything else. */
+function plainInequality(target: string, actual: unknown, expected: unknown): string | undefined {
+  const plain = plainTarget(target);
+  if (plain?.kind === 'records' && plain.counted && typeof actual === 'number') {
+    return `${countOf(plain, actual)}; expected ${String(expected)}`;
+  }
+  if (plain?.kind === 'occurred' && typeof expected === 'boolean') {
+    return expected ? `"${plain.action}" did not happen; it should have` : `"${plain.action}" happened; it should not have`;
+  }
+  if (plain?.kind === 'order' && expected === true) {
+    return `"${plain.first}" did not happen before "${plain.second}"`;
+  }
+  return undefined;
 }
 
 function numericCompare(
@@ -198,10 +224,14 @@ function numericCompare(
   }
   const pass = kind === 'numeric_lte' ? actual <= expected : actual >= expected;
   const symbol = kind === 'numeric_lte' ? '<=' : '>=';
+  const plain = plainTarget(target);
   return {
     status: pass ? 'PASS' : 'FAIL',
     observed: actual,
-    message: `${target} = ${actual}, required ${symbol} ${expected}`,
+    message:
+      plain?.kind === 'records' && plain.counted
+        ? `${countOf(plain, actual)}; ${kind === 'numeric_lte' ? `at most ${expected} allowed` : `at least ${expected} required`}`
+        : `${target} = ${actual}, required ${symbol} ${expected}`,
   };
 }
 

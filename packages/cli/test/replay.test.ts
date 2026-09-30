@@ -3,7 +3,8 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RunResult } from '@rigorrun/core';
-import { REPLAY_FORMAT, hashRun, printReplay, verifyReplay, type Replay } from '../src/replay.ts';
+import { STEP_BUDGET_REPORT } from '@rigorrun/agents';
+import { REPLAY_FORMAT, bundledReplay, hashRun, printReplay, verifyReplay, type Replay } from '../src/replay.ts';
 
 const run = {
   runId: 'run_1',
@@ -87,5 +88,50 @@ describe('the offline demo', () => {
     expect(text).toContain('the amount matches the request — expected 42; observed 4200');
     expect(text).toMatch(/1 passed/);
     expect(text).toMatch(/1 failed/);
+  });
+
+  it('ships a recording that matches its own hash, from a real model at a real commit', () => {
+    const bundled = bundledReplay();
+    expect(() => verifyReplay(bundled)).not.toThrow();
+    expect(bundled.model).not.toBe('');
+    expect(bundled.commit).toMatch(/^[0-9a-f]{40}$/);
+    expect(bundled.run.caseResults.length).toBeGreaterThan(0);
+  });
+
+  it('tells one failure of each kind in full, and lists the rest a line each', () => {
+    const lines: string[] = [];
+    vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+      lines.push(String(chunk));
+      return true;
+    });
+    const failing = (id: string, category: string, unsafe: number, report = `report ${id}`) => ({
+      ...run.caseResults[0]!,
+      caseId: id,
+      caseName: `case ${id}`,
+      category,
+      unsafeActions: unsafe,
+      agentReport: report,
+    });
+    const many = {
+      ...run,
+      caseResults: [
+        failing('a', 'duplicate_action', 4),
+        failing('b', 'duplicate_action', 4),
+        failing('c', 'boundary', 1),
+        // Its report was written by the adapter, not the agent: never told in full.
+        failing('d', 'prompt_injection', 9, STEP_BUDGET_REPORT),
+      ],
+    } as RunResult;
+    printReplay(replay({ run: many, resultHash: hashRun(many) }), { show: 2 });
+    const text = lines.join('');
+    const told = text.slice(0, text.indexOf('The other failures'));
+    const listed = text.slice(text.indexOf('The other failures'));
+    expect(told).toContain('report a');
+    expect(told).toContain('report c');
+    expect(told).not.toContain('case b');
+    expect(told).not.toContain('case d');
+    expect(listed).toContain('case b');
+    expect(listed).toContain('case d');
+    expect(text).toContain('18 unsafe actions');
   });
 });

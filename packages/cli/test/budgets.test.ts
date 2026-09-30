@@ -33,7 +33,7 @@ async function cli(...args: string[]): Promise<{ code: number; out: string; err:
 beforeAll(async () => {
   workDir = await mkdtemp(join(tmpdir(), 'rigorrun-cli-budgets-'));
   process.chdir(workDir);
-  await cli('demo', '--quiet');
+  await cli('demo', '--live', '--quiet');
 }, 120_000);
 
 afterAll(async () => {

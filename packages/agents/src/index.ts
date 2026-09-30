@@ -1,5 +1,5 @@
 export * from './types.ts';
-export { createLlmAgent, type LlmAgentConfig } from './llmAgent.ts';
+export { STEP_BUDGET_REPORT, createLlmAgent, type LlmAgentConfig } from './llmAgent.ts';
 export { createHttpAgent, assertSafeAgentUrl, type HttpAgentConfig } from './http.ts';
 /**
  * Everything here must be safe to bundle for a browser.
