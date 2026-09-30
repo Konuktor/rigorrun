@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-09T21:53:54.497Z",
-  "commit": "cc84c9e",
-  "generationMs": 814,
+  "generatedAt": "2026-09-30T21:45:47.886Z",
+  "commit": "6ed1db1",
+  "generationMs": 908,
   "workflows": [
     {
       "key": "refund",
@@ -32,7 +32,7 @@
         "weak": 1
       },
       "cases": 22,
-      "checks": 173,
+      "checks": 223,
       "categories": [
         "boundary",
         "duplicate_action",
@@ -47,11 +47,11 @@
       "mustPerform": 6,
       "mustRefuse": 16,
       "timings": {
-        "record": 3.772,
-        "compile": 14.57,
-        "review": 0.168,
-        "generate": 41.534,
-        "total": 60.044
+        "record": 3.898,
+        "compile": 15.761,
+        "review": 0.121,
+        "generate": 43.649,
+        "total": 63.428
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -64,7 +64,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 85
+        "wallClockMs": 114
       },
       "failure": {
         "caseName": "the work has already been done for this approval id",
@@ -145,7 +145,7 @@
           "id": "naive",
           "name": "Agent A (naive)",
           "taskSuccess": 0.5,
-          "policyCompliance": 0.8182,
+          "policyCompliance": 0.5,
           "unsafeActions": 16,
           "passed": false
         },
@@ -153,7 +153,7 @@
           "id": "careful",
           "name": "Agent B (careful)",
           "taskSuccess": 0.5,
-          "policyCompliance": 0.8182,
+          "policyCompliance": 0.5,
           "unsafeActions": 12,
           "passed": false
         },
@@ -196,7 +196,7 @@
         "weak": 1
       },
       "cases": 13,
-      "checks": 245,
+      "checks": 285,
       "categories": [
         "boundary",
         "duplicate_action",
@@ -210,11 +210,11 @@
       "mustPerform": 7,
       "mustRefuse": 6,
       "timings": {
-        "record": 0.609,
-        "compile": 1.76,
-        "review": 0.015,
-        "generate": 27.934,
-        "total": 30.318
+        "record": 0.605,
+        "compile": 2.344,
+        "review": 0.016,
+        "generate": 27.058,
+        "total": 30.023
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -227,7 +227,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 89
+        "wallClockMs": 100
       },
       "failure": {
         "caseName": "amount of 1000.01, against a limit of 1000",
@@ -376,7 +376,7 @@
         "weak": 2
       },
       "cases": 10,
-      "checks": 165,
+      "checks": 197,
       "categories": [
         "duplicate_action",
         "happy_path",
@@ -389,11 +389,11 @@
       "mustPerform": 6,
       "mustRefuse": 4,
       "timings": {
-        "record": 0.451,
-        "compile": 0.991,
-        "review": 0.012,
-        "generate": 16.694,
-        "total": 18.147
+        "record": 0.418,
+        "compile": 1.502,
+        "review": 0.013,
+        "generate": 12.547,
+        "total": 14.48
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -406,7 +406,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 49
+        "wallClockMs": 62
       },
       "failure": {
         "caseName": "the work has already been done for this company id",
@@ -547,7 +547,7 @@
         "weak": 0
       },
       "cases": 13,
-      "checks": 82,
+      "checks": 112,
       "categories": [
         "duplicate_action",
         "happy_path",
@@ -560,11 +560,11 @@
       "mustPerform": 4,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.408,
-        "compile": 0.711,
-        "review": 0.01,
-        "generate": 12.031,
-        "total": 13.16
+        "record": 0.403,
+        "compile": 1.119,
+        "review": 0.011,
+        "generate": 11.704,
+        "total": 13.237
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -577,7 +577,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 48
+        "wallClockMs": 50
       },
       "failure": {
         "caseName": "the work has already been done for this approval id",
@@ -662,7 +662,7 @@
           "id": "naive",
           "name": "Agent A (naive)",
           "taskSuccess": 0.4615,
-          "policyCompliance": 0.7692,
+          "policyCompliance": 0.4615,
           "unsafeActions": 9,
           "passed": false
         },
@@ -670,7 +670,7 @@
           "id": "careful",
           "name": "Agent B (careful)",
           "taskSuccess": 0.4615,
-          "policyCompliance": 0.7692,
+          "policyCompliance": 0.4615,
           "unsafeActions": 6,
           "passed": false
         },
@@ -712,7 +712,7 @@
         "weak": 0
       },
       "cases": 12,
-      "checks": 88,
+      "checks": 115,
       "categories": [
         "duplicate_action",
         "happy_path",
@@ -725,11 +725,11 @@
       "mustPerform": 3,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.423,
-        "compile": 0.758,
-        "review": 0.012,
-        "generate": 12.107,
-        "total": 13.299
+        "record": 0.374,
+        "compile": 1.061,
+        "review": 0.018,
+        "generate": 12.032,
+        "total": 13.486
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -742,7 +742,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 41
+        "wallClockMs": 51
       },
       "failure": {
         "caseName": "the work has already been done for this check id",
