@@ -97,3 +97,24 @@ describe('a verdict built on it', () => {
     expect(summary.blockingUnverifiable).toBe(1);
   });
 });
+
+describe('a field the job leaves set, with a value somebody typed', () => {
+  const populated = () =>
+    change({ seed: 'derived.seed.Line[label="(none)"]', field: 'approver', from: null, compare: 'populated' });
+  const row = (approver: unknown): Row => ({ label: '(none)', approver });
+
+  it('passes whatever value it was set to, because the value was never the system’s to decide', () => {
+    expect(evaluateAssertion(populated(), observation([row(null)], [row('Duty manager')])).status).toBe('PASS');
+  });
+
+  it('fails when it was left unset — the sign-off nobody recorded', () => {
+    const result = evaluateAssertion(populated(), observation([row(null)], [row(null)]));
+    expect(result.status).toBe('FAIL');
+    expect(result.message).toMatch(/left unset/);
+    expect(evaluateAssertion(populated(), observation([row(null)], [row('  ')])).status).toBe('FAIL');
+  });
+
+  it('passes a case that started with it already set and kept it', () => {
+    expect(evaluateAssertion(populated(), observation([row('Earlier')], [row('Earlier')])).status).toBe('PASS');
+  });
+});

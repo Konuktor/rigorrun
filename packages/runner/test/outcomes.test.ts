@@ -197,7 +197,13 @@ describe('what a score does with cases that reached no verdict', () => {
     clearEnvironments();
     const { registerEnvironment } = await import('@rigorrun/environment');
     registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), caps: { stateRead: 'none' } }));
-    const result = await runBenchmark(benchmark, [CORRECT]);
+    // A declined case is decided from the call log when the agent performs the
+    // job anyway, whatever can be read; these are the cases only state decides.
+    const stateOnly = {
+      ...benchmark,
+      cases: benchmark.cases.filter((entry) => !entry.checks.some((check) => check.id === 'success__declined')),
+    };
+    const result = await runBenchmark(stateOnly, [CORRECT]);
     const score = result.scores[0]!;
     expect(score.abstained).toBe(result.caseResults.length);
     expect(score.decided).toBe(0);
@@ -207,6 +213,20 @@ describe('what a score does with cases that reached no verdict', () => {
     expect(score.failedThresholds.join(' ')).toMatch(/reached no verdict/);
     expect(result.verdict.outcome).toBe('INCONCLUSIVE');
     expect(result.verdict.winnerAgentId).toBeNull();
+  });
+
+  it('decides a declined case from the call log when the agent did the job anyway, even with nothing readable', async () => {
+    const { benchmark } = await liveBenchmark(liveRegistration({ resetTo: world(CLEAN_ROWS) }));
+    clearEnvironments();
+    const { registerEnvironment } = await import('@rigorrun/environment');
+    registerEnvironment(liveRegistration({ resetTo: world(CLEAN_ROWS), caps: { stateRead: 'none' } }));
+    const declined = { ...benchmark, cases: benchmark.cases.filter((entry) => entry.checks.some((check) => check.id === 'success__declined')) };
+    expect(declined.cases.length).toBeGreaterThan(0);
+    const result = await runBenchmark(declined, [CORRECT]);
+    for (const entry of result.caseResults) {
+      expect(entry.outcome, entry.caseName).toBe('FAIL');
+      expect(entry.assertions.find((a) => a.assertionId === 'success__declined__action_not_performed')?.status).toBe('FAIL');
+    }
   });
 
   it('still fails an agent that got a decided case wrong', async () => {

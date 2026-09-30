@@ -67,7 +67,7 @@ describe('a production system', () => {
     const environment = new SystemEnvironment(connection, SCHEMA, config('production'));
     const result = await environment.executeAction('write_item', { label: 'x' });
     expect(result.ok).toBe(false);
-    expect(result.ok ? '' : result.error.code).toBe('WRITE_REFUSED');
+    expect(result.ok ? '' : result.error?.code).toBe('WRITE_REFUSED');
     expect(called).not.toContain('write_item');
   });
 

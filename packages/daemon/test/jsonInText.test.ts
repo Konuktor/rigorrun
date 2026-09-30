@@ -120,7 +120,14 @@ describe('JSON in a text block is data', () => {
     // The state was read back through the same normaliser, so the verdict
     // rests on records, not on an empty world.
     expect(Object.keys(happy!.finalStateSummary)).toContain('Booking');
-    expect(happy!.taskSuccess).toBe(true);
+    // Decided on those records, not abstained: the confirmation the agent made
+    // is seen. (This agent misreads the deposit from the text block and skips
+    // the sign-off, which the suite now fails it for — the point here is only
+    // that the records were read.)
+    expect(happy!.outcome).not.toBe('ABSTAIN');
+    expect(
+      happy!.assertions.find((a) => a.kind === 'state_change' && a.description.includes('bookingStatus'))?.status,
+    ).toBe('PASS');
     // Read back through the connection the agent used: not independent.
     expect(happy!.evidenceIndependence).toBe('SELF_REPORTED');
   }, 300_000);

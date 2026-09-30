@@ -210,3 +210,27 @@ describe('a run against a constrained environment', () => {
     expect(reasons).toEqual(expect.arrayContaining(['no_seed', 'no_reset']));
   });
 });
+
+describe('a black-box agent', () => {
+  const blackBoxAgent = {
+    id: 'bb',
+    name: 'Black box',
+    kind: 'blackbox' as const,
+    description: 'works on the system itself',
+    execute: async () => ({ report: 'Done.', usage: null, costUsd: null, costNote: 'n/a' }),
+  };
+
+  it('is refused on production, where RigorRun could not refuse any of its writes', async () => {
+    const { benchmark } = await benchmarkFor(claiming({ safety: 'staging' }));
+    clearEnvironments();
+    registerEnvironment(claiming({ safety: 'production' }));
+    await expect(runBenchmark(benchmark, [blackBoxAgent])).rejects.toThrow(/production/);
+  });
+
+  it('runs elsewhere, and says the run saw state only', async () => {
+    const { benchmark } = await benchmarkFor(claiming({}));
+    const result = await runBenchmark(benchmark, [blackBoxAgent]);
+    expect(result.limits.map((limit) => limit.id)).toContain('no_call_trace');
+    expect(result.caseResults.every((entry) => entry.observation === 'state-only')).toBe(true);
+  });
+});
