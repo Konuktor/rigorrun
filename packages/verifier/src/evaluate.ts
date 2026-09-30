@@ -160,12 +160,19 @@ function evaluateKind(
  * invisible. So nothing that rests on which of those records exist is checked.
  */
 function windowedMembership(target: string, observation: Observation): string | undefined {
-  const match = /^derived\.(?:created|deleted|all|changed)\.([A-Za-z_][\w]*)/.exec(target);
-  if (!match) return undefined;
   const windowed = resolvePath(observation, 'derived.windowed');
   if (!windowed.found || typeof windowed.value !== 'object' || windowed.value === null) return undefined;
-  const reason = (windowed.value as Record<string, unknown>)[match[1]!];
-  return typeof reason === 'string' ? reason : undefined;
+  const reasons = windowed.value as Record<string, unknown>;
+  const records = /^derived\.(?:created|deleted|all|changed|seed|count)\.([A-Za-z_][\w]*)/.exec(target);
+  // A reference between two kinds resolves only if its target was read: one
+  // outside the page looks dangling.
+  const refs = /^derived\.refs\.([\w]+)/.exec(target);
+  const kinds = records ? [records[1]!] : refs ? refs[1]!.split('__') : [];
+  for (const kind of kinds) {
+    const reason = reasons[kind];
+    if (typeof reason === 'string') return reason;
+  }
+  return undefined;
 }
 
 /** A value counts as present when it exists, is not null, and is not an empty list. */

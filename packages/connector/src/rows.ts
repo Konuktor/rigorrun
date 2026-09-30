@@ -163,7 +163,8 @@ function pageSignal(
       if (MORE_FLAGS.has(k) && entry === true) found = `${key} is true`;
       else if (NEXT_MARKERS.has(k) && (typeof entry === 'number' || (typeof entry === 'string' && entry !== '')))
         found = `${key} names a next page`;
-      else if (TOTALS.has(k) && typeof entry === 'number' && entry > rows)
+      // An integer only: a `total` of 1234.56 is an amount, not a count of records.
+      else if (TOTALS.has(k) && Number.isInteger(entry) && (entry as number) > rows)
         found = `${key} is ${entry}, and ${rows} came back`;
       if (found) return;
     }

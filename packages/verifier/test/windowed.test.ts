@@ -40,6 +40,14 @@ describe('a windowed kind of record', () => {
     );
   });
 
+  it('covers the starting rows, the counts and references into it', () => {
+    for (const target of ['derived.seed.Refund.length', 'derived.count.Refund.total', 'derived.refs.Refund__Order']) {
+      expect(evaluateAssertion(check({ kind: 'state_equals', target, expected: 1 }), world).status, target).toBe(
+        'UNVERIFIABLE',
+      );
+    }
+  });
+
   it('leaves other kinds of record, and what happened, to be checked as usual', () => {
     expect(evaluateAssertion(check({ kind: 'state_exists', target: 'derived.created.Note' }), world).status).toBe('PASS');
     expect(

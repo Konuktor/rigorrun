@@ -139,6 +139,10 @@ describe('a read that returned one page of a longer list', () => {
     ).toBeUndefined();
   });
 
+  it('does not read an amount as a count of records', () => {
+    expect(stateFromPayloads([{ rows: [row(1)], total: 1234.56 }], schema).windowed).toBeUndefined();
+  });
+
   it('never reads a record’s own fields as a page marker', () => {
     const ORDER: EntitySchema = {
       name: 'Order',
