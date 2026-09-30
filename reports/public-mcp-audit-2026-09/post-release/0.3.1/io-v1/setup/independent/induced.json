@@ -1,0 +1,116 @@
+{
+  "schema": {
+    "entities": [
+      {
+        "name": "Task",
+        "idField": "id",
+        "fields": [
+          {
+            "name": "id",
+            "type": "number",
+            "nullable": false,
+            "role": "identifier"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "nullable": false,
+            "role": "freetext"
+          },
+          {
+            "name": "status",
+            "type": "enum",
+            "nullable": false,
+            "role": "status",
+            "enumValues": [
+              "done",
+              "open"
+            ]
+          }
+        ],
+        "mutable": true,
+        "appendOnly": false
+      }
+    ],
+    "relationships": []
+  },
+  "questions": [
+    {
+      "id": "q_name_Task",
+      "kind": "entity_name",
+      "entity": "Task",
+      "text": "Is \"Task\" the right name for this kind of record?",
+      "evidence": "4 distinct record(s) seen, with fields: id, status, title.",
+      "proposed": "Task",
+      "options": [],
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_id_Task",
+      "kind": "id_field",
+      "entity": "Task",
+      "options": [
+        "id",
+        "title",
+        "status"
+      ],
+      "text": "Does \"id\" identify one Task?",
+      "evidence": "Its value was different for every Task in each list the server returned, and it stayed the same between the readings before and after the job.",
+      "proposed": "id",
+      "confidence": "moderate"
+    },
+    {
+      "id": "q_role_Task_title",
+      "kind": "field_role",
+      "entity": "Task",
+      "field": "title",
+      "text": "What kind of thing is \"title\"?",
+      "evidence": "Free text as far as RigorRun can tell. Values seen: Renew domain, Book venue, Send invoices, Quarterly report.",
+      "proposed": "freetext",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_untrusted_Task_title",
+      "kind": "untrusted",
+      "entity": "Task",
+      "field": "title",
+      "text": "Can somebody outside your organisation write \"title\"?",
+      "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+      "proposed": "no",
+      "options": [
+        "no",
+        "yes"
+      ],
+      "confidence": "weak"
+    },
+    {
+      "id": "q_role_Task_status",
+      "kind": "field_role",
+      "entity": "Task",
+      "field": "status",
+      "text": "What kind of thing is \"status\"?",
+      "evidence": "A small, repeated set of values, though none was seen changing. Values seen: open, done.",
+      "proposed": "status",
+      "options": [
+        "identifier",
+        "quantity",
+        "status",
+        "actor",
+        "timestamp",
+        "flag",
+        "freetext"
+      ],
+      "confidence": "moderate"
+    }
+  ],
+  "ignored": []
+}

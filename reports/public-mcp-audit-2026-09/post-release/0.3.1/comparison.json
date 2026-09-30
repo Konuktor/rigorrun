@@ -1,0 +1,22 @@
+{
+  "version": "0.3.1",
+  "baseline": "requalification-v3",
+  "suites": {
+    "io-v1": {
+      "cases": 12,
+      "unchanged": 12,
+      "changed": []
+    },
+    "io-v2": {
+      "cases": 9,
+      "unchanged": 9,
+      "changed": []
+    },
+    "heldout-inprocess": {
+      "cases": 23,
+      "unchanged": 23,
+      "changed": []
+    }
+  },
+  "status": "UNCHANGED"
+}

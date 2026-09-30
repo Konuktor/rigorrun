@@ -1,0 +1,178 @@
+{
+  "serverName": "taskdesk",
+  "serverVersion": "1.0.0",
+  "protocolVersion": "negotiated",
+  "discoveredAt": "2026-09-30T22:58:20.760Z",
+  "latencyMs": 35,
+  "tools": [
+    {
+      "name": "create_task",
+      "description": "Create one task with the given title. New tasks are open.",
+      "params": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "schemaTruncated": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "hints": {
+        "readOnly": false,
+        "destructive": false,
+        "idempotent": false
+      },
+      "risk": {
+        "level": "write",
+        "source": "server-hint",
+        "rationale": "The server says this tool writes."
+      }
+    },
+    {
+      "name": "update_task",
+      "description": "Change the title or status of one task.",
+      "params": [
+        {
+          "name": "id",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "required": false,
+          "enumValues": [
+            "open",
+            "done"
+          ]
+        }
+      ],
+      "unsupported": [],
+      "schemaTruncated": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "done"
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "hints": {
+        "readOnly": false,
+        "destructive": false,
+        "idempotent": true
+      },
+      "risk": {
+        "level": "write",
+        "source": "server-hint",
+        "rationale": "The server says this tool writes."
+      }
+    },
+    {
+      "name": "complete_task",
+      "description": "Mark one task as done.",
+      "params": [
+        {
+          "name": "id",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "schemaTruncated": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "hints": {
+        "readOnly": false,
+        "destructive": false,
+        "idempotent": true
+      },
+      "risk": {
+        "level": "write",
+        "source": "server-hint",
+        "rationale": "The server says this tool writes."
+      }
+    },
+    {
+      "name": "list_tasks",
+      "description": "List every task.",
+      "params": [],
+      "unsupported": [],
+      "schemaTruncated": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "hints": {
+        "readOnly": true
+      },
+      "risk": {
+        "level": "read",
+        "source": "server-hint",
+        "rationale": "The server says this tool only reads. Unverified."
+      }
+    },
+    {
+      "name": "verifier:query_tasks",
+      "description": "Every task in the task database, read directly and read-only.",
+      "params": [],
+      "unsupported": [],
+      "schemaTruncated": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "hints": {
+        "readOnly": true
+      },
+      "risk": {
+        "level": "read",
+        "source": "server-hint",
+        "rationale": "The server says this tool only reads. Unverified."
+      }
+    }
+  ]
+}

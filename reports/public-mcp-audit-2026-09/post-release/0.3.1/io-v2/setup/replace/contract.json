@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_1e9893b333c8",
+  "name": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
+  "description": "Compiled from one recorded execution in taskdesk2: replace one task, verified independently over tasks and notes.",
+  "goal": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else",
+  "environmentId": "p_1e9893b333c8",
+  "sourceTraceId": "trace_p_1e9893b333c8",
+  "primaryAction": "create_task",
+  "focusEntity": "Task",
+  "focusScope": "created",
+  "remedyActions": [
+    "delete_task"
+  ],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "delete_task": {
+      "id": 3
+    },
+    "create_task": {
+      "title": "Quarterly report"
+    }
+  },
+  "projectionFocus": [
+    "Task"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Task 3 was removed",
+      "key": "Task.3",
+      "value": {
+        "id": 3,
+        "title": "Send invoices",
+        "status": "done"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Task 3 was removed"
+        }
+      ]
+    },
+    {
+      "id": "fact_002",
+      "statement": "Task 4 was created",
+      "key": "Task.4",
+      "value": {
+        "id": 4,
+        "title": "Quarterly report",
+        "status": "open"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_1",
+          "detail": "Task 4 was created"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "title",
+      "param": "title",
+      "mode": "equals",
+      "demonstrated": "Quarterly report"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 1,
+  "expectedFrame": {
+    "entities": {
+      "Note": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      },
+      "Task": {
+        "preExistingRows": 3,
+        "created": 1,
+        "deleted": 1,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "rule_action_order__delete_task__create_task",
+      "statement": "\"delete task\" must happen before \"create task\"",
+      "template": "action_order",
+      "status": "rejected",
+      "confidence": 0,
+      "provenance": [
+        {
+          "kind": "recorded_action",
+          "ref": "delete_task__create_task",
+          "detail": "the operator did delete_task, then create_task"
+        }
+      ],
+      "implications": [
+        "An agent that does them the other way round will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must \"delete task\" always come before \"create task\"?",
+        "reason": "That was the order in the recording. It may simply have been convenient."
+      },
+      "predicate": {
+        "kind": "event_order",
+        "before": "delete_task",
+        "after": "create_task"
+      }
+    }
+  ],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-30T22:58:55.337Z",
+  "approvedAt": "2026-09-30T22:58:55.349Z"
+}

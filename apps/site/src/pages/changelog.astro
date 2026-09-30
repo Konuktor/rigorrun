@@ -6,6 +6,21 @@ import { NPM_URL, REPO_URL } from '../site';
 
 const releases = [
   {
+    version: '0.3.1',
+    date: '1 October 2026',
+    summary: 'See what it catches in a second, and never read one page of a list as the whole system.',
+    changes: [
+      ['Added', 'rigorrun demo replays a real recorded run, offline, in about a second: a real model working the bundled support desk, what it said beside what the system held afterwards. The recording names its model, date and commit, carries a hash of the run, and is refused if edited. rigorrun demo --live runs the pipeline now.'],
+      ['Added', 'rigorrun.xyz/replay shows every case of that recording, with nothing to install.'],
+      ['Added', 'run and gate --project --report <file> write an HTML report, and --published masks identifiers. A failed case shows what the agent said beside what RigorRun saw, in the terminal, the interface and the report.'],
+      ['Changed', 'Failed checks read as sentences: "3 Refund records where customerId is C-1; at most 1 allowed" rather than a path expression.'],
+      ['Fixed', 'A read that answered with one page of a longer list made records that slid out of the page look deleted, so a correct agent could be failed. A page is now recognised (has_more, a next cursor or link, a total above what came back, or a read called with a limit that came back full); every check on which of those records exist says not checked; and nominating such a read says so at setup.'],
+      ['Fixed', '"A or B" with one side that could not be checked and the other not holding was reported as a failure. It is now not checked.'],
+      ['Changed', 'The reference implementation appears as a control that is given the answer, never as the demo\'s winner. The first screen offers the recorded demo or your own system instead of an empty form.'],
+      ['Evidence', 'IO-v1 (12 cases, 36 attempts), IO-v2 (9 cases, 27 attempts) and the held-out set (23 cases) re-run at this release: every case\'s outcome and evidence label is unchanged from the requalification that qualified 0.3.0.'],
+    ],
+  },
+  {
     version: '0.3.0',
     date: '1 October 2026',
     summary: 'Verdicts you can trust on a real system, requalified from evidence, and agents tested where they run.',

@@ -1,0 +1,25 @@
+{
+  "projectId": "p_393a1f1e6497",
+  "readsProblem": "",
+  "readsIgnored": [],
+  "tools": 4,
+  "records": [
+    "Task"
+  ],
+  "rules": {
+    "total": 0,
+    "confirmed": 0,
+    "rejected": 0
+  },
+  "cases": 1,
+  "quality": null,
+  "agents": [
+    {
+      "name": "io-readback",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---

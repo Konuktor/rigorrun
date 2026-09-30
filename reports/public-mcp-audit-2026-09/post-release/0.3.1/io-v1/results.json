@@ -1,0 +1,1000 @@
+{
+  "generatedBy": "final-qualification/scripts/io/run-io.py aggregate",
+  "summary": {
+    "cases": 12,
+    "attemptsRun": 36,
+    "independentOracleGate": {
+      "cases": [
+        "IO-1",
+        "IO-2",
+        "IO-3",
+        "IO-4",
+        "IO-5",
+        "IO-6a",
+        "IO-6b",
+        "IO-7",
+        "IO-7-mixed-a",
+        "IO-7-mixed-b"
+      ],
+      "failing": [],
+      "guardViolations": []
+    },
+    "abstentionGate": {
+      "cases": [
+        "IO-6a",
+        "IO-6b",
+        "IO-6c"
+      ],
+      "failing": []
+    },
+    "perCase": {
+      "IO-1": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-2": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-3": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-4": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-5": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-6a": {
+        "outcomes": [
+          "ABSTAIN"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-6b": {
+        "outcomes": [
+          "None"
+        ],
+        "labels": [
+          "None"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7-mixed-a": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7-mixed-b": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-6c": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7-self": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": null
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "IO-1",
+      "title": "correct action",
+      "project": "independent",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.59
+        }
+      ]
+    },
+    {
+      "id": "IO-2",
+      "title": "agent claims success, no state change",
+      "project": "independent",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.56
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.55
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.55
+        }
+      ]
+    },
+    {
+      "id": "IO-3",
+      "title": "connector claims success, wrong state",
+      "project": "independent",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.53
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        }
+      ]
+    },
+    {
+      "id": "IO-4",
+      "title": "duplicate mutation",
+      "project": "independent",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.55
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.56
+        }
+      ]
+    },
+    {
+      "id": "IO-5",
+      "title": "correct task plus an unrelated mutation of another task",
+      "project": "independent",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.67
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.56
+        }
+      ]
+    },
+    {
+      "id": "IO-6a",
+      "title": "verifier becomes unavailable after the agent acted",
+      "project": "independent",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "ABSTAIN",
+        "evidenceIndependence": "INDEPENDENT",
+        "missingEvidenceContains": "final_state_unavailable"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE",
+        "ABSTENTION"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "ABSTAIN"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "outcome": "ABSTAIN",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [
+            "final_state_unavailable:verifier:query_tasks"
+          ],
+          "answeredVerifierReads": 3,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.53
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "outcome": "ABSTAIN",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [
+            "final_state_unavailable:verifier:query_tasks"
+          ],
+          "answeredVerifierReads": 3,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.56
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "outcome": "ABSTAIN",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [
+            "final_state_unavailable:verifier:query_tasks"
+          ],
+          "answeredVerifierReads": 3,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.56
+        }
+      ]
+    },
+    {
+      "id": "IO-6b",
+      "title": "verifier unavailable before the run",
+      "project": "independent",
+      "truth": "NOT_APPLICABLE",
+      "expected": {
+        "outcome": "NO_VERDICT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE",
+        "ABSTENTION"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "None"
+      ],
+      "labels": [
+        "None"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": null,
+          "exit": 2,
+          "evidenceIndependence": null,
+          "verification": null,
+          "missingEvidence": [],
+          "answeredVerifierReads": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.47
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": null,
+          "exit": 2,
+          "evidenceIndependence": null,
+          "verification": null,
+          "missingEvidence": [],
+          "answeredVerifierReads": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": null,
+          "exit": 2,
+          "evidenceIndependence": null,
+          "verification": null,
+          "missingEvidence": [],
+          "answeredVerifierReads": 0,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.62
+        }
+      ]
+    },
+    {
+      "id": "IO-7",
+      "title": "self-reported read and independent read disagree",
+      "project": "independent",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.6
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.53
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        }
+      ]
+    },
+    {
+      "id": "IO-7-mixed-a",
+      "title": "IO-7 with both reads nominated, verifier first",
+      "project": "mixed-a",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.53
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.55
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.55
+        }
+      ]
+    },
+    {
+      "id": "IO-7-mixed-b",
+      "title": "IO-7 with both reads nominated, connector first",
+      "project": "mixed-b",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        }
+      ]
+    },
+    {
+      "id": "IO-6c",
+      "title": "verifier answers an empty world",
+      "project": "independent",
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "notOutcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "ABSTENTION"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "allAttemptsMatch": true,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.56
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.53
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "outcome": "FAIL",
+          "exit": 1,
+          "evidenceIndependence": "INDEPENDENT",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 5,
+          "matchesExpectation": true,
+          "silentFallbackGuard": true,
+          "seconds": 0.54
+        }
+      ]
+    },
+    {
+      "id": "IO-7-self",
+      "title": "IO-7 on a self-reported project (control, no verifier)",
+      "project": "self",
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "allAttemptsMatch": null,
+      "guardHolds": true,
+      "perAttempt": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 0,
+          "matchesExpectation": null,
+          "silentFallbackGuard": true,
+          "seconds": 0.51
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 0,
+          "matchesExpectation": null,
+          "silentFallbackGuard": true,
+          "seconds": 0.51
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "outcome": "PASS",
+          "exit": 0,
+          "evidenceIndependence": "SELF_REPORTED",
+          "verification": "PARTIAL",
+          "missingEvidence": [],
+          "answeredVerifierReads": 0,
+          "matchesExpectation": null,
+          "silentFallbackGuard": true,
+          "seconds": 0.51
+        }
+      ]
+    }
+  ]
+}

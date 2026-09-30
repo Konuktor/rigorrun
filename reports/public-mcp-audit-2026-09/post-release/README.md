@@ -19,8 +19,15 @@ expectations and attempt counts are the committed ones.
 python3 io_v1.py <version> setup && python3 io_v1.py <version> run && python3 io_v1.py <version> aggregate
 python3 io_v2.py <version> setup && python3 io_v2.py <version> run && python3 io_v2.py <version> aggregate
 ./heldout.sh <version>
+python3 hygiene.py <version> redact && python3 hygiene.py <version> scrub
 python3 compare.py <version>     # <version>/comparison.json; exit 1 on any changed case
 ```
 
 A release whose comparison is not `UNCHANGED` either explains each changed case in its own
 `<version>/NOTES.md` before it ships, or does not ship.
+
+## Releases
+
+| Release | Commit | IO-v1 | IO-v2 | Held-out | Against v3 |
+| --- | --- | --- | --- | --- | --- |
+| 0.3.1 | `ba9bd60` | 12 cases, 36 attempts, no gate failing | 9 cases, 27 attempts, no gate failing | 23/23 as expected, 6 abstentions | UNCHANGED (`0.3.1/comparison.json`) |

@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_101776846d98",
+  "name": "Mark task 2, Book venue, as done; change nothing else.",
+  "description": "Compiled from one recorded execution in taskdesk2: complete one task, verified independently over tasks and notes.",
+  "goal": "Mark task 2, Book venue, as done; change nothing else",
+  "environmentId": "p_101776846d98",
+  "sourceTraceId": "trace_p_101776846d98",
+  "primaryAction": "update_task",
+  "focusEntity": "Task",
+  "focusScope": "changed",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "update_task": {
+      "id": 2,
+      "status": "done"
+    }
+  },
+  "projectionFocus": [
+    "Task"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Task 2: status changed \"open\" → \"done\"",
+      "key": "Task.status",
+      "value": {
+        "from": "open",
+        "to": "done"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Task 2: status changed \"open\" → \"done\""
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "id",
+      "param": "id",
+      "mode": "equals",
+      "demonstrated": 2
+    },
+    {
+      "field": "status",
+      "param": "status",
+      "mode": "equals",
+      "demonstrated": "done"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "expectedCreatedCount": 0,
+  "expectedFrame": {
+    "entities": {
+      "Note": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      },
+      "Task": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 1,
+        "updatedFields": [
+          "status"
+        ],
+        "identity": "named"
+      }
+    }
+  },
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-30T22:58:54.663Z",
+  "approvedAt": "2026-09-30T22:58:54.674Z"
+}
