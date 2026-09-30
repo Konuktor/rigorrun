@@ -1,0 +1,212 @@
+{
+  "id": "SQ-D-04-transaction-across-calls",
+  "target": "sqlite-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.04,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "BEGIN"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":0}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 0
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (id,title) VALUES (99,'tx probe')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "ROLLBACK"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.05,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "BEGIN"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":0}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 0
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (id,title) VALUES (99,'tx probe')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "ROLLBACK"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.04,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "BEGIN"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":0}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 0
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (id,title) VALUES (99,'tx probe')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "ROLLBACK"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

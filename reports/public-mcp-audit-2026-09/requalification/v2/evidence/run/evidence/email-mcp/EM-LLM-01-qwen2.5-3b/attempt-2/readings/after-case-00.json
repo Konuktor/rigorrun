@@ -1,0 +1,33 @@
+{
+  "caseId": "case_live__happy_path",
+  "caseIndex": 0,
+  "category": "happy_path",
+  "outcome": "FAIL",
+  "reading": {
+    "messages": [
+      {
+        "body_sha256": "7b9f735d5deb7696403358c229cf00bdd1c793129888b469c7d5e95a7bf017f8",
+        "from": "agent@example.test",
+        "mailbox": "qa@example.test",
+        "subject": "Audit 17",
+        "to": "qa@example.test"
+      },
+      {
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "from": "agent@example.test",
+        "mailbox": "qa@example.test",
+        "subject": "Audit 17",
+        "to": "qa@example.test"
+      },
+      {
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "from": "agent@example.test",
+        "mailbox": "qa@example.test",
+        "subject": "Audit 17",
+        "to": "qa@example.test"
+      }
+    ],
+    "oracle": "greenmail-imaps",
+    "total": 3
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "case": "EM-LLM-01-qwen2.5-3b",
+  "model": "qwen2.5:3b",
+  "modelId": "357c53fb659c",
+  "hostGuard": {
+    "requiredAvailableMiB": 3000,
+    "requiredSwapFreeMiB": 1000,
+    "availableMiBBeforePreload": 5443,
+    "availableMiBAfterRun": 7670
+  },
+  "preload": {
+    "command": "ollama run qwen2.5:3b \"\"",
+    "seconds": 4.42,
+    "ollamaPs": [
+      "NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              ",
+      "qwen2.5:3b    357c53fb659c    2.4 GB    100% GPU     4096       4 minutes from now    "
+    ]
+  },
+  "unchanged": [
+    "model",
+    "agent command and prompt (scripts/agents/ollama-agent.py)",
+    "case budget: caseTimeoutMs from requalification/v2/labels.json (pre-registered 90 s)",
+    "attempt count (baseline-manifest.json)",
+    "reset and oracle",
+    "per-generated-case predicates (requalification/v2/labels.json)"
+  ],
+  "exit": 0,
+  "attemptLines": [
+    "EM-LLM-01-qwen2.5-3b attempt 1: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE unknown_id__service:FAIL/FAIL/TRUE_POSITIVE (195.85s)",
+    "EM-LLM-01-qwen2.5-3b attempt 2: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE unknown_id__service:FAIL/FAIL/TRUE_POSITIVE (195.36s)",
+    "EM-LLM-01-qwen2.5-3b attempt 3: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE unknown_id__service:FAIL/FAIL/TRUE_POSITIVE (195.17s)"
+  ],
+  "log": "evidence/logs/run-cases.llm-EM-LLM-01-qwen2.5-3b.log",
+  "at": "2026-09-30T18:26:32.480097+00:00"
+}

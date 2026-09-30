@@ -1,0 +1,55 @@
+== up 18:49:28
+  rr-audit-worktide-database-1: healthy
+  rr-audit-worktide-app-1: healthy
+reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)
+rc 0
+== setup 18:49:45
+worktide-mcp/w2: ok=False compiled=False suite=False project=p_b30374c4c64e agents=0 compile journey: POST /api/projects/p_b30374c4c64e/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job tha
+rc 0
+== run 18:51:07
+Traceback (most recent call last):
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/n1/run-eh-wt-03-rq.py", line 163, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/n1/run-eh-wt-03-rq.py", line 157, in main
+    return guarded(lambda: run(rest))
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/n1/run-eh-wt-03-rq.py", line 102, in guarded
+    code = step()
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/n1/run-eh-wt-03-rq.py", line 157, in <lambda>
+    return guarded(lambda: run(rest))
+                           ~~~^^^^^^
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/n1/run-eh-wt-03-rq.py", line 149, in run
+    return eh.main()
+           ~~~~~~~^^
+  File "{REPO}/reports/public-mcp-audit-2026-09/remediation/n1/scripts/run-eh-wt-03.py", line 178, in main
+    info = project()
+  File "{REPO}/reports/public-mcp-audit-2026-09/remediation/n1/scripts/run-eh-wt-03.py", line 61, in project
+    entry = heldout.load(os.path.join(N1, SETUP, "projects.json"))["home-worktide-w2"]
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+KeyError: 'home-worktide-w2'
+rc 1
+== heldout 18:51:07
+journey J-T: {"ok": false, "error": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}"}
+V2-T-01 [gate]: truth KNOWN_GOOD expected PASS actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-T-02 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-T-03 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-T-04 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-T-05 [gate]: truth KNOWN_GOOD expected PASS actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+journey J-U: {"ok": false, "error": "journey: POST /api/projects/p_abb091ab73fa/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}"}
+V2-U-01 [gate]: truth KNOWN_GOOD expected PASS actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_abb091ab73fa/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-U-02 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_abb091ab73fa/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-U-03 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_abb091ab73fa/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+journey J-M: {"ok": false, "error": "journey: POST /api/projects/p_5d9f9b04c07e/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}"}
+V2-M-01 [gate]: truth KNOWN_GOOD expected PASS actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_5d9f9b04c07e/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-M-02 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_5d9f9b04c07e/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-M-03 [gate]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_5d9f9b04c07e/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-S-01 [side-channel]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-S-02 [side-channel]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-S-03 [side-channel]: truth KNOWN_BAD expected FAIL actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_6c7be63b30ae/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-L-01 [limit-probe]: truth KNOWN_BAD expected PASS actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_5d9f9b04c07e/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+V2-L-02 [limit-probe]: truth KNOWN_BAD expected PASS actual NOT_RUN oracle None <-- MISMATCH journey: POST /api/projects/p_abb091ab73fa/compile → 400: {"error":"The recording performed \"time.stop\" but nothing in the system changed. RigorRun verifies a
+rc 0
+== down 18:55:58
+worktide stack removed
+rc 0
+== done 18:56:00

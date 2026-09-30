@@ -1,7 +1,7 @@
 {
   "command": [
     "node",
-    "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
   ],
   "calls": [
     {

@@ -121,3 +121,14 @@ Logs: `v1/evidence/frozen-58/logs/`.
   3. It records the outcome in `run/agent-reregistration.json`.
 
   SQ-W1B-04 is then re-run alone. No attempt had a RigorRun verdict, so the re-run does not depend on any outcome. The final report will show both records.
+
+## Stage D (2026-09-30)
+
+- **Step 3** — `recreate-stacks.sh`: oracles sqlite 3/1, mailhog 0, greenmail 0, worktide 3 tasks / 0 timers.
+- **Step 4** — benchmark-v2 in manifest order, six batches (`v2/evidence/logs/steps.log`): 58/58 cases, 152/152 attempts; TP 57, TN 13, FP 0, FN 2.
+- **Step 5** — first attempt refused at compile by the expired `time.report` window; Amendment 1 (`amendment-1/`); re-run: EH-WT-03 FAIL 3/3, held-out gate 11/11, side-channel 3/3, limit probes 2/2.
+- **Step 6** — aggregate-v2 → cross-regression (regressions 0) → aggregate-v2 → aggregate-v1.
+- **Step 7** — release gate NO_GO (GATE 2, 5, 11); after step 9, recomputed: NO_GO (GATE 2, 5).
+- **Step 8** — final verification with no stack up: 1089/1089, typecheck, lint, e2e 56.
+- **Step 9** — quarantine 2 files, redact 6, scrub 327; every check exits 0.
+- **Finding** — declined cases never asked whether the job's own action succeeded; see README.md.

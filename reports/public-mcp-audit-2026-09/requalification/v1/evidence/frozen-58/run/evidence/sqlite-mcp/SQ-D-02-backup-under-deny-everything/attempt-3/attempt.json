@@ -35,17 +35,17 @@
       {
         "tool": "backup",
         "args": {
-          "destination": "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+          "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
         },
         "result": {
           "content": [
             {
               "type": "text",
-              "text": "{\"destination\":\"/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+              "text": "{\"destination\":\"{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
             }
           ],
           "structuredContent": {
-            "destination": "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+            "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
             "pages_copied": 3
           },
           "isError": false

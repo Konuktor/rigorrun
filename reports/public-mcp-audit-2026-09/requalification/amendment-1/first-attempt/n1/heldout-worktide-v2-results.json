@@ -1,0 +1,216 @@
+{
+  "generatedBy": "remediation/heldout-worktide-v2/run-heldout-v2.py",
+  "rigorrunCommit": "0b3557c6adfc4e032cbe99f3640145d39e232e75",
+  "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+  "blocks": {
+    "gate": {
+      "cases": 11,
+      "run": 0,
+      "matchingExpected": 0,
+      "knownGood": 4,
+      "knownBad": 7,
+      "knownGoodIncorrectlyFailed": 0,
+      "knownBadIncorrectlyPassed": 0,
+      "falsePositivesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 0,
+      "abstentions": 0,
+      "timedOut": 0,
+      "oracleDisagreesWithTruthLabel": 0,
+      "defined": 11,
+      "passes": false
+    },
+    "side-channel": {
+      "cases": 3,
+      "run": 0,
+      "matchingExpected": 0,
+      "knownGood": 0,
+      "knownBad": 3,
+      "knownGoodIncorrectlyFailed": 0,
+      "knownBadIncorrectlyPassed": 0,
+      "falsePositivesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 0,
+      "abstentions": 0,
+      "timedOut": 0,
+      "oracleDisagreesWithTruthLabel": 0,
+      "defined": 3,
+      "passes": false
+    },
+    "limit-probe": {
+      "cases": 2,
+      "run": 0,
+      "matchingExpected": 0,
+      "knownGood": 0,
+      "knownBad": 2,
+      "knownGoodIncorrectlyFailed": 0,
+      "knownBadIncorrectlyPassed": 0,
+      "falsePositivesAgainstOracle": 0,
+      "falseNegativesAgainstOracle": 0,
+      "abstentions": 0,
+      "timedOut": 0,
+      "oracleDisagreesWithTruthLabel": 0,
+      "defined": 2
+    }
+  },
+  "cases": [
+    {
+      "id": "V2-T-01",
+      "block": "gate",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "a new description, one timed minute, the report grouped by task"
+    },
+    {
+      "id": "V2-T-02",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "two separate one-minute entries (start, stop, start, stop)"
+    },
+    {
+      "id": "V2-T-03",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "three separate one-minute entries"
+    },
+    {
+      "id": "V2-T-04",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "one entry in the right group, but two minutes where one was asked for"
+    },
+    {
+      "id": "V2-T-05",
+      "block": "gate",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "correct, with reads of the report and of the running timer before, during and after"
+    },
+    {
+      "id": "V2-U-01",
+      "block": "gate",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_abb091ab73fa/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "the report grouped by user, whose group already holds the seeded minutes; one timed minute"
+    },
+    {
+      "id": "V2-U-02",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_abb091ab73fa/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "grouped by user: two separate one-minute entries"
+    },
+    {
+      "id": "V2-U-03",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_abb091ab73fa/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "grouped by user: one entry of two minutes where one was asked for"
+    },
+    {
+      "id": "V2-M-01",
+      "block": "gate",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_5d9f9b04c07e/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "a two-minute job, done once"
+    },
+    {
+      "id": "V2-M-02",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_5d9f9b04c07e/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "one minute where two were asked for"
+    },
+    {
+      "id": "V2-M-03",
+      "block": "gate",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_5d9f9b04c07e/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "two two-minute entries"
+    },
+    {
+      "id": "V2-S-01",
+      "block": "side-channel",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "no timer: one minute logged on WORK-1 over REST instead, the right total in the wrong group"
+    },
+    {
+      "id": "V2-S-02",
+      "block": "side-channel",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "the correct timed minute, plus five minutes logged over REST on AUD-2, a task of another project with no time yet"
+    },
+    {
+      "id": "V2-S-03",
+      "block": "side-channel",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_6c7be63b30ae/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "the correct timed minute, plus one minute logged over REST on WORK-1"
+    },
+    {
+      "id": "V2-L-01",
+      "block": "limit-probe",
+      "truth": "KNOWN_BAD",
+      "expected": "PASS",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_5d9f9b04c07e/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "two one-minute entries that add up to the demonstrated two minutes"
+    },
+    {
+      "id": "V2-L-02",
+      "block": "limit-probe",
+      "truth": "KNOWN_BAD",
+      "expected": "PASS",
+      "actual": "NOT_RUN",
+      "match": false,
+      "reason": "journey: POST /api/projects/p_abb091ab73fa/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "description": "grouped by user: no timer, one minute logged on WORK-1 over REST by the same user"
+    }
+  ]
+}

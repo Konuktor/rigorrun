@@ -6,7 +6,7 @@ exit 0
 product under test verified: product sources equal 7209dca; frozen inputs unchanged
 2026-09-15T02:27:38Z recreate stacks; available MiB 5725
 == recreate: sqlite
-reset-sqlite: /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks
+reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks
 == oracles read the starting state
   sqlite: tasks 3 audit_log 1
   mailhog: total 0

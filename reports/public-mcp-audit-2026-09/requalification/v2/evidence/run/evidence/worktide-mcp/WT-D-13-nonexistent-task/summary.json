@@ -1,0 +1,86 @@
+{
+  "id": "WT-D-13-nonexistent-task",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.3,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.get",
+            "args": {
+              "task": "AUD-999"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Task \"AUD-999\" not found."
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.28,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.get",
+            "args": {
+              "task": "AUD-999"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Task \"AUD-999\" not found."
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.28,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.get",
+            "args": {
+              "task": "AUD-999"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Task \"AUD-999\" not found."
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

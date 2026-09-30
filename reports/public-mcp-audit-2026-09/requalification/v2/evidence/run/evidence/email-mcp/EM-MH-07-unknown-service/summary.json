@@ -1,0 +1,107 @@
+{
+  "id": "EM-MH-07-unknown-service",
+  "target": "email-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.15,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit ghost",
+              "body": "x",
+              "service": "ghost"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":false,\"error\":\"Service 'ghost' not available. Available services: ['mailhog']\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": false,
+                "error": "Service 'ghost' not available. Available services: ['mailhog']"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.16,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit ghost",
+              "body": "x",
+              "service": "ghost"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":false,\"error\":\"Service 'ghost' not available. Available services: ['mailhog']\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": false,
+                "error": "Service 'ghost' not available. Available services: ['mailhog']"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.16,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit ghost",
+              "body": "x",
+              "service": "ghost"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":false,\"error\":\"Service 'ghost' not available. Available services: ['mailhog']\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": false,
+                "error": "Service 'ghost' not available. Available services: ['mailhog']"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

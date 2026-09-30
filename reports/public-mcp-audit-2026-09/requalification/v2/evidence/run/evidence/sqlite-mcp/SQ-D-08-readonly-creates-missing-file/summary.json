@@ -1,0 +1,89 @@
+{
+  "id": "SQ-D-08-readonly-creates-missing-file",
+  "target": "sqlite-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.04,
+      "result": {
+        "calls": [
+          {
+            "tool": "list_tables",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"tables\":[]}"
+                }
+              ],
+              "structuredContent": {
+                "tables": []
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.04,
+      "result": {
+        "calls": [
+          {
+            "tool": "list_tables",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"tables\":[]}"
+                }
+              ],
+              "structuredContent": {
+                "tables": []
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.04,
+      "result": {
+        "calls": [
+          {
+            "tool": "list_tables",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"tables\":[]}"
+                }
+              ],
+              "structuredContent": {
+                "tables": []
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

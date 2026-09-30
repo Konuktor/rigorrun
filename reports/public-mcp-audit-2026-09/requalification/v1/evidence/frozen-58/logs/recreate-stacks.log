@@ -17,7 +17,7 @@ reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)
 reset-email-mcp: MailHog up on http://127.0.0.1:8025, inbox empty
 reset-greenmail: GreenMail purged, relay on 127.0.0.1:3125
 == recreate: sqlite
-reset-sqlite: /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks
+reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks
 == oracles read the starting state
   sqlite: tasks 3 audit_log 1
   mailhog: total 0

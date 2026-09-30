@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python3 /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification/v2/scripts/oracle-reading.py /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification/v2/evidence/run/evidence/sqlite-mcp/SQ-W1-02-missing-action-false-claim/attempt-1

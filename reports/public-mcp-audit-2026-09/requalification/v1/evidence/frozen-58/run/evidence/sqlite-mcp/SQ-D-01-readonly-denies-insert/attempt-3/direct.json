@@ -1,8 +1,8 @@
 {
   "command": [
-    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
     "--database",
-    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
     "--preset",
     "read-only"
   ],

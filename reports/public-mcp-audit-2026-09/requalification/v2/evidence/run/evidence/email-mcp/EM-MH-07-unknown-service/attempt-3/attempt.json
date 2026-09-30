@@ -1,0 +1,68 @@
+{
+  "case": {
+    "id": "EM-MH-07-unknown-service",
+    "target": "email-mcp",
+    "mode": "direct",
+    "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+    "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "server": [
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "class": "WRONG_ENTITY / boundary",
+    "truth": "EXPECTED_PASS",
+    "intent": "a send to a service that does not exist must be a clean failure with nothing delivered",
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit ghost",
+          "body": "x",
+          "service": "ghost"
+        }
+      }
+    ],
+    "expect": "after['total']==before['total'] and ((calls[0]['result'].get('structuredContent') or {}).get('success')==False or calls[0]['result'].get('isError')==True)"
+  },
+  "attempt": 3,
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "seconds": 1.16,
+  "result": {
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit ghost",
+          "body": "x",
+          "service": "ghost"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":false,\"error\":\"Service 'ghost' not available. Available services: ['mailhog']\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": false,
+            "error": "Service 'ghost' not available. Available services: ['mailhog']"
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "oracleVerdict": "PASS",
+  "scored": false
+}

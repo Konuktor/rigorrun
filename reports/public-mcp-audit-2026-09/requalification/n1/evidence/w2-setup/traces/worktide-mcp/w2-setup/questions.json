@@ -1,0 +1,1128 @@
+[
+  {
+    "id": "q_name_Record1",
+    "kind": "entity_name",
+    "entity": "Record1",
+    "text": "Is \"Record1\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: billableMinutes, billedMinutes, from, groupBy, groups, to, totalMinutes.",
+    "proposed": "Record1",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record1",
+    "kind": "id_field",
+    "entity": "Record1",
+    "options": [
+      "from",
+      "to",
+      "groupBy",
+      "totalMinutes",
+      "billableMinutes",
+      "billedMinutes",
+      "groups"
+    ],
+    "text": "Does \"from\" identify one Record1?",
+    "evidence": "Its value was different for every Record1 in each list the server returned, and it stayed the same between the readings before and after the job. Between the readings before and after the job, \"totalMinutes\" and \"billableMinutes\" changed for the same Record1, so they describe a Record1 rather than name one.",
+    "proposed": "from",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Record1_to",
+    "kind": "unit",
+    "entity": "Record1",
+    "field": "to",
+    "text": "What is \"to\" measured in?",
+    "evidence": "Values seen: 2026-12-31T00:00:00+01:00. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_to",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "to",
+    "text": "What kind of thing is \"to\"?",
+    "evidence": "Every value was a date. Values seen: 2026-12-31T00:00:00+01:00.",
+    "proposed": "timestamp",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Record1_groupBy",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "groupBy",
+    "text": "What kind of thing is \"groupBy\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: task.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_groupBy",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "groupBy",
+    "text": "Can somebody outside your organisation write \"groupBy\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Record1_totalMinutes",
+    "kind": "unit",
+    "entity": "Record1",
+    "field": "totalMinutes",
+    "text": "What is \"totalMinutes\" measured in?",
+    "evidence": "Values seen: 945, 946. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_totalMinutes",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "totalMinutes",
+    "text": "What kind of thing is \"totalMinutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 945, 946.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_unit_Record1_billableMinutes",
+    "kind": "unit",
+    "entity": "Record1",
+    "field": "billableMinutes",
+    "text": "What is \"billableMinutes\" measured in?",
+    "evidence": "Values seen: 945, 946. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_billableMinutes",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "billableMinutes",
+    "text": "What kind of thing is \"billableMinutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 945, 946.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_unit_Record1_billedMinutes",
+    "kind": "unit",
+    "entity": "Record1",
+    "field": "billedMinutes",
+    "text": "What is \"billedMinutes\" measured in?",
+    "evidence": "Values seen: 0. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_billedMinutes",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "billedMinutes",
+    "text": "What kind of thing is \"billedMinutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 0.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Record1_groups",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "groups",
+    "text": "What kind of thing is \"groups\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: [object Object],[object Object],[object ….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_groups",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "groups",
+    "text": "Can somebody outside your organisation write \"groups\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_name_Group",
+    "kind": "entity_name",
+    "entity": "Group",
+    "text": "Is \"Group\" the right name for this kind of record?",
+    "evidence": "4 distinct record(s) seen, with fields: billableMinutes, billedMinutes, key, label, minutes.",
+    "proposed": "Group",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Group",
+    "kind": "id_field",
+    "entity": "Group",
+    "options": [
+      "key",
+      "label",
+      "minutes",
+      "billableMinutes",
+      "billedMinutes"
+    ],
+    "text": "Does \"label\" identify one Group?",
+    "evidence": "Its value was different for every Group in each list the server returned, and it stayed the same between the readings before and after the job. Between the readings before and after the job, \"minutes\" and \"billableMinutes\" changed for the same Group, so they describe a Group rather than name one. \"minutes\" and \"billableMinutes\" add up to a total, so they are quantities, not a name.",
+    "proposed": "label",
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Group_key",
+    "kind": "field_role",
+    "entity": "Group",
+    "field": "key",
+    "text": "What kind of thing is \"key\"?",
+    "evidence": "A small, repeated set of values, though none was seen changing. Values seen: 01a09c3a-5ff3-74e5-becb-1614e94d6f29, 01a09c3a-5ff2-7139-b9ae-011247c2bec7, 01a09c3a-5ff0-777d-8eb9-532db0c216e7.",
+    "proposed": "status",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_unit_Group_minutes",
+    "kind": "unit",
+    "entity": "Group",
+    "field": "minutes",
+    "text": "What is \"minutes\" measured in?",
+    "evidence": "Values seen: 405, 315, 225, 0. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Group_minutes",
+    "kind": "field_role",
+    "entity": "Group",
+    "field": "minutes",
+    "text": "What kind of thing is \"minutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Its values add up to Record1.totalMinutes. Values seen: 405, 315, 225, 0.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_unit_Group_billableMinutes",
+    "kind": "unit",
+    "entity": "Group",
+    "field": "billableMinutes",
+    "text": "What is \"billableMinutes\" measured in?",
+    "evidence": "Values seen: 405, 315, 225, 0. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Group_billableMinutes",
+    "kind": "field_role",
+    "entity": "Group",
+    "field": "billableMinutes",
+    "text": "What kind of thing is \"billableMinutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Its values add up to Record1.totalMinutes. Values seen: 405, 315, 225, 0.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_unit_Group_billedMinutes",
+    "kind": "unit",
+    "entity": "Group",
+    "field": "billedMinutes",
+    "text": "What is \"billedMinutes\" measured in?",
+    "evidence": "Values seen: 0. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Group_billedMinutes",
+    "kind": "field_role",
+    "entity": "Group",
+    "field": "billedMinutes",
+    "text": "What kind of thing is \"billedMinutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 0.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_name_Task",
+    "kind": "entity_name",
+    "entity": "Task",
+    "text": "Is \"Task\" the right name for this kind of record?",
+    "evidence": "3 distinct record(s) seen, with fields: assignees, createdAt, id, identifier, priority, project, status, tags, title, updatedAt.",
+    "proposed": "Task",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Task",
+    "kind": "id_field",
+    "entity": "Task",
+    "options": [
+      "id",
+      "identifier",
+      "title",
+      "priority",
+      "status",
+      "project",
+      "assignees",
+      "tags",
+      "createdAt",
+      "updatedAt"
+    ],
+    "text": "Does \"id\" identify one Task?",
+    "evidence": "Its value was different for every Task in each list the server returned, and it stayed the same between the readings before and after the job.",
+    "proposed": "id",
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Task_identifier",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "identifier",
+    "text": "What kind of thing is \"identifier\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: AUD-2, AUD-3, AUD-1.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_identifier",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "identifier",
+    "text": "Can somebody outside your organisation write \"identifier\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_title",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "title",
+    "text": "What kind of thing is \"title\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Collect the evidence, Publish the report, Write the audit plan.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_title",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "title",
+    "text": "Can somebody outside your organisation write \"title\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_priority",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "priority",
+    "text": "What kind of thing is \"priority\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: normal.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_priority",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "priority",
+    "text": "Can somebody outside your organisation write \"priority\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_status",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "status",
+    "text": "What kind of thing is \"status\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: /v1/task_statuses/01a09c3a-5feb-71bd-89a….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_status",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "status",
+    "text": "Can somebody outside your organisation write \"status\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_project",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "project",
+    "text": "What kind of thing is \"project\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: /v1/projects/01a09c44-41b9-744c-9038-42d….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_project",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "project",
+    "text": "Can somebody outside your organisation write \"project\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_assignees",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "assignees",
+    "text": "What kind of thing is \"assignees\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: .",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_assignees",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "assignees",
+    "text": "Can somebody outside your organisation write \"assignees\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_tags",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "tags",
+    "text": "What kind of thing is \"tags\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: .",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Task_tags",
+    "kind": "untrusted",
+    "entity": "Task",
+    "field": "tags",
+    "text": "Can somebody outside your organisation write \"tags\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Task_createdAt",
+    "kind": "unit",
+    "entity": "Task",
+    "field": "createdAt",
+    "text": "What is \"createdAt\" measured in?",
+    "evidence": "Values seen: 2026-09-13T21:39:58+02:00, 2026-09-13T21:39:57+02:00. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_createdAt",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "createdAt",
+    "text": "What kind of thing is \"createdAt\"?",
+    "evidence": "Every value was a date. Values seen: 2026-09-13T21:39:58+02:00, 2026-09-13T21:39:57+02:00.",
+    "proposed": "timestamp",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_unit_Task_updatedAt",
+    "kind": "unit",
+    "entity": "Task",
+    "field": "updatedAt",
+    "text": "What is \"updatedAt\" measured in?",
+    "evidence": "Values seen: 2026-09-13T21:39:58+02:00, 2026-09-13T21:39:57+02:00. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Task_updatedAt",
+    "kind": "field_role",
+    "entity": "Task",
+    "field": "updatedAt",
+    "text": "What kind of thing is \"updatedAt\"?",
+    "evidence": "Every value was a date. Values seen: 2026-09-13T21:39:58+02:00, 2026-09-13T21:39:57+02:00.",
+    "proposed": "timestamp",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_name_Record4",
+    "kind": "entity_name",
+    "entity": "Record4",
+    "text": "Is \"Record4\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: closedTimeEntryId, description, elapsedSeconds, isBillable, projectId, running, startedAt, taskId, timerId, typeOfWorkId.",
+    "proposed": "Record4",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record4",
+    "kind": "id_field",
+    "entity": "Record4",
+    "options": [
+      "closedTimeEntryId",
+      "running",
+      "timerId",
+      "startedAt",
+      "elapsedSeconds",
+      "taskId",
+      "projectId",
+      "typeOfWorkId",
+      "description",
+      "isBillable"
+    ],
+    "text": "Does \"timerId\" identify one Record4?",
+    "evidence": "Its value was different for every Record4 in each list the server returned, and nothing showed it changing for the same one.",
+    "proposed": "timerId",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_closedTimeEntryId",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "closedTimeEntryId",
+    "text": "What kind of thing is \"closedTimeEntryId\"?",
+    "evidence": "Free text as far as RigorRun can tell. No values were seen.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record4_closedTimeEntryId",
+    "kind": "untrusted",
+    "entity": "Record4",
+    "field": "closedTimeEntryId",
+    "text": "Can somebody outside your organisation write \"closedTimeEntryId\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_running",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "running",
+    "text": "What kind of thing is \"running\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_unit_Record4_startedAt",
+    "kind": "unit",
+    "entity": "Record4",
+    "field": "startedAt",
+    "text": "What is \"startedAt\" measured in?",
+    "evidence": "Values seen: 2026-09-30T21:09:04+02:00. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_startedAt",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "startedAt",
+    "text": "What kind of thing is \"startedAt\"?",
+    "evidence": "Every value was a date. Values seen: 2026-09-30T21:09:04+02:00.",
+    "proposed": "timestamp",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_unit_Record4_elapsedSeconds",
+    "kind": "unit",
+    "entity": "Record4",
+    "field": "elapsedSeconds",
+    "text": "What is \"elapsedSeconds\" measured in?",
+    "evidence": "Values seen: 0. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_elapsedSeconds",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "elapsedSeconds",
+    "text": "What kind of thing is \"elapsedSeconds\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 0.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Record4_taskId",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "taskId",
+    "text": "What kind of thing is \"taskId\"?",
+    "evidence": "Free text as far as RigorRun can tell. No values were seen.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record4_taskId",
+    "kind": "untrusted",
+    "entity": "Record4",
+    "field": "taskId",
+    "text": "Can somebody outside your organisation write \"taskId\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_projectId",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "projectId",
+    "text": "What kind of thing is \"projectId\"?",
+    "evidence": "Free text as far as RigorRun can tell. No values were seen.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record4_projectId",
+    "kind": "untrusted",
+    "entity": "Record4",
+    "field": "projectId",
+    "text": "Can somebody outside your organisation write \"projectId\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_typeOfWorkId",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "typeOfWorkId",
+    "text": "What kind of thing is \"typeOfWorkId\"?",
+    "evidence": "Free text as far as RigorRun can tell. No values were seen.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record4_typeOfWorkId",
+    "kind": "untrusted",
+    "entity": "Record4",
+    "field": "typeOfWorkId",
+    "text": "Can somebody outside your organisation write \"typeOfWorkId\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_description",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "description",
+    "text": "What kind of thing is \"description\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Audit timer.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record4_description",
+    "kind": "untrusted",
+    "entity": "Record4",
+    "field": "description",
+    "text": "Can somebody outside your organisation write \"description\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record4_isBillable",
+    "kind": "field_role",
+    "entity": "Record4",
+    "field": "isBillable",
+    "text": "What kind of thing is \"isBillable\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_name_Record5",
+    "kind": "entity_name",
+    "entity": "Record5",
+    "text": "Is \"Record5\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: durationMinutes, timeEntryId.",
+    "proposed": "Record5",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record5",
+    "kind": "id_field",
+    "entity": "Record5",
+    "options": [
+      "timeEntryId",
+      "durationMinutes"
+    ],
+    "text": "Does \"timeEntryId\" identify one Record5?",
+    "evidence": "Its value was different for every Record5 in each list the server returned, and nothing showed it changing for the same one.",
+    "proposed": "timeEntryId",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Record5_durationMinutes",
+    "kind": "unit",
+    "entity": "Record5",
+    "field": "durationMinutes",
+    "text": "What is \"durationMinutes\" measured in?",
+    "evidence": "Values seen: 1. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record5_durationMinutes",
+    "kind": "field_role",
+    "entity": "Record5",
+    "field": "durationMinutes",
+    "text": "What kind of thing is \"durationMinutes\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 1.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  }
+]

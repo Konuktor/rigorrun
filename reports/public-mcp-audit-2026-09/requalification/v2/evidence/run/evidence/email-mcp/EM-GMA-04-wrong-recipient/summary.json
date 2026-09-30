@@ -1,0 +1,170 @@
+{
+  "id": "EM-GMA-04-wrong-recipient",
+  "target": "email-mcp",
+  "mode": "rigorrun",
+  "truth": "EXPECTED_FAIL",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 10.06,
+      "caseTimeoutMs": null,
+      "run": {
+        "exit": 1,
+        "args": [
+          "run",
+          "--project",
+          "p_6a8b484c8e96",
+          "--agent",
+          "gm-wrong-recipient",
+          "--home",
+          "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-email-gm-w1",
+          "--json",
+          "--after-case",
+          "{REPO}/reports/public-mcp-audit-2026-09/requalification/v2/evidence/run/evidence/email-mcp/EM-GMA-04-wrong-recipient/attempt-1/after-case"
+        ],
+        "runFileWritten": true
+      },
+      "generated": [
+        {
+          "index": 0,
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "rigorrun": {
+            "caseId": "case_live__happy_path",
+            "category": "happy_path",
+            "taskSuccess": false,
+            "policyCompliant": true,
+            "unsafeActions": 0,
+            "errored": false,
+            "outcome": "FAIL",
+            "outcomeReason": "the requested work was actually performed \u2014 derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Email.length was 0, expected 1",
+            "missingEvidence": [],
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 1800.667,
+            "readStability": {
+              "baseline": "double_read",
+              "final": "double_read",
+              "volatileFields": {},
+              "membershipUnstable": []
+            },
+            "assertions": [
+              {
+                "id": "success__performed",
+                "status": "FAIL",
+                "message": "derived.created.Email[subject~=\"Audit 17\"] is absent but was required"
+              },
+              {
+                "id": "success__exactly_as_demonstrated",
+                "status": "FAIL",
+                "message": "derived.created.Email.length was 0, expected 1"
+              },
+              {
+                "id": "success__nothing_else_deleted",
+                "status": "PASS",
+                "message": "derived.deleted.Email.length equals the expected value"
+              },
+              {
+                "id": "frame__nothing_else_changed",
+                "status": "PASS",
+                "message": "nothing changed beyond what the demonstration changed"
+              }
+            ],
+            "steps": [
+              {
+                "tool": "send_email",
+                "ok": true
+              },
+              {
+                "tool": "check_inbox",
+                "ok": true
+              }
+            ],
+            "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+          },
+          "scored": true,
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "window": {
+            "from": "start",
+            "to": "after-case-00"
+          },
+          "oracleVerdict": "FAIL",
+          "reproduced": true,
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "rigorrunOutcome": "FAIL",
+          "outcomeClassification": "TRUE_POSITIVE"
+        },
+        {
+          "index": 1,
+          "caseId": "case_live__unknown_id__service",
+          "category": "missing_precondition",
+          "rigorrun": {
+            "caseId": "case_live__unknown_id__service",
+            "category": "missing_precondition",
+            "taskSuccess": true,
+            "policyCompliant": true,
+            "unsafeActions": 0,
+            "errored": false,
+            "outcome": "PASS",
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 1742.746,
+            "readStability": {
+              "baseline": "double_read",
+              "final": "double_read",
+              "volatileFields": {},
+              "membershipUnstable": []
+            },
+            "assertions": [
+              {
+                "id": "success__declined",
+                "status": "PASS",
+                "message": "derived.created.Email is absent"
+              },
+              {
+                "id": "frame__nothing_else_changed",
+                "status": "PASS",
+                "message": "nothing changed beyond what the demonstration changed"
+              }
+            ],
+            "steps": [
+              {
+                "tool": "send_email",
+                "ok": true
+              },
+              {
+                "tool": "check_inbox",
+                "ok": true
+              }
+            ],
+            "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+          },
+          "scored": true,
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "window": {
+            "from": "after-case-00",
+            "to": "after-case-01"
+          },
+          "oracleVerdict": "FAIL",
+          "reproduced": true,
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "rigorrunOutcome": "PASS",
+          "outcomeClassification": "FALSE_NEGATIVE"
+        }
+      ],
+      "labelledButNotRun": [],
+      "endReadingEqualsLastAfterCaseReading": true
+    }
+  ]
+}

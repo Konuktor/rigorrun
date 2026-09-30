@@ -1,0 +1,170 @@
+{
+  "id": "SQ-D-06-timeout-interrupts",
+  "target": "sqlite-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.24,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM c WHERE x<30000000) SELECT count(*) FROM c"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "failed to read query results: interrupted"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "SELECT 1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[{\"columns\":{\"1\":{\"kind\":\"Integer\",\"value\":1}}}],\"rows_changed\":0}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [
+                  {
+                    "columns": {
+                      "1": {
+                        "kind": "Integer",
+                        "value": 1
+                      }
+                    }
+                  }
+                ],
+                "rows_changed": 0
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.24,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM c WHERE x<30000000) SELECT count(*) FROM c"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "failed to read query results: interrupted"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "SELECT 1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[{\"columns\":{\"1\":{\"kind\":\"Integer\",\"value\":1}}}],\"rows_changed\":0}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [
+                  {
+                    "columns": {
+                      "1": {
+                        "kind": "Integer",
+                        "value": 1
+                      }
+                    }
+                  }
+                ],
+                "rows_changed": 0
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.24,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM c WHERE x<30000000) SELECT count(*) FROM c"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "failed to read query results: interrupted"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "SELECT 1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[{\"columns\":{\"1\":{\"kind\":\"Integer\",\"value\":1}}}],\"rows_changed\":0}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [
+                  {
+                    "columns": {
+                      "1": {
+                        "kind": "Integer",
+                        "value": 1
+                      }
+                    }
+                  }
+                ],
+                "rows_changed": 0
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

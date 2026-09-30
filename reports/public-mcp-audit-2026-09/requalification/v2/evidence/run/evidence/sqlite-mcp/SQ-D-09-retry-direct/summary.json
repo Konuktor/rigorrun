@@ -1,0 +1,128 @@
+{
+  "id": "SQ-D-09-retry-direct",
+  "target": "sqlite-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_FAIL",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 5.12,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+            },
+            "result": {
+              "message": "transport timeout after 5.0s (no response)",
+              "timeout": true
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 5.1,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+            },
+            "result": {
+              "message": "transport timeout after 5.0s (no response)",
+              "timeout": true
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 5.1,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+            },
+            "result": {
+              "message": "transport timeout after 5.0s (no response)",
+              "timeout": true
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

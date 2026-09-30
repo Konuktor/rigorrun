@@ -1,0 +1,119 @@
+{
+  "id": "WT-D-09-timer-start-stop",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.44,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "audit timer"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f39c-6fa5-736d-8c03-1051513a1a58\",\n  \"startedAt\": \"2026-09-30T20:38:30+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"audit timer\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.stop",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"timeEntryId\": \"01a0f39c-7010-72c9-a53b-c2332628a2bc\",\n  \"durationMinutes\": 0\n}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.31,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "audit timer"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f39c-a784-7562-aa42-a6189d38453a\",\n  \"startedAt\": \"2026-09-30T20:38:45+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"audit timer\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.stop",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"timeEntryId\": \"01a0f39c-a7b9-74ca-9326-df627dfb9fba\",\n  \"durationMinutes\": 0\n}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.3,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "audit timer"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f39c-cb61-7eb0-9bdc-fef4f5a8ba28\",\n  \"startedAt\": \"2026-09-30T20:38:54+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"audit timer\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.stop",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"timeEntryId\": \"01a0f39c-cb97-79f6-adda-a8d36e8f3d05\",\n  \"durationMinutes\": 0\n}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

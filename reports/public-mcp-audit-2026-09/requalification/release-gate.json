@@ -1,0 +1,940 @@
+{
+  "generatedBy": "requalification/v2/scripts/release-gate-v2.mjs",
+  "decidedBy": "benchmark-v2",
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "packageVersion": "0.2.0",
+  "status": "NO_GO",
+  "gates": [
+    {
+      "id": "GATE_1",
+      "title": "COMPLETE: every frozen case executed with its planned attempts, and every labelled generated case judged on every planned attempt",
+      "status": "PASS",
+      "evidence": {
+        "totalCases": 58,
+        "casesRun": 58,
+        "casesWithPlannedAttempts": 58,
+        "notRun": [],
+        "generatedAttemptsScored": 72,
+        "generatedAttemptsPlanned": 72,
+        "notScored": [],
+        "unlabelled": []
+      }
+    },
+    {
+      "id": "GATE_2",
+      "title": "R1: all 11 R-1 cases ran, every generated case of theirs has a verdict, and none reproduces R-1",
+      "status": "FAIL",
+      "evidence": {
+        "cases": 11,
+        "casesRun": 11,
+        "reproductions": 1,
+        "casesWithoutVerdict": [],
+        "perCase": [
+          {
+            "id": "EM-GM-01-correct",
+            "attempts": 1,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "PASS"
+                ],
+                "outcome": "TRUE_NEGATIVE",
+                "originalRule": "TRUE_NEGATIVE"
+              },
+              {
+                "generatedCaseId": "case_live__unknown_id__service",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "EM-GM-03-duplicate",
+            "attempts": 1,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              },
+              {
+                "generatedCaseId": "case_live__unknown_id__service",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "EM-GMA-01-correct",
+            "attempts": 1,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "PASS"
+                ],
+                "outcome": "TRUE_NEGATIVE",
+                "originalRule": "TRUE_NEGATIVE"
+              },
+              {
+                "generatedCaseId": "case_live__unknown_id__service",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "EM-GMA-04-wrong-recipient",
+            "attempts": 1,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              },
+              {
+                "generatedCaseId": "case_live__unknown_id__service",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "FALSE_NEGATIVE",
+                "originalRule": "FALSE_NEGATIVE"
+              }
+            ]
+          },
+          {
+            "id": "EM-GMA-05-wrong-subject",
+            "attempts": 1,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              },
+              {
+                "generatedCaseId": "case_live__unknown_id__service",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "SQ-LLM-02-qwen2.5-3b",
+            "attempts": 3,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "PASS"
+                ],
+                "outcome": "TRUE_NEGATIVE",
+                "originalRule": "TRUE_NEGATIVE"
+              }
+            ]
+          },
+          {
+            "id": "SQ-W1-01-correct",
+            "attempts": 3,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "PASS"
+                ],
+                "outcome": "TRUE_NEGATIVE",
+                "originalRule": "TRUE_NEGATIVE"
+              }
+            ]
+          },
+          {
+            "id": "SQ-W1-03-duplicate",
+            "attempts": 3,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "SQ-W1-04-wrong-value",
+            "attempts": 3,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "SQ-W1-05-wrong-entity",
+            "attempts": 3,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "FAIL"
+                ],
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE"
+              }
+            ]
+          },
+          {
+            "id": "SQ-W1B-01-correct",
+            "attempts": 3,
+            "generated": [
+              {
+                "generatedCaseId": "case_live__happy_path",
+                "oracle": [
+                  "PASS"
+                ],
+                "outcome": "TRUE_NEGATIVE",
+                "originalRule": "TRUE_NEGATIVE"
+              }
+            ]
+          }
+        ]
+      },
+      "blocker": "R-1 cases run 11/11; reproductions 1; without a verdict: "
+    },
+    {
+      "id": "GATE_3",
+      "title": "N1: EH-WT-03 still FAIL; Worktide v2 held-out clean; no N-1 cross-regression in benchmark-v2; in-process held-out set as expected — all at the product under test",
+      "status": "PASS",
+      "evidence": {
+        "ehWt03": {
+          "rigorrunCommit": "0b3557c6adfc4e032cbe99f3640145d39e232e75",
+          "productSourcesEqual": true,
+          "outcomes": [
+            "FAIL",
+            "FAIL",
+            "FAIL"
+          ]
+        },
+        "heldoutWorktideV2": {
+          "rigorrunCommit": "0b3557c6adfc4e032cbe99f3640145d39e232e75",
+          "productSourcesEqual": true,
+          "gate": {
+            "cases": 11,
+            "run": 11,
+            "matchingExpected": 11,
+            "knownGood": 4,
+            "knownBad": 7,
+            "knownGoodIncorrectlyFailed": 0,
+            "knownBadIncorrectlyPassed": 0,
+            "falsePositivesAgainstOracle": 0,
+            "falseNegativesAgainstOracle": 0,
+            "abstentions": 0,
+            "timedOut": 0,
+            "oracleDisagreesWithTruthLabel": 0,
+            "defined": 11,
+            "passes": true
+          },
+          "sideChannel": {
+            "cases": 3,
+            "run": 3,
+            "matchingExpected": 3,
+            "knownGood": 0,
+            "knownBad": 3,
+            "knownGoodIncorrectlyFailed": 0,
+            "knownBadIncorrectlyPassed": 0,
+            "falsePositivesAgainstOracle": 0,
+            "falseNegativesAgainstOracle": 0,
+            "abstentions": 0,
+            "timedOut": 0,
+            "oracleDisagreesWithTruthLabel": 0,
+            "defined": 3,
+            "passes": true
+          }
+        },
+        "crossRegression": {
+          "journeysCompared": 4,
+          "journeysCompiledNow": 4,
+          "identityChanges": [
+            {
+              "journey": "email-mcp/gm-w1",
+              "entity": "Record1",
+              "before": "count",
+              "now": "service"
+            },
+            {
+              "journey": "email-mcp/gm-fault",
+              "entity": "Record1",
+              "before": "count",
+              "now": "service"
+            }
+          ],
+          "changedValueAsIdentity": [],
+          "nullableIdentityNow": [],
+          "focusEntityMoved": [],
+          "duplicateKeysInFinalState": [],
+          "suiteShapeChanges": [
+            {
+              "journey": "email-mcp/gm-w1",
+              "before": [
+                "happy_path:case_live__happy_path"
+              ],
+              "now": [
+                "happy_path:case_live__happy_path",
+                "missing_precondition:case_live__unknown_id__service"
+              ]
+            },
+            {
+              "journey": "email-mcp/gm-fault",
+              "before": [
+                "happy_path:case_live__happy_path"
+              ],
+              "now": [
+                "happy_path:case_live__happy_path",
+                "missing_precondition:case_live__unknown_id__service"
+              ]
+            }
+          ],
+          "casesWhoseClassificationMoved": [
+            {
+              "id": "EM-LLM-01-qwen2.5-3b",
+              "after2": {
+                "outcome": "NOT_RUN",
+                "originalRule": "NOT_RUN",
+                "attempts": 0
+              },
+              "now": {
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE",
+                "attempts": 3
+              }
+            },
+            {
+              "id": "SQ-LLM-01-llama3.1-8b",
+              "after2": {
+                "outcome": "NOT_RUN",
+                "originalRule": "NOT_RUN",
+                "attempts": 0
+              },
+              "now": {
+                "outcome": "TRUE_POSITIVE",
+                "originalRule": "TRUE_POSITIVE",
+                "attempts": 1
+              }
+            },
+            {
+              "id": "SQ-LLM-02-qwen2.5-3b",
+              "after2": {
+                "outcome": "NOT_RUN",
+                "originalRule": "NOT_RUN",
+                "attempts": 0
+              },
+              "now": {
+                "outcome": "TRUE_NEGATIVE",
+                "originalRule": "TRUE_NEGATIVE",
+                "attempts": 3
+              }
+            }
+          ],
+          "regressions": [],
+          "unmeasured": [],
+          "greenmailHappyPathDiagnostic": null,
+          "frozenResultsPresent": true
+        },
+        "heldoutInprocess": {
+          "rigorrunCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+          "cases": 23,
+          "matchingExpected": 23,
+          "knownGoodIncorrectlyFailed": 0,
+          "knownBadIncorrectlyPassed": 0,
+          "undecidableGivenAVerdict": 0,
+          "notFinishedGivenAVerdict": 0,
+          "abstentions": 6
+        }
+      }
+    },
+    {
+      "id": "GATE_4",
+      "title": "FALSE_POSITIVES (strict): no known-good generated case graded anything but TRUE_NEGATIVE, under either rule, on any attempt",
+      "status": "PASS",
+      "evidence": {
+        "FP": 0,
+        "originalRuleFP": 0,
+        "knownGood": {
+          "generatedCases": 7,
+          "attempts": 13,
+          "attemptsGradedTrueNegativeBothRules": 13,
+          "notGradedTrueNegative": []
+        }
+      }
+    },
+    {
+      "id": "GATE_5",
+      "title": "FALSE_NEGATIVES: no independently known-bad generated case receives PASS",
+      "status": "FAIL",
+      "evidence": {
+        "knownBad": {
+          "generatedCases": 31,
+          "attempts": 59,
+          "attemptsGivenPass": [
+            {
+              "id": "EM-GM-04-wrong-recipient",
+              "generatedCaseId": "case_live__unknown_id__service",
+              "attempt": 1,
+              "outcome": "PASS",
+              "verdict": "PASS"
+            },
+            {
+              "id": "EM-GMA-04-wrong-recipient",
+              "generatedCaseId": "case_live__unknown_id__service",
+              "attempt": 1,
+              "outcome": "PASS",
+              "verdict": "PASS"
+            }
+          ]
+        },
+        "FN": 2,
+        "originalRuleFN": 2
+      },
+      "blocker": "known-bad attempts given PASS: EM-GM-04-wrong-recipient/case_live__unknown_id__service#1, EM-GMA-04-wrong-recipient/case_live__unknown_id__service#1; FN 2/2"
+    },
+    {
+      "id": "GATE_6",
+      "title": "INJECTED_FAILURES: every reachable injected failure detected on every attempt, and at least one is reachable",
+      "status": "PASS",
+      "evidence": {
+        "labelledGeneratedCases": [
+          "EM-GM-06-retry-after-lost-response/case_live__happy_path"
+        ],
+        "reachableAttempts": 3,
+        "detectedAttempts": 3,
+        "undetected": []
+      }
+    },
+    {
+      "id": "GATE_7",
+      "title": "INDEPENDENT_ORACLE: the ten gated IO-v1 cases and every gated IO-v2 case behave exactly as frozen; independent evidence overrides self-reported evidence; nothing changed outside the frame passes",
+      "status": "PASS",
+      "evidence": {
+        "ioV1": {
+          "ok": true,
+          "planned": 10,
+          "complete": true,
+          "failing": [],
+          "guardViolations": [],
+          "perCase": {
+            "IO-1": {
+              "expected": {
+                "outcome": "PASS",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "PASS"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-2": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-3": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-4": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-5": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-6a": {
+              "expected": {
+                "outcome": "ABSTAIN",
+                "evidenceIndependence": "INDEPENDENT",
+                "missingEvidenceContains": "final_state_unavailable"
+              },
+              "outcomes": [
+                "ABSTAIN"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-6b": {
+              "expected": {
+                "outcome": "NO_VERDICT"
+              },
+              "outcomes": [
+                "None"
+              ],
+              "labels": [
+                "None"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-7": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-7-mixed-a": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "SELF_REPORTED"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "SELF_REPORTED"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-7-mixed-b": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "SELF_REPORTED"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "SELF_REPORTED"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-6c": {
+              "expected": {
+                "notOutcome": "PASS",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO-7-self": {
+              "expected": {
+                "evidenceIndependence": "SELF_REPORTED"
+              },
+              "outcomes": [
+                "PASS"
+              ],
+              "labels": [
+                "SELF_REPORTED"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": null
+            }
+          }
+        },
+        "ioV2": {
+          "ok": true,
+          "planned": 9,
+          "complete": true,
+          "failing": [],
+          "guardViolations": [],
+          "perCase": {
+            "IO2-1": {
+              "expected": {
+                "outcome": "PASS",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "PASS"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-2": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-3": {
+              "expected": {
+                "outcome": "PASS",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "PASS"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-4": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-5": {
+              "expected": {
+                "outcome": "PASS",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "PASS"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-6": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "INDEPENDENT"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "INDEPENDENT"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-7": {
+              "expected": {
+                "outcome": "PASS",
+                "evidenceIndependence": "SELF_REPORTED"
+              },
+              "outcomes": [
+                "PASS"
+              ],
+              "labels": [
+                "SELF_REPORTED"
+              ],
+              "oracle": [
+                "PASS"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-8": {
+              "expected": {
+                "outcome": "FAIL",
+                "evidenceIndependence": "SELF_REPORTED"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "SELF_REPORTED"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            },
+            "IO2-9": {
+              "expected": {
+                "notOutcome": "PASS",
+                "evidenceIndependence": "SELF_REPORTED"
+              },
+              "outcomes": [
+                "FAIL"
+              ],
+              "labels": [
+                "SELF_REPORTED"
+              ],
+              "oracle": [
+                "FAIL"
+              ],
+              "allAttemptsMatch": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "GATE_8",
+      "title": "ABSTENTION: without authoritative evidence RigorRun never gives PASS",
+      "status": "PASS",
+      "evidence": {
+        "ioV1AbstentionFailing": [],
+        "ioV2AbstentionFailing": [],
+        "passWithMissingEvidence": []
+      }
+    },
+    {
+      "id": "GATE_9",
+      "title": "MCP_COMPAT: supported MCP behaviour explicitly known at the product under test; no compatibility ambiguity that would invalidate the next audits",
+      "status": "PASS",
+      "evidence": {
+        "preflight": {
+          "PASS": 14,
+          "LIMIT": 5,
+          "FAIL": 0
+        },
+        "targets": [
+          {
+            "name": "Filesystem MCP",
+            "package": "@modelcontextprotocol/server-filesystem 2026.8.31",
+            "serverProtocol": "legacy: depends on @modelcontextprotocol/sdk ^1.30.0 (latest 2025-11-25); the raw handshake negotiated 2025-11-25 (filesystem-connect.json)",
+            "status": "SUPPORTED",
+            "provenance": "measured again at 7209dca",
+            "measured": [
+              "filesystem-connect",
+              "filesystem-tools-list",
+              "filesystem-call",
+              "filesystem-error",
+              "filesystem-teardown"
+            ],
+            "blocking": false,
+            "preconditions": [
+              "record the negotiated protocol version from a raw handshake (RigorRun records \"negotiated\" for stdio)"
+            ]
+          },
+          {
+            "name": "GitHub MCP",
+            "package": "github/github-mcp-server (main), github.com/modelcontextprotocol/go-sdk v1.7.0",
+            "serverProtocol": "dual-era: go-sdk v1.7.0 supports 2026-07-28, 2025-11-25, 2025-06-18, 2025-03-26, 2024-11-05, and answers the legacy initialize handshake capped at 2025-11-25",
+            "status": "PARTIAL",
+            "provenance": "carried unchanged from the final qualification (a011a64); not re-read at 7209dca",
+            "measured": [],
+            "blocking": false,
+            "preconditions": [
+              "pin the server build and record the negotiated version from a raw initialize handshake (expected 2025-11-25)",
+              "compare RigorRun's discovered tool count with a raw paged tools/list; go-sdk's default page size is 1000, but RigorRun ignores nextCursor, so any second page would be invisible",
+              "prefer the stdio binary or container with the token in the environment; the remote HTTP endpoint needs a secret literally named Authorization, and every project secret is handed to every connector, verifier included",
+              "reproduce any timeout with a raw client before attributing it upstream"
+            ]
+          },
+          {
+            "name": "Playwright MCP",
+            "package": "@playwright/mcp 0.0.80 (playwright-core 1.63.0-alpha-2026-08-31)",
+            "serverProtocol": "legacy: the MCP SDK bundled in playwright-core declares LATEST_PROTOCOL_VERSION 2025-11-25; no 2026-07-28 support in the package",
+            "status": "PARTIAL",
+            "provenance": "carried unchanged from the final qualification (a011a64); not re-read at 7209dca",
+            "measured": [],
+            "blocking": false,
+            "preconditions": [
+              "record the negotiated version and a raw paged tools/list count before the audit",
+              "measure the server's stderr volume with a raw client: RigorRun pipes stderr and never reads it, and 200 KB stalled both calls (stderr-flood.json); any TIMED_OUT must be reproduced with a raw client before it is called an upstream failure",
+              "browser tool results are prose snapshots and images, which normalise to text or empty: verdicts must rest on an independent verifier read (a separate process reading browser or application state), never on the tools' own results",
+              "raise toolCallMs for browser actions that can exceed the 20 s default, keeping caseMs >= toolCallMs + 5000"
+            ]
+          }
+        ],
+        "missingStatements": []
+      }
+    },
+    {
+      "id": "GATE_10",
+      "title": "TESTS: unit/integration, e2e, typecheck and lint all pass at the product under test",
+      "status": "PASS",
+      "evidence": {
+        "test": {
+          "parsed": true,
+          "failed": 0,
+          "passed": 1089,
+          "skipped": 0,
+          "total": 1089,
+          "exit": 0
+        },
+        "typecheck": 0,
+        "lint": 0,
+        "e2e": {
+          "passed": 56,
+          "failed": 0,
+          "exit": 0
+        }
+      }
+    },
+    {
+      "id": "GATE_11",
+      "title": "BENCHMARK_INTEGRITY: no frozen label, case or benchmark definition changed — benchmark-v1, benchmark-v2, IO-v1, IO-v2 and the Worktide v2 held-out set",
+      "status": "PASS",
+      "evidence": {
+        "productUnderTestCheck": "product under test verified: product sources equal 7209dca; frozen inputs unchanged",
+        "frozenAuditFiles": "0 tracked audit file(s) outside remediation/ differ from HEAD",
+        "laterFreezesRecorded": {
+          "benchmarkV2": {
+            "present": true,
+            "freezeJsonSha256": "65d6cc59e87e89f61304cec7ab21d2b7367a55c437a1b34bd62c2a5bac079900",
+            "frozenAt": "2026-09-15T02:19:08.153648+00:00",
+            "filesVerified": 10,
+            "mismatches": []
+          },
+          "ioV2": {
+            "present": true,
+            "freezeJsonSha256": "0a1552dd039cbd3f73f0e6108eef6911b06652b965d3adb6e82fc11fd93532d3",
+            "frozenAt": "2026-09-15T02:18:12+00:00",
+            "filesVerified": 19,
+            "mismatches": []
+          }
+        }
+      }
+    },
+    {
+      "id": "GATE_12",
+      "title": "NO_TARGET_HACKS: no target-specific special casing in production code",
+      "status": "PASS",
+      "evidence": {
+        "scanned": "git diff 07dda8c 7209dca -- packages apps (added lines in */src/)",
+        "hits": []
+      }
+    }
+  ],
+  "blockers": [
+    {
+      "gate": "GATE_2",
+      "blocker": "R-1 cases run 11/11; reproductions 1; without a verdict: "
+    },
+    {
+      "gate": "GATE_5",
+      "blocker": "known-bad attempts given PASS: EM-GM-04-wrong-recipient/case_live__unknown_id__service#1, EM-GMA-04-wrong-recipient/case_live__unknown_id__service#1; FN 2/2"
+    }
+  ]
+}

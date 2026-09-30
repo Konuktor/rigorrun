@@ -1,0 +1,5476 @@
+{
+  "generatedBy": "requalification/v1/scripts/aggregate-v1.mjs",
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "packageVersion": "0.2.0",
+  "frozen58": {
+    "runCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+    "TOTAL_CASES": 58,
+    "CASES_RUN": 46,
+    "CASES_WITH_PLANNED_ATTEMPTS": 46,
+    "NOT_RUN": 12,
+    "ATTEMPTS_PLANNED": 152,
+    "ATTEMPTS_RUN": 136,
+    "DIRECT_PROBE_CASES_RUN": 32,
+    "RIGORRUN_MODE_CASES": 26,
+    "RIGORRUN_MODE_CASES_RUN": 14,
+    "TP": 11,
+    "TN": 3,
+    "FP": 0,
+    "FN": 0,
+    "ABSTAIN": 0,
+    "TIMED_OUT": 0,
+    "AGENT_FAILURE": 0,
+    "HARNESS_FAILURE": 0,
+    "UNKNOWN": 0,
+    "INCONSISTENT": 0,
+    "RIGORRUN_MODE_NOT_RUN": 12,
+    "ORIGINAL_RULE": {
+      "TP": 11,
+      "TN": 3,
+      "FP": 0,
+      "FN": 0,
+      "INCONSISTENT": 0
+    },
+    "ATTEMPT_LEVEL": {
+      "attempts": 40,
+      "TP": 31,
+      "TN": 9,
+      "FP": 0,
+      "FN": 0,
+      "ABSTAIN": 0,
+      "TIMED_OUT": 0,
+      "AGENT_FAILURE": 0,
+      "HARNESS_FAILURE": 0,
+      "ORIGINAL_RULE_FP": 0,
+      "ORIGINAL_RULE_FN": 0
+    },
+    "KNOWN_GOOD": {
+      "cases": 3,
+      "attempts": 9,
+      "attemptsGradedTrueNegativeBothRules": 9,
+      "notGradedTrueNegative": []
+    },
+    "KNOWN_BAD": {
+      "cases": 11,
+      "attempts": 31,
+      "attemptsGivenPass": []
+    },
+    "INJECTED": {
+      "cases": 3,
+      "casesRun": 2,
+      "observedByOracle": 2,
+      "reachableAttempts": 0,
+      "reachableCases": [],
+      "detectedAttempts": 0
+    },
+    "R1": {
+      "cases": 11,
+      "casesRun": 6,
+      "reproductions": 0,
+      "casesWithoutVerdict": [
+        "EM-GM-01-correct",
+        "EM-GM-03-duplicate",
+        "EM-GMA-01-correct",
+        "EM-GMA-04-wrong-recipient",
+        "EM-GMA-05-wrong-subject"
+      ],
+      "perCase": [
+        {
+          "id": "EM-GM-01-correct",
+          "attempts": 0,
+          "oracle": [],
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "EM-GM-03-duplicate",
+          "attempts": 0,
+          "oracle": [],
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "EM-GMA-01-correct",
+          "attempts": 0,
+          "oracle": [],
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "EM-GMA-04-wrong-recipient",
+          "attempts": 0,
+          "oracle": [],
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "EM-GMA-05-wrong-subject",
+          "attempts": 0,
+          "oracle": [],
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "status": "NOT_RUN"
+        },
+        {
+          "id": "SQ-LLM-02-qwen2.5-3b",
+          "attempts": 3,
+          "oracle": [
+            "PASS"
+          ],
+          "outcome": "TRUE_NEGATIVE",
+          "originalRule": "TRUE_NEGATIVE",
+          "status": "PASS"
+        },
+        {
+          "id": "SQ-W1-01-correct",
+          "attempts": 3,
+          "oracle": [
+            "PASS"
+          ],
+          "outcome": "TRUE_NEGATIVE",
+          "originalRule": "TRUE_NEGATIVE",
+          "status": "PASS"
+        },
+        {
+          "id": "SQ-W1-03-duplicate",
+          "attempts": 3,
+          "oracle": [
+            "FAIL"
+          ],
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE",
+          "status": "FAIL"
+        },
+        {
+          "id": "SQ-W1-04-wrong-value",
+          "attempts": 3,
+          "oracle": [
+            "FAIL"
+          ],
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE",
+          "status": "FAIL"
+        },
+        {
+          "id": "SQ-W1-05-wrong-entity",
+          "attempts": 3,
+          "oracle": [
+            "FAIL"
+          ],
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE",
+          "status": "FAIL"
+        },
+        {
+          "id": "SQ-W1B-01-correct",
+          "attempts": 3,
+          "oracle": [
+            "PASS"
+          ],
+          "outcome": "TRUE_NEGATIVE",
+          "originalRule": "TRUE_NEGATIVE",
+          "status": "PASS"
+        }
+      ]
+    },
+    "PER_TARGET": {
+      "email-mcp": {
+        "TOTAL_CASES": 21,
+        "CASES_RUN": 9,
+        "CASES_WITH_PLANNED_ATTEMPTS": 9,
+        "NOT_RUN": 12,
+        "ATTEMPTS_PLANNED": 43,
+        "ATTEMPTS_RUN": 27,
+        "DIRECT_PROBE_CASES_RUN": 9,
+        "RIGORRUN_MODE_CASES": 12,
+        "RIGORRUN_MODE_CASES_RUN": 0,
+        "TP": 0,
+        "TN": 0,
+        "FP": 0,
+        "FN": 0,
+        "ABSTAIN": 0,
+        "TIMED_OUT": 0,
+        "AGENT_FAILURE": 0,
+        "HARNESS_FAILURE": 0,
+        "UNKNOWN": 0,
+        "INCONSISTENT": 0,
+        "RIGORRUN_MODE_NOT_RUN": 12,
+        "ORIGINAL_RULE": {
+          "TP": 0,
+          "TN": 0,
+          "FP": 0,
+          "FN": 0,
+          "INCONSISTENT": 0
+        },
+        "ATTEMPT_LEVEL": {
+          "attempts": 0,
+          "TP": 0,
+          "TN": 0,
+          "FP": 0,
+          "FN": 0,
+          "ABSTAIN": 0,
+          "TIMED_OUT": 0,
+          "AGENT_FAILURE": 0,
+          "HARNESS_FAILURE": 0,
+          "ORIGINAL_RULE_FP": 0,
+          "ORIGINAL_RULE_FN": 0
+        },
+        "KNOWN_GOOD": {
+          "cases": 0,
+          "attempts": 0,
+          "attemptsGradedTrueNegativeBothRules": 0,
+          "notGradedTrueNegative": []
+        },
+        "KNOWN_BAD": {
+          "cases": 0,
+          "attempts": 0,
+          "attemptsGivenPass": []
+        },
+        "INJECTED": {
+          "cases": 2,
+          "casesRun": 1,
+          "observedByOracle": 1,
+          "reachableAttempts": 0,
+          "reachableCases": [],
+          "detectedAttempts": 0
+        }
+      },
+      "worktide-mcp": {
+        "TOTAL_CASES": 13,
+        "CASES_RUN": 13,
+        "CASES_WITH_PLANNED_ATTEMPTS": 13,
+        "NOT_RUN": 0,
+        "ATTEMPTS_PLANNED": 39,
+        "ATTEMPTS_RUN": 39,
+        "DIRECT_PROBE_CASES_RUN": 13,
+        "RIGORRUN_MODE_CASES": 0,
+        "RIGORRUN_MODE_CASES_RUN": 0,
+        "TP": 0,
+        "TN": 0,
+        "FP": 0,
+        "FN": 0,
+        "ABSTAIN": 0,
+        "TIMED_OUT": 0,
+        "AGENT_FAILURE": 0,
+        "HARNESS_FAILURE": 0,
+        "UNKNOWN": 0,
+        "INCONSISTENT": 0,
+        "RIGORRUN_MODE_NOT_RUN": 0,
+        "ORIGINAL_RULE": {
+          "TP": 0,
+          "TN": 0,
+          "FP": 0,
+          "FN": 0,
+          "INCONSISTENT": 0
+        },
+        "ATTEMPT_LEVEL": {
+          "attempts": 0,
+          "TP": 0,
+          "TN": 0,
+          "FP": 0,
+          "FN": 0,
+          "ABSTAIN": 0,
+          "TIMED_OUT": 0,
+          "AGENT_FAILURE": 0,
+          "HARNESS_FAILURE": 0,
+          "ORIGINAL_RULE_FP": 0,
+          "ORIGINAL_RULE_FN": 0
+        },
+        "KNOWN_GOOD": {
+          "cases": 0,
+          "attempts": 0,
+          "attemptsGradedTrueNegativeBothRules": 0,
+          "notGradedTrueNegative": []
+        },
+        "KNOWN_BAD": {
+          "cases": 0,
+          "attempts": 0,
+          "attemptsGivenPass": []
+        },
+        "INJECTED": {
+          "cases": 0,
+          "casesRun": 0,
+          "observedByOracle": 0,
+          "reachableAttempts": 0,
+          "reachableCases": [],
+          "detectedAttempts": 0
+        }
+      },
+      "sqlite-mcp": {
+        "TOTAL_CASES": 24,
+        "CASES_RUN": 24,
+        "CASES_WITH_PLANNED_ATTEMPTS": 24,
+        "NOT_RUN": 0,
+        "ATTEMPTS_PLANNED": 70,
+        "ATTEMPTS_RUN": 70,
+        "DIRECT_PROBE_CASES_RUN": 10,
+        "RIGORRUN_MODE_CASES": 14,
+        "RIGORRUN_MODE_CASES_RUN": 14,
+        "TP": 11,
+        "TN": 3,
+        "FP": 0,
+        "FN": 0,
+        "ABSTAIN": 0,
+        "TIMED_OUT": 0,
+        "AGENT_FAILURE": 0,
+        "HARNESS_FAILURE": 0,
+        "UNKNOWN": 0,
+        "INCONSISTENT": 0,
+        "RIGORRUN_MODE_NOT_RUN": 0,
+        "ORIGINAL_RULE": {
+          "TP": 11,
+          "TN": 3,
+          "FP": 0,
+          "FN": 0,
+          "INCONSISTENT": 0
+        },
+        "ATTEMPT_LEVEL": {
+          "attempts": 40,
+          "TP": 31,
+          "TN": 9,
+          "FP": 0,
+          "FN": 0,
+          "ABSTAIN": 0,
+          "TIMED_OUT": 0,
+          "AGENT_FAILURE": 0,
+          "HARNESS_FAILURE": 0,
+          "ORIGINAL_RULE_FP": 0,
+          "ORIGINAL_RULE_FN": 0
+        },
+        "KNOWN_GOOD": {
+          "cases": 3,
+          "attempts": 9,
+          "attemptsGradedTrueNegativeBothRules": 9,
+          "notGradedTrueNegative": []
+        },
+        "KNOWN_BAD": {
+          "cases": 11,
+          "attempts": 31,
+          "attemptsGivenPass": []
+        },
+        "INJECTED": {
+          "cases": 1,
+          "casesRun": 1,
+          "observedByOracle": 1,
+          "reachableAttempts": 0,
+          "reachableCases": [],
+          "detectedAttempts": 0
+        }
+      }
+    },
+    "NOT_RUN_CASES": [
+      {
+        "id": "EM-GM-01-correct",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GM-02-missing-action-false-claim",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GM-03-duplicate",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GM-04-wrong-recipient",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GM-05-wrong-subject",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GM-06-retry-after-lost-response",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GMA-01-correct",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GMA-02-missing-action-false-claim",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GMA-03-duplicate",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GMA-04-wrong-recipient",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-GMA-05-wrong-subject",
+        "reason": "SUITE_SHAPE_REFUSED"
+      },
+      {
+        "id": "EM-LLM-01-qwen2.5-3b",
+        "reason": "SUITE_SHAPE_REFUSED"
+      }
+    ],
+    "setupRecovery": {
+      "reregistration": {
+        "at": "2026-09-16T04:13:56+00:00",
+        "why": "v1 setup could not register sq-w1-wrong-value on sqlite-mcp/w1b: sk_queues:89:21)\nEmitted 'error' event on Server instance at:\n    at emitErrorNT (node:net:1976:8)\n    at process.processTicksAndRejections (node:internal/process/task_queues:89:21) {\n  code: 'EADDRINUSE',\n  errno: -98,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 42878\n}\n\nNode.js v22.22.2\n\n",
+        "caseAffected": "SQ-W1B-04-wrong-value",
+        "notRunAttemptsKeptAt": "v1/evidence/frozen-58/run/evidence-not-run-agent-unregistered/sqlite-mcp/SQ-W1B-04-wrong-value",
+        "project": "p_9a2d612ce8d3",
+        "exit": 0,
+        "stderrTail": "",
+        "agentsRegisteredAfter": [
+          "ollama-llama3.1-8b",
+          "ollama-qwen2.5-3b",
+          "sq-w1-correct",
+          "sq-w1-duplicate",
+          "sq-w1-forbidden-extra",
+          "sq-w1-missing-action",
+          "sq-w1-wrong-entity",
+          "sq-w1-wrong-value"
+        ],
+        "ok": true
+      },
+      "keptNotRunAttempts": [
+        {
+          "id": "SQ-W1B-04-wrong-value",
+          "attempts": [
+            {
+              "attempt": 1,
+              "rigorrunVerdict": "NOT_RUN",
+              "outcomeClassification": "NOT_SCORED_NOT_RUN",
+              "error": "error No agent \"sq-w1-wrong-value\" on sqlite W1b insert a task (insert demonstrated last)."
+            },
+            {
+              "attempt": 2,
+              "rigorrunVerdict": "NOT_RUN",
+              "outcomeClassification": "NOT_SCORED_NOT_RUN",
+              "error": "error No agent \"sq-w1-wrong-value\" on sqlite W1b insert a task (insert demonstrated last)."
+            },
+            {
+              "attempt": 3,
+              "rigorrunVerdict": "NOT_RUN",
+              "outcomeClassification": "NOT_SCORED_NOT_RUN",
+              "error": "error No agent \"sq-w1-wrong-value\" on sqlite W1b insert a task (insert demonstrated last)."
+            }
+          ]
+        }
+      ]
+    },
+    "cases": {
+      "EM-GM-01-correct": {
+        "id": "EM-GM-01-correct",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "PASS"
+          ],
+          "classification": "TRUE_NEGATIVE",
+          "outcomeClassification": "TRUE_NEGATIVE"
+        }
+      },
+      "EM-GM-02-missing-action-false-claim": {
+        "id": "EM-GM-02-missing-action-false-claim",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GM-03-duplicate": {
+        "id": "EM-GM-03-duplicate",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GM-04-wrong-recipient": {
+        "id": "EM-GM-04-wrong-recipient",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GM-05-wrong-subject": {
+        "id": "EM-GM-05-wrong-subject",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GM-06-retry-after-lost-response": {
+        "id": "EM-GM-06-retry-after-lost-response",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": true,
+        "r1": false,
+        "rigorrunFindings": [
+          "R-4"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GM-07-retry-direct": {
+        "id": "EM-GM-07-retry-direct",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": true,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 18.68,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 6.23,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 6.23,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 6.22,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-GMA-01-correct": {
+        "id": "EM-GMA-01-correct",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "PASS"
+          ],
+          "classification": "TRUE_NEGATIVE",
+          "outcomeClassification": "TRUE_NEGATIVE"
+        }
+      },
+      "EM-GMA-02-missing-action-false-claim": {
+        "id": "EM-GMA-02-missing-action-false-claim",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GMA-03-duplicate": {
+        "id": "EM-GMA-03-duplicate",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GMA-04-wrong-recipient": {
+        "id": "EM-GMA-04-wrong-recipient",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-GMA-05-wrong-subject": {
+        "id": "EM-GMA-05-wrong-subject",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 1,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "EM-LLM-01-qwen2.5-3b": {
+        "id": "EM-LLM-01-qwen2.5-3b",
+        "target": "email-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [
+          "R-4"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 0,
+        "status": "NOT_RUN",
+        "notRunReason": "SUITE_SHAPE_REFUSED",
+        "oracleVerdicts": [],
+        "rigorrunOutcomes": [],
+        "classification": "NOT_RUN",
+        "outcomeClassification": "NOT_RUN",
+        "verificationStrength": [],
+        "evidenceIndependence": [],
+        "totalSeconds": 0,
+        "perAttempt": [],
+        "previous": {
+          "source": "AFTER-1",
+          "rigorrunCommit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "TIMED_OUT"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TIMED_OUT"
+        }
+      },
+      "EM-MH-01-send-one": {
+        "id": "EM-MH-01-send-one",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 3.44,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.15,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.15,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-02-check-inbox-crashes": {
+        "id": "EM-MH-02-check-inbox-crashes",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 3.52,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.17,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.18,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.17,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-03-search-emails-crashes": {
+        "id": "EM-MH-03-search-emails-crashes",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 3.58,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.18,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.19,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.21,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-04-auto-rule-modules-missing": {
+        "id": "EM-MH-04-auto-rule-modules-missing",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 4.01,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.34,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.33,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.34,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-05-to-as-list-and-comma": {
+        "id": "EM-MH-05-to-as-list-and-comma",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 3.41,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.13,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-06-empty-recipient": {
+        "id": "EM-MH-06-empty-recipient",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 3.44,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.16,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-07-unknown-service": {
+        "id": "EM-MH-07-unknown-service",
+        "target": "email-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 3.4,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 1.12,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 1.14,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "EM-MH-08-service-not-persisted-across-restart": {
+        "id": "EM-MH-08-service-not-persisted-across-restart",
+        "target": "email-mcp",
+        "mode": "shell",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 6.89,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 2.29,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 2.31,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 2.29,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-01-tasks-get-doubled-prefix": {
+        "id": "WT-D-01-tasks-get-doubled-prefix",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.8,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.26,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.26,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.28,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-02-tasks-update-doubled-prefix": {
+        "id": "WT-D-02-tasks-update-doubled-prefix",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.84,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.28,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.28,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.28,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-03-tasks-complete-doubled-prefix": {
+        "id": "WT-D-03-tasks-complete-doubled-prefix",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.97,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.34,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.31,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.32,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-04-projects-get-archive-doubled-prefix": {
+        "id": "WT-D-04-projects-get-archive-doubled-prefix",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 1.08,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.37,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.36,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.35,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-05-tasks-create-500": {
+        "id": "WT-D-05-tasks-create-500",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 1.3,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.53,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.38,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.39,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-06-add-dependency-500": {
+        "id": "WT-D-06-add-dependency-500",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 1.14,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.39,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.38,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.37,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-07-time-log-500": {
+        "id": "WT-D-07-time-log-500",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.77,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.26,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.26,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.25,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-08-projects-create-500": {
+        "id": "WT-D-08-projects-create-500",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 1.02,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.41,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.3,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.31,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-09-timer-start-stop": {
+        "id": "WT-D-09-timer-start-stop",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.92,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.3,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.3,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.32,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-10-double-start-closes-first": {
+        "id": "WT-D-10-double-start-closes-first",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 1.12,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.38,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.36,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.38,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-11-stop-with-nothing-running": {
+        "id": "WT-D-11-stop-with-nothing-running",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.73,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.24,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.24,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.25,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-12-key-too-long-rejected": {
+        "id": "WT-D-12-key-too-long-rejected",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.52,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.17,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.18,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.17,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "WT-D-13-nonexistent-task": {
+        "id": "WT-D-13-nonexistent-task",
+        "target": "worktide-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.73,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.24,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.25,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.24,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-01-readonly-denies-insert": {
+        "id": "SQ-D-01-readonly-denies-insert",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.09,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-02-backup-under-deny-everything": {
+        "id": "SQ-D-02-backup-under-deny-everything",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.12,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-03-rows-changed-leak": {
+        "id": "SQ-D-03-rows-changed-leak",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.12,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-04-transaction-across-calls": {
+        "id": "SQ-D-04-transaction-across-calls",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.09,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-05-column-deny-blocks-aggregate": {
+        "id": "SQ-D-05-column-deny-blocks-aggregate",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.09,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-06-timeout-interrupts": {
+        "id": "SQ-D-06-timeout-interrupts",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.69,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.23,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.23,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.23,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-07-multi-statement-rejected": {
+        "id": "SQ-D-07-multi-statement-rejected",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.09,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.03,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-08-readonly-creates-missing-file": {
+        "id": "SQ-D-08-readonly-creates-missing-file",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.09,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.03,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.03,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.03,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-09-retry-direct": {
+        "id": "SQ-D-09-retry-direct",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": true,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 15.3,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 5.1,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 5.1,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 5.1,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-D-10-backup-under-column-deny": {
+        "id": "SQ-D-10-backup-under-column-deny",
+        "target": "sqlite-mcp",
+        "mode": "direct",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "DIRECT_PROBE_NOT_SCORED",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED",
+        "outcomeClassification": "NOT_SCORED",
+        "verificationStrength": [
+          []
+        ],
+        "evidenceIndependence": [],
+        "totalSeconds": 0.13,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.05,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.04,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "NOT_RUN",
+            "rigorrunOutcome": "NOT_RUN",
+            "classification": "NOT_SCORED",
+            "outcomeClassification": "NOT_SCORED",
+            "verification": null,
+            "evidenceIndependence": null,
+            "baseline": null,
+            "budgetMs": null,
+            "durationMs": null,
+            "outcomeReason": null,
+            "missingEvidence": [],
+            "exit": null
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "NOT_RUN"
+          ],
+          "classification": "NOT_SCORED",
+          "outcomeClassification": "NOT_SCORED"
+        }
+      },
+      "SQ-LLM-01-llama3.1-8b": {
+        "id": "SQ-LLM-01-llama3.1-8b",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [
+          "R-4"
+        ],
+        "attemptsPlanned": 1,
+        "attempts": 1,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 42.34,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 42.34,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 41770.597,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-1",
+          "rigorrunCommit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
+          "attempts": 1,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "TIMED_OUT"
+          ],
+          "classification": "FALSE_POSITIVE",
+          "outcomeClassification": "TIMED_OUT"
+        }
+      },
+      "SQ-LLM-02-qwen2.5-3b": {
+        "id": "SQ-LLM-02-qwen2.5-3b",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "PASS",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "PASS"
+        ],
+        "classification": "TRUE_NEGATIVE",
+        "outcomeClassification": "TRUE_NEGATIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 59.92,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 25.55,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 24728.792,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          },
+          {
+            "attempt": 2,
+            "seconds": 17.01,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 16439.038,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          },
+          {
+            "attempt": 3,
+            "seconds": 17.36,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 16752.258,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          }
+        ],
+        "previous": {
+          "source": "AFTER-1",
+          "rigorrunCommit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "PASS"
+          ],
+          "classification": "TRUE_NEGATIVE",
+          "outcomeClassification": "TRUE_NEGATIVE"
+        }
+      },
+      "SQ-W1-01-correct": {
+        "id": "SQ-W1-01-correct",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1",
+          "R-3",
+          "R-5"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "PASS",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "PASS"
+        ],
+        "classification": "TRUE_NEGATIVE",
+        "outcomeClassification": "TRUE_NEGATIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.76,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.6,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 77.107,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.58,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 87.77,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.58,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 79.737,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "PASS"
+          ],
+          "classification": "TRUE_NEGATIVE",
+          "outcomeClassification": "TRUE_NEGATIVE"
+        }
+      },
+      "SQ-W1-02-missing-action-false-claim": {
+        "id": "SQ-W1-02-missing-action-false-claim",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.65,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 67.644,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.53,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 68.518,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.55,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 60.494,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1-03-duplicate": {
+        "id": "SQ-W1-03-duplicate",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.78,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.6,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 100.296,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Row record(s) created, where the demonstration created 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.6,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 93.874,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Row record(s) created, where the demonstration created 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 99.741,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Row record(s) created, where the demonstration created 1",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1-04-wrong-value": {
+        "id": "SQ-W1-04-wrong-value",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.74,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 87.727,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.6,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 89.459,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 77.929,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1-05-wrong-entity": {
+        "id": "SQ-W1-05-wrong-entity",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.74,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 79.123,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 80.782,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 83.396,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1-06-forbidden-extra-delete": {
+        "id": "SQ-W1-06-forbidden-extra-delete",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.75,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 103.083,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row record(s) deleted, where the demonstration deleted 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 89.333,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row record(s) deleted, where the demonstration deleted 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.59,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 108.097,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row record(s) deleted, where the demonstration deleted 0",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1B-01-correct": {
+        "id": "SQ-W1B-01-correct",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_PASS",
+        "injected": false,
+        "r1": true,
+        "rigorrunFindings": [
+          "R-1"
+        ],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "PASS",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunOutcomes": [
+          "PASS"
+        ],
+        "classification": "TRUE_NEGATIVE",
+        "outcomeClassification": "TRUE_NEGATIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.75,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.58,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 91.772,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.57,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 78.003,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.6,
+            "oracleVerdict": "PASS",
+            "rigorrunVerdict": "PASS",
+            "rigorrunOutcome": "PASS",
+            "classification": "TRUE_NEGATIVE",
+            "outcomeClassification": "TRUE_NEGATIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 87.717,
+            "outcomeReason": "every applicable check passed on observed state",
+            "missingEvidence": [],
+            "exit": 0
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "PASS"
+          ],
+          "rigorrunOutcomes": [
+            "PASS"
+          ],
+          "classification": "TRUE_NEGATIVE",
+          "outcomeClassification": "TRUE_NEGATIVE"
+        }
+      },
+      "SQ-W1B-02-missing-action-false-claim": {
+        "id": "SQ-W1B-02-missing-action-false-claim",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.69,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.56,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 70.834,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.54,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 69.473,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.59,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 65.677,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1B-03-duplicate": {
+        "id": "SQ-W1B-03-duplicate",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.76,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.59,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 89.341,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Row record(s) created, where the demonstration created 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 91.484,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Row record(s) created, where the demonstration created 1",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.6,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 103.286,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Row record(s) created, where the demonstration created 1",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1B-04-wrong-value": {
+        "id": "SQ-W1B-04-wrong-value",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.75,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.6,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 77.847,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.58,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 79.588,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 77.264,
+            "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1B-05-wrong-entity": {
+        "id": "SQ-W1B-05-wrong-entity",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.66,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.56,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 77.103,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.54,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 77.425,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.56,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 75.55,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      },
+      "SQ-W1B-06-forbidden-extra-delete": {
+        "id": "SQ-W1B-06-forbidden-extra-delete",
+        "target": "sqlite-mcp",
+        "mode": "rigorrun",
+        "truthLabel": "EXPECTED_FAIL",
+        "injected": false,
+        "r1": false,
+        "rigorrunFindings": [],
+        "attemptsPlanned": 3,
+        "attempts": 3,
+        "status": "FAIL",
+        "notRunReason": null,
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunOutcomes": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE",
+        "outcomeClassification": "TRUE_POSITIVE",
+        "verificationStrength": [
+          "PARTIAL"
+        ],
+        "evidenceIndependence": [
+          "SELF_REPORTED"
+        ],
+        "totalSeconds": 1.76,
+        "perAttempt": [
+          {
+            "attempt": 1,
+            "seconds": 0.62,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 96.799,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row record(s) deleted, where the demonstration deleted 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 2,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 94.768,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row record(s) deleted, where the demonstration deleted 0",
+            "missingEvidence": [],
+            "exit": 1
+          },
+          {
+            "attempt": 3,
+            "seconds": 0.57,
+            "oracleVerdict": "FAIL",
+            "rigorrunVerdict": "FAIL",
+            "rigorrunOutcome": "FAIL",
+            "classification": "TRUE_POSITIVE",
+            "outcomeClassification": "TRUE_POSITIVE",
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 100.454,
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Row record(s) deleted, where the demonstration deleted 0",
+            "missingEvidence": [],
+            "exit": 1
+          }
+        ],
+        "previous": {
+          "source": "AFTER-2",
+          "rigorrunCommit": "0abf8ef5bb5466ff4bba75156836e3cd628a7841",
+          "attempts": 3,
+          "oracleVerdicts": [
+            "FAIL"
+          ],
+          "rigorrunOutcomes": [
+            "FAIL"
+          ],
+          "classification": "TRUE_POSITIVE",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      }
+    }
+  },
+  "heldoutInprocess": {
+    "rigorrunCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+    "cases": 23,
+    "matchingExpected": 23,
+    "knownGoodIncorrectlyFailed": 0,
+    "knownBadIncorrectlyPassed": 0,
+    "undecidableGivenAVerdict": 0,
+    "notFinishedGivenAVerdict": 0,
+    "abstentions": 6
+  },
+  "independentOracle": {
+    "cases": 12,
+    "attemptsRun": 36,
+    "independentOracleGate": {
+      "cases": [
+        "IO-1",
+        "IO-2",
+        "IO-3",
+        "IO-4",
+        "IO-5",
+        "IO-6a",
+        "IO-6b",
+        "IO-7",
+        "IO-7-mixed-a",
+        "IO-7-mixed-b"
+      ],
+      "failing": [],
+      "guardViolations": []
+    },
+    "abstentionGate": {
+      "cases": [
+        "IO-6a",
+        "IO-6b",
+        "IO-6c"
+      ],
+      "failing": []
+    },
+    "perCase": {
+      "IO-1": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-2": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-3": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-4": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-5": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-6a": {
+        "outcomes": [
+          "ABSTAIN"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-6b": {
+        "outcomes": [
+          "None"
+        ],
+        "labels": [
+          "None"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7-mixed-a": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7-mixed-b": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-6c": {
+        "outcomes": [
+          "FAIL"
+        ],
+        "labels": [
+          "INDEPENDENT"
+        ],
+        "oracle": [
+          "PASS"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": true
+      },
+      "IO-7-self": {
+        "outcomes": [
+          "PASS"
+        ],
+        "labels": [
+          "SELF_REPORTED"
+        ],
+        "oracle": [
+          "FAIL"
+        ],
+        "attempts": 3,
+        "allAttemptsMatch": null
+      }
+    }
+  },
+  "mcpPreflight": {
+    "generatedBy": "requalification/mcp/mcp-preflight.ts",
+    "statuses": {
+      "PASS": 14,
+      "LIMIT": 5,
+      "FAIL": 0
+    },
+    "checks": [
+      {
+        "id": "sdk-versions",
+        "target": "RigorRun client",
+        "check": "protocol versions the installed MCP SDK can negotiate",
+        "status": "LIMIT"
+      },
+      {
+        "id": "filesystem-connect",
+        "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+        "check": "connection, identity and negotiated version",
+        "status": "PASS"
+      },
+      {
+        "id": "recorded-protocol-version",
+        "target": "RigorRun client",
+        "check": "the negotiated protocol version is recorded for a stdio server",
+        "status": "LIMIT"
+      },
+      {
+        "id": "filesystem-tools-list",
+        "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+        "check": "tools/list: RigorRun sees every tool the server offers",
+        "status": "PASS"
+      },
+      {
+        "id": "filesystem-call",
+        "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+        "check": "tools/call, and normalisation that follows the result shape",
+        "status": "PASS"
+      },
+      {
+        "id": "filesystem-error",
+        "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+        "check": "a refused call is an error, never data",
+        "status": "PASS"
+      },
+      {
+        "id": "filesystem-teardown",
+        "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+        "check": "close() ends the stdio child",
+        "status": "PASS"
+      },
+      {
+        "id": "memory-structured",
+        "target": "@modelcontextprotocol/server-memory 2026.8.31",
+        "check": "a structured result is read as records",
+        "status": "PASS"
+      },
+      {
+        "id": "memory-teardown",
+        "target": "@modelcontextprotocol/server-memory 2026.8.31",
+        "check": "close() ends the stdio child",
+        "status": "PASS"
+      },
+      {
+        "id": "tools-list-pagination",
+        "target": "RigorRun client",
+        "check": "tools/list follows nextCursor",
+        "status": "LIMIT"
+      },
+      {
+        "id": "normalisation-structured",
+        "target": "RigorRun normaliser",
+        "check": "structuredContent is records",
+        "status": "PASS"
+      },
+      {
+        "id": "normalisation-json-in-text",
+        "target": "RigorRun normaliser",
+        "check": "JSON inside a text block is records (R-8)",
+        "status": "PASS"
+      },
+      {
+        "id": "normalisation-prose",
+        "target": "RigorRun normaliser",
+        "check": "prose is never records",
+        "status": "PASS"
+      },
+      {
+        "id": "errors",
+        "target": "RigorRun client",
+        "check": "isError results and JSON-RPC errors are errors, not data",
+        "status": "PASS"
+      },
+      {
+        "id": "normalisation-links-and-images",
+        "target": "RigorRun normaliser",
+        "check": "resource_link and image-only results",
+        "status": "LIMIT"
+      },
+      {
+        "id": "timeout",
+        "target": "RigorRun client",
+        "check": "a call past its timeout is an error, not an empty result",
+        "status": "PASS"
+      },
+      {
+        "id": "stderr-flood",
+        "target": "RigorRun client",
+        "check": "a server writing 200 KB to stderr is still answered",
+        "status": "LIMIT"
+      },
+      {
+        "id": "teardown-local",
+        "target": "RigorRun client",
+        "check": "close() settles and ends the stdio child after a blocked call",
+        "status": "PASS"
+      },
+      {
+        "id": "modern-only-server",
+        "target": "RigorRun client",
+        "check": "a server that speaks only 2026-07-28 is refused at connect, visibly",
+        "status": "PASS"
+      }
+    ]
+  },
+  "checks": {
+    "final": {
+      "test": {
+        "parsed": true,
+        "failed": 0,
+        "passed": 1089,
+        "skipped": 0,
+        "total": 1089,
+        "files": 99,
+        "filesFailed": 0,
+        "exit": 0
+      },
+      "typecheck": {
+        "exit": 0
+      },
+      "lint": {
+        "exit": 0,
+        "files": 95
+      },
+      "e2e": {
+        "passed": 56,
+        "failed": 0,
+        "flaky": 0,
+        "exit": 0
+      }
+    }
+  }
+}

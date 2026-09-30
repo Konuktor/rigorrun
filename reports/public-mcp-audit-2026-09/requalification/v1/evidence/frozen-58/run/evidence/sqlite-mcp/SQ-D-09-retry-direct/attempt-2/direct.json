@@ -1,11 +1,11 @@
 {
   "command": [
     "node",
-    "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+    "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
     "--",
-    "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
     "--database",
-    "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
     "--preset",
     "read-write"
   ],

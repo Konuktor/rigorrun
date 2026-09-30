@@ -1,0 +1,45 @@
+== up 19:03:23
+  rr-audit-worktide-database-1: healthy
+  rr-audit-worktide-app-1: healthy
+reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)
+rc 0
+== setup 19:05:47
+Traceback (most recent call last):
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/run-eh-wt-03-amended.py", line 20, in <module>
+    MAP = overlay()
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/_overlay.py", line 24, in overlay
+    if _sha(copy) != copy_digest:
+       ~~~~^^^^^^
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/_overlay.py", line 10, in _sha
+    with open(path, "rb") as fh:
+         ~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/overlay/scripts__specs-worktide-w2.json'
+rc 1
+== run 19:05:47
+Traceback (most recent call last):
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/run-eh-wt-03-amended.py", line 20, in <module>
+    MAP = overlay()
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/_overlay.py", line 24, in overlay
+    if _sha(copy) != copy_digest:
+       ~~~~^^^^^^
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/_overlay.py", line 10, in _sha
+    with open(path, "rb") as fh:
+         ~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/overlay/scripts__specs-worktide-w2.json'
+rc 1
+== heldout 19:05:47
+Traceback (most recent call last):
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/run-heldout-amended.py", line 19, in <module>
+    MAP = overlay()
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/_overlay.py", line 24, in overlay
+    if _sha(copy) != copy_digest:
+       ~~~~^^^^^^
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/_overlay.py", line 10, in _sha
+    with open(path, "rb") as fh:
+         ~~~~^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '{REPO}/reports/public-mcp-audit-2026-09/requalification/amendment-1/overlay/scripts__specs-worktide-w2.json'
+rc 1
+== down 19:05:47
+worktide stack removed
+rc 0
+== done 19:05:50

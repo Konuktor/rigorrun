@@ -1,0 +1,86 @@
+{
+  "id": "WT-D-03-tasks-complete-doubled-prefix",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.4,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.complete",
+            "args": {
+              "task": "AUD-1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.37,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.complete",
+            "args": {
+              "task": "AUD-1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.38,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.complete",
+            "args": {
+              "task": "AUD-1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

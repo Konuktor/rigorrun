@@ -1,0 +1,592 @@
+{
+  "serverName": "worktide-mcp",
+  "latencyMs": 152,
+  "tools": [
+    {
+      "name": "tasks.search",
+      "description": "Search tasks by title (partial match) and optional filters. Returns up to 25 tasks with their identifier, title, status, project IRI, due date, assignees, and tags.",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Partial title match"
+        },
+        {
+          "name": "projectKey",
+          "type": "string",
+          "required": false,
+          "description": "Project key like \"WORK\""
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "TaskStatus IRI"
+        },
+        {
+          "name": "assigneeIri",
+          "type": "string",
+          "required": false,
+          "description": "Filter by assignee IRI; \"@me\" for current user"
+        },
+        {
+          "name": "includeClosed",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "tasks.get",
+      "description": "Fetch a single task by UUID, IRI, or identifier (e.g. \"WORK-123\").",
+      "params": [
+        {
+          "name": "task",
+          "type": "string",
+          "required": true,
+          "description": "Task UUID, IRI, or human identifier"
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "tasks.create",
+      "description": "Create a new task. Project is optional (private task without project).",
+      "params": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "projectKey",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "priority",
+          "type": "enum",
+          "required": false,
+          "enumValues": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ]
+        },
+        {
+          "name": "dueOn",
+          "type": "string",
+          "required": false,
+          "description": "ISO date YYYY-MM-DD"
+        },
+        {
+          "name": "parentTask",
+          "type": "string",
+          "required": false,
+          "description": "Task UUID/identifier for subtask creation"
+        }
+      ],
+      "unsupported": [
+        {
+          "name": "assigneeIris",
+          "reason": "it is a list, which RigorRun cannot compare against yet"
+        },
+        {
+          "name": "tagIris",
+          "reason": "it is a list, which RigorRun cannot compare against yet"
+        }
+      ],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "tasks.update",
+      "description": "Update task fields. Pass only the fields to change. Set status to a TaskStatus IRI to move the task on the board (PATCHing status is how Drag-and-Drop persists too).",
+      "params": [
+        {
+          "name": "task",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "priority",
+          "type": "enum",
+          "required": false,
+          "enumValues": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ]
+        },
+        {
+          "name": "statusIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "dueOn",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "startOn",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "isPrio",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [
+        {
+          "name": "tagIris",
+          "reason": "it is a list, which RigorRun cannot compare against yet"
+        }
+      ],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "tasks.complete",
+      "description": "Mark a task as done — finds the workspace's first completed TaskStatus and assigns it.",
+      "params": [
+        {
+          "name": "task",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "tasks.addDependency",
+      "description": "Add a dependency between two tasks. type defaults to finish_to_start (classic blocker).",
+      "params": [
+        {
+          "name": "predecessor",
+          "type": "string",
+          "required": true,
+          "description": "Task UUID/IRI/identifier"
+        },
+        {
+          "name": "successor",
+          "type": "string",
+          "required": true,
+          "description": "Task UUID/IRI/identifier"
+        },
+        {
+          "name": "type",
+          "type": "enum",
+          "required": false,
+          "enumValues": [
+            "finish_to_start",
+            "start_to_start",
+            "finish_to_finish",
+            "start_to_finish"
+          ]
+        },
+        {
+          "name": "lagMinutes",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "projects.list",
+      "description": "List projects in the active workspace. By default excludes archived projects. Returns name, key, status, customer IRI, dates, and tags.",
+      "params": [
+        {
+          "name": "includeArchived",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "customerIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "projects.get",
+      "description": "Fetch a single project by UUID, IRI, or key (e.g. \"WORK\").",
+      "params": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "projects.board",
+      "description": "Return the kanban board for a project — one entry per status column with the tasks currently in it. Closed tasks are included.",
+      "params": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "projects.create",
+      "description": "Create a new project. Number is auto-filled from the workspace pattern if blank.",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": true,
+          "description": "Project key for task identifiers — e.g. \"WORK\""
+        },
+        {
+          "name": "customerIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "isPrivate",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "isRetainer",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "projects.archive",
+      "description": "Set isArchived=true on a project. Reversible via update.",
+      "params": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "time.runningTimer",
+      "description": "Get the user's currently running timer (if any).",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "time.start",
+      "description": "Start a timer. Either taskIri or projectIri is required (taskIri wins if both); a free-text description is optional.",
+      "params": [
+        {
+          "name": "taskIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "projectIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "isBillable",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "time.stop",
+      "description": "Stop the running timer and turn it into a TimeEntry.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "time.log",
+      "description": "Record a time entry retro-actively. Either provide endsAt OR durationMinutes — the other is computed server-side.",
+      "params": [
+        {
+          "name": "taskIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "projectIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "startsAt",
+          "type": "string",
+          "required": true,
+          "description": "ISO 8601 datetime"
+        },
+        {
+          "name": "endsAt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "durationMinutes",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "isBillable",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "time.report",
+      "description": "Aggregate time-entries in a date range, grouped by user/project/task/typeOfWork. Returns total minutes plus per-group breakdown.",
+      "params": [
+        {
+          "name": "from",
+          "type": "string",
+          "required": true,
+          "description": "ISO 8601 start (inclusive)"
+        },
+        {
+          "name": "to",
+          "type": "string",
+          "required": true,
+          "description": "ISO 8601 end (exclusive)"
+        },
+        {
+          "name": "groupBy",
+          "type": "enum",
+          "required": false,
+          "enumValues": [
+            "user",
+            "project",
+            "task",
+            "typeOfWork"
+          ]
+        },
+        {
+          "name": "projectIri",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "userIri",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "me.whoami",
+      "description": "Return the current authenticated user (the holder of the API token).",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "me.myAssignedTasks",
+      "description": "List tasks assigned to the current user, filtered by status (default: open). Useful first-thing-in-the-morning query.",
+      "params": [
+        {
+          "name": "includeClosed",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "dueOnly",
+          "type": "boolean",
+          "required": false,
+          "description": "Limit to tasks with a dueOn"
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    }
+  ]
+}

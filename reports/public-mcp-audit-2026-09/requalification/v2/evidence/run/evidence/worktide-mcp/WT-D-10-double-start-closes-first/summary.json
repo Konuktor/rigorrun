@@ -1,0 +1,161 @@
+{
+  "id": "WT-D-10-double-start-closes-first",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.37,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "first"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f39c-ef0c-778e-864e-fc4d053e69a7\",\n  \"startedAt\": \"2026-09-30T20:39:03+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"first\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "second"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": \"01a0f39c-ef42-7895-be60-911223165c24\",\n  \"running\": true,\n  \"timerId\": \"01a0f39c-ef52-74ee-8681-518d1dddfe92\",\n  \"startedAt\": \"2026-09-30T20:39:03+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"second\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.stop",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"timeEntryId\": \"01a0f39c-ef85-7c7a-97e5-8abb21b38098\",\n  \"durationMinutes\": 0\n}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.37,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "first"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f39d-136b-76be-9c2e-b91b3445df76\",\n  \"startedAt\": \"2026-09-30T20:39:12+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"first\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "second"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": \"01a0f39d-13a1-7b23-ae0a-d73ef5b7fd81\",\n  \"running\": true,\n  \"timerId\": \"01a0f39d-13af-7a46-a6cd-b2c44891112e\",\n  \"startedAt\": \"2026-09-30T20:39:12+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"second\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.stop",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"timeEntryId\": \"01a0f39d-13e3-7b0f-844f-94fff5a552b2\",\n  \"durationMinutes\": 0\n}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.39,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "first"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f39d-3aa5-7573-80ac-80f7e458fac2\",\n  \"startedAt\": \"2026-09-30T20:39:22+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"first\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.start",
+            "args": {
+              "description": "second"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"closedTimeEntryId\": \"01a0f39d-3adb-7f77-9906-ae945ba8bcbb\",\n  \"running\": true,\n  \"timerId\": \"01a0f39d-3aea-7622-8d7c-4e31e9e65ab7\",\n  \"startedAt\": \"2026-09-30T20:39:22+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"second\",\n  \"isBillable\": true\n}"
+                }
+              ]
+            }
+          },
+          {
+            "tool": "time.stop",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\n  \"timeEntryId\": \"01a0f39d-3b1f-7e89-ad92-8402be7be7d6\",\n  \"durationMinutes\": 0\n}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

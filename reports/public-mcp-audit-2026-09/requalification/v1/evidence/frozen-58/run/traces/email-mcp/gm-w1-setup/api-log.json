@@ -64,7 +64,7 @@
         "command": "uv",
         "args": [
           "--directory",
-          "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+          "{REPO}/tmp/rigorrun-audit/email-mcp",
           "run",
           "email-mcp"
         ],
@@ -95,7 +95,7 @@
           "command": "uv",
           "args": [
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],
@@ -1511,7 +1511,7 @@
           "command": "uv",
           "args": [
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],
@@ -1674,7 +1674,7 @@
           "command": "uv",
           "args": [
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],
@@ -2475,7 +2475,7 @@
           "command": "uv",
           "args": [
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],

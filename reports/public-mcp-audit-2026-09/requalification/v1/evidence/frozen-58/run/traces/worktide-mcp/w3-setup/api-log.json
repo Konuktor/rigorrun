@@ -63,7 +63,7 @@
         "transport": "stdio",
         "command": "node",
         "args": [
-          "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+          "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
         ],
         "secretNames": [
           "WORKTIDE_API_TOKEN",
@@ -85,7 +85,7 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+            "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
           ],
           "url": "",
           "auth": "header",
@@ -791,7 +791,7 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+            "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
           ],
           "url": "",
           "auth": "header",
@@ -971,7 +971,7 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+            "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
           ],
           "url": "",
           "auth": "header",
@@ -2743,7 +2743,7 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+            "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
           ],
           "url": "",
           "auth": "header",
