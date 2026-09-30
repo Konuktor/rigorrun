@@ -285,10 +285,40 @@ export const ExternalAgentSchema = z.object({
   keyName: z.string(),
 });
 
+/**
+ * An agent RigorRun only sends work to, and never watches — see `blackBoxAgent.ts`.
+ *
+ * The one kind that may live off this machine, which is why the fields that
+ * decide where a case's work goes are explicit: the exact hosts, the headers by
+ * secret name (never by value), and when a person here agreed to send it.
+ */
+export const BlackBoxAgentSchema = z.object({
+  ...agentCommon,
+  kind: z.literal('blackbox'),
+  endpoint: z.string(),
+  /** Header name → the name of the secret holding its value. */
+  headers: z.record(z.string(), z.string()).default({}),
+  /** A JSON body with `{{placeholders}}`; null sends the rigorrun/task/1 envelope. */
+  bodyTemplate: z.string().nullable().default(null),
+  completion: z.enum(['response', 'poll', 'settle']).default('response'),
+  /** Where the agent's final message is in its answer, as a dotted path. */
+  claimPath: z.string().default('output'),
+  /** Hosts outside loopback it may be reached on. Exact names; https only. */
+  allowedHosts: z.array(z.string()).default([]),
+  /**
+   * When somebody on this machine agreed that each case's work may be sent to
+   * those hosts. Null on an imported project, always, like every other
+   * decision about where things go that arrived in a file.
+   */
+  remoteConfirmedAt: z.string().nullable().default(null),
+  settleQuietMs: z.number().int().positive().default(5000),
+});
+
 export const AgentConfigSchema = z.discriminatedUnion('kind', [
   HttpAgentSchema,
   ProcessAgentSchema,
   ExternalAgentSchema,
+  BlackBoxAgentSchema,
 ]);
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 export type HttpAgentConfig = z.infer<typeof HttpAgentSchema>;
@@ -300,6 +330,7 @@ export function describeAgent(agent: AgentConfig): string {
   // Not reached: RigorRun does not reach this one, which is the whole point of
   // it. The id is what distinguishes two of them on the same project.
   if (agent.kind === 'external') return `driven by you (${agent.id})`;
+  if (agent.kind === 'blackbox') return `${agent.endpoint} (black box)`;
   return `${agent.command} ${agent.args.join(' ')}`.trim();
 }
 

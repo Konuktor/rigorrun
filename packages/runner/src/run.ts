@@ -120,6 +120,25 @@ export async function runBenchmark(
     });
   }
 
+  // A black-box agent works on the system directly. RigorRun cannot refuse its
+  // writes the way it refuses a proxied call, so production is not a place to
+  // send one — and what it did is judged on state alone, which the run says.
+  if (agents.some((agent) => agent.kind === 'blackbox')) {
+    if (capabilities.safety === 'production') {
+      throw new Error(
+        'This system is marked production, and a black-box agent writes to it directly, where RigorRun ' +
+          'cannot refuse anything. Run it against a staging or scratch copy.',
+      );
+    }
+    limits.push({
+      id: 'no_call_trace',
+      limit:
+        'Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. ' +
+        'Every check on what the system holds afterwards was, on a reading the agent never touched.',
+      remedy: 'Connect the agent through the RigorRun MCP proxy as well, to have its calls checked too.',
+    });
+  }
+
   if (options.suiteQuality && !options.suiteQuality.assessed) {
     limits.push({
       id: 'suite_quality_unassessed',
@@ -493,20 +512,31 @@ async function executeCase(
           finalStability,
         )
       : undefined;
+  // A black-box agent's calls were never visible: checks resting on them are
+  // listed as not made, and do not hold the verdict hostage.
+  const blackBox = agent.kind === 'blackbox';
   const summary = verify(
     testCase.checks,
     { state: finalState, derived: frame ? { ...derived, frame } : derived, events: [], agentReport: report },
-    stateUnverifiable
-      ? {
-          unverifiableSources: ['STATE'],
-          unverifiableReason:
-            baseline.source === 'UNAVAILABLE'
-              ? capabilities.stateRead === 'none'
-                ? 'this environment cannot be read back'
-                : 'the starting world could not be read'
-              : 'the final world could not be read',
-        }
-      : {},
+    {
+      ...(stateUnverifiable
+        ? {
+            unverifiableSources: ['STATE'] as const,
+            unverifiableReason:
+              baseline.source === 'UNAVAILABLE'
+                ? capabilities.stateRead === 'none'
+                  ? 'this environment cannot be read back'
+                  : 'the starting world could not be read'
+                : 'the final world could not be read',
+          }
+        : {}),
+      ...(blackBox
+        ? {
+            unobservedSources: ['EVENT'] as const,
+            unobservedReason: 'black-box: RigorRun did not see the agent\u2019s calls',
+          }
+        : {}),
+    },
   );
 
   const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, budgetMs);
@@ -570,6 +600,7 @@ async function executeCase(
     ...(usage ? { usage } : {}),
     costUsd,
     costNote,
+    observation: blackBox ? ('state-only' as const) : ('calls-and-state' as const),
     agentReport: report,
     finalStateHash: await hashValue(finalState),
     finalStateSummary: summariseCanonicalState(finalState),

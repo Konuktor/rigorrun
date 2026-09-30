@@ -36,6 +36,7 @@ import {
 } from '@rigorrun/environment';
 import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
+import { createBlackBoxAgent, probeBlackBox, type BlackBoxCompletion } from './blackBoxAgent.ts';
 import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
@@ -64,6 +65,17 @@ export interface ServiceOptions {
   now?: () => Date;
   /** Where the funnel is recorded. Defaults to the store's own directory. */
   activation?: ActivationLog;
+}
+
+/** How a person describes a black-box agent. Header values are secret names. */
+export interface BlackBoxInput {
+  endpoint: string;
+  allowedHosts?: string[];
+  headers?: Record<string, string>;
+  bodyTemplate?: string | null;
+  completion?: BlackBoxCompletion;
+  claimPath?: string;
+  settleQuietMs?: number;
 }
 
 export class Service {
@@ -621,7 +633,8 @@ export class Service {
     input:
       | { name: string; endpoint: string; allowRemoteHosts?: boolean }
       | { name: string; command: string; args?: string[]; cwd?: string }
-      | { name: string; driven: true },
+      | { name: string; driven: true }
+      | { name: string; blackBox: BlackBoxInput },
   ): Promise<{ project: Project; agent: AgentConfig; key?: string }> {
     const project = await this.store.read(projectId);
     const id = `a_${randomBytes(4).toString('hex')}`;
@@ -629,7 +642,35 @@ export class Service {
 
     let agent: AgentConfig;
     let key: string | undefined;
-    if ('driven' in input) {
+    if ('blackBox' in input) {
+      const spec = input.blackBox;
+      const allowedHosts = (spec.allowedHosts ?? []).map((host) => host.trim().toLowerCase()).filter(Boolean);
+      const headers = spec.headers ?? {};
+      const probe = await probeBlackBox({
+        endpoint: spec.endpoint,
+        allowedHosts,
+        bodyTemplate: spec.bodyTemplate ?? null,
+        headers: () => this.resolveHeaders(headers),
+      });
+      agent = {
+        id,
+        name: input.name || 'Your agent',
+        kind: 'blackbox',
+        endpoint: spec.endpoint,
+        headers,
+        bodyTemplate: spec.bodyTemplate ?? null,
+        completion: spec.completion ?? 'response',
+        claimPath: spec.claimPath ?? 'output',
+        allowedHosts,
+        // Typed here, by whoever is at this machine: that is the agreement. An
+        // imported project's black-box agents come back with this cleared.
+        remoteConfirmedAt: now,
+        settleQuietMs: spec.settleQuietMs ?? 5000,
+        lastProbeAt: now,
+        lastProbeOk: probe.ok,
+        lastProbeProblem: probe.ok ? '' : probe.problem,
+      };
+    } else if ('driven' in input) {
       // There is nothing to probe: RigorRun cannot call this agent, which is
       // why it exists. It becomes connected when its driver asks for work,
       // which is the only evidence available that it is real.
@@ -1026,6 +1067,27 @@ export class Service {
         ...agentTimeout,
       });
     }
+    if (config.kind === 'blackbox') {
+      if (config.remoteConfirmedAt === null) {
+        throw new Error(
+          `${config.name} sends each case's work to ${config.endpoint}, and nobody on this machine has ` +
+            'agreed to that. It came from an imported project rather than from you. Open it and confirm first.',
+        );
+      }
+      return createBlackBoxAgent({
+        id: config.id,
+        name: config.name,
+        endpoint: config.endpoint,
+        allowedHosts: config.allowedHosts,
+        headers: () => this.resolveHeaders(config.headers),
+        bodyTemplate: config.bodyTemplate,
+        completion: config.completion,
+        claimPath: config.claimPath,
+        settleQuietMs: config.settleQuietMs,
+        timeoutMs:
+          options.caseBudgetMs !== undefined ? Math.max(floorMs, options.caseBudgetMs + BUDGET_MARGIN_MS) : floorMs,
+      });
+    }
     if (config.kind === 'process') {
       if (config.confirmedByOperatorAt === null) {
         throw new Error(
@@ -1054,6 +1116,22 @@ export class Service {
   }
 
   // ------------------------------------------------------------------ helpers
+
+  /** Header values, from the credential store, at the moment they are sent. */
+  private async resolveHeaders(byName: Record<string, string>): Promise<Record<string, string>> {
+    const out: Record<string, string> = {};
+    for (const [header, secretName] of Object.entries(byName)) {
+      const value = await this.store.secret(secretName);
+      if (value === undefined) {
+        throw new Error(
+          `The ${header} header comes from the secret ${secretName}, which is not set on this machine. ` +
+            `Set it with \`npx rigorrun secrets set ${secretName}\`.`,
+        );
+      }
+      out[header] = value;
+    }
+    return out;
+  }
 
   /** The confirmed schema, re-derived from the recorded observations. */
   private async schemaOf(project: Project): Promise<EnvironmentSchema> {

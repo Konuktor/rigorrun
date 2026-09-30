@@ -210,7 +210,7 @@ interface ChangeSpec {
   field?: string;
   from?: unknown;
   to?: unknown;
-  compare?: 'quantity' | 'closed' | 'open' | 'unattributable';
+  compare?: 'quantity' | 'closed' | 'open' | 'unattributable' | 'populated';
   reason?: string;
 }
 
@@ -269,6 +269,13 @@ function stateChange(target: string, expected: unknown, observation: Observation
   }
 
   const value = record[field];
+  if (spec.compare === 'populated') {
+    // Held to "set", never to a value: the demonstrated one was typed by hand.
+    const set = value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === '');
+    return set
+      ? { status: 'PASS', observed: value, message: `${field} is set, as demonstrated` }
+      : { status: 'FAIL', observed: value ?? null, message: `${field} was left unset; the demonstration set it` };
+  }
   const demonstrated = changeWords(field, created ? undefined : spec.from, spec.to);
   const observed = changeWords(field, created ? undefined : started?.[field], value);
   if (created || sameValue(started?.[field], spec.from)) {

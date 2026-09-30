@@ -31,6 +31,7 @@ import {
   type ProjectionKeySchema,
   capabilityLimits,
   deepEqual,
+  validateProjectionPath,
 } from '@rigorrun/environment';
 import { generateMutations, type Mutation } from './mutations.ts';
 import { findUntestableRules, markUntestable, type UntestableRule } from './enforcement.ts';
@@ -346,7 +347,7 @@ function successChecks(
   };
 
   if (!expected.shouldPerform) {
-    return [
+    const declined: Assertion[] = [
       {
         ...common,
         id: 'success__declined',
@@ -355,6 +356,22 @@ function successChecks(
         target: collection,
       },
     ];
+    // What the reads cannot see, the call log can: a job sent somewhere no
+    // nominated read looks leaves every state check holding (requalification
+    // v2, GATE 5). The job's own action succeeding is the job being done.
+    const performed = `derived.events.occurred.${contract.primaryAction}`;
+    if (!validateProjectionPath(keys, performed)) {
+      declined.push({
+        ...common,
+        id: 'success__declined__action_not_performed',
+        kind: 'state_equals',
+        description: `the job's own action, "${contract.primaryAction}", did not succeed (${expected.refusalReason})`,
+        target: performed,
+        expected: false,
+        verificationSource: 'EVENT',
+      });
+    }
+    return declined;
   }
 
   // Identify the record by the values the request asked for, through the
@@ -510,7 +527,10 @@ function successChecks(
       ...common,
       id,
       kind: 'state_change',
-      description: `the ${name} the job changed goes ${changeWords(change)}, as demonstrated`,
+      description:
+        change.compare === 'populated'
+          ? `the ${name} the job changed ends with ${changeWords(change)}, as demonstrated`
+          : `the ${name} the job changed goes ${changeWords(change)}, as demonstrated`,
       target: `derived.all.${name}${record}`,
       expected: {
         seed: `derived.seed.${name}${record}`,
@@ -526,6 +546,7 @@ function successChecks(
 
 /** `minutes 0 → 1 (+1)`, as a person reads a check. */
 function changeWords(change: ExpectedChange): string {
+  if (change.compare === 'populated') return `${change.field} set (any value; the demonstrated one was typed by hand)`;
   const to = JSON.stringify(change.to);
   if (change.from === undefined) return `${change.field} ${to}`;
   if (typeof change.from !== 'number' || typeof change.to !== 'number') {

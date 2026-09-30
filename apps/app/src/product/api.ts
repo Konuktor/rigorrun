@@ -87,6 +87,8 @@ export interface ProjectView {
     | { kind: 'process'; command: string; args: string[] }
     // An agent RigorRun cannot start. It holds a key and comes to ask for work.
     | { kind: 'external'; keyName: string }
+    // An agent RigorRun only sends work to; the system is read afterwards.
+    | { kind: 'blackbox'; endpoint: string; allowedHosts: string[] }
   ))[];
   runs: {
     runId: string;
@@ -414,7 +416,17 @@ export const api = {
     input:
       | { name: string; endpoint: string }
       | { name: string; command: string; args: string[] }
-      | { name: string; driven: true },
+      | { name: string; driven: true }
+      | {
+          name: string;
+          blackBox: {
+            endpoint: string;
+            allowedHosts: string[];
+            headers: Record<string, string>;
+            bodyTemplate: string | null;
+            claimPath: string;
+          };
+        },
   ) =>
     // `key` comes back only for a driven agent, only on this one response.
     post<{ project: ProjectView; agent: ProjectView['agents'][number]; key?: string }>(

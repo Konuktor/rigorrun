@@ -30,6 +30,20 @@ const TeachStepSchema = z.union([
 
 const AgentSpecSchema = z.union([
   z.object({ name: z.string().min(1), command: z.string().min(1), args: z.array(z.string()).default([]), cwd: z.string().optional() }),
+  // Black box first: an agent that answers on an address and does the work
+  // itself, wherever it runs. Header values are secret names, never values.
+  z.object({
+    name: z.string().min(1),
+    blackBox: z.object({
+      endpoint: z.string().min(1),
+      allowedHosts: z.array(z.string()).default([]),
+      headers: z.record(z.string(), z.string()).default({}),
+      bodyTemplate: z.string().nullable().default(null),
+      completion: z.enum(['response', 'poll', 'settle']).default('response'),
+      claimPath: z.string().default('output'),
+      settleQuietMs: z.number().int().positive().default(5000),
+    }),
+  }),
   z.object({ name: z.string().min(1), endpoint: z.string().min(1) }),
 ]);
 
@@ -158,9 +172,11 @@ export async function cmdSetup(specPath: string | undefined, flags: Flags): Prom
     const agents: { name: string; ok: boolean; problem: string }[] = [];
     for (const agent of spec.agents) {
       const input =
-        'endpoint' in agent
-          ? { name: agent.name, endpoint: agent.endpoint }
-          : { name: agent.name, command: agent.command, args: agent.args, ...(agent.cwd ? { cwd: agent.cwd } : {}) };
+        'blackBox' in agent
+          ? { name: agent.name, blackBox: agent.blackBox }
+          : 'endpoint' in agent
+            ? { name: agent.name, endpoint: agent.endpoint }
+            : { name: agent.name, command: agent.command, args: agent.args, ...(agent.cwd ? { cwd: agent.cwd } : {}) };
       const added = await service.addAgent(project.id, input);
       agents.push({ name: agent.name, ok: added.agent.lastProbeOk, problem: added.agent.lastProbeProblem });
       say(`  agent           ${agent.name} ${added.agent.lastProbeOk ? c.green('answers') : c.red(added.agent.lastProbeProblem)}`);

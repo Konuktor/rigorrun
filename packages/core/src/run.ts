@@ -126,6 +126,12 @@ export const CaseResultSchema = z.object({
   costUsd: z.number().nullable().default(null),
   costNote: z.string().default('cost unavailable'),
 
+  /**
+   * What RigorRun could see of the agent's work. `state-only` is a black-box
+   * agent: its calls were never visible, so checks about their order were not
+   * made, and the verdict rests on what the system holds afterwards.
+   */
+  observation: z.enum(['calls-and-state', 'state-only']).optional(),
   /** What the agent claimed. Shown next to reality; never scored. */
   agentReport: z.string().default(''),
   /** Hash of the post-execution world state, for reproducibility checks. */

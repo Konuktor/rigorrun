@@ -18,6 +18,10 @@ export default tseslint.config(
       // never edited, and not ours to hold to a style rule.
       '**/.astro/**',
       'playwright-report/**',
+      // Frozen audit evidence: hashed by the audit's freezes, so it is recorded
+      // as it ran rather than restyled. Everything else under reports/ is linted.
+      'reports/public-mcp-audit-2026-09/remediation/heldout/inprocess/heldout.inprocess.test.ts',
+      'reports/public-mcp-audit-2026-09/scripts/aggregate-results.mjs',
       'test-results/**',
     ],
   },

@@ -399,9 +399,22 @@ function expectedChanges(context: Context, bindings: readonly ArgumentBinding[])
       const field = fieldByName(entity, delta.field);
       if (!field || field.type === 'timestamp' || field.role === 'timestamp') continue;
       if (naming.includes(field.name) || bound.has(field.name)) continue;
-      if (typedElsewhere(field.name, asLiteral(delta.to))) continue;
       const row = table[delta.id];
       if (!row) continue;
+      if (typedElsewhere(field.name, asLiteral(delta.to))) {
+        // The value is the operator's, so it is never pinned. That the job
+        // left the field set is still the job's doing — a sign-off recorded —
+        // and is the only way to see it when nobody watched the calls.
+        if (isUnset(delta.from) && !isUnset(delta.to)) {
+          changes.push({
+            record: Object.fromEntries(naming.map((name) => [name, asLiteral(row[name])])),
+            field: field.name,
+            from: null,
+            compare: 'populated',
+          });
+        }
+        continue;
+      }
       changes.push({
         record: Object.fromEntries(naming.map((name) => [name, asLiteral(row[name])])),
         field: field.name,
@@ -453,6 +466,10 @@ function typedArguments(context: Context): (field: string, value: Literal) => bo
       return typeof arg === 'string' && typeof value !== 'boolean' && wholeToken(arg, value);
     });
   };
+}
+
+function isUnset(value: unknown): boolean {
+  return value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
 }
 
 function asLiteral(value: unknown): Literal {

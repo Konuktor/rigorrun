@@ -15,6 +15,15 @@ export interface VerifyOptions {
   unverifiableSources?: readonly VerificationSource[];
   /** Why, for the message on each affected check. */
   unverifiableReason?: string;
+  /**
+   * Evidence sources RigorRun was never placed to observe for this case —
+   * a black-box agent's calls, for one. Known before the case ran, so the
+   * checks resting on them are `UNVERIFIABLE` and listed, but never blocking:
+   * the verdict rests on the checks that read the system.
+   */
+  unobservedSources?: readonly VerificationSource[];
+  /** Why, for the message on each affected check. */
+  unobservedReason?: string;
 }
 
 export interface VerificationSummary {
@@ -45,11 +54,20 @@ export function verify(
   options: VerifyOptions = {},
 ): VerificationSummary {
   const missing = new Set(options.unverifiableSources ?? []);
-  const results = assertions.map((assertion) =>
-    missing.has(verificationSourceOf(assertion))
-      ? unverifiable(assertion, options.unverifiableReason ?? 'the evidence for this check does not exist here')
-      : evaluateAssertion(assertion, observation),
-  );
+  const unobserved = new Set(options.unobservedSources ?? []);
+  const results = assertions.map((assertion) => {
+    const source = verificationSourceOf(assertion);
+    if (missing.has(source)) {
+      return unverifiable(assertion, options.unverifiableReason ?? 'the evidence for this check does not exist here');
+    }
+    if (unobserved.has(source)) {
+      return {
+        ...unverifiable(assertion, options.unobservedReason ?? 'RigorRun was not placed to observe this evidence'),
+        blocking: false,
+      };
+    }
+    return evaluateAssertion(assertion, observation);
+  });
 
   // Inapplicable and unverifiable checks are excluded from both verdicts.
   // Counting them as passes would let a benchmark score perfectly by never

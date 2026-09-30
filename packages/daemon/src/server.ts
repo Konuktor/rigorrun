@@ -22,6 +22,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
+import { z } from 'zod';
 import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
@@ -48,6 +49,17 @@ export interface RunnerOptions {
   uiDir?: string;
   port?: number;
 }
+
+/** A black-box agent as the interface or the API describes it. */
+const BlackBoxRequestSchema = z.object({
+  endpoint: z.string().min(1, 'an endpoint is required'),
+  allowedHosts: z.array(z.string()).default([]),
+  headers: z.record(z.string(), z.string()).default({}),
+  bodyTemplate: z.string().nullable().default(null),
+  completion: z.enum(['response', 'poll', 'settle']).default('response'),
+  claimPath: z.string().default('output'),
+  settleQuietMs: z.number().int().positive().max(600_000).default(5000),
+});
 
 export class Runner {
   readonly pairing = new Pairing();
@@ -438,8 +450,22 @@ export class Runner {
         command?: string;
         args?: unknown;
         driven?: boolean;
+        blackBox?: unknown;
       }>();
       const name = String(body.name ?? '');
+      if (body.blackBox !== undefined) {
+        // Where each case's work will be sent, decided here by the person at
+        // this screen. Parsed rather than trusted, like every connector.
+        const parsed = BlackBoxRequestSchema.safeParse(body.blackBox);
+        if (!parsed.success) {
+          return context.json(
+            { error: `That black-box agent is incomplete: ${parsed.error.issues[0]?.message ?? 'unknown shape'}` },
+            400,
+          );
+        }
+        const added = await service.addAgent(context.req.param('id'), { name, blackBox: parsed.data });
+        return context.json({ project: summarise(added.project), agent: added.agent });
+      }
       if (body.driven === true) {
         const added = await service.addAgent(context.req.param('id'), { name, driven: true });
         // The key travels in this one response and is never readable again.

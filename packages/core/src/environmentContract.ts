@@ -180,7 +180,12 @@ export const ExpectedChangeSchema = z.object({
   /** The value before the job; absent when the job created the record. */
   from: LiteralSchema.optional(),
   to: LiteralSchema.optional(),
-  compare: z.enum(['quantity', 'closed', 'open', 'unattributable']),
+  /**
+   * `populated`: the job left the field set, and which value is not the
+   * system's to decide — it was typed into a preparatory call, an approver's
+   * name given when asking for a sign-off. Held to "set", never to the value.
+   */
+  compare: z.enum(['quantity', 'closed', 'open', 'unattributable', 'populated']),
 });
 export type ExpectedChange = z.infer<typeof ExpectedChangeSchema>;
 
