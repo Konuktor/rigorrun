@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "ec_p_60706460342f",
+  "id": "ec_p_7c86357c69f7",
   "name": "Create exactly one task titled Quarterly report; change nothing else.",
   "description": "Compiled from one recorded execution in taskdesk: create one task, verified independently.",
   "goal": "Create exactly one task titled Quarterly report; change nothing else",
-  "environmentId": "p_60706460342f",
-  "sourceTraceId": "trace_p_60706460342f",
+  "environmentId": "p_7c86357c69f7",
+  "sourceTraceId": "trace_p_7c86357c69f7",
   "primaryAction": "create_task",
   "focusEntity": "Task",
   "focusScope": "created",
@@ -63,6 +63,6 @@
   "rules": [],
   "successAssertions": [],
   "policyAssertions": [],
-  "createdAt": "2026-09-30T23:09:53.948Z",
-  "approvedAt": "2026-09-30T23:09:53.964Z"
+  "createdAt": "2026-09-30T23:17:19.862Z",
+  "approvedAt": "2026-09-30T23:17:19.873Z"
 }

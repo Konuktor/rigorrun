@@ -51,7 +51,7 @@
           "status": "done"
         },
         "attempt": 1,
-        "ms": 4,
+        "ms": 5,
         "result": {
           "content": [
             {
@@ -112,7 +112,7 @@
         "tool": "list_tasks",
         "args": {},
         "attempt": 1,
-        "ms": 1,
+        "ms": 2,
         "result": {
           "content": [
             {
@@ -148,7 +148,7 @@
           "status": "done"
         },
         "attempt": 1,
-        "ms": 2,
+        "ms": 3,
         "result": {
           "content": [
             {
@@ -172,7 +172,7 @@
           "body": "Deposit paid for the river hall"
         },
         "attempt": 1,
-        "ms": 8,
+        "ms": 9,
         "result": {
           "content": [
             {
@@ -269,7 +269,7 @@
           "body": "Deposit paid for the river hall"
         },
         "attempt": 1,
-        "ms": 10,
+        "ms": 9,
         "result": {
           "content": [
             {

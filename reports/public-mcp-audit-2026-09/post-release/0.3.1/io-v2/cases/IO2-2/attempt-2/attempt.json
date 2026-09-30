@@ -1,7 +1,7 @@
 {
   "case": "IO2-2",
   "attempt": 2,
-  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
   "seconds": 0.61,
   "project": "create",
   "agent": "io2-create-extra-note-edit",
@@ -501,70 +501,70 @@
   "serverCalls": {
     "verifier": [
       {
-        "at": 1790809825.4347389,
+        "at": 1790810271.1745553,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.4362025,
+        "at": 1790810271.1759071,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.4422293,
+        "at": 1790810271.1809676,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.442968,
+        "at": 1790810271.181656,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.4439418,
+        "at": 1790810271.1825302,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.444737,
+        "at": 1790810271.1832032,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.5134099,
+        "at": 1790810271.2516181,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 4
       },
       {
-        "at": 1790809825.5138025,
+        "at": 1790810271.252081,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809825.5142822,
+        "at": 1790810271.2527246,
         "server": "taskdesk2-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 4
       },
       {
-        "at": 1790809825.5146005,
+        "at": 1790810271.253341,
         "server": "taskdesk2-oracle",
         "tool": "query_notes",
         "answered": true,

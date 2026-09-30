@@ -1,12 +1,12 @@
 [
   {
-    "agentId": "a_589d335f",
-    "at": 1790809824.8678536,
+    "agentId": "a_958e35ed",
+    "at": 1790810270.6075695,
     "caseId": "case_live__happy_path",
     "caseIndex": 0,
     "category": "happy_path",
     "outcome": "FAIL",
-    "runId": "run_fd98d4d3d694",
+    "runId": "run_6a60eddf512b",
     "snapshot": {
       "exists": true,
       "oracle": "sqlite-ro",

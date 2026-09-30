@@ -1,8 +1,8 @@
 {
   "case": "IO-6c",
   "attempt": 3,
-  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
-  "seconds": 0.53,
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
+  "seconds": 0.54,
   "initialState": {
     "exists": true,
     "oracle": "sqlite-ro",
@@ -243,35 +243,35 @@
   "serverCalls": {
     "verifier": [
       {
-        "at": 1790809816.850703,
+        "at": 1790810262.5983365,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 0
       },
       {
-        "at": 1790809816.855877,
+        "at": 1790810262.6040843,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 0
       },
       {
-        "at": 1790809816.856357,
+        "at": 1790810262.6046803,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 0
       },
       {
-        "at": 1790809816.9158168,
+        "at": 1790810262.663677,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 0
       },
       {
-        "at": 1790809816.916339,
+        "at": 1790810262.664058,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,

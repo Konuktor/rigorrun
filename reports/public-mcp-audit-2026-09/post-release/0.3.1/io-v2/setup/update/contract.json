@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "ec_p_62fceed2558f",
+  "id": "ec_p_6a19fd607601",
   "name": "Mark task 2, Book venue, as done; change nothing else.",
   "description": "Compiled from one recorded execution in taskdesk2: complete one task, verified independently over tasks and notes.",
   "goal": "Mark task 2, Book venue, as done; change nothing else",
-  "environmentId": "p_62fceed2558f",
-  "sourceTraceId": "trace_p_62fceed2558f",
+  "environmentId": "p_6a19fd607601",
+  "sourceTraceId": "trace_p_6a19fd607601",
   "primaryAction": "update_task",
   "focusEntity": "Task",
   "focusScope": "changed",
@@ -80,6 +80,6 @@
   "rules": [],
   "successAssertions": [],
   "policyAssertions": [],
-  "createdAt": "2026-09-30T23:10:20.063Z",
-  "approvedAt": "2026-09-30T23:10:20.075Z"
+  "createdAt": "2026-09-30T23:17:45.781Z",
+  "approvedAt": "2026-09-30T23:17:45.791Z"
 }

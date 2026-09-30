@@ -13,7 +13,7 @@
       "tool": "list_tasks",
       "args": {},
       "attempt": 1,
-      "ms": 2,
+      "ms": 3,
       "result": {
         "content": [
           {
@@ -48,7 +48,7 @@
         "title": "Quarterly report"
       },
       "attempt": 1,
-      "ms": 3,
+      "ms": 6,
       "result": {
         "content": [
           {

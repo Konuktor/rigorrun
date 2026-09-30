@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "bm_ec_p_a3c5df62e347",
+  "id": "bm_ec_p_4eb608346742",
   "name": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else. — private benchmark",
-  "description": "Generated from contract ec_p_a3c5df62e347. 1 cases across 1 categories.",
-  "environment": "p_a3c5df62e347",
-  "contractId": "ec_p_a3c5df62e347",
-  "contractHash": "sha256:9fe006acda5f26682f07ebd0b37f190c5dfc6558f7c4fa5453c65be8d722d306",
+  "description": "Generated from contract ec_p_4eb608346742. 1 cases across 1 categories.",
+  "environment": "p_4eb608346742",
+  "contractId": "ec_p_4eb608346742",
+  "contractHash": "sha256:833586414eb3f99998af077cbbc8b7d7261627248ec708ce9f529865901496ad",
   "generator": "deterministic",
-  "createdAt": "2026-09-30T23:10:20.761Z",
+  "createdAt": "2026-09-30T23:17:46.490Z",
   "notTestable": [
     {
       "rule": "partial_state_read",

@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_183397c25a9f",
-  "benchmarkId": "bm_ec_p_60706460342f",
+  "runId": "run_62a4ce72da5b",
+  "benchmarkId": "bm_ec_p_7c86357c69f7",
   "benchmarkName": "Create exactly one task titled Quarterly report; change nothing else. — private benchmark",
-  "benchmarkHash": "sha256:600268ac9778ee230b5739fea531a5d83947dbe761e2145c28b1cb8ab69bb861",
-  "contractHash": "sha256:b003fde1baf738a99a4ba9c62714d54df819b91cfaf29bc5adfbd3c2572aceb3",
-  "environment": "p_60706460342f",
-  "startedAt": "2026-09-30T23:10:07.563Z",
-  "finishedAt": "2026-09-30T23:10:07.639Z",
+  "benchmarkHash": "sha256:ccb2606cdc02e39d2cc393a0ae61fc24c1843a54e3d48bcf33c907234d176a76",
+  "contractHash": "sha256:d0b11943f4a440badf27401f21724c10383a3ae35fa916518ecb40a95cf5cc18",
+  "environment": "p_7c86357c69f7",
+  "startedAt": "2026-09-30T23:17:33.315Z",
+  "finishedAt": "2026-09-30T23:17:33.386Z",
   "agents": [
     {
-      "id": "a_56f823c1",
+      "id": "a_0f2ee6a3",
       "name": "io-correct-oracle-down",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_183397c25a9f",
+      "runId": "run_62a4ce72da5b",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_56f823c1",
-      "correlationId": "run_183397c25a9f.a_56f823c1.case_live__happy_path",
-      "startedAt": "2026-09-30T23:10:07.564Z",
+      "agentId": "a_0f2ee6a3",
+      "correlationId": "run_62a4ce72da5b.a_0f2ee6a3.case_live__happy_path",
+      "startedAt": "2026-09-30T23:17:33.315Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T23:10:07.630Z",
-      "durationMs": 66.208,
+      "finishedAt": "2026-09-30T23:17:33.377Z",
+      "durationMs": 61.239,
       "steps": [
         {
           "index": 0,
-          "at": 1790809807623,
+          "at": 1790810253371,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809807627,
+          "at": 1790810253374,
           "tool": "create_task",
           "args": {
             "title": "Quarterly report"
@@ -190,7 +190,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_56f823c1",
+      "agentId": "a_0f2ee6a3",
       "agentName": "io-correct-oracle-down",
       "n": 1,
       "taskSuccessRate": 0,
@@ -217,9 +217,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 1,
       "inconclusive": true,
-      "avgLatencyMs": 66.208,
-      "medianLatencyMs": 66.208,
-      "p95LatencyMs": 66.208,
+      "avgLatencyMs": 61.239,
+      "medianLatencyMs": 61.239,
+      "p95LatencyMs": 61.239,
       "avgSteps": 2,
       "passAtK": {
         "pass@1": 0
@@ -303,7 +303,7 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:e7d0cab2b74dc86c1ede5d9a9947a6fe04ac3fa39d8ffbce0941ce6f0371a1c2",
+  "resultHash": "sha256:7ab2dad80432092e88a5efa529ce7e857ea509211d8b07b5a1efb743594fab67",
   "rigorrunVersion": "0.1.0"
 }
 

@@ -13,7 +13,7 @@
       "tool": "list_tasks",
       "args": {},
       "attempt": 1,
-      "ms": 2,
+      "ms": 3,
       "result": {
         "content": [
           {
@@ -72,7 +72,7 @@
         "status": "done"
       },
       "attempt": 1,
-      "ms": 3,
+      "ms": 2,
       "result": {
         "content": [
           {

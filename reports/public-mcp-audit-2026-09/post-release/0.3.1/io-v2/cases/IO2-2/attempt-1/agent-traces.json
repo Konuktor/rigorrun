@@ -49,7 +49,7 @@
           "title": "Quarterly report"
         },
         "attempt": 1,
-        "ms": 3,
+        "ms": 4,
         "result": {
           "content": [
             {
@@ -73,7 +73,7 @@
           "body": "Registrar login moved to the new vault"
         },
         "attempt": 1,
-        "ms": 3,
+        "ms": 2,
         "result": {
           "content": [
             {

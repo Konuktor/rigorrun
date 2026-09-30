@@ -1,6 +1,6 @@
 {
   "generatedBy": "remediation/heldout/inprocess/heldout.inprocess.test.ts",
-  "rigorrunCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
+  "rigorrunCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
   "totals": {
     "cases": 23,
     "matchingExpected": 23,

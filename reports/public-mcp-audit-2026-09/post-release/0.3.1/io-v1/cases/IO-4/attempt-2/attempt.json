@@ -1,7 +1,7 @@
 {
   "case": "IO-4",
   "attempt": 2,
-  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
   "seconds": 0.54,
   "initialState": {
     "exists": true,
@@ -294,35 +294,35 @@
   "serverCalls": {
     "verifier": [
       {
-        "at": 1790809803.0205982,
+        "at": 1790810248.877874,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809803.025287,
+        "at": 1790810248.883478,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809803.0257814,
+        "at": 1790810248.8841467,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 3
       },
       {
-        "at": 1790809803.0898817,
+        "at": 1790810248.9471927,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,
         "rows": 5
       },
       {
-        "at": 1790809803.0905654,
+        "at": 1790810248.9478624,
         "server": "taskdesk-oracle",
         "tool": "query_tasks",
         "answered": true,

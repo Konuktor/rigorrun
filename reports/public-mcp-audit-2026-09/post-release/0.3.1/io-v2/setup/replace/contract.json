@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "ec_p_a3c5df62e347",
+  "id": "ec_p_4eb608346742",
   "name": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
   "description": "Compiled from one recorded execution in taskdesk2: replace one task, verified independently over tasks and notes.",
   "goal": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else",
-  "environmentId": "p_a3c5df62e347",
-  "sourceTraceId": "trace_p_a3c5df62e347",
+  "environmentId": "p_4eb608346742",
+  "sourceTraceId": "trace_p_4eb608346742",
   "primaryAction": "create_task",
   "focusEntity": "Task",
   "focusScope": "created",
@@ -122,6 +122,6 @@
   ],
   "successAssertions": [],
   "policyAssertions": [],
-  "createdAt": "2026-09-30T23:10:20.726Z",
-  "approvedAt": "2026-09-30T23:10:20.736Z"
+  "createdAt": "2026-09-30T23:17:46.453Z",
+  "approvedAt": "2026-09-30T23:17:46.464Z"
 }

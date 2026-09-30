@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "p_60706460342f",
+  "id": "p_7c86357c69f7",
   "name": "taskdesk: create one task, verified independently",
   "goal": "Create exactly one task titled Quarterly report; change nothing else.",
   "connector": {
@@ -84,9 +84,9 @@
   ],
   "agents": [
     {
-      "id": "a_44872cdc",
+      "id": "a_67d574e1",
       "name": "io-correct",
-      "lastProbeAt": "2026-09-30T23:09:53.983Z",
+      "lastProbeAt": "2026-09-30T23:17:19.892Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -97,12 +97,12 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:09:53.983Z"
+      "confirmedByOperatorAt": "2026-09-30T23:17:19.892Z"
     },
     {
-      "id": "a_7380f4de",
+      "id": "a_b406c643",
       "name": "io-claim-only",
-      "lastProbeAt": "2026-09-30T23:09:54.020Z",
+      "lastProbeAt": "2026-09-30T23:17:19.934Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -113,12 +113,12 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:09:54.020Z"
+      "confirmedByOperatorAt": "2026-09-30T23:17:19.934Z"
     },
     {
-      "id": "a_51b6a817",
+      "id": "a_b0777314",
       "name": "io-duplicate",
-      "lastProbeAt": "2026-09-30T23:09:54.059Z",
+      "lastProbeAt": "2026-09-30T23:17:19.975Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -129,12 +129,12 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:09:54.059Z"
+      "confirmedByOperatorAt": "2026-09-30T23:17:19.975Z"
     },
     {
-      "id": "a_17b82bd9",
+      "id": "a_8d34fe5d",
       "name": "io-extra-update",
-      "lastProbeAt": "2026-09-30T23:09:54.099Z",
+      "lastProbeAt": "2026-09-30T23:17:20.014Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -145,12 +145,12 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:09:54.099Z"
+      "confirmedByOperatorAt": "2026-09-30T23:17:20.014Z"
     },
     {
-      "id": "a_56f823c1",
+      "id": "a_0f2ee6a3",
       "name": "io-correct-oracle-down",
-      "lastProbeAt": "2026-09-30T23:09:54.138Z",
+      "lastProbeAt": "2026-09-30T23:17:20.052Z",
       "lastProbeOk": true,
       "lastProbeProblem": "",
       "kind": "process",
@@ -161,10 +161,10 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:09:54.138Z"
+      "confirmedByOperatorAt": "2026-09-30T23:17:20.052Z"
     },
     {
-      "id": "a_3a9ea6f0",
+      "id": "a_5639a399",
       "name": "io-readback",
       "kind": "process",
       "command": "/usr/bin/python3",
@@ -174,19 +174,19 @@
         "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
       "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
-      "confirmedByOperatorAt": "2026-09-30T23:09:54.177Z",
-      "lastProbeAt": "2026-09-30T23:09:54.177Z",
+      "confirmedByOperatorAt": "2026-09-30T23:17:20.093Z",
+      "lastProbeAt": "2026-09-30T23:17:20.093Z",
       "lastProbeOk": true,
       "lastProbeProblem": ""
     }
   ],
   "runs": [],
   "timings": {
-    "createdAt": "2026-09-30T23:09:53.818Z",
-    "environmentConnectedAt": "2026-09-30T23:09:53.906Z",
-    "workflowRecordedAt": "2026-09-30T23:09:53.941Z",
-    "benchmarkGeneratedAt": "2026-09-30T23:09:53.981Z",
-    "agentConnectedAt": "2026-09-30T23:09:54.016Z",
+    "createdAt": "2026-09-30T23:17:19.729Z",
+    "environmentConnectedAt": "2026-09-30T23:17:19.823Z",
+    "workflowRecordedAt": "2026-09-30T23:17:19.857Z",
+    "benchmarkGeneratedAt": "2026-09-30T23:17:19.889Z",
+    "agentConnectedAt": "2026-09-30T23:17:19.928Z",
     "firstVerdictAt": null
   },
   "baselineRunId": null,

@@ -1,38 +1,38 @@
 {
   "schemaVersion": 1,
-  "runId": "run_3049ef751a8b",
-  "benchmarkId": "bm_ec_p_b2885bfc557e",
+  "runId": "run_9d8b59238039",
+  "benchmarkId": "bm_ec_p_2883d840c013",
   "benchmarkName": "Create exactly one task titled Quarterly report; change nothing else. \u2014 private benchmark",
-  "benchmarkHash": "sha256:bb9fad5f60fa5d1d411b441b7abc81fd20b55ca4a258585dff9c7ee3fb72db51",
-  "contractHash": "sha256:94490552ae3972dcd8824d6cb6eb3be566e59f231ba358a6e12688b87c54ede4",
-  "environment": "p_b2885bfc557e",
-  "startedAt": "2026-09-30T23:10:22.643Z",
-  "finishedAt": "2026-09-30T23:10:22.777Z",
+  "benchmarkHash": "sha256:b8145abb42e0663914f2a59ab0ffa7760793d571bf89062a6eb437cf3c6da22a",
+  "contractHash": "sha256:a6915c4ab4965d13d479c5a5380de88dc962a9123eca419c344319b0b0383110",
+  "environment": "p_2883d840c013",
+  "startedAt": "2026-09-30T23:17:48.361Z",
+  "finishedAt": "2026-09-30T23:17:48.493Z",
   "agents": [
     {
-      "id": "a_5037f2b8",
+      "id": "a_ef436ea2",
       "name": "io2-create-correct",
       "kind": "process"
     }
   ],
   "caseResults": [
     {
-      "runId": "run_3049ef751a8b",
+      "runId": "run_9d8b59238039",
       "caseId": "case_live__happy_path",
       "caseName": "The job as demonstrated",
       "category": "happy_path",
-      "agentId": "a_5037f2b8",
-      "correlationId": "run_3049ef751a8b.a_5037f2b8.case_live__happy_path",
-      "startedAt": "2026-09-30T23:10:22.644Z",
+      "agentId": "a_ef436ea2",
+      "correlationId": "run_9d8b59238039.a_ef436ea2.case_live__happy_path",
+      "startedAt": "2026-09-30T23:17:48.362Z",
       "verification": "PARTIAL",
       "evidenceIndependence": "INDEPENDENT",
       "budgetMs": 60000,
-      "finishedAt": "2026-09-30T23:10:22.710Z",
-      "durationMs": 66.303,
+      "finishedAt": "2026-09-30T23:17:48.434Z",
+      "durationMs": 72.198,
       "steps": [
         {
           "index": 0,
-          "at": 1790809822704,
+          "at": 1790810268429,
           "tool": "list_tasks",
           "args": {},
           "ok": true,
@@ -58,7 +58,7 @@
         },
         {
           "index": 1,
-          "at": 1790809822709,
+          "at": 1790810268433,
           "tool": "create_task",
           "args": {
             "title": "Quarterly report"
@@ -257,7 +257,7 @@
   ],
   "scores": [
     {
-      "agentId": "a_5037f2b8",
+      "agentId": "a_ef436ea2",
       "agentName": "io2-create-correct",
       "n": 1,
       "taskSuccessRate": 1,
@@ -284,9 +284,9 @@
       "harnessFailures": 0,
       "inconclusiveRate": 0,
       "inconclusive": false,
-      "avgLatencyMs": 66.303,
-      "medianLatencyMs": 66.303,
-      "p95LatencyMs": 66.303,
+      "avgLatencyMs": 72.198,
+      "medianLatencyMs": 72.198,
+      "p95LatencyMs": 72.198,
       "avgSteps": 2,
       "passAtK": {
         "pass@1": 1
@@ -298,7 +298,7 @@
     }
   ],
   "verdict": {
-    "winnerAgentId": "a_5037f2b8",
+    "winnerAgentId": "a_ef436ea2",
     "outcome": "PASS",
     "summary": "io2-create-correct wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 decided cases.",
     "rationale": [
@@ -366,6 +366,6 @@
       "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
     ]
   },
-  "resultHash": "sha256:5fc19eaef20e810007471e34971d6fe6c97daa4cd61a3c352cb378b4aa440aad",
+  "resultHash": "sha256:f4d51b3ec04e923eeea69eb7b709a4753aab679c2aad417947f99d1bceb7268c",
   "rigorrunVersion": "0.1.0"
 }

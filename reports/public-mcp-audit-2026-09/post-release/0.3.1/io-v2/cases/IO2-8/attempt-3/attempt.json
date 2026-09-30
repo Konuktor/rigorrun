@@ -1,8 +1,8 @@
 {
   "case": "IO2-8",
   "attempt": 3,
-  "productCommit": "1dbcf67ab3eed4c0143dbb6a14aeb823d93f08d7",
-  "seconds": 0.56,
+  "productCommit": "57515c26cf2ee7ff07d98033667a56a1890204a4",
+  "seconds": 0.58,
   "project": "selfread",
   "agent": "io2-create-extra-note-edit",
   "task": "Create exactly one task titled Quarterly report; change nothing else.",
