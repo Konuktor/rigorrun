@@ -48,6 +48,14 @@ describe('failed checks in words', () => {
     ).toBe('"createRefund" did not happen before "addNote"');
   });
 
+  it('reads a long hostile order target in linear time', () => {
+    const hostile = `derived.events.orderOk.-__before__${'-__before__'.repeat(20_000)}!`;
+    const started = performance.now();
+    expect(plainTarget(hostile)).toBeUndefined();
+    expect(performance.now() - started).toBeLessThan(200);
+    expect(plainTarget('derived.events.orderOk.a__before__b')).toEqual({ kind: 'order', first: 'a', second: 'b' });
+  });
+
   it('keeps the path for anything it does not recognise', () => {
     expect(plainTarget('state.Refund[0].amount')).toBeUndefined();
     expect(plainTarget('derived.all.Refund[a=1][b=2].length')).toBeUndefined();

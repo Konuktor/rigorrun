@@ -28,13 +28,23 @@ const VIEWS: Record<string, string> = {
 
 const RECORDS = /^derived\.(created|all|changed|deleted)\.([A-Za-z_][\w]*)(\[.*\])?(\.(?:length|count))?$/;
 const OCCURRED = /^derived\.events\.occurred\.([\w.-]+)$/;
-const ORDER = /^derived\.events\.orderOk\.([\w.-]+?)__before__([\w.-]+)$/;
+const ORDER_PREFIX = 'derived.events.orderOk.';
+const BEFORE = '__before__';
+const ACTION = /^[\w.-]+$/;
 
 export function plainTarget(target: string): PlainTarget | undefined {
   const occurred = OCCURRED.exec(target);
   if (occurred) return { kind: 'occurred', action: occurred[1]! };
-  const order = ORDER.exec(target);
-  if (order) return { kind: 'order', first: order[1]!, second: order[2]! };
+  // Split rather than matched: a pattern with `__before__` between two runs of
+  // word characters backtracks on a long enough name.
+  if (target.startsWith(ORDER_PREFIX)) {
+    const pair = target.slice(ORDER_PREFIX.length);
+    const at = pair.indexOf(BEFORE);
+    const first = pair.slice(0, at);
+    const second = pair.slice(at + BEFORE.length);
+    if (at > 0 && ACTION.test(first) && ACTION.test(second)) return { kind: 'order', first, second };
+    return undefined;
+  }
 
   const records = RECORDS.exec(target);
   if (!records) return undefined;
