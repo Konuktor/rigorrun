@@ -6,6 +6,20 @@ import { NPM_URL, REPO_URL } from '../site';
 
 const releases = [
   {
+    version: '0.3.0',
+    date: '1 October 2026',
+    summary: 'Verdicts you can trust on a real system, requalified from evidence, and agents tested where they run.',
+    changes: [
+      ['Fixed', 'On real systems 0.2.0 failed correct agents and passed wrong ones: a public audit scored every correct agent FAIL and passed duplicate, wrong-value and wrong-entity agents. Each case is now held to the change the demonstration made, from the world it started in, and to nothing else changing for any kind of record.'],
+      ['Fixed', 'A case whose right answer is to decline passed an agent that did the job anyway, when the result landed where no nominated read looks. A declined case now also checks, from the call log, that the job\'s own action did not succeed.'],
+      ['Fixed', 'RigorRun could reset, record or build a suite against a system marked production, and connecting defaulted to staging. It now never writes to production on its own behalf, and the kind of system must be chosen.'],
+      ['Added', 'Black-box agents (rigorrun/task/1): send each case\'s work to an agent wherever it runs, unchanged, and judge what the system holds afterwards through RigorRun\'s own connection.'],
+      ['Added', 'Case outcomes PASS, FAIL, ABSTAIN, TIMED_OUT, AGENT_FAILURE and HARNESS_FAILURE; exit code 3 when too many cases reached no verdict; rigorrun setup for a project from a file; an independent verifier connection.'],
+      ['Added', 'Credentials for CI as RIGORRUN_SECRET__<NAME>; secrets set prompts without echo.'],
+      ['Evidence', 'Released only after a pre-registered requalification returned GO on all twelve gates: 58 cases, 152 attempts, no false pass or false fail against an independent oracle.'],
+    ],
+  },
+  {
     version: '0.2.0',
     date: '9 September 2026',
     summary: 'Verify a server nobody wrote, and stop a gate that could not fail.',
@@ -43,7 +57,7 @@ const releases = [
       <Eyebrow>Changelog</Eyebrow>
       <h1 class="mt-4 text-display font-medium text-balance">Every release, including what was wrong.</h1>
       <p class="mt-7 text-lead text-secondary">
-        Three releases so far, all on <a class="rr-link" href={NPM_URL}>npm</a>. Fixes describe the
+        Four releases so far, all on <a class="rr-link" href={NPM_URL}>npm</a>. Fixes describe the
         defect rather than the patch, because "improved reliability" tells you nothing about whether
         you were affected.
       </p>
