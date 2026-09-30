@@ -42,7 +42,7 @@ gating and comparing are also available from the command line, which is the half
 
 | Command | What it does |
 | --- | --- |
-| `rigorrun demo` | The bundled example, end to end, offline. |
+| `rigorrun demo` | A real recorded run, replayed offline: what the model said beside what the system held. `--live` runs the bundled example end to end now; `--report <file>` writes every case to a page. |
 | `rigorrun compile <trace.json>` · `generate <contract.json>` | The pipeline stages, individually. |
 
 ## Thresholds
