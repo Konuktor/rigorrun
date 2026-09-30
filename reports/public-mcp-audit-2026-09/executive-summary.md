@@ -30,3 +30,14 @@ Nothing about the MCP-server population: three young, small servers on one machi
 ## Recommendations
 
 For RigorRun: read the live state at case start for `seed: none` connectors, or refuse to grade until a reset exists; parse JSON-in-text results in the demonstration path exactly as the probe does; make the case budget configurable and larger than the tool timeout; and let a project attach a second read-only connector as an independent oracle. For the maintainers: the disclosure drafts under `disclosure/`, with the sqlite one going privately first.
+
+## Addendum, 2026-10-01: fixed in 0.3.0
+
+This section was added after publication. Nothing above it has changed.
+
+- **The defect behind the pattern (R-1) and the ones found with it are fixed.** Re-run against the same frozen benchmark, labels and oracles, RigorRun scored TP 19, TN 4, FP 0, FN 0 on the 23 cases that reached a verdict; 3 cases did not reach one and are counted as not passing (`remediation/before-after.md`, `remediation/after-results.json`).
+- **A pre-registered requalification returned GO on all 12 gates** at product commit `28e8ec3`, with an independent oracle on every attempt: TP 59, TN 13, FP 0, FN 0 over 72 generated attempts (`requalification-v3/README.md`, `release-gate.json`, `results-v2.json`). The first attempt, v2, returned NO_GO and is kept as it was (`requalification/README.md`).
+- **0.3.0 is that commit** plus its version strings and one hardening fix, record ids from data never touching an object prototype (`2321161`, `e4ba6aa`). It is published with npm provenance.
+- **0.2.0 should not be used on real systems.** Use 0.3.0 or later.
+
+The upstream findings above are unaffected: they are statements about the three servers, not about RigorRun.
