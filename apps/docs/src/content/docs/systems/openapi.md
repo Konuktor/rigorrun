@@ -18,7 +18,7 @@ is read from the document when it declares one. Values go to the credential stor
 travel with the project.
 
 ```bash
-rigorrun secret set REGISTRY_CLIENT_SECRET
+npx rigorrun secrets set REGISTRY_CLIENT_SECRET
 ```
 
 `secret set` refuses a value on the command line, because that is shell history.

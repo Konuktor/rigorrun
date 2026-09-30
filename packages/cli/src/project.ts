@@ -15,6 +15,7 @@ import {
   Service,
   compareRuns,
   describeConnector,
+  secretEnvName,
   storeRoot,
   timeToFirstVerdictMs,
 } from '@rigorrun/daemon';
@@ -276,11 +277,17 @@ export async function cmdSecret(
   }
 
   if (action === 'set') {
-    if (!name) throw new CliError('Which secret? Try `rigorrun secret set MY_TOKEN`.');
-    const value = process.env['RIGORRUN_SECRET_VALUE'];
+    if (!name) throw new CliError('Which secret? Try `npx rigorrun secrets set MY_TOKEN`.');
+    // Never an argument: that is shell history. Typed without echo when there
+    // is a terminal, or handed over in RIGORRUN_SECRET_VALUE when there is not.
+    const value =
+      process.env['RIGORRUN_SECRET_VALUE'] ||
+      (process.stdin.isTTY ? await readHidden(`Value for ${name} (not shown): `) : '');
     if (!value) {
       throw new CliError(
-        'Pass the value in RIGORRUN_SECRET_VALUE so it does not end up in your shell history.',
+        'No value. Run this in a terminal to type it without echo, or pass it in RIGORRUN_SECRET_VALUE ' +
+          `so it does not end up in your shell history. In CI, set ${secretEnvName(name)} instead — ` +
+          'RigorRun reads it when nothing is stored.',
       );
     }
     await store.setSecret(name, value);
@@ -298,7 +305,36 @@ export async function cmdSecret(
     return 0;
   }
 
-  throw new CliError('Try `rigorrun secrets list|set|remove`.');
+  throw new CliError('Try `npx rigorrun secrets list|set|remove`.');
+}
+
+/** Reads one line from the terminal without echoing it. */
+function readHidden(prompt: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const input = process.stdin;
+    let value = '';
+    process.stderr.write(prompt);
+    input.setRawMode(true);
+    input.resume();
+    input.setEncoding('utf8');
+    const finish = (error?: Error): void => {
+      input.setRawMode(false);
+      input.pause();
+      input.removeListener('data', onData);
+      process.stderr.write('\n');
+      if (error) reject(error);
+      else resolve(value);
+    };
+    const onData = (chunk: string): void => {
+      for (const char of chunk) {
+        if (char === '\r' || char === '\n') return finish();
+        if (char === '\u0003') return finish(new CliError('Cancelled.'));
+        if (char === '\u007f' || char === '\b') value = value.slice(0, -1);
+        else value += char;
+      }
+    };
+    input.on('data', onData);
+  });
 }
 
 function printRun(result: RunResult, json: boolean): void {

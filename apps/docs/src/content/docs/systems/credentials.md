@@ -9,9 +9,9 @@ name, so RigorRun knows it works rather than assuming. Where none is present, an
 used instead. `rigorrun doctor` reports which one you got.
 
 ```bash
-rigorrun secrets list
-rigorrun secret set VENUE_DESK_TOKEN
-rigorrun secret remove VENUE_DESK_TOKEN
+npx rigorrun secrets list
+npx rigorrun secrets set VENUE_DESK_TOKEN      # prompts, without echo
+npx rigorrun secrets remove VENUE_DESK_TOKEN
 ```
 
 ## No command prints a secret
@@ -26,5 +26,7 @@ project therefore carries no secrets unless you explicitly ask for them with `--
 
 ## In CI
 
-Set them in the environment the way you would for anything else. RigorRun reads from the environment
-when the store has no entry, so a CI job needs no keychain.
+A credential the project names `VENUE_DESK_TOKEN` can arrive as `RIGORRUN_SECRET__VENUE_DESK_TOKEN`:
+the name upper-cased, with anything but letters and digits made `_`. RigorRun reads it only when the
+store has no entry, so a CI job needs no keychain, and a value on your laptop is never overridden by a
+stray variable. Values that arrive this way are never written into an exported project.

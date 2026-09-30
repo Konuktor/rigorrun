@@ -90,7 +90,10 @@ jobs:
              --min-success 0.95
         env:
           RIGORRUN_HOME: ${{ github.workspace }}/.rigorrun
-          RIGORRUN_SECRET_VALUE: ${{ secrets.DESK_TOKEN }}
+          # A credential the project names DESK_TOKEN arrives as
+          # RIGORRUN_SECRET__DESK_TOKEN: the name upper-cased, anything but
+          # letters and digits made `_`. A value stored on the machine wins.
+          RIGORRUN_SECRET__DESK_TOKEN: ${{ secrets.DESK_TOKEN }}
 ```
 
 Two things this example is honest about. The project has to exist on that

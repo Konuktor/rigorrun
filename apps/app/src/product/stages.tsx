@@ -444,7 +444,7 @@ export function ConnectEnvironment({
                 </Field>
                 <Field
                   label="Which credential holds the client id?"
-                  hint="A name, as below. Set its value with rigorrun secrets set."
+                  hint="A name, as below. Set its value with npx rigorrun secrets set."
                 >
                   {({ id, describedBy }) => (
                     <TextInput
@@ -580,7 +580,7 @@ export function ConnectEnvironment({
           hint={
             <>
               Names only, one per line. Set the values with{' '}
-              <code className="font-mono">rigorrun secret set NAME</code>; they stay in this
+              <code className="font-mono">npx rigorrun secrets set NAME</code>; they stay in this
               machine&rsquo;s store and never travel with the project.
             </>
           }

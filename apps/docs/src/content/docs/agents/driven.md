@@ -16,29 +16,42 @@ Copy it then. It is not stored anywhere you can read it back, and it is not in t
 
 ## The loop
 
-```python
-import requests
+Two endpoints, both taking the key as a bearer header:
 
-BASE = "http://127.0.0.1:41925"
-KEY  = "..."            # from the interface
-AGENT = "agent_..."     # from the interface
-headers = {"authorization": f"Bearer {KEY}"}
-
-while True:
-    work = requests.get(f"{BASE}/api/drive/{AGENT}", headers=headers).json()
-    if not work.get("task"):
-        break                                   # the suite is finished
-
-    report = your_agent(work["task"], work["tools"], work["url"])
-
-    requests.post(
-        f"{BASE}/api/drive/{AGENT}/finished",
-        headers=headers,
-        json={"report": report},
-    )
+```
+GET  /api/drive/<agentId>            → { "waiting": <case> | null }
+POST /api/drive/<agentId>/finished   ← { "caseId", "status", "output" }
 ```
 
-About twenty lines. Your agent can be anything that can make an HTTP request.
+A waiting case carries `caseId`, `task` (`instruction`, `inputs`, `policyBrief`), `mcpUrl` — an MCP
+address scoped to that one case, which is how your agent touches the system — `expiresAt` and
+`maxSteps`.
+
+```python
+import json, os, time, urllib.request
+
+RUNNER = "http://127.0.0.1:41925"   # the address the runner printed
+AGENT = "a_1a2b3c4d"                # shown with the key
+HEADERS = {"Authorization": f"Bearer {os.environ['RIGORRUN_AGENT_KEY']}",
+           "Content-Type": "application/json"}
+
+def call(path, body=None):
+    data = json.dumps(body).encode() if body is not None else None
+    with urllib.request.urlopen(urllib.request.Request(RUNNER + path, data=data, headers=HEADERS)) as r:
+        return json.load(r)
+
+while True:
+    waiting = call(f"/api/drive/{AGENT}")["waiting"]
+    if waiting is None:
+        time.sleep(1)                   # nothing published yet; press Run in the interface
+        continue
+    output = your_agent(waiting["task"], waiting["mcpUrl"])
+    call(f"/api/drive/{AGENT}/finished",
+         {"caseId": waiting["caseId"], "status": "completed", "output": output})
+```
+
+About twenty lines. `output` is shown next to what actually happened and never scored. The loop has to
+run on this machine: the runner and the per-case MCP address both listen on loopback only.
 
 ## Why this exists
 

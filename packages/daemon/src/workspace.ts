@@ -111,7 +111,7 @@ export class Workspace {
     if (missing.length > 0) {
       throw new Error(
         `This project needs ${missing.join(', ')}, which this machine does not have. ` +
-          `Set them with \`rigorrun secrets set <name>\`.`,
+          `Set them with \`npx rigorrun secrets set <name>\`, or in CI as RIGORRUN_SECRET__<NAME>.`,
       );
     }
     return secrets;
@@ -200,7 +200,7 @@ export class Workspace {
         throw new Error(
           `This API signs in with a client id and secret, and ${
             clientId === undefined ? oauth.clientIdSecret : oauth.clientSecretSecret
-          } is not in this machine's credential store. Set it with \`rigorrun secrets set\`.`,
+          } is not in this machine's credential store. Set it with \`npx rigorrun secrets set\`, or in CI as RIGORRUN_SECRET__<NAME>.`,
         );
       }
       return OpenApiConnection.open({

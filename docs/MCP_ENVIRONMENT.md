@@ -62,7 +62,7 @@ Only the *names* live in the project. The values live in one owner-only file
 for this install:
 
 ```bash
-RIGORRUN_SECRET_VALUE=... rigorrun secrets set DESK_TOKEN
+npx rigorrun secrets set DESK_TOKEN   # prompts without echo
 rigorrun secrets list      # names only
 ```
 
