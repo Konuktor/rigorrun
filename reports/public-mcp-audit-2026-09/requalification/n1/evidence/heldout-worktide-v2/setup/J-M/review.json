@@ -1,0 +1,25 @@
+{
+  "confirmedRuleIds": [],
+  "rejectedRuleIds": [
+    "rule_action_order__time.start__time.stop",
+    "rule_field_relation__eq__billableMinutes__minutes",
+    "rule_field_relation__lte__billedMinutes__minutes"
+  ],
+  "rules": [
+    {
+      "id": "rule_action_order__time.start__time.stop",
+      "status": "rejected",
+      "statement": "\"time.start\" must happen before \"time.stop\""
+    },
+    {
+      "id": "rule_field_relation__eq__billableMinutes__minutes",
+      "status": "rejected",
+      "statement": "the group's billable minutes must equal the group's minutes"
+    },
+    {
+      "id": "rule_field_relation__lte__billedMinutes__minutes",
+      "status": "rejected",
+      "statement": "the group's billed minutes must not exceed the group's minutes"
+    }
+  ]
+}

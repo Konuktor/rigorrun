@@ -1,0 +1,21 @@
+LIMIT sdk-versions protocol versions the installed MCP SDK can negotiate
+PASS  filesystem-connect connection, identity and negotiated version
+LIMIT recorded-protocol-version the negotiated protocol version is recorded for a stdio server
+PASS  filesystem-tools-list tools/list: RigorRun sees every tool the server offers
+PASS  filesystem-call tools/call, and normalisation that follows the result shape
+PASS  filesystem-error a refused call is an error, never data
+PASS  filesystem-teardown close() ends the stdio child
+PASS  memory-structured a structured result is read as records
+PASS  memory-teardown close() ends the stdio child
+LIMIT tools-list-pagination tools/list follows nextCursor
+PASS  normalisation-structured structuredContent is records
+PASS  normalisation-json-in-text JSON inside a text block is records (R-8)
+PASS  normalisation-prose prose is never records
+PASS  errors isError results and JSON-RPC errors are errors, not data
+LIMIT normalisation-links-and-images resource_link and image-only results
+PASS  timeout a call past its timeout is an error, not an empty result
+LIMIT stderr-flood a server writing 200 KB to stderr is still answered
+PASS  teardown-local close() settles and ends the stdio child after a blocked call
+PASS  modern-only-server a server that speaks only 2026-07-28 is refused at connect, visibly
+{"PASS":14,"LIMIT":5,"FAIL":0}
+exit 0

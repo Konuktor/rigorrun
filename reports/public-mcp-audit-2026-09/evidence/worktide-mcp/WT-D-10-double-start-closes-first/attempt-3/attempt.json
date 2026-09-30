@@ -1,0 +1,90 @@
+{
+  "case": {
+    "id": "WT-D-10-double-start-closes-first",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "DUPLICATE_SIDE_EFFECT / boundary",
+    "truth": "EXPECTED_PASS",
+    "intent": "a second time.start while one runs: documented as closing the first (closedTimeEntryId); two entries result, none running",
+    "calls": [
+      {
+        "tool": "time.start",
+        "args": {
+          "description": "first"
+        }
+      },
+      {
+        "tool": "time.start",
+        "args": {
+          "description": "second"
+        }
+      },
+      {
+        "tool": "time.stop",
+        "args": {}
+      }
+    ],
+    "expect": "after['db_active_timer_count']==0 and after['db_time_entry_count']==before['db_time_entry_count']+2 and 'closedTimeEntryId' in calls[1]['result']['content'][0]['text']"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "time.start",
+        "args": {
+          "description": "first"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a09c58-8ef0-742e-9590-399195cccafd\",\n  \"startedAt\": \"2026-09-13T21:57:24+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"first\",\n  \"isBillable\": true\n}"
+            }
+          ]
+        }
+      },
+      {
+        "tool": "time.start",
+        "args": {
+          "description": "second"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"closedTimeEntryId\": \"01a09c58-8f5d-7f75-8717-735845f08f14\",\n  \"running\": true,\n  \"timerId\": \"01a09c58-8f98-7295-974b-98ad92c14ba7\",\n  \"startedAt\": \"2026-09-13T21:57:24+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"second\",\n  \"isBillable\": true\n}"
+            }
+          ]
+        }
+      },
+      {
+        "tool": "time.stop",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"timeEntryId\": \"01a09c58-8ff4-7b9a-a7be-b6348bb88c4f\",\n  \"durationMinutes\": 0\n}"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 0.65,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

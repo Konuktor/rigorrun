@@ -1,0 +1,50 @@
+[
+  {
+    "step": {
+      "tool": "list_services",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": {
+        "services": {
+          "mailhog": {
+            "type": "local",
+            "enabled": true,
+            "configured": true,
+            "description": "Local mailhog testing service"
+          }
+        },
+        "count": 1,
+        "enabled_count": 1,
+        "types": [
+          "smtp",
+          "api",
+          "local",
+          "webhook"
+        ]
+      }
+    }
+  },
+  {
+    "step": {
+      "tool": "send_email",
+      "args": {
+        "to": "qa@example.test",
+        "subject": "Audit 17",
+        "body": "Audit message 17. This is a synthetic test email captured by a local MailHog sink.",
+        "service": "mailhog"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": {
+        "success": true,
+        "status": "sent",
+        "service": "mailhog",
+        "note": "Check web UI at http://127.0.0.1:8025",
+        "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+      }
+    }
+  }
+]

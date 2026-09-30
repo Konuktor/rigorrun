@@ -1,0 +1,38 @@
+{
+  "command": [
+    "node",
+    "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "audit timer"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0a103-7d4d-7342-939d-0e62d6e5222f\",\n  \"startedAt\": \"2026-09-14T19:42:35+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"audit timer\",\n  \"isBillable\": true\n}"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "time.stop",
+      "args": {},
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"timeEntryId\": \"01a0a103-7d9f-7b90-9cdc-9eba80aad0eb\",\n  \"durationMinutes\": 0\n}"
+          }
+        ]
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

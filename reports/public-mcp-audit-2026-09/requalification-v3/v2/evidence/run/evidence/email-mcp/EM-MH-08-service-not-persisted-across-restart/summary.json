@@ -1,0 +1,41 @@
+{
+  "id": "EM-MH-08-service-not-persisted-across-restart",
+  "target": "email-mcp",
+  "mode": "shell",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 2.28,
+      "result": {
+        "exit": 0,
+        "stdout": "{\"before_restart\": [\"audit-local\", \"mailhog\"], \"after_restart\": [\"mailhog\"]}\n"
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 2.29,
+      "result": {
+        "exit": 0,
+        "stdout": "{\"before_restart\": [\"audit-local\", \"mailhog\"], \"after_restart\": [\"mailhog\"]}\n"
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 2.3,
+      "result": {
+        "exit": 0,
+        "stdout": "{\"before_restart\": [\"audit-local\", \"mailhog\"], \"after_restart\": [\"mailhog\"]}\n"
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

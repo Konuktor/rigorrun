@@ -1,0 +1,39 @@
+{
+  "id": "EM-MH-08-service-not-persisted-across-restart",
+  "target": "email-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "shell",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 2.29,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 2.31,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 2.29,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "3/3"
+}

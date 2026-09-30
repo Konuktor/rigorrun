@@ -1,0 +1,50 @@
+{
+  "case": {
+    "id": "WT-D-11-stop-with-nothing-running",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "BOUNDARY",
+    "truth": "EXPECTED_PASS",
+    "intent": "time.stop with no timer must be a clean error and change nothing",
+    "calls": [
+      {
+        "tool": "time.stop",
+        "args": {}
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError')==True and \"No timer running\" in calls[0]['result']['content'][0]['text'] and after['db_time_entry_count']==before['db_time_entry_count']"
+  },
+  "attempt": 1,
+  "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+  "seconds": 0.25,
+  "result": {
+    "calls": [
+      {
+        "tool": "time.stop",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[400] No timer running."
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "oracleVerdict": "PASS",
+  "scored": false
+}

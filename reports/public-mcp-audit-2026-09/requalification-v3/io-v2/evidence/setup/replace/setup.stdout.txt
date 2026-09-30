@@ -1,0 +1,31 @@
+{
+  "projectId": "p_337b0224ea8a",
+  "readsProblem": "",
+  "readsIgnored": [],
+  "tools": 10,
+  "records": [
+    "Task",
+    "Note"
+  ],
+  "rules": {
+    "total": 1,
+    "confirmed": 0,
+    "rejected": 1
+  },
+  "cases": 1,
+  "quality": null,
+  "agents": [
+    {
+      "name": "io2-replace-correct",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io2-replace-extra-note-edit",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---

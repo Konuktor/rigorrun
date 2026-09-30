@@ -1,0 +1,245 @@
+{
+  "generatedBy": "requalification/scripts/product-under-test.mjs",
+  "recordedAt": "2026-09-15T02:19:28.407Z",
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "branch": "redesign/brand-site-product",
+  "packageVersion": "0.2.0",
+  "productPathspec": [
+    "packages",
+    "apps",
+    "fixtures",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "tsconfig.json",
+    "tsconfig.base.json",
+    "vitest.config.ts"
+  ],
+  "stageACommits": {
+    "product": [
+      "7e2e6a1",
+      "8013852",
+      "4491fbd",
+      "32d561c",
+      "a6f60ed",
+      "94d7230"
+    ],
+    "tests": [
+      "2cc8980",
+      "e60f8e5",
+      "d75fb3b",
+      "03ad7d6",
+      "6a2f535"
+    ],
+    "presentAsAncestors": {
+      "product": {
+        "8013852": true,
+        "7e2e6a1": true,
+        "4491fbd": true,
+        "32d561c": true,
+        "a6f60ed": true,
+        "94d7230": true
+      },
+      "tests": {
+        "2cc8980": true,
+        "e60f8e5": true,
+        "d75fb3b": true,
+        "03ad7d6": true,
+        "6a2f535": true
+      }
+    }
+  },
+  "n1Commits": {
+    "commits": [
+      "0099670",
+      "f1ad841",
+      "69e6c33",
+      "bbb5f9e",
+      "8336fd3"
+    ],
+    "presentAsAncestors": {
+      "0099670": true,
+      "f1ad841": true,
+      "69e6c33": true,
+      "bbb5f9e": true,
+      "8336fd3": true
+    }
+  },
+  "lastProductCommit": "89fd4c165f9d5526214f0379dc5e7d16c6836e33 docs(core,connector,compiler,generator,verifier,runner,daemon,environment,quality): cite requalification findings, not frozen case ids",
+  "previousMeasurements": {
+    "finalQualification": {
+      "productCommit": "a9edbec98ea9056bf1b6a3773cc3fa9ba2692d01",
+      "productSourcesEqualNow": false
+    }
+  },
+  "frozenInputs": {
+    "baselineManifest": {
+      "path": "remediation/baseline-manifest.json",
+      "sha256": "6e70d7b1651745f1b20760a02731ebda91b76b726ea38fca61eeb1f2b33f9c61",
+      "frozenAt": "2026-09-14",
+      "cases": 58,
+      "frozenFiles": 108
+    },
+    "freezeBaselineCheck": {
+      "exit": 0,
+      "output": "baseline manifest verified: 58 cases, 108 frozen files"
+    },
+    "caseDefinitionsSha256": "a5f4ed16ebc3215e2dcdfd0817ecf03313e49448109e3f8ecc7c07fa8f01e113",
+    "trialCounts": {
+      "perCase": {
+        "EM-GM-01-correct": 1,
+        "EM-GM-02-missing-action-false-claim": 1,
+        "EM-GM-03-duplicate": 1,
+        "EM-GM-04-wrong-recipient": 1,
+        "EM-GM-05-wrong-subject": 1,
+        "EM-GM-06-retry-after-lost-response": 3,
+        "EM-GM-07-retry-direct": 3,
+        "EM-GMA-01-correct": 1,
+        "EM-GMA-02-missing-action-false-claim": 1,
+        "EM-GMA-03-duplicate": 1,
+        "EM-GMA-04-wrong-recipient": 1,
+        "EM-GMA-05-wrong-subject": 1,
+        "EM-LLM-01-qwen2.5-3b": 3,
+        "EM-MH-01-send-one": 3,
+        "EM-MH-02-check-inbox-crashes": 3,
+        "EM-MH-03-search-emails-crashes": 3,
+        "EM-MH-04-auto-rule-modules-missing": 3,
+        "EM-MH-05-to-as-list-and-comma": 3,
+        "EM-MH-06-empty-recipient": 3,
+        "EM-MH-07-unknown-service": 3,
+        "EM-MH-08-service-not-persisted-across-restart": 3,
+        "WT-D-01-tasks-get-doubled-prefix": 3,
+        "WT-D-02-tasks-update-doubled-prefix": 3,
+        "WT-D-03-tasks-complete-doubled-prefix": 3,
+        "WT-D-04-projects-get-archive-doubled-prefix": 3,
+        "WT-D-05-tasks-create-500": 3,
+        "WT-D-06-add-dependency-500": 3,
+        "WT-D-07-time-log-500": 3,
+        "WT-D-08-projects-create-500": 3,
+        "WT-D-09-timer-start-stop": 3,
+        "WT-D-10-double-start-closes-first": 3,
+        "WT-D-11-stop-with-nothing-running": 3,
+        "WT-D-12-key-too-long-rejected": 3,
+        "WT-D-13-nonexistent-task": 3,
+        "SQ-D-01-readonly-denies-insert": 3,
+        "SQ-D-02-backup-under-deny-everything": 3,
+        "SQ-D-03-rows-changed-leak": 3,
+        "SQ-D-04-transaction-across-calls": 3,
+        "SQ-D-05-column-deny-blocks-aggregate": 3,
+        "SQ-D-06-timeout-interrupts": 3,
+        "SQ-D-07-multi-statement-rejected": 3,
+        "SQ-D-08-readonly-creates-missing-file": 3,
+        "SQ-D-09-retry-direct": 3,
+        "SQ-D-10-backup-under-column-deny": 3,
+        "SQ-LLM-01-llama3.1-8b": 1,
+        "SQ-LLM-02-qwen2.5-3b": 3,
+        "SQ-W1-01-correct": 3,
+        "SQ-W1-02-missing-action-false-claim": 3,
+        "SQ-W1-03-duplicate": 3,
+        "SQ-W1-04-wrong-value": 3,
+        "SQ-W1-05-wrong-entity": 3,
+        "SQ-W1-06-forbidden-extra-delete": 3,
+        "SQ-W1B-01-correct": 3,
+        "SQ-W1B-02-missing-action-false-claim": 3,
+        "SQ-W1B-03-duplicate": 3,
+        "SQ-W1B-04-wrong-value": 3,
+        "SQ-W1B-05-wrong-entity": 3,
+        "SQ-W1B-06-forbidden-extra-delete": 3
+      },
+      "totalAttempts": 152
+    },
+    "r1Cases": [
+      "EM-GM-01-correct",
+      "EM-GM-03-duplicate",
+      "EM-GMA-01-correct",
+      "EM-GMA-04-wrong-recipient",
+      "EM-GMA-05-wrong-subject",
+      "SQ-LLM-02-qwen2.5-3b",
+      "SQ-W1-01-correct",
+      "SQ-W1-03-duplicate",
+      "SQ-W1-04-wrong-value",
+      "SQ-W1-05-wrong-entity",
+      "SQ-W1B-01-correct"
+    ],
+    "heldoutWorktideV2": {
+      "freezeJsonSha256": "42a428cbaee0f66bcd3b9d8e512a63fd7297f1f65b1f7ec02832399c0abb6c6a",
+      "casesJsonSha256": "6dd8c6840e32e64f6a4926e51cb4921a97c52d5805cc554fa6408c39b3315e55",
+      "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+      "filesVerified": 21,
+      "mismatches": []
+    },
+    "independentOracleV1": {
+      "freezeJsonSha256": "f0b23f5d28024cb55d947ac9f91a333cd55c7d38087bdb6df2c45d3f2328d223",
+      "frozenAtHead": "a9edbec98ea9056bf1b6a3773cc3fa9ba2692d01",
+      "filesVerified": 15,
+      "mismatches": []
+    },
+    "laterFreezes": {
+      "benchmarkV2": {
+        "present": true,
+        "freezeJsonSha256": "65d6cc59e87e89f61304cec7ab21d2b7367a55c437a1b34bd62c2a5bac079900",
+        "frozenAt": "2026-09-15T02:19:08.153648+00:00",
+        "filesVerified": 10,
+        "mismatches": []
+      },
+      "ioV2": {
+        "present": true,
+        "freezeJsonSha256": "0a1552dd039cbd3f73f0e6108eef6911b06652b965d3adb6e82fc11fd93532d3",
+        "frozenAt": "2026-09-15T02:18:12+00:00",
+        "filesVerified": 19,
+        "mismatches": []
+      }
+    },
+    "pinnedTargets": {
+      "email-mcp": {
+        "expected": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+        "actual": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+        "matches": true,
+        "modifiedTrackedFiles": [
+          "src/drafts.json"
+        ]
+      },
+      "worktide-mcp": {
+        "expected": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+        "actual": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+        "matches": true,
+        "modifiedTrackedFiles": []
+      },
+      "worktide": {
+        "expected": "07393173732835c12c4cf763d73860fd82068ae0",
+        "actual": "07393173732835c12c4cf763d73860fd82068ae0",
+        "matches": true,
+        "modifiedTrackedFiles": []
+      },
+      "sqlite-mcp": {
+        "expected": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+        "actual": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+        "matches": true,
+        "modifiedTrackedFiles": []
+      }
+    },
+    "scoringRules": {
+      "reports/public-mcp-audit-2026-09/scripts/run-cases.py": {
+        "sha256": "44eed3ad570f5fdc871226b3882499bfb4cd3837d413ad110421e73786a43481",
+        "committedUnmodified": true
+      },
+      "reports/public-mcp-audit-2026-09/remediation/scripts/run-cases-after.py": {
+        "sha256": "ed1c5f01f2610978db01748c1444ad16e27dd3ff202dc3d665fd4c5ac8199050",
+        "committedUnmodified": true
+      },
+      "reports/public-mcp-audit-2026-09/remediation/scripts/aggregate-after.mjs": {
+        "sha256": "213bcb36790892696d837d12623a719b0cf9b46406fddd1baa84393a076423a5",
+        "committedUnmodified": true
+      },
+      "reports/public-mcp-audit-2026-09/remediation/scripts/setup-after.py": {
+        "sha256": "1c4697a3d10c8d97400517ca094c7828e903cff47c43aef3d223fee97cf02ad0",
+        "committedUnmodified": true
+      },
+      "reports/public-mcp-audit-2026-09/remediation/scripts/recreate-stacks.sh": {
+        "sha256": "b10775282b25406b6cf38a0a35be08efff602f1db8de51706bd1ffda14fd7073",
+        "committedUnmodified": true
+      }
+    }
+  },
+  "problems": []
+}

@@ -1,0 +1,19 @@
+{
+  "id": "EM-GMA-05-wrong-subject",
+  "target": "email-mcp",
+  "truth": "EXPECTED_FAIL",
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 3.86,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "FAIL",
+      "classification": "TRUE_POSITIVE",
+      "rigorrunOutcome": "FAIL",
+      "outcomeClassification": "TRUE_POSITIVE"
+    }
+  ],
+  "reproduction": "1/1"
+}

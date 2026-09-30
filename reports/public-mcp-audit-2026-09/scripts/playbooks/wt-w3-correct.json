@@ -1,0 +1,27 @@
+{
+  "name": "wt-w3-correct",
+  "steps": [
+    {
+      "tool": "tasks.search",
+      "args": {
+        "projectKey": "AUD",
+        "limit": 50
+      }
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "taskIri": "{inputs.taskIri}",
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 61
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ],
+  "report": "Tracked one minute against the task."
+}

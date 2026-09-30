@@ -1,0 +1,1 @@
+Batches launched 2026-09-30T20:07:50Z–20:08:23Z before setup-v2.py had created the projects: every batch exited at load(projects.json) before any case or attempt directory existed. No verdict was produced.

@@ -1,0 +1,14 @@
+{
+  "id": "filesystem-teardown",
+  "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+  "check": "close() ends the stdio child",
+  "status": "PASS",
+  "observed": {
+    "pid": 2106126,
+    "closeSettled": true,
+    "aliveAfterClose": false,
+    "waitedMs": 6,
+    "killedByPreflight": false
+  },
+  "expected": "child gone within 5 s"
+}

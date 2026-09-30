@@ -1,0 +1,31 @@
+{
+  "projectId": "p_ab3470bd8ad0",
+  "readsProblem": "",
+  "readsIgnored": [],
+  "tools": 10,
+  "records": [
+    "Task",
+    "Note"
+  ],
+  "rules": {
+    "total": 0,
+    "confirmed": 0,
+    "rejected": 0
+  },
+  "cases": 3,
+  "quality": null,
+  "agents": [
+    {
+      "name": "io2-update-correct",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "io2-update-extra-note-create",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---

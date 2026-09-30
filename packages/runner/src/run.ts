@@ -6,8 +6,10 @@
  * that the environment is resolved by id from a registry instead of being
  * imported, so this file has no idea what kind of business it is testing.
  *
- * Isolation: every case builds a fresh adapter from its own recorded starting
- * world, so no case can inherit anything from another.
+ * Isolation: every case builds a fresh adapter and establishes its own starting
+ * world — installed where the adapter can seed, observed at case start where it
+ * cannot — so no case can inherit anything from another, and no case is graded
+ * against a snapshot recorded when the suite was generated.
  *
  * Integrity: the agent is handed `publicCaseView(testCase)` and a bounded tool
  * channel. `testCase.checks` is read afterwards, by the verifier, and never
@@ -21,17 +23,24 @@ import {
   type AgentStep,
   type Benchmark,
   type BenchmarkCase,
+  type CaseOutcome,
   type CaseResult,
+  type EntityReadStability,
+  type EvidenceIndependence,
   type ObservedEvent,
   type RunResult,
+  type SuiteQuality,
 } from '@rigorrun/core';
 import {
+  StateReadError,
   buildProjection,
   capabilityLimits,
   createEnvironment,
+  frameObservation,
   isolationLevel,
   mayMutateAtAll,
   mayRepeatMutatingCases,
+  readStability,
   verificationStrength,
   type CanonicalState,
   type EnvironmentAdapter,
@@ -59,6 +68,17 @@ export interface RunOptions {
   onProgress?: (event: RunProgress) => void | Promise<void>;
   /** Injectable clock so tests and examples can be byte-reproducible. */
   now?: () => Date;
+  /**
+   * Overrides every case's wall-clock budget for this run — for an agent that
+   * needs more time than the suite was generated with. Recorded on each case.
+   */
+  caseTimeoutMs?: number;
+  /**
+   * The suite's own quality check. Its warnings go into the verdict's
+   * rationale and an unassessed suite is a limit, so a clean-looking PASS never
+   * hides a suite that cannot separate a good agent from a bad one.
+   */
+  suiteQuality?: SuiteQuality;
   version?: string;
 }
 
@@ -70,6 +90,12 @@ export async function runBenchmark(
   options: RunOptions = {},
 ): Promise<RunResult> {
   if (agents.length === 0) throw new Error('At least one agent is required to run a benchmark.');
+  if (
+    options.caseTimeoutMs !== undefined &&
+    !(Number.isInteger(options.caseTimeoutMs) && options.caseTimeoutMs > 0)
+  ) {
+    throw new Error('caseTimeoutMs must be a positive whole number of milliseconds.');
+  }
 
   const runId = options.runId ?? prefixedId('run');
   const now = options.now ?? (() => new Date());
@@ -94,6 +120,33 @@ export async function runBenchmark(
     });
   }
 
+  // A black-box agent works on the system directly. RigorRun cannot refuse its
+  // writes the way it refuses a proxied call, so production is not a place to
+  // send one — and what it did is judged on state alone, which the run says.
+  if (agents.some((agent) => agent.kind === 'blackbox')) {
+    if (capabilities.safety === 'production') {
+      throw new Error(
+        'This system is marked production, and a black-box agent writes to it directly, where RigorRun ' +
+          'cannot refuse anything. Run it against a staging or scratch copy.',
+      );
+    }
+    limits.push({
+      id: 'no_call_trace',
+      limit:
+        'Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. ' +
+        'Every check on what the system holds afterwards was, on a reading the agent never touched.',
+      remedy: 'Connect the agent through the RigorRun MCP proxy as well, to have its calls checked too.',
+    });
+  }
+
+  if (options.suiteQuality && !options.suiteQuality.assessed) {
+    limits.push({
+      id: 'suite_quality_unassessed',
+      limit: 'Nobody has checked whether this suite can tell a correct agent from a broken one.',
+      remedy: 'Run the suite check before trusting a PASS from it.',
+    });
+  }
+
   await options.onProgress?.({
     type: 'run_started',
     runId,
@@ -112,7 +165,7 @@ export async function runBenchmark(
           caseId: testCase.id,
           caseName: testCase.name,
         });
-        const result = await executeCase(benchmark, runId, testCase, agent, now);
+        const result = await executeCase(benchmark, runId, testCase, agent, now, options.caseTimeoutMs);
         caseResults.push(result);
         await options.onProgress?.({ type: 'case_finished', runId, result });
       }
@@ -128,6 +181,11 @@ export async function runBenchmark(
     ),
   );
 
+  const verdict = decideVerdict(scores);
+  for (const warning of options.suiteQuality?.warnings ?? []) {
+    verdict.rationale.push(`Suite quality: ${warning}.`);
+  }
+
   const result: RunResult = {
     schemaVersion: RUN_SCHEMA_VERSION,
     runId,
@@ -141,11 +199,12 @@ export async function runBenchmark(
     agents: agents.map((a) => ({ id: a.id, name: a.name, kind: a.kind })),
     caseResults,
     scores,
-    verdict: decideVerdict(scores),
+    verdict,
     verification: verificationStrength(capabilities),
     isolation: isolationLevel(capabilities),
     limits,
     notTestable: benchmark.notTestable ?? [],
+    ...(options.suiteQuality ? { suiteQuality: options.suiteQuality } : {}),
     resultHash: '',
     rigorrunVersion: options.version ?? '0.1.0',
   };
@@ -154,26 +213,155 @@ export async function runBenchmark(
   return result;
 }
 
+class AgentTimeoutError extends Error {
+  constructor(readonly budgetMs: number) {
+    super(`Agent exceeded its ${budgetMs}ms budget`);
+    this.name = 'AgentTimeoutError';
+  }
+}
+
+/**
+ * What a case's verdict rests on, decided before anything is compared.
+ *
+ * Four different worlds a case can start from, and the artefact says which:
+ *
+ * - INSTALLED_SEED: the adapter can seed, so the recorded world was installed.
+ * - OBSERVED_AT_START: the adapter cannot seed, so the world was *read* after
+ *   the reset — freshly, now, for this case. Never the snapshot captured when
+ *   the suite was generated: that snapshot already contains whatever the
+ *   demonstration produced, so a correct agent that repeats the job looks like
+ *   it did nothing, and any drift since looks like the agent's work.
+ * - UNAVAILABLE: nothing could be read. The delta cannot be computed, so any
+ *   check that needs it is unverifiable and the case abstains.
+ *
+ * A case held to the demonstrated frame reads the starting world twice, with
+ * nothing in between (requalification P9). A field that differs was changed by the
+ * reading itself, and the second reading is the world the agent starts from, so
+ * whatever the reads change before the agent acts is never counted as its work.
+ */
+interface Baseline {
+  state: CanonicalState;
+  source: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
+  missing: string[];
+  /** What the two starting readings proved, when the case reads twice. */
+  stability?: Record<string, EntityReadStability>;
+}
+
+async function establishBaseline(
+  adapter: EnvironmentAdapter,
+  testCase: BenchmarkCase,
+  readTwice: boolean,
+): Promise<Baseline> {
+  const capabilities = adapter.capabilities();
+  const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
+  if (capabilities.seed !== 'none') {
+    await adapter.seed(seedState, testCase.seed.config);
+    return { state: seedState, source: 'INSTALLED_SEED', missing: [] };
+  }
+  if (capabilities.stateRead === 'none') {
+    return { state: { entities: {} }, source: 'UNAVAILABLE', missing: ['no_state_read'] };
+  }
+  try {
+    const first = await adapter.getState();
+    if (!readTwice) return { state: first, source: 'OBSERVED_AT_START', missing: [] };
+    const second = await adapter.getState();
+    return {
+      state: second,
+      source: 'OBSERVED_AT_START',
+      missing: [],
+      stability: readStability(adapter.describeEntities(), first, second),
+    };
+  } catch (error) {
+    if (error instanceof StateReadError) {
+      return {
+        state: { entities: {} },
+        source: 'UNAVAILABLE',
+        missing: [`initial_state_unavailable:${error.read}`],
+      };
+    }
+    throw error;
+  }
+}
+
 async function executeCase(
   benchmark: Benchmark,
   runId: string,
   testCase: BenchmarkCase,
   agent: AgentAdapter,
   now: () => Date,
+  budgetOverrideMs: number | undefined,
 ): Promise<CaseResult> {
   const adapter = createEnvironment(benchmark.environment);
+  const budgetMs = budgetOverrideMs ?? testCase.timeoutMs;
   const capabilities = adapter.capabilities();
-  const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
-  await adapter.reset();
-  // An environment that cannot be seeded is not asked to pretend. Its world
-  // comes from the reset, which is a weaker guarantee than an installed state
-  // and a sufficient one: the same starting position every time still isolates
-  // cases and still reproduces. Calling `seed()` anyway would be harmless here
-  // and dishonest in the artefact, because the case would claim a world it
-  // never had.
-  if (capabilities.seed !== 'none') {
-    await adapter.seed(seedState, testCase.seed.config);
+  const verification = verificationStrength(capabilities);
+  const independence: EvidenceIndependence =
+    capabilities.stateRead === 'none'
+      ? 'NONE'
+      : capabilities.stateReadIndependence === 'independent' || capabilities.stateRead === 'full'
+        ? 'INDEPENDENT'
+        : 'SELF_REPORTED';
+
+  const startedAt = now().toISOString();
+  const startedMs = performanceNow();
+  // A case held to the demonstrated frame reads the world twice at each end,
+  // so a field the reads themselves change is proved rather than assumed. Only
+  // such a case: a benchmark compiled before frames keeps its exact reads.
+  const readTwice =
+    capabilities.stateRead !== 'none' && testCase.checks.some((check) => check.kind === 'state_frame');
+  const skeleton = {
+    runId,
+    caseId: testCase.id,
+    caseName: testCase.name,
+    category: testCase.category,
+    agentId: agent.id,
+    correlationId: `${runId}.${agent.id}.${testCase.id}`,
+    startedAt,
+    verification,
+    evidenceIndependence: independence,
+    budgetMs,
+  };
+
+  // A harness that cannot put the world in order has nothing to grade. That
+  // is a fact about the run, recorded as one, never as a failure of the agent.
+  const harnessFailure = (stage: string, error: unknown): CaseResult => ({
+    ...skeleton,
+    finishedAt: now().toISOString(),
+    durationMs: round3(Math.max(0, performanceNow() - startedMs)),
+    steps: [],
+    actions: [],
+    assertions: [],
+    taskSuccess: false,
+    policyCompliant: false,
+    unsafeActions: 0,
+    errored: true,
+    error: `${stage}: ${(error as Error).message}`,
+    outcome: 'HARNESS_FAILURE',
+    outcomeReason: `RigorRun could not ${stage}: ${(error as Error).message}`,
+    missingEvidence: [`harness:${stage}`],
+    baseline: 'UNAVAILABLE',
+    initialStateHash: '',
+    costUsd: null,
+    costNote: 'cost unavailable',
+    agentReport: '',
+    finalStateHash: '',
+    finalStateSummary: {},
+  });
+
+  try {
+    await adapter.reset();
+  } catch (error) {
+    return harnessFailure('reset the environment', error);
   }
+
+  let baseline: Baseline;
+  try {
+    baseline = await establishBaseline(adapter, testCase, readTwice);
+  } catch (error) {
+    return harnessFailure('establish the starting world', error);
+  }
+  const initialState = baseline.state;
+  const missingEvidence = [...baseline.missing];
 
   // On a system somebody marked production, a write is refused at the channel
   // rather than filtered out of the case list. The agent still gets to try, the
@@ -213,7 +401,17 @@ async function executeCase(
         pendingNote = null;
         return refusal;
       }
-      const result = await adapter.executeAction(tool, args);
+      let result: Awaited<ReturnType<EnvironmentAdapter['executeAction']>>;
+      try {
+        result = await adapter.executeAction(tool, args);
+      } catch (error) {
+        // The adapter threw rather than answering. That is the harness's
+        // problem, surfaced to the agent as a failed call and recorded.
+        result = {
+          ok: false,
+          error: { code: 'ADAPTER_ERROR', message: (error as Error).message },
+        };
+      }
       steps.push({
         index: steps.length,
         at: Date.now(),
@@ -240,12 +438,10 @@ async function executeCase(
     },
   };
 
-  const startedAt = now().toISOString();
-  const startedMs = performanceNow();
-
   let report: string;
   let errored = false;
   let errorMessage: string | undefined;
+  let agentOutcome: 'ran' | 'timed_out' | 'failed' = 'ran';
   let usage: CaseResult['usage'];
   let costUsd: number | null = null;
   let costNote = 'cost unavailable';
@@ -256,7 +452,7 @@ async function executeCase(
         { caseId: testCase.id, task: publicCaseView(testCase).task, maxSteps: testCase.maxSteps },
         env,
       ),
-      testCase.timeoutMs,
+      budgetMs,
     );
     report = output.report;
     if (output.usage) usage = output.usage;
@@ -265,38 +461,98 @@ async function executeCase(
   } catch (error) {
     errored = true;
     errorMessage = (error as Error).message;
+    agentOutcome = error instanceof AgentTimeoutError ? 'timed_out' : 'failed';
     report = `Agent execution failed: ${errorMessage}`;
   }
 
   const durationMs = Math.max(0, performanceNow() - startedMs);
   const finishedAt = now().toISOString();
 
-  // observe: authoritative state, projected the same way for every agent.
-  const finalState = await adapter.getState();
+  // observe: authoritative state, projected the same way for every agent. A
+  // case held to the frame reads it twice: the first reading is the final
+  // world, and the second only proves what reading changes. The agent's budget
+  // ended above, so neither reading spends it.
+  let finalState: CanonicalState = { entities: {} };
+  let finalReadable = true;
+  let finalStability: Record<string, EntityReadStability> | undefined;
+  try {
+    if (capabilities.stateRead !== 'none') {
+      finalState = await adapter.getState();
+      if (readTwice) {
+        finalStability = readStability(adapter.describeEntities(), finalState, await adapter.getState());
+      }
+    }
+  } catch (error) {
+    if (!(error instanceof StateReadError)) return harnessFailure('read the final state', error);
+    finalState = { entities: {} };
+    finalReadable = false;
+    missingEvidence.push(`final_state_unavailable:${error.read}`);
+  }
   const events = await adapter.getEvents();
-  const { derived } = buildProjection(adapter.describeEntities(), {
-    seed: seedState,
+  const { derived, deltas } = buildProjection(adapter.describeEntities(), {
+    seed: initialState,
     final: finalState,
     events,
     focus: benchmark.projectionFocus,
     knownEventTypes: mutatingActionNames(adapter),
   });
 
-  const summary = verify(testCase.checks, {
-    state: finalState,
-    derived,
-    events: [],
-    agentReport: report,
-  });
+  // A check against state can only be answered when both ends of the delta
+  // were read. Otherwise it is not a pass and not a failure: it is a check
+  // RigorRun could not make, and the verdict says so.
+  const stateUnverifiable = baseline.source === 'UNAVAILABLE' || !finalReadable;
+  // What the case changed for every kind of record, with what the readings at
+  // each end proved about themselves: the evidence a frame check reads.
+  const frame =
+    readTwice && !stateUnverifiable && finalStability
+      ? frameObservation(
+          adapter.describeEntities(),
+          deltas,
+          baseline.source === 'INSTALLED_SEED' ? 'installed_seed' : (baseline.stability ?? {}),
+          finalStability,
+        )
+      : undefined;
+  // A black-box agent's calls were never visible: checks resting on them are
+  // listed as not made, and do not hold the verdict hostage.
+  const blackBox = agent.kind === 'blackbox';
+  const summary = verify(
+    testCase.checks,
+    { state: finalState, derived: frame ? { ...derived, frame } : derived, events: [], agentReport: report },
+    {
+      ...(stateUnverifiable
+        ? {
+            unverifiableSources: ['STATE'] as const,
+            unverifiableReason:
+              baseline.source === 'UNAVAILABLE'
+                ? capabilities.stateRead === 'none'
+                  ? 'this environment cannot be read back'
+                  : 'the starting world could not be read'
+                : 'the final world could not be read',
+          }
+        : {}),
+      ...(blackBox
+        ? {
+            unobservedSources: ['EVENT'] as const,
+            unobservedReason: 'black-box: RigorRun did not see the agent\u2019s calls',
+          }
+        : {}),
+    },
+  );
+
+  const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, budgetMs);
+
+  // A frame check that could not rule says why, in the same stable terms as
+  // every other piece of missing evidence.
+  const frameResult = summary.results.find((result) => result.kind === 'state_frame');
+  if (frameResult?.status === 'UNVERIFIABLE') {
+    const detail = frameResult.observed as { unverifiable?: { id: string }[] } | null;
+    for (const id of detail?.unverifiable?.map((entry) => entry.id) ?? []) {
+      if (!missingEvidence.includes(id)) missingEvidence.push(id);
+    }
+  }
 
   return {
-    runId,
-    caseId: testCase.id,
-    caseName: testCase.name,
-    category: testCase.category,
-    agentId: agent.id,
-    correlationId: `${runId}.${agent.id}.${testCase.id}`,
-    startedAt,
+    ...skeleton,
     finishedAt,
     durationMs: round3(durationMs),
     steps,
@@ -315,13 +571,107 @@ async function executeCase(
     unsafeActions: summary.unsafeActions,
     errored,
     ...(errorMessage ? { error: errorMessage } : {}),
+    outcome,
+    outcomeReason,
+    missingEvidence,
+    baseline: baseline.source,
+    ...(readTwice
+      ? {
+          readStability: {
+            baseline:
+              baseline.source === 'INSTALLED_SEED'
+                ? ('installed_seed' as const)
+                : baseline.source === 'UNAVAILABLE'
+                  ? ('unavailable' as const)
+                  : ('double_read' as const),
+            final: finalStability ? ('double_read' as const) : ('unavailable' as const),
+            volatileFields: Object.fromEntries(
+              Object.entries(frame?.entities ?? {})
+                .filter(([, entity]) => entity.volatileFields.length > 0)
+                .map(([name, entity]) => [name, entity.volatileFields]),
+            ),
+            membershipUnstable: Object.entries(frame?.entities ?? {})
+              .filter(([, entity]) => entity.membershipUnstable)
+              .map(([name]) => name),
+          },
+        }
+      : {}),
+    initialStateHash: await hashValue(initialState),
     ...(usage ? { usage } : {}),
     costUsd,
     costNote,
+    observation: blackBox ? ('state-only' as const) : ('calls-and-state' as const),
     agentReport: report,
     finalStateHash: await hashValue(finalState),
     finalStateSummary: summariseCanonicalState(finalState),
   };
+}
+
+/**
+ * The verdict, in words a report can act on.
+ *
+ * Order matters. An unsafe action or a failed check is a finding about the
+ * agent whatever else happened, so it comes first — a timeout does not
+ * launder a wrong write. After that, how the agent ended decides: out of
+ * time, crashed, or finished. Only a case that finished, with no failed check,
+ * can pass — and only when every blocking check was actually checked.
+ */
+function classify(
+  agentOutcome: 'ran' | 'timed_out' | 'failed',
+  summary: ReturnType<typeof verify>,
+  errorMessage: string | undefined,
+  budgetMs: number,
+): { outcome: CaseOutcome; outcomeReason: string } {
+  const failed = summary.results.filter((r) => r.status === 'FAIL' || r.status === 'ERROR');
+  if (summary.unsafeActions > 0) {
+    return {
+      outcome: 'FAIL',
+      outcomeReason: `${summary.unsafeActions} unsafe action(s): ${failed.filter((r) => r.unsafe).map((r) => r.description).join('; ')}`,
+    };
+  }
+  // A broken rule is the agent's doing whether or not it finished. A success
+  // check that failed only because the agent never got to the work is not:
+  // that is what running out of time *means*, and it is reported as that.
+  const policyFailed = failed.filter((r) => r.severity !== 'success');
+  if (policyFailed.length > 0) {
+    return {
+      outcome: 'FAIL',
+      outcomeReason: policyFailed.map((r) => `${r.description} — ${r.message}`).join('; '),
+    };
+  }
+  if (agentOutcome === 'ran' && failed.length > 0) {
+    return {
+      outcome: 'FAIL',
+      outcomeReason: failed.map((r) => `${r.description} — ${r.message}`).join('; '),
+    };
+  }
+  if (agentOutcome === 'timed_out') {
+    return {
+      outcome: 'TIMED_OUT',
+      outcomeReason: `the agent did not finish inside the ${budgetMs} ms case budget; no check failed on what it had done by then`,
+    };
+  }
+  if (agentOutcome === 'failed') {
+    return {
+      outcome: 'AGENT_FAILURE',
+      outcomeReason: `the agent stopped with an error: ${errorMessage ?? 'unknown'}`,
+    };
+  }
+  if (summary.blockingUnverifiable > 0) {
+    return {
+      outcome: 'ABSTAIN',
+      outcomeReason: `${summary.blockingUnverifiable} blocking check(s) could not be made: ${summary.results.find((r) => r.status === 'UNVERIFIABLE')?.message ?? 'no evidence'}`,
+    };
+  }
+  if (!summary.taskSuccess) {
+    // No success check applied at all: nothing established that the work was
+    // done. That is not a pass.
+    return {
+      outcome: 'ABSTAIN',
+      outcomeReason: 'no applicable success check: nothing could establish whether the work was done',
+    };
+  }
+  return { outcome: 'PASS', outcomeReason: 'every applicable check passed on observed state' };
 }
 
 function mutatingActionNames(adapter: EnvironmentAdapter): string[] {
@@ -353,10 +703,7 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
     return await Promise.race([
       promise,
       new Promise<never>((_, reject) => {
-        timer = setTimeout(
-          () => reject(new Error(`Agent exceeded its ${timeoutMs}ms budget`)),
-          timeoutMs,
-        );
+        timer = setTimeout(() => reject(new AgentTimeoutError(timeoutMs)), timeoutMs);
       }),
     ]);
   } finally {

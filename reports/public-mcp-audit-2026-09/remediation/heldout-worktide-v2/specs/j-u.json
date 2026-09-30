@@ -1,0 +1,84 @@
+{
+  "secrets": {
+    "WORKTIDE_API_TOKEN": "AUDIT_WORKTIDE_API_TOKEN",
+    "WORKTIDE_API_URL": "AUDIT_WORKTIDE_API_URL",
+    "WORKTIDE_WORKSPACE_ID": "AUDIT_WORKTIDE_WORKSPACE_ID"
+  },
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "node",
+    "args": [
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "secretNames": [
+      "WORKTIDE_API_TOKEN",
+      "WORKTIDE_API_URL",
+      "WORKTIDE_WORKSPACE_ID"
+    ]
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "tasks.search",
+    "tasks.get",
+    "projects.list",
+    "projects.get",
+    "projects.board",
+    "time.runningTimer",
+    "time.report",
+    "me.whoami",
+    "me.myAssignedTasks"
+  ],
+  "verifierReads": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.report",
+      "args": {
+        "from": "2026-09-01",
+        "to": "2026-09-30",
+        "groupBy": "user"
+      }
+    },
+    {
+      "tool": "tasks.search",
+      "args": {
+        "projectKey": "AUD",
+        "limit": 50
+      }
+    }
+  ],
+  "reset": {
+    "kind": "none"
+  },
+  "answers": {},
+  "review": {
+    "confirm": [],
+    "reject": []
+  },
+  "quality": true,
+  "agents": [],
+  "name": "worktide v2 J-U: one timed minute, reported by user",
+  "goal": "Start a timer described 'Desk review', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running.",
+  "teach": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "Desk review"
+      }
+    },
+    {
+      "sleepSeconds": 61
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ]
+}

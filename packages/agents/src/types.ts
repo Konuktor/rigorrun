@@ -46,7 +46,7 @@ export interface AgentRunOutput {
  * daemon. It is a kind rather than a flag on `http` because nothing about it
  * is a URL: there is no endpoint to probe and nothing to call.
  */
-export type AgentKind = 'demo' | 'http' | 'llm' | 'process' | 'external';
+export type AgentKind = 'demo' | 'http' | 'llm' | 'process' | 'external' | 'blackbox';
 
 export interface AgentAdapter {
   id: string;

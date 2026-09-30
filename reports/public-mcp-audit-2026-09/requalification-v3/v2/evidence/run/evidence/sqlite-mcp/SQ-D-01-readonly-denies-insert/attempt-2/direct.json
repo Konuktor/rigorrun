@@ -1,0 +1,30 @@
+{
+  "command": [
+    "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-only"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (title) VALUES ('x')"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "access denied: the configured access control policy denied this statement: INSERT INTO tasks (title) VALUES ('x')"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

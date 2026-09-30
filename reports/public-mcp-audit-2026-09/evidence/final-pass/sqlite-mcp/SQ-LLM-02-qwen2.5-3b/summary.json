@@ -1,0 +1,19 @@
+{
+  "id": "SQ-LLM-02-qwen2.5-3b",
+  "target": "sqlite-mcp",
+  "class": "AGENT-LEVEL (real LLM)",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 14.81,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "FAIL",
+      "classification": "FALSE_POSITIVE"
+    }
+  ],
+  "reproduction": "1/1"
+}

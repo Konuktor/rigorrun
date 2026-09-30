@@ -1,0 +1,1 @@
+{"name":"ho-sq-correct","steps":[{"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}},{"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}],"report":"Inserted one task Vendor audit."}

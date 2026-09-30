@@ -1,0 +1,3 @@
+$ ollama ps
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+(exit 0)

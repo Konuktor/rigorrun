@@ -1,0 +1,373 @@
+{
+  "generatedBy": "heldout-worktide-v2/probe/probe-target.py",
+  "note": "a probe of the target only; RigorRun is not run",
+  "probedAt": "2026-09-14T15:12:45+00:00",
+  "whoami": {
+    "id": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+    "email": "sven@worktide.test",
+    "fullName": "Sven Wappler",
+    "workspaces": [
+      {
+        "id": "{WORKSPACE}",
+        "name": "Wappler Systems",
+        "slug": "wappler-systems",
+        "locale": "de",
+        "timezone": "Europe/Berlin",
+        "role": "owner",
+        "isCurrent": true
+      }
+    ]
+  },
+  "reports": {
+    "task": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "task",
+      "totalMinutes": 945,
+      "billableMinutes": 945,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": "01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+          "label": "WORK-3 \u2014 Time-Tracker UI prototypen",
+          "minutes": 405,
+          "billableMinutes": 405,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+          "label": "WORK-2 \u2014 Login-Form bauen",
+          "minutes": 315,
+          "billableMinutes": 315,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+          "label": "WORK-1 \u2014 MVP Skeleton aufsetzen",
+          "minutes": 225,
+          "billableMinutes": 225,
+          "billedMinutes": 0
+        },
+        {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 0,
+          "billableMinutes": 0,
+          "billedMinutes": 0
+        }
+      ]
+    },
+    "user": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "user",
+      "totalMinutes": 945,
+      "billableMinutes": 945,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": "01a09c3a-5d41-74fc-b582-5d0aa0c5ce59",
+          "label": "Alex Becker",
+          "minutes": 720,
+          "billableMinutes": 720,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+          "label": "Sven Wappler",
+          "minutes": 225,
+          "billableMinutes": 225,
+          "billedMinutes": 0
+        }
+      ]
+    },
+    "project": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "project",
+      "totalMinutes": 945,
+      "billableMinutes": 945,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": "01a09c3a-5feb-73e1-89ad-659db10ac84c",
+          "label": "WORK \u2014 Worktide Launch",
+          "minutes": 945,
+          "billableMinutes": 945,
+          "billedMinutes": 0
+        },
+        {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 0,
+          "billableMinutes": 0,
+          "billedMinutes": 0
+        }
+      ]
+    },
+    "typeOfWork": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "typeOfWork",
+      "totalMinutes": 945,
+      "billableMinutes": 945,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 945,
+          "billableMinutes": 945,
+          "billedMinutes": 0
+        }
+      ]
+    }
+  },
+  "seededOracle": {
+    "running_timers": 0,
+    "time_entries": [
+      {
+        "durationMinutes": 60,
+        "isBillable": null,
+        "note": "Arbeit an: MVP Skeleton aufsetzen",
+        "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+      },
+      {
+        "durationMinutes": 75,
+        "isBillable": null,
+        "note": "Arbeit an: MVP Skeleton aufsetzen",
+        "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+      },
+      {
+        "durationMinutes": 90,
+        "isBillable": null,
+        "note": "Arbeit an: MVP Skeleton aufsetzen",
+        "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7"
+      },
+      {
+        "durationMinutes": 105,
+        "isBillable": null,
+        "note": "Arbeit an: Login-Form bauen",
+        "task": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7"
+      },
+      {
+        "durationMinutes": 120,
+        "isBillable": null,
+        "note": "Arbeit an: Login-Form bauen",
+        "task": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7"
+      },
+      {
+        "durationMinutes": 90,
+        "isBillable": null,
+        "note": "Arbeit an: Login-Form bauen",
+        "task": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7"
+      },
+      {
+        "durationMinutes": 120,
+        "isBillable": null,
+        "note": "Arbeit an: Time-Tracker UI prototypen",
+        "task": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+      },
+      {
+        "durationMinutes": 135,
+        "isBillable": null,
+        "note": "Arbeit an: Time-Tracker UI prototypen",
+        "task": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+      },
+      {
+        "durationMinutes": 150,
+        "isBillable": null,
+        "note": "Arbeit an: Time-Tracker UI prototypen",
+        "task": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29"
+      },
+      {
+        "durationMinutes": 0,
+        "isBillable": null,
+        "note": "audit timer",
+        "task": null
+      }
+    ],
+    "time_entry_count": 10
+  },
+  "workTasks": {
+    "WORK-1": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+    "WORK-2": "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+    "WORK-3": "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+    "WORK-4": "/v1/tasks/01a09c3a-5ff4-7385-a00a-005570c618fd"
+  },
+  "restTimeEntry": {
+    "request": {
+      "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+      "user": "/v1/users/01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+      "startsAt": "2026-09-14T09:00:00+02:00",
+      "durationMinutes": 1,
+      "note": "v2 probe entry",
+      "isBillable": true
+    },
+    "status": 201,
+    "body": {
+      "durationMinutes": 1,
+      "task": "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+      "note": "v2 probe entry"
+    },
+    "entries": [
+      10,
+      11
+    ],
+    "minutesByTask": [
+      {
+        "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7": 225,
+        "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7": 315,
+        "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29": 405,
+        "null": 0
+      },
+      {
+        "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7": 226,
+        "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7": 315,
+        "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29": 405,
+        "null": 0
+      }
+    ],
+    "reportByTask": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "task",
+      "totalMinutes": 946,
+      "billableMinutes": 946,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": "01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+          "label": "WORK-3 \u2014 Time-Tracker UI prototypen",
+          "minutes": 405,
+          "billableMinutes": 405,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+          "label": "WORK-2 \u2014 Login-Form bauen",
+          "minutes": 315,
+          "billableMinutes": 315,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+          "label": "WORK-1 \u2014 MVP Skeleton aufsetzen",
+          "minutes": 226,
+          "billableMinutes": 226,
+          "billedMinutes": 0
+        },
+        {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 0,
+          "billableMinutes": 0,
+          "billedMinutes": 0
+        }
+      ]
+    }
+  },
+  "restTimerMcpStop": {
+    "startStatus": 201,
+    "startBody": {
+      "task": null,
+      "running": true,
+      "description": null
+    },
+    "stop": [
+      {
+        "tool": "time.stop",
+        "args": {},
+        "isError": false,
+        "data": {
+          "timeEntryId": "01a0a07c-59aa-7eb8-9d7c-c2d101d580b3",
+          "durationMinutes": 1
+        }
+      }
+    ],
+    "entries": [
+      10,
+      11
+    ],
+    "minutesByTask": [
+      {
+        "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7": 225,
+        "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7": 315,
+        "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29": 405,
+        "null": 0
+      },
+      {
+        "/v1/tasks/01a09c3a-5ff0-777d-8eb9-532db0c216e7": 225,
+        "/v1/tasks/01a09c3a-5ff2-7139-b9ae-011247c2bec7": 315,
+        "/v1/tasks/01a09c3a-5ff3-74e5-becb-1614e94d6f29": 405,
+        "null": 1
+      }
+    ],
+    "reportByTask": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "task",
+      "totalMinutes": 946,
+      "billableMinutes": 946,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": "01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+          "label": "WORK-3 \u2014 Time-Tracker UI prototypen",
+          "minutes": 405,
+          "billableMinutes": 405,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+          "label": "WORK-2 \u2014 Login-Form bauen",
+          "minutes": 315,
+          "billableMinutes": 315,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+          "label": "WORK-1 \u2014 MVP Skeleton aufsetzen",
+          "minutes": 225,
+          "billableMinutes": 225,
+          "billedMinutes": 0
+        },
+        {
+          "key": null,
+          "label": "(unassigned)",
+          "minutes": 1,
+          "billableMinutes": 1,
+          "billedMinutes": 0
+        }
+      ]
+    },
+    "reportByUser": {
+      "from": "2026-09-01T00:00:00+02:00",
+      "to": "2026-09-30T00:00:00+02:00",
+      "groupBy": "user",
+      "totalMinutes": 946,
+      "billableMinutes": 946,
+      "billedMinutes": 0,
+      "groups": [
+        {
+          "key": "01a09c3a-5d41-74fc-b582-5d0aa0c5ce59",
+          "label": "Alex Becker",
+          "minutes": 720,
+          "billableMinutes": 720,
+          "billedMinutes": 0
+        },
+        {
+          "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+          "label": "Sven Wappler",
+          "minutes": 226,
+          "billableMinutes": 226,
+          "billedMinutes": 0
+        }
+      ]
+    }
+  },
+  "afterReset": {
+    "running_timers": 0,
+    "time_entry_count": 10
+  }
+}

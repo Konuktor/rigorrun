@@ -1,0 +1,95 @@
+{
+  "case": {
+    "id": "EM-MH-03-search-emails-crashes",
+    "target": "email-mcp",
+    "mode": "direct",
+    "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+    "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "server": [
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "class": "SCHEMA / TOOL ERROR (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "search_emails(query='Audit', service='mailhog') must find the captured message",
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 via MailHog",
+          "service": "mailhog"
+        }
+      },
+      {
+        "tool": "search_emails",
+        "args": {
+          "query": "Audit",
+          "service": "mailhog"
+        }
+      }
+    ],
+    "expect": "calls[1]['result'].get('isError') is not True and (calls[1]['result'].get('structuredContent') or {}).get('count')==1"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 via MailHog",
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via mailhog service\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": true,
+            "status": "sent",
+            "service": "mailhog",
+            "note": "Check web UI at http://127.0.0.1:8025",
+            "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "search_emails",
+        "args": {
+          "query": "Audit",
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Error calling tool 'search_emails': LocalEmailService.check_inbox() got an unexpected keyword argument 'subject_contains'"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 1.5,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_dc9a7ea2ef3f",
+  "name": "Create exactly one task titled Quarterly report; change nothing else.",
+  "description": "Compiled from one recorded execution in taskdesk: create one task, connector read then verifier read.",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else",
+  "environmentId": "p_dc9a7ea2ef3f",
+  "sourceTraceId": "trace_p_dc9a7ea2ef3f",
+  "primaryAction": "create_task",
+  "focusEntity": "Task",
+  "focusScope": "created",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "create_task": {
+      "title": "Quarterly report"
+    }
+  },
+  "projectionFocus": [
+    "Task"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Task 4 was created",
+      "key": "Task.4",
+      "value": {
+        "id": 4,
+        "title": "Quarterly report",
+        "status": "open"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Task 4 was created"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "title",
+      "param": "title",
+      "mode": "equals",
+      "demonstrated": "Quarterly report"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "expectedFrame": {
+    "entities": {
+      "Task": {
+        "preExistingRows": 3,
+        "created": 1,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      }
+    }
+  },
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-30T20:04:05.590Z",
+  "approvedAt": "2026-09-30T20:04:05.600Z"
+}

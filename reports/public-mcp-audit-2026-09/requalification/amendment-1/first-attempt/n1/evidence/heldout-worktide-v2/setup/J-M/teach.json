@@ -1,0 +1,54 @@
+[
+  {
+    "step": {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"running\": false\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "tool": "time.start",
+      "args": {
+        "description": "Long check"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f3aa-7d57-7e0f-9d83-4c330f22a2b9\",\n  \"startedAt\": \"2026-09-30T20:53:51+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Long check\",\n  \"isBillable\": true\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "sleepSeconds": 125
+    }
+  },
+  {
+    "step": {
+      "tool": "time.stop",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"timeEntryId\": \"01a0f3ac-6833-791b-b36f-9b6b73ad0a61\",\n  \"durationMinutes\": 2\n}"
+        }
+      ]
+    }
+  }
+]

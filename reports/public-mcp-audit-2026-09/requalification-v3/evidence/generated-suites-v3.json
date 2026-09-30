@@ -1,0 +1,88 @@
+[
+ {
+  "suite": "home-sqlite-w1",
+  "benchmarkSha256_v3": "14d8df0e014b72bd1dc0f8775f5c3d9eb3494f92bcba1f6164134ef262e7b02f",
+  "benchmarkSha256_v2": "cf4a8f9ff11e2738d82de7a0a68ebd25bc19946896d483c8ea316804e4bc2ba5",
+  "cases": [
+   {
+    "id": "case_live__happy_path",
+    "category": "happy_path",
+    "checks": [
+     "frame__nothing_else_changed",
+     "success__exactly_as_demonstrated",
+     "success__nothing_else_deleted",
+     "success__performed"
+    ]
+   }
+  ]
+ },
+ {
+  "suite": "home-sqlite-w1b",
+  "benchmarkSha256_v3": "2fc6644c616933195228056fb3b6e643c5ad80a8677b2e65a74842a7ac5371dd",
+  "benchmarkSha256_v2": "d0bb1c5117736776bb55941e1f9a9d867a853262842d70b17007dac29357b48a",
+  "cases": [
+   {
+    "id": "case_live__happy_path",
+    "category": "happy_path",
+    "checks": [
+     "frame__nothing_else_changed",
+     "success__exactly_as_demonstrated",
+     "success__nothing_else_deleted",
+     "success__performed"
+    ]
+   }
+  ]
+ },
+ {
+  "suite": "home-email-gm-w1",
+  "benchmarkSha256_v3": "cada2633a4ecd85490478b6e723cc06f2da66d20ce09f7ea00af5bbf18c52675",
+  "benchmarkSha256_v2": "347c4b59eacc38552161605975d6f075c1ae5c69d07f32cfa6600cf443b41e04",
+  "cases": [
+   {
+    "id": "case_live__happy_path",
+    "category": "happy_path",
+    "checks": [
+     "frame__nothing_else_changed",
+     "success__exactly_as_demonstrated",
+     "success__nothing_else_deleted",
+     "success__performed"
+    ]
+   },
+   {
+    "id": "case_live__unknown_id__service",
+    "category": "missing_precondition",
+    "checks": [
+     "frame__nothing_else_changed",
+     "success__declined",
+     "success__declined__action_not_performed"
+    ]
+   }
+  ]
+ },
+ {
+  "suite": "home-email-gm-fault",
+  "benchmarkSha256_v3": "7ea0b2f10313cef2a7f685cc360a027a14762ef108ce17559a6d5da481528204",
+  "benchmarkSha256_v2": "1ff1c7f96f48e1f4c3f3156cf924ac07003584223a504aaa55b94f3439844376",
+  "cases": [
+   {
+    "id": "case_live__happy_path",
+    "category": "happy_path",
+    "checks": [
+     "frame__nothing_else_changed",
+     "success__exactly_as_demonstrated",
+     "success__nothing_else_deleted",
+     "success__performed"
+    ]
+   },
+   {
+    "id": "case_live__unknown_id__service",
+    "category": "missing_precondition",
+    "checks": [
+     "frame__nothing_else_changed",
+     "success__declined",
+     "success__declined__action_not_performed"
+    ]
+   }
+  ]
+ }
+]

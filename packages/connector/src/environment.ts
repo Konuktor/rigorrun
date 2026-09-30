@@ -20,11 +20,12 @@
  * isolated and still reproducible. They simply cannot be *arbitrary*.
  *
  * `getState()` asks for every row a system holds. Nothing offers that either.
- * What this returns is whatever the nominated verifier reads came back with —
- * genuinely partial, declared as `designated-reads`, and labelled PARTIAL on
- * every verdict built from it. A check written against a record nobody
- * nominated a read for is inapplicable rather than passing, which is the whole
- * reason the verifier has a tri-state.
+ * What this returns is whatever the nominated reads came back with — only the
+ * verifier's, once one is nominated — genuinely partial, declared as
+ * `designated-reads`, and labelled PARTIAL on every verdict built from it. A
+ * record no read returns is absent, and absent reads as nonexistent: RigorRun
+ * cannot tell a record nobody nominated a read for from one that is not there,
+ * so what the reads cover is what a verdict can speak about.
  *
  * `restore()` expects time travel. It resets. That is sound *only* because
  * seeding is impossible here: the one world anybody could want back is the one
@@ -33,6 +34,7 @@
  * left to quietly mean the wrong thing.
  */
 import {
+  StateReadError,
   type ActionDefinition,
   type CanonicalState,
   type CaseConfig,
@@ -46,7 +48,27 @@ import {
 } from '@rigorrun/environment';
 import type { SystemConnection } from './types.ts';
 import type { SystemEnvironmentConfig } from './environmentConfig.ts';
-import { stateFromPayloads } from './rows.ts';
+import { hasPayload, normalizeCallResult } from './result.ts';
+import { isVerifierTool, readsForVerdict } from './verified.ts';
+import { IdentityConflictError, stateFromPayloads } from './rows.ts';
+
+/**
+ * RigorRun was about to write to a system somebody marked production.
+ *
+ * The runner already refuses an agent's writes there. This covers the writes
+ * RigorRun makes on its own behalf — the reset before a demonstration and before
+ * every case, a generation probe, a teaching step — which no agent is present to
+ * be blamed for, and which would otherwise land on somebody's real day.
+ */
+export class ProductionWriteRefused extends Error {
+  constructor(readonly tool: string) {
+    super(
+      `${tool} writes, and this system is marked production, so RigorRun will not call it. ` +
+        'Point the project at a staging or scratch copy, or mark the tool read-only if it only reads.',
+    );
+    this.name = 'ProductionWriteRefused';
+  }
+}
 
 export class SystemEnvironment implements EnvironmentAdapter {
   readonly id: string;
@@ -79,6 +101,16 @@ export class SystemEnvironment implements EnvironmentAdapter {
           : 'none',
       // A real system does not let you install a world.
       seed: 'none',
+      // Independent only when every nominated read goes through a connection
+      // the agent never touches. The label follows what was nominated: once a
+      // verifier read is nominated the world is read through it alone (see
+      // readsForVerdict), but a project that also nominates the system's own
+      // reads has asked for them, and is labelled for what it asked for.
+      stateReadIndependence:
+        this.config.verifierReads.length > 0 &&
+        this.config.verifierReads.every((read) => isVerifierTool(read.tool))
+          ? 'independent'
+          : 'self-reported',
       reset: this.config.reset.kind === 'tool' ? 'tool' : 'none',
       // Every call goes through this adapter, so the log is ours rather than
       // the system's own audit trail. Weaker evidence, honestly labelled.
@@ -94,6 +126,8 @@ export class SystemEnvironment implements EnvironmentAdapter {
   getActions(): ActionDefinition[] {
     const readOnly = new Set(this.config.readOnlyTools);
     return this.connection.discovery.tools
+      // A verifier's tools are how the result is checked, never something to do.
+      .filter((tool) => !isVerifierTool(tool.name))
       .map((tool) => ({
         name: tool.name,
         description: tool.description,
@@ -106,8 +140,13 @@ export class SystemEnvironment implements EnvironmentAdapter {
           // server's own identifier field — both sides come from the same
           // system, so this is not RigorRun bringing a vocabulary, it is
           // RigorRun noticing that a system is consistent with itself.
+          // Only a record named by that one field: a report row named by
+          // several dimensions has no single value an argument could carry.
           const entity = this.schema.entities.find(
-            (candidate) => candidate.idField === param.name,
+            (candidate) =>
+              candidate.idField === param.name &&
+              candidate.keyFields === undefined &&
+              candidate.identity === undefined,
           );
           return entity ? { ...param, entityRef: entity.name } : param;
         }),
@@ -143,12 +182,18 @@ export class SystemEnvironment implements EnvironmentAdapter {
     };
   }
 
+  /** Production refuses every tool nobody confirmed only reads. */
+  private writesRefused(tool: string): boolean {
+    return this.config.safety === 'production' && !this.config.readOnlyTools.includes(tool);
+  }
+
   async reset(): Promise<void> {
     const strategy = this.config.reset;
     this.events = [];
     this.clock = 0;
     if (strategy.kind !== 'tool') return;
-    const result = await this.connection.call(strategy.tool, strategy.args ?? {});
+    if (this.writesRefused(strategy.tool)) throw new ProductionWriteRefused(strategy.tool);
+    const result = await this.connection.call(strategy.tool, strategy.args ?? {}, this.config.toolCallMs);
     if (!result.ok) {
       throw new Error(
         `Reset failed: ${strategy.tool} returned ${result.error?.message ?? 'an error'}. ` +
@@ -163,20 +208,55 @@ export class SystemEnvironment implements EnvironmentAdapter {
   }
 
   /**
-   * The world, as far as the nominated reads can see it.
+   * The world, as far as the reads a verdict uses can see it.
    *
-   * Rows that no verifier read returns are simply absent, and absent is not the
-   * same as empty: a check against them resolves to INAPPLICABLE rather than
-   * failing, so a missing read narrows what can be concluded instead of
-   * inventing a verdict.
+   * Once a verifier read is nominated, those are the verifier's alone, and the
+   * system's own reads are not called (requalification P10; see readsForVerdict).
+   *
+   * A read that fails, or answers in prose, leaves the world unknown and throws
+   * StateReadError; an unknown world is never handed back as an empty one.
+   *
+   * Rows that no used read returns are absent, and the verifier treats absent
+   * as nonexistent: a `state_exists` check on them fails, and a record present
+   * at the start but absent now reads as deleted. A read that answers empty and
+   * a record type no read covers look the same from here, which is why what the
+   * reads cover is a decision for the person nominating them.
    */
   async getState(): Promise<CanonicalState> {
     const payloads: unknown[] = [];
-    for (const read of this.config.verifierReads) {
-      const result = await this.connection.call(read.tool, read.args ?? {});
-      if (result.ok && result.structured !== undefined) payloads.push(result.structured);
+    const answeredBy: string[] = [];
+    for (const read of readsForVerdict(this.config.verifierReads).used) {
+      const normalized = normalizeCallResult(
+        await this.connection.call(read.tool, read.args ?? {}, this.config.toolCallMs),
+      );
+      // A read that fails leaves the world unknown, and unknown is not empty:
+      // said so, rather than handed back as a world in which everything has
+      // vanished.
+      if (normalized.kind === 'error') {
+        throw new StateReadError(read.tool, normalized.error?.message ?? 'the call failed');
+      }
+      // Prose where records were nominated is not an empty world either. The
+      // read answered and said nothing RigorRun can compare, so the world is
+      // unknown for this case and the verdict abstains. Treating it as empty
+      // would make every record look deleted and fail a correct agent.
+      if (normalized.kind === 'text') {
+        throw new StateReadError(read.tool, 'it answered with text rather than records');
+      }
+      if (hasPayload(normalized)) {
+        payloads.push(normalized.payload);
+        answeredBy.push(read.tool);
+      }
     }
-    return stateFromPayloads(payloads, this.schema);
+    try {
+      return stateFromPayloads(payloads, this.schema);
+    } catch (error) {
+      // Two different records under one identity: keeping either would invent
+      // a world, so the world is unknown for this case.
+      if (error instanceof IdentityConflictError) {
+        throw new StateReadError(answeredBy[error.payloadIndex] ?? 'a nominated read', error.message);
+      }
+      throw error;
+    }
   }
 
   getEvents(): EnvEvent[] {
@@ -184,7 +264,19 @@ export class SystemEnvironment implements EnvironmentAdapter {
   }
 
   async executeAction(name: string, args: Record<string, unknown>) {
-    const result = await this.connection.call(name, args);
+    if (isVerifierTool(name)) {
+      return {
+        ok: false,
+        error: {
+          code: 'NOT_AN_ACTION',
+          message: `${name} is how RigorRun checks the result; it is not something an agent can call.`,
+        },
+      };
+    }
+    if (this.writesRefused(name)) {
+      return { ok: false, error: { code: 'WRITE_REFUSED', message: new ProductionWriteRefused(name).message } };
+    }
+    const result = await this.connection.call(name, args, this.config.toolCallMs);
     this.clock += 1;
     this.events.push({
       type: name,
@@ -194,6 +286,9 @@ export class SystemEnvironment implements EnvironmentAdapter {
       ok: result.ok,
       ...(result.ok ? {} : { error: result.error?.message ?? 'the call failed' }),
     });
+    // The agent is handed the system's own answer, unrewritten: what it sees
+    // is the server, not RigorRun's reading of the server. Only state reads
+    // go through the normaliser.
     return result.ok
       ? { ok: true, data: result.structured ?? result.content }
       : {

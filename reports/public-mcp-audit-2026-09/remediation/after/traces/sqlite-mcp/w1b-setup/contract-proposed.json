@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_68cddc5e250a",
+  "name": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back.",
+  "description": "Compiled from one recorded execution in sqlite W1b insert a task (insert demonstrated last).",
+  "goal": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back",
+  "environmentId": "p_68cddc5e250a",
+  "sourceTraceId": "trace_p_68cddc5e250a",
+  "primaryAction": "execute",
+  "focusEntity": "Row",
+  "focusScope": "created",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "execute": {
+      "query": "INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy')"
+    }
+  },
+  "projectionFocus": [
+    "Row"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Row 4 was created",
+      "key": "Row.4",
+      "value": {
+        "amount": 45.5,
+        "id": 4,
+        "owner": "cy",
+        "status": "open",
+        "title": "Quarterly report"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Row 4 was created"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "amount",
+      "param": "query",
+      "mode": "param_contains_field",
+      "demonstrated": 45.5
+    },
+    {
+      "field": "owner",
+      "param": "query",
+      "mode": "param_contains_field",
+      "demonstrated": "cy"
+    },
+    {
+      "field": "status",
+      "param": "query",
+      "mode": "param_contains_field",
+      "demonstrated": "open"
+    },
+    {
+      "field": "title",
+      "param": "query",
+      "mode": "param_contains_field",
+      "demonstrated": "Quarterly report"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-14T09:24:58.052Z"
+}

@@ -1,0 +1,78 @@
+{
+  "case": {
+    "id": "WT-D-04-projects-get-archive-doubled-prefix",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "MISSING_ACTION (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "projects.get must return AUD and projects.archive must archive it",
+    "calls": [
+      {
+        "tool": "projects.get",
+        "args": {
+          "project": "AUD"
+        }
+      },
+      {
+        "tool": "projects.archive",
+        "args": {
+          "project": "AUD"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True and calls[1]['result'].get('isError') is not True"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "projects.get",
+        "args": {
+          "project": "AUD"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+            }
+          ],
+          "isError": true
+        }
+      },
+      {
+        "tool": "projects.archive",
+        "args": {
+          "project": "AUD"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "seconds": 0.55,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

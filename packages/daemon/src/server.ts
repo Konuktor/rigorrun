@@ -22,10 +22,11 @@ import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
-import type { Benchmark, EnvironmentContract, RunResult } from '@rigorrun/core';
+import { z } from 'zod';
+import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
-import { ConnectorSchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
+import { ConnectorSchema, SafetySchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
 import type { Service } from './service.ts';
 
 const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -48,6 +49,17 @@ export interface RunnerOptions {
   uiDir?: string;
   port?: number;
 }
+
+/** A black-box agent as the interface or the API describes it. */
+const BlackBoxRequestSchema = z.object({
+  endpoint: z.string().min(1, 'an endpoint is required'),
+  allowedHosts: z.array(z.string()).default([]),
+  headers: z.record(z.string(), z.string()).default({}),
+  bodyTemplate: z.string().nullable().default(null),
+  completion: z.enum(['response', 'poll', 'settle']).default('response'),
+  claimPath: z.string().default('output'),
+  settleQuietMs: z.number().int().positive().max(600_000).default(5000),
+});
 
 export class Runner {
   readonly pairing = new Pairing();
@@ -332,11 +344,20 @@ export class Runner {
           400,
         );
       }
-      const connected = await service.connectEnvironment(
-        context.req.param('id'),
-        parsed.data,
-        body.safety ?? 'staging',
-      );
+      // No default. Whether RigorRun may write to a system is decided by the
+      // person who knows what it is, never filled in on their behalf.
+      const safety = SafetySchema.safeParse(body.safety);
+      if (!safety.success) {
+        return context.json(
+          {
+            error:
+              'Say what kind of system this is: production, staging, local or ephemeral. ' +
+              'RigorRun will not guess whether it may write to it.',
+          },
+          400,
+        );
+      }
+      const connected = await service.connectEnvironment(context.req.param('id'), parsed.data, safety.data);
       return context.json({
         project: summarise(connected.project),
         serverName: connected.serverName,
@@ -347,14 +368,14 @@ export class Runner {
 
     app.post('/api/projects/:id/environment/config', async (context) => {
       const body = await context.req.json<Parameters<Service['configureEnvironment']>[1]>();
-      const { project, readsProblem } = await service.configureEnvironment(
+      const { project, readsProblem, readsIgnored } = await service.configureEnvironment(
         context.req.param('id'),
         body,
       );
       // Travels beside the saved project rather than as an error: the
       // configuration is valid and was saved, and what RigorRun has to say is
       // about what it will be able to prove later.
-      return context.json({ project: summarise(project), readsProblem });
+      return context.json({ project: summarise(project), readsProblem, readsIgnored });
     });
 
     // ---------------------------------------------------------- teach a job
@@ -429,8 +450,22 @@ export class Runner {
         command?: string;
         args?: unknown;
         driven?: boolean;
+        blackBox?: unknown;
       }>();
       const name = String(body.name ?? '');
+      if (body.blackBox !== undefined) {
+        // Where each case's work will be sent, decided here by the person at
+        // this screen. Parsed rather than trusted, like every connector.
+        const parsed = BlackBoxRequestSchema.safeParse(body.blackBox);
+        if (!parsed.success) {
+          return context.json(
+            { error: `That black-box agent is incomplete: ${parsed.error.issues[0]?.message ?? 'unknown shape'}` },
+            400,
+          );
+        }
+        const added = await service.addAgent(context.req.param('id'), { name, blackBox: parsed.data });
+        return context.json({ project: summarise(added.project), agent: added.agent });
+      }
       if (body.driven === true) {
         const added = await service.addAgent(context.req.param('id'), { name, driven: true });
         // The key travels in this one response and is never readable again.
@@ -670,6 +705,7 @@ function publicRun(run: RunResult) {
     isolation: run.isolation,
     limits: run.limits,
     notTestable: run.notTestable,
+    suiteQuality: run.suiteQuality ?? null,
     verdict: run.verdict,
     scores: run.scores,
     caseResults: run.caseResults.map((entry) => ({
@@ -680,6 +716,12 @@ function publicRun(run: RunResult) {
       policyCompliant: entry.policyCompliant,
       unsafeActions: entry.unsafeActions,
       durationMs: entry.durationMs,
+      outcome: caseOutcome(entry),
+      outcomeReason: entry.outcomeReason,
+      missingEvidence: entry.missingEvidence,
+      verification: entry.verification ?? run.verification,
+      evidenceIndependence: entry.evidenceIndependence ?? 'SELF_REPORTED',
+      baseline: entry.baseline ?? 'INSTALLED_SEED',
 
       // Everything below is the evidence for the line above. It was all
       // recorded already and none of it reached the screen, so a failure was a

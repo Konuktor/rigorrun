@@ -1,0 +1,356 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_29ef3714d57c",
+  "benchmarkId": "bm_ec_p_0bb653210e4f",
+  "benchmarkName": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back. — private benchmark",
+  "benchmarkHash": "sha256:a0f7d54c1d5a6bda4fc7aef683380bc4040a414240368834e8655b529aa04e7e",
+  "contractHash": "sha256:f0db1807ed5e6a8e8bea9dd8ff6b11c2635f9c028b9ba8a4cd30df89f32fbd56",
+  "environment": "p_0bb653210e4f",
+  "startedAt": "2026-09-14T09:34:15.543Z",
+  "finishedAt": "2026-09-14T09:34:15.618Z",
+  "agents": [
+    {
+      "id": "a_2a4b4cf5",
+      "name": "sq-w1-missing-action",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_29ef3714d57c",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_2a4b4cf5",
+      "correlationId": "run_29ef3714d57c.a_2a4b4cf5.case_live__happy_path",
+      "startedAt": "2026-09-14T09:34:15.543Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "SELF_REPORTED",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-14T09:34:15.606Z",
+      "durationMs": 62.878,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789378455604,
+          "tool": "execute",
+          "args": {
+            "query": "SELECT * FROM tasks ORDER BY id"
+          },
+          "ok": true,
+          "result": {
+            "rows": [
+              {
+                "columns": {
+                  "amount": {
+                    "kind": "Real",
+                    "value": 120.5
+                  },
+                  "id": {
+                    "kind": "Integer",
+                    "value": 1
+                  },
+                  "owner": {
+                    "kind": "Text",
+                    "value": "ada"
+                  },
+                  "status": {
+                    "kind": "Text",
+                    "value": "open"
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Prepare invoice"
+                  }
+                }
+              },
+              {
+                "columns": {
+                  "amount": {
+                    "kind": "Real",
+                    "value": 80
+                  },
+                  "id": {
+                    "kind": "Integer",
+                    "value": 2
+                  },
+                  "owner": {
+                    "kind": "Text",
+                    "value": "bo"
+                  },
+                  "status": {
+                    "kind": "Text",
+                    "value": "open"
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Review contract"
+                  }
+                }
+              },
+              {
+                "columns": {
+                  "amount": {
+                    "kind": "Real",
+                    "value": 0
+                  },
+                  "id": {
+                    "kind": "Integer",
+                    "value": 3
+                  },
+                  "owner": {
+                    "kind": "Text",
+                    "value": "ada"
+                  },
+                  "status": {
+                    "kind": "Text",
+                    "value": "done"
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Archive old files"
+                  }
+                }
+              }
+            ],
+            "rows_changed": 0
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "execute",
+          "at": 1,
+          "payload": {
+            "query": "SELECT * FROM tasks ORDER BY id"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Row record(s) created, as demonstrated — no more",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Row.length was 0, expected 1"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Row record deleted — the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Row.length equals the expected value"
+        }
+      ],
+      "taskSuccess": false,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "FAIL",
+      "outcomeReason": "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "initialStateHash": "sha256:52e6dea021fdda067f1449632ea7ce35940ca276ab39e62b17b90c89b6497c16",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back.",
+      "finalStateHash": "sha256:52e6dea021fdda067f1449632ea7ce35940ca276ab39e62b17b90c89b6497c16",
+      "finalStateSummary": {
+        "Row": {
+          "count": 3,
+          "rows": [
+            {
+              "amount": 120.5,
+              "id": 1,
+              "owner": "ada",
+              "status": "open",
+              "title": "Prepare invoice"
+            },
+            {
+              "amount": 80,
+              "id": 2,
+              "owner": "bo",
+              "status": "open",
+              "title": "Review contract"
+            },
+            {
+              "amount": 0,
+              "id": 3,
+              "owner": "ada",
+              "status": "done",
+              "title": "Archive old files"
+            }
+          ]
+        },
+        "Row2": {
+          "count": 1,
+          "rows": [
+            {
+              "action": "completed",
+              "id": 1,
+              "note": "seed",
+              "task_id": 3
+            }
+          ]
+        },
+        "Table": {
+          "count": 0,
+          "rows": []
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_2a4b4cf5",
+      "agentName": "sq-w1-missing-action",
+      "n": 1,
+      "taskSuccessRate": 0,
+      "taskSuccessInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 62.878,
+      "medianLatencyMs": 62.878,
+      "p95LatencyMs": 62.878,
+      "avgSteps": 1,
+      "passAtK": {
+        "pass@1": 0
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": false,
+      "failedThresholds": [
+        "task success 0.0% < required 95.0%"
+      ]
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": null,
+    "outcome": "FAIL",
+    "summary": "No agent met the release thresholds. Best of the group was sq-w1-missing-action.",
+    "rationale": [
+      "sq-w1-missing-action does NOT meet the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 0.0%–79.3%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": false,
+    "mutantKillRate": null,
+    "independentKillRate": null,
+    "falsePositiveRate": null,
+    "replayStable": null,
+    "hiddenAnswerIsolated": null,
+    "deadRules": 0,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "resultHash": "sha256:ec9e6b188a3d15a0ef22cfa495ae1facc614c0b4b5c61593a6134479ab988bbd",
+  "rigorrunVersion": "0.1.0"
+}
+
+Against the baseline  1 case regressed: The job as demonstrated — the job is no longer done.
+  regressed The job as demonstrated — the job is no longer done
+
+--- stderr ---
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"

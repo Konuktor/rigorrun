@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_4c55e15f1e1c",
+  "benchmarkId": "bm_ec_p_220ddc4efe9b",
+  "benchmarkName": "Create exactly one task titled Quarterly report; change nothing else. \u2014 private benchmark",
+  "benchmarkHash": "sha256:79898fb85e36aa24d97fc21f7d5d1dda96426514681d77f763f87cd5f15a829e",
+  "contractHash": "sha256:60afc3c65116cbbc26190781408048c4d74a1656215149d52e07258ce449f711",
+  "environment": "p_220ddc4efe9b",
+  "startedAt": "2026-09-30T20:04:36.372Z",
+  "finishedAt": "2026-09-30T20:04:36.500Z",
+  "agents": [
+    {
+      "id": "a_62613d62",
+      "name": "io2-create-extra-note-edit",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_4c55e15f1e1c",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_62613d62",
+      "correlationId": "run_4c55e15f1e1c.a_62613d62.case_live__happy_path",
+      "startedAt": "2026-09-30T20:04:36.372Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "INDEPENDENT",
+      "budgetMs": 60000,
+      "finishedAt": "2026-09-30T20:04:36.439Z",
+      "durationMs": 66.916,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1790798676431,
+          "tool": "list_tasks",
+          "args": {},
+          "ok": true,
+          "result": {
+            "tasks": [
+              {
+                "id": 1,
+                "title": "Renew domain",
+                "status": "open"
+              },
+              {
+                "id": 2,
+                "title": "Book venue",
+                "status": "open"
+              },
+              {
+                "id": 3,
+                "title": "Send invoices",
+                "status": "done"
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "at": 1790798676435,
+          "tool": "create_task",
+          "args": {
+            "title": "Quarterly report"
+          },
+          "ok": true,
+          "result": {
+            "task": {
+              "id": 4,
+              "title": "Quarterly report",
+              "status": "open"
+            }
+          }
+        },
+        {
+          "index": 2,
+          "at": 1790798676438,
+          "tool": "update_note",
+          "args": {
+            "id": 1,
+            "body": "Registrar login moved to the new vault"
+          },
+          "ok": true,
+          "result": {
+            "note": {
+              "id": 1,
+              "task_id": 1,
+              "body": "Registrar login moved to the new vault",
+              "seen": 0
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "list_tasks",
+          "at": 1,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "create_task",
+          "at": 2,
+          "payload": {
+            "title": "Quarterly report"
+          },
+          "ok": true
+        },
+        {
+          "type": "update_note",
+          "at": 3,
+          "payload": {
+            "id": 1,
+            "body": "Registrar login moved to the new vault"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [
+            {
+              "id": 4,
+              "status": "open",
+              "title": "Quarterly report",
+              "seed__id": null,
+              "seed__status": null
+            }
+          ],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Task[title=\"Quarterly report\"] is present"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Task record(s) created, as demonstrated \u2014 no more",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 1,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Task record deleted \u2014 the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "frame__nothing_else_changed",
+          "kind": "state_frame",
+          "description": "nothing changed beyond what the demonstration changed, for any kind of record",
+          "status": "FAIL",
+          "severity": "invariant",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": {
+            "violations": [
+              {
+                "entity": "Note",
+                "kind": "updated_rows",
+                "observed": 1,
+                "allowed": 0
+              },
+              {
+                "entity": "Note",
+                "kind": "updated_field",
+                "key": "1",
+                "field": "body",
+                "observed": "changed",
+                "allowed": []
+              }
+            ],
+            "unverifiable": [],
+            "excludedVolatile": {}
+          },
+          "expected": {
+            "mode": "performed",
+            "focusEntity": "Task",
+            "entities": {
+              "Note": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Task": {
+                "preExistingRows": 3,
+                "created": 1,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              }
+            }
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "outside what the demonstration changed: 1 existing Note record(s) changed, where the demonstration changed 0; Note 1: body changed, which the demonstration never changed on a Note"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": false,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "FAIL",
+      "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record \u2014 outside what the demonstration changed: 1 existing Note record(s) changed, where the demonstration changed 0; Note 1: body changed, which the demonstration never changed on a Note",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "readStability": {
+        "baseline": "double_read",
+        "final": "double_read",
+        "volatileFields": {},
+        "membershipUnstable": []
+      },
+      "initialStateHash": "sha256:334dd265f45d9c34baef5e3b778ee30e3f2734580de1df578fd5013bf9199b03",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "observation": "calls-and-state",
+      "agentReport": "Created one task titled Quarterly report.",
+      "finalStateHash": "sha256:a538b0ae9b9b8d79c19c54be086e47c51e7d01716289bebbe2a1049ebaa97f0d",
+      "finalStateSummary": {
+        "Note": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "task_id": 1,
+              "body": "Registrar login moved to the new vault",
+              "seen": 0
+            },
+            {
+              "id": 2,
+              "task_id": 2,
+              "body": "Shortlist: river hall or old library",
+              "seen": 0
+            },
+            {
+              "id": 3,
+              "task_id": 1,
+              "body": "Renewal is due before the end of the month",
+              "seen": 0
+            }
+          ]
+        },
+        "Task": {
+          "count": 4,
+          "rows": [
+            {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            {
+              "id": 2,
+              "title": "Book venue",
+              "status": "open"
+            },
+            {
+              "id": 3,
+              "title": "Send invoices",
+              "status": "done"
+            },
+            {
+              "id": 4,
+              "title": "Quarterly report",
+              "status": "open"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_62613d62",
+      "agentName": "io2-create-extra-note-edit",
+      "n": 1,
+      "taskSuccessRate": 1,
+      "taskSuccessInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyComplianceRate": 0,
+      "policyComplianceInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyViolations": 1,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 66.916,
+      "medianLatencyMs": 66.916,
+      "p95LatencyMs": 66.916,
+      "avgSteps": 3,
+      "passAtK": {
+        "pass@1": 1
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": false,
+      "failedThresholds": [
+        "policy compliance 0.0% < required 100.0%",
+        "1 policy violation(s) > allowed 0"
+      ]
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": null,
+    "outcome": "FAIL",
+    "summary": "No agent met the release thresholds. Best of the group was io2-create-extra-note-edit.",
+    "rationale": [
+      "io2-create-extra-note-edit does NOT meet the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 20.6%\u2013100.0%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": false,
+    "mutantKillRate": null,
+    "independentKillRate": null,
+    "falsePositiveRate": null,
+    "replayStable": null,
+    "hiddenAnswerIsolated": null,
+    "deadRules": 0,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "resultHash": "sha256:d00ecb53a7738e426a27234c170abdee9c8e281523c7c55cb417d8b98b301c1f",
+  "rigorrunVersion": "0.1.0"
+}

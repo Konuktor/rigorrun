@@ -1,0 +1,9 @@
+{
+  "name": "io-correct-oracle-down",
+  "steps": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } },
+    { "shell": "touch oracle-down.flag" }
+  ],
+  "report": "Created one task titled Quarterly report."
+}

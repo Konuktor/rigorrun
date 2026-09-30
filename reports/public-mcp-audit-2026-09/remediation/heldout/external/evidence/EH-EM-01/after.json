@@ -1,0 +1,41 @@
+{
+  "messages": [
+    {
+      "body_sha256": "b6f378658d990ceec83c05051a9b2ce5a674ab3ca31828db934ba671250368bb",
+      "from": "noise@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Badge reminder",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "e9dccef1f323d9e892b33738345ff732e15703f6c9c0b3e8837764530d930dfd",
+      "from": "noise@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Lunch order",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "0c60728573427aef2943f656e2a22dc6a9ec5eb8f274f15a7c68ca83f052b414",
+      "from": "noise@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Rota change",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "80f6b64c7a116d2e72e552fa8b149481b7b4bc89fad46cc616ed9ad5cc5b5e41",
+      "from": "agent@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Rota change",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "a51e7eda9f72f236fba6b603d0093237121e3692c30308693f84c2694c661fb8",
+      "from": "noise@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Standup moved",
+      "to": "qa@example.test"
+    }
+  ],
+  "oracle": "greenmail-imaps",
+  "total": 5
+}

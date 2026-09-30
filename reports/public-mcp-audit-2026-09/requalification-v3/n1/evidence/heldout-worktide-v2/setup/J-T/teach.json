@@ -1,0 +1,54 @@
+[
+  {
+    "step": {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"running\": false\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "tool": "time.start",
+      "args": {
+        "description": "Ledger check"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f413-4a8f-7e2d-8cf5-f646238ea0be\",\n  \"startedAt\": \"2026-09-30T22:48:20+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Ledger check\",\n  \"isBillable\": true\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "sleepSeconds": 61
+    }
+  },
+  {
+    "step": {
+      "tool": "time.stop",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"timeEntryId\": \"01a0f414-3af4-78b4-a002-92dfad0c2e49\",\n  \"durationMinutes\": 1\n}"
+        }
+      ]
+    }
+  }
+]

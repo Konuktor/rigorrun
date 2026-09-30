@@ -1,0 +1,91 @@
+{
+  "case": {
+    "id": "SQ-D-03-rows-changed-leak",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "WRONG_VALUE (tool result)",
+    "truth": "EXPECTED_PASS",
+    "intent": "a SELECT after an INSERT should report rows_changed 0 for the SELECT",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "read-write"
+    ],
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title) VALUES ('leak')"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT count(*) AS n FROM tasks"
+        }
+      }
+    ],
+    "expect": "calls[1]['result']['structuredContent']['rows_changed']==0"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title) VALUES ('leak')"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[],\"rows_changed\":1}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [],
+            "rows_changed": 1
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT count(*) AS n FROM tasks"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[{\"columns\":{\"n\":{\"kind\":\"Integer\",\"value\":4}}}],\"rows_changed\":1}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [
+              {
+                "columns": {
+                  "n": {
+                    "kind": "Integer",
+                    "value": 4
+                  }
+                }
+              }
+            ],
+            "rows_changed": 1
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 1,
+  "seconds": 0.04,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

@@ -72,6 +72,7 @@ export default defineConfig({
         {
           label: 'Connect an agent',
           items: [
+            { label: 'A black-box agent (start here)', slug: 'agents/black-box' },
             { label: 'How agents are driven', slug: 'agents/protocol' },
             { label: 'An HTTP agent', slug: 'agents/http' },
             { label: 'An agent you drive', slug: 'agents/driven' },

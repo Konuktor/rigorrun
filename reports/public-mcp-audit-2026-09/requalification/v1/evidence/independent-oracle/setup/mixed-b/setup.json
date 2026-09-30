@@ -1,0 +1,145 @@
+{
+  "project": "mixed-b",
+  "exit": 0,
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "callsDuringSetup": [
+    {
+      "at": 1789439074.2895176,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789439074.2946901,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789439074.2973657,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789439074.2978652,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789439074.2985685,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789439074.3010154,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789439074.3013198,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1789439074.3033464,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789439074.3057547,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789439074.3358266,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789439074.3396184,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789439074.3403502,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789439074.3407972,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1789439074.3427374,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1789439074.3431501,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1789439074.3439903,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    }
+  ],
+  "summary": {
+    "projectId": "p_2d9263906560",
+    "readsProblem": "A verifier read is nominated, so RigorRun reads the result only through the verifier. These reads go through the system's own connection and will be ignored: list_tasks. Verdicts stay labelled SELF_REPORTED while they are nominated; remove them to have verdicts labelled INDEPENDENT.",
+    "readsIgnored": [
+      "list_tasks"
+    ],
+    "tools": 5,
+    "records": [
+      "Task"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "io-readback",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "suiteShape": [
+    "happy_path"
+  ],
+  "budgetsMs": [
+    60000
+  ],
+  "ok": true
+}

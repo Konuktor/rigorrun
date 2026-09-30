@@ -1,0 +1,2 @@
+2026-09-30T18:46:27Z SQ-LLM-01-llama3.1-8b: llama3.1:8b preloaded in 6.05 s; available 7658 MiB before preload, 10435 MiB after
+SQ-LLM-01-llama3.1-8b attempt 1: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE (39.07s)

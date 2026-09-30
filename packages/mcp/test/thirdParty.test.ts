@@ -29,6 +29,7 @@
  * blame the recording for changing nothing. It now says so before any of that,
  * and says which of the two problems it actually is.
  */
+import { hasPayload, normalizeCallResult } from '@rigorrun/connector';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -137,7 +138,10 @@ describe('a public MCP server nobody here wrote', () => {
       ] as const) {
         const result = await connection.call(tool, args as Record<string, unknown>);
         expect(result.ok).toBe(true);
-        observations.push({ tool, payload: result.structured ?? result.content });
+        const normalized = normalizeCallResult(result);
+        // The filesystem server answers in prose. The normaliser says so, and
+        // nothing prose-shaped is ever offered to induction.
+        if (hasPayload(normalized)) observations.push({ tool, payload: normalized.payload });
       }
 
       // This is the honest answer, not a bug. `[FILE] q3-plan.md` is a

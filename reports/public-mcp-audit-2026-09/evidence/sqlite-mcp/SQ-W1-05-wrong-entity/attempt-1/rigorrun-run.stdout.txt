@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_8ea5475a8f44",
+  "benchmarkId": "bm_ec_p_c3b5982b515a",
+  "benchmarkName": "Insert exactly one new task titled Quarterly report with status open, amount 45.5 and owner cy into the tasks table, then read the table back. — private benchmark",
+  "benchmarkHash": "sha256:bd807c2abd2c35d6f8a632dcfb0cb65d92323e6671a867df099c9117f9ebfde8",
+  "contractHash": "sha256:2859f3ef973d0572f8afa7df4aa6bef0afe920ca43ef49a48a5f45fab68e2d79",
+  "environment": "p_c3b5982b515a",
+  "startedAt": "2026-09-13T19:28:24.303Z",
+  "finishedAt": "2026-09-13T19:28:24.394Z",
+  "agents": [
+    {
+      "id": "a_d5ab808b",
+      "name": "sq-w1-wrong-entity",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_8ea5475a8f44",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_d5ab808b",
+      "correlationId": "run_8ea5475a8f44.a_d5ab808b.case_live__happy_path",
+      "startedAt": "2026-09-13T19:28:24.304Z",
+      "finishedAt": "2026-09-13T19:28:24.380Z",
+      "durationMs": 76.061,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789327704374,
+          "tool": "execute",
+          "args": {
+            "query": "INSERT INTO audit_log (task_id, action, note) VALUES (1, 'Quarterly report', 'open 45.5 cy')"
+          },
+          "ok": true,
+          "result": {
+            "rows": [],
+            "rows_changed": 1
+          }
+        },
+        {
+          "index": 1,
+          "at": 1789327704378,
+          "tool": "execute",
+          "args": {
+            "query": "SELECT * FROM tasks ORDER BY id"
+          },
+          "ok": true,
+          "result": {
+            "rows": [
+              {
+                "columns": {
+                  "amount": {
+                    "kind": "Real",
+                    "value": 120.5
+                  },
+                  "id": {
+                    "kind": "Integer",
+                    "value": 1
+                  },
+                  "owner": {
+                    "kind": "Text",
+                    "value": "ada"
+                  },
+                  "status": {
+                    "kind": "Text",
+                    "value": "open"
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Prepare invoice"
+                  }
+                }
+              },
+              {
+                "columns": {
+                  "amount": {
+                    "kind": "Real",
+                    "value": 80
+                  },
+                  "id": {
+                    "kind": "Integer",
+                    "value": 2
+                  },
+                  "owner": {
+                    "kind": "Text",
+                    "value": "bo"
+                  },
+                  "status": {
+                    "kind": "Text",
+                    "value": "open"
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Review contract"
+                  }
+                }
+              },
+              {
+                "columns": {
+                  "amount": {
+                    "kind": "Real",
+                    "value": 0
+                  },
+                  "id": {
+                    "kind": "Integer",
+                    "value": 3
+                  },
+                  "owner": {
+                    "kind": "Text",
+                    "value": "ada"
+                  },
+                  "status": {
+                    "kind": "Text",
+                    "value": "done"
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Archive old files"
+                  }
+                }
+              }
+            ],
+            "rows_changed": 1
+          }
+        }
+      ],
+      "actions": [
+        {
+          "type": "execute",
+          "at": 1,
+          "payload": {
+            "query": "INSERT INTO audit_log (task_id, action, note) VALUES (1, 'Quarterly report', 'open 45.5 cy')"
+          },
+          "ok": true
+        },
+        {
+          "type": "execute",
+          "at": 2,
+          "payload": {
+            "query": "SELECT * FROM tasks ORDER BY id"
+          },
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [
+            {
+              "kind": "Text",
+              "value": "open 45.5 cy",
+              "seed__kind": null,
+              "seed__value": null
+            }
+          ],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Id is present"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy).",
+      "finalStateHash": "sha256:718b347025f04dd82dd354e9f2c943123c304accaf47ffd167879701e07d3dde",
+      "finalStateSummary": {
+        "Id": {
+          "count": 17,
+          "rows": [
+            {
+              "kind": "Real",
+              "value": 0
+            },
+            {
+              "kind": "Integer",
+              "value": 1
+            },
+            {
+              "kind": "Integer",
+              "value": 2
+            },
+            {
+              "kind": "Integer",
+              "value": 3
+            },
+            {
+              "kind": "Real",
+              "value": 80
+            }
+          ]
+        },
+        "Table": {
+          "count": 0,
+          "rows": []
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_d5ab808b",
+      "agentName": "sq-w1-wrong-entity",
+      "n": 1,
+      "taskSuccessRate": 1,
+      "taskSuccessInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "avgLatencyMs": 76.061,
+      "medianLatencyMs": 76.061,
+      "p95LatencyMs": 76.061,
+      "avgSteps": 2,
+      "passAtK": {
+        "pass@1": 1
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": true,
+      "failedThresholds": []
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": "a_d5ab808b",
+    "summary": "sq-w1-wrong-entity wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 cases.",
+    "rationale": [
+      "sq-w1-wrong-entity meets the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 20.6%–100.0%; a larger benchmark would narrow it."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "resultHash": "sha256:239be57d82ac0089bf1e248759be36ee9f81bdf364ae90c1c5b5623f551c51e6",
+  "rigorrunVersion": "0.1.0"
+}
+
+Against the baseline  1 case(s) improved, none regressed.
+
+--- stderr ---
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"

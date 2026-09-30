@@ -32,11 +32,54 @@ const bookingShape = {
   note: z.string(),
 };
 
+/**
+ * How answers are shaped. The default is the well-behaved server: JSON in a
+ * text block *and* `structuredContent`. `DESK_RESULT_SHAPE=text-json` is the
+ * far more common real server that publishes no output schema and answers with
+ * JSON inside a text block only; `prose` answers in sentences, which is a
+ * system that can be watched and never verified.
+ */
+const RESULT_SHAPE = process.env['DESK_RESULT_SHAPE'] ?? 'structured';
+
+/** A server that answers in text alone publishes no output schema either. */
+function output<T extends Record<string, unknown>>(schema: T): { outputSchema?: T } {
+  return RESULT_SHAPE === 'structured' ? { outputSchema: schema } : {};
+}
+
 function payload(value: unknown) {
+  if (RESULT_SHAPE === 'text-json') {
+    return { content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }] };
+  }
+  if (RESULT_SHAPE === 'prose') {
+    return { content: [{ type: 'text' as const, text: describeInProse(value) }] };
+  }
   return {
     content: [{ type: 'text' as const, text: JSON.stringify(value) }],
     structuredContent: value as Record<string, unknown>,
   };
+}
+
+function describeInProse(value: unknown): string {
+  const lines: string[] = [];
+  const walk = (entry: unknown, prefix: string) => {
+    if (Array.isArray(entry)) {
+      lines.push(`${prefix}${entry.length} item(s):`);
+      entry.forEach((item, index) => walk(item, `${prefix}  #${index + 1} `));
+    } else if (entry && typeof entry === 'object') {
+      lines.push(
+        `${prefix}${Object.entries(entry as Record<string, unknown>)
+          .map(([key, v]) => (v && typeof v === 'object' ? `${key}: (see below)` : `${key} is ${String(v)}`))
+          .join(', ')}.`,
+      );
+      for (const [key, v] of Object.entries(entry as Record<string, unknown>)) {
+        if (v && typeof v === 'object') walk(v, `${prefix}${key}: `);
+      }
+    } else {
+      lines.push(`${prefix}${String(entry)}`);
+    }
+  };
+  walk(value, '');
+  return lines.join('\n');
 }
 
 function failure(message: string) {
@@ -54,7 +97,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
     {
       description: 'Every venue the desk can book, with its capacity.',
       inputSchema: {},
-      outputSchema: { venues: z.array(z.object(venueShape)) },
+      ...output({ venues: z.array(z.object(venueShape)) }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },
     async () => payload({ venues: desk.listVenues() }),
@@ -65,7 +108,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
     {
       description: 'Everyone who can hold a booking, and whether they are in good standing.',
       inputSchema: {},
-      outputSchema: {
+      ...output({
         organisers: z.array(
           z.object({
             organiserId: z.string(),
@@ -73,7 +116,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
             standing: z.enum(['good', 'flagged']),
           }),
         ),
-      },
+      }),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },
     async () => payload({ organisers: desk.listOrganisers() }),
@@ -112,7 +155,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
     {
       description: 'One booking, exactly as the desk has it recorded.',
       inputSchema: { bookingId: z.string() },
-      outputSchema: bookingShape,
+      ...output(bookingShape),
       annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
     },
     async ({ bookingId }) => {
@@ -131,7 +174,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
         depositAmount: z.number(),
         note: z.string().optional(),
       },
-      outputSchema: bookingShape,
+      ...output(bookingShape),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
     },
     async (input) => {
@@ -147,7 +190,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
     {
       description: 'Records who authorised a booking.',
       inputSchema: { bookingId: z.string(), approver: z.string() },
-      outputSchema: bookingShape,
+      ...output(bookingShape),
     },
     async ({ bookingId, approver }) => {
       const result = desk.recordSignoff(bookingId, approver);
@@ -160,7 +203,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
     {
       description: 'Moves a held booking to confirmed.',
       inputSchema: { bookingId: z.string() },
-      outputSchema: bookingShape,
+      ...output(bookingShape),
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
     },
     async ({ bookingId }) => {
@@ -174,7 +217,7 @@ export function createDeskServer(desk = new Desk()): McpServer {
     {
       description: 'Restores the desk to its seeded state. Intended for test environments.',
       inputSchema: {},
-      outputSchema: { reset: z.boolean() },
+      ...output({ reset: z.boolean() }),
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true },
     },
     async () => {

@@ -1,0 +1,15 @@
+rerun of the one file that failed in test.log, after the npm registry answered normally again (2026-09-14T17:24:09Z)
+               total        used        free      shared  buff/cache   available
+Mem:           15657        6176        1972         456        8402        9481
+Swap:          16050        3120       12930
+
+ RUN  v4.1.11 {REPO}
+
+ ✓ packages/sandbox/test/adversarial.test.ts (10 tests) 20869ms
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  23:24:09
+   Duration  21.44s (transform 279ms, setup 0ms, import 486ms, tests 20.87s, environment 0ms)
+
+exit 0

@@ -1,0 +1,3 @@
+$ pnpm --version
+11.7.0
+(exit 0)

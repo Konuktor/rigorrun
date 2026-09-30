@@ -1,0 +1,54 @@
+[
+  {
+    "step": {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"running\": false\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "tool": "time.start",
+      "args": {
+        "description": "Audit timer"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a09f3c-bf34-700b-89f1-346691422eef\",\n  \"startedAt\": \"2026-09-14T11:25:53+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Audit timer\",\n  \"isBillable\": true\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "sleepSeconds": 61
+    }
+  },
+  {
+    "step": {
+      "tool": "time.stop",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"timeEntryId\": \"01a09f3d-b067-7209-8fdf-7c3d21467f2e\",\n  \"durationMinutes\": 1\n}"
+        }
+      ]
+    }
+  }
+]

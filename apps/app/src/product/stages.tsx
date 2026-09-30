@@ -202,11 +202,17 @@ export function ConnectEnvironment({
   }, [declared, tokenUrlTouched]);
   const [startUrl, setStartUrl] = useState(browser?.startUrl ?? '');
   const [secretNames, setSecretNames] = useState((saved?.secretNames ?? []).join('\n'));
-  const [safety, setSafety] = useState(project.safety);
+  // Nothing is pre-selected for a new connection. Whether RigorRun may write to
+  // a system is the one decision it must never make on somebody's behalf.
+  const [safety, setSafety] = useState<ProjectView['safety'] | ''>(project.connector ? project.safety : '');
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
   async function connect(): Promise<void> {
+    if (!safety) {
+      setProblem('Say what kind of system this is first. RigorRun will not guess whether it may write to it.');
+      return;
+    }
     setBusy(true);
     setProblem('');
     try {
@@ -438,7 +444,7 @@ export function ConnectEnvironment({
                 </Field>
                 <Field
                   label="Which credential holds the client id?"
-                  hint="A name, as below. Set its value with rigorrun secrets set."
+                  hint="A name, as below. Set its value with npx rigorrun secrets set."
                 >
                   {({ id, describedBy }) => (
                     <TextInput
@@ -574,7 +580,7 @@ export function ConnectEnvironment({
           hint={
             <>
               Names only, one per line. Set the values with{' '}
-              <code className="font-mono">rigorrun secret set NAME</code>; they stay in this
+              <code className="font-mono">npx rigorrun secrets set NAME</code>; they stay in this
               machine&rsquo;s store and never travel with the project.
             </>
           }
@@ -602,6 +608,7 @@ export function ConnectEnvironment({
               value={safety}
               onChange={(value) => setSafety(value as ProjectView['safety'])}
               testId="safety"
+              placeholder="Choose one…"
               options={[
                 { value: 'ephemeral', label: 'Throwaway — made for testing, reset freely' },
                 { value: 'local', label: 'Local — my machine, nobody else affected' },
@@ -615,7 +622,7 @@ export function ConnectEnvironment({
         {problem ? <Problem>{problem}</Problem> : null}
 
         <div>
-          <Button onClick={connect} disabled={busy} testId="connect">
+          <Button onClick={connect} disabled={busy || !safety} testId="connect">
             {busy ? 'Connecting…' : 'Connect'}
           </Button>
         </div>

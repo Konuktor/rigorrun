@@ -1,0 +1,53 @@
+{
+  "case": {
+    "id": "SQ-D-01-readonly-denies-insert",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+    "truth": "EXPECTED_PASS",
+    "intent": "read-only preset must refuse INSERT and leave state unchanged",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "read-only"
+    ],
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title) VALUES ('x')"
+        }
+      }
+    ],
+    "expect": "calls[0]['result']['isError']==True and 'denied' in calls[0]['result']['content'][0]['text'] and after==before"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (title) VALUES ('x')"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "access denied: the configured access control policy denied this statement: INSERT INTO tasks (title) VALUES ('x')"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 0.03,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

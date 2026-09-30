@@ -1,0 +1,20 @@
+[
+  {
+    "id": "J-T",
+    "spec": "specs/j-t.json",
+    "reportGroupBy": "task",
+    "demonstratedMinutes": 1
+  },
+  {
+    "id": "J-U",
+    "spec": "specs/j-u.json",
+    "reportGroupBy": "user",
+    "demonstratedMinutes": 1
+  },
+  {
+    "id": "J-M",
+    "spec": "specs/j-m.json",
+    "reportGroupBy": "task",
+    "demonstratedMinutes": 2
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "id": "WT-D-11-stop-with-nothing-running",
+  "target": "worktide-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.36,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 0.29,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 0.29,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED",
+      "rigorrunOutcome": "NOT_RUN",
+      "outcomeClassification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "3/3"
+}

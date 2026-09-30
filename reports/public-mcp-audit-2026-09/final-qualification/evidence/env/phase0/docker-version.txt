@@ -1,0 +1,3 @@
+$ docker --version
+Docker version 28.5.2+dfsg4, build 9cc6dea35e9a963f281434761c656fba4ac43aed
+(exit 0)

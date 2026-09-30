@@ -1,0 +1,248 @@
+{
+  "project": "selfread",
+  "spec": "specs/io2-selfread.template.json",
+  "exit": 0,
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "predictedSuiteShape": [
+    "happy_path"
+  ],
+  "predictedSetup": null,
+  "callsDuringSetup": [
+    {
+      "at": 1789439121.6400318,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6416073,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6464608,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6469345,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6497858,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6503165,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6509507,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.651413,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6517026,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6543245,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6547425,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6551132,
+      "server": "taskdesk2",
+      "tool": "create_task",
+      "args": {
+        "title": "Quarterly report"
+      }
+    },
+    {
+      "at": 1789439121.656721,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6571057,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.65988,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.66022,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6879632,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6884482,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.692379,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6928124,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6935358,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.693906,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6944427,
+      "server": "taskdesk2",
+      "tool": "create_task",
+      "args": {
+        "title": "Quarterly report"
+      }
+    },
+    {
+      "at": 1789439121.6959472,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6961823,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6965992,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6968157,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6977782,
+      "server": "taskdesk2",
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "at": 1789439121.6979976,
+      "server": "taskdesk2",
+      "tool": "list_notes",
+      "args": {}
+    }
+  ],
+  "errorTail": [],
+  "summary": {
+    "projectId": "p_e34ed1309739",
+    "readsProblem": "",
+    "readsIgnored": [],
+    "tools": 8,
+    "records": [
+      "Task",
+      "Note"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "io2-create-correct",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "io2-create-extra-note-edit",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "projectDirs": [
+    "p_e34ed1309739"
+  ],
+  "suiteShape": [
+    "happy_path"
+  ],
+  "caseIds": [
+    "case_live__happy_path"
+  ],
+  "singleHappyPath": true,
+  "suiteShapeAsPredicted": true,
+  "budgetsMs": [
+    60000
+  ],
+  "checks": {
+    "case_live__happy_path": [
+      "success__performed",
+      "success__exactly_as_demonstrated",
+      "success__nothing_else_deleted",
+      "frame__nothing_else_changed"
+    ]
+  },
+  "frameModes": {
+    "case_live__happy_path": [
+      "performed"
+    ]
+  },
+  "ok": true
+}

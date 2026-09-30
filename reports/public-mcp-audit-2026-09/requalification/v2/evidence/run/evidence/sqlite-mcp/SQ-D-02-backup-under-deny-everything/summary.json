@@ -1,0 +1,137 @@
+{
+  "id": "SQ-D-02-backup-under-deny-everything",
+  "target": "sqlite-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.1,
+      "result": {
+        "calls": [
+          {
+            "tool": "backup",
+            "args": {
+              "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"destination\":\"{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+                }
+              ],
+              "structuredContent": {
+                "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+                "pages_copied": 3
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "vacuum",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "failed to vacuum database: authorization denied"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.06,
+      "result": {
+        "calls": [
+          {
+            "tool": "backup",
+            "args": {
+              "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"destination\":\"{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+                }
+              ],
+              "structuredContent": {
+                "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+                "pages_copied": 3
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "vacuum",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "failed to vacuum database: authorization denied"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.09,
+      "result": {
+        "calls": [
+          {
+            "tool": "backup",
+            "args": {
+              "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"destination\":\"{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+                }
+              ],
+              "structuredContent": {
+                "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+                "pages_copied": 3
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "vacuum",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "failed to vacuum database: authorization denied"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

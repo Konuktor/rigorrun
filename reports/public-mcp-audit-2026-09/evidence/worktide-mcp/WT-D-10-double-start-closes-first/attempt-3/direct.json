@@ -1,0 +1,52 @@
+{
+  "command": [
+    "node",
+    "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "first"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a09c58-8ef0-742e-9590-399195cccafd\",\n  \"startedAt\": \"2026-09-13T21:57:24+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"first\",\n  \"isBillable\": true\n}"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "second"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"closedTimeEntryId\": \"01a09c58-8f5d-7f75-8717-735845f08f14\",\n  \"running\": true,\n  \"timerId\": \"01a09c58-8f98-7295-974b-98ad92c14ba7\",\n  \"startedAt\": \"2026-09-13T21:57:24+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"second\",\n  \"isBillable\": true\n}"
+          }
+        ]
+      }
+    },
+    {
+      "tool": "time.stop",
+      "args": {},
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\n  \"timeEntryId\": \"01a09c58-8ff4-7b9a-a7be-b6348bb88c4f\",\n  \"durationMinutes\": 0\n}"
+          }
+        ]
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "sdk-versions",
+  "target": "RigorRun client",
+  "check": "protocol versions the installed MCP SDK can negotiate",
+  "status": "LIMIT",
+  "observed": {
+    "lockfileSdkVersion": "1.30.0",
+    "LATEST_PROTOCOL_VERSION": "2025-11-25",
+    "SUPPORTED_PROTOCOL_VERSIONS": "LATEST_PROTOCOL_VERSION, '2025-06-18', '2025-03-26', '2024-11-05', '2024-10-07'",
+    "knows20260728": false
+  },
+  "expected": "recorded; 2026-07-28 support would need the string in the SDK",
+  "impact": "RigorRun speaks only the legacy initialize handshake (2024-11-05 … 2025-11-25); a server that supports only 2026-07-28 cannot be connected."
+}

@@ -1,0 +1,7 @@
+sqlite-mcp/w1: ok=True compiled=True suite=True project=p_685a24c9aa85 agents=6  
+sqlite-mcp/w1b: ok=True compiled=True suite=True project=p_04ed810d4b40 agents=8  
+email-mcp/w1: ok=False compiled=False suite=False project=p_186bdeca1a06 agents=0 compile journey: POST /api/projects/p_186bdeca1a06/compile → 400: {"error":"The recording performed \"send_email\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job th
+email-mcp/gm-w1: ok=True compiled=True suite=True project=p_6ac447989a59 agents=6  
+email-mcp/gm-fault: ok=True compiled=True suite=True project=p_efa2a0340436 agents=1  
+worktide-mcp/w2: ok=True compiled=True suite=True project=p_34c01a0eaac2 agents=0  
+worktide-mcp/w3: ok=True compiled=True suite=True project=p_c8b683c1151f agents=0  

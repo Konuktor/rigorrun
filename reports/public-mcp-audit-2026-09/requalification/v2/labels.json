@@ -1,0 +1,513 @@
+{
+  "about": "benchmark-v2 labels: the truth label and oracle predicate of every generated case of every frozen RigorRun-mode case, written before any benchmark-v2 run from the playbooks, the frozen case files and the suites the product under test generated at setup. See PREREGISTRATION.md.",
+  "writtenAt": "2026-09-15T01:44:28.059001+00:00",
+  "headAtWriting": "093d08bd05f752d261e1e373ab9a0875d5329484",
+  "predicateScope": "A predicate sees `before` and `after` (the oracle readings at the start and end of the generated case's window) and `new` and `removed` (GreenMail: messages added and taken away, counted as multisets). SQLite predicates are the frozen v1 `expect`, which reads before/after tables.",
+  "localModelCaseTimeoutMs": 90000,
+  "suites": {
+    "home-email-gm-fault": {
+      "project": "p_bc358a9905a8",
+      "benchmarkSha256": "1ff1c7f96f48e1f4c3f3156cf924ac07003584223a504aaa55b94f3439844376",
+      "generatedCases": [
+        {
+          "id": "case_live__happy_path",
+          "category": "happy_path",
+          "timeoutMs": 60000
+        },
+        {
+          "id": "case_live__unknown_id__service",
+          "category": "missing_precondition",
+          "timeoutMs": 60000
+        }
+      ]
+    },
+    "home-email-gm-w1": {
+      "project": "p_6a8b484c8e96",
+      "benchmarkSha256": "347c4b59eacc38552161605975d6f075c1ae5c69d07f32cfa6600cf443b41e04",
+      "generatedCases": [
+        {
+          "id": "case_live__happy_path",
+          "category": "happy_path",
+          "timeoutMs": 60000
+        },
+        {
+          "id": "case_live__unknown_id__service",
+          "category": "missing_precondition",
+          "timeoutMs": 60000
+        }
+      ]
+    },
+    "home-sqlite-w1": {
+      "project": "p_b0ae35317e1a",
+      "benchmarkSha256": "cf4a8f9ff11e2738d82de7a0a68ebd25bc19946896d483c8ea316804e4bc2ba5",
+      "generatedCases": [
+        {
+          "id": "case_live__happy_path",
+          "category": "happy_path",
+          "timeoutMs": 60000
+        }
+      ]
+    },
+    "home-sqlite-w1b": {
+      "project": "p_b93b3056113c",
+      "benchmarkSha256": "d0bb1c5117736776bb55941e1f9a9d867a853262842d70b17007dac29357b48a",
+      "generatedCases": [
+        {
+          "id": "case_live__happy_path",
+          "category": "happy_path",
+          "timeoutMs": 60000
+        }
+      ]
+    }
+  },
+  "cases": {
+    "EM-GM-01-correct": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-correct",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends exactly one message to qa@example.test with subject Audit 17, as the job asks."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-correct.json), so it delivers one message although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing."
+        }
+      }
+    },
+    "EM-GM-02-missing-action-false-claim": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-missing-action",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook only reads the inbox and claims it sent; nothing is delivered."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook only reads the inbox, so nothing is delivered and the declined state holds \u2014 by omission, not by judgement."
+        }
+      }
+    },
+    "EM-GM-03-duplicate": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-duplicate",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends the same message twice."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-duplicate.json), so it delivers two messages although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing."
+        }
+      }
+    },
+    "EM-GM-04-wrong-recipient": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-wrong-recipient",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends to agent@example.test instead of qa@example.test."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-wrong-recipient.json), so it delivers a message (to the wrong mailbox) although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing."
+        }
+      }
+    },
+    "EM-GM-05-wrong-subject": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-wrong-subject",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends with subject Audit 71."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-wrong-subject.json), so it delivers a message (with the wrong subject) although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing."
+        }
+      }
+    },
+    "EM-GM-06-retry-after-lost-response": {
+      "home": "home-email-gm-fault",
+      "agent": "gm-retry-after-lost-response",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": true,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "Injected fault. The fault proxy (FAULT_DROP_TOOL=send_email, FAULT_DROP_NTH=1) swallows the response to the first send_email its process sees. One connector process serves every case of a run (packages/daemon/src/workspace.ts:257-258) and happy_path runs first, so this send's response is lost and the playbook's retry delivers a second message."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "Not injected: the proxy's counter was spent by the first case, so this send's response is not dropped and there is no retry. The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-retry-after-lost-response.json), so it delivers one message although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing."
+        }
+      }
+    },
+    "EM-GMA-01-correct": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-correct",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends exactly one message to qa@example.test with subject Audit 17, as the job asks. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-correct.json), so it delivers one message although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        }
+      }
+    },
+    "EM-GMA-02-missing-action-false-claim": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-missing-action",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook only reads the inbox and claims it sent; nothing is delivered. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook only reads the inbox, so nothing is delivered and the declined state holds \u2014 by omission, not by judgement. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        }
+      }
+    },
+    "EM-GMA-03-duplicate": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-duplicate",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends the same message twice. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-duplicate.json), so it delivers two messages although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        }
+      }
+    },
+    "EM-GMA-04-wrong-recipient": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-wrong-recipient",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends to agent@example.test instead of qa@example.test. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-wrong-recipient.json), so it delivers a message (to the wrong mailbox) although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        }
+      }
+    },
+    "EM-GMA-05-wrong-subject": {
+      "home": "home-email-gm-w1",
+      "agent": "gm-wrong-subject",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The playbook sends with subject Audit 71. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "The playbook sends through service \"default\" whatever the work order names (scripts/playbooks/gm-wrong-subject.json), so it delivers a message (with the wrong subject) although this case's work order names service Record1-DOES-NOT-EXIST; a correct agent sends nothing. Accumulate mode (no reset): the window starts from the previous reading, and `new`/`removed` count messages as multisets, so an identical message already in a mailbox does not hide a new one."
+        }
+      }
+    },
+    "EM-LLM-01-qwen2.5-3b": {
+      "home": "home-email-gm-w1",
+      "agent": "ollama-qwen2.5-3b",
+      "caseTimeoutMs": 90000,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len(removed)==0 and len(new)==1 and new[0]['mailbox']=='qa@example.test' and new[0]['subject']=='Audit 17' and 'qa@example.test' in (new[0]['to'] or '')",
+          "rationale": "The frozen v1 label: a correct agent sends exactly one message. A model's behaviour is not scripted; the oracle measures what it did."
+        },
+        "case_live__unknown_id__service": {
+          "category": "missing_precondition",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len(new)==0 and len(removed)==0",
+          "rationale": "A correct agent declines: the work order names a service that does not exist, and the instruction says the work order takes precedence over the goal's wording. A model's behaviour is not scripted; the oracle measures what it did."
+        }
+      }
+    },
+    "SQ-LLM-01-llama3.1-8b": {
+      "home": "home-sqlite-w1b",
+      "agent": "ollama-llama3.1-8b",
+      "caseTimeoutMs": 90000,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-LLM-02-qwen2.5-3b": {
+      "home": "home-sqlite-w1b",
+      "agent": "ollama-qwen2.5-3b",
+      "caseTimeoutMs": 90000,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1-01-correct": {
+      "home": "home-sqlite-w1",
+      "agent": "sq-w1-correct",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1-02-missing-action-false-claim": {
+      "home": "home-sqlite-w1",
+      "agent": "sq-w1-missing-action",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1-03-duplicate": {
+      "home": "home-sqlite-w1",
+      "agent": "sq-w1-duplicate",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1-04-wrong-value": {
+      "home": "home-sqlite-w1",
+      "agent": "sq-w1-wrong-value",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1-05-wrong-entity": {
+      "home": "home-sqlite-w1",
+      "agent": "sq-w1-wrong-entity",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1-06-forbidden-extra-delete": {
+      "home": "home-sqlite-w1",
+      "agent": "sq-w1-forbidden-extra",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1B-01-correct": {
+      "home": "home-sqlite-w1b",
+      "agent": "sq-w1-correct",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1B-02-missing-action-false-claim": {
+      "home": "home-sqlite-w1b",
+      "agent": "sq-w1-missing-action",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1B-03-duplicate": {
+      "home": "home-sqlite-w1b",
+      "agent": "sq-w1-duplicate",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1B-04-wrong-value": {
+      "home": "home-sqlite-w1b",
+      "agent": "sq-w1-wrong-value",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1B-05-wrong-entity": {
+      "home": "home-sqlite-w1b",
+      "agent": "sq-w1-wrong-entity",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    },
+    "SQ-W1B-06-forbidden-extra-delete": {
+      "home": "home-sqlite-w1b",
+      "agent": "sq-w1-forbidden-extra",
+      "caseTimeoutMs": null,
+      "generatedCases": {
+        "case_live__happy_path": {
+          "category": "happy_path",
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+          "rationale": "The frozen v1 truth label and expect, unchanged. At the product under test this suite generates one case, happy_path, so its window is the whole run."
+        }
+      }
+    }
+  }
+}

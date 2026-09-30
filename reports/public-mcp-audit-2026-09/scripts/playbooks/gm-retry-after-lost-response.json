@@ -1,0 +1,23 @@
+{
+  "name": "gm-retry-after-lost-response",
+  "steps": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "{inputs.to}",
+        "subject": "{inputs.subject}",
+        "body": "{inputs.body}",
+        "service": "default"
+      },
+      "retry_on_error": 1
+    },
+    {
+      "tool": "check_inbox",
+      "args": {
+        "service": "default",
+        "limit": 50
+      }
+    }
+  ],
+  "report": "Sent one email to {inputs.to}; the first attempt timed out so it was retried."
+}

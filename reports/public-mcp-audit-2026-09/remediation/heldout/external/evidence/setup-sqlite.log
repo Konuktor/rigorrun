@@ -1,0 +1,52 @@
+{
+  "projectId": "p_fe0a307657bc",
+  "readsProblem": "",
+  "tools": 13,
+  "records": [
+    "Row",
+    "Row2"
+  ],
+  "rules": {
+    "total": 0,
+    "confirmed": 0,
+    "rejected": 0
+  },
+  "cases": 1,
+  "quality": null,
+  "agents": [
+    {
+      "name": "ho-sq-correct",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-sq-reads-twice",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-sq-near-duplicate",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-sq-wrong-entity",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-sq-retry",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "ho-sq-slow",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"
+unknown format "uint64" ignored in schema at path "#/properties/rows_changed"

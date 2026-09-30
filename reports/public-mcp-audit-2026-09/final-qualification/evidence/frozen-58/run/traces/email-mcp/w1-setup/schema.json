@@ -1,0 +1,109 @@
+{
+  "entities": [
+    {
+      "name": "Record1",
+      "idField": "count",
+      "fields": [
+        {
+          "name": "services",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "enabled_count",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "types",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Mailhog",
+      "idField": "type",
+      "fields": [
+        {
+          "name": "type",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        },
+        {
+          "name": "configured",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Record3",
+      "idField": "status",
+      "fields": [
+        {
+          "name": "success",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    }
+  ],
+  "relationships": []
+}

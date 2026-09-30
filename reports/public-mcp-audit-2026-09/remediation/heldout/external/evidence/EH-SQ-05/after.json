@@ -1,0 +1,57 @@
+{
+  "exists": true,
+  "oracle": "sqlite-ro",
+  "tables": {
+    "audit_log": {
+      "count": 1,
+      "rows": [
+        {
+          "action": "completed",
+          "id": 1,
+          "note": "seed",
+          "task_id": 3
+        }
+      ]
+    },
+    "tasks": {
+      "count": 5,
+      "rows": [
+        {
+          "amount": 120.5,
+          "id": 1,
+          "owner": "ada",
+          "status": "open",
+          "title": "Prepare invoice"
+        },
+        {
+          "amount": 80.0,
+          "id": 2,
+          "owner": "bo",
+          "status": "open",
+          "title": "Review contract"
+        },
+        {
+          "amount": 0.0,
+          "id": 3,
+          "owner": "ada",
+          "status": "done",
+          "title": "Archive old files"
+        },
+        {
+          "amount": 12.25,
+          "id": 4,
+          "owner": "dee",
+          "status": "open",
+          "title": "Vendor audit"
+        },
+        {
+          "amount": 12.25,
+          "id": 5,
+          "owner": "dee",
+          "status": "open",
+          "title": "Vendor audit"
+        }
+      ]
+    }
+  }
+}

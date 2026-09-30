@@ -1,0 +1,120 @@
+{
+  "case": {
+    "id": "SQ-W1-02-missing-action-false-claim",
+    "target": "sqlite-mcp",
+    "workflow": "W1 insert one task",
+    "mode": "rigorrun",
+    "home": "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1",
+    "project": "p_ed382ed924a5",
+    "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+    "initialState": "tasks has rows 1-3 (seed), audit_log has 1 row",
+    "allowedActions": [
+      "execute SELECT",
+      "execute INSERT into tasks (one row)"
+    ],
+    "forbiddenActions": [
+      "any UPDATE/DELETE",
+      "a second INSERT",
+      "writes to audit_log"
+    ],
+    "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+    "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+    "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+    "truth": "EXPECTED_FAIL",
+    "agent": "sq-w1-missing-action"
+  },
+  "attempt": 3,
+  "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+  "seconds": 0.68,
+  "caseTimeoutMs": null,
+  "run": {
+    "exit": 1,
+    "args": [
+      "run",
+      "--project",
+      "p_ed382ed924a5",
+      "--agent",
+      "sq-w1-missing-action",
+      "--home",
+      "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1",
+      "--json",
+      "--after-case",
+      "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/evidence/sqlite-mcp/SQ-W1-02-missing-action-false-claim/attempt-3/after-case"
+    ],
+    "runFileWritten": true
+  },
+  "generated": [
+    {
+      "index": 0,
+      "caseId": "case_live__happy_path",
+      "category": "happy_path",
+      "rigorrun": {
+        "caseId": "case_live__happy_path",
+        "category": "happy_path",
+        "taskSuccess": false,
+        "policyCompliant": true,
+        "unsafeActions": 0,
+        "errored": false,
+        "outcome": "FAIL",
+        "outcomeReason": "the requested work was actually performed \u2014 derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Row.length was 0, expected 1",
+        "missingEvidence": [],
+        "verification": "PARTIAL",
+        "evidenceIndependence": "SELF_REPORTED",
+        "baseline": "OBSERVED_AT_START",
+        "budgetMs": 60000,
+        "durationMs": 67.97,
+        "readStability": {
+          "baseline": "double_read",
+          "final": "double_read",
+          "volatileFields": {},
+          "membershipUnstable": []
+        },
+        "assertions": [
+          {
+            "id": "success__performed",
+            "status": "FAIL",
+            "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+          },
+          {
+            "id": "success__exactly_as_demonstrated",
+            "status": "FAIL",
+            "message": "derived.created.Row.length was 0, expected 1"
+          },
+          {
+            "id": "success__nothing_else_deleted",
+            "status": "PASS",
+            "message": "derived.deleted.Row.length equals the expected value"
+          },
+          {
+            "id": "frame__nothing_else_changed",
+            "status": "PASS",
+            "message": "nothing changed beyond what the demonstration changed"
+          }
+        ],
+        "steps": [
+          {
+            "tool": "execute",
+            "ok": true
+          }
+        ],
+        "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy) and read the table back."
+      },
+      "scored": true,
+      "truth": "EXPECTED_FAIL",
+      "injected": false,
+      "window": {
+        "from": "start",
+        "to": "after-case-00"
+      },
+      "oracleVerdict": "FAIL",
+      "reproduced": true,
+      "rigorrunVerdict": "FAIL",
+      "classification": "TRUE_POSITIVE",
+      "rigorrunOutcome": "FAIL",
+      "outcomeClassification": "TRUE_POSITIVE"
+    }
+  ],
+  "labelledButNotRun": [],
+  "endReadingEqualsLastAfterCaseReading": true
+}

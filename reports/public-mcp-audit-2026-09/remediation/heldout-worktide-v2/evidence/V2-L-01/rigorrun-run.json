@@ -1,0 +1,453 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_96c8ac616a67",
+  "benchmarkId": "bm_ec_p_44755bbd52ca",
+  "benchmarkName": "Start a timer described 'Long check', let it run for two minutes, then stop it, so that exactly one new time entry of two minutes exists and no timer is left running. \u2014 private benchmark",
+  "benchmarkHash": "sha256:3505eac89ab36dde82f70543fb799352a630d0495d27d887e4d53a7e89bd98f9",
+  "contractHash": "sha256:3d5be2c8d4b2d484ff58a9ceaa914bab21bd0aa47ca4cabf6f48ad77f5c3ddcd",
+  "environment": "p_44755bbd52ca",
+  "startedAt": "2026-09-14T16:30:15.374Z",
+  "finishedAt": "2026-09-14T16:32:18.279Z",
+  "agents": [
+    {
+      "id": "a_cd350651",
+      "name": "v2-two-separate-minutes",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_96c8ac616a67",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_cd350651",
+      "correlationId": "run_96c8ac616a67.a_cd350651.case_live__happy_path",
+      "startedAt": "2026-09-14T16:30:15.374Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "SELF_REPORTED",
+      "budgetMs": 240000,
+      "finishedAt": "2026-09-14T16:32:18.002Z",
+      "durationMs": 122628.063,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1789403415787,
+          "tool": "time.start",
+          "args": {
+            "description": "Long check"
+          },
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0a0c1-44d3-72f4-a4c3-baf3ce12fc6e\",\n  \"startedAt\": \"2026-09-14T18:30:15+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Long check\",\n  \"isBillable\": true\n}"
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "at": 1789403476861,
+          "tool": "time.stop",
+          "args": {},
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"timeEntryId\": \"01a0a0c2-335c-7615-9608-548dc8be5bbe\",\n  \"durationMinutes\": 1\n}"
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "at": 1789403476921,
+          "tool": "time.start",
+          "args": {
+            "description": "Long check"
+          },
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0a0c2-33a1-7dcc-ac25-1a6d42ff1af5\",\n  \"startedAt\": \"2026-09-14T18:31:16+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Long check\",\n  \"isBillable\": true\n}"
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "at": 1789403538001,
+          "tool": "time.stop",
+          "args": {},
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"timeEntryId\": \"01a0a0c3-2231-76e9-8a15-4dc77e809607\",\n  \"durationMinutes\": 1\n}"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": "time.start",
+          "at": 1,
+          "payload": {
+            "description": "Long check"
+          },
+          "ok": true
+        },
+        {
+          "type": "time.stop",
+          "at": 2,
+          "payload": {},
+          "ok": true
+        },
+        {
+          "type": "time.start",
+          "at": 3,
+          "payload": {
+            "description": "Long check"
+          },
+          "ok": true
+        },
+        {
+          "type": "time.stop",
+          "at": 4,
+          "payload": {},
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [
+            {
+              "billableMinutes": 2,
+              "billedMinutes": 0,
+              "key": null,
+              "label": "(unassigned)",
+              "minutes": 2,
+              "seed__billableMinutes": 0,
+              "seed__billedMinutes": 0,
+              "seed__key": null,
+              "seed__label": "(unassigned)",
+              "seed__minutes": 0,
+              "cmp__billableMinutes__minus__billedMinutes": 2,
+              "cmp__billableMinutes__minus__minutes": 0,
+              "cmp__billedMinutes__minus__minutes": -2
+            }
+          ],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Group is present"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Group record(s) changed, as demonstrated \u2014 no more",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 1,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Group record deleted \u2014 the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_created",
+          "kind": "state_equals",
+          "description": "no Group record created \u2014 the demonstration created none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__as_demonstrated__1",
+          "kind": "state_change",
+          "description": "the Group the job changed goes billableMinutes 0 \u2192 2 (+2), as demonstrated",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 2,
+          "expected": {
+            "seed": "derived.seed.Group[label=\"(unassigned)\"]",
+            "field": "billableMinutes",
+            "from": 0,
+            "to": 2,
+            "compare": "quantity"
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "billableMinutes 0 \u2192 2 (+2), as demonstrated"
+        },
+        {
+          "assertionId": "success__as_demonstrated__2",
+          "kind": "state_change",
+          "description": "the Group the job changed goes minutes 0 \u2192 2 (+2), as demonstrated",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 2,
+          "expected": {
+            "seed": "derived.seed.Group[label=\"(unassigned)\"]",
+            "field": "minutes",
+            "from": 0,
+            "to": 2,
+            "compare": "quantity"
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "minutes 0 \u2192 2 (+2), as demonstrated"
+        }
+      ],
+      "taskSuccess": true,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "PASS",
+      "outcomeReason": "every applicable check passed on observed state",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "initialStateHash": "sha256:c55b8ab301c03b5968e9bde2f71f4aa1aa1147b69597acadec1e346f6ceb9185",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Started the timer, let it run a minute, stopped it: one time entry.",
+      "finalStateHash": "sha256:e9cf5c9b214894e876186b62ba16e2f9b85d5293d933a5c684f967a9d3fd2ff0",
+      "finalStateSummary": {
+        "Group": {
+          "count": 4,
+          "rows": [
+            {
+              "key": "01a09c3a-5ff3-74e5-becb-1614e94d6f29",
+              "label": "WORK-3 \u2014 Time-Tracker UI prototypen",
+              "minutes": 405,
+              "billableMinutes": 405,
+              "billedMinutes": 0
+            },
+            {
+              "key": "01a09c3a-5ff2-7139-b9ae-011247c2bec7",
+              "label": "WORK-2 \u2014 Login-Form bauen",
+              "minutes": 315,
+              "billableMinutes": 315,
+              "billedMinutes": 0
+            },
+            {
+              "key": "01a09c3a-5ff0-777d-8eb9-532db0c216e7",
+              "label": "WORK-1 \u2014 MVP Skeleton aufsetzen",
+              "minutes": 225,
+              "billableMinutes": 225,
+              "billedMinutes": 0
+            },
+            {
+              "key": null,
+              "label": "(unassigned)",
+              "minutes": 2,
+              "billableMinutes": 2,
+              "billedMinutes": 0
+            }
+          ]
+        },
+        "Record1": {
+          "count": 1,
+          "rows": [
+            {
+              "from": "2026-09-01T00:00:00+02:00",
+              "to": "2026-09-30T00:00:00+02:00",
+              "groupBy": "task",
+              "totalMinutes": 947,
+              "billableMinutes": 947,
+              "billedMinutes": 0
+            }
+          ]
+        },
+        "Record4": {
+          "count": 0,
+          "rows": []
+        },
+        "Record5": {
+          "count": 0,
+          "rows": []
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": "01a09c48-96db-7179-93b5-9de4616ac34e",
+              "identifier": "AUD-2",
+              "title": "Collect the evidence",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:58+02:00",
+              "updatedAt": "2026-09-13T21:39:58+02:00"
+            },
+            {
+              "id": "01a09c48-97a6-7202-b2de-e76be5553721",
+              "identifier": "AUD-3",
+              "title": "Publish the report",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:58+02:00",
+              "updatedAt": "2026-09-13T21:39:58+02:00"
+            },
+            {
+              "id": "01a09c48-960d-7a2b-9cb4-63b84ba76c74",
+              "identifier": "AUD-1",
+              "title": "Write the audit plan",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:57+02:00",
+              "updatedAt": "2026-09-13T21:39:57+02:00"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_cd350651",
+      "agentName": "v2-two-separate-minutes",
+      "n": 1,
+      "taskSuccessRate": 1,
+      "taskSuccessInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 122628.063,
+      "medianLatencyMs": 122628.063,
+      "p95LatencyMs": 122628.063,
+      "avgSteps": 4,
+      "passAtK": {
+        "pass@1": 1
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": true,
+      "failedThresholds": []
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": "a_cd350651",
+    "outcome": "PASS",
+    "summary": "v2-two-separate-minutes wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 decided cases.",
+    "rationale": [
+      "v2-two-separate-minutes meets the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 20.6%\u2013100.0%; a larger benchmark would narrow it.",
+      "Suite quality: the reference implementation fails 100% of cases, so a correct agent can be failed."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": true,
+    "mutantKillRate": 1,
+    "independentKillRate": 1,
+    "falsePositiveRate": 1,
+    "replayStable": true,
+    "hiddenAnswerIsolated": true,
+    "deadRules": 0,
+    "warnings": [
+      "the reference implementation fails 100% of cases, so a correct agent can be failed"
+    ]
+  },
+  "resultHash": "sha256:029924d6059362e605ddffaf633360d69277f63ba68f11a1b05521f3aed23273",
+  "rigorrunVersion": "0.1.0"
+}

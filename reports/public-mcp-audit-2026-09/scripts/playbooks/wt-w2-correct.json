@@ -1,0 +1,23 @@
+{
+  "name": "wt-w2-correct",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 61
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ],
+  "report": "Started the timer, waited a minute, stopped it: one time entry."
+}

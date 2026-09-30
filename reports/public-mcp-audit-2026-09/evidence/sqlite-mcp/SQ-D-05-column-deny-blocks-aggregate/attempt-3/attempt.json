@@ -1,0 +1,138 @@
+{
+  "case": {
+    "id": "SQ-D-05-column-deny-blocks-aggregate",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+    "truth": "EXPECTED_PASS",
+    "intent": "--deny Read(tasks.amount) must block SELECT * and sum(amount) but allow id,title",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "read-only",
+      "--deny",
+      "Read(tasks.amount)"
+    ],
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT * FROM tasks"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT id,title FROM tasks"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT sum(amount) FROM tasks"
+        }
+      }
+    ],
+    "expect": "calls[0]['result']['isError']==True and calls[1]['result']['isError']==False and calls[2]['result']['isError']==True"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT * FROM tasks"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "access denied: the configured access control policy denied this statement: SELECT * FROM tasks"
+            }
+          ],
+          "isError": true
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT id,title FROM tasks"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[{\"columns\":{\"id\":{\"kind\":\"Integer\",\"value\":1},\"title\":{\"kind\":\"Text\",\"value\":\"Prepare invoice\"}}},{\"columns\":{\"id\":{\"kind\":\"Integer\",\"value\":2},\"title\":{\"kind\":\"Text\",\"value\":\"Review contract\"}}},{\"columns\":{\"id\":{\"kind\":\"Integer\",\"value\":3},\"title\":{\"kind\":\"Text\",\"value\":\"Archive old files\"}}}],\"rows_changed\":0}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [
+              {
+                "columns": {
+                  "id": {
+                    "kind": "Integer",
+                    "value": 1
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Prepare invoice"
+                  }
+                }
+              },
+              {
+                "columns": {
+                  "id": {
+                    "kind": "Integer",
+                    "value": 2
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Review contract"
+                  }
+                }
+              },
+              {
+                "columns": {
+                  "id": {
+                    "kind": "Integer",
+                    "value": 3
+                  },
+                  "title": {
+                    "kind": "Text",
+                    "value": "Archive old files"
+                  }
+                }
+              }
+            ],
+            "rows_changed": 0
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "SELECT sum(amount) FROM tasks"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "access denied: the configured access control policy denied this statement: SELECT sum(amount) FROM tasks"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 0.03,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-09-15T02:40:08+00:00",
+  "decision": "benchmark-v1 keeps the strict frozen protocol and is reported only (requalification decision 3); benchmark-v2 scores these suites in full and decides the gates",
+  "reason": "SUITE_SHAPE_REFUSED: at the product under test both GreenMail suites generate two cases, happy_path and missing_precondition, and the frozen protocol's suite-shape check (run-v1.sh setup, as run-frozen-58.sh) refuses to score a suite that is not the single demonstrated case. Setup evidence: ",
+  "evidence": [
+    "requalification/v1/evidence/frozen-58/logs/setup.log",
+    "requalification/v1/evidence/frozen-58/logs/chain-1.log"
+  ],
+  "cases": {
+    "EM-GM-01-correct": "SUITE_SHAPE_REFUSED",
+    "EM-GM-02-missing-action-false-claim": "SUITE_SHAPE_REFUSED",
+    "EM-GM-03-duplicate": "SUITE_SHAPE_REFUSED",
+    "EM-GM-04-wrong-recipient": "SUITE_SHAPE_REFUSED",
+    "EM-GM-05-wrong-subject": "SUITE_SHAPE_REFUSED",
+    "EM-GM-06-retry-after-lost-response": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-01-correct": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-02-missing-action-false-claim": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-03-duplicate": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-04-wrong-recipient": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-05-wrong-subject": "SUITE_SHAPE_REFUSED",
+    "EM-LLM-01-qwen2.5-3b": "SUITE_SHAPE_REFUSED"
+  }
+}

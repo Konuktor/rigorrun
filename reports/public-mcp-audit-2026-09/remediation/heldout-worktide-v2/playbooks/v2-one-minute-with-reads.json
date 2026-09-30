@@ -1,0 +1,47 @@
+{
+  "name": "v2-one-minute-with-reads",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.report",
+      "args": {
+        "from": "2026-09-01",
+        "to": "2026-09-30",
+        "groupBy": "task"
+      }
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 61
+    },
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    },
+    {
+      "tool": "time.report",
+      "args": {
+        "from": "2026-09-01",
+        "to": "2026-09-30",
+        "groupBy": "task"
+      }
+    },
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    }
+  ],
+  "report": "Checked the report, started the timer, let it run a minute, stopped it, checked again: one time entry."
+}

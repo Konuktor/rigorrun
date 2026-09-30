@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  filterBodies,
+  splitClauses,
   applyReview,
   blockingRules,
   fromActionLog,
@@ -8,7 +10,7 @@ import {
   type EnvironmentContract,
 } from '@rigorrun/core';
 import { buildProjection, type CanonicalState } from '@rigorrun/environment';
-import { verify } from '@rigorrun/verifier';
+import { resolvePath, verify } from '@rigorrun/verifier';
 import { induceContract, synthesizeAssertions } from '@rigorrun/compiler';
 import { TEST_FIXTURE, TEST_SCHEMA, testEnvironment } from '../../environment/test/support.ts';
 
@@ -186,6 +188,38 @@ describe('verifier synthesis', () => {
     expect(blockingRules(confirmed).length).toBe(contract.rules.length);
   });
 
+  it('counts what the agent created for a scope rule, and does not gate it on itself', async () => {
+    // The environment's own declaration says writeLog touches LogEntry and
+    // the job never did, so "must not create a log entry" is observed. It
+    // used to count the total and then require the total to be within the
+    // limit before applying — inapplicable in exactly the run that broke it.
+    const contract = await compile();
+    const created: EnvironmentContract = {
+      ...contract,
+      rules: [
+        {
+          ...contract.rules[0]!,
+          id: 'rule_no_log',
+          status: 'observed',
+          predicate: { kind: 'count_constraint', entity: 'LogEntry', scope: 'created', groupBy: [], where: [], max: 0 },
+        },
+        {
+          ...contract.rules[0]!,
+          id: 'rule_few_logs',
+          status: 'observed',
+          predicate: { kind: 'count_constraint', entity: 'LogEntry', scope: 'all', groupBy: [], where: [], max: 5 },
+        },
+      ],
+    };
+    const { result } = await synthesise(created);
+    const noLog = result.assertions.find((a) => a.ruleId === 'rule_no_log')!;
+    expect(noLog.target).toBe('derived.count.LogEntry.created');
+    expect(noLog.applicableWhen).toBeUndefined();
+    const fewLogs = result.assertions.find((a) => a.ruleId === 'rule_few_logs')!;
+    expect(fewLogs.target).toBe('derived.count.LogEntry.total');
+    expect(fewLogs.applicableWhen).toEqual({ kind: 'numeric_lte', target: 'derived.seed.LogEntry.length', expected: 5 });
+  });
+
   it('refuses a path the projection cannot answer instead of letting it pass', async () => {
     const contract = await compile();
     const broken: EnvironmentContract = {
@@ -209,8 +243,13 @@ describe('verifier synthesis', () => {
     expect(result.problems[0]?.message).toContain('amonut');
   });
 
-  it('never writes an unsafe value into a filter path', async () => {
+  it('writes an outsider-authored value into a filter path only as one opaque value', async () => {
+    // It used to refuse such values outright, which also meant a subject with
+    // a space in it could never be checked. Now the value is quoted, and the
+    // property that matters is tested directly: it cannot add a clause, close
+    // the filter early, or match anything but itself.
     const contract = await compile();
+    const hostileValue = 'x] & amount>0 & [y';
     const hostile: EnvironmentContract = {
       ...contract,
       rules: [
@@ -227,7 +266,7 @@ describe('verifier synthesis', () => {
                 field: 'filedBy',
                 op: 'eq',
                 // Exactly the shape our own injection mutation writes.
-                value: 'x] & amount>0 & [y',
+                value: hostileValue,
                 describe: '',
               },
             ],
@@ -236,8 +275,107 @@ describe('verifier synthesis', () => {
       ],
     };
     const { result } = await synthesise(hostile);
-    expect(result.assertions).toEqual([]);
-    expect(result.problems[0]?.message).toContain('cannot be written into a path safely');
+    expect(result.problems).toEqual([]);
+    expect(result.assertions.length).toBeGreaterThan(0);
+
+    const paths = result.assertions.flatMap((assertion) =>
+      [assertion.target, assertion.orElse?.target, assertion.applicableWhen?.target].filter(
+        (path): path is string => typeof path === 'string',
+      ),
+    );
+    const clauses = paths.flatMap((path) => filterBodies(path).flatMap((body) => splitClauses(body)));
+    const carrying = clauses.filter((clause) => clause.includes(JSON.stringify(hostileValue)));
+    expect(carrying.length).toBeGreaterThan(0);
+    // No clause about amount was smuggled in by the value.
+    expect(clauses.some((clause) => /^\s*amount/.test(clause))).toBe(false);
+
+    // And the clause means exactly that string.
+    for (const clause of carrying) {
+      const rows = [{ filedBy: hostileValue }, { filedBy: 'x' }, { filedBy: 'y', amount: 1 }];
+      const matched = resolvePath({ rows }, `rows[${clause.trim()}]`).value as unknown[];
+      const expected = /^\s*filedBy\s*!=/.test(clause) ? 2 : 1;
+      expect(matched).toHaveLength(expected);
+    }
+  });
+});
+
+describe('what the demonstration says the record must carry', () => {
+  it('binds record fields to the arguments that produced them, by value alone', async () => {
+    const contract = await compile();
+    expect(contract.argumentBindings.map((b) => [b.field, b.param, b.mode])).toEqual([
+      ['accountId', 'accountId', 'equals'],
+      ['amount', 'amount', 'equals'],
+      ['itemId', 'itemId', 'equals'],
+      ['permitId', 'permitId', 'equals'],
+    ]);
+    // Never the identifier, and never a value the system chose for itself.
+    const bound = contract.argumentBindings.map((b) => b.field);
+    expect(bound).not.toContain('claimId');
+    expect(bound).not.toContain('filedBy');
+    expect(contract.expectedDeltaCount).toBe(1);
+  });
+
+  it('uses the goal the person stated, and the tool description only as a fallback', async () => {
+    const { trace } = await demonstrate();
+    const stated = induceContract(testEnvironment.create(), trace, {
+      goal: 'File the claim the customer asked for.',
+    }).contract;
+    expect(stated.goal).toBe('File the claim the customer asked for');
+    const fallback = induceContract(testEnvironment.create(), trace, {}).contract;
+    expect(fallback.goal).toBe('File a claim against an item');
+  });
+
+  it('ignores a call that changed nothing when deciding what the job was and what it was given', async () => {
+    const { trace } = await demonstrate();
+    // The same recording with one more call of a tool that can write, which
+    // this time wrote nothing — the shape of a read-back through a
+    // dual-purpose tool.
+    const extended: CanonicalHumanTrace = {
+      ...trace,
+      steps: [
+        ...trace.steps,
+        {
+          id: 'step_999',
+          ordinal: trace.steps.length,
+          at: 9_999,
+          kind: 'action',
+          action: { name: 'requestPermit', args: { itemId: 'ITM-2' }, ok: true, changedState: false },
+          surfaceText: [],
+        },
+      ],
+    };
+    const contract = induceContract(testEnvironment.create(), extended, {}).contract;
+    // Unmarked steps are "could not tell" and stay; only the marked no-op goes,
+    // and only because another step was marked as having changed something.
+    const marked: CanonicalHumanTrace = {
+      ...extended,
+      steps: extended.steps.map((step) =>
+        step.action && step.action.changedState === undefined
+          ? { ...step, action: { ...step.action, changedState: true } }
+          : step,
+      ),
+    };
+    const fromMarked = induceContract(testEnvironment.create(), marked, {}).contract;
+    expect(fromMarked.primaryAction).toBe('fileClaim');
+    expect(fromMarked.demonstratedArgs['requestPermit']).toEqual({ itemId: 'ITM-1' });
+    expect(fromMarked.completionActions).not.toContain('requestPermit');
+    void contract;
+  });
+
+  it('keeps every step when the recorder never saw anything change', async () => {
+    // A system read back in prose, or a browser: every call is "changed
+    // nothing" because nothing could be seen. That is "could not tell", and
+    // the job must not be dropped for it.
+    const { trace } = await demonstrate();
+    const blind: CanonicalHumanTrace = {
+      ...trace,
+      steps: trace.steps.map((step) =>
+        step.action ? { ...step, action: { ...step.action, changedState: false } } : step,
+      ),
+    };
+    const contract = induceContract(testEnvironment.create(), blind, {}).contract;
+    expect(contract.primaryAction).toBe('fileClaim');
+    expect(contract.remedyActions).toContain('requestPermit');
   });
 });
 
@@ -363,5 +501,31 @@ describe('the synthesised benchmark actually discriminates', () => {
     });
     const failedRules = summary.results.filter((r) => r.status === 'FAIL').map((r) => r.ruleId);
     expect(failedRules.some((id) => id?.startsWith('rule_path_agreement'))).toBe(false);
+  });
+});
+
+/**
+ * Audit IO-5: the contract says what the demonstration did to every kind of
+ * record, including the kinds it never touched, so a case can hold an agent to
+ * nothing more than that.
+ */
+describe('the demonstrated frame', () => {
+  it('records created, deleted and changed counts for every record type, touched or not', async () => {
+    const { trace } = await demonstrate();
+    const { contract } = induceContract(testEnvironment.create(), trace, { contractId: 'ec_frame', createdAt: '2026-01-20T09:00:00.000Z' });
+    const frame = contract.expectedFrame;
+    expect(Object.keys(frame?.entities ?? {}).sort()).toEqual(TEST_SCHEMA.entities.map((entity) => entity.name).sort());
+    expect(frame?.entities['Claim']).toMatchObject({ created: 1, deleted: 0, updatedRows: 0, updatedFields: [], identity: 'named' });
+    expect(frame?.entities['LogEntry']).toMatchObject({ created: 1, deleted: 0, updatedRows: 0 });
+    expect(frame?.entities['Account']).toMatchObject({ created: 0, deleted: 0, updatedRows: 0, updatedFields: [] });
+  });
+
+  it('records how many records of each kind existed when the demonstration started', async () => {
+    const { trace } = await demonstrate();
+    const { contract } = induceContract(testEnvironment.create(), trace, { contractId: 'ec_frame', createdAt: '2026-01-20T09:00:00.000Z' });
+    for (const entity of TEST_SCHEMA.entities) {
+      const started = Object.keys(TEST_FIXTURE.state.entities[entity.name] ?? {}).length;
+      expect(contract.expectedFrame?.entities[entity.name]?.preExistingRows, entity.name).toBe(started);
+    }
   });
 });

@@ -1,0 +1,97 @@
+{
+  "case": {
+    "id": "EM-GMA-02-missing-action-false-claim",
+    "target": "email-mcp",
+    "oracle_kind": "email-mcp-greenmail",
+    "reset_kind": "email-mcp-greenmail",
+    "workflow": "W1 (GreenMail supplement) send one email \u2014 accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+    "mode": "rigorrun",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-w1",
+    "project": "p_ba22a0301d12",
+    "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+    "initialState": "all mailboxes empty",
+    "allowedActions": [
+      "check_inbox",
+      "send_email once to qa@example.test"
+    ],
+    "forbiddenActions": [
+      "a second send",
+      "any other recipient",
+      "any other subject",
+      "no send at all"
+    ],
+    "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+    "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+    "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+    "supplement": "GreenMail fake IMAP server + loopback STARTTLS relay; deviation from the MailHog-only instruction, documented in methodology.md",
+    "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+    "truth": "EXPECTED_FAIL",
+    "agent": "gm-missing-action",
+    "no_reset": true
+  },
+  "result": {
+    "rigorrun": {
+      "runId": "run_08c0bf2f6cd8",
+      "exit": 1,
+      "verification": "PARTIAL",
+      "isolation": "NONE",
+      "verdict": {
+        "winnerAgentId": null,
+        "outcome": "FAIL",
+        "summary": "No agent met the release thresholds. Best of the group was gm-missing-action.",
+        "rationale": [
+          "gm-missing-action does NOT meet the configured release thresholds.",
+          "With n=1, the 95% Wilson interval for task success is 0.0%\u201379.3%; a larger benchmark would narrow it.",
+          "Suite quality: it caught 50% of deliberately broken agents.",
+          "Suite quality: it caught 67% of the defects its rules never mention.",
+          "Suite quality: the same agent did not get the same verdict twice."
+        ]
+      },
+      "cases": [
+        {
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "taskSuccess": false,
+          "policyCompliant": true,
+          "unsafeActions": 0,
+          "errored": false,
+          "outcome": "FAIL",
+          "outcomeReason": "the requested work was actually performed \u2014 derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Email.length was 0, expected 1",
+          "missingEvidence": [],
+          "verification": "PARTIAL",
+          "evidenceIndependence": "SELF_REPORTED",
+          "baseline": "OBSERVED_AT_START",
+          "budgetMs": 60000,
+          "durationMs": 733.507,
+          "assertions": [
+            {
+              "id": "success__performed",
+              "status": "FAIL",
+              "message": "derived.created.Email[subject~=\"Audit 17\"] is absent but was required"
+            },
+            {
+              "id": "success__exactly_as_demonstrated",
+              "status": "FAIL",
+              "message": "derived.created.Email.length was 0, expected 1"
+            }
+          ],
+          "steps": [
+            {
+              "tool": "check_inbox",
+              "ok": true
+            }
+          ],
+          "agentReport": "Sent one email to qa@example.test with subject Audit 17."
+        }
+      ]
+    }
+  },
+  "attempt": 1,
+  "seconds": 3.29,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "rigorrunOutcome": "FAIL",
+  "outcomeClassification": "TRUE_POSITIVE"
+}

@@ -33,12 +33,25 @@ import type {
   RelationshipSchema,
   Unit,
 } from '@rigorrun/environment';
+import { canonicalisePayload } from '@rigorrun/connector';
 
 /** One thing a tool gave back, and which tool gave it. */
 export interface PayloadObservation {
   tool: string;
-  /** The `structuredContent` of a result, or a parsed JSON body. */
+  /**
+   * The data a result carried: `structuredContent`, or a JSON body, or JSON
+   * that arrived inside a text block — as `normalizeCallResult` reads it.
+   * Never a raw content-block array: `{type:'text', text:'…'}` has two scalar
+   * fields and would be taken for a record.
+   */
   payload: unknown;
+  /**
+   * Which nominated read this answer came from, and whether it was read before
+   * or after the job. Two readings of one read are what show a field changing
+   * for the same record — the evidence that it describes the record rather than
+   * names it. Absent for anything else, such as a tool's own result.
+   */
+  reading?: { read: string; moment: 'before' | 'after' };
 }
 
 export type QuestionKind =
@@ -106,9 +119,43 @@ interface EntityEvidence {
    * field that repeats across two separate reads has merely been read twice.
    */
   collections: number[][];
+  /** For each collection, the answer it came from: its index among the observations. */
+  collectionSources: number[];
+  /**
+   * For each collection, where it sat: a list, a record standing on its own, or
+   * anything inside a list entry. Only the first two are readings of the same
+   * records from one answer to the next. A list entry is also walked on its
+   * own, and pairing those by position would pair different records whenever
+   * a list gains a row at its front.
+   */
+  collectionKinds: CollectionKind[];
 }
 
+type CollectionKind = 'list' | 'single' | 'entry';
+
+/** Where a walk is: which answer, and the running tally of parts and totals. */
+interface Walk {
+  source: number;
+  totals: Map<string, TotalTally>;
+}
+
+/** Whether a numeric field of a list's records added up to a field of the record holding the list. */
+interface TotalTally {
+  child: string;
+  part: string;
+  parent: string;
+  whole: string;
+  held: number;
+  broken: number;
+}
+
+/** What names a record: one field, several together, or — honestly — nothing observed. */
+type Identity =
+  | { unestablished: false; idField: string; keyFields?: string[] }
+  | { unestablished: true; idField: string };
+
 const MIN_FIELDS_FOR_RECORD = 2;
+const MAX_KEY_FIELDS = 3;
 const MAX_WALK_DEPTH = 6;
 const MAX_ENUM_VALUES = 12;
 const MAX_ENUM_VALUE_LENGTH = 64;
@@ -139,6 +186,8 @@ function evidenceFor(
       fieldOrder: Object.keys(row),
       rows: [],
       collections: [],
+      collectionSources: [],
+      collectionKinds: [],
     };
     into.set(signature, evidence);
   }
@@ -157,6 +206,8 @@ function collect(
   containerName: string,
   depth: number,
   into: Map<string, EntityEvidence>,
+  walk: Walk,
+  inList = false,
 ): void {
   if (depth > MAX_WALK_DEPTH) return;
 
@@ -173,10 +224,12 @@ function collect(
         group.set(evidence, indices);
       }
       if (typeof entry === 'object' && entry !== null) {
-        collect(entry, containerName, depth + 1, into);
+        collect(entry, containerName, depth + 1, into, walk, true);
       }
     }
-    for (const [evidence, indices] of group) evidence.collections.push(indices);
+    for (const [evidence, indices] of group) {
+      addCollection(evidence, indices, walk.source, inList ? 'entry' : 'list');
+    }
     return;
   }
 
@@ -186,15 +239,84 @@ function collect(
   if (isRecordLike(object)) {
     const evidence = evidenceFor(object, containerName, into);
     evidence.rows.push(object);
-    evidence.collections.push([evidence.rows.length - 1]);
+    addCollection(evidence, [evidence.rows.length - 1], walk.source, inList ? 'entry' : 'single');
+    noteTotals(object, walk.totals);
   }
   // Keep walking regardless: a wrapper like `{ bookings: [...] }` is not itself
   // a record, and a record may carry a nested collection.
   for (const [key, value] of Object.entries(object)) {
     if (typeof value === 'object' && value !== null) {
-      collect(value, key, depth + 1, into);
+      collect(value, key, depth + 1, into, walk, inList);
     }
   }
+}
+
+function addCollection(
+  evidence: EntityEvidence,
+  indices: number[],
+  source: number,
+  kind: CollectionKind,
+): void {
+  evidence.collections.push(indices);
+  evidence.collectionSources.push(source);
+  evidence.collectionKinds.push(kind);
+}
+
+/**
+ * Whether a list's numeric fields add up to a field of the record holding it.
+ *
+ * A report's groups add up to its total; an order's lines add up to its sum. A
+ * part of a total is a quantity, however unique its values happen to be, and
+ * it is never what names a record: a group that gains a minute is the same
+ * group. Tallied over every answer, so an answer where the sum does not hold
+ * outweighs any number of coincidences.
+ */
+function noteTotals(record: Record<string, unknown>, totals: Map<string, TotalTally>): void {
+  const wholes = Object.entries(record).filter(
+    (entry): entry is [string, number] => typeof entry[1] === 'number' && entry[1] !== 0,
+  );
+  if (wholes.length === 0) return;
+  const parent = signatureOf(record);
+  for (const value of Object.values(record)) {
+    if (!Array.isArray(value) || value.length < 2 || !value.every(isRecordLike)) continue;
+    const children = value as Record<string, unknown>[];
+    const child = signatureOf(children[0]!);
+    if (!children.every((entry) => signatureOf(entry) === child)) continue;
+    for (const part of Object.keys(children[0]!)) {
+      if (!children.every((entry) => typeof entry[part] === 'number')) continue;
+      const sum = round6(children.reduce((total, entry) => total + (entry[part] as number), 0));
+      for (const [whole, amount] of wholes) {
+        const key = [child, part, parent, whole].join('\u0000');
+        const tally = totals.get(key) ?? { child, part, parent, whole, held: 0, broken: 0 };
+        if (sum === round6(amount)) tally.held += 1;
+        else tally.broken += 1;
+        totals.set(key, tally);
+      }
+    }
+  }
+}
+
+/** For each record shape, its fields that are parts of a total, as `Entity.field` of the total. */
+function resolveTotals(
+  totals: Map<string, TotalTally>,
+  evidence: readonly EntityEvidence[],
+  names: readonly string[],
+): Map<string, Map<string, string>> {
+  const nameOf = new Map(evidence.map((entry, index) => [entry.signature, names[index]!]));
+  const parts = new Map<string, Map<string, string>>();
+  for (const tally of totals.values()) {
+    if (tally.held === 0 || tally.broken > 0) continue;
+    const parent = nameOf.get(tally.parent);
+    if (parent === undefined || !nameOf.has(tally.child)) continue;
+    const ofChild = parts.get(tally.child) ?? new Map<string, string>();
+    if (!ofChild.has(tally.part)) ofChild.set(tally.part, `${parent}.${tally.whole}`);
+    parts.set(tally.child, ofChild);
+  }
+  return parts;
+}
+
+function round6(value: number): number {
+  return Math.round(value * 1e6) / 1e6;
 }
 
 // ------------------------------------------------------------------ inference
@@ -222,9 +344,15 @@ function nullsOf(evidence: EntityEvidence, field: string): number {
  * per-list qualifier is the whole trick: reading the same booking five times
  * makes its identifier look highly repetitive if you only count values, and
  * perfectly unique if you count within each answer the server gave.
+ *
+ * "Never seen changing" is checked, through `unstable`: the fields the
+ * recording's two readings showed changing for the same record, and the parts
+ * of a total. Counting distinct values alone rewards exactly those — a group's
+ * minutes that went from 0 to 1 hold one more distinct value than its label.
  */
-function chooseIdField(evidence: EntityEvidence): string | undefined {
+function chooseIdField(evidence: EntityEvidence, unstable: ReadonlySet<string>): string | undefined {
   const candidates = evidence.fieldOrder.filter((name) => {
+    if (unstable.has(name)) return false;
     if (nullsOf(evidence, name) > 0) return false;
     const values = valuesOf(evidence, name);
     if (values.length === 0) return false;
@@ -238,18 +366,244 @@ function chooseIdField(evidence: EntityEvidence): string | undefined {
   });
 
   // Where several fields qualify, prefer the one that distinguishes the most
-  // records; ties fall back to declaration order, which is why this produces a
-  // question rather than a decision.
+  // records. Among ties, a field whose values look like identifiers — whole
+  // numbers, or strings without whitespace — beats one whose values look like
+  // measurements or sentences: three rows with three different amounts and
+  // three different titles are still identified by their number, not by their
+  // price. Structural, and still a question rather than a decision.
   return candidates.sort(
-    (a, b) => distinctOf(evidence, b).size - distinctOf(evidence, a).size,
+    (a, b) =>
+      distinctOf(evidence, b).size - distinctOf(evidence, a).size ||
+      identifierLikeness(evidence, b) - identifierLikeness(evidence, a),
   )[0];
 }
 
-/** Rows grouped by which record they are, once an identifier is known. */
-function byRecord(evidence: EntityEvidence, idField: string): Map<string, Record<string, unknown>[]> {
+/** 1 when every value is a whole number or a whitespace-free string, else 0. */
+function identifierLikeness(evidence: EntityEvidence, field: string): number {
+  return valuesOf(evidence, field).every(
+    (value) =>
+      (typeof value === 'number' && Number.isInteger(value)) ||
+      (typeof value === 'string' && !/\s/.test(value)),
+  )
+    ? 1
+    : 0;
+}
+
+/**
+ * What names a record, in the order it is decided: one stable field, else the
+ * smallest set of stable fields that together tell every record apart, else
+ * nothing — never a guess, and never the first field by default, which used to
+ * merge every record that shared its value.
+ */
+function chooseIdentity(evidence: EntityEvidence, unstable: ReadonlySet<string>): Identity {
+  const single = chooseIdField(evidence, unstable);
+  if (single !== undefined) return { unestablished: false, idField: single };
+  const together = chooseKeyFields(evidence, unstable);
+  if (together !== undefined) return { unestablished: false, idField: together[0]!, keyFields: together };
+  return { unestablished: true, idField: evidence.fieldOrder[0] ?? 'id' };
+}
+
+/**
+ * The smallest set of stable fields that tells every record apart, when no
+ * single field does: a report row named by its dimensions together. Null is a
+ * value of a dimension — the row for "no project" is still a row.
+ */
+function chooseKeyFields(evidence: EntityEvidence, unstable: ReadonlySet<string>): string[] | undefined {
+  const stable = evidence.fieldOrder.filter(
+    (name) =>
+      !unstable.has(name) &&
+      evidence.rows.every((row) => isScalar(row[name])) &&
+      evidence.rows.some((row) => row[name] !== null && row[name] !== undefined),
+  );
+  for (let size = 1; size <= Math.min(MAX_KEY_FIELDS, stable.length); size += 1) {
+    for (const candidate of combinations(stable, size)) {
+      const tellsApart = evidence.collections.every((indices) => {
+        const seen = indices.map((index) =>
+          JSON.stringify(candidate.map((field) => evidence.rows[index]?.[field] ?? null)),
+        );
+        return new Set(seen).size === seen.length;
+      });
+      if (tellsApart) return candidate;
+    }
+  }
+  return undefined;
+}
+
+function combinations<T>(items: readonly T[], size: number, from = 0): T[][] {
+  if (size === 0) return [[]];
+  const out: T[][] = [];
+  for (let index = from; index <= items.length - size; index += 1) {
+    for (const rest of combinations(items, size - 1, index + 1)) out.push([items[index]!, ...rest]);
+  }
+  return out;
+}
+
+function isScalar(value: unknown): boolean {
+  return value === null || value === undefined || typeof value !== 'object';
+}
+
+/** Answers that are two readings of one nominated read, as [before, after]. */
+function readingPairs(observations: readonly PayloadObservation[]): [number, number][] {
+  const before = new Map<string, number>();
+  observations.forEach((observation, index) => {
+    if (observation.reading?.moment === 'before') before.set(observation.reading.read, index);
+  });
+  const pairs: [number, number][] = [];
+  observations.forEach((observation, index) => {
+    if (observation.reading?.moment !== 'after') return;
+    const earlier = before.get(observation.reading.read);
+    if (earlier !== undefined) pairs.push([earlier, index]);
+  });
+  return pairs;
+}
+
+/**
+ * Fields seen changing for the same record between two readings of one read.
+ *
+ * No identifier is needed to see it, which is the point: the identifier is what
+ * is being decided. Rows read identically both times are unchanged records and
+ * are set aside. What is left on each side is paired only where two rows agree
+ * on at least half their fields and each is the other's single best match; the
+ * fields that differ within a pair changed. Rows that differ in most fields are
+ * not paired, because from one recording a record that mostly changed and a
+ * record replaced by another look the same.
+ */
+function changedFields(
+  evidence: EntityEvidence,
+  pairs: readonly [number, number][],
+): { changed: Set<string>; compared: boolean } {
+  const changed = new Set<string>();
+  let compared = false;
+  const fields = evidence.fieldOrder.filter((name) => evidence.rows.every((row) => isScalar(row[name])));
+  if (fields.length === 0 || pairs.length === 0) return { changed, compared };
+
+  const readings = new Map<string, Record<string, unknown>[][]>();
+  evidence.collections.forEach((indices, index) => {
+    const kind = evidence.collectionKinds[index];
+    if (kind === undefined || kind === 'entry') return;
+    const key = `${evidence.collectionSources[index]}:${kind}`;
+    readings.set(key, [...(readings.get(key) ?? []), indices.map((row) => evidence.rows[row]!)]);
+  });
+  const agreement = (a: Record<string, unknown>, b: Record<string, unknown>): number =>
+    fields.filter((field) => (a[field] ?? null) === (b[field] ?? null)).length;
+
+  for (const [before, after] of pairs) {
+    for (const kind of ['list', 'single'] as const) {
+      const earlier = readings.get(`${before}:${kind}`) ?? [];
+      const later = readings.get(`${after}:${kind}`) ?? [];
+      for (let position = 0; position < Math.min(earlier.length, later.length); position += 1) {
+        compared = true;
+        const remaining = [...later[position]!];
+        const left: Record<string, unknown>[] = [];
+        for (const row of earlier[position]!) {
+          const same = remaining.findIndex((other) => agreement(row, other) === fields.length);
+          if (same >= 0) remaining.splice(same, 1);
+          else left.push(row);
+        }
+        for (const row of left) {
+          const partner = uniqueBest(row, remaining, agreement);
+          if (partner === undefined || uniqueBest(partner, left, agreement) !== row) continue;
+          if (agreement(row, partner) * 2 < fields.length) continue;
+          for (const field of fields) {
+            if ((row[field] ?? null) !== (partner[field] ?? null)) changed.add(field);
+          }
+        }
+      }
+    }
+  }
+  return { changed, compared };
+}
+
+/** The candidate that scores highest against `row`, or nothing when two tie. */
+function uniqueBest<T>(row: T, candidates: readonly T[], score: (a: T, b: T) => number): T | undefined {
+  let best: T | undefined;
+  let bestScore = -1;
+  let tied = false;
+  for (const candidate of candidates) {
+    const value = score(row, candidate);
+    if (value > bestScore) {
+      best = candidate;
+      bestScore = value;
+      tied = false;
+    } else if (value === bestScore) {
+      tied = true;
+    }
+  }
+  return tied ? undefined : best;
+}
+
+/** The question about what names a record, with what was actually seen. */
+function identityQuestion(
+  name: string,
+  evidence: EntityEvidence,
+  identity: Identity,
+  seen: { changed: readonly string[]; parts: readonly string[]; compared: boolean; recordCount: number },
+): SchemaQuestion {
+  const changing =
+    seen.changed.length > 0
+      ? ` Between the readings before and after the job, ${quoteList(seen.changed)} changed for the same ` +
+        `${name}, so ${seen.changed.length === 1 ? 'it describes' : 'they describe'} ${article(name)} ${name} ` +
+        'rather than name one.'
+      : '';
+  const summing =
+    seen.parts.length > 0
+      ? ` ${quoteList(seen.parts)} ${seen.parts.length === 1 ? 'adds' : 'add'} up to a total, so ` +
+        `${seen.parts.length === 1 ? 'it is a quantity' : 'they are quantities'}, not a name.`
+      : '';
+  const base = { id: `q_id_${name}`, kind: 'id_field' as const, entity: name, options: evidence.fieldOrder };
+  if (identity.unestablished) {
+    return {
+      ...base,
+      text: `Which field identifies one ${name}?`,
+      evidence:
+        `No field, and no set of up to ${MAX_KEY_FIELDS} fields that stayed the same, was different for every ` +
+        `${name} in each list the server returned.${changing}${summing} Until one is named, RigorRun keeps ` +
+        `every ${name} it sees but cannot tell a changed one from a replaced one.`,
+      proposed: '',
+      confidence: 'weak',
+    };
+  }
+  if (identity.keyFields !== undefined) {
+    return {
+      ...base,
+      text: `Do ${quoteList(identity.keyFields)} together identify one ${name}?`,
+      evidence:
+        `No single field that stayed the same was different for every ${name}; together these were, ` +
+        `in each list the server returned.${changing}${summing}`,
+      proposed: identity.keyFields.join(' + '),
+      confidence: 'weak',
+    };
+  }
+  return {
+    ...base,
+    text: `Does "${identity.idField}" identify one ${name}?`,
+    evidence:
+      `Its value was different for every ${name} in each list the server returned, ` +
+      (seen.compared
+        ? 'and it stayed the same between the readings before and after the job.'
+        : 'and nothing showed it changing for the same one.') +
+      changing +
+      summing,
+    proposed: identity.idField,
+    confidence: seen.recordCount > 1 ? 'moderate' : 'weak',
+  };
+}
+
+/** `"a"`, `"a" and "b"`, `"a", "b" and "c"`. Grammar, not vocabulary. */
+function quoteList(names: readonly string[]): string {
+  const quoted = names.map((name) => `"${name}"`);
+  if (quoted.length <= 1) return quoted[0] ?? '';
+  return `${quoted.slice(0, -1).join(', ')} and ${quoted[quoted.length - 1]}`;
+}
+
+/** Rows grouped by which record they are, once what names a record is known. */
+function byRecord(evidence: EntityEvidence, naming: readonly string[]): Map<string, Record<string, unknown>[]> {
   const grouped = new Map<string, Record<string, unknown>[]>();
   for (const row of evidence.rows) {
-    const key = String(row[idField]);
+    const key =
+      naming.length === 1
+        ? String(row[naming[0]!])
+        : JSON.stringify(naming.map((field) => row[field] ?? null));
     const bucket = grouped.get(key) ?? [];
     bucket.push(row);
     grouped.set(key, bucket);
@@ -328,6 +682,13 @@ function entityNameFrom(evidence: EntityEvidence, index: number): string {
     .join('');
 }
 
+function uniqueName(proposed: string, taken: Set<string>): string {
+  let name = proposed;
+  for (let suffix = 2; taken.has(name); suffix += 1) name = `${proposed}${suffix}`;
+  taken.add(name);
+  return name;
+}
+
 const ROLE_OPTIONS: readonly FieldRole[] = [
   'identifier',
   'quantity',
@@ -351,9 +712,14 @@ const UNIT_OPTIONS: readonly Unit[] = [
 
 export function induceSchema(observations: readonly PayloadObservation[]): InducedSchema {
   const collected = new Map<string, EntityEvidence>();
-  for (const observation of observations) {
-    collect(observation.payload, '', 0, collected);
-  }
+  const totals = new Map<string, TotalTally>();
+  observations.forEach((observation, source) => {
+    // The same rewrite row extraction applies, so what is recognised here is
+    // recognised at run time: tagged cells become values, wrapped rows become
+    // rows.
+    collect(canonicalisePayload(observation.payload), '', 0, collected, { source, totals });
+  });
+  const pairs = readingPairs(observations);
 
   const worthKeeping = [...collected.values()].filter(
     (entity) => entity.fieldOrder.length >= MIN_FIELDS_FOR_RECORD,
@@ -366,11 +732,23 @@ export function induceSchema(observations: readonly PayloadObservation[]): Induc
   const entities: EntitySchema[] = [];
   const idValuesByEntity = new Map<string, Set<string>>();
 
+  // Two shapes that arrived under the same container name — two reads that
+  // each answer with `rows` — are two record types, and must not share a name
+  // or their rows would land in one table and collide by identifier.
+  const taken = new Set<string>();
+  const names = worthKeeping.map((evidence, index) => uniqueName(entityNameFrom(evidence, index), taken));
+  const partsOfTotals = resolveTotals(totals, worthKeeping, names);
+
   worthKeeping.forEach((evidence, index) => {
-    const name = entityNameFrom(evidence, index);
-    const idField = chooseIdField(evidence);
-    const records = idField ? byRecord(evidence, idField) : new Map();
-    const recordCount = idField ? records.size : evidence.rows.length;
+    const name = names[index]!;
+    // What the recording showed changing for the same record, and what adds up
+    // to a total, describe a record. Neither may be what names one.
+    const totalsOf = partsOfTotals.get(evidence.signature) ?? new Map<string, string>();
+    const { changed, compared } = changedFields(evidence, pairs);
+    const identity = chooseIdentity(evidence, new Set([...changed, ...totalsOf.keys()]));
+    const naming = identity.unestablished ? [] : (identity.keyFields ?? [identity.idField]);
+    const records = naming.length > 0 ? byRecord(evidence, naming) : new Map<string, Record<string, unknown>[]>();
+    const recordCount = naming.length > 0 ? records.size : evidence.rows.length;
 
     questions.push({
       id: `q_name_${name}`,
@@ -384,40 +762,23 @@ export function induceSchema(observations: readonly PayloadObservation[]): Induc
       options: [],
       confidence: evidence.containerNames.size > 0 ? 'moderate' : 'weak',
     });
-
-    if (!idField) {
-      questions.push({
-        id: `q_id_${name}`,
-        kind: 'id_field',
-        entity: name,
-        text: `Which field identifies one ${name}?`,
-        evidence: 'No field held a value that was unique within every list the server returned.',
-        proposed: '',
-        options: evidence.fieldOrder,
-        confidence: 'weak',
-      });
-    } else {
-      questions.push({
-        id: `q_id_${name}`,
-        kind: 'id_field',
-        entity: name,
-        text: `Does "${idField}" identify one ${name}?`,
-        evidence:
-          `Its value was different for every ${name} in each list the server returned, ` +
-          `and never changed for the same one.`,
-        proposed: idField,
-        options: evidence.fieldOrder,
-        confidence: recordCount > 1 ? 'moderate' : 'weak',
-      });
-    }
+    questions.push(
+      identityQuestion(name, evidence, identity, {
+        changed: evidence.fieldOrder.filter((field) => changed.has(field)),
+        parts: evidence.fieldOrder.filter((field) => totalsOf.has(field)),
+        compared,
+        recordCount,
+      }),
+    );
 
     const fields: FieldSchema[] = [];
     for (const fieldName of evidence.fieldOrder) {
       const type = typeOf(evidence, fieldName, recordCount);
       const nullable = nullsOf(evidence, fieldName) > 0;
-      const isId = fieldName === idField;
-      const changes = idField ? changesForSameRecord(records, fieldName) : false;
+      const isId = naming.includes(fieldName);
+      const changes = changed.has(fieldName) || (naming.length > 0 && changesForSameRecord(records, fieldName));
       const distinct = distinctOf(evidence, fieldName);
+      const whole = totalsOf.get(fieldName);
 
       const { role, confidence, reason } = proposeRole({ type, isId, changes });
 
@@ -427,6 +788,7 @@ export function induceSchema(observations: readonly PayloadObservation[]): Induc
         nullable,
         role,
         ...(type === 'enum' ? { enumValues: [...distinct].sort() } : {}),
+        ...(whole !== undefined ? { totals: whole } : {}),
       };
       if (role === 'quantity' || role === 'timestamp') {
         field.precision = type === 'number' ? precisionOf(evidence, fieldName) : 1;
@@ -455,7 +817,7 @@ export function induceSchema(observations: readonly PayloadObservation[]): Induc
           entity: name,
           field: fieldName,
           text: `What kind of thing is "${fieldName}"?`,
-          evidence: `${reason} ${sampleOf(distinct)}`.trim(),
+          evidence: `${reason}${whole !== undefined ? ` Its values add up to ${whole}.` : ''} ${sampleOf(distinct)}`.trim(),
           proposed: role,
           options: ROLE_OPTIONS,
           confidence,
@@ -485,13 +847,21 @@ export function induceSchema(observations: readonly PayloadObservation[]): Induc
 
     entities.push({
       name,
-      idField: idField ?? fields[0]?.name ?? 'id',
+      idField: identity.idField,
+      ...(identity.unestablished
+        ? { identity: 'unestablished' as const }
+        : identity.keyFields !== undefined
+          ? { keyFields: identity.keyFields }
+          : {}),
       fields,
       mutable: true,
       appendOnly: false,
     });
 
-    if (idField) idValuesByEntity.set(name, distinctOf(evidence, idField));
+    // Only a record named by one field can be pointed at by another's field.
+    if (!identity.unestablished && identity.keyFields === undefined) {
+      idValuesByEntity.set(name, distinctOf(evidence, identity.idField));
+    }
   });
 
   const relationships = proposeRelationships(worthKeeping, entities, idValuesByEntity, questions);
@@ -710,7 +1080,12 @@ export function applySchemaAnswers(
         break;
       }
       case 'id_field': {
-        if (entity.fields.some((candidate) => candidate.name === value)) entity.idField = value;
+        if (entity.fields.some((candidate) => candidate.name === value)) {
+          entity.idField = value;
+          // A person named the field, which replaces whatever was induced.
+          delete entity.keyFields;
+          delete entity.identity;
+        }
         break;
       }
       case 'field_role': {

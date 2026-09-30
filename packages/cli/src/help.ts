@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
@@ -29,6 +29,7 @@ VERIFY A SERVER
 
 PROJECTS
   projects                 List the projects on this machine.
+  setup <spec.json>        Create a project from a spec, with no interface.
   run --project <id>       Run the project's suite against its agent.
   gate --project <id>      Same, but exit non-zero if it misses the bar.
   compare-runs --project <id> <runId>
@@ -90,6 +91,19 @@ RUN / GATE OPTIONS
       --min-success <0..1>      Minimum task success. Default 0.95.
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
+      --max-inconclusive <n>    Cases allowed to end without a verdict. Default 0.
+      --case-timeout <ms>       Wall-clock budget per case for this run.
+                                Default: the suite's own (60000 when generated).
+      --after-case <program>    Run a program (a path or a name; no shell, no
+                                arguments) after each case has finished and
+                                before the next starts, outside the case budget.
+                                It gets a minimal environment plus
+                                RIGORRUN_RUN_ID, RIGORRUN_AGENT_ID,
+                                RIGORRUN_CASE_ID, RIGORRUN_CASE_INDEX,
+                                RIGORRUN_CASE_OUTCOME and RIGORRUN_CASE_CATEGORY;
+                                its output goes to stderr. A non-zero exit, or
+                                not finishing within 10 minutes, stops the run
+                                with exit 2.
 
 COMPARE OPTIONS
       --baseline <runId>        Compare against this instead of the baseline.
@@ -98,6 +112,7 @@ VERIFY OPTIONS
       --max-undetermined <n>    Undetermined findings tolerated. Default 0.
       --min-exercised <n>       Tools that must have been exercised. Default 1.
       --strict                  Treat minor contradictions as failures too.
+      --needs-credential <tool> A tool that needs a credential. Repeatable. Never inferred.
   -o, --out <file>              Where to write the record.
       --json                    Print the record and nothing else.
 
@@ -106,7 +121,9 @@ EXIT CODES
   1  the benchmark failed, the gate was not met, or a declaration was
      contradicted by what the server was observed to do
   2  configuration or runtime error
-  3  verify only: it ran, but established too little to be worth much
+  3  it ran, but established too little to be worth much: verify found too
+     little, or run/gate had too many cases end without a verdict (abstained
+     for lack of evidence, or lost to a harness failure)
 
 EXAMPLES
   rigorrun                                     start here
@@ -147,6 +164,7 @@ OPTIONS
       --max-undetermined <n>  Undetermined findings tolerated. Default 0.
       --min-exercised <n>     Tools that must have been exercised. Default 1.
       --strict                Treat minor contradictions as failures too.
+      --needs-credential <tool> A tool that needs a credential. Repeatable. Never inferred.
   -o, --out <file>            Where to write the record.
       --json                  Print the record to stdout and nothing else.
 
@@ -171,11 +189,27 @@ OPTIONS
       --json         Print the run result as JSON.
       --quiet        Suppress per-case progress.
 `,
+  setup: `rigorrun setup <spec.json> - create a project with no interface
+
+Drives the same steps the interface does, from a JSON spec: connect, nominate
+reads, demonstrate the job, answer schema questions, compile, decide rules,
+build the suite, optionally check it, register agents. Prints the project id.
+
+A spec names the environment variable each secret comes from ("secrets":
+{"API_TOKEN": "MY_TOKEN_VAR"}); values are never read from the spec. A rule
+RigorRun only inferred is confirmed only when a "review.confirm" pattern
+matches its statement; every other inferred rule is rejected.
+
+OPTIONS
+      --home <dir>   Where the project store lives.
+      --json         Print a summary instead of the project id.
+      --quiet        Suppress progress.
+`,
   gate: `rigorrun gate <benchmark.json> - fail a build on an unreliable agent
 
 Runs one agent against a benchmark and applies release thresholds.
 Exits 0 when every threshold is met, 1 when any is missed, 2 on a
-configuration error.
+configuration error, 3 when too many cases reached no verdict.
 
 OPTIONS
       --agent <id>                  Required. The agent to gate.
@@ -186,6 +220,11 @@ OPTIONS
       --min-policy <0..1>           Default 1
       --max-policy-violations <n>   Default 0
       --max-unsafe <n>              Default 0
+      --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
+      --case-timeout <ms>           Wall-clock budget per case. Default: the suite's
+      --after-case <program>        Run a program (no shell, no arguments) after each
+                                    case, before the next. A failure stops the run
+                                    with exit 2.
       --repeats <n>                 Attempts per case. Default 1.
       --report <path>               Also write an HTML report.
 `,

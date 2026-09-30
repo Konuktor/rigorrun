@@ -1,0 +1,21 @@
+{
+  "id": "stderr-flood",
+  "target": "RigorRun client",
+  "check": "a server writing 200 KB to stderr is still answered",
+  "status": "LIMIT",
+  "observed": {
+    "firstOk": false,
+    "firstError": {
+      "code": "call_failed",
+      "message": "MCP error -32001: Request timed out"
+    },
+    "secondOk": false,
+    "secondError": {
+      "code": "call_failed",
+      "message": "MCP error -32001: Request timed out"
+    },
+    "ms": 30027
+  },
+  "expected": "both calls answered",
+  "impact": "stderr is piped and never read; a server that logs heavily to stderr can block and time out."
+}

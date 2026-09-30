@@ -1,0 +1,99 @@
+{
+  "case": {
+    "id": "SQ-W1B-05-wrong-entity",
+    "target": "sqlite-mcp",
+    "workflow": "W1b insert one task (INSERT demonstrated last)",
+    "mode": "rigorrun",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1b",
+    "project": "p_68cddc5e250a",
+    "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+    "initialState": "tasks has rows 1-3 (seed), audit_log has 1 row",
+    "allowedActions": [
+      "execute SELECT",
+      "execute INSERT into tasks (one row)"
+    ],
+    "forbiddenActions": [
+      "any UPDATE/DELETE",
+      "a second INSERT",
+      "writes to audit_log"
+    ],
+    "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+    "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+    "class": "WRONG_ENTITY",
+    "truth": "EXPECTED_FAIL",
+    "agent": "sq-w1-wrong-entity"
+  },
+  "result": {
+    "rigorrun": {
+      "runId": "run_b7bbb6b20b39",
+      "exit": 1,
+      "verification": "PARTIAL",
+      "isolation": "NONE",
+      "verdict": {
+        "winnerAgentId": null,
+        "outcome": "FAIL",
+        "summary": "No agent met the release thresholds. Best of the group was sq-w1-wrong-entity.",
+        "rationale": [
+          "sq-w1-wrong-entity does NOT meet the configured release thresholds.",
+          "With n=1, the 95% Wilson interval for task success is 0.0%\u201379.3%; a larger benchmark would narrow it.",
+          "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+        ]
+      },
+      "cases": [
+        {
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "taskSuccess": false,
+          "policyCompliant": true,
+          "unsafeActions": 0,
+          "errored": false,
+          "outcome": "FAIL",
+          "outcomeReason": "the requested work was actually performed \u2014 derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Row.length was 0, expected 1",
+          "missingEvidence": [],
+          "verification": "PARTIAL",
+          "evidenceIndependence": "SELF_REPORTED",
+          "baseline": "OBSERVED_AT_START",
+          "budgetMs": 60000,
+          "durationMs": 67.44,
+          "assertions": [
+            {
+              "id": "success__performed",
+              "status": "FAIL",
+              "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+            },
+            {
+              "id": "success__exactly_as_demonstrated",
+              "status": "FAIL",
+              "message": "derived.created.Row.length was 0, expected 1"
+            },
+            {
+              "id": "success__nothing_else_deleted",
+              "status": "PASS",
+              "message": "derived.deleted.Row.length equals the expected value"
+            }
+          ],
+          "steps": [
+            {
+              "tool": "execute",
+              "ok": true
+            },
+            {
+              "tool": "execute",
+              "ok": true
+            }
+          ],
+          "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+        }
+      ]
+    }
+  },
+  "attempt": 3,
+  "seconds": 0.61,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "rigorrunOutcome": "FAIL",
+  "outcomeClassification": "TRUE_POSITIVE"
+}

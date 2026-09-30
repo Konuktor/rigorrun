@@ -1,0 +1,74 @@
+{
+  "case": {
+    "id": "EM-MH-01-send-one",
+    "target": "email-mcp",
+    "mode": "direct",
+    "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+    "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "server": [
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "class": "BASELINE",
+    "truth": "EXPECTED_PASS",
+    "intent": "send exactly one email to qa@example.test with subject Audit 17 via the documented MailHog service",
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 via MailHog",
+          "service": "mailhog"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError')==False and after['total']==before['total']+1 and after['messages'][-1]['to']==['qa@example.test'] and after['messages'][-1]['subject']=='Audit 17'"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 via MailHog",
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via mailhog service\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": true,
+            "status": "sent",
+            "service": "mailhog",
+            "note": "Check web UI at http://127.0.0.1:8025",
+            "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 1.43,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

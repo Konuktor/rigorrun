@@ -1,0 +1,72 @@
+{
+  "command": [
+    "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+    "--database",
+    "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+    "--preset",
+    "read-write"
+  ],
+  "calls": [
+    {
+      "tool": "execute",
+      "args": {
+        "query": "BEGIN"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[],\"rows_changed\":0}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [],
+          "rows_changed": 0
+        },
+        "isError": false
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "INSERT INTO tasks (id,title) VALUES (99,'tx probe')"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[],\"rows_changed\":1}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [],
+          "rows_changed": 1
+        },
+        "isError": false
+      }
+    },
+    {
+      "tool": "execute",
+      "args": {
+        "query": "ROLLBACK"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "{\"rows\":[],\"rows_changed\":1}"
+          }
+        ],
+        "structuredContent": {
+          "rows": [],
+          "rows_changed": 1
+        },
+        "isError": false
+      }
+    }
+  ],
+  "server": {
+    "name": "mcp-server-sqlite",
+    "version": "1.0.0"
+  }
+}

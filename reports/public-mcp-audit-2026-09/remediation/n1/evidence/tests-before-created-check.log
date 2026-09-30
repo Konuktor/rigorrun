@@ -1,0 +1,44 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts (14 tests | 1 failed) 91ms
+     ✓ names the row by what stayed the same, and expects the demonstrated change 27ms
+     ✓ passes the correct agent and fails the duplicate, the wrong row and the extra row (A–D) 15ms
+     × D, where the other row is new: fails a job that also makes a row appear 9ms
+     ✓ says what the duplicate did: the demonstrated change, and the one observed 3ms
+     ✓ G: abstains when the case starts from a different value, unless the result contradicts every reading 5ms
+     ✓ reads the rows that add up to the total as quantities, never as their names 2ms
+     ✓ fails a duplicate contribution to the new row 5ms
+     ✓ keys a cell by its dimensions, not by the quantity that happened to be unique 3ms
+     ✓ fails the duplicate and the wrong cell 6ms
+     ✓ keeps the null as a value of the identity rather than dropping the row 3ms
+     ✓ keeps the numeric id as the identity, and the amount as a value 4ms
+     ✓ does not name a record by a changing string, and never passes a duplicate visible only in it 2ms
+     ✓ says so, keeps every row, and abstains rather than passing a change it cannot attribute 3ms
+     ✓ is unchanged: keyed by its identifier, created rows counted 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > an aggregate row whose quantity the job changes > D, where the other row is new: fails a job that also makes a row appear
+AssertionError: the right row plus a row that did not exist: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/aggregateIdentity.test.ts:187:64
+    185|   for (const [name, steps, expected] of table) {
+    186|     const result = await run(compiled, world, scripted(name, steps));
+    187|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    188|   }
+    189| }
+ ❯ packages/runner/test/aggregateIdentity.test.ts:260:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  21:41:39
+   Duration  802ms (transform 395ms, setup 0ms, import 607ms, tests 91ms, environment 0ms)
+

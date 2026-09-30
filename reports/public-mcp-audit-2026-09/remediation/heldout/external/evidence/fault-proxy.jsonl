@@ -1,0 +1,29 @@
+{"at":"2026-09-14T10:30:36.487Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":1,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.491Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":2,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.499Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":3,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.500Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":4,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:36.552Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:36.552Z","pid":1434005,"mode":"drop_response","injected":"WILL_ALTER_RESPONSE","id":6,"call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:36.554Z","pid":1434005,"mode":"drop_response","injected":"RESPONSE_DROPPED","id":6}
+{"at":"2026-09-14T10:30:56.563Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":6,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:56.581Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":7,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:56.583Z","pid":1434005,"mode":"drop_response","direction":"client→server","call":8,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.659Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":1,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.662Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":2,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.666Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":3,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.666Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":4,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T10:30:58.718Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:30:58.718Z","pid":1434639,"mode":"drop_request","injected":"REQUEST_DROPPED","id":6,"call":5,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:31:18.726Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":6,"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"}}
+{"at":"2026-09-14T10:31:18.733Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":7,"tool":"execute","args":{"query":"SELECT * FROM tasks ORDER BY id"}}
+{"at":"2026-09-14T10:31:18.735Z","pid":1434639,"mode":"drop_request","direction":"client→server","call":8,"tool":"execute","args":{"query":"SELECT * FROM audit_log ORDER BY id"}}
+{"at":"2026-09-14T11:47:48.163Z","pid":1543231,"mode":"error_after_forward","direction":"client→server","call":1,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:47:48.163Z","pid":1543231,"mode":"error_after_forward","injected":"WILL_ALTER_RESPONSE","id":4,"call":1,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:47:48.225Z","pid":1543231,"mode":"error_after_forward","injected":"RESPONSE_REPLACED_WITH_ERROR","id":4}
+{"at":"2026-09-14T11:47:48.228Z","pid":1543231,"mode":"error_after_forward","direction":"client→server","call":2,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:47:54.239Z","pid":1543740,"mode":"delay_response","direction":"client→server","call":1,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:47:54.239Z","pid":1543740,"mode":"delay_response","injected":"WILL_ALTER_RESPONSE","id":4,"call":1,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:47:54.303Z","pid":1543740,"mode":"delay_response","injected":"RESPONSE_DELAYED","id":4,"delayMs":4000}
+{"at":"2026-09-14T11:48:04.030Z","pid":1544137,"mode":"drop_request","direction":"client→server","call":1,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:48:04.030Z","pid":1544137,"mode":"drop_request","injected":"REQUEST_DROPPED","id":4,"call":1,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}
+{"at":"2026-09-14T11:48:24.039Z","pid":1544137,"mode":"drop_request","direction":"client→server","call":2,"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"}}

@@ -1,0 +1,16 @@
+{
+  "id": "timeout",
+  "target": "RigorRun client",
+  "check": "a call past its timeout is an error, not an empty result",
+  "status": "PASS",
+  "observed": {
+    "ok": false,
+    "kind": "error",
+    "error": {
+      "code": "call_failed",
+      "message": "MCP error -32001: Request timed out"
+    },
+    "ms": 20009
+  },
+  "expected": "call_failed after about 20 s"
+}

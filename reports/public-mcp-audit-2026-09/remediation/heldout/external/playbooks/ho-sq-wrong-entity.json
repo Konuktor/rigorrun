@@ -1,0 +1,1 @@
+{"name":"ho-sq-wrong-entity","steps":[{"tool":"execute","args":{"query":"INSERT INTO audit_log (task_id, action, note) VALUES (2, 'Vendor audit', 'open 12.25 dee')"}}],"report":"Inserted one task Vendor audit."}

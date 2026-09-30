@@ -1,0 +1,90 @@
+[
+  {
+    "questionId": "q_name_Row",
+    "value": "Row"
+  },
+  {
+    "questionId": "q_id_Row",
+    "value": "id"
+  },
+  {
+    "questionId": "q_unit_Row_amount",
+    "value": "count"
+  },
+  {
+    "questionId": "q_role_Row_amount",
+    "value": "quantity"
+  },
+  {
+    "questionId": "q_role_Row_owner",
+    "value": "status"
+  },
+  {
+    "questionId": "q_role_Row_status",
+    "value": "status"
+  },
+  {
+    "questionId": "q_role_Row_title",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Row_title",
+    "value": "no"
+  },
+  {
+    "questionId": "q_name_Row2",
+    "value": "Row2"
+  },
+  {
+    "questionId": "q_id_Row2",
+    "value": "action"
+  },
+  {
+    "questionId": "q_unit_Row2_id",
+    "value": "count"
+  },
+  {
+    "questionId": "q_role_Row2_id",
+    "value": "identifier"
+  },
+  {
+    "questionId": "q_role_Row2_note",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Row2_note",
+    "value": "no"
+  },
+  {
+    "questionId": "q_unit_Row2_task_id",
+    "value": "count"
+  },
+  {
+    "questionId": "q_role_Row2_task_id",
+    "value": "identifier"
+  },
+  {
+    "questionId": "q_name_Table",
+    "value": "Table"
+  },
+  {
+    "questionId": "q_id_Table",
+    "value": "name"
+  },
+  {
+    "questionId": "q_role_Table_sql",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Table_sql",
+    "value": "no"
+  },
+  {
+    "questionId": "q_rel_Row2_id",
+    "value": "optional"
+  },
+  {
+    "questionId": "q_rel_Row2_task_id",
+    "value": "optional"
+  }
+]

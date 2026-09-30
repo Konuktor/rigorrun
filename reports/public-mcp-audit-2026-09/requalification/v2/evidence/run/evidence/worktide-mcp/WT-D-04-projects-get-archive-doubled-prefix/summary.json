@@ -1,0 +1,131 @@
+{
+  "id": "WT-D-04-projects-get-archive-doubled-prefix",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.44,
+      "result": {
+        "calls": [
+          {
+            "tool": "projects.get",
+            "args": {
+              "project": "AUD"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "projects.archive",
+            "args": {
+              "project": "AUD"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.46,
+      "result": {
+        "calls": [
+          {
+            "tool": "projects.get",
+            "args": {
+              "project": "AUD"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "projects.archive",
+            "args": {
+              "project": "AUD"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.47,
+      "result": {
+        "calls": [
+          {
+            "tool": "projects.get",
+            "args": {
+              "project": "AUD"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "projects.archive",
+            "args": {
+              "project": "AUD"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"PATCH http://127.0.0.1:18081/v1/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

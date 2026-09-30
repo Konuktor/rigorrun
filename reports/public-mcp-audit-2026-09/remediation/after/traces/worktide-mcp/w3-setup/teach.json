@@ -1,0 +1,58 @@
+[
+  {
+    "step": {
+      "tool": "tasks.search",
+      "args": {
+        "projectKey": "AUD",
+        "limit": 50
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"tasks\": [\n    {\n      \"id\": \"01a09c48-96db-7179-93b5-9de4616ac34e\",\n      \"identifier\": \"AUD-2\",\n      \"title\": \"Collect the evidence\",\n      \"priority\": \"normal\",\n      \"status\": \"/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36\",\n      \"project\": \"/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\",\n      \"assignees\": [],\n      \"tags\": [],\n      \"createdAt\": \"2026-09-13T21:39:58+02:00\",\n      \"updatedAt\": \"2026-09-13T21:39:58+02:00\"\n    },\n    {\n      \"id\": \"01a09c48-97a6-7202-b2de-e76be5553721\",\n      \"identifier\": \"AUD-3\",\n      \"title\": \"Publish the report\",\n      \"priority\": \"normal\",\n      \"status\": \"/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36\",\n      \"project\": \"/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\",\n      \"assignees\": [],\n      \"tags\": [],\n      \"createdAt\": \"2026-09-13T21:39:58+02:00\",\n      \"updatedAt\": \"2026-09-13T21:39:58+02:00\"\n    },\n    {\n      \"id\": \"01a09c48-960d-7a2b-9cb4-63b84ba76c74\",\n      \"identifier\": \"AUD-1\",\n      \"title\": \"Write the audit plan\",\n      \"priority\": \"normal\",\n      \"status\": \"/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36\",\n      \"project\": \"/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf\",\n      \"assignees\": [],\n      \"tags\": [],\n      \"createdAt\": \"2026-09-13T21:39:57+02:00\",\n      \"updatedAt\": \"2026-09-13T21:39:57+02:00\"\n    }\n  ],\n  \"total\": 3\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "tool": "time.start",
+      "args": {
+        "taskIri": "/v1/tasks/01a09c48-96db-7179-93b5-9de4616ac34e",
+        "description": "Evidence work"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a09f3e-073a-7ef9-84a5-3889543a2f22\",\n  \"startedAt\": \"2026-09-14T11:27:17+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Evidence work\",\n  \"isBillable\": true\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "sleepSeconds": 61
+    }
+  },
+  {
+    "step": {
+      "tool": "time.stop",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"timeEntryId\": \"01a09f3e-f8f6-74d3-ac32-342820fbce22\",\n  \"durationMinutes\": 1\n}"
+        }
+      ]
+    }
+  }
+]

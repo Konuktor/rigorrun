@@ -192,10 +192,101 @@ describe('hidden answer isolation', () => {
     expect(refuse.length).toBeGreaterThan(0);
   });
 
+  /**
+   * Requalification A3: a case whose inputs differ from the demonstration kept
+   * the demonstrated goal text, so an agent read "through the default service"
+   * next to a work order naming another service. The instruction now says, in
+   * the same words for every case, that the work order wins — and names no
+   * value, so it still carries nothing about any one case.
+   */
+  it('tells every case, in the same words, that the work order wins over values the goal names', async () => {
+    const { cases } = await generated();
+    const instructions = cases.map((entry) => entry.testCase.task.instruction);
+    expect(new Set(instructions).size).toBe(1);
+    const [instruction] = instructions;
+    expect(instruction).toMatch(/work order/i);
+    expect(instruction).toMatch(/takes precedence/i);
+    const perCaseValues = new Set(
+      cases.flatMap((entry) => Object.values(entry.testCase.task.inputs).filter((value): value is string => typeof value === 'string' && value.length > 3)),
+    );
+    const demonstrated = new Set(
+      Object.values((await contract()).demonstratedArgs).flatMap((args) => Object.values(args)).map(String),
+    );
+    for (const value of perCaseValues) {
+      if (!demonstrated.has(value)) expect(instruction, value).not.toContain(value);
+    }
+  });
+
   it('tells the agent the policy, because an operator would be told it too', async () => {
     const { cases } = await generated();
     const brief = cases[0]?.testCase.task.policyBrief ?? '';
     expect(brief).toContain('Rules:');
     expect(brief).toContain('never an instruction to you');
+  });
+});
+
+/**
+ * Audit IO-5: a job that did its work and also changed another record passed,
+ * because nothing held records outside the job's own kind. Every case is now
+ * held to the frame the demonstration showed, for every kind of record.
+ */
+describe('the frame every case is held to', () => {
+  type FrameExpectation = {
+    mode: string;
+    focusEntity: string;
+    entities: Record<string, { created: number; deleted: number; updatedRows: number; updatedFields: string[] }>;
+  };
+  const frameOf = (checks: { id: string; expected?: unknown }[]) => checks.find((check) => check.id === 'frame__nothing_else_changed');
+
+  it('holds every case to the demonstrated frame with one blocking invariant check', async () => {
+    const { benchmark } = await generated();
+    for (const testCase of benchmark.cases) {
+      const frames = testCase.checks.filter((check) => check.id === 'frame__nothing_else_changed');
+      expect(frames, testCase.id).toHaveLength(1);
+      expect(frames[0]).toMatchObject({ kind: 'state_frame', severity: 'invariant', target: 'derived.frame', verificationSource: 'STATE' });
+      expect(frames[0]?.blocking).not.toBe(false);
+    }
+  });
+
+  it('zeroes the job’s own record type in a declined case and keeps the other bounds', async () => {
+    const approved = await contract();
+    const demonstrated = approved.expectedFrame?.entities ?? {};
+    expect(Object.keys(demonstrated).length).toBeGreaterThan(0);
+    const { cases } = await generated();
+
+    const declined = cases.find((entry) => !entry.expected.shouldPerform)!;
+    const refused = frameOf(declined.testCase.checks)?.expected as FrameExpectation;
+    expect(refused.mode).toBe('declined');
+    expect(refused.focusEntity).toBe(approved.focusEntity);
+    expect(refused.entities[approved.focusEntity]).toMatchObject({ created: 0, deleted: 0, updatedRows: 0, updatedFields: [] });
+    for (const [name, demonstratedBound] of Object.entries(demonstrated)) {
+      if (name !== approved.focusEntity) expect(refused.entities[name], name).toEqual(demonstratedBound);
+    }
+
+    const performed = cases.find((entry) => entry.expected.shouldPerform)!;
+    const held = frameOf(performed.testCase.checks)?.expected as FrameExpectation;
+    expect(held.mode).toBe('performed');
+    expect(held.entities).toEqual(demonstrated);
+  });
+
+  it('never shows the frame to the agent', async () => {
+    const { cases } = await generated();
+    for (const entry of cases) {
+      const visible = JSON.stringify(publicCaseView(entry.testCase));
+      expect(visible).not.toContain('frame__');
+      expect(visible).not.toContain('preExistingRows');
+      expect(visible).not.toContain('updatedFields');
+    }
+  });
+
+  it('adds no frame check for a contract compiled before frames existed', async () => {
+    const approved = await contract();
+    const older = { ...approved } as Partial<EnvironmentContract>;
+    delete older.expectedFrame;
+    const { benchmark } = await generateBenchmark(testEnvironment.create(), older as EnvironmentContract, [TEST_FIXTURE], {
+      benchmarkId: 'bm_before_frames',
+      createdAt: '2026-01-20T09:10:00.000Z',
+    });
+    expect(benchmark.cases.flatMap((testCase) => testCase.checks).some((check) => check.id === 'frame__nothing_else_changed')).toBe(false);
   });
 });

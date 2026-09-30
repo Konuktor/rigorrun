@@ -1,0 +1,16 @@
+side=before ref=07dda8c738d6daada161ffcf2bfc046b3c874ac5
+07dda8c738d6daada161ffcf2bfc046b3c874ac5
+
+ RUN  v4.1.11 {SCRATCH}/rr-before
+
+ ✓ packages/runner/test/zz_repro.test.ts (4 tests) 58ms
+ ✓ packages/cli/test/zz_repro.test.ts (3 tests) 7ms
+ ✓ packages/daemon/test/zz_repro.test.ts (3 tests) 720ms
+     ✓ DEFECT: the read probe is silent, then compile refuses after the job was demonstrated  362ms
+     ✓ DEFECT: a trailing no-op call supplies the primary action or its arguments, and the goal is a tool description  325ms
+
+ Test Files  3 passed (3)
+      Tests  10 passed (10)
+   Start at  14:15:01
+   Duration  1.33s (transform 855ms, setup 0ms, import 1.61s, tests 785ms, environment 0ms)
+

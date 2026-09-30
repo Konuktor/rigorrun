@@ -1,0 +1,23 @@
+{
+  "name": "v2-one-minute",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    },
+    {
+      "sleep": 61
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ],
+  "report": "Started the timer, let it run a minute, stopped it: one time entry."
+}

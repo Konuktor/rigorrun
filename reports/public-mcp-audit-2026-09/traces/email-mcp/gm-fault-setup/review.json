@@ -1,0 +1,13 @@
+{
+  "confirmedRuleIds": [],
+  "rejectedRuleIds": [
+    "rule_side_effect__Record1__Email"
+  ],
+  "rules": [
+    {
+      "id": "rule_side_effect__Record1__Email",
+      "status": "rejected",
+      "statement": "every email must be recorded in a record1"
+    }
+  ]
+}

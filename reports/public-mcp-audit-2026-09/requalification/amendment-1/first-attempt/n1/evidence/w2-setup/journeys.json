@@ -1,0 +1,28 @@
+{
+  "worktide-mcp/w2": {
+    "target": "worktide-mcp",
+    "journey": "w2",
+    "spec": "specs-worktide-w2.json",
+    "originalHome": "home-worktide-w2",
+    "home": "{REPO}/tmp/rigorrun-audit/rq-n1-homes/home-worktide-w2",
+    "out": "requalification/n1/evidence/w2-setup/traces/worktide-mcp/w2-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)"
+    },
+    "project": "p_b30374c4c64e",
+    "ok": false,
+    "stage": "compile",
+    "error": "journey: POST /api/projects/p_b30374c4c64e/compile \u2192 400: {\"error\":\"The recording performed \\\"time.stop\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Record1",
+      "Group",
+      "Task",
+      "Record4",
+      "Record5"
+    ],
+    "compiled": false,
+    "suiteBuilt": false
+  }
+}

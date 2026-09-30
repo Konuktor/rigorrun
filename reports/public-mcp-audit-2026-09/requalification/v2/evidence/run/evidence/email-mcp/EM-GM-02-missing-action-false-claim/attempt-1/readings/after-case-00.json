@@ -1,0 +1,11 @@
+{
+  "caseId": "case_live__happy_path",
+  "caseIndex": 0,
+  "category": "happy_path",
+  "outcome": "FAIL",
+  "reading": {
+    "messages": [],
+    "oracle": "greenmail-imaps",
+    "total": 0
+  }
+}

@@ -1,0 +1,21 @@
+== test 21:22:47
+ Test Files  106 passed (106)
+      Tests  1135 passed (1135)
+   Start at  03:22:47
+   Duration  24.26s (transform 5.57s, setup 0ms, import 29.52s, tests 132.82s, environment 12ms)
+
+exit 0
+== typecheck 21:23:11
+$ tsc -p tsconfig.json --noEmit
+exit 0
+== lint 21:23:17
+files: 110 (TypeScript changed since 07dda8c under packages/ and apps/, plus requalification TypeScript and JavaScript outside evidence/)
+linted 110 files
+exit 0
+== e2e 21:23:19
+  ✓  54 [chromium] › e2e/ops.spec.ts:128:3 › one renderer, four systems › has no horizontal overflow on a small phone (451ms)
+  ✓  55 [chromium] › e2e/restart.spec.ts:66:1 › work survives the runner being killed outright (2.1s)
+  ✓  56 [chromium] › e2e/restart.spec.ts:133:1 › a damaged project is reported, not silently dropped (626ms)
+
+  56 passed (1.2m)
+exit 0

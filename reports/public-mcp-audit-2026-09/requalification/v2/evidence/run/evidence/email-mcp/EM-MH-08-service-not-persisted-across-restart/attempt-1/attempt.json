@@ -1,0 +1,30 @@
+{
+  "case": {
+    "id": "EM-MH-08-service-not-persisted-across-restart",
+    "target": "email-mcp",
+    "mode": "shell",
+    "class": "RESTART / PERSISTENCE",
+    "truth": "EXPECTED_PASS",
+    "oracle": "the second process's own list_services (state under test is the server's config, not MailHog)",
+    "intent": "configure_service('audit-local', type local) then restart the server: the docs say runtime configuration is lost on restart unless mirrored into the environment; this case records that behaviour",
+    "initialState": "fresh server process with the documented MAILHOG_* environment",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "command": "python3 {REPO}/reports/public-mcp-audit-2026-09/scripts/mcp-call.py --calls '[{\"tool\":\"configure_service\",\"args\":{\"name\":\"audit-local\",\"type\":\"local\",\"config\":{\"smtp_server\":\"127.0.0.1\",\"smtp_port\":1025,\"http_url\":\"http://127.0.0.1:8025\",\"service_type\":\"mailhog\"}}},{\"tool\":\"list_services\",\"args\":{}}]' -- uv --directory {REPO}/tmp/rigorrun-audit/email-mcp run email-mcp > /tmp/rr-em-restart-1.json; python3 {REPO}/reports/public-mcp-audit-2026-09/scripts/mcp-call.py --calls '[{\"tool\":\"list_services\",\"args\":{}}]' -- uv --directory {REPO}/tmp/rigorrun-audit/email-mcp run email-mcp > /tmp/rr-em-restart-2.json; python3 -c \"import json; a=json.load(open('/tmp/rr-em-restart-1.json')); b=json.load(open('/tmp/rr-em-restart-2.json')); s1=a['calls'][1]['result']['structuredContent']['services']; s2=b['calls'][0]['result']['structuredContent']['services']; print(json.dumps({'before_restart': sorted(s1), 'after_restart': sorted(s2)}))\"",
+    "expect": "'audit-local' in result['stdout'] and result['stdout'].count('audit-local')==1",
+    "notes": "expect encodes the documented behaviour (present before restart, gone after). PASS = matches the documentation; this is recorded as INFO, not a bug."
+  },
+  "attempt": 1,
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "seconds": 2.32,
+  "result": {
+    "exit": 0,
+    "stdout": "{\"before_restart\": [\"audit-local\", \"mailhog\"], \"after_restart\": [\"mailhog\"]}\n"
+  },
+  "oracleVerdict": "PASS",
+  "scored": false
+}

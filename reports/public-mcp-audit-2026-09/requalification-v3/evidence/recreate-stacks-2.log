@@ -1,0 +1,26 @@
+== pinned checkouts (from baseline-manifest.json)
+  email-mcp     fef2a06e9313aa69e7fd1572e18c53ccfc082bcc OK (tracked files modified)
+  worktide-mcp  4dbd0851b8c16b7acf32e1ea45a1234c425cd19e OK
+  worktide      07393173732835c12c4cf763d73860fd82068ae0 OK
+  sqlite-mcp    ff19c64e40b68df83b07e22c2faf73094ab04aeb OK
+== teardown
+mail containers removed
+worktide stack removed
+starttls relay stopped
+teardown done
+  nothing of the audit is running
+== recreate: worktide (compose, then restore the seeded snapshot)
+  rr-audit-worktide-database-1: healthy
+  rr-audit-worktide-app-1: healthy
+reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)
+== recreate: mail sinks
+reset-email-mcp: MailHog up on http://127.0.0.1:8025, inbox empty
+reset-greenmail: GreenMail purged, relay on 127.0.0.1:3125
+== recreate: sqlite
+reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks
+== oracles read the starting state
+  sqlite: tasks 3 audit_log 1
+  mailhog: total 0
+  greenmail: total 0
+  worktide: tasks 3 running timers 0 time entries 10 projects ['AUD', 'KA', 'PORT', 'WIKI', 'WORK']
+recreate done

@@ -1,0 +1,7 @@
+{
+  "name": "io-claim-only",
+  "steps": [
+    { "tool": "list_tasks", "args": {} }
+  ],
+  "report": "Created one task titled Quarterly report."
+}

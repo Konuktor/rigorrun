@@ -1,0 +1,19 @@
+{
+  "name": "wt-w2-wrong-value",
+  "steps": [
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "Lunch break"
+      }
+    },
+    {
+      "sleep": 61
+    },
+    {
+      "tool": "time.stop",
+      "args": {}
+    }
+  ],
+  "report": "Started the timer 'Audit timer', waited a minute, stopped it."
+}

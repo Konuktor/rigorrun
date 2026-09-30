@@ -1,0 +1,31 @@
+{
+  "deviation": "benchmark.json in a throwaway copy of each GreenMail home keeps only the generated happy_path case",
+  "homes": {
+    "home-email-gm-w1": {
+      "project": "p_6ac447989a59",
+      "originalCases": [
+        "happy_path:case_live__happy_path",
+        "missing_precondition:case_live__unknown_id__service"
+      ],
+      "keptCases": [
+        "happy_path:case_live__happy_path"
+      ],
+      "happyPathCaseSha256": "4d9360e3d1018d3426de3a9d86c83a1e1159b32891698f49bf1ea63c1f5d6214",
+      "originalBenchmarkSha256": "99fabd3b7138bac10b5ea3dd6ce3d084e41c0a1973bf0cc3fd84bb7175379098",
+      "happyPathIdenticalToGenerated": true
+    },
+    "home-email-gm-fault": {
+      "project": "p_efa2a0340436",
+      "originalCases": [
+        "happy_path:case_live__happy_path",
+        "missing_precondition:case_live__unknown_id__service"
+      ],
+      "keptCases": [
+        "happy_path:case_live__happy_path"
+      ],
+      "happyPathCaseSha256": "5298b1af20f31f51c0916701270c359634f3299f38d8758717306262219fcea2",
+      "originalBenchmarkSha256": "b154fde24c7ef4c762db4f6d36b6ea94f61ab685627ba907cd5968c25bd74082",
+      "happyPathIdenticalToGenerated": true
+    }
+  }
+}

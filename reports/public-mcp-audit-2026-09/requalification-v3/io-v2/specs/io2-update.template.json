@@ -1,0 +1,38 @@
+{
+  "name": "taskdesk2: complete one task, verified independently over tasks and notes",
+  "goal": "Mark task 2, Book venue, as done; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "{PYTHON}",
+    "args": ["{IO}/taskdesk2_server.py", "--db", "{STATE}/desk.db", "--faults", "{STATE}/faults.json", "--shadow", "{STATE}/shadow.json", "--calls-log", "{STATE}/calls.log"],
+    "url": "",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "{PYTHON}",
+      "args": ["{IO}/taskdesk2_oracle_server.py", "--db", "{STATE}/desk.db", "--down-flag", "{STATE}/oracle-down.flag", "--empty-flag", "{STATE}/oracle-empty.flag", "--calls-log", "{STATE}/calls.log"],
+      "url": "",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": ["list_tasks", "list_notes", "verifier:query_tasks", "verifier:query_notes"],
+  "verifierReads": [
+    { "tool": "verifier:query_tasks", "args": {} },
+    { "tool": "verifier:query_notes", "args": {} }
+  ],
+  "reset": { "kind": "none" },
+  "teach": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "update_task", "args": { "id": 2, "status": "done" } }
+  ],
+  "answers": {},
+  "review": { "confirm": [], "reject": [] },
+  "quality": false,
+  "agents": [
+    { "name": "io2-update-correct", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io2-update-correct.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io2-update-extra-note-create", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io2-update-extra-note-create.json", "{TRACES}"], "cwd": "{STATE}" }
+  ]
+}

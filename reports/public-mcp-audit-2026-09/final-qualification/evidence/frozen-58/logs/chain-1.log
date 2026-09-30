@@ -1,0 +1,38 @@
+== batch sq-rr 17:34:19
+SQ-W1B-06-forbidden-extra-delete attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (0.62s)
+SQ-W1B-06-forbidden-extra-delete attempt 2: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (0.61s)
+SQ-W1B-06-forbidden-extra-delete attempt 3: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (0.63s)
+exit 0
+== batch sq-d 17:34:44
+SQ-D-10-backup-under-column-deny attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.04s)
+SQ-D-10-backup-under-column-deny attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.03s)
+SQ-D-10-backup-under-column-deny attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.03s)
+exit 0
+== batch wt 17:35:04
+WT-D-13-nonexistent-task attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.29s)
+WT-D-13-nonexistent-task attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.27s)
+WT-D-13-nonexistent-task attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (0.29s)
+exit 0
+== batch mh 17:45:44
+EM-MH-08-service-not-persisted-across-restart attempt 1: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (2.82s)
+EM-MH-08-service-not-persisted-across-restart attempt 2: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (2.87s)
+EM-MH-08-service-not-persisted-across-restart attempt 3: oracle=PASS rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (2.92s)
+exit 0
+== batch gm-direct 17:46:27
+EM-GM-07-retry-direct attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.52s)
+EM-GM-07-retry-direct attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.53s)
+EM-GM-07-retry-direct attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.51s)
+exit 0
+== SQ-LLM-02 17:46:51
+product under test verified: product sources equal a9edbec; frozen inputs unchanged
+2026-09-14T17:46:58Z SQ-LLM-02-qwen2.5-3b: qwen2.5:3b preloaded in 3.49 s; available 7254 MiB before preload, 7424 MiB after
+SQ-LLM-02-qwen2.5-3b attempt 1: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (20.46s)
+SQ-LLM-02-qwen2.5-3b attempt 2: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (15.17s)
+SQ-LLM-02-qwen2.5-3b attempt 3: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (15.16s)
+exit 0
+== SQ-LLM-01 17:47:52
+product under test verified: product sources equal a9edbec; frozen inputs unchanged
+2026-09-14T17:48:04Z SQ-LLM-01-llama3.1-8b: llama3.1:8b preloaded in 9.44 s; available 7345 MiB before preload, 12039 MiB after
+SQ-LLM-01-llama3.1-8b attempt 1: oracle=PASS rigorrun=FAIL outcome=TIMED_OUT class=FALSE_POSITIVE / TIMED_OUT (69.03s)
+exit 0
+== chain done 17:49:16

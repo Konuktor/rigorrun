@@ -1,0 +1,72 @@
+{
+  "case": {
+    "id": "WT-D-09-timer-start-stop",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "BASELINE (timer)",
+    "truth": "EXPECTED_PASS",
+    "intent": "time.start then time.stop must leave no running timer and exactly one new time entry",
+    "calls": [
+      {
+        "tool": "time.start",
+        "args": {
+          "description": "audit timer"
+        }
+      },
+      {
+        "tool": "time.stop",
+        "args": {}
+      }
+    ],
+    "expect": "calls[1]['result'].get('isError') is not True and after['db_active_timer_count']==0 and after['db_time_entry_count']==before['db_time_entry_count']+1"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "time.start",
+        "args": {
+          "description": "audit timer"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a09f4e-6b5d-7d61-b6c6-0a798ffea064\",\n  \"startedAt\": \"2026-09-14T11:45:11+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"audit timer\",\n  \"isBillable\": true\n}"
+            }
+          ]
+        }
+      },
+      {
+        "tool": "time.stop",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"timeEntryId\": \"01a09f4e-6b96-7280-90dd-6dbf0dc1e4fe\",\n  \"durationMinutes\": 0\n}"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "seconds": 0.31,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

@@ -1,0 +1,77 @@
+{
+  "case": {
+    "id": "SQ-D-02-backup-under-deny-everything",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+    "truth": "EXPECTED_PASS",
+    "intent": "deny-everything preset should not let a caller copy the database to a path of its choosing",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "deny-everything"
+    ],
+    "calls": [
+      {
+        "tool": "backup",
+        "args": {
+          "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+        }
+      },
+      {
+        "tool": "vacuum",
+        "args": {}
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError')==True",
+    "notes": "expect encodes the documented contract (deny everything). PASS means the tool refused; FAIL means the backup was written despite the preset."
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "backup",
+        "args": {
+          "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"destination\":\"{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db\",\"pages_copied\":3}"
+            }
+          ],
+          "structuredContent": {
+            "destination": "{REPO}/tmp/rigorrun-audit/sqlite-mcp/exfil.db",
+            "pages_copied": 3
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "vacuum",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "failed to vacuum database: authorization denied"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 0.04,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

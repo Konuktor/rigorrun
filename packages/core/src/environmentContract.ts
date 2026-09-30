@@ -18,8 +18,9 @@
  */
 import { z } from 'zod';
 import { ENVIRONMENT_CONTRACT_SCHEMA_VERSION } from './versions.ts';
+import { DemonstratedFrameSchema } from './frame.ts';
 import { AssertionSchema } from './assertion.ts';
-import { RulePredicateSchema } from './predicate.ts';
+import { LiteralSchema, RulePredicateSchema } from './predicate.ts';
 
 export { ENVIRONMENT_CONTRACT_SCHEMA_VERSION } from './versions.ts';
 
@@ -132,6 +133,62 @@ export const ObservedFactSchema = z.object({
 });
 export type ObservedFact = z.infer<typeof ObservedFactSchema>;
 
+/**
+ * How a field of the record the job is about relates to one of the job's
+ * arguments, as seen in the demonstration.
+ *
+ * Observed, never named: the compiler finds that the value typed as `subject`
+ * appeared inside the record's `subject` field, or that the record's `title`
+ * appeared inside the SQL the operator typed. That is what lets a case say
+ * "the record carries the values that were asked for" without RigorRun ever
+ * knowing what a subject or a title is.
+ */
+export const ArgumentBindingSchema = z.object({
+  /** Field of the focus entity. Never its identifier. */
+  field: z.string().min(1),
+  /** Parameter of the primary action. */
+  param: z.string().min(1),
+  mode: z.enum([
+    /** The field held exactly the argument's value. */
+    'equals',
+    /** The field's text contained the argument's text (a wrapper, a prefix). */
+    'field_contains_param',
+    /** The argument's text contained the field's value (values inside a query). */
+    'param_contains_field',
+  ]),
+  /** The field's value in the demonstration. */
+  demonstrated: z.unknown(),
+});
+export type ArgumentBinding = z.infer<typeof ArgumentBindingSchema>;
+
+/**
+ * A change the demonstration made to one record the job is about, which a case
+ * must reproduce.
+ *
+ * Observed, never named: the compiler reads it off the delta between the
+ * recording's readings. `record` holds the values that name the record (empty
+ * for the record the job created). `compare` says how a case that starts from a
+ * different value is reasoned about: arithmetic for a quantity, the value itself
+ * for a closed set, nothing predictable for free text. `unattributable` records
+ * that nothing observed names one record, so a change cannot be told from a
+ * replacement and the case must abstain rather than count.
+ */
+export const ExpectedChangeSchema = z.object({
+  record: z.record(z.string(), LiteralSchema).default({}),
+  /** The changed field; empty for `unattributable`. */
+  field: z.string(),
+  /** The value before the job; absent when the job created the record. */
+  from: LiteralSchema.optional(),
+  to: LiteralSchema.optional(),
+  /**
+   * `populated`: the job left the field set, and which value is not the
+   * system's to decide — it was typed into a preparatory call, an approver's
+   * name given when asking for a sign-off. Held to "set", never to the value.
+   */
+  compare: z.enum(['quantity', 'closed', 'open', 'unattributable', 'populated']),
+});
+export type ExpectedChange = z.infer<typeof ExpectedChangeSchema>;
+
 export const EnvironmentContractSchema = z.object({
   schemaVersion: z.literal(ENVIRONMENT_CONTRACT_SCHEMA_VERSION),
   id: z.string().min(1),
@@ -173,6 +230,46 @@ export const EnvironmentContractSchema = z.object({
    */
   projectionFocus: z.array(z.string()).default([]),
   observedFacts: z.array(ObservedFactSchema).default([]),
+  /** Which record fields carry which arguments, observed from the demonstration. */
+  argumentBindings: z.array(ArgumentBindingSchema).default([]),
+  /**
+   * How many focus records the demonstration created (or changed). The job as
+   * demonstrated produces exactly this many; an agent that produces more has
+   * done something the job is not — a duplicate — and one that produces fewer
+   * has not done it.
+   */
+  expectedDeltaCount: z.number().int().nonnegative().optional(),
+  /**
+   * How many focus records the demonstration deleted, usually none. The
+   * expected final state is the starting world plus the demonstrated delta, so
+   * a record of this kind the demonstration left in place must still be there:
+   * an agent that deletes one has done something the job does not.
+   */
+  expectedDeletedCount: z.number().int().nonnegative().optional(),
+  /**
+   * How many focus records a job that changes records also created — none,
+   * since a job that creates one is a job that creates. Held exactly like
+   * deletions: a record of this kind that appears, such as a report gaining a
+   * group it never had, is a side effect the demonstration did not have. Set
+   * only for jobs that change records; a job that creates is already held to
+   * how many it creates.
+   */
+  expectedCreatedCount: z.number().int().nonnegative().optional(),
+  /**
+   * How the records the job is about must change, as the demonstration changed
+   * them. A count cannot see a duplicate that lands on the same record: one
+   * time entry and two both change one row of a report, and only the amount
+   * tells them apart.
+   */
+  expectedChanges: z.array(ExpectedChangeSchema).optional(),
+  /**
+   * What the demonstration did to every kind of record, touched or not — the
+   * `expected*` fields above describe only the record the job is about
+   * (requalification P9). An upper bound per kind: an agent that creates, deletes or changes
+   * more than this has done something the job does not. Absent on contracts
+   * compiled before it existed, whose cases carry no frame check.
+   */
+  expectedFrame: DemonstratedFrameSchema.optional(),
   rules: z.array(ContractRuleSchema).default([]),
   successAssertions: z.array(AssertionSchema).default([]),
   policyAssertions: z.array(AssertionSchema).default([]),

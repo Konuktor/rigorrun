@@ -1,0 +1,474 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_c18ddf514a9b",
+  "benchmarkId": "bm_ec_p_314180f87e86",
+  "benchmarkName": "Start a timer described 'Desk review', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running. \u2014 private benchmark",
+  "benchmarkHash": "sha256:4d1ce54f0f4adbd9ff46ec5b32fdfb65fb5aee2a3e1f2364f385f4f8e84640d4",
+  "contractHash": "sha256:0bf4f1fc5345cc83d71b9d1a8f4df677391404f9a4250405b4283406b38742fc",
+  "environment": "p_314180f87e86",
+  "startedAt": "2026-09-30T19:33:33.620Z",
+  "finishedAt": "2026-09-30T19:35:39.677Z",
+  "agents": [
+    {
+      "id": "a_7a79d6a1",
+      "name": "v2-one-long-timer",
+      "kind": "process"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_c18ddf514a9b",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_7a79d6a1",
+      "correlationId": "run_c18ddf514a9b.a_7a79d6a1.case_live__happy_path",
+      "startedAt": "2026-09-30T19:33:33.620Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "SELF_REPORTED",
+      "budgetMs": 240000,
+      "finishedAt": "2026-09-30T19:35:39.233Z",
+      "durationMs": 125612.377,
+      "steps": [
+        {
+          "index": 0,
+          "at": 1790796814153,
+          "tool": "time.start",
+          "args": {
+            "description": "Desk review"
+          },
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f3ce-d733-7829-a48a-61f8a998410f\",\n  \"startedAt\": \"2026-09-30T21:33:34+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Desk review\",\n  \"isBillable\": true\n}"
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "at": 1790796939231,
+          "tool": "time.stop",
+          "args": {},
+          "ok": true,
+          "result": [
+            {
+              "type": "text",
+              "text": "{\n  \"timeEntryId\": \"01a0f3d0-bfbd-7f45-8e0a-c6a66bd195dc\",\n  \"durationMinutes\": 2\n}"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": "time.start",
+          "at": 1,
+          "payload": {
+            "description": "Desk review"
+          },
+          "ok": true
+        },
+        {
+          "type": "time.stop",
+          "at": 2,
+          "payload": {},
+          "ok": true
+        }
+      ],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [
+            {
+              "billableMinutes": 227,
+              "billedMinutes": 0,
+              "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+              "label": "Sven Wappler",
+              "minutes": 227,
+              "seed__billableMinutes": 225,
+              "seed__billedMinutes": 0,
+              "seed__key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+              "seed__minutes": 225,
+              "cmp__billableMinutes__minus__billedMinutes": 227,
+              "cmp__billableMinutes__minus__minutes": 0,
+              "cmp__billedMinutes__minus__minutes": -227
+            }
+          ],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Group is present"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Group record(s) changed, as demonstrated \u2014 no more",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 1,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.changed.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Group record deleted \u2014 the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__nothing_else_created",
+          "kind": "state_equals",
+          "description": "no Group record created \u2014 the demonstration created none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.created.Group.length equals the expected value"
+        },
+        {
+          "assertionId": "success__as_demonstrated__1",
+          "kind": "state_change",
+          "description": "the Group the job changed goes billableMinutes 225 \u2192 226 (+1), as demonstrated",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 227,
+          "expected": {
+            "seed": "derived.seed.Group[key=01a09c3a-5be3-7cb2-89d8-597c14e4799d]",
+            "field": "billableMinutes",
+            "from": 225,
+            "to": 226,
+            "compare": "quantity"
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "expected billableMinutes 225 \u2192 226 (+1); observed billableMinutes 225 \u2192 227 (+2)"
+        },
+        {
+          "assertionId": "success__as_demonstrated__2",
+          "kind": "state_change",
+          "description": "the Group the job changed goes minutes 225 \u2192 226 (+1), as demonstrated",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 227,
+          "expected": {
+            "seed": "derived.seed.Group[key=01a09c3a-5be3-7cb2-89d8-597c14e4799d]",
+            "field": "minutes",
+            "from": 225,
+            "to": 226,
+            "compare": "quantity"
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "expected minutes 225 \u2192 226 (+1); observed minutes 225 \u2192 227 (+2)"
+        },
+        {
+          "assertionId": "frame__nothing_else_changed",
+          "kind": "state_frame",
+          "description": "nothing changed beyond what the demonstration changed, for any kind of record",
+          "status": "PASS",
+          "severity": "invariant",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": {
+            "violations": [],
+            "unverifiable": [],
+            "excludedVolatile": {}
+          },
+          "expected": {
+            "mode": "performed",
+            "focusEntity": "Group",
+            "entities": {
+              "Group": {
+                "preExistingRows": 2,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 1,
+                "updatedFields": [
+                  "billableMinutes",
+                  "minutes"
+                ],
+                "identity": "named"
+              },
+              "Record1": {
+                "preExistingRows": 1,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 1,
+                "updatedFields": [
+                  "billableMinutes",
+                  "totalMinutes"
+                ],
+                "identity": "named"
+              },
+              "Record4": {
+                "preExistingRows": 0,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Record5": {
+                "preExistingRows": 0,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Task": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              }
+            }
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "nothing changed beyond what the demonstration changed"
+        }
+      ],
+      "taskSuccess": false,
+      "policyCompliant": true,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "FAIL",
+      "outcomeReason": "the Group the job changed goes billableMinutes 225 \u2192 226 (+1), as demonstrated \u2014 expected billableMinutes 225 \u2192 226 (+1); observed billableMinutes 225 \u2192 227 (+2); the Group the job changed goes minutes 225 \u2192 226 (+1), as demonstrated \u2014 expected minutes 225 \u2192 226 (+1); observed minutes 225 \u2192 227 (+2)",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "readStability": {
+        "baseline": "double_read",
+        "final": "double_read",
+        "volatileFields": {},
+        "membershipUnstable": []
+      },
+      "initialStateHash": "sha256:872025f4ce480da2bceec405b233ff9894657bb5e5fe729f78e13c63b34ac343",
+      "costUsd": null,
+      "costNote": "cost unavailable",
+      "agentReport": "Started the timer, let it run, stopped it: one time entry.",
+      "finalStateHash": "sha256:912f828eb7528f8338a71b523692a301a9d1e754a71707f04635542f2d921204",
+      "finalStateSummary": {
+        "Group": {
+          "count": 2,
+          "rows": [
+            {
+              "key": "01a09c3a-5d41-74fc-b582-5d0aa0c5ce59",
+              "label": "Alex Becker",
+              "minutes": 720,
+              "billableMinutes": 720,
+              "billedMinutes": 0
+            },
+            {
+              "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d",
+              "label": "Sven Wappler",
+              "minutes": 227,
+              "billableMinutes": 227,
+              "billedMinutes": 0
+            }
+          ]
+        },
+        "Record1": {
+          "count": 1,
+          "rows": [
+            {
+              "from": "2026-09-01T00:00:00+02:00",
+              "to": "2026-12-31T00:00:00+01:00",
+              "groupBy": "user",
+              "totalMinutes": 947,
+              "billableMinutes": 947,
+              "billedMinutes": 0
+            }
+          ]
+        },
+        "Record4": {
+          "count": 0,
+          "rows": []
+        },
+        "Record5": {
+          "count": 0,
+          "rows": []
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": "01a09c48-96db-7179-93b5-9de4616ac34e",
+              "identifier": "AUD-2",
+              "title": "Collect the evidence",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:58+02:00",
+              "updatedAt": "2026-09-13T21:39:58+02:00"
+            },
+            {
+              "id": "01a09c48-97a6-7202-b2de-e76be5553721",
+              "identifier": "AUD-3",
+              "title": "Publish the report",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:58+02:00",
+              "updatedAt": "2026-09-13T21:39:58+02:00"
+            },
+            {
+              "id": "01a09c48-960d-7a2b-9cb4-63b84ba76c74",
+              "identifier": "AUD-1",
+              "title": "Write the audit plan",
+              "priority": "normal",
+              "status": "/v1/task_statuses/01a09c3a-5feb-71bd-89ad-659daa6a1f36",
+              "project": "/v1/projects/01a09c44-41b9-744c-9038-42dcf5767fdf",
+              "createdAt": "2026-09-13T21:39:57+02:00",
+              "updatedAt": "2026-09-13T21:39:57+02:00"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_7a79d6a1",
+      "agentName": "v2-one-long-timer",
+      "n": 1,
+      "taskSuccessRate": 0,
+      "taskSuccessInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyComplianceRate": 1,
+      "policyComplianceInterval": {
+        "point": 1,
+        "lower": 0.2065,
+        "upper": 1,
+        "n": 1
+      },
+      "policyViolations": 0,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 125612.377,
+      "medianLatencyMs": 125612.377,
+      "p95LatencyMs": 125612.377,
+      "avgSteps": 2,
+      "passAtK": {
+        "pass@1": 0
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": false,
+      "failedThresholds": [
+        "task success 0.0% < required 95.0%"
+      ]
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": null,
+    "outcome": "FAIL",
+    "summary": "No agent met the release thresholds. Best of the group was v2-one-long-timer.",
+    "rationale": [
+      "v2-one-long-timer does NOT meet the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 0.0%\u201379.3%; a larger benchmark would narrow it.",
+      "Suite quality: the reference implementation fails 100% of cases, so a correct agent can be failed."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": true,
+    "mutantKillRate": 1,
+    "independentKillRate": 1,
+    "falsePositiveRate": 1,
+    "replayStable": true,
+    "hiddenAnswerIsolated": true,
+    "deadRules": 0,
+    "warnings": [
+      "the reference implementation fails 100% of cases, so a correct agent can be failed"
+    ]
+  },
+  "resultHash": "sha256:39a72098b98b373bd41b0c608b4715253f876efdb51f58c74ad341bcde1b373e",
+  "rigorrunVersion": "0.1.0"
+}

@@ -294,6 +294,8 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // ----------------------------------------------- 7. connect their own agent
   await page.getByTestId('agent-name').fill('Booking agent');
+  // A black box is the default; this stranger's agent speaks the proxied protocol.
+  await page.getByTestId('agent-kind').selectOption('http');
   await page.getByTestId('agent-endpoint').fill(`http://127.0.0.1:${AGENT_PORT}/`);
   await page.getByTestId('add-agent').click();
   await expect(page.getByText('answering')).toBeVisible();
@@ -351,6 +353,7 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   // person adding a second agent would click the same tab.
   await page.getByTestId('step-agent').click();
   await page.getByTestId('agent-name').fill('Booking agent (after a change)');
+  await page.getByTestId('agent-kind').selectOption('http');
   await page.getByTestId('agent-endpoint').fill(`http://127.0.0.1:${BROKEN_AGENT_PORT}/`);
   await page.getByTestId('add-agent').click();
   await expect(page.getByText('answering').last()).toBeVisible();

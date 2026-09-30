@@ -1,0 +1,95 @@
+{
+  "case": {
+    "id": "EM-MH-02-check-inbox-crashes",
+    "target": "email-mcp",
+    "mode": "direct",
+    "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+    "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "server": [
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "class": "SCHEMA / TOOL ERROR (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "check_inbox(service='mailhog') must list the captured message (documented in docs/local-testing.md and the tool's own docstring)",
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 via MailHog",
+          "service": "mailhog"
+        }
+      },
+      {
+        "tool": "check_inbox",
+        "args": {
+          "service": "mailhog"
+        }
+      }
+    ],
+    "expect": "calls[1]['result'].get('isError') is not True and (calls[1]['result'].get('structuredContent') or {}).get('count')==1"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "send_email",
+        "args": {
+          "to": "qa@example.test",
+          "subject": "Audit 17",
+          "body": "Audit message 17 via MailHog",
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via mailhog service\"}"
+            }
+          ],
+          "structuredContent": {
+            "success": true,
+            "status": "sent",
+            "service": "mailhog",
+            "note": "Check web UI at http://127.0.0.1:8025",
+            "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "check_inbox",
+        "args": {
+          "service": "mailhog"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Error calling tool 'check_inbox': LocalEmailService.check_inbox() takes from 1 to 4 positional arguments but 6 were given"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "seconds": 1.44,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

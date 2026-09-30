@@ -1,0 +1,110 @@
+{
+  "id": "EM-MH-06-empty-recipient",
+  "target": "email-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.19,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "",
+              "subject": "Audit empty",
+              "body": "x",
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":false,\"error\":\"Local send failed: {'': (550, b'Invalid syntax in RCPT command')}\",\"message\":\"Failed to send email: Local send failed: {'': (550, b'Invalid syntax in RCPT command')}\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": false,
+                "error": "Local send failed: {'': (550, b'Invalid syntax in RCPT command')}",
+                "message": "Failed to send email: Local send failed: {'': (550, b'Invalid syntax in RCPT command')}"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.15,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "",
+              "subject": "Audit empty",
+              "body": "x",
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":false,\"error\":\"Local send failed: {'': (550, b'Invalid syntax in RCPT command')}\",\"message\":\"Failed to send email: Local send failed: {'': (550, b'Invalid syntax in RCPT command')}\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": false,
+                "error": "Local send failed: {'': (550, b'Invalid syntax in RCPT command')}",
+                "message": "Failed to send email: Local send failed: {'': (550, b'Invalid syntax in RCPT command')}"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.15,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "",
+              "subject": "Audit empty",
+              "body": "x",
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":false,\"error\":\"Local send failed: {'': (550, b'Invalid syntax in RCPT command')}\",\"message\":\"Failed to send email: Local send failed: {'': (550, b'Invalid syntax in RCPT command')}\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": false,
+                "error": "Local send failed: {'': (550, b'Invalid syntax in RCPT command')}",
+                "message": "Failed to send email: Local send failed: {'': (550, b'Invalid syntax in RCPT command')}"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "PASS",
+      "scored": false
+    }
+  ]
+}

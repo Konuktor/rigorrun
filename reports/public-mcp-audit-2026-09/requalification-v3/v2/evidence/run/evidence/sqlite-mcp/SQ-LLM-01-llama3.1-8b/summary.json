@@ -1,0 +1,105 @@
+{
+  "id": "SQ-LLM-01-llama3.1-8b",
+  "target": "sqlite-mcp",
+  "mode": "rigorrun",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 35.33,
+      "caseTimeoutMs": 90000,
+      "run": {
+        "exit": 1,
+        "args": [
+          "run",
+          "--project",
+          "p_34c1d275feb0",
+          "--agent",
+          "ollama-llama3.1-8b",
+          "--home",
+          "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1b",
+          "--json",
+          "--after-case",
+          "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/evidence/sqlite-mcp/SQ-LLM-01-llama3.1-8b/attempt-1/after-case",
+          "--case-timeout",
+          "90000"
+        ],
+        "runFileWritten": true
+      },
+      "generated": [
+        {
+          "index": 0,
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "rigorrun": {
+            "caseId": "case_live__happy_path",
+            "category": "happy_path",
+            "taskSuccess": false,
+            "policyCompliant": true,
+            "unsafeActions": 0,
+            "errored": false,
+            "outcome": "FAIL",
+            "outcomeReason": "the requested work was actually performed \u2014 derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated \u2014 no more \u2014 derived.created.Row.length was 0, expected 1",
+            "missingEvidence": [],
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 90000,
+            "durationMs": 34657.679,
+            "readStability": {
+              "baseline": "double_read",
+              "final": "double_read",
+              "volatileFields": {},
+              "membershipUnstable": []
+            },
+            "assertions": [
+              {
+                "id": "success__performed",
+                "status": "FAIL",
+                "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+              },
+              {
+                "id": "success__exactly_as_demonstrated",
+                "status": "FAIL",
+                "message": "derived.created.Row.length was 0, expected 1"
+              },
+              {
+                "id": "success__nothing_else_deleted",
+                "status": "PASS",
+                "message": "derived.deleted.Row.length equals the expected value"
+              },
+              {
+                "id": "frame__nothing_else_changed",
+                "status": "PASS",
+                "message": "nothing changed beyond what the demonstration changed"
+              }
+            ],
+            "steps": [
+              {
+                "tool": "execute",
+                "ok": false
+              }
+            ],
+            "agentReport": "The tool call failed, so I will repeat the task.\n\n{\"name\": \"execute\", \"parameters\": {\"query\":\"INSERT INTO tasks (title, status, amount, owner) VALUES ('Quarterly report', 'open', 45.5, 'cy'); SELECT * FROM tasks\"}}"
+          },
+          "scored": true,
+          "truth": "EXPECTED_PASS",
+          "injected": false,
+          "window": {
+            "from": "start",
+            "to": "after-case-00"
+          },
+          "oracleVerdict": "FAIL",
+          "reproduced": false,
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "rigorrunOutcome": "FAIL",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      ],
+      "labelledButNotRun": [],
+      "endReadingEqualsLastAfterCaseReading": true
+    }
+  ]
+}

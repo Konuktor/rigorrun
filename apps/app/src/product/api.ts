@@ -87,6 +87,8 @@ export interface ProjectView {
     | { kind: 'process'; command: string; args: string[] }
     // An agent RigorRun cannot start. It holds a key and comes to ask for work.
     | { kind: 'external'; keyName: string }
+    // An agent RigorRun only sends work to; the system is read afterwards.
+    | { kind: 'blackbox'; endpoint: string; allowedHosts: string[] }
   ))[];
   runs: {
     runId: string;
@@ -192,7 +194,15 @@ export interface RunView {
   isolation: string;
   limits: { id: string; limit: string; remedy: string }[];
   notTestable: { rule: string; reason: string }[];
-  verdict: { winnerAgentId: string | null; summary: string; rationale: string[] };
+  /** What the suite's own quality check said; warnings are shown beside the verdict. */
+  suiteQuality: {
+    assessed: boolean;
+    mutantKillRate: number | null;
+    independentKillRate: number | null;
+    falsePositiveRate: number | null;
+    warnings: string[];
+  } | null;
+  verdict: { winnerAgentId: string | null; summary: string; rationale: string[]; outcome?: 'PASS' | 'FAIL' | 'INCONCLUSIVE' };
   scores: {
     agentId: string;
     agentName: string;
@@ -213,12 +223,19 @@ export interface CaseResultView {
   policyCompliant: boolean;
   unsafeActions: number;
   durationMs: number;
+  /** The verdict, classified: a timeout or an abstention is not a wrong answer. */
+  outcome: 'PASS' | 'FAIL' | 'ABSTAIN' | 'TIMED_OUT' | 'AGENT_FAILURE' | 'HARNESS_FAILURE';
+  outcomeReason: string;
+  missingEvidence: string[];
+  verification: string;
+  evidenceIndependence: 'INDEPENDENT' | 'SELF_REPORTED' | 'NONE';
+  baseline: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
   steps: { tool: string; args: Record<string, unknown>; ok: boolean; error: string }[];
   stepsOmitted: number;
   finalState: Record<string, unknown>;
   checks: {
     description: string;
-    status: 'PASS' | 'FAIL' | 'ERROR' | 'INAPPLICABLE';
+    status: 'PASS' | 'FAIL' | 'ERROR' | 'INAPPLICABLE' | 'UNVERIFIABLE';
     message: string;
     verificationSource: 'STATE' | 'EVENT' | 'OUTPUT' | 'HUMAN' | 'MODEL' | 'DECLARED';
     evaluator: string;
@@ -360,7 +377,7 @@ export const api = {
       { connector, safety },
     ),
   configure: (id: string, config: unknown) =>
-    post<{ project: ProjectView; readsProblem: string }>(
+    post<{ project: ProjectView; readsProblem: string; readsIgnored?: string[] }>(
       `/api/projects/${id}/environment/config`,
       config,
     ),
@@ -399,7 +416,17 @@ export const api = {
     input:
       | { name: string; endpoint: string }
       | { name: string; command: string; args: string[] }
-      | { name: string; driven: true },
+      | { name: string; driven: true }
+      | {
+          name: string;
+          blackBox: {
+            endpoint: string;
+            allowedHosts: string[];
+            headers: Record<string, string>;
+            bodyTemplate: string | null;
+            claimPath: string;
+          };
+        },
   ) =>
     // `key` comes back only for a driven agent, only on this one response.
     post<{ project: ProjectView; agent: ProjectView['agents'][number]; key?: string }>(

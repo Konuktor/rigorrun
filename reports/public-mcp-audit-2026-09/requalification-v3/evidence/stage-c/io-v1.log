@@ -1,0 +1,226 @@
+independent: exit=0 ok=True project=p_ba0b198da4b8 shape=['happy_path'] records=['Task'] agents=[('io-correct', True), ('io-claim-only', True), ('io-duplicate', True), ('io-extra-update', True), ('io-correct-oracle-down', True), ('io-readback', True)]
+mixed-a: exit=0 ok=True project=p_095ce8aedfbc shape=['happy_path'] records=['Task'] agents=[('io-readback', True)]
+mixed-b: exit=0 ok=True project=p_dc9a7ea2ef3f shape=['happy_path'] records=['Task'] agents=[('io-readback', True)]
+self: exit=0 ok=True project=p_a45e22adae29 shape=['happy_path'] records=['Task'] agents=[('io-readback', True)]
+IO-1 attempt 1: oracle=PASS rigorrun=PASS label=INDEPENDENT exit=0 verifierReads=5 matches=True guard=ok (0.53s)
+IO-1 attempt 2: oracle=PASS rigorrun=PASS label=INDEPENDENT exit=0 verifierReads=5 matches=True guard=ok (0.54s)
+IO-1 attempt 3: oracle=PASS rigorrun=PASS label=INDEPENDENT exit=0 verifierReads=5 matches=True guard=ok (0.55s)
+IO-2 attempt 1: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-2 attempt 2: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.54s)
+IO-2 attempt 3: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-3 attempt 1: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-3 attempt 2: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-3 attempt 3: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.52s)
+IO-4 attempt 1: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-4 attempt 2: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-4 attempt 3: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-5 attempt 1: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.54s)
+IO-5 attempt 2: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-5 attempt 3: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-6a attempt 1: oracle=PASS rigorrun=ABSTAIN label=INDEPENDENT exit=1 verifierReads=3 matches=True guard=ok (0.54s)
+IO-6a attempt 2: oracle=PASS rigorrun=ABSTAIN label=INDEPENDENT exit=1 verifierReads=3 matches=True guard=ok (0.55s)
+IO-6a attempt 3: oracle=PASS rigorrun=ABSTAIN label=INDEPENDENT exit=1 verifierReads=3 matches=True guard=ok (0.54s)
+IO-6b attempt 1: oracle=FAIL rigorrun=None label=None exit=2 verifierReads=0 matches=True guard=ok (0.44s)
+IO-6b attempt 2: oracle=FAIL rigorrun=None label=None exit=2 verifierReads=0 matches=True guard=ok (0.46s)
+IO-6b attempt 3: oracle=FAIL rigorrun=None label=None exit=2 verifierReads=0 matches=True guard=ok (0.43s)
+IO-7 attempt 1: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-7 attempt 2: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.56s)
+IO-7 attempt 3: oracle=FAIL rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.57s)
+IO-7-mixed-a attempt 1: oracle=FAIL rigorrun=FAIL label=SELF_REPORTED exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-7-mixed-a attempt 2: oracle=FAIL rigorrun=FAIL label=SELF_REPORTED exit=1 verifierReads=5 matches=True guard=ok (0.56s)
+IO-7-mixed-a attempt 3: oracle=FAIL rigorrun=FAIL label=SELF_REPORTED exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-7-mixed-b attempt 1: oracle=FAIL rigorrun=FAIL label=SELF_REPORTED exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-7-mixed-b attempt 2: oracle=FAIL rigorrun=FAIL label=SELF_REPORTED exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-7-mixed-b attempt 3: oracle=FAIL rigorrun=FAIL label=SELF_REPORTED exit=1 verifierReads=5 matches=True guard=ok (0.54s)
+IO-6c attempt 1: oracle=PASS rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.55s)
+IO-6c attempt 2: oracle=PASS rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.58s)
+IO-6c attempt 3: oracle=PASS rigorrun=FAIL label=INDEPENDENT exit=1 verifierReads=5 matches=True guard=ok (0.53s)
+IO-7-self attempt 1: oracle=FAIL rigorrun=PASS label=SELF_REPORTED exit=0 verifierReads=0 matches=None guard=ok (0.5s)
+IO-7-self attempt 2: oracle=FAIL rigorrun=PASS label=SELF_REPORTED exit=0 verifierReads=0 matches=None guard=ok (0.5s)
+IO-7-self attempt 3: oracle=FAIL rigorrun=PASS label=SELF_REPORTED exit=0 verifierReads=0 matches=None guard=ok (0.5s)
+{
+  "cases": 12,
+  "attemptsRun": 36,
+  "independentOracleGate": {
+    "cases": [
+      "IO-1",
+      "IO-2",
+      "IO-3",
+      "IO-4",
+      "IO-5",
+      "IO-6a",
+      "IO-6b",
+      "IO-7",
+      "IO-7-mixed-a",
+      "IO-7-mixed-b"
+    ],
+    "failing": [],
+    "guardViolations": []
+  },
+  "abstentionGate": {
+    "cases": [
+      "IO-6a",
+      "IO-6b",
+      "IO-6c"
+    ],
+    "failing": []
+  },
+  "perCase": {
+    "IO-1": {
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "PASS"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-2": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-3": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-4": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-5": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-6a": {
+      "outcomes": [
+        "ABSTAIN"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "PASS"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-6b": {
+      "outcomes": [
+        "None"
+      ],
+      "labels": [
+        "None"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-7": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-7-mixed-a": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-7-mixed-b": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-6c": {
+      "outcomes": [
+        "FAIL"
+      ],
+      "labels": [
+        "INDEPENDENT"
+      ],
+      "oracle": [
+        "PASS"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": true
+    },
+    "IO-7-self": {
+      "outcomes": [
+        "PASS"
+      ],
+      "labels": [
+        "SELF_REPORTED"
+      ],
+      "oracle": [
+        "FAIL"
+      ],
+      "attempts": 3,
+      "allAttemptsMatch": null
+    }
+  }
+}

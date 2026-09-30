@@ -6,4 +6,5 @@ export * from './registry.ts';
 export * from './inMemory.ts';
 export * from './delta.ts';
 export * from './projection.ts';
+export * from './frame.ts';
 export * from './conformance.ts';

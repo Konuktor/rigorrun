@@ -1,0 +1,3244 @@
+{
+  "generated_by": "remediation/scripts/aggregate-after.mjs",
+  "rigorrun_commit": "f4145bb17020fd63a25fc2b00e64c4c41d7b5cd1",
+  "baseline": {
+    "commit": "07dda8c738d6daada161ffcf2bfc046b3c874ac5",
+    "totals": {
+      "cases_total": 58,
+      "rigorrun_scored_cases": 26,
+      "true_positives": 10,
+      "true_negatives": 0,
+      "false_positives": 6,
+      "false_negatives": 10,
+      "injected_failures": 3,
+      "injected_failures_detected_by_oracle": 2,
+      "injected_failures_detected_by_rigorrun": 0,
+      "true_positive_rate": 0.5,
+      "false_positive_rate": 1,
+      "mutation_detection_rate": 0.5,
+      "confirmed_upstream_findings": 10,
+      "confirmed_rigorrun_findings": 8,
+      "findings_total": 21
+    },
+    "counts": {
+      "cases": 58,
+      "rigorrunMode": 26,
+      "scored": 26,
+      "falsePositives": 6,
+      "falseNegatives": 10,
+      "knownGoodGraded": 6,
+      "knownGoodGradedFalsePositive": 6,
+      "injected": 3,
+      "r1Cases": 11
+    },
+    "tests": {
+      "files": 73,
+      "tests": 847,
+      "passed": 847,
+      "log": "evidence/rigorrun-test-baseline.log"
+    }
+  },
+  "TOTAL_CASES": 58,
+  "CASES_RUN": 58,
+  "RIGORRUN_MODE_CASES": 26,
+  "RIGORRUN_MODE_CASES_RUN": 26,
+  "SCORED_CASES": 24,
+  "ABSTENTIONS": 0,
+  "NOT_RUN_CASES": [],
+  "NOT_REACHING_VERDICT": 2,
+  "INCONSISTENT_ACROSS_ATTEMPTS": 0,
+  "TRUE_POSITIVES": 17,
+  "TRUE_NEGATIVES": 5,
+  "FALSE_POSITIVES": 0,
+  "FALSE_NEGATIVES": 2,
+  "ORIGINAL_RULE": {
+    "TRUE_POSITIVES": 18,
+    "TRUE_NEGATIVES": 5,
+    "FALSE_POSITIVES": 1,
+    "FALSE_NEGATIVES": 2
+  },
+  "INJECTED_FAILURES_TOTAL": 3,
+  "INJECTED_FAILURES_OBSERVED_BY_ORACLE": 3,
+  "INJECTED_FAILURES_REACHED": 1,
+  "INJECTED_FAILURES_DETECTED": 1,
+  "KNOWN_GOOD_TOTAL": 6,
+  "KNOWN_GOOD_CORRECTLY_GRADED": 5,
+  "R1_CASES": 11,
+  "R1_CASES_RUN": 11,
+  "R1_REPRODUCTIONS_BEFORE": 11,
+  "KNOWN_GOOD_BEFORE": 6,
+  "KNOWN_GOOD_CORRECT_BEFORE": 0,
+  "R1_REPRODUCTIONS": 0,
+  "R1_REPRODUCTIONS_ORIGINAL_RULE": 0,
+  "BASELINE_FALSE_POSITIVES_NOW": [
+    {
+      "id": "EM-GM-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "EM-GM-06-retry-after-lost-response",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "EM-GMA-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "SQ-LLM-02-qwen2.5-3b",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "SQ-W1-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "SQ-W1B-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ]
+    }
+  ],
+  "BASELINE_KNOWN_GOOD_NOW": [
+    {
+      "id": "EM-GM-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "EM-GM-06-retry-after-lost-response",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "EM-GMA-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "SQ-LLM-02-qwen2.5-3b",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "SQ-W1-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ]
+    },
+    {
+      "id": "SQ-W1B-01-correct",
+      "outcome": "TRUE_NEGATIVE",
+      "originalRule": "TRUE_NEGATIVE",
+      "oracle": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ]
+    }
+  ],
+  "BASELINE_FALSE_NEGATIVES_NOW": [
+    {
+      "id": "EM-GM-03-duplicate",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "EM-GMA-03-duplicate",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "EM-GMA-04-wrong-recipient",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "EM-GMA-05-wrong-subject",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "SQ-W1-03-duplicate",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "SQ-W1-04-wrong-value",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "SQ-W1-05-wrong-entity",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "SQ-W1B-03-duplicate",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "SQ-W1B-04-wrong-value",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    },
+    {
+      "id": "SQ-W1B-05-wrong-entity",
+      "outcome": "TRUE_POSITIVE",
+      "originalRule": "TRUE_POSITIVE",
+      "oracle": [
+        "FAIL"
+      ]
+    }
+  ],
+  "RIGORRUN_FINDINGS_FIXED": 0,
+  "RIGORRUN_FINDINGS_PARTIAL": 0,
+  "RIGORRUN_FINDINGS_UNRESOLVED": 0,
+  "FINDINGS": {},
+  "PER_TARGET_BREAKDOWN": {
+    "email-mcp": {
+      "TOTAL_CASES": 21,
+      "CASES_RUN": 21,
+      "RIGORRUN_MODE_CASES": 12,
+      "RIGORRUN_MODE_CASES_RUN": 12,
+      "SCORED_CASES": 11,
+      "ABSTENTIONS": 0,
+      "NOT_RUN_CASES": [],
+      "NOT_REACHING_VERDICT": 1,
+      "INCONSISTENT_ACROSS_ATTEMPTS": 0,
+      "TRUE_POSITIVES": 9,
+      "TRUE_NEGATIVES": 2,
+      "FALSE_POSITIVES": 0,
+      "FALSE_NEGATIVES": 0,
+      "ORIGINAL_RULE": {
+        "TRUE_POSITIVES": 10,
+        "TRUE_NEGATIVES": 2,
+        "FALSE_POSITIVES": 0,
+        "FALSE_NEGATIVES": 0
+      },
+      "INJECTED_FAILURES_TOTAL": 2,
+      "INJECTED_FAILURES_OBSERVED_BY_ORACLE": 2,
+      "INJECTED_FAILURES_REACHED": 1,
+      "INJECTED_FAILURES_DETECTED": 1,
+      "KNOWN_GOOD_TOTAL": 2,
+      "KNOWN_GOOD_CORRECTLY_GRADED": 2
+    },
+    "worktide-mcp": {
+      "TOTAL_CASES": 13,
+      "CASES_RUN": 13,
+      "RIGORRUN_MODE_CASES": 0,
+      "RIGORRUN_MODE_CASES_RUN": 0,
+      "SCORED_CASES": 0,
+      "ABSTENTIONS": 0,
+      "NOT_RUN_CASES": [],
+      "NOT_REACHING_VERDICT": 0,
+      "INCONSISTENT_ACROSS_ATTEMPTS": 0,
+      "TRUE_POSITIVES": 0,
+      "TRUE_NEGATIVES": 0,
+      "FALSE_POSITIVES": 0,
+      "FALSE_NEGATIVES": 0,
+      "ORIGINAL_RULE": {
+        "TRUE_POSITIVES": 0,
+        "TRUE_NEGATIVES": 0,
+        "FALSE_POSITIVES": 0,
+        "FALSE_NEGATIVES": 0
+      },
+      "INJECTED_FAILURES_TOTAL": 0,
+      "INJECTED_FAILURES_OBSERVED_BY_ORACLE": 0,
+      "INJECTED_FAILURES_REACHED": 0,
+      "INJECTED_FAILURES_DETECTED": 0,
+      "KNOWN_GOOD_TOTAL": 0,
+      "KNOWN_GOOD_CORRECTLY_GRADED": 0
+    },
+    "sqlite-mcp": {
+      "TOTAL_CASES": 24,
+      "CASES_RUN": 24,
+      "RIGORRUN_MODE_CASES": 14,
+      "RIGORRUN_MODE_CASES_RUN": 14,
+      "SCORED_CASES": 13,
+      "ABSTENTIONS": 0,
+      "NOT_RUN_CASES": [],
+      "NOT_REACHING_VERDICT": 1,
+      "INCONSISTENT_ACROSS_ATTEMPTS": 0,
+      "TRUE_POSITIVES": 8,
+      "TRUE_NEGATIVES": 3,
+      "FALSE_POSITIVES": 0,
+      "FALSE_NEGATIVES": 2,
+      "ORIGINAL_RULE": {
+        "TRUE_POSITIVES": 8,
+        "TRUE_NEGATIVES": 3,
+        "FALSE_POSITIVES": 1,
+        "FALSE_NEGATIVES": 2
+      },
+      "INJECTED_FAILURES_TOTAL": 1,
+      "INJECTED_FAILURES_OBSERVED_BY_ORACLE": 1,
+      "INJECTED_FAILURES_REACHED": 0,
+      "INJECTED_FAILURES_DETECTED": 0,
+      "KNOWN_GOOD_TOTAL": 4,
+      "KNOWN_GOOD_CORRECTLY_GRADED": 3
+    }
+  },
+  "VERIFICATION_STRENGTH_BREAKDOWN": {
+    "PARTIAL": 26
+  },
+  "EVIDENCE_INDEPENDENCE_BREAKDOWN": {
+    "SELF_REPORTED": 26
+  },
+  "BASELINE_SOURCE_BREAKDOWN": {
+    "OBSERVED_AT_START": 26
+  },
+  "TIMEOUT_BREAKDOWN": {
+    "outcomes": {
+      "FAIL": 17,
+      "PASS": 7,
+      "TIMED_OUT": 2
+    },
+    "budgetsMs": {
+      "60000": 26
+    },
+    "timedOutCases": [
+      "EM-LLM-01-qwen2.5-3b",
+      "SQ-LLM-01-llama3.1-8b"
+    ],
+    "agentFailureCases": [],
+    "harnessFailureCases": []
+  },
+  "HELDOUT": null,
+  "TESTS": null,
+  "JOURNEYS": {
+    "sqlite-mcp/w1": {
+      "target": "sqlite-mcp",
+      "journey": "w1",
+      "spec": "specs-sqlite-w1.json",
+      "originalHome": "home-sqlite-w1",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1",
+      "out": "remediation/after/traces/sqlite-mcp/w1-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
+      },
+      "project": "p_8cd3f3aae15f",
+      "ok": true,
+      "readsProblem": "(no problem reported)",
+      "schemaEntities": [
+        "Row",
+        "Row2",
+        "Table"
+      ],
+      "compiled": true,
+      "suiteBuilt": true,
+      "cases": 1,
+      "agents": [
+        {
+          "name": "sq-w1-correct",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-missing-action",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-duplicate",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-wrong-value",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-wrong-entity",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-forbidden-extra",
+          "ok": true
+        }
+      ]
+    },
+    "sqlite-mcp/w1b": {
+      "target": "sqlite-mcp",
+      "journey": "w1b",
+      "spec": "specs-sqlite-w1b.json",
+      "originalHome": "home-sqlite-w1b",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1b",
+      "out": "remediation/after/traces/sqlite-mcp/w1b-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
+      },
+      "project": "p_826c3de861ed",
+      "ok": true,
+      "readsProblem": "(no problem reported)",
+      "schemaEntities": [
+        "Row",
+        "Row2",
+        "Table"
+      ],
+      "compiled": true,
+      "suiteBuilt": true,
+      "cases": 1,
+      "agents": [
+        {
+          "name": "sq-w1-correct",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-missing-action",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-duplicate",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-wrong-value",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-wrong-entity",
+          "ok": true
+        },
+        {
+          "name": "sq-w1-forbidden-extra",
+          "ok": true
+        },
+        {
+          "name": "ollama-llama3.1-8b",
+          "ok": true
+        },
+        {
+          "name": "ollama-qwen2.5-3b",
+          "ok": true
+        }
+      ]
+    },
+    "email-mcp/w1": {
+      "target": "email-mcp",
+      "journey": "w1",
+      "spec": "specs-email-w1.json",
+      "originalHome": "home-email-w1",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-w1",
+      "out": "remediation/after/traces/email-mcp/w1-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-email-mcp: MailHog up on http://127.0.0.1:8025, inbox empty"
+      },
+      "project": "p_b298e9a63f23",
+      "ok": false,
+      "stage": "compile",
+      "error": "journey: POST /api/projects/p_b298e9a63f23/compile → 400: {\"error\":\"The recording performed \\\"send_email\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+      "readsProblem": "These reads did not answer: check_inbox. RigorRun will not be able to verify what they cover.",
+      "schemaEntities": [
+        "Record1",
+        "Mailhog",
+        "Record3"
+      ],
+      "compiled": false,
+      "suiteBuilt": false
+    },
+    "email-mcp/gm-w1": {
+      "target": "email-mcp",
+      "journey": "gm-w1",
+      "spec": "specs-email-gm-w1.json",
+      "originalHome": "home-email-gm-w1",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-w1",
+      "out": "remediation/after/traces/email-mcp/gm-w1-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-greenmail: GreenMail purged, relay on 127.0.0.1:3125"
+      },
+      "project": "p_ba22a0301d12",
+      "ok": true,
+      "readsProblem": "(no problem reported)",
+      "schemaEntities": [
+        "Record1",
+        "Record2",
+        "Email"
+      ],
+      "compiled": true,
+      "suiteBuilt": true,
+      "cases": 1,
+      "quality": {
+        "false_positive_rate": 0,
+        "case_discrimination": 0,
+        "boundary_discrimination": "no threshold rule found",
+        "rule_decisiveness": 0,
+        "mutant_kill_rate": 0.5,
+        "false_accusation": 0,
+        "replay_stability": false,
+        "hidden_answer_isolation": true,
+        "provenance_strength": "0 strong · 0 moderate · 0 weak",
+        "unconfirmed_rules": 0,
+        "verifier_determinism": true
+      },
+      "agents": [
+        {
+          "name": "gm-correct",
+          "ok": true
+        },
+        {
+          "name": "gm-missing-action",
+          "ok": true
+        },
+        {
+          "name": "gm-duplicate",
+          "ok": true
+        },
+        {
+          "name": "gm-wrong-recipient",
+          "ok": true
+        },
+        {
+          "name": "gm-wrong-subject",
+          "ok": true
+        },
+        {
+          "name": "ollama-qwen2.5-3b",
+          "ok": true
+        }
+      ]
+    },
+    "email-mcp/gm-fault": {
+      "target": "email-mcp",
+      "journey": "gm-fault",
+      "spec": "specs-email-gm-fault.json",
+      "originalHome": "home-email-gm-fault",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-fault",
+      "out": "remediation/after/traces/email-mcp/gm-fault-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-greenmail: GreenMail purged, relay on 127.0.0.1:3125"
+      },
+      "project": "p_1474a37f44e6",
+      "ok": true,
+      "readsProblem": "(no problem reported)",
+      "schemaEntities": [
+        "Record1",
+        "Record2",
+        "Email"
+      ],
+      "compiled": true,
+      "suiteBuilt": true,
+      "cases": 1,
+      "agents": [
+        {
+          "name": "gm-retry-after-lost-response",
+          "ok": true
+        }
+      ],
+      "armedAfterSetup": [
+        "FAULT_DROP_NTH",
+        "FAULT_DROP_TOOL"
+      ]
+    },
+    "worktide-mcp/w2": {
+      "target": "worktide-mcp",
+      "journey": "w2",
+      "spec": "specs-worktide-w2.json",
+      "originalHome": "home-worktide-w2",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-worktide-w2",
+      "out": "remediation/after/traces/worktide-mcp/w2-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)"
+      },
+      "project": "p_f37eabbb2a62",
+      "ok": true,
+      "readsProblem": "(no problem reported)",
+      "schemaEntities": [
+        "Record1",
+        "Group",
+        "Task",
+        "Record4",
+        "Record5"
+      ],
+      "compiled": true,
+      "suiteBuilt": true,
+      "cases": 1,
+      "quality": {
+        "false_positive_rate": 1,
+        "case_discrimination": 0,
+        "boundary_discrimination": "no threshold rule found",
+        "rule_decisiveness": 0,
+        "mutant_kill_rate": 1,
+        "false_accusation": 1,
+        "replay_stability": true,
+        "hidden_answer_isolation": true,
+        "provenance_strength": "0 strong · 0 moderate · 0 weak",
+        "unconfirmed_rules": 0,
+        "verifier_determinism": true
+      }
+    },
+    "worktide-mcp/w3": {
+      "target": "worktide-mcp",
+      "journey": "w3",
+      "spec": "specs-worktide-w3.json",
+      "originalHome": "home-worktide-w3",
+      "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-worktide-w3",
+      "out": "remediation/after/traces/worktide-mcp/w3-setup",
+      "reset": {
+        "exit": 0,
+        "tail": "reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)"
+      },
+      "project": "p_971216ad2250",
+      "ok": true,
+      "readsProblem": "(no problem reported)",
+      "schemaEntities": [
+        "Record1",
+        "Group",
+        "Task",
+        "Record4",
+        "Record5"
+      ],
+      "compiled": true,
+      "suiteBuilt": true,
+      "cases": 1,
+      "quality": {
+        "false_positive_rate": 1,
+        "case_discrimination": 0,
+        "boundary_discrimination": "no threshold rule found",
+        "rule_decisiveness": 0,
+        "mutant_kill_rate": 1,
+        "false_accusation": 1,
+        "replay_stability": true,
+        "hidden_answer_isolation": true,
+        "provenance_strength": "0 strong · 0 moderate · 0 weak",
+        "unconfirmed_rules": 0,
+        "verifier_determinism": true
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "EM-GM-01-correct",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "TRUE_NEGATIVE",
+      "outcomeClassification": "TRUE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "FALSE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GM-02-missing-action-false-claim",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GM-03-duplicate",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 2, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "EM-GM-04-wrong-recipient",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GM-05-wrong-subject",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Email[subject~=\"Audit 17\"] is absent but was required"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GM-06-retry-after-lost-response",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": true,
+      "rigorrunFindings": [
+        "R-4"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 2, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "FALSE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GM-07-retry-direct",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": true,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-GMA-01-correct",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "TRUE_NEGATIVE",
+      "outcomeClassification": "TRUE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "FALSE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GMA-02-missing-action-false-claim",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-GMA-03-duplicate",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 2, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "EM-GMA-04-wrong-recipient",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Email[subject~=\"Audit 17\"] is absent but was required; exactly 1 Email record(s) created, as demonstrated — no more — derived.created.Email.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "EM-GMA-05-wrong-subject",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Email[subject~=\"Audit 17\"] is absent but was required"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "EM-LLM-01-qwen2.5-3b",
+      "target": "email-mcp",
+      "mode": "rigorrun",
+      "class": "AGENT-LEVEL (real LLM)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-4"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "TIMED_OUT"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TIMED_OUT",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the agent did not finish inside the 60000 ms case budget; no check failed on what it had done by then"
+      ],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "EM-MH-01-send-one",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "BASELINE",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-02-check-inbox-crashes",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-03-search-emails-crashes",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-04-auto-rule-modules-missing",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-05-to-as-list-and-comma",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-06-empty-recipient",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-07-unknown-service",
+      "target": "email-mcp",
+      "mode": "direct",
+      "class": "WRONG_ENTITY / boundary",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "EM-MH-08-service-not-persisted-across-restart",
+      "target": "email-mcp",
+      "mode": "shell",
+      "class": "RESTART / PERSISTENCE",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-01-tasks-get-doubled-prefix",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-02-tasks-update-doubled-prefix",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "WRONG_VALUE / MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-03-tasks-complete-doubled-prefix",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-04-projects-get-archive-doubled-prefix",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-05-tasks-create-500",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-06-add-dependency-500",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-07-time-log-500",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-08-projects-create-500",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-09-timer-start-stop",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "BASELINE (timer)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-10-double-start-closes-first",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "DUPLICATE_SIDE_EFFECT / boundary",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-11-stop-with-nothing-running",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-12-key-too-long-rejected",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "WT-D-13-nonexistent-task",
+      "target": "worktide-mcp",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-01-readonly-denies-insert",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-02-backup-under-deny-everything",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-03-rows-changed-leak",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "WRONG_VALUE (tool result)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-04-transaction-across-calls",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "STATE CONSISTENCY / transaction",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-05-column-deny-blocks-aggregate",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-06-timeout-interrupts",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "TIMEOUT",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-07-multi-statement-rejected",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-08-readonly-creates-missing-file",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "BOUNDARY / side effect",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-09-retry-direct",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": true,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-D-10-backup-under-column-deny",
+      "target": "sqlite-mcp",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "rigorrunOutcomes": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "outcomeClassification": "NOT_SCORED",
+      "verification": [],
+      "evidenceIndependence": [],
+      "baseline": [],
+      "budgetMs": [],
+      "outcomeReasons": [],
+      "missingEvidence": [],
+      "reproduction": "0/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "NOT_RUN"
+        ],
+        "classification": "NOT_SCORED"
+      }
+    },
+    {
+      "id": "SQ-LLM-01-llama3.1-8b",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "AGENT-LEVEL (real LLM)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-4"
+      ],
+      "attemptsPlanned": 1,
+      "attempts": 1,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "TIMED_OUT"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "outcomeClassification": "TIMED_OUT",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the agent did not finish inside the 60000 ms case budget; no check failed on what it had done by then"
+      ],
+      "missingEvidence": [],
+      "reproduction": "1/1",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-LLM-02-qwen2.5-3b",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "AGENT-LEVEL (real LLM)",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "TRUE_NEGATIVE",
+      "outcomeClassification": "TRUE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "FALSE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-W1-01-correct",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1",
+        "R-3",
+        "R-5"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "TRUE_NEGATIVE",
+      "outcomeClassification": "TRUE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "FALSE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-W1-02-missing-action-false-claim",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-W1-03-duplicate",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 2, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "SQ-W1-04-wrong-value",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "SQ-W1-05-wrong-entity",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "SQ-W1-06-forbidden-extra-delete",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "outcomeClassification": "FALSE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-W1B-01-correct",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "truthLabel": "EXPECTED_PASS",
+      "injected": false,
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "PASS"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "TRUE_NEGATIVE",
+      "outcomeClassification": "TRUE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "PASS"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "FALSE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-W1B-02-missing-action-false-claim",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    },
+    {
+      "id": "SQ-W1B-03-duplicate",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 2, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "SQ-W1B-04-wrong-value",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "SQ-W1B-05-wrong-entity",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunOutcomes": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "outcomeClassification": "TRUE_POSITIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "the requested work was actually performed — derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required; exactly 1 Row record(s) created, as demonstrated — no more — derived.created.Row.length was 0, expected 1"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "PASS"
+        ],
+        "classification": "FALSE_NEGATIVE"
+      }
+    },
+    {
+      "id": "SQ-W1B-06-forbidden-extra-delete",
+      "target": "sqlite-mcp",
+      "mode": "rigorrun",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "truthLabel": "EXPECTED_FAIL",
+      "injected": false,
+      "rigorrunFindings": [],
+      "attemptsPlanned": 3,
+      "attempts": 3,
+      "oracleVerdicts": [
+        "FAIL"
+      ],
+      "rigorrunVerdicts": [
+        "PASS"
+      ],
+      "rigorrunOutcomes": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "outcomeClassification": "FALSE_NEGATIVE",
+      "verification": [
+        "PARTIAL"
+      ],
+      "evidenceIndependence": [
+        "SELF_REPORTED"
+      ],
+      "baseline": [
+        "OBSERVED_AT_START"
+      ],
+      "budgetMs": [
+        60000
+      ],
+      "outcomeReasons": [
+        "every applicable check passed on observed state"
+      ],
+      "missingEvidence": [],
+      "reproduction": "3/3",
+      "notRun": null,
+      "before": {
+        "oracleVerdicts": [
+          "FAIL"
+        ],
+        "rigorrunVerdicts": [
+          "FAIL"
+        ],
+        "classification": "TRUE_POSITIVE"
+      }
+    }
+  ]
+}

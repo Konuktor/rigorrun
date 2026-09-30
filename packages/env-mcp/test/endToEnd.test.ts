@@ -191,6 +191,8 @@ describe('an environment RigorRun was pointed at rather than shipped with', () =
     expect(built.environment.capabilities()).toEqual({
       discovery: 'tools-only',
       stateRead: 'designated-reads',
+      // Every read goes through the connection the agent uses: self-reported.
+      stateReadIndependence: 'self-reported',
       seed: 'none',
       reset: 'tool',
       events: 'proxy-log',

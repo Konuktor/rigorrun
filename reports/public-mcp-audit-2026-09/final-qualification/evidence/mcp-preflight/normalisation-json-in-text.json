@@ -1,0 +1,12 @@
+{
+  "id": "normalisation-json-in-text",
+  "target": "RigorRun normaliser",
+  "check": "JSON inside a text block is records (R-8)",
+  "status": "PASS",
+  "observed": {
+    "ok": true,
+    "kind": "json_text",
+    "error": null
+  },
+  "expected": "json_text"
+}

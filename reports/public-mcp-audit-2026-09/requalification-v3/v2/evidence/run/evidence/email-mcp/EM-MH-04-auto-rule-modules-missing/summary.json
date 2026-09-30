@@ -1,0 +1,209 @@
+{
+  "id": "EM-MH-04-auto-rule-modules-missing",
+  "target": "email-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 1.35,
+      "result": {
+        "calls": [
+          {
+            "tool": "list_auto_rules",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'list_auto_rules': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "watcher_status",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'watcher_status': No module named 'email_mcp.tools.watcher'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "list_pending_replies",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'list_pending_replies': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "add_auto_rule",
+            "args": {
+              "name": "audit",
+              "match_pattern": "Audit",
+              "reply_body": "thanks"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'add_auto_rule': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 1.33,
+      "result": {
+        "calls": [
+          {
+            "tool": "list_auto_rules",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'list_auto_rules': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "watcher_status",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'watcher_status': No module named 'email_mcp.tools.watcher'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "list_pending_replies",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'list_pending_replies': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "add_auto_rule",
+            "args": {
+              "name": "audit",
+              "match_pattern": "Audit",
+              "reply_body": "thanks"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'add_auto_rule': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 1.34,
+      "result": {
+        "calls": [
+          {
+            "tool": "list_auto_rules",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'list_auto_rules': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "watcher_status",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'watcher_status': No module named 'email_mcp.tools.watcher'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "list_pending_replies",
+            "args": {},
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'list_pending_replies': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          },
+          {
+            "tool": "add_auto_rule",
+            "args": {
+              "name": "audit",
+              "match_pattern": "Audit",
+              "reply_body": "thanks"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'add_auto_rule': No module named 'email_mcp.tools.autorespond'"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "note": "Every file that defines an independent-oracle case, hashed before any case ran. run-io.py refuses to run when one differs.",
+  "frozenAtHead": "a9edbec98ea9056bf1b6a3773cc3fa9ba2692d01",
+  "files": {
+    "cases.json": "14726f41ebd4abfb4bbde5dde28de6ebf14c27eb77ad009924b218752a9453ce",
+    "taskdesk_server.py": "e9a929bfe4dd41292de09374629ad9baf9edf52c912fe063cb68627e3ab772e2",
+    "taskdesk_oracle_server.py": "c43f60c7014c27dece50323ae877ec160a82d76b5177708005b8a155c62e6ea3",
+    "reset-taskdesk.sh": "e9edabc65925aada6fa077a6ff2df874108afe65c7f95cf48a296db57f5fa2fa",
+    "run-io.py": "af5992bc2543a7c60a08b0a8065295453a3b358cb2531325b603409527837812",
+    "playbooks/io-claim-only.json": "febfffd9ea4d58ffd9c73c7f40295fdf24b3338543cc31b11ded4e5a1e2be93a",
+    "playbooks/io-correct-oracle-down.json": "6ac6764cf43f043c8ae8150841acbd6351d8476d9a571c225cba6a86ca519c3d",
+    "playbooks/io-correct.json": "e3b348eb48656cb66cfcc326e3cae271c7999371e1370d2cfadf32a1d33b3e16",
+    "playbooks/io-duplicate.json": "3fcd8eadf6a4703b0d3699221cb889a842196059c0a7a975ca551cf7834a36ec",
+    "playbooks/io-extra-update.json": "a833300326988c62e62e16217554ce479a60d4164fef17ce248e152e1e79f855",
+    "playbooks/io-readback.json": "d7bef8531480f8ce2c772457420ee75827123bcf56a626af76c639d85ec3f591",
+    "specs/io-independent.template.json": "059ed8ee9e91d5eea18e5ea484f2eb09074402621882b4256c6854d094c3d2ad",
+    "specs/io-mixed-a.template.json": "f703683b410ab5f857c69ec9377a70c03d016b82f7b175c4798b7271e0ae6ae8",
+    "specs/io-mixed-b.template.json": "b0d6dc2de90452f1d6820e89709494ec91f1ed4943059b3adf5481a70a991062",
+    "specs/io-self.template.json": "d0a20d10165592cf661c28140061a3031c806e094a49d18d72089152dac72a9a"
+  }
+}

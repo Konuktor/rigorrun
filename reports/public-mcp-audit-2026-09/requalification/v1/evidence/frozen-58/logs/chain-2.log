@@ -1,0 +1,11 @@
+== batch sq-rr 02:34:27
+exit 0
+== batch sq-d 02:34:51
+exit 0
+== batch wt 02:35:12
+exit 0
+== batch mh 02:41:28
+exit 0
+== batch gm-direct 02:42:03
+exit 0
+== local SQ-LLM-02-qwen2.5-3b 02:42:26

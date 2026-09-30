@@ -1,0 +1,15 @@
+{
+  "id": "filesystem-call",
+  "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+  "check": "tools/call, and normalisation that follows the result shape",
+  "status": "PASS",
+  "observed": {
+    "ok": true,
+    "kind": "structured",
+    "hasStructured": true,
+    "structuredKeys": [
+      "content"
+    ]
+  },
+  "expected": "ok; structured when the server sends structuredContent, otherwise text or json_text"
+}

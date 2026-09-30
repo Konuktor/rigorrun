@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_73f7655aa32b",
+  "name": "Create exactly one task titled Quarterly report; change nothing else.",
+  "description": "Compiled from one recorded execution in taskdesk: create one task, connector read then verifier read.",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else",
+  "environmentId": "p_73f7655aa32b",
+  "sourceTraceId": "trace_p_73f7655aa32b",
+  "primaryAction": "create_task",
+  "focusEntity": "Task",
+  "focusScope": "created",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "create_task": {
+      "title": "Quarterly report"
+    }
+  },
+  "projectionFocus": [
+    "Task"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Task 4 was created",
+      "key": "Task.4",
+      "value": {
+        "id": 4,
+        "title": "Quarterly report",
+        "status": "open"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Task 4 was created"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "title",
+      "param": "title",
+      "mode": "equals",
+      "demonstrated": "Quarterly report"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-14T17:27:57.833Z",
+  "approvedAt": "2026-09-14T17:27:57.843Z"
+}

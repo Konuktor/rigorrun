@@ -1,0 +1,89 @@
+{
+  "id": "WT-D-08-projects-create-500",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.52,
+      "result": {
+        "calls": [
+          {
+            "tool": "projects.create",
+            "args": {
+              "name": "MCP created project",
+              "key": "MCPX"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[500] Typed property App\\Entity\\Project::$workspace must not be accessed before initialization"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.42,
+      "result": {
+        "calls": [
+          {
+            "tool": "projects.create",
+            "args": {
+              "name": "MCP created project",
+              "key": "MCPX"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[500] Typed property App\\Entity\\Project::$workspace must not be accessed before initialization"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.36,
+      "result": {
+        "calls": [
+          {
+            "tool": "projects.create",
+            "args": {
+              "name": "MCP created project",
+              "key": "MCPX"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[500] Typed property App\\Entity\\Project::$workspace must not be accessed before initialization"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

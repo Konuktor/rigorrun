@@ -1,0 +1,29 @@
+{
+  "command": [
+    "node",
+    "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "time.log",
+      "args": {
+        "startsAt": "2026-09-13T10:00:00+02:00",
+        "durationMinutes": 30,
+        "description": "audit log entry"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[500] Typed property App\\Entity\\TimeEntry::$user must not be accessed before initialization"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

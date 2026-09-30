@@ -25,11 +25,16 @@ import {
 } from '@rigorrun/mcp';
 import {
   SystemEnvironment,
+  VerifiedConnection,
   detectMismatch,
+  hasPayload,
+  normalizeCallResult,
+  readsForVerdict,
   stateFromPayloads,
   type AnnotationMismatch,
   type SystemConnection,
   type SystemEnvironmentConfig,
+  ProductionWriteRefused,
 } from '@rigorrun/connector';
 import { OpenApiConnection } from '@rigorrun/env-openapi';
 import { BrowserConnection } from '@rigorrun/env-browser';
@@ -39,8 +44,8 @@ import { basename, join } from 'node:path';
 import {
   describeConnectorAction,
   secretNamesOf,
-  type Connector,
   type Project,
+  type DirectConnector,
 } from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
 import { openInBrowser } from './openUrl.ts';
@@ -106,7 +111,7 @@ export class Workspace {
     if (missing.length > 0) {
       throw new Error(
         `This project needs ${missing.join(', ')}, which this machine does not have. ` +
-          `Set them with \`rigorrun secrets set <name>\`.`,
+          `Set them with \`npx rigorrun secrets set <name>\`, or in CI as RIGORRUN_SECRET__<NAME>.`,
       );
     }
     return secrets;
@@ -163,12 +168,24 @@ export class Workspace {
         evidenceDir: join(this.store.path, 'projects', project.id, 'evidence'),
       });
     }
-    return this.openConnector(connector, await this.secretsFor(project));
+    const secrets = await this.secretsFor(project);
+    const primary = await this.openConnector(connector, secrets);
+    if (!connector.verifier) return primary;
+    // A second connection to the same system, for the verdict only. Opened
+    // after the first, and if it cannot be opened the first is closed: a
+    // project that asked for independent reads does not quietly fall back to
+    // reading through the agent's own connection.
+    try {
+      return new VerifiedConnection(primary, await this.openConnector(connector.verifier, secrets));
+    } catch (error) {
+      await primary.close().catch(() => undefined);
+      throw error;
+    }
   }
 
   /** One connector, already narrowed, with its credentials already fetched. */
   private async openConnector(
-    connector: Exclude<Connector, { kind: 'browser' }>,
+    connector: DirectConnector,
     secrets: Record<string, string>,
   ): Promise<SystemConnection> {
     if (connector.kind === 'openapi') {
@@ -183,7 +200,7 @@ export class Workspace {
         throw new Error(
           `This API signs in with a client id and secret, and ${
             clientId === undefined ? oauth.clientIdSecret : oauth.clientSecretSecret
-          } is not in this machine's credential store. Set it with \`rigorrun secrets set\`.`,
+          } is not in this machine's credential store. Set it with \`npx rigorrun secrets set\`, or in CI as RIGORRUN_SECRET__<NAME>.`,
         );
       }
       return OpenApiConnection.open({
@@ -325,6 +342,14 @@ export class Workspace {
   async startDemonstration(project: Project): Promise<void> {
     const live = this.live.get(project.id);
     if (!live) throw new Error(`${project.name} is not connected.`);
+    if (project.safety === 'production') {
+      // Recording executes the job for real. On production that is a real
+      // refund, a real email — so it is refused before anything is called.
+      throw new Error(
+        'This system is marked production, and recording does the job for real. ' +
+          'Record against a staging or scratch copy, then point the finished suite wherever you like.',
+      );
+    }
     if (project.verifierReads.length === 0) {
       throw new Error(
         'Nominate at least one read before recording. Without one there is no way to see what ' +
@@ -337,18 +362,33 @@ export class Workspace {
     live.connection.allowWrites?.();
 
     await this.environment(project, { entities: [], relationships: [] }).reset();
-    const beforePayloads = await this.readPayloads(project);
+    const beforeAnswers = await this.readAnswers(project);
     live.demonstration = {
       startedAt: Date.now(),
-      beforePayloads,
+      beforePayloads: beforeAnswers.map((answer) => answer.payload),
       entries: [],
-      observations: beforePayloads.map((payload) => ({ tool: 'before', payload })),
+      observations: beforeAnswers.map((answer) => ({
+        tool: 'before',
+        payload: answer.payload,
+        reading: { read: answer.read, moment: 'before' as const },
+      })),
     };
     await this.saveDemonstration(project);
   }
 
   /** Calls every nominated read and keeps the answers exactly as they came. */
   private async readPayloads(project: Project): Promise<unknown[]> {
+    return (await this.readAnswers(project)).map((answer) => answer.payload);
+  }
+
+  /**
+   * The nominated reads' answers, each labelled with the read that gave it.
+   *
+   * The label is what lets induction compare two readings of the same read,
+   * taken before and after the job: a field that changed between them for the
+   * same record describes that record, and must never be what names it.
+   */
+  private async readAnswers(project: Project): Promise<{ read: string; payload: unknown }[]> {
     const live = this.live.get(project.id);
     if (!live) throw new Error(`${project.name} is not connected.`);
     // A connector that cannot read the system back reads nothing, whatever its
@@ -358,12 +398,25 @@ export class Workspace {
     // agent against the system's own account of what it did. Empty is the
     // honest answer, and everything downstream already says OBSERVATIONAL.
     if (live.connection.canReadState === false) return [];
-    const payloads: unknown[] = [];
-    for (const read of project.verifierReads) {
-      const result = await live.connection.call(read.tool, read.args);
-      if (result.ok && result.structured !== undefined) payloads.push(result.structured);
+    const answers: { read: string; payload: unknown }[] = [];
+    // Once a verifier read is nominated, the demonstration is recorded through
+    // it alone, exactly as verdicts are read (requalification P10). The label
+    // keeps each read's place in the nomination, so a reading is named the same
+    // way however many reads are set aside.
+    const { used } = readsForVerdict(project.verifierReads);
+    for (const [index, read] of project.verifierReads.entries()) {
+      if (!used.includes(read)) continue;
+      // The one reading of a result, shared with the setup probe and the
+      // runner: a server that answers with JSON inside a text block is read
+      // here exactly as it was read when the probe said it could be.
+      const normalized = normalizeCallResult(
+        await live.connection.call(read.tool, read.args, project.budgets.toolCallMs),
+      );
+      if (hasPayload(normalized)) {
+        answers.push({ read: `${index}:${read.tool}:${JSON.stringify(read.args ?? {})}`, payload: normalized.payload });
+      }
     }
-    return payloads;
+    return answers;
   }
 
   /**
@@ -404,46 +457,59 @@ export class Workspace {
     const live = this.live.get(project.id);
     if (!live?.demonstration) throw new Error('Nothing is being recorded right now.');
 
-    // What the system looked like before this call, so a claim can be checked
-    // against what actually happened. Only read for tools the *system* says are
-    // read-only: everything else is expected to change things, so comparing
-    // would cost a round trip to learn nothing.
+    // What the system looked like before this call, so what the call did can
+    // be seen rather than assumed. Read for every tool the operator has not
+    // vouched for as read-only — those are the calls that might be the job,
+    // and a call of a tool that can write but wrote nothing (a SELECT through
+    // `execute`) must not be mistaken for it — and for tools the *system*
+    // claims are read-only, so the claim can be checked.
     const claimsReadOnly =
       live.connection.discovery.tools.find((entry) => entry.name === tool)?.hints.readOnly === true;
-    const before = claimsReadOnly ? await this.readPayloads(project) : undefined;
+    const vouchedReadOnly = project.readOnlyTools.includes(tool);
+    if (project.safety === 'production' && !vouchedReadOnly) throw new ProductionWriteRefused(tool);
+    const watch = claimsReadOnly || !vouchedReadOnly;
+    const before = watch ? await this.readPayloads(project) : undefined;
 
-    const result = await live.connection.call(tool, args);
-    if (result.structured !== undefined) {
-      live.demonstration.observations.push({ tool, payload: result.structured });
+    const result = await live.connection.call(tool, args, project.budgets.toolCallMs);
+    const normalized = normalizeCallResult(result);
+    if (hasPayload(normalized)) {
+      live.demonstration.observations.push({ tool, payload: normalized.payload });
     }
 
+    let changed: boolean | undefined;
     if (before !== undefined) {
       const after = await this.readPayloads(project);
-      const mismatch = detectMismatch(
-        tool,
-        { readOnly: true },
-        JSON.stringify(after) !== JSON.stringify(before),
-      );
-      // Recorded rather than acted on. RigorRun already treats every
-      // unconfirmed tool as writing, so this changes nothing about what it
-      // does — it changes what the person is told, which is the part that
-      // matters. A system that claims a tool only reads and then changes state
-      // is either wrong about its own implementation or misdescribing itself,
-      // and both are worth knowing before trusting a verdict from it.
-      if (mismatch && !live.mismatches.some((entry) => entry.tool === mismatch.tool)) {
-        live.mismatches.push(mismatch);
+      const differs = JSON.stringify(after) !== JSON.stringify(before);
+      // Whether a call changed anything is only knowable when the reads showed
+      // something. Two empty answers — a system that answers in prose, a
+      // browser that cannot read itself back — are "could not tell", and
+      // recording them as "changed nothing" would drop the job itself.
+      if (before.length > 0 || after.length > 0) changed = differs;
+      if (claimsReadOnly) {
+        const mismatch = detectMismatch(tool, { readOnly: true }, differs);
+        // Recorded rather than acted on. RigorRun already treats every
+        // unconfirmed tool as writing, so this changes nothing about what it
+        // does — it changes what the person is told, which is the part that
+        // matters. A system that claims a tool only reads and then changes state
+        // is either wrong about its own implementation or misdescribing itself,
+        // and both are worth knowing before trusting a verdict from it.
+        if (mismatch && !live.mismatches.some((entry) => entry.tool === mismatch.tool)) {
+          live.mismatches.push(mismatch);
+        }
       }
     }
 
     // Reads are watched but not written into the trace. The contract is
     // induced from what *changed*, and a read that changed nothing would
-    // become a step the agent is expected to reproduce.
-    if (!project.readOnlyTools.includes(tool)) {
+    // become a step the agent is expected to reproduce. A call that could
+    // have written is recorded with whether it did.
+    if (!vouchedReadOnly) {
       live.demonstration.entries.push({
         at: Date.now() - live.demonstration.startedAt,
         action: tool,
         args,
         ok: result.ok,
+        ...(changed === undefined ? {} : { changed }),
       });
     }
 
@@ -473,10 +539,15 @@ export class Workspace {
     const live = this.live.get(project.id);
     if (!live?.demonstration) throw new Error('Nothing is being recorded right now.');
 
-    const afterPayloads = await this.readPayloads(project);
+    const afterAnswers = await this.readAnswers(project);
+    const afterPayloads = afterAnswers.map((answer) => answer.payload);
     const observations = [
       ...live.demonstration.observations,
-      ...afterPayloads.map((payload) => ({ tool: 'after', payload })),
+      ...afterAnswers.map((answer) => ({
+        tool: 'after',
+        payload: answer.payload,
+        reading: { read: answer.read, moment: 'after' as const },
+      })),
     ];
 
     // Induction comes first, then both states are built from the payloads that
@@ -527,6 +598,7 @@ export function environmentConfig(project: Project): SystemEnvironmentConfig {
         : { kind: 'none' },
     safety: project.safety,
     readOnlyTools: project.readOnlyTools,
+    toolCallMs: project.budgets.toolCallMs,
   };
 }
 

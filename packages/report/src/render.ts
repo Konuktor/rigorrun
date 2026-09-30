@@ -6,12 +6,13 @@
  * the report routinely contains a prompt-injection payload and agent-written
  * prose, and neither is trusted.
  */
-import type {
-  AgentScore,
-  Benchmark,
-  CaseResult,
-  RunResult,
-  EnvironmentContract,
+import {
+  caseOutcome,
+  type AgentScore,
+  type Benchmark,
+  type CaseResult,
+  type RunResult,
+  type EnvironmentContract,
 } from '@rigorrun/core';
 import { pct } from '@rigorrun/scoring';
 import { esc, escJson } from './escape.ts';
@@ -137,10 +138,26 @@ function caseMatrix(run: RunResult): string {
         .map((agent) => {
           const result = run.caseResults.find((r) => r.caseId === caseId && r.agentId === agent.id);
           if (!result) return '<td></td>';
-          const ok = result.taskSuccess && result.policyCompliant;
-          const cls = result.unsafeActions > 0 ? 'cell unsafe' : ok ? 'cell pass' : 'cell fail';
-          const glyph = result.unsafeActions > 0 ? '!' : ok ? '✓' : '✕';
-          return `<td><span class="${cls}" title="${esc(result.caseName)}">${glyph}</span></td>`;
+          const outcome = caseOutcome(result);
+          const cls =
+            result.unsafeActions > 0
+              ? 'cell unsafe'
+              : outcome === 'PASS'
+                ? 'cell pass'
+                : outcome === 'FAIL' || outcome === 'AGENT_FAILURE'
+                  ? 'cell fail'
+                  : 'cell undecided';
+          const glyph =
+            result.unsafeActions > 0
+              ? '!'
+              : outcome === 'PASS'
+                ? '✓'
+                : outcome === 'FAIL' || outcome === 'AGENT_FAILURE'
+                  ? '✕'
+                  : outcome === 'TIMED_OUT'
+                    ? '⏱'
+                    : '?';
+          return `<td><span class="${cls}" title="${esc(result.caseName)} — ${esc(outcome)}${result.outcomeReason ? `: ${esc(result.outcomeReason)}` : ''}">${glyph}</span></td>`;
         })
         .join('');
       return `<tr>
@@ -158,7 +175,7 @@ function caseMatrix(run: RunResult): string {
     <tbody>${rows}</tbody>
   </table>
   <p class="dim mono" style="margin-top:10px">
-    ✓ passed · ✕ failed · <span class="cell unsafe" style="width:16px;height:16px;font-size:10px">!</span> unsafe action taken
+    ✓ passed · ✕ failed · ⏱ timed out · ? no verdict (abstained or harness failure) · <span class="cell unsafe" style="width:16px;height:16px;font-size:10px">!</span> unsafe action taken
   </p>
 </div>`;
 }
@@ -173,6 +190,7 @@ function reliability(run: RunResult): string {
         ${metric('Policy compliance', pct(s.policyComplianceRate), `${s.policyViolations} violation(s)`)}
         ${metric('Unsafe actions', String(s.unsafeActions), 'failed checks flagged unsafe')}
         ${metric('Error rate', pct(s.errorRate), 'agent or adapter failures')}
+        ${metric('No verdict', String(s.abstained + s.harnessFailures), `${s.abstained} abstained · ${s.timedOut} timed out · ${s.harnessFailures} harness`)}
         ${metric('Median latency', fmtMs(s.medianLatencyMs), `avg ${fmtMs(s.avgLatencyMs)} · p95 ${fmtMs(s.p95LatencyMs)}`)}
         ${metric('Cost', costLabel(s), esc(s.costNote))}
       </div>
@@ -201,7 +219,11 @@ function metric(label: string, value: string, sub: string): string {
 }
 
 function failures(run: RunResult, mode: string): string {
-  const failed = run.caseResults.filter((r) => !r.taskSuccess || !r.policyCompliant);
+  // Anything that is not a clean pass gets its evidence shown, including a
+  // result whose flags disagree with its classification.
+  const failed = run.caseResults.filter(
+    (r) => caseOutcome(r) !== 'PASS' || !r.taskSuccess || !r.policyCompliant,
+  );
   if (failed.length === 0) {
     return `<h2>Failures</h2><div class="panel"><p class="muted">No agent failed any case in this run.</p></div>`;
   }
@@ -221,9 +243,11 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
       <span class="tag" style="margin-left:8px">${esc(result.category)}</span>
       <div class="dim mono">${esc(result.caseId)} · ${esc(agentName)} · ${esc(result.correlationId)}</div>
     </div>
-    <div>${result.unsafeActions > 0 ? `<span class="tag fail">${result.unsafeActions} unsafe</span>` : '<span class="tag fail">FAIL</span>'}</div>
+    <div>${result.unsafeActions > 0 ? `<span class="tag fail">${result.unsafeActions} unsafe</span>` : `<span class="tag ${caseOutcome(result) === 'FAIL' ? 'fail' : 'error'}">${esc(caseOutcome(result))}</span>`}</div>
   </div>
   <div class="body">
+    ${result.outcomeReason ? `<p class="mono dim">${esc(result.outcomeReason)}</p>` : ''}
+    ${result.missingEvidence.length > 0 ? `<p class="mono dim">Missing evidence: ${result.missingEvidence.map(esc).join(', ')}</p>` : ''}
     <div class="grid cols-2">
       <div>
         <h3>What the agent did</h3>
@@ -351,6 +375,10 @@ function metadata(
     <dt>Finished</dt><dd>${esc(run.finishedAt)}</dd>
     <dt>Generated</dt><dd>${esc(generatedAt)}</dd>
     <dt>RigorRun</dt><dd>${esc(run.rigorrunVersion)}</dd>
+    <dt>Verification</dt><dd>${esc(run.verification)}</dd>
+    <dt>Isolation</dt><dd>${esc(run.isolation)}</dd>
+    ${run.limits.map((limit) => `<dt>Limit</dt><dd>${esc(limit.limit)}${limit.remedy ? ` <span class="dim">${esc(limit.remedy)}</span>` : ''}</dd>`).join('')}
+    ${(run.suiteQuality?.warnings ?? []).map((warning) => `<dt>Suite quality</dt><dd>${esc(warning)}</dd>`).join('')}
   </dl>
   <p class="dim mono" style="margin-top:10px">
     Hashes are SHA-256 over the canonical JSON of each artefact. The benchmark hash is computed

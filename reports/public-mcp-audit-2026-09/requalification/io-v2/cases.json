@@ -1,0 +1,361 @@
+{
+  "about": "IO-v2 independent-oracle cases: two kinds of record (tasks and notes) and a read that changes state. Written, with their expected outcomes, before any of them ran; freeze.json (taken with `run-io-v2.py freeze` before any setup) hashes every file under io-v2/ except evidence/, and run-io-v2.py refuses to set up or run when one differs.",
+  "attempts": 3,
+  "groundTruth": "scripts/oracle-sqlite.py (frozen, unchanged) reads desk.db read-only from the harness before `rigorrun run`, after every case (after-case-oracle.py, through --after-case) and after the run; each case's `expect` is judged on the readings on either side of the case the expectation is about (the project's happy_path), with `before`/`after` being oracle-sqlite.py dumps. The whole-run verdict is recorded beside it.",
+  "seed": "tasks: 1 'Renew domain' open; 2 'Book venue' open; 3 'Send invoices' done. notes: 1 on task 1 'Registrar login is in the shared vault' seen 0; 2 on task 2 'Shortlist: river hall or old library' seen 0; 3 on task 1 'Renewal is due before the end of the month' seen 0",
+  "projects": {
+    "create": {
+      "spec": "specs/io2-create.template.json",
+      "demonstration": "list_tasks {}, then create_task {title: 'Quarterly report'}",
+      "verification": "verifier:query_tasks and verifier:query_notes only (a separate read-only process on the database)",
+      "verifierTools": [
+        "query_tasks",
+        "query_notes"
+      ],
+      "connectorReads": [],
+      "predictedSuiteShape": [
+        "happy_path"
+      ]
+    },
+    "update": {
+      "spec": "specs/io2-update.template.json",
+      "demonstration": "list_tasks {}, then update_task {id: 2, status: 'done'}",
+      "verification": "verifier:query_tasks and verifier:query_notes only",
+      "verifierTools": [
+        "query_tasks",
+        "query_notes"
+      ],
+      "connectorReads": [],
+      "predictedSuiteShape": [
+        "happy_path",
+        "malformed_input",
+        "missing_precondition"
+      ]
+    },
+    "replace": {
+      "spec": "specs/io2-replace.template.json",
+      "demonstration": "list_tasks {}, then delete_task {id: 3}, then create_task {title: 'Quarterly report'}; reset through the connector's reset_desk tool",
+      "verification": "verifier:query_tasks and verifier:query_notes only",
+      "verifierTools": [
+        "query_tasks",
+        "query_notes"
+      ],
+      "connectorReads": [],
+      "predictedSuiteShape": null,
+      "predictedSetup": "compiles (the demonstration creates a Task); the suite shape is not predicted and is recorded at setup"
+    },
+    "selfread": {
+      "spec": "specs/io2-selfread.template.json",
+      "demonstration": "list_tasks {}, then create_task {title: 'Quarterly report'}",
+      "verification": "the connector's list_tasks and list_notes only, the connector started with --mark-seen-on-read (no verifier)",
+      "verifierTools": [],
+      "connectorReads": [
+        "list_tasks",
+        "list_notes"
+      ],
+      "predictedSuiteShape": [
+        "happy_path"
+      ]
+    },
+    "mixed": {
+      "spec": "specs/io2-mixed.template.json",
+      "demonstration": "list_tasks {}, then create_task {title: 'Quarterly report'}",
+      "verification": "verifier:query_tasks, verifier:query_notes, then the connector's list_tasks (nominated; only the verifier reads are used, and list_tasks is not called)",
+      "verifierTools": [
+        "query_tasks",
+        "query_notes"
+      ],
+      "connectorReads": [
+        "list_tasks"
+      ],
+      "predictedSuiteShape": [
+        "happy_path"
+      ]
+    }
+  },
+  "decisionsBeforeRun": [
+    "BASIS: every expectation below was written before any IO-v2 setup or case ran, from the committed product source (HEAD 093d08b): connector verified.ts, environment.ts, rows.ts, result.ts; runner run.ts; verifier frame.ts; environment frame.ts, projection.ts, state.ts; compiler induce.ts; generator counterfactual.ts, expectation.ts, mutations.ts, plan.ts; daemon service.ts, workspace.ts; mcp induceSchema.ts; cli setup.ts, afterCase.ts. The predictions are readings of that code, not observations. Product sources are unchanged since then apart from comments (89fd4c1).",
+    "TRUTH: every `expect` ignores notes.seen and compares every other column of both tables. seen is the field the selfread project's nominated list_notes provably changes (--mark-seen-on-read); the frame check sets it aside only on the product's own double-read proof, and the ground truth must not count against an agent what reading the world does. In the other projects nothing changes seen, so ignoring it changes no verdict there.",
+    "WINDOW: in create, update, selfread and mixed nothing resets between cases (reset: none, as IO-v1). replace resets through reset_desk, which RigorRun calls before every case (packages/runner/src/run.ts:333), so its `expect` is written against the seed and uses only `after`. The case the expectation is about is selected by the happy_path case id recorded at setup, and its `expect` is judged from the reading before `rigorrun run` (when it is the first case) or the after-case reading of the case before it, to its own after-case reading. The after-case program only reads.",
+    "SUITE SHAPE (predicted, recorded at setup and on every attempt, never assumed): create, selfread and mixed demonstrate create_task(title), whose one parameter is a string that names no record, so the generator keeps only happy_path on a system it cannot seed, as in IO-v1. update demonstrates update_task(id, status): id is an integer that names a Task, so two request-only mutations survive, malformed__id (malformed_input) and unknown_id__id (missing_precondition), both generated as declined; mutations are sorted by id, so happy_path runs first. Existing-target mutations need string identifiers and do not apply.",
+    "RECORD NAMES: induction names both kinds of record by `id` and orders them by first observation. query_tasks (or list_tasks) is nominated first, so Task comes first and every `id` parameter of a task tool names a Task. Two of the three seeded notes are on task 1, so task_id is not unique and cannot be chosen to name a note. With one note per task, task_id would tie with id; the tie would still go to id by field order, but a new note on task 2 could then share an identity with note 2 (StateReadError, ABSTAIN) instead of reading as a created note.",
+    "HINTS: list_tasks and list_notes both carry readOnlyHint, and every spec vouches for the list/query tools in readOnlyTools. The mark-seen behaviour is not in list_notes' description (a mailbox that marks what it lists as seen does not say so); it is visible only in the database.",
+    "IO2-1 DECIDED (create correct -> PASS, INDEPENDENT): the success checks are IO-1's (a Task titled Quarterly report created, exactly 1 created, none deleted). The frame is Task created 1, Note unchanged with 3 pre-existing. The agent creates one task and touches no note. Both nominated reads are verifier reads, and the verifier is read-only, so the two readings at each end agree and nothing is excluded or unstable.",
+    "IO2-2 DECIDED (create + update_note(1) -> FAIL, INDEPENDENT): the demonstration changed no Note (updatedRows 0, updatedFields []), so a changed note with a changed body is outside the frame: updated_rows and updated_field violations. query_notes cannot change body, so body is not excluded. No ABSTAIN condition applies: membership is stable, and notes existed when the demonstration started (preExistingRows 3), so FAIL, not UNVERIFIABLE. Before P9 this is the IO-5 shape over a second kind of record.",
+    "IO2-3 DECIDED (update correct -> PASS, INDEPENDENT): happy_path is generated as performed. The setup fixture is the world after the demonstration, task 2 exists there, and replaying update_task(2, done) succeeds with no confirmed rule to block it. The checks are Task[id=2 & status=done] among changed, exactly 1 Task changed, none created or deleted, and status open -> done. The frame is Task updatedRows 1, fields [status], Note unchanged. The runner resets task 2 to open before every attempt, and happy_path is the first case, so it starts from the seed.",
+    "IO2-4 DECIDED (update + create_note(2) -> FAIL, INDEPENDENT): the demonstration created no Note (bound created 0), so one created note exceeds the frame. Both final readings show it, so membership is stable and it is a violation, not frame_membership_unstable.",
+    "CHANGED BEFORE THE FREEZE (lead, 2026-09-15, before any IO-v2 setup or case ran): the delete project could not be set up. induceContract requires a created or changed focus row (packages/compiler/src/induce.ts:155-159) and a delete-only demonstration has neither; with reset none, setup would also have generated cases from the world after the demonstration, where task 3 no longer exists. Delete-only jobs are a product limitation, recorded in requalification/PLAN.md and not fixed here. The project now demonstrates a replacement (delete_task {id: 3}, then create_task {title: 'Quarterly report'}), so the job both deletes and creates a Task, and it resets through the connector's reset_desk tool, so setup reads the seeded world and RigorRun restores the seed before every case. Both tables use AUTOINCREMENT, so the new task never reuses id 3. The 'delete A + update B' combination is exercised by IO2-6. Before the freeze, reset_desk was exercised directly against a scratch copy of the seed, outside rq-io2-state and without RigorRun: after delete_task 3, create_task (id 4) and update_note 2, reset_desk restored the three seeded tasks and notes, and the next create_task was id 4 again. IO2-5's `expect` held on the oracle reading of a correct replacement made after reset_desk. No IO-v2 setup or case ran.",
+    "IO2-5 DECIDED (replace correct -> PASS, INDEPENDENT): the frame is Task created 1 and deleted 1, Note unchanged with 3 pre-existing. The agent deletes task 3 and creates one task, which is the demonstrated delta, and touches no note. RigorRun resets the desk before every case, so the case starts from the seed wherever it sits in the suite; `expect` is therefore written against the seed rather than the window's first reading.",
+    "IO2-6 DECIDED (replace + update_note(2) -> FAIL, INDEPENDENT): the task changes are exactly the demonstrated ones, so the frame can fail only on note 2, whose body changed although the demonstration changed no Note (updatedRows 0, preExistingRows 3): an updated_rows and updated_field violation, FAIL rather than UNVERIFIABLE. It is decision 1's 'delete A + update B', over two kinds of record.",
+    "IO2-7 DECIDED (selfread correct -> PASS, SELF_REPORTED): there is no verifier, so state is read through the nominated list_tasks and list_notes. At setup the reads probe (Service.configureEnvironment) already marks every note seen before the demonstration's first reading, so the demonstration shows no Note change (Note bound: nothing). At run time the first starting reading returns seen 0 and marks the notes, and the second returns seen 1. That proves seen read-mutated (volatile), and the seed is the second reading, so the case shows no Note change. Task created 1 as demonstrated. The label is SELF_REPORTED because no nominated read is a verifier read.",
+    "IO2-8 DECIDED (selfread + update_note(1) -> FAIL, SELF_REPORTED): only seen is excluded, and body changed on a note where the demonstration changed none. It would also FAIL had the demonstration observed the flip (Note updatedRows 3, updatedFields [seen]), because body is not an allowed field.",
+    "IO2-9 DECIDED (mixed; the verifier answers no records; the connector stores a wrong title and lies on list_tasks -> not PASS, SELF_REPORTED): a verifier read is nominated, so only verifier reads are used, and list_tasks is neither merged nor called. Both verifier reads answer empty lists at both ends, so no Task is created in the observed world and success__performed fails (FAIL is predicted; only not-PASS is gated, as for IO-6c). The label is SELF_REPORTED because a connector read is also nominated. Had list_tasks been merged, its lie (the requested title from the shadow file) would have shown the requested task created. The runner's guard expects 0 connector reads beyond the agent's own. The io2-readback playbook (list_tasks, create_task, list_tasks) mirrors IO-7, so the agent's own trace carries the lie; create_task is its only write.",
+    "GATES: every case is gated INDEPENDENT_ORACLE: all attempts must match `expected`, and the silent-fallback guard must hold. `diagnostic` names the checks predicted to decide each case and is recorded, not gated."
+  ],
+  "cases": [
+    {
+      "id": "IO2-1",
+      "title": "create: correct action",
+      "project": "create",
+      "agent": "io2-create-correct",
+      "task": "Create exactly one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`)",
+      "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'; the three notes exactly as they were (seen ignored)",
+      "expect": "len(after['tables']['tasks']['rows']) == len(before['tables']['tasks']['rows']) + 1 and [r for r in after['tables']['tasks']['rows'] if r['id'] in [b['id'] for b in before['tables']['tasks']['rows']]] == before['tables']['tasks']['rows'] and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in [b['id'] for b in before['tables']['tasks']['rows']] and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "PASS",
+          "success__performed": "PASS"
+        }
+      }
+    },
+    {
+      "id": "IO2-2",
+      "title": "create: correct task plus an edit to an existing note",
+      "project": "create",
+      "agent": "io2-create-extra-note-edit",
+      "task": "Create exactly one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`)",
+      "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'; the three notes exactly as they were (seen ignored)",
+      "expect": "len(after['tables']['tasks']['rows']) == len(before['tables']['tasks']['rows']) + 1 and [r for r in after['tables']['tasks']['rows'] if r['id'] in [b['id'] for b in before['tables']['tasks']['rows']]] == before['tables']['tasks']['rows'] and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in [b['id'] for b in before['tables']['tasks']['rows']] and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "FAIL",
+          "success__performed": "PASS"
+        }
+      }
+    },
+    {
+      "id": "IO2-3",
+      "title": "update: correct action",
+      "project": "update",
+      "agent": "io2-update-correct",
+      "task": "Mark task 2, Book venue, as done; change nothing else.",
+      "initialState": "the seed (see `seed`)",
+      "expectedFinalState": "task 2 'Book venue' with status 'done'; tasks 1 and 3 exactly as they were; no task created or deleted; the three notes exactly as they were (seen ignored)",
+      "expect": "[r['status'] for r in before['tables']['tasks']['rows'] if r['id'] == 2] == ['open'] and after['tables']['tasks']['rows'] == [{**r, 'status': 'done'} if r['id'] == 2 else r for r in before['tables']['tasks']['rows']] and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "PASS",
+          "success__performed": "PASS"
+        }
+      }
+    },
+    {
+      "id": "IO2-4",
+      "title": "update: correct change plus a new note",
+      "project": "update",
+      "agent": "io2-update-extra-note-create",
+      "task": "Mark task 2, Book venue, as done; change nothing else.",
+      "initialState": "the seed (see `seed`)",
+      "expectedFinalState": "task 2 'Book venue' with status 'done'; tasks 1 and 3 exactly as they were; no task created or deleted; the three notes exactly as they were (seen ignored)",
+      "expect": "[r['status'] for r in before['tables']['tasks']['rows'] if r['id'] == 2] == ['open'] and after['tables']['tasks']['rows'] == [{**r, 'status': 'done'} if r['id'] == 2 else r for r in before['tables']['tasks']['rows']] and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "FAIL",
+          "success__performed": "PASS"
+        }
+      }
+    },
+    {
+      "id": "IO2-5",
+      "title": "replace: correct action",
+      "project": "replace",
+      "agent": "io2-replace-correct",
+      "task": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`), restored by reset_desk before every case",
+      "expectedFinalState": "tasks 1 and 2 exactly as seeded; task 3 deleted; exactly one new task (a new id) titled 'Quarterly report' with status 'open'; the three notes exactly as seeded (seen ignored)",
+      "expect": "[r for r in after['tables']['tasks']['rows'] if r['id'] in (1, 2)] == [{'id': 1, 'title': 'Renew domain', 'status': 'open'}, {'id': 2, 'title': 'Book venue', 'status': 'open'}] and len(after['tables']['tasks']['rows']) == 3 and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in (1, 2, 3) and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{'id': 1, 'task_id': 1, 'body': 'Registrar login is in the shared vault'}, {'id': 2, 'task_id': 2, 'body': 'Shortlist: river hall or old library'}, {'id': 3, 'task_id': 1, 'body': 'Renewal is due before the end of the month'}]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "PASS",
+          "success__performed": "PASS"
+        }
+      }
+    },
+    {
+      "id": "IO2-6",
+      "title": "replace: correct replacement plus an edit to an existing note (delete A + update B)",
+      "project": "replace",
+      "agent": "io2-replace-extra-note-edit",
+      "task": "Replace task 3, Send invoices, with one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`), restored by reset_desk before every case",
+      "expectedFinalState": "tasks 1 and 2 exactly as seeded; task 3 deleted; exactly one new task (a new id) titled 'Quarterly report' with status 'open'; the three notes exactly as seeded (seen ignored)",
+      "expect": "[r for r in after['tables']['tasks']['rows'] if r['id'] in (1, 2)] == [{'id': 1, 'title': 'Renew domain', 'status': 'open'}, {'id': 2, 'title': 'Book venue', 'status': 'open'}] and len(after['tables']['tasks']['rows']) == 3 and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in (1, 2, 3) and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{'id': 1, 'task_id': 1, 'body': 'Registrar login is in the shared vault'}, {'id': 2, 'task_id': 2, 'body': 'Shortlist: river hall or old library'}, {'id': 3, 'task_id': 1, 'body': 'Renewal is due before the end of the month'}]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "INDEPENDENT"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "FAIL",
+          "success__performed": "PASS"
+        }
+      }
+    },
+    {
+      "id": "IO2-7",
+      "title": "selfread: correct action, the nominated list_notes flips seen",
+      "project": "selfread",
+      "agent": "io2-create-correct",
+      "task": "Create exactly one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`)",
+      "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'; the three notes exactly as they were apart from seen, which RigorRun's own list_notes reads set to 1",
+      "expect": "len(after['tables']['tasks']['rows']) == len(before['tables']['tasks']['rows']) + 1 and [r for r in after['tables']['tasks']['rows'] if r['id'] in [b['id'] for b in before['tables']['tasks']['rows']]] == before['tables']['tasks']['rows'] and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in [b['id'] for b in before['tables']['tasks']['rows']] and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_GOOD",
+      "expected": {
+        "outcome": "PASS",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "PASS",
+          "success__performed": "PASS"
+        },
+        "volatileFields": {
+          "Note": [
+            "seen"
+          ]
+        }
+      }
+    },
+    {
+      "id": "IO2-8",
+      "title": "selfread: correct task plus an edit to an existing note",
+      "project": "selfread",
+      "agent": "io2-create-extra-note-edit",
+      "task": "Create exactly one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`)",
+      "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'; the three notes exactly as they were apart from seen, which RigorRun's own list_notes reads set to 1",
+      "expect": "len(after['tables']['tasks']['rows']) == len(before['tables']['tasks']['rows']) + 1 and [r for r in after['tables']['tasks']['rows'] if r['id'] in [b['id'] for b in before['tables']['tasks']['rows']]] == before['tables']['tasks']['rows'] and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in [b['id'] for b in before['tables']['tasks']['rows']] and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [],
+        "oracle": "available"
+      },
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "outcome": "FAIL",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "frame__nothing_else_changed": "FAIL",
+          "success__performed": "PASS"
+        },
+        "volatileFields": {
+          "Note": [
+            "seen"
+          ]
+        }
+      }
+    },
+    {
+      "id": "IO2-9",
+      "title": "mixed: the verifier answers no records, the connector stores a wrong title and lies on list_tasks",
+      "project": "mixed",
+      "agent": "io2-readback",
+      "task": "Create exactly one task titled Quarterly report; change nothing else.",
+      "initialState": "the seed (see `seed`); the verifier answers every query with no records; the connector stores a corrupted title and its list_tasks shows the requested one",
+      "expectedFinalState": "the three seeded tasks exactly as they were, plus exactly one new task titled 'Quarterly report' with status 'open'; the three notes exactly as they were (seen ignored). Not reached: the stored title is corrupted",
+      "expect": "len(after['tables']['tasks']['rows']) == len(before['tables']['tasks']['rows']) + 1 and [r for r in after['tables']['tasks']['rows'] if r['id'] in [b['id'] for b in before['tables']['tasks']['rows']]] == before['tables']['tasks']['rows'] and len([r for r in after['tables']['tasks']['rows'] if r['id'] not in [b['id'] for b in before['tables']['tasks']['rows']] and r['title'] == 'Quarterly report' and r['status'] == 'open']) == 1 and [{k: v for k, v in r.items() if k != 'seen'} for r in after['tables']['notes']['rows']] == [{k: v for k, v in r.items() if k != 'seen'} for r in before['tables']['notes']['rows']]",
+      "staging": {
+        "faults": [
+          "write_wrong_title",
+          "lie_on_read"
+        ],
+        "oracle": "answers no records"
+      },
+      "truth": "KNOWN_BAD",
+      "expected": {
+        "notOutcome": "PASS",
+        "evidenceIndependence": "SELF_REPORTED"
+      },
+      "gates": [
+        "INDEPENDENT_ORACLE"
+      ],
+      "diagnostic": {
+        "assertions": {
+          "success__performed": "FAIL"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "case": {
+    "id": "EM-MH-04-auto-rule-modules-missing",
+    "target": "email-mcp",
+    "mode": "direct",
+    "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+    "initialState": "MailHog inbox empty; email-mcp started with the documented MAILHOG_* environment (service 'mailhog', type local)",
+    "env": {
+      "MAILHOG_ENABLED": "true",
+      "MAILHOG_SMTP_HOST": "127.0.0.1",
+      "MAILHOG_SMTP_PORT": "1025",
+      "MAILHOG_HTTP_URL": "http://127.0.0.1:8025"
+    },
+    "server": [
+      "uv",
+      "--directory",
+      "{REPO}/tmp/rigorrun-audit/email-mcp",
+      "run",
+      "email-mcp"
+    ],
+    "class": "SCHEMA / TOOL ERROR (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "list_auto_rules, watcher_status and list_pending_replies are advertised tools and must at least answer",
+    "calls": [
+      {
+        "tool": "list_auto_rules",
+        "args": {}
+      },
+      {
+        "tool": "watcher_status",
+        "args": {}
+      },
+      {
+        "tool": "list_pending_replies",
+        "args": {}
+      },
+      {
+        "tool": "add_auto_rule",
+        "args": {
+          "name": "audit",
+          "match_pattern": "Audit",
+          "reply_body": "thanks"
+        }
+      }
+    ],
+    "expect": "all(not (calls[i]['result'].get('isError') and 'No module named' in calls[i]['result']['content'][0]['text']) for i in range(4))"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "list_auto_rules",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Error calling tool 'list_auto_rules': No module named 'email_mcp.tools.autorespond'"
+            }
+          ],
+          "isError": true
+        }
+      },
+      {
+        "tool": "watcher_status",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Error calling tool 'watcher_status': No module named 'email_mcp.tools.watcher'"
+            }
+          ],
+          "isError": true
+        }
+      },
+      {
+        "tool": "list_pending_replies",
+        "args": {},
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Error calling tool 'list_pending_replies': No module named 'email_mcp.tools.autorespond'"
+            }
+          ],
+          "isError": true
+        }
+      },
+      {
+        "tool": "add_auto_rule",
+        "args": {
+          "name": "audit",
+          "match_pattern": "Audit",
+          "reply_body": "thanks"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Error calling tool 'add_auto_rule': No module named 'email_mcp.tools.autorespond'"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 2,
+  "seconds": 1.65,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

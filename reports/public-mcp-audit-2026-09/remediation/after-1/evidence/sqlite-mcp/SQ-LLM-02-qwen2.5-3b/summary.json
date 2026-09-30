@@ -1,0 +1,39 @@
+{
+  "id": "SQ-LLM-02-qwen2.5-3b",
+  "target": "sqlite-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 25.64,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    },
+    {
+      "attempt": 2,
+      "seconds": 15.14,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    },
+    {
+      "attempt": 3,
+      "seconds": 15.07,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    }
+  ],
+  "reproduction": "3/3"
+}

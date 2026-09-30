@@ -1,0 +1,207 @@
+{
+  "project": "mixed-a",
+  "exit": 0,
+  "productCommit": "a9edbec98ea9056bf1b6a3773cc3fa9ba2692d01",
+  "callsDuringSetup": [
+    {
+      "at": 1789406877.1721675,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789406877.1734056,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1767929,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789406877.1773448,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1800237,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789406877.1804821,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1808555,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1812167,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789406877.1813488,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1841612,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 3
+    },
+    {
+      "at": 1789406877.1843903,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1846857,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1789406877.1863759,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789406877.1865118,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.1891687,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789406877.1894617,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.2175088,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789406877.2178202,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.2212117,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789406877.2215173,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.2222662,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 4
+    },
+    {
+      "at": 1789406877.222449,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.2228768,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1789406877.2248394,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1789406877.2250717,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.2257416,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1789406877.2259889,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406877.2270505,
+      "server": "taskdesk-oracle",
+      "tool": "query_tasks",
+      "answered": true,
+      "rows": 5
+    },
+    {
+      "at": 1789406877.2272348,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    }
+  ],
+  "summary": {
+    "projectId": "p_7d22c09feeb3",
+    "readsProblem": "",
+    "tools": 5,
+    "records": [
+      "Task"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "io-readback",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "suiteShape": [
+    "happy_path"
+  ],
+  "budgetsMs": [
+    60000
+  ],
+  "ok": true
+}

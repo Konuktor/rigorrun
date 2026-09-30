@@ -1,0 +1,40 @@
+{
+  "worktide-mcp/w2": {
+    "target": "worktide-mcp",
+    "journey": "w2",
+    "spec": "specs-worktide-w2.json",
+    "originalHome": "home-worktide-w2",
+    "home": "{REPO}/tmp/rigorrun-audit/rq-n1-homes/home-worktide-w2",
+    "out": "requalification/n1/evidence/w2-setup/traces/worktide-mcp/w2-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)"
+    },
+    "project": "p_7ed1cf6d1669",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Record1",
+      "Group",
+      "Task",
+      "Record4",
+      "Record5"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "quality": {
+      "false_positive_rate": 1,
+      "case_discrimination": 0,
+      "boundary_discrimination": "no threshold rule found",
+      "rule_decisiveness": 0,
+      "mutant_kill_rate": 1,
+      "false_accusation": 1,
+      "replay_stability": true,
+      "hidden_answer_isolation": true,
+      "provenance_strength": "0 strong \u00b7 0 moderate \u00b7 0 weak",
+      "unconfirmed_rules": 0,
+      "verifier_determinism": true
+    }
+  }
+}

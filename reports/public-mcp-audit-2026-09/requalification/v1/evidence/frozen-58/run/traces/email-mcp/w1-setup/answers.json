@@ -1,0 +1,94 @@
+[
+  {
+    "questionId": "q_name_Record1",
+    "value": "Record1"
+  },
+  {
+    "questionId": "q_id_Record1",
+    "value": "count"
+  },
+  {
+    "questionId": "q_role_Record1_services",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Record1_services",
+    "value": "no"
+  },
+  {
+    "questionId": "q_unit_Record1_enabled_count",
+    "value": "count"
+  },
+  {
+    "questionId": "q_role_Record1_enabled_count",
+    "value": "quantity"
+  },
+  {
+    "questionId": "q_role_Record1_types",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Record1_types",
+    "value": "no"
+  },
+  {
+    "questionId": "q_name_Mailhog",
+    "value": "Mailhog"
+  },
+  {
+    "questionId": "q_id_Mailhog",
+    "value": "type"
+  },
+  {
+    "questionId": "q_role_Mailhog_enabled",
+    "value": "flag"
+  },
+  {
+    "questionId": "q_role_Mailhog_configured",
+    "value": "flag"
+  },
+  {
+    "questionId": "q_role_Mailhog_description",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Mailhog_description",
+    "value": "no"
+  },
+  {
+    "questionId": "q_name_Record3",
+    "value": "Record3"
+  },
+  {
+    "questionId": "q_id_Record3",
+    "value": "status"
+  },
+  {
+    "questionId": "q_role_Record3_success",
+    "value": "flag"
+  },
+  {
+    "questionId": "q_role_Record3_service",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Record3_service",
+    "value": "no"
+  },
+  {
+    "questionId": "q_role_Record3_note",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Record3_note",
+    "value": "no"
+  },
+  {
+    "questionId": "q_role_Record3_message",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Record3_message",
+    "value": "no"
+  }
+]

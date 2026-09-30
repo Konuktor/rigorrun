@@ -1,0 +1,39 @@
+{
+  "name": "taskdesk: create one task, verified independently",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "{PYTHON}",
+    "args": ["{IO}/taskdesk_server.py", "--db", "{STATE}/tasks.db", "--faults", "{STATE}/faults.json", "--shadow", "{STATE}/shadow.json", "--calls-log", "{STATE}/calls.log"],
+    "url": "",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "{PYTHON}",
+      "args": ["{IO}/taskdesk_oracle_server.py", "--db", "{STATE}/tasks.db", "--down-flag", "{STATE}/oracle-down.flag", "--empty-flag", "{STATE}/oracle-empty.flag", "--calls-log", "{STATE}/calls.log"],
+      "url": "",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": ["list_tasks", "verifier:query_tasks"],
+  "verifierReads": [{ "tool": "verifier:query_tasks", "args": {} }],
+  "reset": { "kind": "none" },
+  "teach": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } }
+  ],
+  "answers": {},
+  "review": { "confirm": [], "reject": [] },
+  "quality": false,
+  "agents": [
+    { "name": "io-correct", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-correct.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io-claim-only", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-claim-only.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io-duplicate", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-duplicate.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io-extra-update", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-extra-update.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io-correct-oracle-down", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-correct-oracle-down.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io-readback", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io-readback.json", "{TRACES}"], "cwd": "{STATE}" }
+  ]
+}

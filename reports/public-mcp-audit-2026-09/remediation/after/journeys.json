@@ -1,0 +1,303 @@
+{
+  "sqlite-mcp/w1": {
+    "target": "sqlite-mcp",
+    "journey": "w1",
+    "spec": "specs-sqlite-w1.json",
+    "originalHome": "home-sqlite-w1",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1",
+    "out": "remediation/after/traces/sqlite-mcp/w1-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
+    },
+    "project": "p_0bb653210e4f",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Row",
+      "Row2",
+      "Table"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "agents": [
+      {
+        "name": "sq-w1-correct",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-missing-action",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-duplicate",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-wrong-value",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-wrong-entity",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-forbidden-extra",
+        "ok": true
+      }
+    ]
+  },
+  "sqlite-mcp/w1b": {
+    "target": "sqlite-mcp",
+    "journey": "w1b",
+    "spec": "specs-sqlite-w1b.json",
+    "originalHome": "home-sqlite-w1b",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1b",
+    "out": "remediation/after/traces/sqlite-mcp/w1b-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
+    },
+    "project": "p_68cddc5e250a",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Row",
+      "Row2",
+      "Table"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "agents": [
+      {
+        "name": "sq-w1-correct",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-missing-action",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-duplicate",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-wrong-value",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-wrong-entity",
+        "ok": true
+      },
+      {
+        "name": "sq-w1-forbidden-extra",
+        "ok": true
+      },
+      {
+        "name": "ollama-llama3.1-8b",
+        "ok": true
+      },
+      {
+        "name": "ollama-qwen2.5-3b",
+        "ok": true
+      }
+    ]
+  },
+  "email-mcp/w1": {
+    "target": "email-mcp",
+    "journey": "w1",
+    "spec": "specs-email-w1.json",
+    "originalHome": "home-email-w1",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-w1",
+    "out": "remediation/after/traces/email-mcp/w1-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-email-mcp: MailHog up on http://127.0.0.1:8025, inbox empty"
+    },
+    "project": "p_fc43463f8ff2",
+    "ok": false,
+    "stage": "compile",
+    "error": "journey: POST /api/projects/p_fc43463f8ff2/compile \u2192 400: {\"error\":\"The recording performed \\\"send_email\\\" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.\"}",
+    "readsProblem": "These reads did not answer: check_inbox. RigorRun will not be able to verify what they cover.",
+    "schemaEntities": [
+      "Record1",
+      "Mailhog",
+      "Record3"
+    ],
+    "compiled": false,
+    "suiteBuilt": false
+  },
+  "email-mcp/gm-w1": {
+    "target": "email-mcp",
+    "journey": "gm-w1",
+    "spec": "specs-email-gm-w1.json",
+    "originalHome": "home-email-gm-w1",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-w1",
+    "out": "remediation/after/traces/email-mcp/gm-w1-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-greenmail: GreenMail purged, relay on 127.0.0.1:3125"
+    },
+    "project": "p_4ca6df2ec6c4",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Record1",
+      "Record2",
+      "Email"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "quality": {
+      "false_positive_rate": 0,
+      "case_discrimination": 0,
+      "boundary_discrimination": "no threshold rule found",
+      "rule_decisiveness": 0,
+      "mutant_kill_rate": 0.5,
+      "false_accusation": 0,
+      "replay_stability": false,
+      "hidden_answer_isolation": true,
+      "provenance_strength": "0 strong \u00b7 0 moderate \u00b7 0 weak",
+      "unconfirmed_rules": 0,
+      "verifier_determinism": true
+    },
+    "agents": [
+      {
+        "name": "gm-correct",
+        "ok": true
+      },
+      {
+        "name": "gm-missing-action",
+        "ok": true
+      },
+      {
+        "name": "gm-duplicate",
+        "ok": true
+      },
+      {
+        "name": "gm-wrong-recipient",
+        "ok": true
+      },
+      {
+        "name": "gm-wrong-subject",
+        "ok": true
+      },
+      {
+        "name": "ollama-qwen2.5-3b",
+        "ok": true
+      }
+    ]
+  },
+  "email-mcp/gm-fault": {
+    "target": "email-mcp",
+    "journey": "gm-fault",
+    "spec": "specs-email-gm-fault.json",
+    "originalHome": "home-email-gm-fault",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-fault",
+    "out": "remediation/after/traces/email-mcp/gm-fault-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-greenmail: GreenMail purged, relay on 127.0.0.1:3125"
+    },
+    "project": "p_6692388c0a7f",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Record1",
+      "Record2",
+      "Email"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "agents": [
+      {
+        "name": "gm-retry-after-lost-response",
+        "ok": true
+      }
+    ],
+    "armedAfterSetup": [
+      "FAULT_DROP_NTH",
+      "FAULT_DROP_TOOL"
+    ]
+  },
+  "worktide-mcp/w2": {
+    "target": "worktide-mcp",
+    "journey": "w2",
+    "spec": "specs-worktide-w2.json",
+    "originalHome": "home-worktide-w2",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-worktide-w2",
+    "out": "remediation/after/traces/worktide-mcp/w2-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)"
+    },
+    "project": "p_7026aaef7bd9",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Record1",
+      "Group",
+      "Task",
+      "Record4",
+      "Record5"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "quality": {
+      "false_positive_rate": 1,
+      "case_discrimination": 0,
+      "boundary_discrimination": "no threshold rule found",
+      "rule_decisiveness": 0,
+      "mutant_kill_rate": 1,
+      "false_accusation": 1,
+      "replay_stability": true,
+      "hidden_answer_isolation": true,
+      "provenance_strength": "0 strong \u00b7 0 moderate \u00b7 0 weak",
+      "unconfirmed_rules": 0,
+      "verifier_determinism": true
+    }
+  },
+  "worktide-mcp/w3": {
+    "target": "worktide-mcp",
+    "journey": "w3",
+    "spec": "specs-worktide-w3.json",
+    "originalHome": "home-worktide-w3",
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-worktide-w3",
+    "out": "remediation/after/traces/worktide-mcp/w3-setup",
+    "reset": {
+      "exit": 0,
+      "tail": "reset-worktide: restored snapshot (tasks running_timers time_entries = 3 0 10)"
+    },
+    "project": "p_fc691390b34b",
+    "ok": true,
+    "readsProblem": "(no problem reported)",
+    "schemaEntities": [
+      "Record1",
+      "Group",
+      "Task",
+      "Record4",
+      "Record5"
+    ],
+    "compiled": true,
+    "suiteBuilt": true,
+    "cases": 1,
+    "quality": {
+      "false_positive_rate": 1,
+      "case_discrimination": 0,
+      "boundary_discrimination": "no threshold rule found",
+      "rule_decisiveness": 0,
+      "mutant_kill_rate": 1,
+      "false_accusation": 1,
+      "replay_stability": true,
+      "hidden_answer_isolation": true,
+      "provenance_strength": "0 strong \u00b7 0 moderate \u00b7 0 weak",
+      "unconfirmed_rules": 0,
+      "verifier_determinism": true
+    }
+  }
+}

@@ -1,0 +1,10 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ✓ packages/runner/test/zz_heldout.test.ts (8 tests) 350ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  17:15:16
+   Duration  1.14s (transform 518ms, setup 0ms, import 681ms, tests 350ms, environment 0ms)
+

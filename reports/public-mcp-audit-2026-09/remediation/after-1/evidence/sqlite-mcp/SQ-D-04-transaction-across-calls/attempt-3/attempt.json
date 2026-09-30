@@ -1,0 +1,109 @@
+{
+  "case": {
+    "id": "SQ-D-04-transaction-across-calls",
+    "target": "sqlite-mcp",
+    "mode": "direct",
+    "oracle": "oracle-sqlite.py",
+    "initialState": "seed: tasks 1-3, audit_log 1",
+    "class": "STATE CONSISTENCY / transaction",
+    "truth": "EXPECTED_PASS",
+    "intent": "BEGIN, INSERT, ROLLBACK across three tool calls must leave no row",
+    "server": [
+      "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+      "--database",
+      "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+      "--preset",
+      "read-write"
+    ],
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "BEGIN"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (id,title) VALUES (99,'tx probe')"
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "ROLLBACK"
+        }
+      }
+    ],
+    "expect": "after==before"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "execute",
+        "args": {
+          "query": "BEGIN"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[],\"rows_changed\":0}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [],
+            "rows_changed": 0
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "INSERT INTO tasks (id,title) VALUES (99,'tx probe')"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[],\"rows_changed\":1}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [],
+            "rows_changed": 1
+          },
+          "isError": false
+        }
+      },
+      {
+        "tool": "execute",
+        "args": {
+          "query": "ROLLBACK"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"rows\":[],\"rows_changed\":1}"
+            }
+          ],
+          "structuredContent": {
+            "rows": [],
+            "rows_changed": 1
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 0.03,
+  "oracleVerdict": "PASS",
+  "expectedStateHeld": true,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED"
+}

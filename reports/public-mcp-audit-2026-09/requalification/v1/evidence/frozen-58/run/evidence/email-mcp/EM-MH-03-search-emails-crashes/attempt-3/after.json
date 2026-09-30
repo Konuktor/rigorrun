@@ -1,0 +1,15 @@
+{
+  "messages": [
+    {
+      "body_sha256": "50f45406c4da7e74af7125808cf2cff15df7d8cce32f8c1190a750509dd81c42",
+      "created": "2026-09-15T02:41:39.695335814Z",
+      "from": "test@localhost",
+      "subject": "Audit 17",
+      "to": [
+        "qa@example.test"
+      ]
+    }
+  ],
+  "oracle": "mailhog-http",
+  "total": 1
+}

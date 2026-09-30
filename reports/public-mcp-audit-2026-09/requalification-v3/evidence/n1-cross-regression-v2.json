@@ -1,0 +1,610 @@
+{
+  "generatedBy": "requalification/v2/scripts/n1-cross-regression-v2.mjs",
+  "summary": {
+    "journeysCompared": 4,
+    "journeysCompiledNow": 4,
+    "identityChanges": [
+      {
+        "journey": "email-mcp/gm-w1",
+        "entity": "Record1",
+        "before": "count",
+        "now": "service"
+      },
+      {
+        "journey": "email-mcp/gm-fault",
+        "entity": "Record1",
+        "before": "count",
+        "now": "service"
+      }
+    ],
+    "changedValueAsIdentity": [],
+    "nullableIdentityNow": [],
+    "focusEntityMoved": [],
+    "duplicateKeysInFinalState": [],
+    "suiteShapeChanges": [
+      {
+        "journey": "email-mcp/gm-w1",
+        "before": [
+          "happy_path:case_live__happy_path"
+        ],
+        "now": [
+          "happy_path:case_live__happy_path",
+          "missing_precondition:case_live__unknown_id__service"
+        ]
+      },
+      {
+        "journey": "email-mcp/gm-fault",
+        "before": [
+          "happy_path:case_live__happy_path"
+        ],
+        "now": [
+          "happy_path:case_live__happy_path",
+          "missing_precondition:case_live__unknown_id__service"
+        ]
+      }
+    ],
+    "casesWhoseClassificationMoved": [
+      {
+        "id": "EM-LLM-01-qwen2.5-3b",
+        "after2": {
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "attempts": 0
+        },
+        "now": {
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE",
+          "attempts": 3
+        }
+      },
+      {
+        "id": "SQ-LLM-01-llama3.1-8b",
+        "after2": {
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "attempts": 0
+        },
+        "now": {
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE",
+          "attempts": 1
+        }
+      },
+      {
+        "id": "SQ-LLM-02-qwen2.5-3b",
+        "after2": {
+          "outcome": "NOT_RUN",
+          "originalRule": "NOT_RUN",
+          "attempts": 0
+        },
+        "now": {
+          "outcome": "TRUE_NEGATIVE",
+          "originalRule": "TRUE_NEGATIVE",
+          "attempts": 3
+        }
+      }
+    ],
+    "regressions": [],
+    "unmeasured": [],
+    "greenmailHappyPathDiagnostic": null,
+    "frozenResultsPresent": true
+  },
+  "journeys": [
+    {
+      "journey": "sqlite-mcp/w1",
+      "compiledBefore": true,
+      "compiledNow": true,
+      "identity": [
+        {
+          "entity": "Row",
+          "before": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "now": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Row2",
+          "before": {
+            "idField": "action",
+            "identityFields": [
+              "action",
+              "id",
+              "task_id"
+            ]
+          },
+          "now": {
+            "idField": "action",
+            "identityFields": [
+              "action",
+              "id",
+              "task_id"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Table",
+          "before": {
+            "idField": "name",
+            "identityFields": [
+              "name"
+            ]
+          },
+          "now": {
+            "idField": "name",
+            "identityFields": [
+              "name"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        }
+      ],
+      "changedValueAsIdentity": [],
+      "contract": {
+        "before": {
+          "focusEntity": "Row",
+          "focusScope": "created",
+          "primaryAction": "execute",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "amount<-query:param_contains_field",
+            "owner<-query:param_contains_field",
+            "status<-query:param_contains_field",
+            "title<-query:param_contains_field"
+          ]
+        },
+        "now": {
+          "focusEntity": "Row",
+          "focusScope": "created",
+          "primaryAction": "execute",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "amount<-query:param_contains_field",
+            "owner<-query:param_contains_field",
+            "status<-query:param_contains_field",
+            "title<-query:param_contains_field"
+          ]
+        },
+        "focusEntityMoved": false
+      },
+      "checks": {
+        "before": [],
+        "now": [],
+        "added": [],
+        "removed": []
+      },
+      "suiteShape": {
+        "before": [
+          "happy_path:case_live__happy_path"
+        ],
+        "now": [
+          "happy_path:case_live__happy_path"
+        ],
+        "changed": false
+      },
+      "relationships": {
+        "before": [
+          "row2_row",
+          "row2_row"
+        ],
+        "now": [
+          "row2_row",
+          "row2_row"
+        ]
+      },
+      "inferredRules": {
+        "before": [],
+        "now": []
+      }
+    },
+    {
+      "journey": "sqlite-mcp/w1b",
+      "compiledBefore": true,
+      "compiledNow": true,
+      "identity": [
+        {
+          "entity": "Row",
+          "before": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "now": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Row2",
+          "before": {
+            "idField": "action",
+            "identityFields": [
+              "action",
+              "id",
+              "task_id"
+            ]
+          },
+          "now": {
+            "idField": "action",
+            "identityFields": [
+              "action",
+              "id",
+              "task_id"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Table",
+          "before": {
+            "idField": "name",
+            "identityFields": [
+              "name"
+            ]
+          },
+          "now": {
+            "idField": "name",
+            "identityFields": [
+              "name"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        }
+      ],
+      "changedValueAsIdentity": [],
+      "contract": {
+        "before": {
+          "focusEntity": "Row",
+          "focusScope": "created",
+          "primaryAction": "execute",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "amount<-query:param_contains_field",
+            "owner<-query:param_contains_field",
+            "status<-query:param_contains_field",
+            "title<-query:param_contains_field"
+          ]
+        },
+        "now": {
+          "focusEntity": "Row",
+          "focusScope": "created",
+          "primaryAction": "execute",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "amount<-query:param_contains_field",
+            "owner<-query:param_contains_field",
+            "status<-query:param_contains_field",
+            "title<-query:param_contains_field"
+          ]
+        },
+        "focusEntityMoved": false
+      },
+      "checks": {
+        "before": [],
+        "now": [],
+        "added": [],
+        "removed": []
+      },
+      "suiteShape": {
+        "before": [
+          "happy_path:case_live__happy_path"
+        ],
+        "now": [
+          "happy_path:case_live__happy_path"
+        ],
+        "changed": false
+      },
+      "relationships": {
+        "before": [
+          "row2_row",
+          "row2_row"
+        ],
+        "now": [
+          "row2_row",
+          "row2_row"
+        ]
+      },
+      "inferredRules": {
+        "before": [],
+        "now": []
+      }
+    },
+    {
+      "journey": "email-mcp/gm-w1",
+      "compiledBefore": true,
+      "compiledNow": true,
+      "identity": [
+        {
+          "entity": "Email",
+          "before": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "now": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Record1",
+          "before": {
+            "idField": "count",
+            "identityFields": [
+              "count"
+            ]
+          },
+          "now": {
+            "idField": "service",
+            "identityFields": [
+              "service"
+            ]
+          },
+          "idFieldChanged": true,
+          "identityNowPlainValue": [
+            "count"
+          ],
+          "plainValueNowIdentity": [
+            "service"
+          ],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Record2",
+          "before": {
+            "idField": "status",
+            "identityFields": [
+              "status"
+            ]
+          },
+          "now": {
+            "idField": "status",
+            "identityFields": [
+              "status",
+              "service"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [
+            "service"
+          ],
+          "nullableIdentityNow": false
+        }
+      ],
+      "changedValueAsIdentity": [],
+      "contract": {
+        "before": {
+          "focusEntity": "Email",
+          "focusScope": "created",
+          "primaryAction": "send_email",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "subject<-subject:field_contains_param"
+          ]
+        },
+        "now": {
+          "focusEntity": "Email",
+          "focusScope": "created",
+          "primaryAction": "send_email",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "subject<-subject:field_contains_param"
+          ]
+        },
+        "focusEntityMoved": false
+      },
+      "checks": {
+        "before": [],
+        "now": [],
+        "added": [],
+        "removed": []
+      },
+      "suiteShape": {
+        "before": [
+          "happy_path:case_live__happy_path"
+        ],
+        "now": [
+          "happy_path:case_live__happy_path",
+          "missing_precondition:case_live__unknown_id__service"
+        ],
+        "changed": true
+      },
+      "relationships": {
+        "before": [],
+        "now": [
+          "record2_record1"
+        ]
+      },
+      "inferredRules": {
+        "before": [
+          "rule_side_effect__Record1__Email"
+        ],
+        "now": []
+      }
+    },
+    {
+      "journey": "email-mcp/gm-fault",
+      "compiledBefore": true,
+      "compiledNow": true,
+      "identity": [
+        {
+          "entity": "Email",
+          "before": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "now": {
+            "idField": "id",
+            "identityFields": [
+              "id"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Record1",
+          "before": {
+            "idField": "count",
+            "identityFields": [
+              "count"
+            ]
+          },
+          "now": {
+            "idField": "service",
+            "identityFields": [
+              "service"
+            ]
+          },
+          "idFieldChanged": true,
+          "identityNowPlainValue": [
+            "count"
+          ],
+          "plainValueNowIdentity": [
+            "service"
+          ],
+          "nullableIdentityNow": false
+        },
+        {
+          "entity": "Record2",
+          "before": {
+            "idField": "status",
+            "identityFields": [
+              "status"
+            ]
+          },
+          "now": {
+            "idField": "status",
+            "identityFields": [
+              "status",
+              "service"
+            ]
+          },
+          "idFieldChanged": false,
+          "identityNowPlainValue": [],
+          "plainValueNowIdentity": [
+            "service"
+          ],
+          "nullableIdentityNow": false
+        }
+      ],
+      "changedValueAsIdentity": [],
+      "contract": {
+        "before": {
+          "focusEntity": "Email",
+          "focusScope": "created",
+          "primaryAction": "send_email",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "subject<-subject:field_contains_param"
+          ]
+        },
+        "now": {
+          "focusEntity": "Email",
+          "focusScope": "created",
+          "primaryAction": "send_email",
+          "expectedDeltaCount": 1,
+          "expectedDeletedCount": 0,
+          "expectedCreatedCount": null,
+          "expectedChanges": null,
+          "argumentBindings": [
+            "subject<-subject:field_contains_param"
+          ]
+        },
+        "focusEntityMoved": false
+      },
+      "checks": {
+        "before": [],
+        "now": [],
+        "added": [],
+        "removed": []
+      },
+      "suiteShape": {
+        "before": [
+          "happy_path:case_live__happy_path"
+        ],
+        "now": [
+          "happy_path:case_live__happy_path",
+          "missing_precondition:case_live__unknown_id__service"
+        ],
+        "changed": true
+      },
+      "relationships": {
+        "before": [],
+        "now": [
+          "record2_record1"
+        ]
+      },
+      "inferredRules": {
+        "before": [
+          "rule_side_effect__Record1__Email"
+        ],
+        "now": []
+      }
+    }
+  ]
+}

@@ -87,6 +87,16 @@ export class ArtefactCorruptError extends Error {
   }
 }
 
+const SECRET_ENV_PREFIX = 'RIGORRUN_SECRET__';
+
+/**
+ * The environment variable a credential can arrive in: `RIGORRUN_SECRET__` and
+ * the name, upper-cased, with anything but letters and digits made `_`.
+ */
+export function secretEnvName(name: string): string {
+  return `${SECRET_ENV_PREFIX}${name.toUpperCase().replace(/[^A-Z0-9]/g, '_')}`;
+}
+
 export class ProjectStore {
   private readonly secretStore: SecretStore;
 
@@ -211,12 +221,26 @@ export class ProjectStore {
    * deciding whether to run this against staging deserves to know which.
    */
   async secret(name: string): Promise<string | undefined> {
-    return this.secretStore.get(name);
+    const stored = await this.secretStore.get(name);
+    if (stored !== undefined) return stored;
+    // A CI runner has no keychain and nobody to type into one. The value on
+    // this machine still wins; the environment only fills what nobody stored.
+    const fromEnvironment = process.env[secretEnvName(name)];
+    return fromEnvironment ? fromEnvironment : undefined;
   }
 
-  /** Every name and value. For the two callers that have to scan them. */
+  /**
+   * Every name and value. For the callers that have to scan them.
+   *
+   * Values handed over through the environment are included under an `env:`
+   * key, so every scan for a leaked credential knows them too — and so a backup,
+   * which copies stored names only, never carries them anywhere.
+   */
   async secrets(): Promise<Record<string, string>> {
-    return this.secretStore.all();
+    const fromEnvironment = Object.entries(process.env)
+      .filter((entry): entry is [string, string] => entry[0].startsWith(SECRET_ENV_PREFIX) && Boolean(entry[1]))
+      .map(([variable, value]) => [`env:${variable}`, value] as const);
+    return { ...Object.fromEntries(fromEnvironment), ...(await this.secretStore.all()) };
   }
 
   /** Just the names — readable even when the keychain is locked. */

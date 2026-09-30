@@ -1,0 +1,39 @@
+{
+  "id": "SQ-W1-01-correct",
+  "target": "sqlite-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.61,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    },
+    {
+      "attempt": 2,
+      "seconds": 0.61,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    },
+    {
+      "attempt": 3,
+      "seconds": 0.58,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    }
+  ],
+  "reproduction": "3/3"
+}

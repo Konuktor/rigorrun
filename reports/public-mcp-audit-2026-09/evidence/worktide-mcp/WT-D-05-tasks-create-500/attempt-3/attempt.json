@@ -1,0 +1,59 @@
+{
+  "case": {
+    "id": "WT-D-05-tasks-create-500",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "MISSING_ACTION (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "tasks.create must create one task in AUD",
+    "calls": [
+      {
+        "tool": "tasks.create",
+        "args": {
+          "title": "Audit follow-up",
+          "projectKey": "AUD",
+          "priority": "high"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True and after['task_count']==before['task_count']+1"
+  },
+  "result": {
+    "calls": [
+      {
+        "tool": "tasks.create",
+        "args": {
+          "title": "Audit follow-up",
+          "projectKey": "AUD",
+          "priority": "high"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[500] Typed property App\\Entity\\Task::$workspace must not be accessed before initialization"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "attempt": 3,
+  "seconds": 0.5,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED"
+}

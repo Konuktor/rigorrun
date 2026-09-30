@@ -13,6 +13,7 @@
 import { describe, expect, it, beforeAll, afterAll } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { normalizeToolResult } from '@rigorrun/connector';
 import { McpConnection, induceSchema, type McpStdioConfig, type PayloadObservation } from '../src/index.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -192,3 +193,50 @@ describe('the vocabulary trap', () => {
 function describeVia(via: { kind: string; field?: string }): string {
   return via.field ?? via.kind;
 }
+
+describe('shapes the audit found in the wild', () => {
+  // A SQL bridge answers every query with a table of typed cells. Read as
+  // records, each cell became a two-field entity keyed by its own value and
+  // no row ever existed to verify against (audit finding R-3).
+  const cell = (kind: string, value: unknown) => ({ kind, value });
+  const tasks = {
+    rows: [
+      { columns: { amount: cell('Real', 120.5), id: cell('Integer', 1), owner: cell('Text', 'ada'), status: cell('Text', 'open'), title: cell('Text', 'Prepare invoice') } },
+      { columns: { amount: cell('Real', 80), id: cell('Integer', 2), owner: cell('Text', 'bo'), status: cell('Text', 'open'), title: cell('Text', 'Review contract') } },
+      { columns: { amount: cell('Real', 0), id: cell('Integer', 3), owner: cell('Text', 'ada'), status: cell('Text', 'done'), title: cell('Text', 'Archive old files') } },
+    ],
+    rows_changed: 0,
+  };
+  const log = {
+    rows: [{ columns: { action: cell('Text', 'completed'), id: cell('Integer', 1), note: cell('Text', 'seed'), task_id: cell('Integer', 3) } }],
+    rows_changed: 0,
+  };
+
+  it('induces the rows, keyed by their identifier, not the cells', () => {
+    const result = induceSchema([{ tool: 'query', payload: tasks }]);
+    expect(result.schema.entities).toHaveLength(1);
+    const [entity] = result.schema.entities;
+    expect(entity!.idField).toBe('id');
+    expect(entity!.fields.map((f) => f.name).sort()).toEqual(['amount', 'id', 'owner', 'status', 'title']);
+    expect(entity!.name).not.toBe('Id');
+    expect(entity!.name).not.toBe('Column');
+  });
+
+  it('keeps two record types apart when two reads use the same container name', () => {
+    const result = induceSchema([
+      { tool: 'query', payload: tasks },
+      { tool: 'query', payload: log },
+    ]);
+    const names = result.schema.entities.map((e) => e.name);
+    expect(new Set(names).size).toBe(2);
+    expect(names.every((name) => name.startsWith('Row'))).toBe(true);
+  });
+
+  it('sees the record inside a JSON text block once the result is normalised', () => {
+    // What the setup probe used to hand it was the content-block array. What
+    // every interpreter hands it now is the normaliser's reading.
+    const normalized = normalizeToolResult({ content: [{ type: 'text', text: '{"timers": [{"timerId": "t-1", "running": true}, {"timerId": "t-2", "running": false}]}' }] });
+    const result = induceSchema([{ tool: 'read', payload: normalized.payload }]);
+    expect(result.schema.entities.map((e) => e.fields.map((f) => f.name).sort())).toEqual([['running', 'timerId']]);
+  });
+});

@@ -33,7 +33,7 @@ gating and comparing are also available from the command line, which is the half
 
 | Command | What it does |
 | --- | --- |
-| `rigorrun secrets list` · `secret set NAME` · `secret remove NAME` | Credential names and values. No command prints a secret. |
+| `rigorrun secrets list` · `secrets set NAME` · `secrets remove NAME` | Credential names and values. `set` prompts without echo; in CI, `RIGORRUN_SECRET__<NAME>`. No command prints a secret. |
 | `rigorrun backup` · `restore <dir>` | The whole workspace. Never credentials. |
 | `rigorrun export-project <id>` · `import-project <file>` | One project as a file. |
 | `rigorrun trust <id>` | Show and approve what an imported connector would run. |

@@ -1,0 +1,5 @@
+{
+  "measurement": "after-fix",
+  "productSourcesOf": "f1ad84152d836be20e0684598f37fea9a6dfc07c",
+  "note": "written after the runs: attempts 1-3 ran at b6dd961 and attempt 4 with the sanity cases at 53ac584; both carry the product sources of f1ad841 (the N-1 fix before the creation check)"
+}

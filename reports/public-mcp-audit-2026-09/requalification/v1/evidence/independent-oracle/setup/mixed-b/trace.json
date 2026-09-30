@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "trace_p_2d9263906560",
+  "name": "Create exactly one task titled Quarterly report; change nothing else.",
+  "environmentId": "p_2d9263906560",
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "durationMs": 9,
+  "actor": {
+    "id": "operator",
+    "kind": "human",
+    "label": "Operator"
+  },
+  "source": "action_log",
+  "before": {
+    "entities": {
+      "Task": {
+        "1": {
+          "id": 1,
+          "title": "Renew domain",
+          "status": "open"
+        },
+        "2": {
+          "id": 2,
+          "title": "Book venue",
+          "status": "open"
+        },
+        "3": {
+          "id": 3,
+          "title": "Send invoices",
+          "status": "done"
+        }
+      }
+    }
+  },
+  "after": {
+    "entities": {
+      "Task": {
+        "1": {
+          "id": 1,
+          "title": "Renew domain",
+          "status": "open"
+        },
+        "2": {
+          "id": 2,
+          "title": "Book venue",
+          "status": "open"
+        },
+        "3": {
+          "id": 3,
+          "title": "Send invoices",
+          "status": "done"
+        },
+        "4": {
+          "id": 4,
+          "title": "Quarterly report",
+          "status": "open"
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "id": "step_001",
+      "ordinal": 0,
+      "at": 9,
+      "kind": "action",
+      "action": {
+        "name": "create_task",
+        "args": {
+          "title": "Quarterly report"
+        },
+        "ok": true,
+        "changedState": true
+      },
+      "surfaceText": []
+    }
+  ],
+  "meta": {
+    "recorder": "rigorrun-action-log",
+    "recorderVersion": "1",
+    "redaction": "caller-supplied",
+    "droppedSensitiveEvents": 0
+  }
+}

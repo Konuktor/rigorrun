@@ -14,12 +14,14 @@
 import { randomBytes } from 'node:crypto';
 import {
   applyReview,
+  effectiveSteps,
   fromActionLog,
   rulesAwaitingReview,
   type Benchmark,
   type CanonicalHumanTrace,
   type EnvironmentContract,
   type RunResult,
+  type SuiteQuality,
 } from '@rigorrun/core';
 import { induceContract } from '@rigorrun/compiler';
 import { createReferenceAgent, generateBenchmark, replayFailure } from '@rigorrun/generator';
@@ -34,11 +36,16 @@ import {
 } from '@rigorrun/environment';
 import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
+import { createBlackBoxAgent, probeBlackBox, type BlackBoxCompletion } from './blackBoxAgent.ts';
 import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
 import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
+import { hasPayload, normalizeCallResult, readsForVerdict } from '@rigorrun/connector';
+import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
+  BudgetsSchema,
+  budgetProblem,
   describeAgent,
   newProject,
   type AgentConfig,
@@ -58,6 +65,17 @@ export interface ServiceOptions {
   now?: () => Date;
   /** Where the funnel is recorded. Defaults to the store's own directory. */
   activation?: ActivationLog;
+}
+
+/** How a person describes a black-box agent. Header values are secret names. */
+export interface BlackBoxInput {
+  endpoint: string;
+  allowedHosts?: string[];
+  headers?: Record<string, string>;
+  bodyTemplate?: string | null;
+  completion?: BlackBoxCompletion;
+  claimPath?: string;
+  settleQuietMs?: number;
 }
 
 export class Service {
@@ -244,9 +262,13 @@ export class Service {
       readOnlyTools: string[];
       verifierReads: { tool: string; args?: Record<string, unknown> }[];
       reset: { kind: 'tool' | 'none'; tool?: string };
+      budgets?: { toolCallMs?: number; caseMs?: number };
     },
-  ): Promise<{ project: Project; readsProblem: string }> {
+  ): Promise<{ project: Project; readsProblem: string; readsIgnored: string[] }> {
     const project = await this.store.read(projectId);
+    const budgets = BudgetsSchema.parse({ ...project.budgets, ...(input.budgets ?? {}) });
+    const problem = budgetProblem(budgets);
+    if (problem) throw new Error(problem);
     const updated: Project = {
       ...project,
       readOnlyTools: input.readOnlyTools,
@@ -255,13 +277,28 @@ export class Service {
         args: read.args ?? {},
       })),
       reset: { kind: input.reset.kind, tool: input.reset.tool ?? '' },
+      budgets,
     };
     await this.store.write(updated);
-    return { project: updated, readsProblem: await this.probeVerifierReads(updated) };
+    // Said at setup rather than discovered in a verdict: a read the person
+    // nominated that RigorRun will never call is something to hear about now.
+    const readsIgnored = readsForVerdict(updated.verifierReads).ignored.map((read) => read.tool);
+    const ignoredWarning =
+      readsIgnored.length > 0
+        ? 'A verifier read is nominated, so RigorRun reads the result only through the verifier. ' +
+          `These reads go through the system's own connection and will be ignored: ${readsIgnored.join(', ')}. ` +
+          'Verdicts stay labelled SELF_REPORTED while they are nominated; remove them to have verdicts labelled INDEPENDENT.'
+        : '';
+    const probe = await this.probeVerifierReads(updated);
+    return {
+      project: updated,
+      readsProblem: [ignoredWarning, probe].filter(Boolean).join('\n\n'),
+      readsIgnored,
+    };
   }
 
   /**
-   * Calls the nominated reads and says whether records came back.
+   * Calls the reads a verdict will use and says whether records came back.
    *
    * This exists because of what a real third-party MCP server did. It published
    * fourteen tools, connected cleanly, and every one of its reads returned
@@ -303,20 +340,32 @@ export class Service {
       );
     }
 
+    // Read through the same normaliser the demonstration and the runner use.
+    // The probe once looked at `structured ?? content` while capture looked at
+    // `structured` alone, and a server that answers with JSON inside a text
+    // block passed here and produced nothing later — after the person had
+    // done the whole job. Whatever this says now is what capture will see.
     const observations: PayloadObservation[] = [];
     const failed: string[] = [];
-    for (const read of project.verifierReads) {
-      const result = await connection.call(read.tool, read.args).catch(() => undefined);
+    const prose: string[] = [];
+    let sawEmpty = false;
+    for (const read of readsForVerdict(project.verifierReads).used) {
+      const result = await connection
+        .call(read.tool, read.args, project.budgets.toolCallMs)
+        .catch(() => undefined);
       if (!result?.ok) {
         failed.push(read.tool);
         continue;
       }
-      observations.push({ tool: read.tool, payload: result.structured ?? result.content });
+      const normalized = normalizeCallResult(result);
+      if (hasPayload(normalized)) observations.push({ tool: read.tool, payload: normalized.payload });
+      else if (normalized.kind === 'text') prose.push(read.tool);
+      else sawEmpty = true;
     }
     if (failed.length > 0) {
       return `These reads did not answer: ${failed.join(', ')}. RigorRun will not be able to verify what they cover.`;
     }
-    if (induceSchema(observations).schema.entities.length !== 0) return '';
+    if (observations.length > 0 && induceSchema(observations).schema.entities.length !== 0) return '';
 
     // Nothing was induced, and there are two very different reasons for that.
     // A system that answers in prose can never be verified. A system that is
@@ -324,7 +373,7 @@ export class Service {
     // the moment somebody demonstrates a job — reporting that as a problem
     // would be sending people to fix something that is not broken, which is
     // the mistake this whole probe exists to stop making.
-    if (payloadsAreEmpty(observations.map((entry) => entry.payload))) {
+    if (prose.length === 0 && (sawEmpty || payloadsAreEmpty(observations.map((entry) => entry.payload)))) {
       return (
         'These reads answered, and there is nothing in this system yet, so RigorRun cannot tell ' +
         'what its records look like. That is fine — it will work them out from what your ' +
@@ -491,6 +540,9 @@ export class Service {
     const draft = induceContract(adapter, trace, {
       contractId: `ec_${project.id}`,
       createdAt: this.now().toISOString(),
+      // The job as the person described it. The primary tool's description is
+      // a fallback only: a server's doc comment describes a tool, not a job.
+      ...(project.goal.trim() ? { goal: project.goal } : {}),
     }).contract;
     await this.store.writeArtefact(projectId, 'contract', draft);
     return draft;
@@ -532,14 +584,28 @@ export class Service {
       );
     }
 
+    if (project.safety === 'production') {
+      // Building a suite executes the job to work out what each case should
+      // end with, and probes which rules the system enforces itself. On a
+      // production system every one of those is a real write.
+      throw new Error(
+        'This system is marked production, and building a suite performs the job to work out ' +
+          'each expected result. Build it against a staging or scratch copy.',
+      );
+    }
     const schema = await this.schemaOf(project);
     const { fixture } = await this.registerFor(project, schema);
     const { benchmark } = await generateBenchmark(
       this.workspace.environment(project, schema),
       contract,
       [fixture],
+      { caseTimeoutMs: project.budgets.caseMs },
     );
     await this.store.writeArtefact(projectId, 'benchmark', benchmark);
+    // A quality check describes the suite it checked. A regenerated suite has
+    // not been checked, and carrying the old verdict forward would put a
+    // number on a run that was never measured.
+    await this.store.deleteArtefact(projectId, 'quality');
 
     const updated: Project = {
       ...project,
@@ -567,7 +633,8 @@ export class Service {
     input:
       | { name: string; endpoint: string; allowRemoteHosts?: boolean }
       | { name: string; command: string; args?: string[]; cwd?: string }
-      | { name: string; driven: true },
+      | { name: string; driven: true }
+      | { name: string; blackBox: BlackBoxInput },
   ): Promise<{ project: Project; agent: AgentConfig; key?: string }> {
     const project = await this.store.read(projectId);
     const id = `a_${randomBytes(4).toString('hex')}`;
@@ -575,7 +642,35 @@ export class Service {
 
     let agent: AgentConfig;
     let key: string | undefined;
-    if ('driven' in input) {
+    if ('blackBox' in input) {
+      const spec = input.blackBox;
+      const allowedHosts = (spec.allowedHosts ?? []).map((host) => host.trim().toLowerCase()).filter(Boolean);
+      const headers = spec.headers ?? {};
+      const probe = await probeBlackBox({
+        endpoint: spec.endpoint,
+        allowedHosts,
+        bodyTemplate: spec.bodyTemplate ?? null,
+        headers: () => this.resolveHeaders(headers),
+      });
+      agent = {
+        id,
+        name: input.name || 'Your agent',
+        kind: 'blackbox',
+        endpoint: spec.endpoint,
+        headers,
+        bodyTemplate: spec.bodyTemplate ?? null,
+        completion: spec.completion ?? 'response',
+        claimPath: spec.claimPath ?? 'output',
+        allowedHosts,
+        // Typed here, by whoever is at this machine: that is the agreement. An
+        // imported project's black-box agents come back with this cleared.
+        remoteConfirmedAt: now,
+        settleQuietMs: spec.settleQuietMs ?? 5000,
+        lastProbeAt: now,
+        lastProbeOk: probe.ok,
+        lastProbeProblem: probe.ok ? '' : probe.problem,
+      };
+    } else if ('driven' in input) {
       // There is nothing to probe: RigorRun cannot call this agent, which is
       // why it exists. It becomes connected when its driver asks for work,
       // which is the only evidence available that it is real.
@@ -750,8 +845,24 @@ export class Service {
     };
   }
 
-  async runAgent(projectId: string, agentId: string): Promise<RunResult> {
+  async runAgent(
+    projectId: string,
+    agentId: string,
+    options: {
+      caseTimeoutMs?: number;
+      /**
+       * Called after each case has finished, final state read included, and
+       * awaited before the next case starts — the point a harness takes its own
+       * reading of the system. If it throws, the run stops.
+       */
+      afterCase?: (result: RunResult['caseResults'][number], index: number) => Promise<void>;
+    } = {},
+  ): Promise<RunResult> {
     const project = await this.store.read(projectId);
+    if (options.caseTimeoutMs !== undefined) {
+      const problem = budgetProblem({ toolCallMs: project.budgets.toolCallMs, caseMs: options.caseTimeoutMs });
+      if (problem) throw new Error(problem);
+    }
     const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
     if (!benchmark) throw new Error('There is no benchmark to run yet.');
 
@@ -771,10 +882,31 @@ export class Service {
 
     let result;
     try {
+      // The longest budget any case will run under, so the agent process is
+      // never stopped before the runner's own budget has had its say.
+      const longestCaseMs = Math.max(
+        ...benchmark.cases.map((entry) => options.caseTimeoutMs ?? entry.timeoutMs),
+      );
+      const afterCase = options.afterCase;
+      let finishedCases = 0;
       result = await runBenchmark(
         benchmark,
-        [this.adapterFor(config, { total: benchmark.cases.length })],
-        { runId: `run_${randomBytes(6).toString('hex')}` },
+        [this.adapterFor(config, { total: benchmark.cases.length, caseBudgetMs: longestCaseMs })],
+        {
+          runId: `run_${randomBytes(6).toString('hex')}`,
+          ...(options.caseTimeoutMs !== undefined ? { caseTimeoutMs: options.caseTimeoutMs } : {}),
+          ...(afterCase
+            ? {
+                onProgress: async (event) => {
+                  if (event.type !== 'case_finished') return;
+                  const index = finishedCases;
+                  finishedCases += 1;
+                  await afterCase(event.result, index);
+                },
+              }
+            : {}),
+          suiteQuality: suiteQualityOf(await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality')),
+        },
       );
     } catch (error) {
       await this.activation.attempt('run_failed', projectId);
@@ -915,7 +1047,15 @@ export class Service {
     await this.activation.stage('agent_connected', projectId);
   }
 
-  adapterFor(config: AgentConfig, options: { total?: number } = {}): AgentAdapter {
+  adapterFor(config: AgentConfig, options: { total?: number; caseBudgetMs?: number } = {}): AgentAdapter {
+    // An agent's own timeout is only ever raised, never lowered: at least its
+    // usual allowance, and at least the case budget plus a margin, so that a
+    // slow case ends as TIMED_OUT by the runner rather than as a killed agent.
+    const floorMs = config.kind === 'external' ? 10 * 60_000 : 120_000;
+    const agentTimeout =
+      options.caseBudgetMs !== undefined
+        ? { timeoutMs: Math.max(floorMs, options.caseBudgetMs + BUDGET_MARGIN_MS) }
+        : {};
     if (config.kind === 'external') {
       // Nothing is called. The adapter publishes the case and waits for
       // whoever holds this agent's key to come and do it.
@@ -924,6 +1064,28 @@ export class Service {
         name: config.name,
         proxy: this.options.proxy,
         total: options.total ?? 0,
+        ...agentTimeout,
+      });
+    }
+    if (config.kind === 'blackbox') {
+      if (config.remoteConfirmedAt === null) {
+        throw new Error(
+          `${config.name} sends each case's work to ${config.endpoint}, and nobody on this machine has ` +
+            'agreed to that. It came from an imported project rather than from you. Open it and confirm first.',
+        );
+      }
+      return createBlackBoxAgent({
+        id: config.id,
+        name: config.name,
+        endpoint: config.endpoint,
+        allowedHosts: config.allowedHosts,
+        headers: () => this.resolveHeaders(config.headers),
+        bodyTemplate: config.bodyTemplate,
+        completion: config.completion,
+        claimPath: config.claimPath,
+        settleQuietMs: config.settleQuietMs,
+        timeoutMs:
+          options.caseBudgetMs !== undefined ? Math.max(floorMs, options.caseBudgetMs + BUDGET_MARGIN_MS) : floorMs,
       });
     }
     if (config.kind === 'process') {
@@ -941,6 +1103,7 @@ export class Service {
         args: config.args,
         ...(config.cwd ? { cwd: config.cwd } : {}),
         proxy: this.options.proxy,
+        ...agentTimeout,
       });
     }
     return createHttpV2Agent({
@@ -948,10 +1111,27 @@ export class Service {
       name: config.name,
       endpoint: config.endpoint,
       proxy: this.options.proxy,
+      ...agentTimeout,
     });
   }
 
   // ------------------------------------------------------------------ helpers
+
+  /** Header values, from the credential store, at the moment they are sent. */
+  private async resolveHeaders(byName: Record<string, string>): Promise<Record<string, string>> {
+    const out: Record<string, string> = {};
+    for (const [header, secretName] of Object.entries(byName)) {
+      const value = await this.store.secret(secretName);
+      if (value === undefined) {
+        throw new Error(
+          `The ${header} header comes from the secret ${secretName}, which is not set on this machine. ` +
+            `Set it with \`npx rigorrun secrets set ${secretName}\`.`,
+        );
+      }
+      out[header] = value;
+    }
+    return out;
+  }
 
   /** The confirmed schema, re-derived from the recorded observations. */
   private async schemaOf(project: Project): Promise<EnvironmentSchema> {
@@ -1018,7 +1198,10 @@ export class Service {
  * frequently about something else entirely.
  */
 function firstActionArgs(trace: CanonicalHumanTrace | undefined): Record<string, unknown> {
-  const actions = trace?.steps.filter((step) => step.kind === 'action') ?? [];
+  // Only the calls that did something. A read-back through a tool that also
+  // writes — a SELECT after an INSERT through the same `execute` — would
+  // otherwise overwrite the job's arguments with the read's.
+  const actions = trace ? effectiveSteps(trace) : [];
   const combined: Record<string, unknown> = {};
   for (const step of actions) Object.assign(combined, step.action?.args ?? {});
   return combined;
@@ -1060,4 +1243,55 @@ function payloadsAreEmpty(payloads: readonly unknown[]): boolean {
 
   for (const payload of payloads) walk(payload, 0);
   return sawContainer && !sawContent;
+}
+
+/**
+ * The suite's quality check, reduced to what a verdict must carry.
+ *
+ * Every warning is a reason a PASS from this suite is worth less than it looks:
+ * a reference implementation it fails, broken agents it lets through, verdicts
+ * that change on replay, an answer the agent can see, rules nothing exercises.
+ * An unassessed suite says so rather than saying nothing.
+ */
+export function suiteQualityOf(quality: BenchmarkQuality | undefined): SuiteQuality {
+  if (!quality) {
+    return {
+      assessed: false,
+      mutantKillRate: null,
+      independentKillRate: null,
+      falsePositiveRate: null,
+      replayStable: null,
+      hiddenAnswerIsolated: null,
+      deadRules: 0,
+      warnings: ['this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one'],
+    };
+  }
+  const percent = (value: number) => `${Math.round(value * 100)}%`;
+  const measured = quality.measures.find((measure) => measure.id === 'false_positive_rate')?.value;
+  const falsePositiveRate = typeof measured === 'number' ? measured : null;
+  const warnings: string[] = [];
+  if (falsePositiveRate !== null && falsePositiveRate > 0) {
+    warnings.push(`the reference implementation fails ${percent(falsePositiveRate)} of cases, so a correct agent can be failed`);
+  }
+  if (quality.mutantKillRate < 1) {
+    warnings.push(`it caught ${percent(quality.mutantKillRate)} of deliberately broken agents`);
+  }
+  if (quality.independentKillRate < 1) {
+    warnings.push(`it caught ${percent(quality.independentKillRate)} of the defects its rules never mention`);
+  }
+  if (!quality.replayStable) warnings.push('the same agent did not get the same verdict twice');
+  if (!quality.hiddenAnswerIsolated) warnings.push('an expected answer is visible to the agent');
+  if (quality.deadRules.length > 0) {
+    warnings.push(`${quality.deadRules.length} confirmed rule(s) are never exercised by any case`);
+  }
+  return {
+    assessed: true,
+    mutantKillRate: quality.mutantKillRate,
+    independentKillRate: quality.independentKillRate,
+    falsePositiveRate,
+    replayStable: quality.replayStable,
+    hiddenAnswerIsolated: quality.hiddenAnswerIsolated,
+    deadRules: quality.deadRules.length,
+    warnings,
+  };
 }

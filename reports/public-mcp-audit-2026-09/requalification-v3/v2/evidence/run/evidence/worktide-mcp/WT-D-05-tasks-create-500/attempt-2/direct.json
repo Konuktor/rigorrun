@@ -1,0 +1,29 @@
+{
+  "command": [
+    "node",
+    "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+  ],
+  "calls": [
+    {
+      "tool": "tasks.create",
+      "args": {
+        "title": "Audit follow-up",
+        "projectKey": "AUD",
+        "priority": "high"
+      },
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "[500] Typed property App\\Entity\\Task::$workspace must not be accessed before initialization"
+          }
+        ],
+        "isError": true
+      }
+    }
+  ],
+  "server": {
+    "name": "worktide-mcp",
+    "version": "0.1.0"
+  }
+}

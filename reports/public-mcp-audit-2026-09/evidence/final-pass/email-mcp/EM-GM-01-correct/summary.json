@@ -1,0 +1,19 @@
+{
+  "id": "EM-GM-01-correct",
+  "target": "email-mcp",
+  "class": "BASELINE",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 3.1,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "FAIL",
+      "classification": "FALSE_POSITIVE"
+    }
+  ],
+  "reproduction": "1/1"
+}

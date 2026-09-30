@@ -1,0 +1,56 @@
+{
+  "case": {
+    "id": "WT-D-12-key-too-long-rejected",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "SCHEMA / TOOL ERROR",
+    "truth": "EXPECTED_PASS",
+    "intent": "a 17-character project key must be rejected by the tool schema before any request",
+    "calls": [
+      {
+        "tool": "projects.create",
+        "args": {
+          "name": "too long",
+          "key": "ABCDEFGHIJKLMNOPQ"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError')==True and \"at most 16\" in calls[0]['result']['content'][0]['text'] and after['projects']==before['projects']"
+  },
+  "attempt": 1,
+  "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "seconds": 0.19,
+  "result": {
+    "calls": [
+      {
+        "tool": "projects.create",
+        "args": {
+          "name": "too long",
+          "key": "ABCDEFGHIJKLMNOPQ"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Invalid arguments: [\n  {\n    \"code\": \"too_big\",\n    \"maximum\": 16,\n    \"type\": \"string\",\n    \"inclusive\": true,\n    \"exact\": false,\n    \"message\": \"String must contain at most 16 character(s)\",\n    \"path\": [\n      \"key\"\n    ]\n  }\n]"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "oracleVerdict": "PASS",
+  "scored": false
+}

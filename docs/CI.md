@@ -12,14 +12,27 @@ no person.
 | `0` | Passed. |
 | `1` | The agent failed, or the gate was not met. |
 | `2` | Something is wrong with the setup. |
+| `3` | It ran, but too many cases reached no verdict: RigorRun abstained for lack of evidence, or the harness failed. Raise `--max-inconclusive` only if you mean it. |
 
 A build server cannot tell those apart from prose, so `2` never means "the agent
-was bad" — it means RigorRun could not run the question.
+was bad" — it means RigorRun could not run the question — and `3` never means
+"the agent was bad" either: it means RigorRun could not answer it. Every case
+carries an `outcome` (`PASS`, `FAIL`, `ABSTAIN`, `TIMED_OUT`, `AGENT_FAILURE`,
+`HARNESS_FAILURE`) with a reason and the evidence it was missing.
 
 This contract is asserted at the end of `e2e/external-user.spec.ts`: the same
 run that sets a project up in a browser then shells out to `rigorrun gate
 --project` against that workspace and checks the code. The snippet below is the
 command that test runs.
+
+## Setting a project up without the interface
+
+```bash
+MY_TOKEN_VAR=... rigorrun setup project.json   # prints the project id
+```
+
+The spec names where each credential comes from, never its value, and confirms
+only the inferred rules it names. See `rigorrun setup --help`.
 
 ## Commands
 
@@ -77,7 +90,10 @@ jobs:
              --min-success 0.95
         env:
           RIGORRUN_HOME: ${{ github.workspace }}/.rigorrun
-          RIGORRUN_SECRET_VALUE: ${{ secrets.DESK_TOKEN }}
+          # A credential the project names DESK_TOKEN arrives as
+          # RIGORRUN_SECRET__DESK_TOKEN: the name upper-cased, anything but
+          # letters and digits made `_`. A value stored on the machine wins.
+          RIGORRUN_SECRET__DESK_TOKEN: ${{ secrets.DESK_TOKEN }}
 ```
 
 Two things this example is honest about. The project has to exist on that

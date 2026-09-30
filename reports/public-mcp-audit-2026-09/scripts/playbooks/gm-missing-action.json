@@ -1,0 +1,13 @@
+{
+  "name": "gm-missing-action",
+  "steps": [
+    {
+      "tool": "check_inbox",
+      "args": {
+        "service": "default",
+        "limit": 50
+      }
+    }
+  ],
+  "report": "Sent one email to {inputs.to} with subject {inputs.subject}."
+}

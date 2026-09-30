@@ -4,12 +4,15 @@ export * from './ids.ts';
 export * from './logger.ts';
 export * from './redaction.ts';
 export * from './assertion.ts';
+export * from './pathSyntax.ts';
 export * from './trace.ts';
 export * from './canonicalTrace.ts';
 export * from './traceNormalize.ts';
 export * from './predicate.ts';
 export * from './selector.ts';
+export * from './frame.ts';
 export * from './environmentContract.ts';
+export * from './budgets.ts';
 export * from './benchmark.ts';
 export * from './run.ts';
 export * from './record.ts';
@@ -24,4 +27,4 @@ export * from './record.ts';
  * record recorded a harness that was never released. Kept in step with
  * package.json by `packages/cli/test/package.test.ts`.
  */
-export const RIGORRUN_VERSION = '0.2.0';
+export const RIGORRUN_VERSION = '0.3.0';

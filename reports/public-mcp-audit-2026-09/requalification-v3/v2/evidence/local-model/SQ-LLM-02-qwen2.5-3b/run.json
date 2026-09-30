@@ -1,0 +1,35 @@
+{
+  "case": "SQ-LLM-02-qwen2.5-3b",
+  "model": "qwen2.5:3b",
+  "modelId": "357c53fb659c",
+  "hostGuard": {
+    "requiredAvailableMiB": 3000,
+    "requiredSwapFreeMiB": 1000,
+    "availableMiBBeforePreload": 11204,
+    "availableMiBAfterRun": 10791
+  },
+  "preload": {
+    "command": "ollama run qwen2.5:3b \"\"",
+    "seconds": 1.31,
+    "ollamaPs": [
+      "NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              ",
+      "qwen2.5:3b    357c53fb659c    2.4 GB    100% GPU     4096       4 minutes from now    "
+    ]
+  },
+  "unchanged": [
+    "model",
+    "agent command and prompt (scripts/agents/ollama-agent.py)",
+    "case budget: caseTimeoutMs from requalification/v2/labels.json (pre-registered 90 s)",
+    "attempt count (baseline-manifest.json)",
+    "reset and oracle",
+    "per-generated-case predicates (requalification/v2/labels.json)"
+  ],
+  "exit": 0,
+  "attemptLines": [
+    "SQ-LLM-02-qwen2.5-3b attempt 1: exit=0 happy_path:PASS/PASS/TRUE_NEGATIVE (16.2s)",
+    "SQ-LLM-02-qwen2.5-3b attempt 2: exit=0 happy_path:PASS/PASS/TRUE_NEGATIVE (8.04s)",
+    "SQ-LLM-02-qwen2.5-3b attempt 3: exit=0 happy_path:PASS/PASS/TRUE_NEGATIVE (8.05s)"
+  ],
+  "log": "evidence/logs/run-cases.llm-SQ-LLM-02-qwen2.5-3b.log",
+  "at": "2026-09-30T20:38:26.223900+00:00"
+}

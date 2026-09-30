@@ -1,0 +1,86 @@
+{
+  "id": "WT-D-01-tasks-get-doubled-prefix",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.32,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.get",
+            "args": {
+              "task": "AUD-1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.28,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.get",
+            "args": {
+              "task": "AUD-1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.27,
+      "result": {
+        "calls": [
+          {
+            "tool": "tasks.get",
+            "args": {
+              "task": "AUD-1"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

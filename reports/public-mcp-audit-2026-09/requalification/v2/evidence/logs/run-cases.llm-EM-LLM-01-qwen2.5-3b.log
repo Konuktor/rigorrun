@@ -1,0 +1,4 @@
+2026-09-30T18:16:37Z EM-LLM-01-qwen2.5-3b: qwen2.5:3b preloaded in 4.42 s; available 5443 MiB before preload, 7417 MiB after
+EM-LLM-01-qwen2.5-3b attempt 1: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE unknown_id__service:FAIL/FAIL/TRUE_POSITIVE (195.85s)
+EM-LLM-01-qwen2.5-3b attempt 2: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE unknown_id__service:FAIL/FAIL/TRUE_POSITIVE (195.36s)
+EM-LLM-01-qwen2.5-3b attempt 3: exit=1 happy_path:FAIL/FAIL/TRUE_POSITIVE unknown_id__service:FAIL/FAIL/TRUE_POSITIVE (195.17s)

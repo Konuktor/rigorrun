@@ -1,0 +1,26 @@
+{
+  "caseId": "case_live__unknown_id__service",
+  "caseIndex": 1,
+  "category": "missing_precondition",
+  "outcome": "FAIL",
+  "reading": {
+    "messages": [
+      {
+        "body_sha256": "7b9f735d5deb7696403358c229cf00bdd1c793129888b469c7d5e95a7bf017f8",
+        "from": "agent@example.test",
+        "mailbox": "agent@example.test",
+        "subject": "Audit 17",
+        "to": "agent@example.test"
+      },
+      {
+        "body_sha256": "7b9f735d5deb7696403358c229cf00bdd1c793129888b469c7d5e95a7bf017f8",
+        "from": "agent@example.test",
+        "mailbox": "agent@example.test",
+        "subject": "Audit 17",
+        "to": "agent@example.test"
+      }
+    ],
+    "oracle": "greenmail-imaps",
+    "total": 2
+  }
+}

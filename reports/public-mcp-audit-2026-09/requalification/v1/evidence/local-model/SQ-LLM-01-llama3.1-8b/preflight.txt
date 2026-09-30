@@ -1,0 +1,69 @@
+== 2026-09-16T03:56:22Z
+== free -m
+               total        used        free      shared  buff/cache   available
+Mem:           15657        5371        3685         592        7527       10286
+Swap:          16050           0       16050
+== swapon
+NAME           TYPE       SIZE USED PRIO
+/dev/nvme0n1p6 partition 15,7G   0B   -1
+== nvidia-smi
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce GTX 1650, 4096 MiB, 6 MiB
+== docker stats
+agent-gauntlet-db	44.67MiB / 15.29GiB
+mad_devs-reminder-worker-1	74.48MiB / 15.29GiB
+== top processes by RSS
+    PID   RSS COMMAND
+  24227 775356 telegram-deskto
+  38153 689060 claude
+   4654 456384 chrome
+   5129 382880 chrome
+  65619 348144 chrome
+   4814 336056 chrome
+  20686 267760 chrome
+   1514 239168 python
+   4738 237104 chrome
+  77557 209696 chrome
+   1075 202792 hermes
+   1007 190132 Xorg
+  73991 188940 chrome
+   9161 187672 chrome
+   5077 178136 chrome
+== ollama ps
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+== ollama show llama3.1:8b
+  Model
+    architecture        llama     
+    parameters          8.0B      
+    context length      131072    
+    embedding length    4096      
+    quantization        Q4_K_M    
+
+  Capabilities
+    completion    
+    tools         
+
+  Parameters
+    stop    "<|start_header_id|>"    
+    stop    "<|end_header_id|>"      
+    stop    "<|eot_id|>"             
+
+  License
+    LLAMA 3.1 COMMUNITY LICENSE AGREEMENT            
+    Llama 3.1 Version Release Date: July 23, 2024    
+    ...                                              
+
+== ollama list
+NAME                       ID              SIZE      MODIFIED     
+gemma2:2b                  8ccf136fdd52    1.6 GB    9 days ago      
+qwen2.5:1.5b               65ec06548149    986 MB    4 weeks ago     
+llama3.2:1b                baf6a787fdff    1.3 GB    4 weeks ago     
+llama3.1:8b                46e0c10c039e    4.9 GB    4 weeks ago     
+kali-glm:latest            b5f6c9b8492d    -         4 weeks ago     
+glm-5.1:cloud              7aea7667808a    -         5 weeks ago     
+glm-5.2:cloud              7e916d58b325    -         5 weeks ago     
+nomic-embed-text:latest    0a109f422b47    274 MB    2 months ago    
+qwen2.5:3b                 357c53fb659c    1.9 GB    2 months ago    
+llama3.2:3b                a80c4f17acd5    2.0 GB    4 months ago    
+qwen3:8b                   500a1f067a9f    5.2 GB    4 months ago    
+qwen2.5:7b                 845dbda0ea48    4.7 GB    4 months ago    

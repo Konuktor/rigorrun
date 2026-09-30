@@ -1,0 +1,587 @@
+{
+  "generatedBy": "remediation/scripts/release-gate.mjs",
+  "verdict": "REMEDIATION INCOMPLETE",
+  "gates": [
+    {
+      "id": "R1",
+      "title": "R-1: 0 reproductions across the original R-1 cases",
+      "status": "FAIL",
+      "evidence": {
+        "cases": 11,
+        "allRun": false,
+        "reproductions": 0,
+        "reproductionsOriginalRule": 0,
+        "perCase": [
+          {
+            "id": "EM-GM-01-correct",
+            "oracle": [
+              "PASS"
+            ],
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE"
+          },
+          {
+            "id": "EM-GM-03-duplicate",
+            "oracle": [
+              "FAIL"
+            ],
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE"
+          },
+          {
+            "id": "EM-GMA-01-correct",
+            "oracle": [
+              "PASS"
+            ],
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE"
+          },
+          {
+            "id": "EM-GMA-04-wrong-recipient",
+            "oracle": [
+              "FAIL"
+            ],
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE"
+          },
+          {
+            "id": "EM-GMA-05-wrong-subject",
+            "oracle": [
+              "FAIL"
+            ],
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE"
+          },
+          {
+            "id": "SQ-LLM-02-qwen2.5-3b",
+            "oracle": [],
+            "outcome": "NOT_RUN",
+            "originalRule": "NOT_RUN"
+          },
+          {
+            "id": "SQ-W1-01-correct",
+            "oracle": [
+              "PASS"
+            ],
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE"
+          },
+          {
+            "id": "SQ-W1-03-duplicate",
+            "oracle": [
+              "FAIL"
+            ],
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE"
+          },
+          {
+            "id": "SQ-W1-04-wrong-value",
+            "oracle": [
+              "FAIL"
+            ],
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE"
+          },
+          {
+            "id": "SQ-W1-05-wrong-entity",
+            "oracle": [
+              "FAIL"
+            ],
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE"
+          },
+          {
+            "id": "SQ-W1B-01-correct",
+            "oracle": [
+              "PASS"
+            ],
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE"
+          }
+        ]
+      }
+    },
+    {
+      "id": "FP",
+      "title": "Known-good frozen cases: 0 false positives",
+      "status": "PASS",
+      "evidence": {
+        "falsePositives": 0,
+        "falsePositivesOriginalRule": 0,
+        "knownGood": 4,
+        "knownGoodCorrect": 4,
+        "baselineKnownGoodNow": [
+          {
+            "id": "EM-GM-01-correct",
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE",
+            "oracle": [
+              "PASS"
+            ],
+            "rigorrunOutcomes": [
+              "PASS"
+            ]
+          },
+          {
+            "id": "EM-GM-06-retry-after-lost-response",
+            "outcome": "TRUE_POSITIVE",
+            "originalRule": "TRUE_POSITIVE",
+            "oracle": [
+              "FAIL"
+            ],
+            "rigorrunOutcomes": [
+              "FAIL"
+            ]
+          },
+          {
+            "id": "EM-GMA-01-correct",
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE",
+            "oracle": [
+              "PASS"
+            ],
+            "rigorrunOutcomes": [
+              "PASS"
+            ]
+          },
+          {
+            "id": "SQ-LLM-02-qwen2.5-3b",
+            "outcome": "NOT_RUN",
+            "originalRule": "NOT_RUN",
+            "oracle": [],
+            "rigorrunOutcomes": []
+          },
+          {
+            "id": "SQ-W1-01-correct",
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE",
+            "oracle": [
+              "PASS"
+            ],
+            "rigorrunOutcomes": [
+              "PASS"
+            ]
+          },
+          {
+            "id": "SQ-W1B-01-correct",
+            "outcome": "TRUE_NEGATIVE",
+            "originalRule": "TRUE_NEGATIVE",
+            "oracle": [
+              "PASS"
+            ],
+            "rigorrunOutcomes": [
+              "PASS"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "INJECTED",
+      "title": "Injected failures: every reachable injected failure correctly detected",
+      "status": "PASS",
+      "evidence": {
+        "total": 3,
+        "observedByOracle": 3,
+        "reachedByRigorRun": 1,
+        "detected": 1
+      }
+    },
+    {
+      "id": "R8",
+      "title": "R-8: Worktide proceeds beyond the previous normalisation failure",
+      "status": "PASS",
+      "evidence": {
+        "w2": {
+          "compiled": true,
+          "suiteBuilt": true,
+          "entities": [
+            "Record1",
+            "Group",
+            "Task",
+            "Record4",
+            "Record5"
+          ],
+          "stage": null
+        },
+        "w3": {
+          "compiled": true,
+          "suiteBuilt": true,
+          "entities": [
+            "Record1",
+            "Group",
+            "Task",
+            "Record4",
+            "Record5"
+          ],
+          "stage": null
+        }
+      }
+    },
+    {
+      "id": "TESTS_ORIGINAL",
+      "title": "Original RigorRun tests: 100% pass",
+      "status": "PASS",
+      "evidence": {
+        "log": "remediation/n1/evidence/full-test.log",
+        "passed": 1017,
+        "total": 1017,
+        "originalBaseline": 847
+      }
+    },
+    {
+      "id": "TESTS_NEW",
+      "title": "New regression tests: 100% pass",
+      "status": "PASS",
+      "evidence": {
+        "files": 19,
+        "missing": [],
+        "notInLog": []
+      }
+    },
+    {
+      "id": "NO_TARGET_HACKS",
+      "title": "No target-specific logic in production code",
+      "status": "PASS",
+      "evidence": {
+        "scanned": "git diff 07dda8c HEAD -- packages apps (added lines in */src/)",
+        "hits": []
+      }
+    },
+    {
+      "id": "LABELS",
+      "title": "No benchmark expected label altered",
+      "status": "PASS",
+      "evidence": {
+        "check": "freeze-baseline.mjs --check",
+        "output": "baseline manifest verified: 58 cases, 108 frozen files"
+      }
+    },
+    {
+      "id": "METRICS",
+      "title": "Every prose metric matches after-results.json (and n1/results.json)",
+      "status": "PASS",
+      "evidence": {
+        "check": "aggregate-after.mjs --check; n1/scripts/aggregate-n1.mjs --check",
+        "output": "after-results.json verified; 85 numbers checked in prose, 0 mismatches",
+        "n1Output": "n1/results.json verified; 169 numbers checked in prose, 0 mismatches"
+      }
+    },
+    {
+      "id": "NO_NEW_REGRESSION",
+      "title": "No serious new regression discovered",
+      "status": "PASS",
+      "evidence": {
+        "file": "remediation/open-regressions.json",
+        "present": true,
+        "entries": [
+          {
+            "id": "P8",
+            "kind": "regression",
+            "serious": true,
+            "title": "An agent that does the job and also deletes another record of the same kind passed",
+            "summary": "Introduced by the P3 expected-delta checks, which covered creations and changes of the focus entity but not deletions. AFTER-1 (f4145bb) graded SQ-W1-06 and SQ-W1B-06 FALSE_NEGATIVE on all six attempts; the baseline had caught them only through R-1.",
+            "fix": "65bbaed: expectedDeletedCount observed from the demonstration and success__nothing_else_deleted generated",
+            "status": "RESOLVED",
+            "resolvedBy": {
+              "run": "AFTER-2",
+              "commit": "26d1e6a product sources (measured as 0abf8ef)",
+              "cases": {
+                "SQ-W1-06-forbidden-extra-delete": {
+                  "attempts": 3,
+                  "outcome": "TRUE_POSITIVE",
+                  "originalRule": "TRUE_POSITIVE"
+                },
+                "SQ-W1B-06-forbidden-extra-delete": {
+                  "attempts": 3,
+                  "outcome": "TRUE_POSITIVE",
+                  "originalRule": "TRUE_POSITIVE"
+                }
+              }
+            },
+            "evidence": [
+              "remediation/after-1-results.json",
+              "remediation/after-results.json",
+              "packages/runner/test/expectedDelta.test.ts"
+            ]
+          },
+          {
+            "id": "N-1",
+            "kind": "newly_reachable_defect",
+            "serious": true,
+            "title": "Worktide W2/W3 suites key a time-report group by its minutes value, so the generated case is unsatisfiable",
+            "summary": "With R-8 fixed, the Worktide W2 and W3 journeys compile and build a suite for the first time. The only nominated read is a time report. Its groups carry no identifier-like field, so schema induction chose the integer 'minutes' as the identity. The demonstration raised one group's minutes from 0 to 1, which the contract reads as one Group created. The generated checks are 'derived.created.Group exists' and 'derived.created.Group.length == 1'. The suite's own quality check replays the job without the minute passing and reports false_positive_rate 1 and false_accusation 1 on both suites.",
+            "regression": false,
+            "whyNotARegression": "At the audited commit 07dda8c both journeys were refused at compile (R-8), so no Worktide suite existed to regress. The identity heuristic (chooseIdField / identifierLikeness in packages/mcp/src/induceSchema.ts) predates the remediation.",
+            "impactOnFrozenBenchmark": "none: all 13 frozen Worktide cases are direct probes that RigorRun does not grade",
+            "impactOnHeldOut": {
+              "expectationsCommitted": "f4145bb, 14:30:04 +0600, before any W2 suite of the re-runs existed",
+              "measured": {
+                "EH-WT-01": {
+                  "truth": "KNOWN_GOOD",
+                  "expected": "PASS",
+                  "actual": "PASS",
+                  "oracle": "PASS"
+                },
+                "EH-WT-02": {
+                  "truth": "KNOWN_BAD",
+                  "expected": "FAIL",
+                  "actual": "FAIL",
+                  "oracle": "FAIL"
+                },
+                "EH-WT-03": {
+                  "truth": "KNOWN_BAD",
+                  "expected": "FAIL",
+                  "actual": "PASS",
+                  "oracle": "FAIL"
+                }
+              },
+              "consequence": "EH-WT-03 (two time entries instead of one) is a known-bad case RigorRun passed: the extra entry raises one report group's minutes once, which the minutes-keyed identity reads as the single demonstrated creation and deletion."
+            },
+            "evidence": [
+              "remediation/after/traces/worktide-mcp/w2-setup/quality.json",
+              "remediation/after/traces/worktide-mcp/w3-setup/quality.json",
+              "remediation/after/traces/worktide-mcp/w2-setup/schema.json",
+              "remediation/after/journeys.json",
+              "remediation/heldout/results-external.json",
+              "remediation/n1/before-fix.md",
+              "remediation/n1/design.md",
+              "remediation/n1/after-fix.md",
+              "remediation/n1/after-fix-final.json",
+              "remediation/heldout-worktide-v2/results.json",
+              "remediation/heldout-worktide-v2/RUN-NOTES.md",
+              "remediation/n1/rigor-review.md"
+            ],
+            "status": "RESOLVED",
+            "recommendedFix": "Do not choose a field as an identifier when its values changed between the demonstration's before and after reads for what is otherwise the same record, or when it is a measure; treat such report records as unkeyed aggregates. Validate on a new held-out Worktide set, since this one has now seen the defect.",
+            "statusHistory": [
+              {
+                "status": "OPEN",
+                "recorded": "final verification of the R-1...R-8 remediation (release gate at e4bc7b6)"
+              },
+              {
+                "status": "RESOLVED",
+                "recorded": "N-1 remediation, 2026-09-14",
+                "measuredAt": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500"
+              }
+            ],
+            "fix": "0099670 identity from stable fields, never a value the demonstration changed, and one canonical record key; f1ad841 expectedChanges and state_change; 69e6c33 a job that changes records is held to the records of that kind it creates",
+            "resolvedBy": {
+              "ehWt03": {
+                "finalMeasurement": {
+                  "commit": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+                  "outcomes": [
+                    "FAIL",
+                    "FAIL",
+                    "FAIL"
+                  ]
+                },
+                "firstMeasurement": {
+                  "commit": "53ac5848df45073311c67902f5bc9421d37093c7",
+                  "outcomes": [
+                    "FAIL",
+                    "TIMED_OUT",
+                    "FAIL",
+                    "FAIL"
+                  ],
+                  "note": "the TIMED_OUT run was host memory exhaustion; the duplicate was never staged (oracle PASS)"
+                }
+              },
+              "heldoutWorktideV2": {
+                "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+                "measuredAt": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+                "gate": {
+                  "defined": 11,
+                  "run": 11,
+                  "knownGoodIncorrectlyFailed": 0,
+                  "knownBadIncorrectlyPassed": 0,
+                  "abstentions": 0,
+                  "timedOut": 0
+                },
+                "sideChannel": {
+                  "defined": 3,
+                  "run": 3,
+                  "knownGoodIncorrectlyFailed": 0,
+                  "knownBadIncorrectlyPassed": 0
+                },
+                "limitProbesDisclosedNotGated": {
+                  "V2-L-01": "PASS",
+                  "V2-L-02": "PASS"
+                }
+              }
+            },
+            "residualRisks": [
+              "Split contributions (entries adding up to the demonstrated total) and a report dimension that cannot see the difference pass: disclosed limit probes V2-L-01 and V2-L-02.",
+              "The frozen 58-case real-server benchmark (AFTER-2) predates N-1 and has not been re-run at the N-1 commit; N-1 changes identity induction for every induced schema.",
+              "The v2 set was written by the agent that designed the fix; V2-S-02 motivated amendment 3 before the freeze. One run per case.",
+              "A new group in a report with no totals, and records that change in most fields, can still be keyed by a unique value (design.md, false-negative risks)."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "N1",
+      "title": "N-1: EH-WT-03 never passes after the fix, and fails on at least three completed runs at the current product sources",
+      "status": "PASS",
+      "evidence": {
+        "file": "remediation/n1/after-fix-final.json",
+        "rigorrunCommit": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+        "productSourcesMatchHead": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "actual": "FAIL",
+            "oracle": "FAIL",
+            "unassignedMinutes": [
+              0,
+              2
+            ]
+          },
+          {
+            "attempt": 2,
+            "actual": "FAIL",
+            "oracle": "FAIL",
+            "unassignedMinutes": [
+              0,
+              2
+            ]
+          },
+          {
+            "attempt": 3,
+            "actual": "FAIL",
+            "oracle": "FAIL",
+            "unassignedMinutes": [
+              0,
+              2
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "HELDOUT_WORKTIDE_V2",
+      "title": "Worktide v2 held-out: frozen before running; no known-good FAIL and no known-bad PASS in the gated blocks; every case run",
+      "status": "PASS",
+      "evidence": {
+        "file": "remediation/heldout-worktide-v2/results.json",
+        "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+        "rigorrunCommit": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+        "frozenBeforeRun": true,
+        "blocks": {
+          "gate": {
+            "cases": 11,
+            "run": 11,
+            "matchingExpected": 11,
+            "knownGood": 4,
+            "knownBad": 7,
+            "knownGoodIncorrectlyFailed": 0,
+            "knownBadIncorrectlyPassed": 0,
+            "falsePositivesAgainstOracle": 0,
+            "falseNegativesAgainstOracle": 0,
+            "abstentions": 0,
+            "timedOut": 0,
+            "oracleDisagreesWithTruthLabel": 0,
+            "defined": 11,
+            "passes": true
+          },
+          "side-channel": {
+            "cases": 3,
+            "run": 3,
+            "matchingExpected": 3,
+            "knownGood": 0,
+            "knownBad": 3,
+            "knownGoodIncorrectlyFailed": 0,
+            "knownBadIncorrectlyPassed": 0,
+            "falsePositivesAgainstOracle": 0,
+            "falseNegativesAgainstOracle": 0,
+            "abstentions": 0,
+            "timedOut": 0,
+            "oracleDisagreesWithTruthLabel": 0,
+            "defined": 3,
+            "passes": true
+          },
+          "limit-probe": {
+            "cases": 2,
+            "run": 2,
+            "matchingExpected": 2,
+            "knownGood": 0,
+            "knownBad": 2,
+            "knownGoodIncorrectlyFailed": 0,
+            "knownBadIncorrectlyPassed": 2,
+            "falsePositivesAgainstOracle": 0,
+            "falseNegativesAgainstOracle": 2,
+            "abstentions": 0,
+            "timedOut": 0,
+            "oracleDisagreesWithTruthLabel": 0,
+            "defined": 2
+          }
+        },
+        "gatedBlocks": [
+          "gate",
+          "side-channel"
+        ],
+        "knownBadPassed": [],
+        "knownGoodFailed": [],
+        "limitProbes": [
+          {
+            "id": "V2-L-01",
+            "truth": "KNOWN_BAD",
+            "actual": "PASS",
+            "oracle": "FAIL"
+          },
+          {
+            "id": "V2-L-02",
+            "truth": "KNOWN_BAD",
+            "actual": "PASS",
+            "oracle": "FAIL"
+          }
+        ],
+        "notRun": []
+      }
+    },
+    {
+      "id": "HELDOUT",
+      "title": "Held-out: no known-good case failed; no known-bad case passed; every case run",
+      "status": "PASS",
+      "evidence": {
+        "inProcess": {
+          "cases": 23,
+          "matchingExpected": 23,
+          "knownGoodIncorrectlyFailed": 0,
+          "knownBadIncorrectlyPassed": 0,
+          "undecidableGivenAVerdict": 0,
+          "notFinishedGivenAVerdict": 0,
+          "abstentions": 6
+        },
+        "inProcessSource": "remediation/n1/evidence/results-inprocess.json",
+        "external": {
+          "cases": 16,
+          "run": 16,
+          "matchingExpected": 15,
+          "knownGoodIncorrectlyFailed": 0,
+          "knownBadIncorrectlyPassed": 1,
+          "falsePositivesAgainstOracle": 0,
+          "falseNegativesAgainstOracle": 1,
+          "abstentions": 0,
+          "timedOut": 1,
+          "oracleDisagreesWithTruthLabel": 0,
+          "faultNotAsIntended": 0
+        },
+        "supersededByN1": [
+          {
+            "id": "EH-WT-03",
+            "actual": "PASS",
+            "oracle": "FAIL",
+            "measuredAt": "d87abca7dc182f73873f8a30d594786f4888ecd1"
+          }
+        ],
+        "knownGoodFailed": [],
+        "knownBadPassed": [],
+        "undecidableGivenAVerdict": [],
+        "notRun": [],
+        "oracleContradictsTruthLabel": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "email-mcp W1 (GreenMail supplement) send one email",
+  "goal": "Send exactly one email to qa@example.test with the subject Audit 17 through the default service.",
+  "secrets": {"SMTP_SERVER": "AUDIT_SMTP_SERVER", "SMTP_PORT": "AUDIT_SMTP_PORT", "SMTP_USER": "AUDIT_SMTP_USER", "SMTP_PASSWORD": "AUDIT_SMTP_PASSWORD", "SMTP_FROM": "AUDIT_SMTP_FROM", "IMAP_SERVER": "AUDIT_IMAP_SERVER", "IMAP_PORT": "AUDIT_IMAP_PORT", "IMAP_USER": "AUDIT_IMAP_USER", "IMAP_PASSWORD": "AUDIT_IMAP_PASSWORD"},
+  "connector": {"kind": "mcp", "transport": "stdio", "command": "uv", "args": ["--directory", "{REPO}/tmp/rigorrun-audit/email-mcp", "run", "email-mcp"], "secretNames": ["SMTP_SERVER", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SMTP_FROM", "IMAP_SERVER", "IMAP_PORT", "IMAP_USER", "IMAP_PASSWORD"]},
+  "safety": "local",
+  "readOnlyTools": ["check_inbox", "list_services", "email_status", "list_folders", "search_emails", "fetch_email_detail", "email_help", "show_inbox_card", "show_services_card", "show_email_status_card"],
+  "verifierReads": [{"tool": "check_inbox", "args": {"service": "default", "limit": 50}}],
+  "reset": {"kind": "none"},
+  "teach": [
+    {"tool": "check_inbox", "args": {"service": "default", "limit": 50}},
+    {"tool": "send_email", "args": {"to": "qa@example.test", "subject": "Audit 17", "body": "Audit message 17. This is a synthetic test email captured by a local fake mail server.", "service": "default"}}
+  ],
+  "answers": {},
+  "review": {"confirm": [], "reject": []},
+  "quality": true,
+  "agents": []
+}

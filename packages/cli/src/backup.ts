@@ -140,7 +140,7 @@ export async function cmdRestore(
     );
   }
   line();
-  line(c.grey('  Credentials are not in a backup. Set them again with `rigorrun secrets set`.'));
+  line(c.grey('  Credentials are not in a backup. Set them again with `npx rigorrun secrets set <name>`.'));
   return 0;
 }
 
@@ -268,6 +268,8 @@ export async function cmdImportProject(
       // agreed to run. Cleared unconditionally, whatever the file claimed —
       // the field is written by the person who typed it, and nobody typed this.
       ...(agent.kind === 'process' ? { confirmedByOperatorAt: null } : {}),
+      // Where a case's work gets sent is a decision for this machine, not the file.
+      ...(agent.kind === 'blackbox' ? { remoteConfirmedAt: null } : {}),
     })),
     connectorTrust: { origin: 'imported', confirmedAt: null },
   };

@@ -1,0 +1,34 @@
+== 2026-09-16T03:57:12Z
+== free -m
+               total        used        free      shared  buff/cache   available
+Mem:           15657        4743        2176         590        9661       10914
+Swap:          16050        1341       14709
+== swapon
+NAME           TYPE       SIZE USED PRIO
+/dev/nvme0n1p6 partition 15,7G 1,3G   -1
+== nvidia-smi
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce GTX 1650, 4096 MiB, 3347 MiB
+== docker stats
+agent-gauntlet-db	21.97MiB / 15.29GiB
+mad_devs-reminder-worker-1	48.16MiB / 15.29GiB
+== top processes by RSS
+    PID   RSS COMMAND
+  79623 5484328 ollama
+  24227 587524 telegram-deskto
+   4654 439620 chrome
+  38153 407844 claude
+  20686 248588 chrome
+   4814 244632 chrome
+   5129 238560 chrome
+   1514 234932 python
+   1075 203420 hermes
+  77557 200492 chrome
+  65619 200352 chrome
+   1007 183788 Xorg
+   4738 179008 chrome
+   1512 171720 ollama
+   9161 154952 chrome
+== ollama ps
+NAME           ID              SIZE      PROCESSOR          CONTEXT    UNTIL              
+llama3.1:8b    46e0c10c039e    5.9 GB    43%/57% CPU/GPU    4096       4 minutes from now    

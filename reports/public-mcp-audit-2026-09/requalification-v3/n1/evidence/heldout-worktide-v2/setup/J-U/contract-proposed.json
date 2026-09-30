@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_850e1bae781f",
+  "name": "Start a timer described 'Desk review', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running.",
+  "description": "Compiled from one recorded execution in worktide v2 J-U: one timed minute, reported by user.",
+  "goal": "Start a timer described 'Desk review', let it run for one minute, then stop it, so that exactly one new time entry exists and no timer is left running",
+  "environmentId": "p_850e1bae781f",
+  "sourceTraceId": "trace_p_850e1bae781f",
+  "primaryAction": "time.stop",
+  "focusEntity": "Group",
+  "focusScope": "changed",
+  "remedyActions": [
+    "time.start"
+  ],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "time.start": {
+      "description": "Desk review"
+    },
+    "time.stop": {}
+  },
+  "projectionFocus": [
+    "Group",
+    "Record1"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Group 01a09c3a-5be3-7cb2-89d8-597c14e4799d: billableMinutes changed 225 → 226",
+      "key": "Group.billableMinutes",
+      "value": {
+        "from": 225,
+        "to": 226
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Group 01a09c3a-5be3-7cb2-89d8-597c14e4799d: billableMinutes changed 225 → 226"
+        }
+      ]
+    },
+    {
+      "id": "fact_002",
+      "statement": "Group 01a09c3a-5be3-7cb2-89d8-597c14e4799d: minutes changed 225 → 226",
+      "key": "Group.minutes",
+      "value": {
+        "from": 225,
+        "to": 226
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_1",
+          "detail": "Group 01a09c3a-5be3-7cb2-89d8-597c14e4799d: minutes changed 225 → 226"
+        }
+      ]
+    },
+    {
+      "id": "fact_003",
+      "statement": "Record1 2026-09-01T00:00:00+02:00: billableMinutes changed 945 → 946",
+      "key": "Record1.billableMinutes",
+      "value": {
+        "from": 945,
+        "to": 946
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_2",
+          "detail": "Record1 2026-09-01T00:00:00+02:00: billableMinutes changed 945 → 946"
+        }
+      ]
+    },
+    {
+      "id": "fact_004",
+      "statement": "Record1 2026-09-01T00:00:00+02:00: totalMinutes changed 945 → 946",
+      "key": "Record1.totalMinutes",
+      "value": {
+        "from": 945,
+        "to": 946
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_3",
+          "detail": "Record1 2026-09-01T00:00:00+02:00: totalMinutes changed 945 → 946"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "expectedCreatedCount": 0,
+  "expectedChanges": [
+    {
+      "record": {
+        "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d"
+      },
+      "field": "billableMinutes",
+      "from": 225,
+      "to": 226,
+      "compare": "quantity"
+    },
+    {
+      "record": {
+        "key": "01a09c3a-5be3-7cb2-89d8-597c14e4799d"
+      },
+      "field": "minutes",
+      "from": 225,
+      "to": 226,
+      "compare": "quantity"
+    }
+  ],
+  "expectedFrame": {
+    "entities": {
+      "Group": {
+        "preExistingRows": 2,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 1,
+        "updatedFields": [
+          "billableMinutes",
+          "minutes"
+        ],
+        "identity": "named"
+      },
+      "Record1": {
+        "preExistingRows": 1,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 1,
+        "updatedFields": [
+          "billableMinutes",
+          "totalMinutes"
+        ],
+        "identity": "named"
+      },
+      "Record4": {
+        "preExistingRows": 0,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      },
+      "Record5": {
+        "preExistingRows": 0,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      },
+      "Task": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "rule_action_order__time.start__time.stop",
+      "statement": "\"time.start\" must happen before \"time.stop\"",
+      "template": "action_order",
+      "status": "inferred",
+      "confidence": 0.5,
+      "provenance": [
+        {
+          "kind": "recorded_action",
+          "ref": "time.start__time.stop",
+          "detail": "the operator did time.start, then time.stop"
+        }
+      ],
+      "implications": [
+        "An agent that does them the other way round will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must \"time.start\" always come before \"time.stop\"?",
+        "reason": "That was the order in the recording. It may simply have been convenient."
+      },
+      "predicate": {
+        "kind": "event_order",
+        "before": "time.start",
+        "after": "time.stop"
+      }
+    },
+    {
+      "id": "rule_field_relation__eq__billableMinutes__minutes",
+      "statement": "the group's billable minutes must equal the group's minutes",
+      "template": "field_relation",
+      "status": "inferred",
+      "confidence": 0.6,
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "Group",
+          "detail": "in the demonstration the group's billable minutes and the group's minutes were both 226"
+        }
+      ],
+      "implications": [
+        "An agent that lets the two differ will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must the group's billable minutes always equal the group's minutes?",
+        "reason": "They matched once. One recording cannot show whether a mismatch is ever allowed."
+      },
+      "predicate": {
+        "kind": "row_constraint",
+        "entity": "Group",
+        "scope": "changed",
+        "when": [],
+        "then": [
+          {
+            "field": "cmp__billableMinutes__minus__minutes",
+            "op": "eq",
+            "value": 0,
+            "describe": "the group's billable minutes equals the group's minutes"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rule_field_relation__lte__billedMinutes__minutes",
+      "statement": "the group's billed minutes must not exceed the group's minutes",
+      "template": "field_relation",
+      "status": "inferred",
+      "confidence": 0.45,
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "Group",
+          "detail": "in the demonstration the group's billed minutes was below the group's minutes"
+        }
+      ],
+      "implications": [
+        "An agent that goes over will fail."
+      ],
+      "generatedAssertions": [],
+      "generatedCases": [],
+      "question": {
+        "text": "Must the group's billed minutes never exceed the group's minutes?",
+        "reason": "One recording stayed below the other value; nothing showed what happens above it."
+      },
+      "predicate": {
+        "kind": "row_constraint",
+        "entity": "Group",
+        "scope": "changed",
+        "when": [],
+        "then": [
+          {
+            "field": "cmp__billedMinutes__minus__minutes",
+            "op": "lte",
+            "value": 0,
+            "describe": "the group's billed minutes is at most the group's minutes"
+          }
+        ]
+      }
+    }
+  ],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-09-30T21:00:55.338Z"
+}

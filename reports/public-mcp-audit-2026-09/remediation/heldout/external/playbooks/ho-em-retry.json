@@ -1,0 +1,1 @@
+{"name":"ho-em-retry","steps":[{"tool":"send_email","args":{"to":"qa@example.test","subject":"Rota change","body":"The rota moves to Thursday.","service":"default"},"retry_on_error":1}],"report":"Sent one email to qa@example.test with subject Rota change; retried once after an error."}

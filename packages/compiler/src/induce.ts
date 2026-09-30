@@ -16,18 +16,22 @@
  * facts that are literally in the delta are `observed`.
  */
 import {
+  type ArgumentBinding,
   type CanonicalHumanTrace,
   type ContractRule,
   type EnvironmentContract,
+  type ExpectedChange,
+  type Literal,
   type ObservedFact,
   type Provenance,
   type RulePredicate,
   ENVIRONMENT_CONTRACT_SCHEMA_VERSION,
-  actionSteps,
+  effectiveSteps,
   surfaceText,
 } from '@rigorrun/core';
 import {
   buildProjection,
+  demonstratedFrame,
   describeDelta,
   diffStates,
   entityByName,
@@ -58,6 +62,12 @@ export interface InduceOptions {
   contractId?: string;
   name?: string;
   createdAt?: string;
+  /**
+   * What the person said the job is, in their words. Used as the goal the
+   * agent is given; the primary tool's own description is only a fallback,
+   * because a server's doc comment is a description of a tool, not of a job.
+   */
+  goal?: string;
 }
 
 export interface Induction {
@@ -151,7 +161,7 @@ export function induceContract(
   // Remedies are the mutating things the operator did *before* the job itself
   // — asking for an approval, opening a record. Anything after it is a side
   // effect, not a way of unblocking the work.
-  const performed = actionSteps(trace).map((step) => step.action?.name ?? '');
+  const performed = effectiveSteps(trace).map((step) => step.action?.name ?? '');
   const primaryIndex = performed.lastIndexOf(primary);
   const isMutating = (name: string): boolean =>
     !(adapter.getActions().find((a) => a.name === name)?.readOnly ?? true);
@@ -161,8 +171,10 @@ export function induceContract(
   const completionActions = performed
     .slice(primaryIndex + 1)
     .filter((name) => name !== '' && name !== primary && isMutating(name));
+  // The last call of each action that did something. A read-back through a
+  // tool that also writes is not the job, and its arguments are not the job's.
   const demonstratedArgs: Record<string, Record<string, unknown>> = {};
-  for (const step of actionSteps(trace)) {
+  for (const step of effectiveSteps(trace)) {
     if (step.action) demonstratedArgs[step.action.name] = step.action.args;
   }
 
@@ -212,12 +224,14 @@ export function induceContract(
   ].sort((a, b) => a.id.localeCompare(b.id));
 
   const createdAt = options.createdAt ?? new Date().toISOString();
+  const bindings = argumentBindings(context);
+  const changes = expectedChanges(context, bindings);
   const contract: EnvironmentContract = {
     schemaVersion: ENVIRONMENT_CONTRACT_SCHEMA_VERSION,
     id: options.contractId ?? `ec_${trace.id}`,
     name: options.name ?? trace.name,
     description: `Compiled from one recorded execution in ${adapter.name}.`,
-    goal: goalStatement(context),
+    goal: goalStatement(context, options.goal),
     environmentId: adapter.id,
     sourceTraceId: trace.id,
     primaryAction: primary,
@@ -239,6 +253,14 @@ export function induceContract(
       ]),
     ].sort(),
     observedFacts: observedFacts(context),
+    argumentBindings: bindings,
+    expectedDeltaCount: expectedDeltaCount(context),
+    expectedDeletedCount: expectedDeletedCount(context),
+    ...(focusScope === 'changed' ? { expectedCreatedCount: createdCount(context) } : {}),
+    ...(changes.length > 0 ? { expectedChanges: changes } : {}),
+    // Every kind of record, not only the one the job is about: an agent that
+    // also changes something the job never touched must be visible (requalification P9).
+    expectedFrame: demonstratedFrame(schema, before, after),
     rules,
     successAssertions: [],
     policyAssertions: [],
@@ -289,11 +311,261 @@ function factValue(delta: StateDelta): unknown {
   }
 }
 
-function goalStatement(context: Context): string {
+/** Trailing full stops off, without a pattern that backtracks on a run of them. */
+function withoutTrailingDots(text: string): string {
+  let end = text.length;
+  while (end > 0 && text[end - 1] === '.') end -= 1;
+  return text.slice(0, end);
+}
+
+function goalStatement(context: Context, stated: string | undefined): string {
+  const said = stated === undefined ? undefined : withoutTrailingDots(stated.trim());
+  if (said && said.length > 0) return said;
   const definition = context.adapter.getActions().find((a) => a.name === context.primaryAction);
   const label = entityLabel(context.schema, context.focusEntity.name);
   const described = definition?.description?.trim().replace(/\.+$/, '');
   return described && described.length > 0 ? described : `Complete ${article(label)} correctly`;
+}
+
+/**
+ * How many records of the kind the job is about the demonstration produced.
+ *
+ * Read from the delta, so a job that files two lines at once is expected to
+ * file two, and one that files one is expected to file exactly one. This is
+ * the number that makes a duplicate detectable: "a record exists" is true of a
+ * world with two of them.
+ */
+function expectedDeltaCount(context: Context): number {
+  const name = context.focusEntity.name;
+  if (context.focusScope === 'created') {
+    return context.deltas.filter((delta) => delta.kind === 'entity_created' && delta.entity === name).length;
+  }
+  return new Set(
+    context.deltas
+      .filter((delta) => delta.entity === name && delta.kind !== 'entity_created' && delta.kind !== 'entity_deleted')
+      .map((delta) => delta.id),
+  ).size;
+}
+
+/**
+ * How many records of the kind the job is about the demonstration deleted —
+ * usually none. Read from the delta like the count above, so a job that
+ * replaces a record is held to deleting exactly one, and a job that only
+ * creates is held to deleting nothing.
+ */
+function expectedDeletedCount(context: Context): number {
+  const name = context.focusEntity.name;
+  return context.deltas.filter((delta) => delta.kind === 'entity_deleted' && delta.entity === name).length;
+}
+
+/** How many records of the kind the job is about the demonstration created. */
+function createdCount(context: Context): number {
+  const name = context.focusEntity.name;
+  return context.deltas.filter((delta) => delta.kind === 'entity_created' && delta.entity === name).length;
+}
+
+/**
+ * How each record the job is about must change, read off the demonstration.
+ *
+ * A count says how many records changed, never how. On a total — minutes on a
+ * report row, units in a bucket — one entry and two entries both change one
+ * row, and only the amount tells them apart. So a changed record is held to
+ * the change the demonstration made to each of its fields, except the fields
+ * that name it, the ones an argument already binds, and clocks. A created
+ * record is held only on the parts of a total: everything else about a new
+ * record, its identifier or its number, is the system's to assign. A record
+ * nothing names cannot be told from its replacement, and that is recorded
+ * rather than counted.
+ */
+function expectedChanges(context: Context, bindings: readonly ArgumentBinding[]): ExpectedChange[] {
+  const entity = context.focusEntity;
+  const naming = entity.keyFields ?? [entity.idField];
+  const bound = new Set(bindings.map((binding) => binding.field));
+  const own = (delta: StateDelta): boolean => delta.entity === entity.name;
+  const created = context.deltas.filter(
+    (delta): delta is Extract<StateDelta, { kind: 'entity_created' }> => own(delta) && delta.kind === 'entity_created',
+  );
+
+  if (entity.identity === 'unestablished') {
+    const replaced = created.length > 0 && context.deltas.some((delta) => own(delta) && delta.kind === 'entity_deleted');
+    return replaced ? [{ record: {}, field: '', compare: 'unattributable' }] : [];
+  }
+
+  // A value the operator typed into a preparatory call is theirs, not the
+  // system's: an approver's name given when asking for a sign-off. The agent is
+  // never handed those arguments, so holding a case to them would fail an
+  // agent that asked a different approver. The job's own arguments are
+  // different — the case carries them, and the bindings decide what they pin.
+  const typedElsewhere = typedArguments(context);
+
+  const changes: ExpectedChange[] = [];
+  if (context.focusScope === 'changed') {
+    const table = context.after.entities[entity.name] ?? {};
+    for (const delta of context.deltas) {
+      if (delta.kind !== 'field_changed' || !own(delta)) continue;
+      const field = fieldByName(entity, delta.field);
+      if (!field || field.type === 'timestamp' || field.role === 'timestamp') continue;
+      if (naming.includes(field.name) || bound.has(field.name)) continue;
+      const row = table[delta.id];
+      if (!row) continue;
+      if (typedElsewhere(field.name, asLiteral(delta.to))) {
+        // The value is the operator's, so it is never pinned. That the job
+        // left the field set is still the job's doing — a sign-off recorded —
+        // and is the only way to see it when nobody watched the calls.
+        if (isUnset(delta.from) && !isUnset(delta.to)) {
+          changes.push({
+            record: Object.fromEntries(naming.map((name) => [name, asLiteral(row[name])])),
+            field: field.name,
+            from: null,
+            compare: 'populated',
+          });
+        }
+        continue;
+      }
+      changes.push({
+        record: Object.fromEntries(naming.map((name) => [name, asLiteral(row[name])])),
+        field: field.name,
+        from: asLiteral(delta.from),
+        to: asLiteral(delta.to),
+        compare: field.type === 'number' ? 'quantity' : field.type === 'boolean' || field.type === 'enum' ? 'closed' : 'open',
+      });
+    }
+  } else if (created.length === 1) {
+    const row = created[0]!.row;
+    for (const field of entity.fields) {
+      if (field.totals === undefined || naming.includes(field.name) || bound.has(field.name)) continue;
+      const value = row[field.name];
+      if (typeof value !== 'number') continue;
+      changes.push({ record: {}, field: field.name, to: value, compare: 'quantity' });
+    }
+  }
+  return changes.sort(
+    (a, b) => JSON.stringify(a.record).localeCompare(JSON.stringify(b.record)) || a.field.localeCompare(b.field),
+  );
+}
+
+/**
+ * Whether a value carries an argument the operator gave to a call other than
+ * the job's own, by the same relations argument bindings observe: equal, the
+ * field containing the argument, or the argument containing the field as a
+ * whole token. A boolean or one-character value counts only under the
+ * argument's own name, because those coincide with far too much.
+ */
+function typedArguments(context: Context): (field: string, value: Literal) => boolean {
+  const primary = context.demonstratedArgs[context.primaryAction] ?? {};
+  const scalar = (value: unknown): value is string | number | boolean =>
+    value !== null && value !== undefined && typeof value !== 'object';
+  const ownValues = new Set(Object.values(primary).filter(scalar).map((value) => String(value)));
+  const typed = Object.entries(context.demonstratedArgs)
+    .filter(([action]) => action !== context.primaryAction)
+    .flatMap(([, args]) => Object.entries(args))
+    .filter((entry): entry is [string, string | number | boolean] => scalar(entry[1]))
+    .filter(([, value]) => !ownValues.has(String(value)));
+  return (field, value) => {
+    if (value === null) return false;
+    const weak = typeof value === 'boolean' || String(value).trim().length < 2;
+    return typed.some(([param, arg]) => {
+      if (weak && param !== field) return false;
+      if (String(arg) === String(value)) return true;
+      if (typeof value === 'string' && typeof arg === 'string' && arg.trim().length >= 3 && value.includes(arg)) {
+        return true;
+      }
+      return typeof arg === 'string' && typeof value !== 'boolean' && wholeToken(arg, value);
+    });
+  };
+}
+
+function isUnset(value: unknown): boolean {
+  return value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
+}
+
+function asLiteral(value: unknown): Literal {
+  return value === null || typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'
+    ? value
+    : null;
+}
+
+/**
+ * Which fields of the created (or changed) record carry which arguments.
+ *
+ * Purely by value, on this one demonstration: a field holds exactly what was
+ * passed, or its text contains what was passed (a wrapper around a subject),
+ * or what was passed contains its value as a whole token (a title inside a
+ * query). Nothing here reads a name for meaning. Three guards keep a
+ * coincidence from becoming a check that fails a correct agent:
+ *
+ * - a created record's identifier is never bound: it is the system's to
+ *   assign. A changed record's identifier is the opposite — it is how the
+ *   request names *which* record — so it is bound, by equality only;
+ * - a boolean or a one-character value is bound only where the system itself
+ *   gave the argument the field's name, because `1` and `true` coincide with
+ *   far too much to be evidence;
+ * - one argument equal to several fields is ambiguous, and ambiguity is not
+ *   evidence: only a same-named field keeps the binding, otherwise none does.
+ *
+ * Under-binding costs a weaker check. Over-binding costs a false failure.
+ */
+function argumentBindings(context: Context): ArgumentBinding[] {
+  const args = Object.entries(context.demonstratedArgs[context.primaryAction] ?? {}).filter(
+    (entry): entry is [string, string | number | boolean] =>
+      entry[1] !== null && entry[1] !== undefined && typeof entry[1] !== 'object',
+  );
+  const rank: Record<ArgumentBinding['mode'], number> = {
+    equals: 0,
+    field_contains_param: 1,
+    param_contains_field: 2,
+  };
+
+  const perField: ArgumentBinding[] = [];
+  for (const field of context.focusEntity.fields) {
+    const isId = field.name === context.focusEntity.idField;
+    if (isId && context.focusScope === 'created') continue;
+    const raw = context.focusRow[field.name];
+    if (raw === null || raw === undefined || typeof raw === 'object') continue;
+    const value = raw as string | number | boolean;
+    const weak = typeof value === 'boolean' || String(value).trim().length < 2;
+
+    let best: ArgumentBinding | undefined;
+    let bestSameName = false;
+    for (const [param, arg] of args) {
+      const sameName = param === field.name;
+      if (weak && !sameName) continue;
+      let mode: ArgumentBinding['mode'] | undefined;
+      if (String(arg) === String(value)) mode = 'equals';
+      else if (typeof value === 'string' && typeof arg === 'string' && arg.trim().length >= 3 && value.includes(arg)) {
+        mode = 'field_contains_param';
+      } else if (typeof arg === 'string' && typeof value !== 'boolean' && wholeToken(arg, value)) {
+        mode = 'param_contains_field';
+      }
+      if (mode === undefined) continue;
+      if (isId && mode !== 'equals') continue;
+      const better =
+        best === undefined ||
+        rank[mode] < rank[best.mode] ||
+        (rank[mode] === rank[best.mode] && sameName && !bestSameName);
+      if (better) {
+        best = { field: field.name, param, mode, demonstrated: value };
+        bestSameName = sameName;
+      }
+    }
+    if (best) perField.push(best);
+  }
+
+  return perField
+    .filter((binding) => {
+      if (binding.mode !== 'equals') return true;
+      const rivals = perField.filter((other) => other.mode === 'equals' && other.param === binding.param);
+      return rivals.length === 1 || binding.field === binding.param;
+    })
+    .sort((a, b) => a.field.localeCompare(b.field));
+}
+
+/** Whether `text` contains `value` as a whole token, not as part of a longer one. */
+function wholeToken(text: string, value: string | number): boolean {
+  const needle = String(value).trim();
+  if (needle.length < 2) return false;
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(^|[^A-Za-z0-9_.])${escaped}([^A-Za-z0-9_.]|$)`).test(text);
 }
 
 // ------------------------------------------------------------------- templates
@@ -1234,7 +1506,7 @@ function guardedActions(context: Context, guarded: ReadonlySet<string>): Set<str
 }
 
 function actionOrder(context: Context, conditional: ReadonlySet<string>): ContractRule[] {
-  const performed = actionSteps(context.trace)
+  const performed = effectiveSteps(context.trace)
     .map((step) => step.action?.name)
     .filter((name): name is string => name !== undefined)
     .filter((name) => !(context.adapter.getActions().find((a) => a.name === name)?.readOnly ?? true));
@@ -1377,7 +1649,7 @@ function resolvePrimaryAction(
     return definition.mutates.some((entity) => !appendOnly.has(entity) && touched.has(entity));
   };
 
-  const performed = actionSteps(trace)
+  const performed = effectiveSteps(trace)
     .map((step) => step.action?.name)
     .filter((name): name is string => name !== undefined);
 
@@ -1419,7 +1691,7 @@ function resolveFocusEntity(
 }
 
 function eventsFromTrace(trace: CanonicalHumanTrace): EnvEvent[] {
-  return actionSteps(trace).map((step, index) => ({
+  return effectiveSteps(trace).map((step, index) => ({
     type: step.action?.name ?? 'unknown',
     ordinal: index,
     at: step.at,

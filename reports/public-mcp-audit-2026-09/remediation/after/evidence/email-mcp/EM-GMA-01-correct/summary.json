@@ -1,0 +1,19 @@
+{
+  "id": "EM-GMA-01-correct",
+  "target": "email-mcp",
+  "truth": "EXPECTED_PASS",
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 3.58,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "PASS",
+      "classification": "TRUE_NEGATIVE",
+      "rigorrunOutcome": "PASS",
+      "outcomeClassification": "TRUE_NEGATIVE"
+    }
+  ],
+  "reproduction": "1/1"
+}

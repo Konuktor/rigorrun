@@ -1,0 +1,1304 @@
+{
+  "serverName": "Email-MCP",
+  "latencyMs": 1242,
+  "tools": [
+    {
+      "name": "send_email",
+      "description": "Send an email via specified email service.\n\nSends an email using the specified email service. Supports SMTP, API-based services,\nlocal testing services, and webhook integrations. Automatically detects service\ncapabilities and uses the appropriate sending method.",
+      "params": [
+        {
+          "name": "to",
+          "type": "string",
+          "required": true,
+          "description": "Recipient email address(es). Can be:\n- Single address: \"user@example.com\"\n- Comma-separated: \"user1@example.com, user2@example.com\"\n- List: [\"user1@example.com\", \"user2@example.com\"]"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "Email subject line. Required."
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "Plain text email body. Required. This serves as the fallback\nfor email clients that don't support HTML."
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false,
+          "description": "Email service to use. Options:\n- \"default\": Default SMTP/IMAP service (from env vars)\n- \"sendgrid\": SendGrid transactional email\n- \"mailgun\": Mailgun transactional email\n- \"resend\": Resend transactional email\n- \"mailhog\": Local MailHog testing service\n- \"slack\": Send to Slack webhook\n- \"discord\": Send to Discord webhook\n- Custom service names configured via EMAIL_SERVICES"
+        },
+        {
+          "name": "html",
+          "type": "string",
+          "required": false,
+          "description": "Optional HTML email body. If provided, the email will be sent\nas multipart/alternative with both text and HTML versions.\nExample: \"<h1>Title</h1><p>Content</p>\""
+        }
+      ],
+      "unsupported": [
+        {
+          "name": "cc",
+          "reason": "no type is declared, so RigorRun cannot assert on it"
+        },
+        {
+          "name": "bcc",
+          "reason": "no type is declared, so RigorRun cannot assert on it"
+        },
+        {
+          "name": "attachments",
+          "reason": "no type is declared, so RigorRun cannot assert on it"
+        }
+      ],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "check_inbox",
+      "description": "Check inbox via specified email service.\n\nRetrieves emails from the specified service and folder. Supports IMAP-based services,\nlocal testing services with web APIs, and service-specific inbox checking.",
+      "params": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": false,
+          "description": "Email service to check. Options:\n- \"default\": Default IMAP service (from env vars)\n- \"mailhog\": Local MailHog testing service\n- \"mailpit\": Local Mailpit testing service\n- Custom service names that support inbox checking"
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false,
+          "description": "Mail folder name to check. Default: \"INBOX\". Common folders:\n- \"INBOX\": Main inbox folder\n- \"Sent\": Sent items folder\n- \"Drafts\": Draft messages folder\n- \"Trash\": Deleted messages folder\nFolder names are case-sensitive and provider-specific."
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Maximum number of emails to return. Default: 10."
+        },
+        {
+          "name": "unread_only",
+          "type": "boolean",
+          "required": false,
+          "description": "If True, only returns unread emails. Default: False."
+        },
+        {
+          "name": "from_contains",
+          "type": "string",
+          "required": false,
+          "description": "Optional case-insensitive substring filter on From (IMAP scans recent mail)."
+        },
+        {
+          "name": "subject_contains",
+          "type": "string",
+          "required": false,
+          "description": "Optional case-insensitive substring filter on Subject."
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "mailing_lists_catalog",
+      "description": "MAILING_LISTS_CATALOG -- List named mailing-list presets from EMAIL_MCP_MAILING_LISTS (JSON).\n\nConfigure labels/folders once (e.g. Gmail filter -> IMAP folder), then use mailing_list_latest(id).\n\nReturns:\n    success, entries[] with id, service, folder, limit, unread_only, from_contains, subject_contains;\n    or error if unset/invalid JSON.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "mailing_list_latest",
+      "description": "MAILING_LIST_LATEST -- Fetch newest messages for a preset id (see mailing_lists_catalog).\n\nLoads folder/service/filters from EMAIL_MCP_MAILING_LISTS. Typical use: newsletter drops in a\ndedicated IMAP folder (Alpha Signal, etc.). Optional limit/unread_only override entry defaults.",
+      "params": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "Preset id from catalog (e.g. alphasignal)."
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Override max messages (default: from preset, usually 5)."
+        },
+        {
+          "name": "unread_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Override UNSEEN-only (default: from preset, usually True for newest drop)."
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "email_status",
+      "description": "Get email service status and test connectivity.\n\nTests connectivity for specified service or all configured services.\nVerifies that credentials are correct and services are reachable.",
+      "params": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": false,
+          "description": "Specific service to test, or None for all services."
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "configure_service",
+      "description": "Configure a new email service dynamically.\n\nAdds a new email service configuration at runtime. The service will be\navailable for sending emails and inbox checking immediately.",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Unique name for the service (e.g., \"my-sendgrid\", \"dev-mailhog\")"
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": true,
+          "description": "Service type - \"smtp\", \"api\", \"local\", or \"webhook\""
+        },
+        {
+          "name": "enabled",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the service should be enabled (default: True)"
+        }
+      ],
+      "unsupported": [
+        {
+          "name": "config",
+          "reason": "it is a nested object, which RigorRun cannot compare against yet"
+        }
+      ],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_services",
+      "description": "List all configured email services.\n\nReturns information about all available email services, their types,\nand configuration status.\n\nReturns:\n    Dictionary with service information:\n    {\n        \"services\": {\n            \"service_name\": {\n                \"type\": str,        # Service type\n                \"enabled\": bool,    # Whether service is enabled\n                \"configured\": bool, # Whether properly configured\n                \"description\": str  # Human-readable description\n            }\n        },\n        \"count\": int,           # Total number of services\n        \"enabled_count\": int,   # Number of enabled services\n        \"types\": [str]          # List of available service types\n    }\n\nExamples:\n    # List all services\n    list_services()\n    # Returns: {\n    #     \"services\": {\n    #         \"default\": {\"type\": \"smtp\", \"enabled\": true, \"configured\": true, \"description\": \"Default SMTP/IMAP service\"},\n    #         \"sendgrid\": {\"type\": \"api\", \"enabled\": true, \"configured\": true, \"description\": \"SendGrid transactional email\"}\n    #     },\n    #     \"count\": 2,\n    #     \"enabled_count\": 2,\n    #     \"types\": [\"smtp\", \"api\", \"local\", \"webhook\"]\n    # }\n\nNotes:\n    - Shows both automatically configured and manually added services\n    - Configuration status indicates if required credentials are available\n    - Use email_status() to test actual connectivity",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "email_help",
+      "description": "Get help and usage information for email MCP tools and services.\n\nReturns comprehensive help information including available tools, supported services,\nusage examples, configuration requirements, and common use cases.\n\nReturns:\n    Dictionary with service and tool information:\n    {\n        \"server\": str,              # Server name\n        \"version\": str,             # Server version\n        \"description\": str,         # Server description\n        \"supported_services\": {     # Available service types\n            \"smtp\": str,            # Description of SMTP services\n            \"api\": str,             # Description of API services\n            \"local\": str,           # Description of local services\n            \"webhook\": str          # Description of webhook services\n        },\n        \"tools\": [...],             # List of available tools\n        \"examples\": [...],          # Usage examples\n        \"notes\": [...]              # Important notes and tips\n    }\n\nExamples:\n    # Get comprehensive help\n    email_help()\n    # Returns full documentation for all services and tools\n\nNotes:\n    - Use list_services() to see currently configured services\n    - Use email_status() to test service connectivity\n    - Use configure_service() to add new services dynamically",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "fetch_email_detail",
+      "description": "Fetch a single email by ID with full body (text + HTML).\n\nReturns the complete email including decoded text body, HTML body,\nand all headers. Requires IMAP access on the target service.\n\n## Return Format\n{success, id, subject, from, to, cc, date, text_body, html_body, headers, service, message}\n\n## Examples\nfetch_email_detail(email_id=\"abc123\")\nfetch_email_detail(email_id=\"def456\", service=\"sendgrid\", folder=\"INBOX\")",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "delete_email",
+      "description": "Delete a single email by ID (moves to Trash via IMAP).\n\n## Return Format\n{success, service, email_id, message}\n\n## Examples\ndelete_email(email_id=\"abc123\")\ndelete_email(email_id=\"def456\", service=\"sendgrid\")",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "move_email",
+      "description": "Move an email between IMAP folders (COPY + DELETE).\n\n## Return Format\n{success, service, email_id, message}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "to_folder",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "copy_email",
+      "description": "Copy an email to another folder, leaving the original in place.\n\n## Return Format\n{success, service, email_id, to_folder, message}\n\n## Examples\ncopy_email(email_id=\"abc123\", to_folder=\"Github\")\ncopy_email(email_id=\"def456\", to_folder=\"Archive\", service=\"graph\")",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "to_folder",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "forward_email",
+      "description": "Forward an existing email to new recipients (original preserved).\n\nThe forwarded copy keeps the original subject (Fwd: prefix) and\nbody; an optional comment is prepended.\n\n## Return Format\n{success, service, email_id, to, message}\n\n## Examples\nforward_email(email_id=\"abc123\", to=\"boss@example.com\")\nforward_email(email_id=\"abc123\", to=[\"a@x.com\", \"b@x.com\"], comment=\"See attached thread\")",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "to",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "flag_spam",
+      "description": "Flag an email as spam (Junk flag + move to Spam folder).\n\n## Return Format\n{success, service, email_id, message}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "mark_email_read",
+      "description": "Mark a single email as read (SEEN flag) via IMAP.\n\n## Return Format\n{success, service, email_id, message}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "mark_email_unread",
+      "description": "Mark a single email as unread (remove SEEN flag) via IMAP.\n\n## Return Format\n{success, service, email_id, message}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "flag_email",
+      "description": "Star/flag a single email (IMAP \\Flagged), distinct from mark-as-read.\n\n## Return Format\n{success, service, email_id, message}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "unflag_email",
+      "description": "Remove the star/flag from a single email.\n\n## Return Format\n{success, service, email_id, message}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_folders",
+      "description": "List all IMAP folders/mailboxes for a service.\n\n## Return Format\n{success, folders: [{name, delimiter}], service, count, message}\n\n## Examples\nlist_folders()\nlist_folders(service=\"sendgrid\")",
+      "params": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "create_folder",
+      "description": "Create a new IMAP folder.\n\n## Return Format\n{success, folder, message}",
+      "params": [
+        {
+          "name": "folder",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "delete_folder",
+      "description": "Delete an IMAP folder.\n\n## Return Format\n{success, folder, message}",
+      "params": [
+        {
+          "name": "folder",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "rename_folder",
+      "description": "Rename an IMAP folder.\n\n## Return Format\n{success, old_name, new_name, message}",
+      "params": [
+        {
+          "name": "old_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "search_emails",
+      "description": "Search emails via IMAP SEARCH command (subject/from/body keywords).\n\nUses IMAP SEARCH to find messages matching the query string,\nthen fetches headers for the most recent matches.\n\n## Return Format\n{success, emails: [{id, subject, from, date}], count, service, folder, query, message}\n\n## Examples\nsearch_emails(query=\"meeting notes\")\nsearch_emails(query=\"invoice\", folder=\"INBOX\", limit=5)",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "remove_service",
+      "description": "Remove a dynamically configured email service.\n\n## Return Format\n{success, service, message}",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "start_watcher",
+      "description": "Start background IMAP polling for new emails.\n\nPolls configured services at intervals. When new unread emails arrive,\nPOSTs a JSON payload to the webhook URL. Designed for integration with\nrobofang (TTS alerts) or fleet-agent (workflow triggers).\n\nWith auto_respond=True, new emails also run through the auto-respond\nrule engine (replies, filter actions, notifications).\n\n## Return Format\n{running, message, services: [name]}\n\n## Examples\nstart_watcher(interval=60, webhook_url=\"http://localhost:10956/api/alerts\")\nstart_watcher(interval=120, auto_respond=True)",
+      "params": [
+        {
+          "name": "interval",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "webhook_url",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "services",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "auto_respond",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "stop_watcher",
+      "description": "Stop the background mail watcher.\n\n## Return Format\n{running, message}",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "watcher_status",
+      "description": "Check if the mail watcher is running.\n\n## Return Format\n{running, config: {interval, webhook_url, services}}",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "email_connector",
+      "description": "Push email events into the fleet pipeline (aiwatcher / robofang).\n\n[RATIONALE]\nOne portmanteau keeps the connector surface compact: operations map to\naiwatcher's fleet ingest and robofang's email hook, plus a health probe.\n\nOperations:\n- aiwatcher: ingest an event (title, summary, url, urgency_hint) into\n  aiwatcher's news pipeline. Source is fixed to 'email-mcp'.\n- robofang: send an email (from_addr, subject, body) into robofang's\n  inbox hook for processing/reply.\n- status: probe both connectors (reachability + enabled state).\n\nConnectors are opt-in: set EMAIL_MCP_AIWATCHER_URL / EMAIL_MCP_ROBOFANG_URL\nin .env (empty = disabled). Failures are returned, never raised.\n\n## Return Format\n{success, connector, ...operation-specific fields}\n\n## Examples\nemail_connector(operation=\"aiwatcher\", title=\"Urgent: payment due\",\n                summary=\"Invoice overdue\", urgency_hint=8.0)\nemail_connector(operation=\"robofang\", from_addr=\"sandra@hotmail.com\",\n                subject=\"Alert\", body=\"Backup failed\")\nemail_connector(operation=\"status\")",
+      "params": [
+        {
+          "name": "operation",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "urgency_hint",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "from_addr",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "add_contact",
+      "description": "Add a contact to the address book.\n\n## Return Format\n{success, contact: {id, name, email, phone, notes, group}}",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "group",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "search_contacts",
+      "description": "Search contacts by name or email.\n\n## Return Format\n{contacts: [{id, name, email, phone, group}]}",
+      "params": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "run_workflow",
+      "description": "Generate a creative email using a preset workflow.\n\nSupported workflows: love-letter, breakup, thank-you, complaint,\napology, fan-mail, hate-mail. Recipients can be anything: person,\npet, object, or concept. Formats: text, ascii, svg.\n\n## Return Format\n{success, workflow, response (the generated text), format}\n\n## Examples\nrun_workflow(workflow=\"love-letter\", recipient=\"Landlady\", format=\"ascii\")\nrun_workflow(workflow=\"complaint\", recipient=\"The WiFi Router\", tone=\"comedic\")",
+      "params": [
+        {
+          "name": "workflow",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "tone",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "mood",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "format",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "add_auto_rule",
+      "description": "Add an auto-respond rule.\n\nWhen incoming mail matches the pattern, the rule fires.\nuse_ai=true generates a reply via LLM. auto_send sends it immediately\nwithout human approval. Otherwise the reply goes to the pending queue.\n\nfilter_action runs a workflow on the matched email: mark_read, star,\nmove (filter_target=folder), spam, delete, forward (filter_target=email),\nor notify (filter_target=aiwatcher|robofang|both).\nLower priority values match first (default 100).\n\n## Return Format\n{success, rule: {id, name, match_pattern, ...}}\n\n## Examples\nadd_auto_rule(name=\"Invoice reply\", match_pattern=\"invoice\", reply_body=\"Thanks, we'll process this.\")\nadd_auto_rule(name=\"Github triage\", match_pattern=\"github\", filter_action=\"move\", filter_target=\"Github\", priority=10)\nadd_auto_rule(name=\"Urgent notify\", match_pattern=\"urgent\", filter_action=\"notify\", filter_target=\"both\")",
+      "params": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "match_pattern",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "reply_body",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "reply_subject",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "match_field",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "use_ai",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "auto_send",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "name": "ai_prompt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "filter_action",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "filter_target",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "priority",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_auto_rules",
+      "description": "List all auto-respond rules.\n\n## Return Format\n{rules: [{id, name, match_pattern, reply_body, use_ai, auto_send, enabled}]}",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "update_auto_rule",
+      "description": "Update an auto-respond rule (match field/pattern, actions, priority, enabled).\n\nAllowed keys: name, match_field, match_pattern, reply_body, reply_subject,\nuse_ai, auto_send, ai_prompt, service, response_mode, spoof_tone,\nspam_action, filter_action, filter_target, priority, enabled.\n\n## Return Format\n{success, rule: {...}}\n\n## Examples\nupdate_auto_rule(rule_id=\"abc123\", updates={\"enabled\": False})\nupdate_auto_rule(rule_id=\"abc123\", updates={\"filter_action\": \"move\", \"filter_target\": \"Github\", \"priority\": 10})",
+      "params": [
+        {
+          "name": "rule_id",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [
+        {
+          "name": "updates",
+          "reason": "it is a nested object, which RigorRun cannot compare against yet"
+        }
+      ],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "test_auto_rule",
+      "description": "Dry-run rule matching against a sample email (nothing executes).\n\nWith rule_id, tests only that rule; otherwise tests all enabled rules\nin priority order. Returns the winning rule and the actions it would fire.\n\n## Return Format\n{success, matched, rule: {id, name, priority}, would_fire: [str], message}\n\n## Examples\ntest_auto_rule(email_subject=\"invoice overdue\")\ntest_auto_rule(email_from=\"boss@x.com\", email_subject=\"urgent\", rule_id=\"abc123\")",
+      "params": [
+        {
+          "name": "email_from",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "email_subject",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "email_body",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "rule_id",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "delete_auto_rule",
+      "description": "Delete an auto-respond rule by ID.\n\n## Return Format\n{success, message}",
+      "params": [
+        {
+          "name": "rule_id",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "backfill_auto_rules",
+      "description": "Apply existing auto-rules to mail already sitting in a folder (not just new mail).\n\n[RATIONALE] Rules only ever fired going forward via the mail watcher --\nexisting inbox clutter never got sorted retroactively. This sweeps a\nfolder once and applies each matched rule's organizational filter\naction (mark_read/star/delete/move/spam). \"notify\" and \"forward\" never\nfire here (would spam connectors or send mail based on rules written\nfor new mail only). Rules matching on message body are skipped -- this\nsweep only sees subject/from, not body text.\n\ndry_run=True (default) previews what would happen; call again with\ndry_run=False to actually apply.\n\n## Return Format\n{success, scanned, matched, applied, dry_run, rules_skipped_body_match, results, message}\n\n## Examples\nbackfill_auto_rules(folder=\"INBOX\")\nbackfill_auto_rules(service=\"gmail\", folder=\"INBOX\", dry_run=False)",
+      "params": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false
+        },
+        {
+          "name": "dry_run",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "list_pending_replies",
+      "description": "List pending auto-replies awaiting human approval.\n\n## Return Format\n{pending: [{id, email_subject, email_from, reply_body, status}]}",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "approve_reply",
+      "description": "Approve a pending auto-reply and send it immediately.\n\n## Return Format\n{success, message, sent}",
+      "params": [
+        {
+          "name": "pending_id",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "auto_respond_now",
+      "description": "Manually trigger AI auto-respond on a specific email.\n\nFetches the email, generates an AI reply, and adds it to the\npending queue for approval.\n\n## Return Format\n{success, matched, rule?: name, queued, reply_subject?}",
+      "params": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "email_shutdown",
+      "description": "Gracefully shut down the Email MCP server.\n\nRequires confirm=True to prevent accidental termination.\n\n## Return Format\n{\"success\": bool, \"message\": str}\n\n## Examples\nemail_shutdown(confirm=True)",
+      "params": [
+        {
+          "name": "confirm",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "suggest_email_subject",
+      "description": "Suggest 1-3 concise email subject lines for the given body (uses MCP sampling when available).",
+      "params": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "email_agentic_assist",
+      "description": "Plan a short multi-step email workflow using sampling (agentic assist).\n\nUses the host LLM via sampling when available; optional Anthropic fallback if configured.",
+      "params": [
+        {
+          "name": "goal",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": true
+    },
+    {
+      "name": "show_email_status_card",
+      "description": "Show email service connectivity status as a rich Prefab card.\n\nDisplays a live grid of all configured email services with connection\nstate, type, and error info -- no need to parse JSON in chat.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "show_inbox_card",
+      "description": "Show inbox as a rich Prefab card with subject, sender, and date.",
+      "params": [
+        {
+          "name": "service",
+          "type": "string",
+          "required": false,
+          "description": "Email service to check (default: 'default')."
+        },
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false,
+          "description": "Max emails to display (default 10)."
+        },
+        {
+          "name": "unread_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Show only unread messages."
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "show_services_card",
+      "description": "Show all configured email services as a rich Prefab list card.",
+      "params": [],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    },
+    {
+      "name": "show_mailing_list_digest_card",
+      "description": "Show latest emails from configured mailing lists as a rich digest card.\n\nFetches recent unread emails from mailing list presets (configured\nvia EMAIL_MCP_MAILING_LISTS env var). Displays sender, subject,\nand snippet per list. Useful as a daily news intake overview.",
+      "params": [
+        {
+          "name": "limit",
+          "type": "number",
+          "required": false
+        }
+      ],
+      "unsupported": [],
+      "hints": {},
+      "risk": {
+        "level": "unknown",
+        "source": "default",
+        "rationale": "The server published no hint. Treated as writing until shown otherwise."
+      },
+      "hasOutputSchema": false
+    }
+  ]
+}

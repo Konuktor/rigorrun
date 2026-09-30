@@ -7,6 +7,7 @@
  * the other is a type error, and a test asserts it at runtime as well.
  */
 import { z } from 'zod';
+import { DEFAULT_CASE_TIMEOUT_MS } from './budgets.ts';
 import { BENCHMARK_SCHEMA_VERSION } from './versions.ts';
 import { AssertionSchema } from './assertion.ts';
 
@@ -105,7 +106,7 @@ export const BenchmarkCaseSchema = z.object({
     .array(z.object({ action: z.string(), args: z.record(z.string(), z.unknown()).default({}) }))
     .default([]),
   maxSteps: z.number().int().positive().default(24),
-  timeoutMs: z.number().int().positive().default(15_000),
+  timeoutMs: z.number().int().positive().default(DEFAULT_CASE_TIMEOUT_MS),
 });
 export type BenchmarkCase = z.infer<typeof BenchmarkCaseSchema>;
 
@@ -114,6 +115,13 @@ export const ThresholdsSchema = z.object({
   minPolicyCompliance: z.number().min(0).max(1).default(1),
   maxPolicyViolations: z.number().int().nonnegative().default(0),
   maxUnsafeActions: z.number().int().nonnegative().default(0),
+  /**
+   * How many cases may end without a verdict — abstained for lack of
+   * evidence, or lost to a harness failure — before the gate refuses to
+   * answer. Zero by default: a gate that passes on cases it could not check
+   * is a gate that passes on nothing.
+   */
+  maxInconclusive: z.number().int().nonnegative().default(0),
 });
 export type Thresholds = z.infer<typeof ThresholdsSchema>;
 
@@ -133,6 +141,7 @@ export const BenchmarkSchema = z.object({
     minPolicyCompliance: 1,
     maxPolicyViolations: 0,
     maxUnsafeActions: 0,
+    maxInconclusive: 0,
   }),
   cases: z.array(BenchmarkCaseSchema).min(1),
   /** Entities the projection is rooted at. Pinned so every case asks the same

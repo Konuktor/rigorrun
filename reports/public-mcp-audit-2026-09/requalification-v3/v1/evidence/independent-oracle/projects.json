@@ -1,0 +1,18 @@
+{
+  "independent": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io-homes/independent",
+    "project": "p_ba0b198da4b8"
+  },
+  "mixed-a": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io-homes/mixed-a",
+    "project": "p_095ce8aedfbc"
+  },
+  "mixed-b": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io-homes/mixed-b",
+    "project": "p_dc9a7ea2ef3f"
+  },
+  "self": {
+    "home": "{REPO}/tmp/rigorrun-audit/rq-io-homes/self",
+    "project": "p_a45e22adae29"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "filesystem-error",
+  "target": "@modelcontextprotocol/server-filesystem 2026.8.31",
+  "check": "a refused call is an error, never data",
+  "status": "PASS",
+  "observed": {
+    "ok": false,
+    "kind": "error",
+    "error": null
+  },
+  "expected": "ok false, kind error"
+}

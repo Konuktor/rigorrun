@@ -1,0 +1,1 @@
+{"name":"ho-sq-retry","steps":[{"tool":"execute","args":{"query":"INSERT INTO tasks (title, status, amount, owner) VALUES ('Vendor audit', 'open', 12.25, 'dee')"},"retry_on_error":1}],"report":"Inserted one task Vendor audit; retried once after an error."}

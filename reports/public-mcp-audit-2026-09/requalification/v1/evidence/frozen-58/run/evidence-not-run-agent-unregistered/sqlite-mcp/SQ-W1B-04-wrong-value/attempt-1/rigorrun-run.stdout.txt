@@ -1,0 +1,3 @@
+
+--- stderr ---
+error No agent "sq-w1-wrong-value" on sqlite W1b insert a task (insert demonstrated last).

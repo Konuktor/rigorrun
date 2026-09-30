@@ -1,0 +1,1079 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts (13 tests | 12 failed) 75ms
+     × names the row by what stayed the same, and expects the demonstrated change 27ms
+     × passes the correct agent and fails the duplicate, the wrong row and the extra row (A–D) 12ms
+     × says what the duplicate did: the demonstrated change, and the one observed 3ms
+     × G: abstains when the case starts from a different value, unless the result contradicts every reading 3ms
+     × reads the rows that add up to the total as quantities, never as their names 2ms
+     × fails a duplicate contribution to the new row 4ms
+     × keys a cell by its dimensions, not by the quantity that happened to be unique 4ms
+     × fails the duplicate and the wrong cell 4ms
+     × keeps the null as a value of the identity rather than dropping the row 2ms
+     × keeps the numeric id as the identity, and the amount as a value 3ms
+     × does not name a record by a changing string, and never passes a duplicate visible only in it 2ms
+     × says so, keeps every row, and abstains rather than passing a change it cannot attribute 2ms
+     ✓ is unchanged: keyed by its identifier, created rows counted 6ms
+ ❯ packages/mcp/test/identity.test.ts (14 tests | 9 failed) 17ms
+     × names the row by the field that stayed the same, and says why 6ms
+     × reads a single record the same way across its two readings 1ms
+     ✓ without readings, has no change evidence and keeps the earlier choice 0ms
+     × keeps `id` when a numeric amount changes 1ms
+     × rejects a changing string and keeps a stable number 1ms
+     × rejects a changing number and keeps a stable string 1ms
+     × names a row by several stable dimensions when no single field does 2ms
+     × keeps a null dimension as part of the identity 1ms
+     × declares no identity when nothing stable tells rows apart 1ms
+     ✓ never proposes a link to a record named by several fields 0ms
+     ✓ lets a person override the identity, which clears the induced one 0ms
+     × marks the part as a quantity of the total, even when the job only adds a row 1ms
+     ✓ does not mistake a zero total, or a single row, for a sum 0ms
+     ✓ keeps an explicit identifier on a created record 0ms
+ ❯ packages/daemon/test/stepChange.test.ts (2 tests | 1 failed) 456ms
+     ✓ records which calls changed the system  366ms
+     × takes the job, its arguments and its goal from what changed and what the person said 67ms
+ ❯ packages/connector/test/environment.test.ts (8 tests | 1 failed) 18ms
+     ✓ reads records from structured content 2ms
+     ✓ reads records from JSON inside a text block 0ms
+     ✓ throws StateReadError, naming the read, when a read fails 1ms
+     ✓ throws StateReadError when a read answers in prose, rather than reporting an empty world 0ms
+     × throws StateReadError when two different records in one answer claim one identity (audit N-1) 6ms
+     ✓ reads an empty answer as an empty world 0ms
+     ✓ offers no verifier tool as an action and refuses to call one 6ms
+     ✓ labels reads independent only when every nominated read goes through the verifier 0ms
+ ❯ packages/connector/test/rows.test.ts (9 tests | 6 failed) 12ms
+     ✓ finds rows behind tagged cells and a uniform wrapper 2ms
+     ✓ still finds plain rows 1ms
+     ✓ keys state by the row identifier, not by cell values 0ms
+     × keys a row by several fields together, so rows sharing one of them stay apart 4ms
+     × keeps a row whose identity is null 1ms
+     × with no identity, keeps two identical rows as two 1ms
+     × refuses two different rows that claim one identity in one answer 1ms
+     × merges a partial copy of the same record rather than refusing it 2ms
+     × keeps a single-field key exactly as before 1ms
+ ❯ packages/verifier/test/stateChange.test.ts (13 tests | 13 failed) 11ms
+     × passes the demonstrated change 5ms
+     × fails a quantity that changed by a different amount, and says both 1ms
+     × fails a closed value that ended somewhere else 0ms
+     × cannot judge a free string that differs, and does not pass it 0ms
+     × compares numbers after rounding, as the projection does 0ms
+     × cannot tell "add 10" from "set to 10" when the result is one of them 0ms
+     × fails a result that neither reading allows 0ms
+     × passes a closed value that reached the demonstrated one, and cannot judge any other 1ms
+     × fails when the record the demonstration changed is gone 1ms
+     × cannot judge when the identity matches more than one record 0ms
+     × holds a created record to its demonstrated value 0ms
+     × never attributes a change it has no identity for 0ms
+     × counts an unverifiable change as blocking, so the case abstains rather than passes 0ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 42 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/connector/test/environment.test.ts > SystemEnvironment.getState > throws StateReadError when two different records in one answer claim one identity (audit N-1)
+AssertionError: promise resolved "{ entities: { Item: { …(1) } } }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "entities": {
++     "Item": {
++       "I-1": {
++         "itemId": "I-1",
++         "label": "renamed",
++       },
++     },
++   },
+  }
+
+ ❯ packages/connector/test/environment.test.ts:97:100
+     95|   it('throws StateReadError when two different records in one answer c…
+     96|     const clash = [{ itemId: 'I-1', label: 'first' }, { itemId: 'I-1',…
+     97|     await expect(environment({ ok: true, durationMs: 0, structured: { …
+       |                                                                                                    ^
+     98|   });
+     99|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/42]⎯
+
+ FAIL  packages/connector/test/rows.test.ts > record keys > keys a row by several fields together, so rows sharing one of them stay apart
+AssertionError: expected [ 'ann', 'bo' ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ packages/connector/test/rows.test.ts:71:32
+     69|     const rows = [{ owner: 'ann', area: 'north', units: 3 }, { owner: …
+     70|     const table = stateFromPayloads([{ cells: rows }], schemaOf(cell))…
+     71|     expect(Object.keys(table)).toHaveLength(3);
+       |                                ^
+     72|     expect(Object.keys(table).sort()).toEqual(rows.map((row) => record…
+     73|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/42]⎯
+
+ FAIL  packages/connector/test/rows.test.ts > record keys > keeps a row whose identity is null
+AssertionError: expected [ 'x1' ] to have a length of 2 but got 1
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ packages/connector/test/rows.test.ts:78:102
+     76|     const slot = entity({ name: 'Slot', keyFields: ['ref'] }, ['ref', …
+     77|     const rows = [{ ref: null, units: 0 }, { ref: 'x1', units: 4 }];
+     78|     expect(Object.keys(stateFromPayloads([{ slots: rows }], schemaOf(s…
+       |                                                                                                      ^
+     79|   });
+     80|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/42]⎯
+
+ FAIL  packages/connector/test/rows.test.ts > record keys > with no identity, keeps two identical rows as two
+AssertionError: expected [ 'a', 'b' ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ packages/connector/test/rows.test.ts:84:106
+     82|     const tally = entity({ name: 'Tally', identity: 'unestablished' },…
+     83|     const rows = [{ tag: 'a', units: 5 }, { tag: 'a', units: 5 }, { ta…
+     84|     expect(Object.keys(stateFromPayloads([{ tallies: rows }], schemaOf…
+       |                                                                                                          ^
+     85|   });
+     86|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/42]⎯
+
+ FAIL  packages/connector/test/rows.test.ts > record keys > refuses two different rows that claim one identity in one answer
+AssertionError: expected [Function] to throw an error
+ ❯ packages/connector/test/rows.test.ts:93:57
+     91|       { id: 1, title: 'Prepare invoice', status: 'done', amount: 1, ow…
+     92|     ];
+     93|     expect(() => stateFromPayloads([{ rows }], schema)).toThrow(Identi…
+       |                                                         ^
+     94|   });
+     95|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/42]⎯
+
+ FAIL  packages/connector/test/rows.test.ts > record keys > merges a partial copy of the same record rather than refusing it
+AssertionError: expected [ { id: 1, …(2) } ] to deeply equal [ { id: 1, …(4) } ]
+
+- Expected
++ Received
+
+  [
+    {
+-     "amount": 1,
+      "id": 1,
+-     "owner": "ada",
+      "status": "open",
+      "title": "Prepare invoice",
+    },
+  ]
+
+ ❯ packages/connector/test/rows.test.ts:103:34
+    101|     };
+    102|     const table = stateFromPayloads([payload], schema).entities['Row']…
+    103|     expect(Object.values(table)).toEqual([{ id: 1, title: 'Prepare inv…
+       |                                  ^
+    104|   });
+    105|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/42]⎯
+
+ FAIL  packages/connector/test/rows.test.ts > record keys > keeps a single-field key exactly as before
+TypeError: recordKey is not a function
+ ❯ packages/connector/test/rows.test.ts:107:12
+    105|
+    106|   it('keeps a single-field key exactly as before', () => {
+    107|     expect(recordKey(ROW, { id: 7, title: 'x' })).toBe('7');
+       |            ^
+    108|   });
+    109| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/42]⎯
+
+ FAIL  packages/daemon/test/stepChange.test.ts > a recording that ends in calls which change nothing > takes the job, its arguments and its goal from what changed and what the person said
+AssertionError: expected 'Its value was different for every Boo…' to match /bookingStatus/
+
+- Expected:
+/bookingStatus/
+
++ Received:
+"Its value was different for every Booking in each list the server returned, and never changed for the same one."
+
+ ❯ packages/daemon/test/stepChange.test.ts:116:34
+    114|     const idQuestion = induced?.questions.find((question) => question.…
+    115|     expect(idQuestion?.proposed).toBe('bookingId');
+    116|     expect(idQuestion?.evidence).toMatch(/bookingStatus/);
+       |                                  ^
+    117|     expect(contract.expectedChanges).toContainEqual(
+    118|       expect.objectContaining({ record: { bookingId: 'BKG-4001' }, fie…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > F: a value the job changed is never the identity > names the row by the field that stayed the same, and says why
+AssertionError: expected 'units' to be 'label' // Object.is equality
+
+Expected: "label"
+Received: "units"
+
+ ❯ packages/mcp/test/identity.test.ts:31:26
+     29|     const result = induceSchema(readings(before, after));
+     30|     const line = entityWith(result, 'units');
+     31|     expect(line.idField).toBe('label');
+       |                          ^
+     32|     expect(line.keyFields).toBeUndefined();
+     33|     expect(line.fields.find((field) => field.name === 'units')?.role).…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > F: a value the job changed is never the identity > reads a single record the same way across its two readings
+AssertionError: expected 'total' not to be 'total' // Object.is equality
+ ❯ packages/mcp/test/identity.test.ts:41:53
+     39|   it('reads a single record the same way across its two readings', () …
+     40|     const result = induceSchema(readings({ span: 'all', total: 12, sco…
+     41|     expect(entityWith(result, 'total').idField).not.toBe('total');
+       |                                                     ^
+     42|   });
+     43|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > H: a numeric identifier stays an identifier > keeps `id` when a numeric amount changes
+AssertionError: expected 'amount' to be 'id' // Object.is equality
+
+Expected: "id"
+Received: "amount"
+
+ ❯ packages/mcp/test/identity.test.ts:63:26
+     61|     const result = induceSchema(readings(rows(20), rows(25)));
+     62|     const item = entityWith(result, 'amount');
+     63|     expect(item.idField).toBe('id');
+       |                          ^
+     64|     expect(item.fields.find((field) => field.name === 'id')?.role).toB…
+     65|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > I: identity is not decided by type > rejects a changing string and keeps a stable number
+AssertionError: expected 'total' to be 'code' // Object.is equality
+
+Expected: "code"
+Received: "total"
+
+ ❯ packages/mcp/test/identity.test.ts:71:91
+     69|   it('rejects a changing string and keeps a stable number', () => {
+     70|     const rows = (total: string) => ({ counters: [{ code: 7001, total …
+     71|     expect(entityWith(induceSchema(readings(rows('0 u'), rows('3 u')))…
+       |                                                                                           ^
+     72|   });
+     73|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > I: identity is not decided by type > rejects a changing number and keeps a stable string
+AssertionError: expected 'count' to be 'tag' // Object.is equality
+
+Expected: "tag"
+Received: "count"
+
+ ❯ packages/mcp/test/identity.test.ts:76:83
+     74|   it('rejects a changing number and keeps a stable string', () => {
+     75|     const rows = (count: number) => ({ tags: [{ tag: 'north-desk', cou…
+     76|     expect(entityWith(induceSchema(readings(rows(0), rows(3))), 'count…
+       |                                                                                   ^
+     77|   });
+     78| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > compound and nullable identities > names a row by several stable dimensions when no single field does
+AssertionError: expected [] to deeply equal [ 'area', 'owner' ]
+
+- Expected
++ Received
+
+- [
+-   "area",
+-   "owner",
+- ]
++ []
+
+ ❯ packages/mcp/test/identity.test.ts:86:48
+     84|     });
+     85|     const cell = entityWith(induceSchema(readings(cells(0), cells(5)))…
+     86|     expect([...(cell.keyFields ?? [])].sort()).toEqual(['area', 'owner…
+       |                                                ^
+     87|     expect(cell.keyFields).toContain(cell.idField);
+     88|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > compound and nullable identities > keeps a null dimension as part of the identity
+AssertionError: expected undefined to deeply equal [ 'ref' ]
+
+- Expected:
+[
+  "ref",
+]
+
++ Received:
+undefined
+
+ ❯ packages/mcp/test/identity.test.ts:92:87
+     90|   it('keeps a null dimension as part of the identity', () => {
+     91|     const slots = (units: number) => ({ slots: [{ ref: null, units }, …
+     92|     expect(entityWith(induceSchema(readings(slots(0), slots(3))), 'uni…
+       |                                                                                       ^
+     93|   });
+     94|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > compound and nullable identities > declares no identity when nothing stable tells rows apart
+AssertionError: expected undefined to be 'unestablished' // Object.is equality
+
+- Expected:
+"unestablished"
+
++ Received:
+undefined
+
+ ❯ packages/mcp/test/identity.test.ts:97:91
+     95|   it('declares no identity when nothing stable tells rows apart', () =…
+     96|     const tallies = (units: number) => ({ tallies: [{ tag: 'a', units …
+     97|     expect(entityWith(induceSchema(readings(tallies(0), tallies(10))),…
+       |                                                                                           ^
+     98|   });
+     99|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/42]⎯
+
+ FAIL  packages/mcp/test/identity.test.ts > quantities that add up to a total > marks the part as a quantity of the total, even when the job only adds a row
+AssertionError: expected 'units' to be 'label' // Object.is equality
+
+Expected: "label"
+Received: "units"
+
+ ❯ packages/mcp/test/identity.test.ts:132:26
+    130|     const result = induceSchema(readings(report([]), report([{ ref: nu…
+    131|     const line = entityWith(result, 'label');
+    132|     expect(line.idField).toBe('label');
+       |                          ^
+    133|     expect(line.fields.find((field) => field.name === 'units')?.totals…
+    134|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > an aggregate row whose quantity the job changes > names the row by what stayed the same, and expects the demonstrated change
+AssertionError: expected 'units' not to be 'units' // Object.is equality
+ ❯ packages/runner/test/aggregateIdentity.test.ts:235:30
+    233|     const { schema, contract } = await compile(LANE_REPORT);
+    234|     const line = entityWith(schema, 'units');
+    235|     expect(line.idField).not.toBe('units');
+       |                              ^
+    236|     expect(line.keyFields ?? [line.idField]).not.toContain('units');
+    237|     expect(contract.focusScope).toBe('changed');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > an aggregate row whose quantity the job changes > passes the correct agent and fails the duplicate, the wrong row and the extra row (A–D)
+AssertionError: B: duplicated side effect: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/aggregateIdentity.test.ts:187:64
+    185|   for (const [name, steps, expected] of table) {
+    186|     const result = await run(compiled, world, scripted(name, steps));
+    187|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    188|   }
+    189| }
+ ❯ packages/runner/test/aggregateIdentity.test.ts:246:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > an aggregate row whose quantity the job changes > says what the duplicate did: the demonstrated change, and the one observed
+AssertionError: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts:259:28
+    257|     const compiled = await compile(LANE_REPORT);
+    258|     const result = await run(compiled, LANE_REPORT.hidden, scripted('d…
+    259|     expect(result.outcome).toBe('FAIL');
+       |                            ^
+    260|     expect(result.outcomeReason).toContain('+10');
+    261|     expect(result.outcomeReason).toContain('+20');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > an aggregate row whose quantity the job changes > G: abstains when the case starts from a different value, unless the result contradicts every reading
+AssertionError: correct, from a drifted start: every applicable check passed on observed state: expected 'PASS' to be 'ABSTAIN' // Object.is equality
+
+Expected: "ABSTAIN"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/aggregateIdentity.test.ts:187:64
+    185|   for (const [name, steps, expected] of table) {
+    186|     const result = await run(compiled, world, scripted(name, steps));
+    187|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    188|   }
+    189| }
+ ❯ packages/runner/test/aggregateIdentity.test.ts:268:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > a report that adds up, where the job creates a new row (totals) > reads the rows that add up to the total as quantities, never as their names
+AssertionError: expected 'units' to be 'label' // Object.is equality
+
+Expected: "label"
+Received: "units"
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts:290:26
+    288|     const { schema, contract } = await compile(TOTALS);
+    289|     const line = entityWith(schema, 'label');
+    290|     expect(line.idField).toBe('label');
+       |                          ^
+    291|     expect(line.fields.find((field) => field.name === 'units')).toEqua…
+    292|     expect(contract.focusScope).toBe('created');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > a report that adds up, where the job creates a new row (totals) > fails a duplicate contribution to the new row
+AssertionError: duplicate: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/aggregateIdentity.test.ts:187:64
+    185|   for (const [name, steps, expected] of table) {
+    186|     const result = await run(compiled, world, scripted(name, steps));
+    187|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    188|   }
+    189| }
+ ❯ packages/runner/test/aggregateIdentity.test.ts:297:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > rows named by several dimensions together (compound identity) > keys a cell by its dimensions, not by the quantity that happened to be unique
+AssertionError: expected [] to deeply equal [ 'area', 'owner' ]
+
+- Expected
++ Received
+
+- [
+-   "area",
+-   "owner",
+- ]
++ []
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts:332:48
+    330|     const { schema } = await compile(CELLS);
+    331|     const cell = entityWith(schema, 'units');
+    332|     expect([...(cell.keyFields ?? [])].sort()).toEqual(['area', 'owner…
+       |                                                ^
+    333|   });
+    334|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > rows named by several dimensions together (compound identity) > fails the duplicate and the wrong cell
+AssertionError: duplicate: every applicable check passed on observed state: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ expectOutcomes packages/runner/test/aggregateIdentity.test.ts:187:64
+    185|   for (const [name, steps, expected] of table) {
+    186|     const result = await run(compiled, world, scripted(name, steps));
+    187|     expect(result.outcome, `${name}: ${result.outcomeReason}`).toBe(ex…
+       |                                                                ^
+    188|   }
+    189| }
+ ❯ packages/runner/test/aggregateIdentity.test.ts:337:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > a dimension that is null for one row > keeps the null as a value of the identity rather than dropping the row
+AssertionError: expected undefined to deeply equal [ 'ref' ]
+
+- Expected:
+[
+  "ref",
+]
+
++ Received:
+undefined
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts:367:60
+    365|   it('keeps the null as a value of the identity rather than dropping t…
+    366|     const compiled = await compile(SLOTS);
+    367|     expect(entityWith(compiled.schema, 'units').keyFields).toEqual(['r…
+       |                                                            ^
+    368|     await expectOutcomes(compiled, SLOTS.hidden, [
+    369|       ['correct', [fill], 'PASS'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > H: a numeric identifier next to a numeric quantity > keeps the numeric id as the identity, and the amount as a value
+AssertionError: expected 'amount' to be 'id' // Object.is equality
+
+Expected: "id"
+Received: "amount"
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts:400:59
+    398|   it('keeps the numeric id as the identity, and the amount as a value'…
+    399|     const compiled = await compile(ITEMS);
+    400|     expect(entityWith(compiled.schema, 'amount').idField).toBe('id');
+       |                                                           ^
+    401|     await expectOutcomes(compiled, ITEMS.hidden, [
+    402|       ['correct', [adjust(2, 5)], 'PASS'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > I: a string value next to a numeric code > does not name a record by a changing string, and never passes a duplicate visible only in it
+AssertionError: expected 'total' to be 'code' // Object.is equality
+
+Expected: "code"
+Received: "total"
+
+ ❯ packages/runner/test/aggregateIdentity.test.ts:435:58
+    433|   it('does not name a record by a changing string, and never passes a …
+    434|     const compiled = await compile(COUNTERS);
+    435|     expect(entityWith(compiled.schema, 'total').idField).toBe('code');
+       |                                                          ^
+    436|     await expectOutcomes(compiled, COUNTERS.hidden, [
+    437|       ['correct', [tick], 'PASS'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/42]⎯
+
+ FAIL  packages/runner/test/aggregateIdentity.test.ts > G: rows with no identity at all > says so, keeps every row, and abstains rather than passing a change it cannot attribute
+Error: The recording performed "bump" but nothing in the system changed. RigorRun verifies against authoritative state, so a job that leaves no trace cannot be compiled.
+ ❯ induceContract packages/compiler/src/induce.ts:143:11
+    141|       );
+    142|     }
+    143|     throw new Error(
+       |           ^
+    144|       `The recording performed "${primary}" but nothing in the system …
+    145|     );
+ ❯ compile packages/runner/test/aggregateIdentity.test.ts:166:17
+ ❯ packages/runner/test/aggregateIdentity.test.ts:464:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts where the demonstration started > passes the demonstrated change
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:28:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts where the demonstration started > fails a quantity that changed by a different amount, and says both
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:32:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts where the demonstration started > fails a closed value that ended somewhere else
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:39:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts where the demonstration started > cannot judge a free string that differs, and does not pass it
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:44:38
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts where the demonstration started > compares numbers after rounding, as the projection does
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:49:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts somewhere else > cannot tell "add 10" from "set to 10" when the result is one of them
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:55:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts somewhere else > fails a result that neither reading allows
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:60:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the case starts somewhere else > passes a closed value that reached the demonstrated one, and cannot judge any other
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:65:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the record itself > fails when the record the demonstration changed is gone
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:72:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the record itself > cannot judge when the identity matches more than one record
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:76:30
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the record itself > holds a created record to its demonstrated value
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ packages/verifier/test/stateChange.test.ts:80:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > the record itself > never attributes a change it has no identity for
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ packages/verifier/test/stateChange.test.ts:87:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/42]⎯
+
+ FAIL  packages/verifier/test/stateChange.test.ts > a verdict built on it > counts an unverifiable change as blocking, so the case abstains rather than passes
+ZodError: [
+  {
+    "code": "invalid_value",
+    "values": [
+      "state_equals",
+      "state_exists",
+      "state_not_exists",
+      "numeric_lte",
+      "numeric_gte",
+      "contains",
+      "not_contains",
+      "url_matches",
+      "element_exists",
+      "element_not_exists",
+      "http_status",
+      "json_path_equals",
+      "event_occurred",
+      "event_not_occurred"
+    ],
+    "path": [
+      "kind"
+    ],
+    "message": "Invalid option: expected one of \"state_equals\"|\"state_exists\"|\"state_not_exists\"|\"numeric_lte\"|\"numeric_gte\"|\"contains\"|\"not_contains\"|\"url_matches\"|\"element_exists\"|\"element_not_exists\"|\"http_status\"|\"json_path_equals\"|\"event_occurred\"|\"event_not_occurred\""
+  }
+]
+ ❯ change packages/verifier/test/stateChange.test.ts:19:19
+     17|
+     18| const change = (expected: Record<string, unknown>, target = 'derived.a…
+     19|   AssertionSchema.parse({ id: 'success__as_demonstrated__1', kind: 'st…
+       |                   ^
+     20|
+     21| const changed = (compare: string, from: unknown, to: unknown, field = …
+ ❯ changed packages/verifier/test/stateChange.test.ts:22:3
+ ❯ packages/verifier/test/stateChange.test.ts:96:29
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/42]⎯
+
+
+ Test Files  6 failed (6)
+      Tests  42 failed | 17 passed (59)
+   Start at  20:17:39
+   Duration  2.95s (transform 978ms, setup 0ms, import 1.82s, tests 588ms, environment 0ms)
+

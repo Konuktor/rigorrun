@@ -15,6 +15,7 @@
  * forgotten in a serialiser, a file has to be opened on purpose.
  */
 import { z } from 'zod';
+import { BUDGET_MARGIN_MS, DEFAULT_CASE_TIMEOUT_MS, DEFAULT_TOOL_CALL_TIMEOUT_MS } from '@rigorrun/core';
 
 export const PROJECT_SCHEMA_VERSION = 1;
 
@@ -28,7 +29,7 @@ export const PROJECT_SCHEMA_VERSION = 1;
  */
 const secretNames = z.array(z.string()).default([]);
 
-export const McpConnectorSchema = z.object({
+const McpConnectorBaseSchema = z.object({
   kind: z.literal('mcp'),
   transport: z.enum(['stdio', 'http']),
   /** For stdio. The binary, never a shell string. */
@@ -49,7 +50,7 @@ export const McpConnectorSchema = z.object({
   secretNames,
 });
 
-export const OpenApiConnectorSchema = z.object({
+const OpenApiConnectorBaseSchema = z.object({
   kind: z.literal('openapi'),
   /** The document itself, kept whole so a run does not depend on a URL. */
   spec: z.string().max(8_000_000).default(''),
@@ -82,6 +83,30 @@ export const OpenApiConnectorSchema = z.object({
   secretNames,
 });
 
+/**
+ * A second connection to the same system, used only for the verdict.
+ *
+ * The same shapes a project connects with, minus a verifier of its own. On a
+ * browser it is the only way a verdict reaches records; on an MCP server or an
+ * OpenAPI document it is what makes a verdict independent of the connection
+ * the agent used (audit R-2). Its tools are nominated as `verifier:<tool>`.
+ */
+const VerifierConnectorSchema = z.discriminatedUnion('kind', [McpConnectorBaseSchema, OpenApiConnectorBaseSchema]);
+
+// Optional rather than defaulted on these two, so a project written before a
+// verifier existed — or written by hand — needs no new field to be valid.
+export const McpConnectorSchema = McpConnectorBaseSchema.extend({
+  verifier: VerifierConnectorSchema.nullable().optional(),
+});
+export const OpenApiConnectorSchema = OpenApiConnectorBaseSchema.extend({
+  verifier: VerifierConnectorSchema.nullable().optional(),
+});
+
+/** A connector that opens one connection: what a verifier may be. */
+export type DirectConnector =
+  | z.infer<typeof McpConnectorBaseSchema>
+  | z.infer<typeof OpenApiConnectorBaseSchema>;
+
 export const BrowserConnectorSchema = z.object({
   kind: z.literal('browser'),
   /** Where the job starts. Every navigation is checked against its origin. */
@@ -97,10 +122,7 @@ export const BrowserConnectorSchema = z.object({
    * project says OBSERVATIONAL — RigorRun watched what the agent did and did
    * not check what changed.
    */
-  verifier: z
-    .discriminatedUnion('kind', [McpConnectorSchema, OpenApiConnectorSchema])
-    .nullable()
-    .default(null),
+  verifier: VerifierConnectorSchema.nullable().default(null),
   secretNames,
 });
 
@@ -137,12 +159,12 @@ export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
  * to be repeated in a list is a person setting up a project correctly and
  * being told their credential is missing when it is sitting right there.
  */
-export function secretNamesOf(connector: Connector): string[] {
+export function secretNamesOf(connector: Connector | DirectConnector): string[] {
   const names = [...connector.secretNames];
   if (connector.kind === 'openapi' && connector.oauth) {
     names.push(connector.oauth.clientIdSecret, connector.oauth.clientSecretSecret);
   }
-  if (connector.kind === 'browser' && connector.verifier) {
+  if ('verifier' in connector && connector.verifier) {
     names.push(...secretNamesOf(connector.verifier));
   }
   return [...new Set(names.filter((name) => name.length > 0))];
@@ -151,12 +173,15 @@ export function secretNamesOf(connector: Connector): string[] {
 /** One line naming what a project connects to, for a list or a diagnostic. */
 export function describeConnector(connector: Connector | null): string {
   if (!connector) return 'not connected';
+  const verified = connector.kind !== 'browser' && connector.verifier ? ' · independently verified' : '';
   if (connector.kind === 'mcp') {
-    return connector.transport === 'http' && connector.auth === 'oauth'
-      ? 'MCP · http · signed in'
-      : `MCP · ${connector.transport}`;
+    return (
+      (connector.transport === 'http' && connector.auth === 'oauth'
+        ? 'MCP · http · signed in'
+        : `MCP · ${connector.transport}`) + verified
+    );
   }
-  if (connector.kind === 'openapi') return 'OpenAPI';
+  if (connector.kind === 'openapi') return `OpenAPI${verified}`;
   return connector.verifier ? 'Browser · verified' : 'Browser · observed only';
 }
 
@@ -169,6 +194,16 @@ export function describeConnector(connector: Connector | null): string {
  * nobody can act on.
  */
 export function describeConnectorAction(connector: Connector): string {
+  const own = describeOneConnectorAction(connector);
+  // Opening a project with a verifier runs two things. The confirmation for an
+  // imported project has to name both, or it is not the whole truth.
+  if (connector.kind !== 'browser' && connector.verifier) {
+    return `${own}, and ${describeOneConnectorAction(connector.verifier)} to check the result`;
+  }
+  return own;
+}
+
+function describeOneConnectorAction(connector: Connector | DirectConnector): string {
   if (connector.kind === 'browser') {
     return `open a browser at ${connector.startUrl}`;
   }
@@ -250,10 +285,40 @@ export const ExternalAgentSchema = z.object({
   keyName: z.string(),
 });
 
+/**
+ * An agent RigorRun only sends work to, and never watches — see `blackBoxAgent.ts`.
+ *
+ * The one kind that may live off this machine, which is why the fields that
+ * decide where a case's work goes are explicit: the exact hosts, the headers by
+ * secret name (never by value), and when a person here agreed to send it.
+ */
+export const BlackBoxAgentSchema = z.object({
+  ...agentCommon,
+  kind: z.literal('blackbox'),
+  endpoint: z.string(),
+  /** Header name → the name of the secret holding its value. */
+  headers: z.record(z.string(), z.string()).default({}),
+  /** A JSON body with `{{placeholders}}`; null sends the rigorrun/task/1 envelope. */
+  bodyTemplate: z.string().nullable().default(null),
+  completion: z.enum(['response', 'poll', 'settle']).default('response'),
+  /** Where the agent's final message is in its answer, as a dotted path. */
+  claimPath: z.string().default('output'),
+  /** Hosts outside loopback it may be reached on. Exact names; https only. */
+  allowedHosts: z.array(z.string()).default([]),
+  /**
+   * When somebody on this machine agreed that each case's work may be sent to
+   * those hosts. Null on an imported project, always, like every other
+   * decision about where things go that arrived in a file.
+   */
+  remoteConfirmedAt: z.string().nullable().default(null),
+  settleQuietMs: z.number().int().positive().default(5000),
+});
+
 export const AgentConfigSchema = z.discriminatedUnion('kind', [
   HttpAgentSchema,
   ProcessAgentSchema,
   ExternalAgentSchema,
+  BlackBoxAgentSchema,
 ]);
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 export type HttpAgentConfig = z.infer<typeof HttpAgentSchema>;
@@ -265,6 +330,7 @@ export function describeAgent(agent: AgentConfig): string {
   // Not reached: RigorRun does not reach this one, which is the whole point of
   // it. The id is what distinguishes two of them on the same project.
   if (agent.kind === 'external') return `driven by you (${agent.id})`;
+  if (agent.kind === 'blackbox') return `${agent.endpoint} (black box)`;
   return `${agent.command} ${agent.args.join(' ')}`.trim();
 }
 
@@ -302,6 +368,39 @@ export const TimingsSchema = z.object({
 });
 export type Timings = z.infer<typeof TimingsSchema>;
 
+/**
+ * How long things may take, for this project. See the budget hierarchy in
+ * `@rigorrun/core`. Defaulted so a project written before budgets existed
+ * parses with the defaults.
+ */
+export const BudgetsSchema = z.object({
+  /** How long one tool call may wait for its answer. */
+  toolCallMs: z.number().int().positive().default(DEFAULT_TOOL_CALL_TIMEOUT_MS),
+  /** How long one case may take, end to end. */
+  caseMs: z.number().int().positive().default(DEFAULT_CASE_TIMEOUT_MS),
+});
+export type Budgets = z.infer<typeof BudgetsSchema>;
+
+/**
+ * Why a budget cannot work, or null.
+ *
+ * A case that cannot outlast one call that never answers cannot observe what
+ * an agent does about a lost response — the audit's retry case died this way —
+ * so the configuration is refused rather than accepted and silently useless.
+ */
+export function budgetProblem(budgets: Budgets): string | null {
+  if (budgets.caseMs < budgets.toolCallMs + BUDGET_MARGIN_MS) {
+    return (
+      `A case budget of ${budgets.caseMs} ms cannot outlast one tool call that times out at ` +
+      `${budgets.toolCallMs} ms and leave the agent time to respond to it. Give each case at least ` +
+      `${budgets.toolCallMs + BUDGET_MARGIN_MS} ms, or shorten the tool-call timeout.`
+    );
+  }
+  return null;
+}
+
+export const SafetySchema = z.enum(['production', 'staging', 'local', 'ephemeral']);
+
 export const ProjectSchema = z.object({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   id: z.string(),
@@ -309,11 +408,20 @@ export const ProjectSchema = z.object({
   /** What the person is trying to prove an agent can do. */
   goal: z.string().default(''),
   connector: ConnectorSchema.nullable().default(null),
-  /** production / staging / local / ephemeral. Decides what may be written. */
-  safety: z.enum(['production', 'staging', 'local', 'ephemeral']).default('staging'),
+  /**
+   * production / staging / local / ephemeral. Decides what may be written.
+   *
+   * The default only fills in projects saved before the field existed; every
+   * way of connecting a system now requires the person to choose.
+   */
+  safety: SafetySchema.default('staging'),
   /** Tools a person has confirmed only read. Never the server's own opinion. */
   readOnlyTools: z.array(z.string()).default([]),
   verifierReads: z.array(VerifierReadSchema).default([]),
+  budgets: BudgetsSchema.default({
+    toolCallMs: DEFAULT_TOOL_CALL_TIMEOUT_MS,
+    caseMs: DEFAULT_CASE_TIMEOUT_MS,
+  }),
   reset: z
     .object({ kind: z.enum(['tool', 'none']), tool: z.string().default('') })
     .default({ kind: 'none', tool: '' }),
@@ -356,6 +464,7 @@ export function newProject(input: { id: string; name: string; goal?: string; now
     id: input.id,
     name: input.name,
     goal: input.goal ?? '',
+    budgets: { toolCallMs: DEFAULT_TOOL_CALL_TIMEOUT_MS, caseMs: DEFAULT_CASE_TIMEOUT_MS },
     timings: { createdAt: input.now },
   });
 }

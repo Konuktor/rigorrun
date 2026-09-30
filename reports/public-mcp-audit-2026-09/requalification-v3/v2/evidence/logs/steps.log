@@ -1,0 +1,15 @@
+2026-09-30T20:13:58Z batch em-gm (12 cases); available MiB 10985; swap free MiB 8973
+2026-09-30T20:17:13Z batch em-gm exit 0
+2026-09-30T20:17:13Z local EM-LLM-01-qwen2.5-3b (qwen2.5:3b, 3000 MiB); available MiB 10742
+2026-09-30T20:17:17Z EM-LLM-01-qwen2.5-3b: qwen2.5:3b preloaded in 1.2 s; available 10769 MiB before preload, 10274 MiB after
+2026-09-30T20:27:10Z local EM-LLM-01-qwen2.5-3b exit 0
+2026-09-30T20:27:10Z batch mh-wt-sqd (31 cases); available MiB 9779; swap free MiB 9098
+2026-09-30T20:37:00Z batch mh-wt-sqd exit 0
+2026-09-30T20:37:00Z local SQ-LLM-01-llama3.1-8b (llama3.1:8b, 5000 MiB); available MiB 9597
+2026-09-30T20:37:07Z SQ-LLM-01-llama3.1-8b: llama3.1:8b preloaded in 4.28 s; available 9580 MiB before preload, 11601 MiB after
+2026-09-30T20:37:46Z local SQ-LLM-01-llama3.1-8b exit 0
+2026-09-30T20:37:46Z local SQ-LLM-02-qwen2.5-3b (qwen2.5:3b, 3000 MiB); available MiB 10660
+2026-09-30T20:37:50Z SQ-LLM-02-qwen2.5-3b: qwen2.5:3b preloaded in 1.31 s; available 11204 MiB before preload, 10917 MiB after
+2026-09-30T20:38:26Z local SQ-LLM-02-qwen2.5-3b exit 0
+2026-09-30T20:38:26Z batch sq-w1 (12 cases); available MiB 10771; swap free MiB 8401
+2026-09-30T20:38:53Z batch sq-w1 exit 0

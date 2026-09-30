@@ -1,0 +1,35 @@
+{
+  "id": "WT-D-06-add-dependency-500",
+  "target": "worktide-mcp",
+  "class": "MISSING_ACTION (target)",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.62,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 0.53,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 0.51,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "0/3"
+}

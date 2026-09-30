@@ -1,51 +1,83 @@
 ---
 title: An HTTP agent
-description: Answer one health request and one task request. If your agent already speaks MCP, that plus about ten lines is the whole integration.
+description: Answer a probe and a task request. RigorRun hands each case an MCP address to work through; your agent keeps its own loop.
 ---
 
-RigorRun posts each task to your endpoint and waits for an answer.
+RigorRun posts each case to your endpoint as `rigorrun/agent/2`, hands it an MCP address scoped to
+that one case, and waits. Your agent runs its own loop and says when it is finished.
+
+## A complete server
+
+This runs as it is — `node server.mjs` — and is checked against RigorRun on every change, so it
+cannot quietly stop being the protocol.
+
+```js
+// server.mjs
+import { createServer } from 'node:http';
+
+// Your agent. Give it the instruction, the inputs and the rules a person
+// confirmed, and let it call tools through the MCP server at mcpUrl — an
+// ordinary streamable-HTTP MCP endpoint that exists for this one case.
+async function yourAgent(task, mcpUrl) {
+  return `Read ${Object.keys(task.inputs).length} input(s) and did nothing yet (${mcpUrl ? 'tools ready' : 'no tools'}).`;
+}
+
+createServer(async (req, res) => {
+  const body = JSON.parse(await readBody(req));
+  const answer = body.probe
+    ? // The probe: answer without doing any work.
+      { ok: true, agent: { name: 'my-agent', version: '1.0.0' } }
+    : // A case. `output` is shown next to what actually happened and never scored.
+      { status: 'completed', output: await yourAgent(body.task, body.environment.mcpUrl) };
+  res.writeHead(200, { 'content-type': 'application/json' });
+  res.end(JSON.stringify(answer));
+}).listen(Number(process.env.PORT ?? 7801), '127.0.0.1');
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let text = '';
+    req.on('data', (chunk) => (text += chunk));
+    req.on('end', () => resolve(text));
+    req.on('error', reject);
+  });
+}
+```
+
+Add it in the interface at the agent step (**It listens on an address**, `http://127.0.0.1:7801`) and
+press **Check it answers**.
 
 ## The two requests
 
-Your agent has to answer a small health request saying it is there, which is what the **Check it
-answers** button in the interface calls, and then a task request per case.
+The probe comes first, and a URL that merely parses is not a connection:
 
-```ts
-import { createServer } from 'node:http';
-
-createServer(async (req, res) => {
-  if (req.method === 'GET') {
-    // "I am here." This is what RigorRun probes before a run.
-    res.writeHead(200, { 'content-type': 'application/json' });
-    return res.end(JSON.stringify({ ok: true }));
-  }
-
-  const body = JSON.parse(await text(req));
-  // body.task is the job, in the words from the project.
-  // body.tools is what this case allows.
-  // body.url is the endpoint to call tools through.
-  const report = await yourAgent(body.task, body.tools, body.url);
-
-  res.writeHead(200, { 'content-type': 'application/json' });
-  res.end(JSON.stringify({ report }));
-}).listen(7801);
-
-const text = (req: NodeJS.ReadableStream) =>
-  new Promise<string>((resolve) => {
-    let out = '';
-    req.on('data', (chunk) => (out += chunk));
-    req.on('end', () => resolve(out));
-  });
+```json
+{ "protocol": "rigorrun/agent/2", "probe": true }
 ```
 
-`report` is free text. It is shown on the result and never scored.
+answered with `{ "ok": true }`. Then one request per case:
+
+```jsonc
+{
+  "protocol": "rigorrun/agent/2",
+  "caseId": "case_live__existing_bookingId_BKG-4002",
+  "task": {
+    "instruction": "Confirm a held booking.",
+    "inputs": { "bookingId": "BKG-4002" },
+    "policyBrief": "…the rules a person confirmed…"
+  },
+  "environment": { "mcpUrl": "http://127.0.0.1:41925/mcp/9f2c…", "expiresAt": "…" },
+  "maxSteps": 20
+}
+```
+
+answered with `{ "status": "completed" | "failed", "output": "…" }`.
 
 ## Timeouts
 
-Each case has a step budget and a time budget. An agent that stops answering ends that case with
-`It ended early` rather than hanging the run.
+Each case has a step budget and a time budget. An agent that stops answering ends that case as timed
+out rather than hanging the run, and whatever it managed to do first is already in the evidence.
 
-## If it already speaks MCP
+## Where it may listen
 
-RigorRun exposes the case's tools over MCP at the URL it hands you. An agent that already knows how
-to call MCP tools needs the wrapper above and nothing else.
+Loopback. An agent under test usually holds credentials for the system it is tested against, so
+exposing it on every interface is a decision for a person, not a default.

@@ -1,0 +1,18 @@
+
+ RUN  v4.1.11 {REPO}
+
+ ✓ packages/environment/test/frame.test.ts (7 tests) 13ms
+ ✓ packages/verifier/test/stateFrame.test.ts (16 tests) 15ms
+ ✓ packages/compiler/test/induce.test.ts (25 tests) 99ms
+ ✓ packages/generator/test/counterfactual.test.ts (15 tests) 121ms
+ ✓ packages/runner/test/expectedDelta.test.ts (12 tests) 120ms
+ ✓ packages/runner/test/frame.test.ts (11 tests) 143ms
+ ✓ packages/runner/test/outcomes.test.ts (16 tests) 1057ms
+     ✓ TIMED_OUT when the agent does not finish inside the case budget  389ms
+     ✓ FAIL, not TIMED_OUT, when a check failed on what the agent did before the budget ran out  359ms
+
+ Test Files  7 passed (7)
+      Tests  102 passed (102)
+   Start at  02:36:30
+   Duration  1.61s (transform 1.38s, setup 0ms, import 2.54s, tests 1.57s, environment 1ms)
+

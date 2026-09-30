@@ -1,0 +1,4 @@
+sqlite-mcp/w1: ok=True compiled=True suite=True project=p_ed382ed924a5 agents=6  
+sqlite-mcp/w1b: ok=True compiled=True suite=True project=p_34c1d275feb0 agents=8  
+email-mcp/gm-w1: ok=True compiled=True suite=True project=p_0a1fe940113d agents=6  
+email-mcp/gm-fault: ok=True compiled=True suite=True project=p_7cba532a5b43 agents=1  

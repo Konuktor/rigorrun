@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-09-14T17:37:22.452411+00:00",
+  "decision": "strict frozen protocol for every gate, decided with the user; a labelled happy-path-only diagnostic is run separately and never merged",
+  "reason": "SUITE_SHAPE_REFUSED: at the product commit both GreenMail suites (home-email-gm-w1, home-email-gm-fault) generate two cases, happy_path and missing_precondition 'service names a record that does not exist'. The frozen re-run protocol (rerun.sh suite-shape check, reproduced in run-frozen-58.sh setup) refuses to score a suite that is not the single demonstrated case, because the agent would act a second time before the oracle reads the mailbox.",
+  "cause": "N-1 identity change: the GreenMail inbox read (Record1) was keyed by its changing message count at AFTER-2 and is keyed by the stable service field now; send_email's service parameter therefore references an existing record, and the generator's invalidate_identifier mutation (packages/generator/src/mutations.ts) emits a missing_precondition case.",
+  "evidence": [
+    "evidence/frozen-58/logs/setup.log",
+    "evidence/frozen-58/run/traces/email-mcp/gm-w1-setup/schema.json",
+    "reports/public-mcp-audit-2026-09/remediation/after/traces/email-mcp/gm-w1-setup/schema.json"
+  ],
+  "cases": {
+    "EM-GM-01-correct": "SUITE_SHAPE_REFUSED",
+    "EM-GM-02-missing-action-false-claim": "SUITE_SHAPE_REFUSED",
+    "EM-GM-03-duplicate": "SUITE_SHAPE_REFUSED",
+    "EM-GM-04-wrong-recipient": "SUITE_SHAPE_REFUSED",
+    "EM-GM-05-wrong-subject": "SUITE_SHAPE_REFUSED",
+    "EM-GM-06-retry-after-lost-response": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-01-correct": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-02-missing-action-false-claim": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-03-duplicate": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-04-wrong-recipient": "SUITE_SHAPE_REFUSED",
+    "EM-GMA-05-wrong-subject": "SUITE_SHAPE_REFUSED",
+    "EM-LLM-01-qwen2.5-3b": "SUITE_SHAPE_REFUSED"
+  }
+}

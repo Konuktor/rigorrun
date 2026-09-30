@@ -1,0 +1,44 @@
+== 2026-09-30T20:08:09Z
+== free -m
+               total        used        free      shared  buff/cache   available
+Mem:           15657        3526        7120         108        5458       12131
+Swap:          16050        8433        7617
+== swapon
+NAME           TYPE       SIZE USED PRIO
+/dev/nvme0n1p6 partition 15,7G 8,2G   -1
+== nvidia-smi
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce GTX 1650, 4096 MiB, 3345 MiB
+== docker stats
+rr-audit-greenmail	24.85MiB / 15.29GiB
+rr-audit-mailhog	4.598MiB / 15.29GiB
+rr-audit-worktide-app-1	36.58MiB / 15.29GiB
+rr-audit-worktide-database-1	47.27MiB / 15.29GiB
+rr-audit-worktide-valkey-1	9.445MiB / 15.29GiB
+uptime-monitor-worker-1	0B / 0B
+uptime-monitor-api-1	49.84MiB / 15.29GiB
+uptime-monitor-simulator-1	22.05MiB / 15.29GiB
+uptime-monitor-frontend-1	11.57MiB / 15.29GiB
+saved-workouts-db	18.4MiB / 15.29GiB
+agent-gauntlet-db	13.23MiB / 15.29GiB
+mad_devs-reminder-worker-1	12.27MiB / 15.29GiB
+== top processes by RSS
+    PID   RSS COMMAND
+ 665966 4653240 ollama
+   7224 364532 claude
+ 207497 162880 chrome
+   1095 144344 hermes
+  58145 135300 opencode
+  95686 125888 chrome
+ 115684 96552 chrome
+   7810 94248 chrome
+  10240 93536 chrome
+ 458976 89484 chrome
+  47301 88884 chrome
+   7628 78752 chrome
+  63239 78520 chrome
+  36797 74736 chrome
+ 252609 69620 chrome
+== ollama ps
+NAME           ID              SIZE      PROCESSOR          CONTEXT    UNTIL              
+llama3.1:8b    46e0c10c039e    5.9 GB    43%/57% CPU/GPU    4096       4 minutes from now    

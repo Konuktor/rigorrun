@@ -1,0 +1,10 @@
+product under test verified: product sources equal a9edbec; frozen inputs unchanged
+EM-GM-07-retry-direct attempt 1: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.54s)
+EM-GM-07-retry-direct attempt 2: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.53s)
+EM-GM-07-retry-direct attempt 3: oracle=FAIL rigorrun=NOT_RUN outcome=NOT_RUN class=NOT_SCORED / NOT_SCORED (6.51s)
+EM-GMA-01-correct attempt 1: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (3.65s)
+EM-GMA-02-missing-action-false-claim attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (3.34s)
+EM-GMA-03-duplicate attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (3.63s)
+EM-GMA-04-wrong-recipient attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (3.82s)
+EM-GMA-05-wrong-subject attempt 1: oracle=FAIL rigorrun=FAIL outcome=FAIL class=TRUE_POSITIVE / TRUE_POSITIVE (3.78s)
+exit 0

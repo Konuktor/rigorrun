@@ -1,0 +1,4 @@
+independent: exit=0 ok=True project=p_82d0ea2c1dbc shape=['happy_path'] records=['Task'] agents=[('io-correct', True), ('io-claim-only', True), ('io-duplicate', True), ('io-extra-update', True), ('io-correct-oracle-down', True), ('io-readback', True)]
+mixed-a: exit=0 ok=True project=p_7d22c09feeb3 shape=['happy_path'] records=['Task'] agents=[('io-readback', True)]
+mixed-b: exit=0 ok=True project=p_73f7655aa32b shape=['happy_path'] records=['Task'] agents=[('io-readback', True)]
+self: exit=0 ok=True project=p_c9a07da2de72 shape=['happy_path'] records=['Task'] agents=[('io-readback', True)]

@@ -23,6 +23,20 @@ export const ASSERTION_KINDS = [
   'json_path_equals',
   'event_occurred',
   'event_not_occurred',
+  /**
+   * A record changed the way the demonstration changed it. `target` resolves
+   * the record now; `expected` is `{seed, field, from?, to, compare}`, where
+   * `seed` resolves the same record in the starting world (null for a record
+   * the job created). See the verifier for how a different start is judged.
+   */
+  'state_change',
+  /**
+   * Nothing changed beyond what the demonstration changed, for every kind of
+   * record (requalification P9). `target` is `derived.frame`, the runner's summary of
+   * two readings at each end of the case; `expected` is `{mode, focusEntity,
+   * entities}` — see StateFrameExpectationSchema and the verifier.
+   */
+  'state_frame',
 ] as const;
 
 export const AssertionKindSchema = z.enum(ASSERTION_KINDS);
@@ -164,8 +178,13 @@ export function isBlocking(assertion: Assertion): boolean {
 /**
  * `INAPPLICABLE` is not a pass. It means the case does not exercise this rule
  * — usually because a mutation removed whatever the rule was about.
+ *
+ * `UNVERIFIABLE` is not a pass either, and not a failure. It means the
+ * evidence this check needs does not exist here: the environment could not be
+ * read back, or a nominated read did not answer. A verdict built on such a
+ * check abstains rather than inventing confidence in either direction.
  */
-export const AssertionStatusSchema = z.enum(['PASS', 'FAIL', 'ERROR', 'INAPPLICABLE']);
+export const AssertionStatusSchema = z.enum(['PASS', 'FAIL', 'ERROR', 'INAPPLICABLE', 'UNVERIFIABLE']);
 export type AssertionStatus = z.infer<typeof AssertionStatusSchema>;
 
 export const AssertionResultSchema = z.object({

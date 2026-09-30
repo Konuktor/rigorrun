@@ -1,0 +1,6 @@
+product under test verified: product sources equal 28e8ec3; frozen inputs unchanged
+ ✓ packages/runner/test/zz_heldout_rq.test.ts (8 tests) 299ms
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+exit 0
+28e8ec3209bc95bec8dc0d34eb1a057f3d522499 {'cases': 23, 'matchingExpected': 23, 'knownGoodIncorrectlyFailed': 0, 'knownBadIncorrectlyPassed': 0, 'undecidableGivenAVerdict': 0, 'notFinishedGivenAVerdict': 0, 'abstentions': 6}

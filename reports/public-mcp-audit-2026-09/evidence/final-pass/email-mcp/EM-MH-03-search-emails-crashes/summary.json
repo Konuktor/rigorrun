@@ -1,0 +1,19 @@
+{
+  "id": "EM-MH-03-search-emails-crashes",
+  "target": "email-mcp",
+  "class": "SCHEMA / TOOL ERROR (target)",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 1.48,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "0/1"
+}

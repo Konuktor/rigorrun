@@ -1,0 +1,15 @@
+2026-09-14T17:24:11Z recreate stacks; available MiB 9151
+2026-09-14T17:27:53Z setup; available MiB 8507
+2026-09-14T17:34:19Z batch sq-rr (12 cases); available MiB 7469; swap free MiB 12952
+2026-09-14T17:34:44Z batch sq-rr exit 0; available MiB 7526
+2026-09-14T17:34:44Z batch sq-d (10 cases); available MiB 7500; swap free MiB 12952
+2026-09-14T17:35:04Z batch sq-d exit 0; available MiB 7450
+2026-09-14T17:35:04Z batch wt (13 cases); available MiB 7416; swap free MiB 12952
+2026-09-14T17:45:44Z batch wt exit 0; available MiB 7239
+2026-09-14T17:45:44Z batch mh (8 cases); available MiB 7220; swap free MiB 12956
+2026-09-14T17:46:27Z batch mh exit 0; available MiB 7300
+2026-09-14T17:46:27Z batch gm-direct (1 cases); available MiB 7283; swap free MiB 12956
+2026-09-14T17:46:51Z batch gm-direct exit 0; available MiB 7273
+2026-09-14T17:46:58Z SQ-LLM-02-qwen2.5-3b: qwen2.5:3b preloaded in 3.49 s; available 7254 MiB before preload, 7424 MiB after
+2026-09-14T17:48:04Z SQ-LLM-01-llama3.1-8b: llama3.1:8b preloaded in 9.44 s; available 7345 MiB before preload, 12039 MiB after
+2026-09-14T17:54:11Z EM-LLM-01-qwen2.5-3b: qwen2.5:3b preloaded in 4.88 s; available 10862 MiB before preload, 12543 MiB after

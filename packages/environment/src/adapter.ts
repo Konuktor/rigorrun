@@ -117,6 +117,25 @@ export function presentationFor(
   return hints.entities?.find((candidate) => candidate.entity === entity);
 }
 
+/**
+ * A nominated read did not answer.
+ *
+ * Thrown by `getState()` rather than swallowed: a read that fails leaves the
+ * world *unknown*, and an unknown world must never be handed back as an empty
+ * one — every record would look deleted, and every check against it would
+ * fail an agent for something RigorRun could not see. The runner turns this
+ * into missing evidence and abstains.
+ */
+export class StateReadError extends Error {
+  constructor(
+    readonly read: string,
+    detail: string,
+  ) {
+    super(`${read} did not answer: ${detail}`);
+    this.name = 'StateReadError';
+  }
+}
+
 export interface EnvironmentAdapter {
   readonly id: string;
   readonly name: string;

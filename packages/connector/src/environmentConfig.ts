@@ -60,4 +60,9 @@ export interface SystemEnvironmentConfig {
    * must not be able to reach.
    */
   readOnlyTools: readonly string[];
+  /**
+   * How long one call may wait for its answer. Part of the budget hierarchy in
+   * `@rigorrun/core`: a case budget must outlast one call that never answers.
+   */
+  toolCallMs?: number;
 }

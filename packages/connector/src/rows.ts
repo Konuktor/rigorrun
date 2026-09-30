@@ -12,19 +12,29 @@
  * that looks complete and compares as unequal to everything.
  */
 import {
+  deepEqual,
   emptyState,
+  keyedRows,
+  setOwn,
   type CanonicalState,
   type EntityRow,
   type EntitySchema,
   type EnvironmentSchema,
 } from '@rigorrun/environment';
+import { canonicalisePayload } from './result.ts';
 
 const MAX_DEPTH = 6;
 
 function looksLike(value: unknown, entity: EntitySchema): value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
   const keys = new Set(Object.keys(value));
-  if (!keys.has(entity.idField)) return false;
+  // What names the record must be there: its identifier, or at least one of
+  // the fields that name it together (a system may omit a null dimension). A
+  // record with no established identity is recognised by its fields alone.
+  if (entity.identity !== 'unestablished') {
+    const naming = entity.keyFields ?? [entity.idField];
+    if (!naming.some((field) => keys.has(field))) return false;
+  }
   // Most of the declared fields should be present. Not all: a system may omit
   // a null, and refusing the row for that would lose the record entirely.
   const present = entity.fields.filter((field) => keys.has(field.name)).length;
@@ -55,7 +65,10 @@ export function rowsFromPayload(payload: unknown, entity: EntitySchema): EntityR
     }
     for (const nested of Object.values(value)) walk(nested, depth + 1);
   };
-  walk(payload, 0);
+  // The same rewrite induction applied, so a shape recognised then is
+  // recognised now — a tagged cell or a wrapped row must not match as a
+  // record in one place and vanish in the other.
+  walk(canonicalisePayload(payload), 0);
   return found;
 }
 
@@ -78,16 +91,53 @@ export function stateFromPayloads(
   schema: EnvironmentSchema,
 ): CanonicalState {
   const state = emptyState(schema);
-  for (const payload of payloads) {
+  payloads.forEach((payload, payloadIndex) => {
     for (const entity of schema.entities) {
       const table = state.entities[entity.name] ?? {};
-      for (const row of rowsFromPayload(payload, entity)) {
-        const id = row[entity.idField];
-        if (id === undefined || id === null) continue;
-        table[String(id)] = row;
+      // Within one answer a record seen twice must be the same record. Across
+      // the answers of the reads a verdict uses, the later reading stands. Those
+      // are never a verifier's and the system's own at once: see readsForVerdict.
+      const inThisAnswer = new Map<string, EntityRow>();
+      for (const [key, row] of keyedRows(entity, rowsFromPayload(payload, entity))) {
+        const earlier = inThisAnswer.get(key);
+        const kept = earlier === undefined ? row : oneRecord(entity, earlier, row);
+        if (kept === undefined) throw new IdentityConflictError(entity.name, key, payloadIndex);
+        inThisAnswer.set(key, kept);
+        setOwn(table, key, kept);
       }
       state.entities[entity.name] = table;
     }
-  }
+  });
   return state;
+}
+
+/**
+ * Two different records in one answer that what names them says are one.
+ *
+ * Writing that world down would silently drop one of them, which is how a
+ * record the agent created twice used to disappear. So it is not written
+ * down: a live read turns this into StateReadError and the case abstains.
+ */
+export class IdentityConflictError extends Error {
+  constructor(
+    readonly entity: string,
+    readonly key: string,
+    readonly payloadIndex: number,
+  ) {
+    super(`two different ${entity} records in one answer share the identity ${key}`);
+    this.name = 'IdentityConflictError';
+  }
+}
+
+/** The one record two copies describe: every field both carry agrees, and the fuller copy's other fields are kept. */
+function oneRecord(entity: EntitySchema, a: EntityRow, b: EntityRow): EntityRow | undefined {
+  const merged: EntityRow = {};
+  for (const field of entity.fields) {
+    const inA = Object.prototype.hasOwnProperty.call(a, field.name);
+    const inB = Object.prototype.hasOwnProperty.call(b, field.name);
+    if (inA && inB && !deepEqual(a[field.name], b[field.name])) return undefined;
+    if (inA) merged[field.name] = a[field.name];
+    else if (inB) merged[field.name] = b[field.name];
+  }
+  return merged;
 }

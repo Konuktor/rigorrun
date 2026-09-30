@@ -11,6 +11,7 @@ export * from './orphans.ts';
 export * from './compare.ts';
 export * from './workspace.ts';
 export * from './httpAgent.ts';
+export * from './blackBoxAgent.ts';
 export * from './processAgent.ts';
 export * from './drivenAgent.ts';
 export * from './service.ts';

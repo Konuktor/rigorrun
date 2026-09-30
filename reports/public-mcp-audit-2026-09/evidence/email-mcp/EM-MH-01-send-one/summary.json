@@ -1,0 +1,35 @@
+{
+  "id": "EM-MH-01-send-one",
+  "target": "email-mcp",
+  "class": "BASELINE",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 1.44,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 2,
+      "seconds": 1.49,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    },
+    {
+      "attempt": 3,
+      "seconds": 1.42,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "3/3"
+}

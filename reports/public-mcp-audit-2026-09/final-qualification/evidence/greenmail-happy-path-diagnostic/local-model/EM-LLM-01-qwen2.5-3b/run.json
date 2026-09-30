@@ -1,0 +1,35 @@
+{
+  "case": "EM-LLM-01-qwen2.5-3b",
+  "model": "qwen2.5:3b",
+  "modelId": "357c53fb659c",
+  "hostGuard": {
+    "requiredAvailableMiB": 3000,
+    "requiredSwapFreeMiB": 1000,
+    "availableMiBBeforePreload": 10862,
+    "availableMiBAfterRun": 11079
+  },
+  "preload": {
+    "command": "ollama run qwen2.5:3b \"\"",
+    "seconds": 4.88,
+    "ollamaPs": [
+      "NAME          ID              SIZE      PROCESSOR    CONTEXT    UNTIL              ",
+      "qwen2.5:3b    357c53fb659c    2.4 GB    100% GPU     4096       4 minutes from now    "
+    ]
+  },
+  "unchanged": [
+    "model",
+    "agent command and prompt (scripts/agents/ollama-agent.py)",
+    "60 s case budget (project default)",
+    "attempt count (baseline-manifest.json)",
+    "reset and oracle",
+    "expect predicate"
+  ],
+  "exit": 0,
+  "attemptLines": [
+    "EM-LLM-01-qwen2.5-3b attempt 1: oracle=FAIL rigorrun=FAIL outcome=TIMED_OUT class=TRUE_POSITIVE / TIMED_OUT (75.21s)",
+    "EM-LLM-01-qwen2.5-3b attempt 2: oracle=FAIL rigorrun=FAIL outcome=TIMED_OUT class=TRUE_POSITIVE / TIMED_OUT (74.73s)",
+    "EM-LLM-01-qwen2.5-3b attempt 3: oracle=FAIL rigorrun=FAIL outcome=TIMED_OUT class=TRUE_POSITIVE / TIMED_OUT (74.62s)"
+  ],
+  "log": "evidence/frozen-58/logs/run-cases.llm-EM-LLM-01-qwen2.5-3b.log",
+  "at": "2026-09-14T17:58:03.782855+00:00"
+}

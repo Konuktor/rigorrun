@@ -1,0 +1,152 @@
+{
+  "id": "EM-GM-07-retry-direct",
+  "target": "email-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_FAIL",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 6.5,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 (retry probe)",
+              "service": "default"
+            },
+            "result": {
+              "message": "transport timeout after 5.0s (no response)",
+              "timeout": true
+            }
+          },
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 (retry probe)",
+              "service": "default"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"default\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via default service\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": true,
+                "status": "sent",
+                "service": "default",
+                "message": "Email 'Audit 17' sent successfully to qa@example.test via default service"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 6.52,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 (retry probe)",
+              "service": "default"
+            },
+            "result": {
+              "message": "transport timeout after 5.0s (no response)",
+              "timeout": true
+            }
+          },
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 (retry probe)",
+              "service": "default"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"default\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via default service\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": true,
+                "status": "sent",
+                "service": "default",
+                "message": "Email 'Audit 17' sent successfully to qa@example.test via default service"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 6.48,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 (retry probe)",
+              "service": "default"
+            },
+            "result": {
+              "message": "transport timeout after 5.0s (no response)",
+              "timeout": true
+            }
+          },
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 (retry probe)",
+              "service": "default"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"default\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via default service\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": true,
+                "status": "sent",
+                "service": "default",
+                "message": "Email 'Audit 17' sent successfully to qa@example.test via default service"
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

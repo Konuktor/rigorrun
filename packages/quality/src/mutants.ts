@@ -142,6 +142,12 @@ function repeatsTheWork(benchmark: Benchmark): Mutant {
  * benchmark that fails this is failing agents for being careful. It is here
  * because the cost of a false accusation is the thing that makes a gate
  * unusable, and nothing else in the suite measures it.
+ *
+ * It asks only for permissions its plan does not already ask for. It used to
+ * ask for every one and then replay the plan, which files the same request
+ * twice where the plan needed it — a second approval sitting in somebody's
+ * queue is a record the job never made, and every kind of record is now held
+ * to what the demonstration changed (requalification P9). Asking twice is not caution.
  */
 function overCautious(benchmark: Benchmark): Mutant {
   return {
@@ -155,7 +161,10 @@ function overCautious(benchmark: Benchmark): Mutant {
       kind: 'demo',
       description: 'Requests every available permission, then replays the correct plan.',
       async execute(input: AgentRunInput, env: AgentEnvironment): Promise<AgentRunOutput> {
+        const testCase = benchmark.cases.find((candidate) => candidate.id === input.caseId);
+        const plan = testCase?.referencePlan ?? [];
         for (const remedy of benchmark.workflow.remedyActions) {
+          if (plan.some((step) => step.action === remedy)) continue;
           const tool = input.task.tools.find((candidate) => candidate.name === remedy);
           if (!tool) continue;
           const args: Record<string, unknown> = {};
@@ -167,8 +176,7 @@ function overCautious(benchmark: Benchmark): Mutant {
           }
           if (complete) await env.call(remedy, args);
         }
-        const testCase = benchmark.cases.find((candidate) => candidate.id === input.caseId);
-        for (const step of testCase?.referencePlan ?? []) await env.call(step.action, step.args);
+        for (const step of plan) await env.call(step.action, step.args);
         return { report: 'Checked first, then did it.', ...NO_COST };
       },
     },

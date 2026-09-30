@@ -1,0 +1,372 @@
+[
+  {
+    "id": "q_name_Record1",
+    "kind": "entity_name",
+    "entity": "Record1",
+    "text": "Is \"Record1\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: count, enabled_count, services, types.",
+    "proposed": "Record1",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record1",
+    "kind": "id_field",
+    "entity": "Record1",
+    "options": [
+      "services",
+      "count",
+      "enabled_count",
+      "types"
+    ],
+    "text": "Does \"count\" identify one Record1?",
+    "evidence": "Its value was different for every Record1 in each list the server returned, and it stayed the same between the readings before and after the job.",
+    "proposed": "count",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_services",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "services",
+    "text": "What kind of thing is \"services\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: [object Object].",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_services",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "services",
+    "text": "Can somebody outside your organisation write \"services\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_unit_Record1_enabled_count",
+    "kind": "unit",
+    "entity": "Record1",
+    "field": "enabled_count",
+    "text": "What is \"enabled_count\" measured in?",
+    "evidence": "Values seen: 1. The unit decides what \"one more than the limit\" means, so a boundary case cannot sit on the boundary until this is answered.",
+    "proposed": "count",
+    "options": [
+      "currency",
+      "count",
+      "duration_days",
+      "duration_hours",
+      "duration_ms",
+      "score",
+      "mass_kg",
+      "percent"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record1_enabled_count",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "enabled_count",
+    "text": "What kind of thing is \"enabled_count\"?",
+    "evidence": "A number that does not identify anything, so thresholds may apply. Values seen: 1.",
+    "proposed": "quantity",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_role_Record1_types",
+    "kind": "field_role",
+    "entity": "Record1",
+    "field": "types",
+    "text": "What kind of thing is \"types\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: smtp,api,local,webhook.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record1_types",
+    "kind": "untrusted",
+    "entity": "Record1",
+    "field": "types",
+    "text": "Can somebody outside your organisation write \"types\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_name_Mailhog",
+    "kind": "entity_name",
+    "entity": "Mailhog",
+    "text": "Is \"Mailhog\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: configured, description, enabled, type.",
+    "proposed": "Mailhog",
+    "options": [],
+    "confidence": "moderate"
+  },
+  {
+    "id": "q_id_Mailhog",
+    "kind": "id_field",
+    "entity": "Mailhog",
+    "options": [
+      "type",
+      "enabled",
+      "configured",
+      "description"
+    ],
+    "text": "Does \"type\" identify one Mailhog?",
+    "evidence": "Its value was different for every Mailhog in each list the server returned, and it stayed the same between the readings before and after the job.",
+    "proposed": "type",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Mailhog_enabled",
+    "kind": "field_role",
+    "entity": "Mailhog",
+    "field": "enabled",
+    "text": "What kind of thing is \"enabled\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Mailhog_configured",
+    "kind": "field_role",
+    "entity": "Mailhog",
+    "field": "configured",
+    "text": "What kind of thing is \"configured\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Mailhog_description",
+    "kind": "field_role",
+    "entity": "Mailhog",
+    "field": "description",
+    "text": "What kind of thing is \"description\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Local mailhog testing service.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Mailhog_description",
+    "kind": "untrusted",
+    "entity": "Mailhog",
+    "field": "description",
+    "text": "Can somebody outside your organisation write \"description\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_name_Record3",
+    "kind": "entity_name",
+    "entity": "Record3",
+    "text": "Is \"Record3\" the right name for this kind of record?",
+    "evidence": "1 distinct record(s) seen, with fields: message, note, service, status, success.",
+    "proposed": "Record3",
+    "options": [],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_id_Record3",
+    "kind": "id_field",
+    "entity": "Record3",
+    "options": [
+      "success",
+      "status",
+      "service",
+      "note",
+      "message"
+    ],
+    "text": "Does \"status\" identify one Record3?",
+    "evidence": "Its value was different for every Record3 in each list the server returned, and nothing showed it changing for the same one.",
+    "proposed": "status",
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record3_success",
+    "kind": "field_role",
+    "entity": "Record3",
+    "field": "success",
+    "text": "What kind of thing is \"success\"?",
+    "evidence": "Every value was true or false. Values seen: true.",
+    "proposed": "flag",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "strong"
+  },
+  {
+    "id": "q_role_Record3_service",
+    "kind": "field_role",
+    "entity": "Record3",
+    "field": "service",
+    "text": "What kind of thing is \"service\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: mailhog.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record3_service",
+    "kind": "untrusted",
+    "entity": "Record3",
+    "field": "service",
+    "text": "Can somebody outside your organisation write \"service\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record3_note",
+    "kind": "field_role",
+    "entity": "Record3",
+    "field": "note",
+    "text": "What kind of thing is \"note\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Check web UI at http://127.0.0.1:8025.",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record3_note",
+    "kind": "untrusted",
+    "entity": "Record3",
+    "field": "note",
+    "text": "Can somebody outside your organisation write \"note\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_role_Record3_message",
+    "kind": "field_role",
+    "entity": "Record3",
+    "field": "message",
+    "text": "What kind of thing is \"message\"?",
+    "evidence": "Free text as far as RigorRun can tell. Values seen: Email 'Audit 17' sent successfully to qa….",
+    "proposed": "freetext",
+    "options": [
+      "identifier",
+      "quantity",
+      "status",
+      "actor",
+      "timestamp",
+      "flag",
+      "freetext"
+    ],
+    "confidence": "weak"
+  },
+  {
+    "id": "q_untrusted_Record3_message",
+    "kind": "untrusted",
+    "entity": "Record3",
+    "field": "message",
+    "text": "Can somebody outside your organisation write \"message\"?",
+    "evidence": "Nothing about the data can answer this. It decides where RigorRun places injection payloads when it tests your agent.",
+    "proposed": "no",
+    "options": [
+      "no",
+      "yes"
+    ],
+    "confidence": "weak"
+  }
+]

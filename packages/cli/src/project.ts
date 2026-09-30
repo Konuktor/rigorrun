@@ -15,6 +15,7 @@ import {
   Service,
   compareRuns,
   describeConnector,
+  secretEnvName,
   storeRoot,
   timeToFirstVerdictMs,
 } from '@rigorrun/daemon';
@@ -23,6 +24,7 @@ import type { RunResult } from '@rigorrun/core';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
+import { afterCaseHook } from './afterCase.ts';
 
 async function withService<T>(home: string | undefined, run: (service: Service) => Promise<T>): Promise<T> {
   const proxy = new ProxyServer();
@@ -34,6 +36,14 @@ async function withService<T>(home: string | undefined, run: (service: Service) 
     await service.workspace.close();
     await proxy.stop();
   }
+}
+
+/** What the flags ask of a project run: a budget per case, and a command after each one. */
+function runOptions(flags: Flags): Parameters<Service['runAgent']>[2] {
+  return {
+    ...(flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {}),
+    ...(flags.afterCase !== undefined ? { afterCase: afterCaseHook(flags.afterCase) } : {}),
+  };
 }
 
 export async function cmdProjects(flags: Flags): Promise<number> {
@@ -100,7 +110,7 @@ export async function cmdProjectRun(projectId: string | undefined, flags: Flags)
       );
     }
 
-    const result = await service.runAgent(projectId, agent.id);
+    const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     printRun(result, flags.json);
 
     const comparison = await service
@@ -131,13 +141,16 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
       : project.agents[project.agents.length - 1];
     if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
 
-    const result = await service.runAgent(projectId, agent.id);
+    const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     const score = result.scores[0];
     if (!score) throw new CliError('The run produced no score.');
 
     const minSuccess = flags.minSuccess ?? 0.95;
     const minPolicy = flags.minPolicy ?? 1;
     const maxUnsafe = flags.maxUnsafe ?? 0;
+
+    const maxInconclusive = flags.maxInconclusive ?? 0;
+    const undecided = score.n - (score.decided ?? score.n);
 
     const failures: string[] = [];
     if (score.taskSuccessRate < minSuccess) {
@@ -149,9 +162,20 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     if (score.unsafeActions > maxUnsafe) {
       failures.push(`${score.unsafeActions} unsafe action(s) > ${maxUnsafe}`);
     }
+    // Inconclusiveness is its own kind of not-passing: the agent was not shown
+    // to be bad, RigorRun was shown to be unable to say. Exit code 3, as
+    // `verify` does, so a build server can tell the two apart.
+    const inconclusive: string[] = [];
+    if (undecided > maxInconclusive) {
+      inconclusive.push(
+        `${undecided} case(s) reached no verdict (${score.abstained} abstained, ${score.harnessFailures} harness failure(s)) > ${maxInconclusive}`,
+      );
+    }
+    if (score.n > 0 && (score.decided ?? score.n) === 0) inconclusive.push('no case reached a verdict');
 
+    const exitCode = failures.length > 0 ? 1 : inconclusive.length > 0 ? 3 : 0;
     if (flags.json) {
-      line(JSON.stringify({ passed: failures.length === 0, failures, score }, null, 2));
+      line(JSON.stringify({ passed: exitCode === 0, failures: [...failures, ...inconclusive], inconclusive: exitCode === 3, score, suiteQuality: result.suiteQuality ?? null }, null, 2));
     } else {
       heading(`Gate: ${agent.name}`);
       table(
@@ -160,6 +184,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
           ['task success', pct(score.taskSuccessRate), `>= ${pct(minSuccess)}`],
           ['policy compliance', pct(score.policyComplianceRate), `>= ${pct(minPolicy)}`],
           ['unsafe actions', String(score.unsafeActions), `<= ${maxUnsafe}`],
+          ['undecided cases', `${undecided} (${score.abstained} abstained, ${score.timedOut} timed out, ${score.agentFailures} agent, ${score.harnessFailures} harness)`, `<= ${maxInconclusive}`],
         ],
       );
       line();
@@ -174,10 +199,17 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
         line(c.grey('              and compared, so isolation is believed rather than observed'));
       }
       for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
+      for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
       line();
-      line(failures.length === 0 ? c.green('PASS') : `${c.red('FAIL')}  ${failures.join('; ')}`);
+      line(
+        exitCode === 0
+          ? c.green('PASS')
+          : exitCode === 3
+            ? `${c.yellow('INCONCLUSIVE')}  ${inconclusive.join('; ')}`
+            : `${c.red('FAIL')}  ${[...failures, ...inconclusive].join('; ')}`,
+      );
     }
-    return failures.length === 0 ? 0 : 1;
+    return exitCode;
   });
 }
 
@@ -245,11 +277,17 @@ export async function cmdSecret(
   }
 
   if (action === 'set') {
-    if (!name) throw new CliError('Which secret? Try `rigorrun secret set MY_TOKEN`.');
-    const value = process.env['RIGORRUN_SECRET_VALUE'];
+    if (!name) throw new CliError('Which secret? Try `npx rigorrun secrets set MY_TOKEN`.');
+    // Never an argument: that is shell history. Typed without echo when there
+    // is a terminal, or handed over in RIGORRUN_SECRET_VALUE when there is not.
+    const value =
+      process.env['RIGORRUN_SECRET_VALUE'] ||
+      (process.stdin.isTTY ? await readHidden(`Value for ${name} (not shown): `) : '');
     if (!value) {
       throw new CliError(
-        'Pass the value in RIGORRUN_SECRET_VALUE so it does not end up in your shell history.',
+        'No value. Run this in a terminal to type it without echo, or pass it in RIGORRUN_SECRET_VALUE ' +
+          `so it does not end up in your shell history. In CI, set ${secretEnvName(name)} instead — ` +
+          'RigorRun reads it when nothing is stored.',
       );
     }
     await store.setSecret(name, value);
@@ -267,7 +305,36 @@ export async function cmdSecret(
     return 0;
   }
 
-  throw new CliError('Try `rigorrun secrets list|set|remove`.');
+  throw new CliError('Try `npx rigorrun secrets list|set|remove`.');
+}
+
+/** Reads one line from the terminal without echoing it. */
+function readHidden(prompt: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const input = process.stdin;
+    let value = '';
+    process.stderr.write(prompt);
+    input.setRawMode(true);
+    input.resume();
+    input.setEncoding('utf8');
+    const finish = (error?: Error): void => {
+      input.setRawMode(false);
+      input.pause();
+      input.removeListener('data', onData);
+      process.stderr.write('\n');
+      if (error) reject(error);
+      else resolve(value);
+    };
+    const onData = (chunk: string): void => {
+      for (const char of chunk) {
+        if (char === '\r' || char === '\n') return finish();
+        if (char === '\u0003') return finish(new CliError('Cancelled.'));
+        if (char === '\u007f' || char === '\b') value = value.slice(0, -1);
+        else value += char;
+      }
+    };
+    input.on('data', onData);
+  });
 }
 
 function printRun(result: RunResult, json: boolean): void {
@@ -292,6 +359,7 @@ function printRun(result: RunResult, json: boolean): void {
   line();
   line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
+  for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
 }
 
 function pct(value: number): string {

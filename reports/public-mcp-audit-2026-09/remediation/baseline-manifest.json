@@ -1,0 +1,3664 @@
+{
+  "manifestVersion": "1.0.0",
+  "frozenAt": "2026-09-14",
+  "purpose": "Immutable BEFORE baseline for the RigorRun remediation. Labels, oracles and expect predicates here must not change; a case may only be excluded symmetrically via benchmark-validity-exceptions.md.",
+  "rigorrun": {
+    "repository": "Konuktor/rigorrun",
+    "branch": "redesign/brand-site-product",
+    "commit": "07dda8c738d6daada161ffcf2bfc046b3c874ac5",
+    "version": "0.2.0",
+    "implementation": "repository sources at this commit run with pnpm rigorrun (tsx); the 0.2.0 tarball in dist/ carries the same version and was not re-packed"
+  },
+  "host": {
+    "os": "Linux 6.19.14+kali-amd64 x86_64",
+    "node": "v22.22.2",
+    "pnpm": "11.7.0",
+    "python": "3.13.12 (host) / 3.12.13 (uv, email-mcp)",
+    "docker": "28.5.2",
+    "ollama": "0.23.2",
+    "gpu": "NVIDIA GeForce GTX 1650",
+    "rust_on_host": false
+  },
+  "targets": {
+    "email-mcp": {
+      "commit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "version": "0.5.0",
+      "environment": "local MailHog container (documented by upstream) as the primary sink; local GreenMail fake IMAP/SMTP container behind a loopback STARTTLS relay as a labelled supplement",
+      "tools": 47
+    },
+    "worktide-mcp": {
+      "commit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "version": "0.1.0",
+      "environment": "self-authored docker compose from upstream docs/INSTALL-docker-compose.md: FrankenPHP dev image, MySQL 8.0, Valkey; fixtures loaded; personal access token minted through the REST API; no ddev",
+      "tools": 18
+    },
+    "sqlite-mcp": {
+      "commit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "version": "1.0.0",
+      "environment": "a disposable SQLite file created from scripts/seed-sqlite.sql for every case",
+      "tools": 13
+    }
+  },
+  "originalTotals": {
+    "cases_total": 58,
+    "rigorrun_scored_cases": 26,
+    "true_positives": 10,
+    "true_negatives": 0,
+    "false_positives": 6,
+    "false_negatives": 10,
+    "injected_failures": 3,
+    "injected_failures_detected_by_oracle": 2,
+    "injected_failures_detected_by_rigorrun": 0,
+    "true_positive_rate": 0.5,
+    "false_positive_rate": 1,
+    "mutation_detection_rate": 0.5,
+    "confirmed_upstream_findings": 10,
+    "confirmed_rigorrun_findings": 8,
+    "findings_total": 21
+  },
+  "originalPerTarget": [
+    {
+      "target": "email-mcp",
+      "cases_total": 21,
+      "rigorrun_scored_cases": 12,
+      "true_positives": 5,
+      "true_negatives": 0,
+      "false_positives": 3,
+      "false_negatives": 4,
+      "rigorrun_abstained": 1,
+      "injected_failures": 2,
+      "injected_failures_detected_by_oracle": 1,
+      "injected_failures_detected_by_rigorrun": 0,
+      "rigorrun_journeys_refused": [
+        "w1-setup"
+      ]
+    },
+    {
+      "target": "worktide-mcp",
+      "cases_total": 13,
+      "rigorrun_scored_cases": 0,
+      "true_positives": 0,
+      "true_negatives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "rigorrun_abstained": 2,
+      "injected_failures": 0,
+      "injected_failures_detected_by_oracle": 0,
+      "injected_failures_detected_by_rigorrun": 0,
+      "rigorrun_journeys_refused": [
+        "w2-setup",
+        "w3-setup"
+      ]
+    },
+    {
+      "target": "sqlite-mcp",
+      "cases_total": 24,
+      "rigorrun_scored_cases": 14,
+      "true_positives": 5,
+      "true_negatives": 0,
+      "false_positives": 3,
+      "false_negatives": 6,
+      "rigorrun_abstained": 0,
+      "injected_failures": 1,
+      "injected_failures_detected_by_oracle": 1,
+      "injected_failures_detected_by_rigorrun": 0,
+      "rigorrun_journeys_refused": []
+    }
+  ],
+  "rigorrunFindings": [
+    {
+      "id": "R-1",
+      "severity": "HIGH",
+      "title": "For a system that cannot be seeded, the verdict's baseline is the demonstration-time snapshot, not a fresh read at case start: a correct agent fails and a drifted world passes",
+      "cases": [
+        "SQ-W1-01-correct",
+        "SQ-W1B-01-correct",
+        "SQ-LLM-02-qwen2.5-3b",
+        "EM-GM-01-correct",
+        "EM-GMA-01-correct",
+        "SQ-W1-03-duplicate",
+        "SQ-W1-04-wrong-value",
+        "SQ-W1-05-wrong-entity",
+        "EM-GM-03-duplicate",
+        "EM-GMA-04-wrong-recipient",
+        "EM-GMA-05-wrong-subject"
+      ]
+    },
+    {
+      "id": "R-2",
+      "severity": "HIGH",
+      "title": "No independent oracle: the verdict can only read the target server's own nominated tools, and a project takes one connector",
+      "cases": []
+    },
+    {
+      "id": "R-3",
+      "severity": "MEDIUM",
+      "title": "Column-cell result shapes are induced as a value-keyed 'Id' entity, not as table rows; RigorRun's own quality gate flags the resulting suite",
+      "cases": [
+        "SQ-W1-01-correct"
+      ]
+    },
+    {
+      "id": "R-4",
+      "severity": "MEDIUM",
+      "title": "Generated cases carry a fixed 15 s budget, shorter than the 20 s MCP call timeout, so a case cannot survive one lost response, and slow local models cannot finish",
+      "cases": [
+        "EM-GM-06-retry-after-lost-response",
+        "SQ-LLM-01-llama3.1-8b",
+        "EM-LLM-01-qwen2.5-3b"
+      ]
+    },
+    {
+      "id": "R-5",
+      "severity": "LOW",
+      "title": "The task instruction is built from the primary tool's description rather than the project goal, and a dual-purpose tool's last call becomes the primary action",
+      "cases": [
+        "SQ-W1-01-correct"
+      ]
+    },
+    {
+      "id": "R-6",
+      "severity": "LOW",
+      "title": "No headless project setup; connecting and teaching are interface-only, so the audit drove the runner's HTTP API directly",
+      "cases": []
+    },
+    {
+      "id": "R-8",
+      "severity": "HIGH",
+      "title": "A server that returns JSON only as text content passes the read-nomination probe but yields no records at demonstration time, so compile refuses after the job has been demonstrated",
+      "cases": []
+    },
+    {
+      "id": "R-7",
+      "severity": "INFO",
+      "title": "`rigorrun verify --needs-credential` is documented but not wired into the CLI; verify accepts only Node servers from npm: or dir:",
+      "cases": []
+    }
+  ],
+  "rigorrunTestBaseline": {
+    "files": 73,
+    "tests": 847,
+    "passed": 847,
+    "log": "evidence/rigorrun-test-baseline.log"
+  },
+  "counts": {
+    "cases": 58,
+    "rigorrunMode": 26,
+    "scored": 26,
+    "falsePositives": 6,
+    "falseNegatives": 10,
+    "knownGoodGraded": 6,
+    "knownGoodGradedFalsePositive": 6,
+    "injected": 3,
+    "r1Cases": 11
+  },
+  "cases": [
+    {
+      "id": "EM-GM-01-correct",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "workflow": "W1 (GreenMail supplement) send one email",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-correct",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 2.88
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "FALSE_POSITIVE",
+      "baselineFalsePositive": true,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": true,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/email-mcp/EM-GM-01-correct.json",
+      "caseFileSha256": "sha256:9bd55f2c98805069eea6c509a9bcc72c285f9a3f4f2855e356555b52003fb48c"
+    },
+    {
+      "id": "EM-GM-02-missing-action-false-claim",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "workflow": "W1 (GreenMail supplement) send one email",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-missing-action",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 2.54
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-GM-02-missing-action-false-claim.json",
+      "caseFileSha256": "sha256:5b399ee816f464b46de9614c2aabd126a47d3f9ccf989dcc8962bf098f0168b5"
+    },
+    {
+      "id": "EM-GM-03-duplicate",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "workflow": "W1 (GreenMail supplement) send one email",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-duplicate",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 2.85
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/email-mcp/EM-GM-03-duplicate.json",
+      "caseFileSha256": "sha256:2880a09170ad1d0509fdf2a2ae38407d5b09d4f46569c7def8c9eabee0cd3e08"
+    },
+    {
+      "id": "EM-GM-04-wrong-recipient",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "workflow": "W1 (GreenMail supplement) send one email",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-wrong-recipient",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 2.57
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-GM-04-wrong-recipient.json",
+      "caseFileSha256": "sha256:5701d90615adecf8566f0e2568e4dad9f983573770233e0e02f87b50818e0554"
+    },
+    {
+      "id": "EM-GM-05-wrong-subject",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "workflow": "W1 (GreenMail supplement) send one email",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-wrong-subject",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 2.66
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-GM-05-wrong-subject.json",
+      "caseFileSha256": "sha256:29cfab97a7e33811a5f5debb64a994e8b40eb611a711505fed75a709b262faf4"
+    },
+    {
+      "id": "EM-GM-06-retry-after-lost-response",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+      "workflow": "W1 (GreenMail supplement) send one email",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email; the response to the first send_email is swallowed by the fault proxy (INJECTED FAULT), the agent sees a timeout and retries once.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": true,
+      "injectedFault": "fault-proxy.mjs drops the server's response to the 1st send_email tools/call in the run process (FAULT_DROP_TOOL=send_email, FAULT_DROP_NTH=1); the SMTP send itself is not touched",
+      "supplement": true,
+      "agent": "gm-retry-after-lost-response",
+      "project": "p_acb0e2349b72",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-fault",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 17.3
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 17.37
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 17.38
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "FALSE_POSITIVE",
+      "baselineFalsePositive": true,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": true,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-4"
+      ],
+      "caseFile": "cases/email-mcp/EM-GM-06-retry-after-lost-response.json",
+      "caseFileSha256": "sha256:eab36ba44fa5e08f8c57a6658814181bb4acc8abae3a115200d00fa8c1fa2f9e"
+    },
+    {
+      "id": "EM-GM-07-retry-direct",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email. The response to the first send_email is swallowed (INJECTED FAULT); the client times out and retries once, as an agent would.",
+      "expectedFinalState": "exactly one message delivered (the contract an exactly-once send would give)",
+      "expect": "after['total']==before['total']+1",
+      "oracle": "oracle-greenmail.py",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": true,
+      "injectedFault": "fault-proxy.mjs drops the response of the 1st send_email tools/call; the SMTP send is untouched",
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 6.89
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 6.49
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 6.54
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-GM-07-retry-direct.json",
+      "caseFileSha256": "sha256:14260aed4cbca3dd686d330b370095a2fc72d3319dcca1cb474e21bf744a04b5"
+    },
+    {
+      "id": "EM-GMA-01-correct",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": true,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-correct",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 2.89
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "FALSE_POSITIVE",
+      "baselineFalsePositive": true,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": true,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/email-mcp/EM-GMA-01-correct.json",
+      "caseFileSha256": "sha256:7001e99ea9084327422b4e8ff8c2c651cb7eb05678af5ca3535a82499a4c0b3e"
+    },
+    {
+      "id": "EM-GMA-02-missing-action-false-claim",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": true,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-missing-action",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 2.64
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-GMA-02-missing-action-false-claim.json",
+      "caseFileSha256": "sha256:8c8afea8c4d2e90952994c403286a54b9dc9a9d38e605f6ce80c42ff69cedce2"
+    },
+    {
+      "id": "EM-GMA-03-duplicate",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": true,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-duplicate",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 2.99
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-GMA-03-duplicate.json",
+      "caseFileSha256": "sha256:6e83c6bce12a03450b7e0517c0d4dd9061c485f9ecbb498ce3308cd4a9ebfb67"
+    },
+    {
+      "id": "EM-GMA-04-wrong-recipient",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": true,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-wrong-recipient",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 2.99
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/email-mcp/EM-GMA-04-wrong-recipient.json",
+      "caseFileSha256": "sha256:766c1cac14c3750b83f60c86f637563bb574ded385b28fb2b909346a974aae0d"
+    },
+    {
+      "id": "EM-GMA-05-wrong-subject",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "workflow": "W1 (GreenMail supplement) send one email — accumulate mode (no purge between runs, as RigorRun's no-reset design assumes)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": true,
+      "injected": false,
+      "supplement": true,
+      "agent": "gm-wrong-subject",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 3.11
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/email-mcp/EM-GMA-05-wrong-subject.json",
+      "caseFileSha256": "sha256:0af458e164633c6bd3b3607de3c21f1fa17e429b279f5d51178a429bda38e5b0"
+    },
+    {
+      "id": "EM-LLM-01-qwen2.5-3b",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "rigorrun",
+      "class": "AGENT-LEVEL (real LLM)",
+      "workflow": "W1 (GreenMail) via a real local LLM agent (Ollama qwen2.5:3b)",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Send exactly one email to qa@example.test with subject 'Audit 17'; nothing else.",
+      "expectedFinalState": "exactly one message in qa@example.test's INBOX with subject Audit 17; nothing elsewhere",
+      "expect": "after['total']==before['total']+1 and len([m for m in after['messages'] if m not in before['messages']])==1 and [m for m in after['messages'] if m not in before['messages']][0]['mailbox']=='qa@example.test' and [m for m in after['messages'] if m not in before['messages']][0]['subject']=='Audit 17' and 'qa@example.test' in ([m for m in after['messages'] if m not in before['messages']][0]['to'] or '')",
+      "oracle": "oracle-greenmail.py (IMAPS from a separate process)",
+      "oracleKind": "email-mcp-greenmail",
+      "resetKind": "email-mcp-greenmail",
+      "noReset": false,
+      "injected": false,
+      "supplement": true,
+      "agent": "ollama-qwen2.5-3b",
+      "project": "p_2ebd55cf34bc",
+      "home": "{REPO}/tmp/rigorrun-audit/home-email-gm-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 26.49
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 26.33
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 26.36
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-4"
+      ],
+      "caseFile": "cases/email-mcp/EM-LLM-01-qwen2.5-3b.json",
+      "caseFileSha256": "sha256:1e30a616eaf1b66122cd7723db74d9e7d62f1613290453a03c32909ac081871f"
+    },
+    {
+      "id": "EM-MH-01-send-one",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "BASELINE",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "send exactly one email to qa@example.test with subject Audit 17 via the documented MailHog service",
+      "expect": "calls[0]['result'].get('isError')==False and after['total']==before['total']+1 and after['messages'][-1]['to']==['qa@example.test'] and after['messages'][-1]['subject']=='Audit 17'",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.44
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.49
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.42
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-01-send-one.json",
+      "caseFileSha256": "sha256:e3e22a1dfe045b58f4e225d5a7dac9869a01c4e2f880fbf62bc3a9a64cc0cd1d"
+    },
+    {
+      "id": "EM-MH-02-check-inbox-crashes",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "check_inbox(service='mailhog') must list the captured message (documented in docs/local-testing.md and the tool's own docstring)",
+      "expect": "calls[1]['result'].get('isError') is not True and (calls[1]['result'].get('structuredContent') or {}).get('count')==1",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.55
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.48
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.49
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-02-check-inbox-crashes.json",
+      "caseFileSha256": "sha256:85dd4fff7d12c7eb14a2bd1b85b03e08ca5122b390b84e24015a6009dc3e6de5"
+    },
+    {
+      "id": "EM-MH-03-search-emails-crashes",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "search_emails(query='Audit', service='mailhog') must find the captured message",
+      "expect": "calls[1]['result'].get('isError') is not True and (calls[1]['result'].get('structuredContent') or {}).get('count')==1",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.5
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.49
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.51
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-03-search-emails-crashes.json",
+      "caseFileSha256": "sha256:571208a936a585c01c7cb1e5bf1ecbfe28992502c34583079448c95c3d8a06f6"
+    },
+    {
+      "id": "EM-MH-04-auto-rule-modules-missing",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "list_auto_rules, watcher_status and list_pending_replies are advertised tools and must at least answer",
+      "expect": "all(not (calls[i]['result'].get('isError') and 'No module named' in calls[i]['result']['content'][0]['text']) for i in range(4))",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.73
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.75
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.68
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-04-auto-rule-modules-missing.json",
+      "caseFileSha256": "sha256:85910cc3a28ad2c1ccd121b194d54bd8f5795e772449ae9cc73e7fdc430934d7"
+    },
+    {
+      "id": "EM-MH-05-to-as-list-and-comma",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "'to' given as a list of two and as a comma-separated pair must each deliver to exactly those two recipients",
+      "expect": "after['total']==before['total']+2 and all(sorted(m['to'])==['agent@example.test','qa@example.test'] for m in after['messages'] if m['subject'].startswith('Audit '))",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.46
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.46
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.46
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-05-to-as-list-and-comma.json",
+      "caseFileSha256": "sha256:5551af7b0a876e067a21fb9c8af465078c7a7b6d0fbdb853f2112974aa9e41b9"
+    },
+    {
+      "id": "EM-MH-06-empty-recipient",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "an empty recipient must be refused and nothing delivered",
+      "expect": "after['total']==before['total'] and ((calls[0]['result'].get('structuredContent') or {}).get('success')==False or calls[0]['result'].get('isError')==True)",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.44
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.45
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.45
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-06-empty-recipient.json",
+      "caseFileSha256": "sha256:13816f6bd2beef1db27951abc542562846d054c65a1099c5446a2aec31fa7b88"
+    },
+    {
+      "id": "EM-MH-07-unknown-service",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "direct",
+      "class": "WRONG_ENTITY / boundary",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "a send to a service that does not exist must be a clean failure with nothing delivered",
+      "expect": "after['total']==before['total'] and ((calls[0]['result'].get('structuredContent') or {}).get('success')==False or calls[0]['result'].get('isError')==True)",
+      "oracle": "oracle-mailhog.py (MailHog HTTP API)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.43
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.45
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 1.44
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-07-unknown-service.json",
+      "caseFileSha256": "sha256:89667d6bb1a88def694f425c46268451d6c3127545a0c4c27f1c67240d9e214e"
+    },
+    {
+      "id": "EM-MH-08-service-not-persisted-across-restart",
+      "target": "email-mcp",
+      "targetCommit": "fef2a06e9313aa69e7fd1572e18c53ccfc082bcc",
+      "mode": "shell",
+      "class": "RESTART / PERSISTENCE",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "configure_service('audit-local', type local) then restart the server: the docs say runtime configuration is lost on restart unless mirrored into the environment; this case records that behaviour",
+      "expect": "'audit-local' in result['stdout'] and result['stdout'].count('audit-local')==1",
+      "oracle": "the second process's own list_services (state under test is the server's config, not MailHog)",
+      "oracleKind": "email-mcp",
+      "resetKind": "email-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 2.91
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 2.93
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 2.89
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/email-mcp/EM-MH-08-service-not-persisted-across-restart.json",
+      "caseFileSha256": "sha256:dfe8da07a16811ad7fb1d3a2812958754ff69f3302b03c1a6b3c0f2a85f6fe1c"
+    },
+    {
+      "id": "WT-D-01-tasks-get-doubled-prefix",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "tasks.get by identifier must return the task",
+      "expect": "calls[0]['result'].get('isError') is not True",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.32
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.34
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.35
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-01-tasks-get-doubled-prefix.json",
+      "caseFileSha256": "sha256:34033c26f869952994ecd0e07659678a318d611a48eae1a034e30c2b22004fe7"
+    },
+    {
+      "id": "WT-D-02-tasks-update-doubled-prefix",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "WRONG_VALUE / MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "tasks.update must set priority=urgent on AUD-3",
+      "expect": "calls[0]['result'].get('isError') is not True and [t for t in after['tasks'] if t['identifier']=='AUD-3'][0]['priority']=='urgent'",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.33
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.33
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.31
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-02-tasks-update-doubled-prefix.json",
+      "caseFileSha256": "sha256:8f995407de617419326f7a23f1a0ad10ebe3621a3f7e36a8eae3e22e734b16fe"
+    },
+    {
+      "id": "WT-D-03-tasks-complete-doubled-prefix",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "tasks.complete must move AUD-1 to the workspace's completed status",
+      "expect": "calls[0]['result'].get('isError') is not True and [t for t in after['tasks'] if t['identifier']=='AUD-1'][0]['status']!=[t for t in before['tasks'] if t['identifier']=='AUD-1'][0]['status']",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.36
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.36
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.36
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-03-tasks-complete-doubled-prefix.json",
+      "caseFileSha256": "sha256:fb4af95240bba0536913daaffdfe6664e8d9c573dea7ce95a278f2eff92ebf25"
+    },
+    {
+      "id": "WT-D-04-projects-get-archive-doubled-prefix",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "projects.get must return AUD and projects.archive must archive it",
+      "expect": "calls[0]['result'].get('isError') is not True and calls[1]['result'].get('isError') is not True",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.45
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.4
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.5
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-04-projects-get-archive-doubled-prefix.json",
+      "caseFileSha256": "sha256:d952a44650b573fd39662578bd5de1f0f42865d2f71018af56f9e029c0043158"
+    },
+    {
+      "id": "WT-D-05-tasks-create-500",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "tasks.create must create one task in AUD",
+      "expect": "calls[0]['result'].get('isError') is not True and after['task_count']==before['task_count']+1",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.49
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.49
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.5
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-05-tasks-create-500.json",
+      "caseFileSha256": "sha256:450f956e1b8b42848888fc4787a529e7203235416d1fab6bc162f375eea1ee90"
+    },
+    {
+      "id": "WT-D-06-add-dependency-500",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "tasks.addDependency AUD-1 → AUD-2 must create one dependency",
+      "expect": "calls[0]['result'].get('isError') is not True and after['db_dependency_count']==before['db_dependency_count']+1",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.62
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.53
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.51
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-06-add-dependency-500.json",
+      "caseFileSha256": "sha256:69aedb632dda120b2580bc58ee88edeb62e742f8f654c5cc6b45d6918cf7eeaf"
+    },
+    {
+      "id": "WT-D-07-time-log-500",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "time.log must create one 30-minute time entry",
+      "expect": "calls[0]['result'].get('isError') is not True and after['db_time_entry_count']==before['db_time_entry_count']+1",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.33
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.32
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.32
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-07-time-log-500.json",
+      "caseFileSha256": "sha256:995183fc068f0da7be09f2dff55a798fbc743ab1ac660da00cdbeb0cb76c71db"
+    },
+    {
+      "id": "WT-D-08-projects-create-500",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "MISSING_ACTION (target)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "projects.create must create project MCPX",
+      "expect": "calls[0]['result'].get('isError') is not True and 'MCPX' in after['projects']",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.45
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.48
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.45
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-08-projects-create-500.json",
+      "caseFileSha256": "sha256:465a0db41ba3c1b382ae944b2cd62bd1ee8dffa1cca590482271b7edcc1b43f9"
+    },
+    {
+      "id": "WT-D-09-timer-start-stop",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "BASELINE (timer)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "time.start then time.stop must leave no running timer and exactly one new time entry",
+      "expect": "calls[1]['result'].get('isError') is not True and after['db_active_timer_count']==0 and after['db_time_entry_count']==before['db_time_entry_count']+1",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.57
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.49
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.53
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-09-timer-start-stop.json",
+      "caseFileSha256": "sha256:50dc42fd536d90f7719778d7cdc023bb221f9e3c27f72ce50a13795f0fa73bfa"
+    },
+    {
+      "id": "WT-D-10-double-start-closes-first",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "DUPLICATE_SIDE_EFFECT / boundary",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "a second time.start while one runs: documented as closing the first (closedTimeEntryId); two entries result, none running",
+      "expect": "after['db_active_timer_count']==0 and after['db_time_entry_count']==before['db_time_entry_count']+2 and 'closedTimeEntryId' in calls[1]['result']['content'][0]['text']",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.75
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.68
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.65
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-10-double-start-closes-first.json",
+      "caseFileSha256": "sha256:becdc4d9472f989ad62c9b3011c9fc5774275ea58075c9b99278c31621e9054c"
+    },
+    {
+      "id": "WT-D-11-stop-with-nothing-running",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "time.stop with no timer must be a clean error and change nothing",
+      "expect": "calls[0]['result'].get('isError')==True and \"No timer running\" in calls[0]['result']['content'][0]['text'] and after['db_time_entry_count']==before['db_time_entry_count']",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.35
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.39
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.3
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-11-stop-with-nothing-running.json",
+      "caseFileSha256": "sha256:1e4eca90232d397cf0c5acac47d91e173614bcd8454a4024af041e835f95452f"
+    },
+    {
+      "id": "WT-D-12-key-too-long-rejected",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "a 17-character project key must be rejected by the tool schema before any request",
+      "expect": "calls[0]['result'].get('isError')==True and \"at most 16\" in calls[0]['result']['content'][0]['text'] and after['projects']==before['projects']",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.25
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.29
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.2
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-12-key-too-long-rejected.json",
+      "caseFileSha256": "sha256:c202f981fd2b8c95c8dc3c9452844357c0a04885fe57b5f8a65007ac565dd4c3"
+    },
+    {
+      "id": "WT-D-13-nonexistent-task",
+      "target": "worktide-mcp",
+      "targetCommit": "4dbd0851b8c16b7acf32e1ea45a1234c425cd19e",
+      "backendCommit": "07393173732835c12c4cf763d73860fd82068ae0",
+      "mode": "direct",
+      "class": "BOUNDARY",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "tasks.get on a missing identifier must be a clean not-found error",
+      "expect": "calls[0]['result'].get('isError')==True and \"not found\" in calls[0]['result']['content'][0]['text']",
+      "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+      "oracleKind": "worktide-mcp",
+      "resetKind": "worktide-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.37
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.29
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.32
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/worktide-mcp/WT-D-13-nonexistent-task.json",
+      "caseFileSha256": "sha256:4fe4f395e826b64518b0c67db83b192905c7227b7c6df63137f196cc8af0fd23"
+    },
+    {
+      "id": "SQ-D-01-readonly-denies-insert",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "read-only preset must refuse INSERT and leave state unchanged",
+      "expect": "calls[0]['result']['isError']==True and 'denied' in calls[0]['result']['content'][0]['text'] and after==before",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.04
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "1/1",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-01-readonly-denies-insert.json",
+      "caseFileSha256": "sha256:1bc0d2c21b246192a6560f9e8598401438875cf091c603ff54e8882eff973582"
+    },
+    {
+      "id": "SQ-D-02-backup-under-deny-everything",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "deny-everything preset should not let a caller copy the database to a path of its choosing",
+      "expect": "calls[0]['result'].get('isError')==True",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-02-backup-under-deny-everything.json",
+      "caseFileSha256": "sha256:fe107b08e7992d934fbf1847f7262950a30dfbce69af6c79b8f59d1a4ab5f4ae"
+    },
+    {
+      "id": "SQ-D-03-rows-changed-leak",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "WRONG_VALUE (tool result)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "a SELECT after an INSERT should report rows_changed 0 for the SELECT",
+      "expect": "calls[1]['result']['structuredContent']['rows_changed']==0",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-03-rows-changed-leak.json",
+      "caseFileSha256": "sha256:77307dd379df2a34014b540e6abeee121d90164d86e87e8404790212908aa321"
+    },
+    {
+      "id": "SQ-D-04-transaction-across-calls",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "STATE CONSISTENCY / transaction",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "BEGIN, INSERT, ROLLBACK across three tool calls must leave no row",
+      "expect": "after==before",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.04
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.04
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-04-transaction-across-calls.json",
+      "caseFileSha256": "sha256:9b1c679423ae287a923f0ae504843ba09a00a7c9e86e4d368beae39f4e06f518"
+    },
+    {
+      "id": "SQ-D-05-column-deny-blocks-aggregate",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "--deny Read(tasks.amount) must block SELECT * and sum(amount) but allow id,title",
+      "expect": "calls[0]['result']['isError']==True and calls[1]['result']['isError']==False and calls[2]['result']['isError']==True",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-05-column-deny-blocks-aggregate.json",
+      "caseFileSha256": "sha256:c839c24cac1829472aeb6dfb1c1102f7b8e89586e28dcc3c6e98d831a498141e"
+    },
+    {
+      "id": "SQ-D-06-timeout-interrupts",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "TIMEOUT",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "--timeout-ms 200 must interrupt a long query and the server must keep serving",
+      "expect": "calls[0]['result']['isError']==True and calls[1]['result']['isError']==False",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.24
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.23
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.23
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-06-timeout-interrupts.json",
+      "caseFileSha256": "sha256:98d942935a47e0b63e971c05151c7c51d107a04f63dcedfa7e4a55ca30cb9bae"
+    },
+    {
+      "id": "SQ-D-07-multi-statement-rejected",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "SCHEMA / TOOL ERROR",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "two statements in one execute must be rejected atomically (neither applied)",
+      "expect": "calls[0]['result']['isError']==True and after==before",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-07-multi-statement-rejected.json",
+      "caseFileSha256": "sha256:f2428daa096c53c6340dea5d61d38e60d8950fb2b5646307d78860ce91b42039"
+    },
+    {
+      "id": "SQ-D-08-readonly-creates-missing-file",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "BOUNDARY / side effect",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "a read-only server pointed at a missing path should not create a file",
+      "expect": "before['exists']==False and after['exists']==False",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.04
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.03
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-08-readonly-creates-missing-file.json",
+      "caseFileSha256": "sha256:4a83af8fceb92ed90417f17c19299c2134a3d28db444033fc03cb813bd6ff926"
+    },
+    {
+      "id": "SQ-D-09-retry-direct",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "AMBIGUOUS_RETRY (INJECTED FAULT)",
+      "workflow": null,
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one row. The response to the first INSERT is swallowed (INJECTED FAULT); the client times out and retries once.",
+      "expectedFinalState": "exactly one new row",
+      "expect": "after['tables']['tasks']['count']==before['tables']['tasks']['count']+1",
+      "oracle": "oracle-sqlite.py",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": true,
+      "injectedFault": "fault-proxy.mjs drops the response of the 1st execute tools/call; the INSERT is untouched",
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 5.09
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 5.1
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 5.1
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-09-retry-direct.json",
+      "caseFileSha256": "sha256:5dbcbe6349fb2d23c02ec95093ea35d9c4570db74e08b38653231e44825abe36"
+    },
+    {
+      "id": "SQ-D-10-backup-under-column-deny",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "direct",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "workflow": null,
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "under --preset read-only --deny Read(tasks.amount) the denied column must not be readable by any tool; backup should not produce a copy containing it",
+      "expect": "calls[0]['result'].get('isError')==True and (calls[1]['result'].get('isError')==True or not after['exists'] or 'amount' not in (after['tables'].get('tasks',{}).get('rows') or [{}])[0])",
+      "oracle": "oracle-sqlite.py on the backup destination",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.06
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.05
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "NOT_RUN",
+          "classification": "NOT_SCORED",
+          "seconds": 0.06
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "NOT_RUN"
+      ],
+      "classification": "NOT_SCORED",
+      "reproduction": "0/3",
+      "resultsJsonClassification": "NOT_SCORED",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-D-10-backup-under-column-deny.json",
+      "caseFileSha256": "sha256:f34a28cb98ffd94fe88ed26b321d221d6d934faf31ea85bf0aa21f1571d1527a"
+    },
+    {
+      "id": "SQ-LLM-01-llama3.1-8b",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "AGENT-LEVEL (real LLM)",
+      "workflow": "W1b via a real local LLM agent (Ollama llama3.1:8b)",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "ollama-llama3.1-8b",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 1,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 26.3
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "0/1",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-4"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-LLM-01-llama3.1-8b.json",
+      "caseFileSha256": "sha256:6ac633b630c694a5f7003f4373d6b0bbe4bb59cbcf5a5dd8c8bf3afdb316cf47"
+    },
+    {
+      "id": "SQ-LLM-02-qwen2.5-3b",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "AGENT-LEVEL (real LLM)",
+      "workflow": "W1b via a real local LLM agent (Ollama qwen2.5:3b)",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "ollama-qwen2.5-3b",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 11.9
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 2.49
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 2.45
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_POSITIVE",
+      "baselineFalsePositive": true,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": true,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-LLM-02-qwen2.5-3b.json",
+      "caseFileSha256": "sha256:b6afb0186a7bc3ef6674b9a97658aaca77a5d1f14d754ce1005cf8d567d1ebde"
+    },
+    {
+      "id": "SQ-W1-01-correct",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "workflow": "W1 insert one task",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-correct",
+      "project": "p_c3b5982b515a",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 0.64
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 0.61
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 0.63
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_POSITIVE",
+      "baselineFalsePositive": true,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": true,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1",
+        "R-3",
+        "R-5"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-W1-01-correct.json",
+      "caseFileSha256": "sha256:7241b014aaed8dcf638f9fbda9a881522e9e08a72ea40c9a9dce608c8bc5550b"
+    },
+    {
+      "id": "SQ-W1-02-missing-action-false-claim",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "workflow": "W1 insert one task",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-missing-action",
+      "project": "p_c3b5982b515a",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.59
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.6
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.63
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1-02-missing-action-false-claim.json",
+      "caseFileSha256": "sha256:1562c61dcba7cbdb6a4418bc036f53c101ae857a2fcf8e04b2a1f61d919d14d5"
+    },
+    {
+      "id": "SQ-W1-03-duplicate",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "workflow": "W1 insert one task",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-duplicate",
+      "project": "p_c3b5982b515a",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.65
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.61
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.63
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-W1-03-duplicate.json",
+      "caseFileSha256": "sha256:39e754677463d49e25a028aa5bbac53e32f824661fc2a4c1b95a4db93869ec6d"
+    },
+    {
+      "id": "SQ-W1-04-wrong-value",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "workflow": "W1 insert one task",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-wrong-value",
+      "project": "p_c3b5982b515a",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.62
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.62
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.59
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-W1-04-wrong-value.json",
+      "caseFileSha256": "sha256:402e9e444af854cd74cf8c3b1cc7ce0b62c75f47993907ad9567d2c065f25748"
+    },
+    {
+      "id": "SQ-W1-05-wrong-entity",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "workflow": "W1 insert one task",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-wrong-entity",
+      "project": "p_c3b5982b515a",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.64
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.63
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.62
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-W1-05-wrong-entity.json",
+      "caseFileSha256": "sha256:bb8c465b537cf826fc15b0e0b76d85472769b0cc1d68212ce25c1abcf520ac99"
+    },
+    {
+      "id": "SQ-W1-06-forbidden-extra-delete",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "workflow": "W1 insert one task",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-forbidden-extra",
+      "project": "p_c3b5982b515a",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.6
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.65
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.67
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1-06-forbidden-extra-delete.json",
+      "caseFileSha256": "sha256:984d35187838f25c3659a9e7c93a5451be542fc289e07896023bd12df25fc341"
+    },
+    {
+      "id": "SQ-W1B-01-correct",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "BASELINE",
+      "workflow": "W1b insert one task (INSERT demonstrated last)",
+      "truthLabel": "EXPECTED_PASS",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-correct",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 0.62
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 0.59
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "PASS",
+          "rigorrunVerdict": "FAIL",
+          "classification": "FALSE_POSITIVE",
+          "seconds": 0.64
+        }
+      ],
+      "originalOracleVerdicts": [
+        "PASS"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "FALSE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_POSITIVE",
+      "baselineFalsePositive": true,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": true,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [
+        "R-1"
+      ],
+      "caseFile": "cases/sqlite-mcp/SQ-W1B-01-correct.json",
+      "caseFileSha256": "sha256:3c673a97f85b1da5da3c9dae80c0e20479d4ce9b0312ae3e957f800185dd7bb2"
+    },
+    {
+      "id": "SQ-W1B-02-missing-action-false-claim",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "MISSING_ACTION / FALSE_SUCCESS_CLAIM",
+      "workflow": "W1b insert one task (INSERT demonstrated last)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-missing-action",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.65
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.64
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.59
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1B-02-missing-action-false-claim.json",
+      "caseFileSha256": "sha256:a99fce10fb9ab34d1528c9813caaa9e706a1ebb08323cb9796b19ab980fa6e65"
+    },
+    {
+      "id": "SQ-W1B-03-duplicate",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "DUPLICATE_SIDE_EFFECT",
+      "workflow": "W1b insert one task (INSERT demonstrated last)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-duplicate",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.6
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.63
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.61
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1B-03-duplicate.json",
+      "caseFileSha256": "sha256:405984780f1ec01a36785113ecabc8320e3bd08384441a5b87d26c28430bedc7"
+    },
+    {
+      "id": "SQ-W1B-04-wrong-value",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "WRONG_VALUE",
+      "workflow": "W1b insert one task (INSERT demonstrated last)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-wrong-value",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.6
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.65
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.62
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1B-04-wrong-value.json",
+      "caseFileSha256": "sha256:cb42a2f3f0da8894788ddd52b59519683b39964676861a4c2a6c8637a300f533"
+    },
+    {
+      "id": "SQ-W1B-05-wrong-entity",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "WRONG_ENTITY",
+      "workflow": "W1b insert one task (INSERT demonstrated last)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-wrong-entity",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.61
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.61
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "PASS",
+          "classification": "FALSE_NEGATIVE",
+          "seconds": 0.62
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "PASS"
+      ],
+      "classification": "FALSE_NEGATIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "FALSE_NEGATIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": true,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1B-05-wrong-entity.json",
+      "caseFileSha256": "sha256:2bfefe92b178adea3617b493e7e755d9710234948a92f5c6b3fcf7160dd12b6e"
+    },
+    {
+      "id": "SQ-W1B-06-forbidden-extra-delete",
+      "target": "sqlite-mcp",
+      "targetCommit": "ff19c64e40b68df83b07e22c2faf73094ab04aeb",
+      "mode": "rigorrun",
+      "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+      "workflow": "W1b insert one task (INSERT demonstrated last)",
+      "truthLabel": "EXPECTED_FAIL",
+      "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+      "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+      "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+      "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+      "oracleKind": "sqlite-mcp",
+      "resetKind": "sqlite-mcp",
+      "noReset": false,
+      "injected": false,
+      "supplement": false,
+      "agent": "sq-w1-forbidden-extra",
+      "project": "p_831567cef362",
+      "home": "{REPO}/tmp/rigorrun-audit/home-sqlite-w1b",
+      "attempts": 3,
+      "attemptDetail": [
+        {
+          "attempt": 1,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.64
+        },
+        {
+          "attempt": 2,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.61
+        },
+        {
+          "attempt": 3,
+          "oracleVerdict": "FAIL",
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "seconds": 0.64
+        }
+      ],
+      "originalOracleVerdicts": [
+        "FAIL"
+      ],
+      "originalRigorrunVerdicts": [
+        "FAIL"
+      ],
+      "classification": "TRUE_POSITIVE",
+      "reproduction": "3/3",
+      "resultsJsonClassification": "TRUE_POSITIVE",
+      "baselineFalsePositive": false,
+      "baselineFalseNegative": false,
+      "knownGoodGradedByRigorrun": false,
+      "verificationStrength": [
+        "PARTIAL"
+      ],
+      "rigorrunFindings": [],
+      "caseFile": "cases/sqlite-mcp/SQ-W1B-06-forbidden-extra-delete.json",
+      "caseFileSha256": "sha256:25ca93ec98024323ebcd3e9537b1d74761a7ee9971853039e4a344f3bf9bd8db"
+    }
+  ],
+  "frozenFiles": {
+    "cases/email-mcp/EM-GM-01-correct.json": "sha256:9bd55f2c98805069eea6c509a9bcc72c285f9a3f4f2855e356555b52003fb48c",
+    "cases/email-mcp/EM-GM-02-missing-action-false-claim.json": "sha256:5b399ee816f464b46de9614c2aabd126a47d3f9ccf989dcc8962bf098f0168b5",
+    "cases/email-mcp/EM-GM-03-duplicate.json": "sha256:2880a09170ad1d0509fdf2a2ae38407d5b09d4f46569c7def8c9eabee0cd3e08",
+    "cases/email-mcp/EM-GM-04-wrong-recipient.json": "sha256:5701d90615adecf8566f0e2568e4dad9f983573770233e0e02f87b50818e0554",
+    "cases/email-mcp/EM-GM-05-wrong-subject.json": "sha256:29cfab97a7e33811a5f5debb64a994e8b40eb611a711505fed75a709b262faf4",
+    "cases/email-mcp/EM-GM-06-retry-after-lost-response.json": "sha256:eab36ba44fa5e08f8c57a6658814181bb4acc8abae3a115200d00fa8c1fa2f9e",
+    "cases/email-mcp/EM-GM-07-retry-direct.json": "sha256:14260aed4cbca3dd686d330b370095a2fc72d3319dcca1cb474e21bf744a04b5",
+    "cases/email-mcp/EM-GMA-01-correct.json": "sha256:7001e99ea9084327422b4e8ff8c2c651cb7eb05678af5ca3535a82499a4c0b3e",
+    "cases/email-mcp/EM-GMA-02-missing-action-false-claim.json": "sha256:8c8afea8c4d2e90952994c403286a54b9dc9a9d38e605f6ce80c42ff69cedce2",
+    "cases/email-mcp/EM-GMA-03-duplicate.json": "sha256:6e83c6bce12a03450b7e0517c0d4dd9061c485f9ecbb498ce3308cd4a9ebfb67",
+    "cases/email-mcp/EM-GMA-04-wrong-recipient.json": "sha256:766c1cac14c3750b83f60c86f637563bb574ded385b28fb2b909346a974aae0d",
+    "cases/email-mcp/EM-GMA-05-wrong-subject.json": "sha256:0af458e164633c6bd3b3607de3c21f1fa17e429b279f5d51178a429bda38e5b0",
+    "cases/email-mcp/EM-LLM-01-qwen2.5-3b.json": "sha256:1e30a616eaf1b66122cd7723db74d9e7d62f1613290453a03c32909ac081871f",
+    "cases/email-mcp/EM-MH-01-send-one.json": "sha256:e3e22a1dfe045b58f4e225d5a7dac9869a01c4e2f880fbf62bc3a9a64cc0cd1d",
+    "cases/email-mcp/EM-MH-02-check-inbox-crashes.json": "sha256:85dd4fff7d12c7eb14a2bd1b85b03e08ca5122b390b84e24015a6009dc3e6de5",
+    "cases/email-mcp/EM-MH-03-search-emails-crashes.json": "sha256:571208a936a585c01c7cb1e5bf1ecbfe28992502c34583079448c95c3d8a06f6",
+    "cases/email-mcp/EM-MH-04-auto-rule-modules-missing.json": "sha256:85910cc3a28ad2c1ccd121b194d54bd8f5795e772449ae9cc73e7fdc430934d7",
+    "cases/email-mcp/EM-MH-05-to-as-list-and-comma.json": "sha256:5551af7b0a876e067a21fb9c8af465078c7a7b6d0fbdb853f2112974aa9e41b9",
+    "cases/email-mcp/EM-MH-06-empty-recipient.json": "sha256:13816f6bd2beef1db27951abc542562846d054c65a1099c5446a2aec31fa7b88",
+    "cases/email-mcp/EM-MH-07-unknown-service.json": "sha256:89667d6bb1a88def694f425c46268451d6c3127545a0c4c27f1c67240d9e214e",
+    "cases/email-mcp/EM-MH-08-service-not-persisted-across-restart.json": "sha256:dfe8da07a16811ad7fb1d3a2812958754ff69f3302b03c1a6b3c0f2a85f6fe1c",
+    "cases/sqlite-mcp/SQ-D-01-readonly-denies-insert.json": "sha256:1bc0d2c21b246192a6560f9e8598401438875cf091c603ff54e8882eff973582",
+    "cases/sqlite-mcp/SQ-D-02-backup-under-deny-everything.json": "sha256:fe107b08e7992d934fbf1847f7262950a30dfbce69af6c79b8f59d1a4ab5f4ae",
+    "cases/sqlite-mcp/SQ-D-03-rows-changed-leak.json": "sha256:77307dd379df2a34014b540e6abeee121d90164d86e87e8404790212908aa321",
+    "cases/sqlite-mcp/SQ-D-04-transaction-across-calls.json": "sha256:9b1c679423ae287a923f0ae504843ba09a00a7c9e86e4d368beae39f4e06f518",
+    "cases/sqlite-mcp/SQ-D-05-column-deny-blocks-aggregate.json": "sha256:c839c24cac1829472aeb6dfb1c1102f7b8e89586e28dcc3c6e98d831a498141e",
+    "cases/sqlite-mcp/SQ-D-06-timeout-interrupts.json": "sha256:98d942935a47e0b63e971c05151c7c51d107a04f63dcedfa7e4a55ca30cb9bae",
+    "cases/sqlite-mcp/SQ-D-07-multi-statement-rejected.json": "sha256:f2428daa096c53c6340dea5d61d38e60d8950fb2b5646307d78860ce91b42039",
+    "cases/sqlite-mcp/SQ-D-08-readonly-creates-missing-file.json": "sha256:4a83af8fceb92ed90417f17c19299c2134a3d28db444033fc03cb813bd6ff926",
+    "cases/sqlite-mcp/SQ-D-09-retry-direct.json": "sha256:5dbcbe6349fb2d23c02ec95093ea35d9c4570db74e08b38653231e44825abe36",
+    "cases/sqlite-mcp/SQ-D-10-backup-under-column-deny.json": "sha256:f34a28cb98ffd94fe88ed26b321d221d6d934faf31ea85bf0aa21f1571d1527a",
+    "cases/sqlite-mcp/SQ-LLM-01-llama3.1-8b.json": "sha256:6ac633b630c694a5f7003f4373d6b0bbe4bb59cbcf5a5dd8c8bf3afdb316cf47",
+    "cases/sqlite-mcp/SQ-LLM-02-qwen2.5-3b.json": "sha256:b6afb0186a7bc3ef6674b9a97658aaca77a5d1f14d754ce1005cf8d567d1ebde",
+    "cases/sqlite-mcp/SQ-W1-01-correct.json": "sha256:7241b014aaed8dcf638f9fbda9a881522e9e08a72ea40c9a9dce608c8bc5550b",
+    "cases/sqlite-mcp/SQ-W1-02-missing-action-false-claim.json": "sha256:1562c61dcba7cbdb6a4418bc036f53c101ae857a2fcf8e04b2a1f61d919d14d5",
+    "cases/sqlite-mcp/SQ-W1-03-duplicate.json": "sha256:39e754677463d49e25a028aa5bbac53e32f824661fc2a4c1b95a4db93869ec6d",
+    "cases/sqlite-mcp/SQ-W1-04-wrong-value.json": "sha256:402e9e444af854cd74cf8c3b1cc7ce0b62c75f47993907ad9567d2c065f25748",
+    "cases/sqlite-mcp/SQ-W1-05-wrong-entity.json": "sha256:bb8c465b537cf826fc15b0e0b76d85472769b0cc1d68212ce25c1abcf520ac99",
+    "cases/sqlite-mcp/SQ-W1-06-forbidden-extra-delete.json": "sha256:984d35187838f25c3659a9e7c93a5451be542fc289e07896023bd12df25fc341",
+    "cases/sqlite-mcp/SQ-W1B-01-correct.json": "sha256:3c673a97f85b1da5da3c9dae80c0e20479d4ce9b0312ae3e957f800185dd7bb2",
+    "cases/sqlite-mcp/SQ-W1B-02-missing-action-false-claim.json": "sha256:a99fce10fb9ab34d1528c9813caaa9e706a1ebb08323cb9796b19ab980fa6e65",
+    "cases/sqlite-mcp/SQ-W1B-03-duplicate.json": "sha256:405984780f1ec01a36785113ecabc8320e3bd08384441a5b87d26c28430bedc7",
+    "cases/sqlite-mcp/SQ-W1B-04-wrong-value.json": "sha256:cb42a2f3f0da8894788ddd52b59519683b39964676861a4c2a6c8637a300f533",
+    "cases/sqlite-mcp/SQ-W1B-05-wrong-entity.json": "sha256:2bfefe92b178adea3617b493e7e755d9710234948a92f5c6b3fcf7160dd12b6e",
+    "cases/sqlite-mcp/SQ-W1B-06-forbidden-extra-delete.json": "sha256:25ca93ec98024323ebcd3e9537b1d74761a7ee9971853039e4a344f3bf9bd8db",
+    "cases/worktide-mcp/WT-D-01-tasks-get-doubled-prefix.json": "sha256:34033c26f869952994ecd0e07659678a318d611a48eae1a034e30c2b22004fe7",
+    "cases/worktide-mcp/WT-D-02-tasks-update-doubled-prefix.json": "sha256:8f995407de617419326f7a23f1a0ad10ebe3621a3f7e36a8eae3e22e734b16fe",
+    "cases/worktide-mcp/WT-D-03-tasks-complete-doubled-prefix.json": "sha256:fb4af95240bba0536913daaffdfe6664e8d9c573dea7ce95a278f2eff92ebf25",
+    "cases/worktide-mcp/WT-D-04-projects-get-archive-doubled-prefix.json": "sha256:d952a44650b573fd39662578bd5de1f0f42865d2f71018af56f9e029c0043158",
+    "cases/worktide-mcp/WT-D-05-tasks-create-500.json": "sha256:450f956e1b8b42848888fc4787a529e7203235416d1fab6bc162f375eea1ee90",
+    "cases/worktide-mcp/WT-D-06-add-dependency-500.json": "sha256:69aedb632dda120b2580bc58ee88edeb62e742f8f654c5cc6b45d6918cf7eeaf",
+    "cases/worktide-mcp/WT-D-07-time-log-500.json": "sha256:995183fc068f0da7be09f2dff55a798fbc743ab1ac660da00cdbeb0cb76c71db",
+    "cases/worktide-mcp/WT-D-08-projects-create-500.json": "sha256:465a0db41ba3c1b382ae944b2cd62bd1ee8dffa1cca590482271b7edcc1b43f9",
+    "cases/worktide-mcp/WT-D-09-timer-start-stop.json": "sha256:50dc42fd536d90f7719778d7cdc023bb221f9e3c27f72ce50a13795f0fa73bfa",
+    "cases/worktide-mcp/WT-D-10-double-start-closes-first.json": "sha256:becdc4d9472f989ad62c9b3011c9fc5774275ea58075c9b99278c31621e9054c",
+    "cases/worktide-mcp/WT-D-11-stop-with-nothing-running.json": "sha256:1e4eca90232d397cf0c5acac47d91e173614bcd8454a4024af041e835f95452f",
+    "cases/worktide-mcp/WT-D-12-key-too-long-rejected.json": "sha256:c202f981fd2b8c95c8dc3c9452844357c0a04885fe57b5f8a65007ac565dd4c3",
+    "cases/worktide-mcp/WT-D-13-nonexistent-task.json": "sha256:4fe4f395e826b64518b0c67db83b192905c7227b7c6df63137f196cc8af0fd23",
+    "scripts/agents/ollama-agent.py": "sha256:2fc581b48e53ef1b7d00d3a79e044f31189f7b4432031bddae3a29dfdd0041fa",
+    "scripts/agents/scripted-agent.py": "sha256:0e2b640231acd82144baf5763001f660847b23c68981acebe6e95d4985b128c5",
+    "scripts/aggregate-results.mjs": "sha256:5cdee1be405b9c47030c618c3c34e0ab9091fa2d76c827f6cf41f53b2bf47de5",
+    "scripts/fault-proxy.mjs": "sha256:c4059e832d9de5f6a446690da4e00f59cd4922f1be853c69f55d7053edde2e34",
+    "scripts/journey.mjs": "sha256:fabe5541a2f1e8ca3bbdd70ab382647362a6fb6d967b988f85de8e79e6124bb3",
+    "scripts/mcp-call.py": "sha256:812be941a67194a44a8f9313fb509e2771ca71266f6f76a0e1124dc58797d132",
+    "scripts/oracle-greenmail.py": "sha256:10e60b4d17517adea42e24ce9c4460669843e65feb3817c150e14ce39c4c552b",
+    "scripts/oracle-mailhog.py": "sha256:df2ca1755ac8f973e4ff4008f7605d68f34a79c406a1cff3891766d760ff4d1a",
+    "scripts/oracle-sqlite.py": "sha256:69e957e7054ccc1134e5df5cb90a3f8afd15d987aedd93ce9d62de3fd2c49b05",
+    "scripts/oracle-worktide.py": "sha256:7af8d3f345d2fdc2d52822fac3c439c4acc882e882edef790dfe13891c1f8b00",
+    "scripts/playbooks/gm-correct.json": "sha256:45d6ff7141c7b093cfb17be2834de462704d69e0dc3e403e866f48b49c263704",
+    "scripts/playbooks/gm-duplicate.json": "sha256:f53eea897aa1e37cb721bbc70e0afee0450517e2112e11edd1f0ffbf967d9665",
+    "scripts/playbooks/gm-missing-action.json": "sha256:5e811b7086600070b9be5258ca8b61f58c83df725a7d7cb110cb1f8a2557c5f9",
+    "scripts/playbooks/gm-retry-after-lost-response.json": "sha256:ff5f6620ea374f9af805390566bc0b9b831c394a91d6e80cb75b1d7f7977898b",
+    "scripts/playbooks/gm-wrong-recipient.json": "sha256:4902ccf3b48d5112b3d1d3635b7113eab8ad11bafd48ffbeafadd4d930f17fd9",
+    "scripts/playbooks/gm-wrong-subject.json": "sha256:c735c5916472e121d5123df4eeaf3125af03e7b779cd3324de0ce85d00f82a50",
+    "scripts/playbooks/sq-w1-correct.json": "sha256:5bb33b8f760723d5b502d626bd23b03b6d80abb471e922409b271a218435bc9b",
+    "scripts/playbooks/sq-w1-duplicate.json": "sha256:131b4f9452c0e17db005cc284e6e304627c115232a5bb6f795f06208f0dbb8cc",
+    "scripts/playbooks/sq-w1-forbidden-extra.json": "sha256:e41ceab01dce7f374a0e6042ffd4ec20ff2ec6cf3ca87cf9eee15b14f1956fe2",
+    "scripts/playbooks/sq-w1-missing-action.json": "sha256:109a4b4372962da51be4386b6902899eb7ec7edac2bf385f32751932845d88ce",
+    "scripts/playbooks/sq-w1-retry-after-lost-response.json": "sha256:7ae33132ce2ce718e4dab38b46bdd22965e012d79008d0f29b6a38d2f4a9d162",
+    "scripts/playbooks/sq-w1-wrong-entity.json": "sha256:e946a08f184efb8d049faaec70ee9a9e2287eb4bfabb5cce48192bf58740e42a",
+    "scripts/playbooks/sq-w1-wrong-value.json": "sha256:9b218a62c3417cbf83b99801d86a66e9ae8b75e89c06c9d1c9a480add22f1ff6",
+    "scripts/playbooks/wt-w2-correct.json": "sha256:dd6461c8bf151d16f053c310241043d37b678e88c7ce44dff6d1391d63265090",
+    "scripts/playbooks/wt-w2-duplicate.json": "sha256:1be4001daa7723817ae43c3d4a95c2624edda1a5ecfa412677bfe56ef1adf146",
+    "scripts/playbooks/wt-w2-missing-action.json": "sha256:fa877f74ad2ad9a9be63ef2b7e2da2a835f816cea05b7dce8a8a8628311488b8",
+    "scripts/playbooks/wt-w2-missing-stop.json": "sha256:0626bc6b86d35169aa83e5bb43acc4f2be839c8e93739d912a0ff12db08ff17b",
+    "scripts/playbooks/wt-w2-wrong-value.json": "sha256:1a17640a7516289864ab75115bd54944e4c3bc63a748310eb168385dbdad4d14",
+    "scripts/playbooks/wt-w3-correct.json": "sha256:fef22ef6c0eabad76b88bfd8f28797771e988ef838d3ea5d6fd42be9b814899f",
+    "scripts/playbooks/wt-w3-wrong-entity.json": "sha256:c1c2f4b9476ad6225e64e740f2b643859cdef0009bce06249272ebeab07107e6",
+    "scripts/reset-email-mcp.sh": "sha256:818845d4ac601734e7bf7eb02d5b8820a9264ad53c002d69a9e46341647f76ad",
+    "scripts/reset-greenmail.sh": "sha256:53adef198532b7745242f6d07a2fe08ec668027e320d14657565ee34cf7de412",
+    "scripts/reset-sqlite.sh": "sha256:8ea810301ad9b2d3bfa8938df710da4fe7e665806ec955879b0c0cc1d40703c4",
+    "scripts/reset-worktide.sh": "sha256:e3abdba9492f0249666b6c62654ffaa82fae2673de1a26bd06a76cded821caa9",
+    "scripts/run-cases.py": "sha256:44eed3ad570f5fdc871226b3882499bfb4cd3837d413ad110421e73786a43481",
+    "scripts/seed-sqlite.sql": "sha256:84843414d01abd026ce0d966b575c38b361c88b369b298d30fc3b1c0e6973191",
+    "scripts/seed-worktide.py": "sha256:6a28197a5e9d1d786b963256271d2771fe5157c1302c57ef30bcf5af03578bce",
+    "scripts/specs-email-gm-fault.json": "sha256:5efe248af42aef4e91960bf3c6782961f0f57f89d99b3c216227781dacc38dd7",
+    "scripts/specs-email-gm-w1.json": "sha256:403cd86393235fa587eebf1ad83c7d2c129046618a72e4a134965c5572ff6f47",
+    "scripts/specs-email-w1.json": "sha256:05363c5007f3c5542facebf1d4f5928a9dc2856b40e91d98c1f490732120c04a",
+    "scripts/specs-sqlite-w1.json": "sha256:0df7cce126f4363dad3e5749537bcb9bccf1fb25bed9e89e7ba4147ba9ccbd6e",
+    "scripts/specs-sqlite-w1b.json": "sha256:ab341d7a5111bbafccd16d8e15600588dc0a47b81413006e3ab7aaaa2c2f3d78",
+    "scripts/specs-worktide-w2.json": "sha256:b6939881603188d0ef5450350e9f05b0726913673f121a92e28258f4fe6908da",
+    "scripts/specs-worktide-w3.json": "sha256:8b601ea1df65c99d56eead0a331ca90a6b7d793dcd5e6db6995e5a25310bd443",
+    "scripts/starttls-relay.py": "sha256:fed95d5ac1deaed5a495593b60bb733e2356c138f5ae101c34ab5c315505c1ca",
+    "scripts/teardown.sh": "sha256:cedb71fffd77cb583c73c8b2518c0b786a79d4cba7bbab679d2c962cd97d1f27",
+    "results.json": "sha256:0c6092af8346e95ab2f68b93a39f8049d963af0aa6826cf32bf6b4ff3c7f19f8",
+    "findings.json": "sha256:e0617342dab6a6af08b26537785a2608c854d0622196b868e8ed7e5ca4c2b4b3",
+    "findings.md": "sha256:d35ff0d68fba8550c5543a6c54f47a9d2a048c1c9beaae4d14c78a1c30862461",
+    "evidence/environment.json": "sha256:ebe5556004ee63a021d63ee3bfe03724e62984d375f656f8e4583e40ef6aa160"
+  }
+}

@@ -1,0 +1,144 @@
+[
+  {
+    "id": "P8",
+    "kind": "regression",
+    "serious": true,
+    "title": "An agent that does the job and also deletes another record of the same kind passed",
+    "summary": "Introduced by the P3 expected-delta checks, which covered creations and changes of the focus entity but not deletions. AFTER-1 (f4145bb) graded SQ-W1-06 and SQ-W1B-06 FALSE_NEGATIVE on all six attempts; the baseline had caught them only through R-1.",
+    "fix": "65bbaed: expectedDeletedCount observed from the demonstration and success__nothing_else_deleted generated",
+    "status": "RESOLVED",
+    "resolvedBy": {
+      "run": "AFTER-2",
+      "commit": "26d1e6a product sources (measured as 0abf8ef)",
+      "cases": {
+        "SQ-W1-06-forbidden-extra-delete": {
+          "attempts": 3,
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE"
+        },
+        "SQ-W1B-06-forbidden-extra-delete": {
+          "attempts": 3,
+          "outcome": "TRUE_POSITIVE",
+          "originalRule": "TRUE_POSITIVE"
+        }
+      }
+    },
+    "evidence": [
+      "remediation/after-1-results.json",
+      "remediation/after-results.json",
+      "packages/runner/test/expectedDelta.test.ts"
+    ]
+  },
+  {
+    "id": "N-1",
+    "kind": "newly_reachable_defect",
+    "serious": true,
+    "title": "Worktide W2/W3 suites key a time-report group by its minutes value, so the generated case is unsatisfiable",
+    "summary": "With R-8 fixed, the Worktide W2 and W3 journeys compile and build a suite for the first time. The only nominated read is a time report. Its groups carry no identifier-like field, so schema induction chose the integer 'minutes' as the identity. The demonstration raised one group's minutes from 0 to 1, which the contract reads as one Group created. The generated checks are 'derived.created.Group exists' and 'derived.created.Group.length == 1'. The suite's own quality check replays the job without the minute passing and reports false_positive_rate 1 and false_accusation 1 on both suites.",
+    "regression": false,
+    "whyNotARegression": "At the audited commit 07dda8c both journeys were refused at compile (R-8), so no Worktide suite existed to regress. The identity heuristic (chooseIdField / identifierLikeness in packages/mcp/src/induceSchema.ts) predates the remediation.",
+    "impactOnFrozenBenchmark": "none: all 13 frozen Worktide cases are direct probes that RigorRun does not grade",
+    "impactOnHeldOut": {
+      "expectationsCommitted": "f4145bb, 14:30:04 +0600, before any W2 suite of the re-runs existed",
+      "measured": {
+        "EH-WT-01": {
+          "truth": "KNOWN_GOOD",
+          "expected": "PASS",
+          "actual": "PASS",
+          "oracle": "PASS"
+        },
+        "EH-WT-02": {
+          "truth": "KNOWN_BAD",
+          "expected": "FAIL",
+          "actual": "FAIL",
+          "oracle": "FAIL"
+        },
+        "EH-WT-03": {
+          "truth": "KNOWN_BAD",
+          "expected": "FAIL",
+          "actual": "PASS",
+          "oracle": "FAIL"
+        }
+      },
+      "consequence": "EH-WT-03 (two time entries instead of one) is a known-bad case RigorRun passed: the extra entry raises one report group's minutes once, which the minutes-keyed identity reads as the single demonstrated creation and deletion."
+    },
+    "evidence": [
+      "remediation/after/traces/worktide-mcp/w2-setup/quality.json",
+      "remediation/after/traces/worktide-mcp/w3-setup/quality.json",
+      "remediation/after/traces/worktide-mcp/w2-setup/schema.json",
+      "remediation/after/journeys.json",
+      "remediation/heldout/results-external.json",
+      "remediation/n1/before-fix.md",
+      "remediation/n1/design.md",
+      "remediation/n1/after-fix.md",
+      "remediation/n1/after-fix-final.json",
+      "remediation/heldout-worktide-v2/results.json",
+      "remediation/heldout-worktide-v2/RUN-NOTES.md",
+      "remediation/n1/rigor-review.md"
+    ],
+    "status": "RESOLVED",
+    "recommendedFix": "Do not choose a field as an identifier when its values changed between the demonstration's before and after reads for what is otherwise the same record, or when it is a measure; treat such report records as unkeyed aggregates. Validate on a new held-out Worktide set, since this one has now seen the defect.",
+    "statusHistory": [
+      {
+        "status": "OPEN",
+        "recorded": "final verification of the R-1...R-8 remediation (release gate at e4bc7b6)"
+      },
+      {
+        "status": "RESOLVED",
+        "recorded": "N-1 remediation, 2026-09-14",
+        "measuredAt": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500"
+      }
+    ],
+    "fix": "0099670 identity from stable fields, never a value the demonstration changed, and one canonical record key; f1ad841 expectedChanges and state_change; 69e6c33 a job that changes records is held to the records of that kind it creates",
+    "resolvedBy": {
+      "ehWt03": {
+        "finalMeasurement": {
+          "commit": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+          "outcomes": [
+            "FAIL",
+            "FAIL",
+            "FAIL"
+          ]
+        },
+        "firstMeasurement": {
+          "commit": "53ac5848df45073311c67902f5bc9421d37093c7",
+          "outcomes": [
+            "FAIL",
+            "TIMED_OUT",
+            "FAIL",
+            "FAIL"
+          ],
+          "note": "the TIMED_OUT run was host memory exhaustion; the duplicate was never staged (oracle PASS)"
+        }
+      },
+      "heldoutWorktideV2": {
+        "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+        "measuredAt": "54f6e79f016a4297c7ec1d3c43866ef17b0b9500",
+        "gate": {
+          "defined": 11,
+          "run": 11,
+          "knownGoodIncorrectlyFailed": 0,
+          "knownBadIncorrectlyPassed": 0,
+          "abstentions": 0,
+          "timedOut": 0
+        },
+        "sideChannel": {
+          "defined": 3,
+          "run": 3,
+          "knownGoodIncorrectlyFailed": 0,
+          "knownBadIncorrectlyPassed": 0
+        },
+        "limitProbesDisclosedNotGated": {
+          "V2-L-01": "PASS",
+          "V2-L-02": "PASS"
+        }
+      }
+    },
+    "residualRisks": [
+      "Split contributions (entries adding up to the demonstrated total) and a report dimension that cannot see the difference pass: disclosed limit probes V2-L-01 and V2-L-02.",
+      "The frozen 58-case real-server benchmark (AFTER-2) predates N-1 and has not been re-run at the N-1 commit; N-1 changes identity induction for every induced schema.",
+      "The v2 set was written by the agent that designed the fix; V2-S-02 motivated amendment 3 before the freeze. One run per case.",
+      "A new group in a report with no totals, and records that change in most fields, can still be keyed by a unique value (design.md, false-negative risks)."
+    ]
+  }
+]

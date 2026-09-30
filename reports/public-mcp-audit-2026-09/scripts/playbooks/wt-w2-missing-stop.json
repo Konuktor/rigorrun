@@ -1,0 +1,16 @@
+{
+  "name": "wt-w2-missing-stop",
+  "steps": [
+    {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    {
+      "tool": "time.start",
+      "args": {
+        "description": "{inputs.description}"
+      }
+    }
+  ],
+  "report": "Started the timer, waited a minute, stopped it: one time entry."
+}

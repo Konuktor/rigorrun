@@ -59,9 +59,11 @@ export interface DiscoveryResult {
 /**
  * What came back from one call.
  *
- * `content` and `structured` are kept apart on purpose. Only `structured` is
- * ever read for state, because RigorRun compares records and never prose —
- * a system that answers in sentences can be watched and cannot be verified.
+ * `content` and `structured` are kept apart on purpose, and neither is read
+ * for state directly: `normalizeCallResult` in `result.ts` is the one place
+ * that decides what counts as records. Structured content always does; a text
+ * block does only when the whole block is JSON data; a sentence never does —
+ * a system that answers in prose can be watched and cannot be verified.
  */
 export interface CallResult {
   ok: boolean;
@@ -82,7 +84,11 @@ export interface SystemConnection {
   readonly discovery: DiscoveryResult;
   /** The child process this connection spawned, where it spawned one. */
   readonly childPid: number | null;
-  call(name: string, args: Record<string, unknown>): Promise<CallResult>;
+  /**
+   * Calls one operation. `timeoutMs`, where a connector honours it, is how long
+   * to wait for the answer; a connector that does not uses its own default.
+   */
+  call(name: string, args: Record<string, unknown>, timeoutMs?: number): Promise<CallResult>;
   close(): Promise<void>;
   /**
    * Whether reading this system back is possible at all.

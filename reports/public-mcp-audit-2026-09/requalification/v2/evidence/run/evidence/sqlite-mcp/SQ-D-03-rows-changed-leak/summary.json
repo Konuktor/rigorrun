@@ -1,0 +1,182 @@
+{
+  "id": "SQ-D-03-rows-changed-leak",
+  "target": "sqlite-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.09,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title) VALUES ('leak')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "SELECT count(*) AS n FROM tasks"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[{\"columns\":{\"n\":{\"kind\":\"Integer\",\"value\":4}}}],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [
+                  {
+                    "columns": {
+                      "n": {
+                        "kind": "Integer",
+                        "value": 4
+                      }
+                    }
+                  }
+                ],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.05,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title) VALUES ('leak')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "SELECT count(*) AS n FROM tasks"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[{\"columns\":{\"n\":{\"kind\":\"Integer\",\"value\":4}}}],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [
+                  {
+                    "columns": {
+                      "n": {
+                        "kind": "Integer",
+                        "value": 4
+                      }
+                    }
+                  }
+                ],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 0.09,
+      "result": {
+        "calls": [
+          {
+            "tool": "execute",
+            "args": {
+              "query": "INSERT INTO tasks (title) VALUES ('leak')"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "execute",
+            "args": {
+              "query": "SELECT count(*) AS n FROM tasks"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"rows\":[{\"columns\":{\"n\":{\"kind\":\"Integer\",\"value\":4}}}],\"rows_changed\":1}"
+                }
+              ],
+              "structuredContent": {
+                "rows": [
+                  {
+                    "columns": {
+                      "n": {
+                        "kind": "Integer",
+                        "value": 4
+                      }
+                    }
+                  }
+                ],
+                "rows_changed": 1
+              },
+              "isError": false
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

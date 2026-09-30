@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "trace_p_76ab92de540b",
+  "name": "Mark task 2, Book venue, as done; change nothing else.",
+  "environmentId": "p_76ab92de540b",
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "durationMs": 9,
+  "actor": {
+    "id": "operator",
+    "kind": "human",
+    "label": "Operator"
+  },
+  "source": "action_log",
+  "before": {
+    "entities": {
+      "Task": {
+        "1": {
+          "id": 1,
+          "title": "Renew domain",
+          "status": "open"
+        },
+        "2": {
+          "id": 2,
+          "title": "Book venue",
+          "status": "open"
+        },
+        "3": {
+          "id": 3,
+          "title": "Send invoices",
+          "status": "done"
+        }
+      },
+      "Note": {
+        "1": {
+          "id": 1,
+          "task_id": 1,
+          "body": "Registrar login is in the shared vault",
+          "seen": 0
+        },
+        "2": {
+          "id": 2,
+          "task_id": 2,
+          "body": "Shortlist: river hall or old library",
+          "seen": 0
+        },
+        "3": {
+          "id": 3,
+          "task_id": 1,
+          "body": "Renewal is due before the end of the month",
+          "seen": 0
+        }
+      }
+    }
+  },
+  "after": {
+    "entities": {
+      "Task": {
+        "1": {
+          "id": 1,
+          "title": "Renew domain",
+          "status": "open"
+        },
+        "2": {
+          "id": 2,
+          "title": "Book venue",
+          "status": "done"
+        },
+        "3": {
+          "id": 3,
+          "title": "Send invoices",
+          "status": "done"
+        }
+      },
+      "Note": {
+        "1": {
+          "id": 1,
+          "task_id": 1,
+          "body": "Registrar login is in the shared vault",
+          "seen": 0
+        },
+        "2": {
+          "id": 2,
+          "task_id": 2,
+          "body": "Shortlist: river hall or old library",
+          "seen": 0
+        },
+        "3": {
+          "id": 3,
+          "task_id": 1,
+          "body": "Renewal is due before the end of the month",
+          "seen": 0
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "id": "step_001",
+      "ordinal": 0,
+      "at": 9,
+      "kind": "action",
+      "action": {
+        "name": "update_task",
+        "args": {
+          "id": 2,
+          "status": "done"
+        },
+        "ok": true,
+        "changedState": true
+      },
+      "surfaceText": []
+    }
+  ],
+  "meta": {
+    "recorder": "rigorrun-action-log",
+    "recorderVersion": "1",
+    "redaction": "caller-supplied",
+    "droppedSensitiveEvents": 0
+  }
+}

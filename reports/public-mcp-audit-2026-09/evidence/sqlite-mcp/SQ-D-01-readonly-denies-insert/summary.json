@@ -1,0 +1,19 @@
+{
+  "id": "SQ-D-01-readonly-denies-insert",
+  "target": "sqlite-mcp",
+  "class": "UNAUTHORIZED / FORBIDDEN ACTION",
+  "truth": "EXPECTED_PASS",
+  "injected": false,
+  "mode": "direct",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.04,
+      "oracleVerdict": "PASS",
+      "expectedStateHeld": true,
+      "rigorrunVerdict": "NOT_RUN",
+      "classification": "NOT_SCORED"
+    }
+  ],
+  "reproduction": "1/1"
+}

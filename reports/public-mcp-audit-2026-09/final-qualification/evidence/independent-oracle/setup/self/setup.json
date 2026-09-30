@@ -1,0 +1,116 @@
+{
+  "project": "self",
+  "exit": 0,
+  "productCommit": "a9edbec98ea9056bf1b6a3773cc3fa9ba2692d01",
+  "callsDuringSetup": [
+    {
+      "at": 1789406878.3841777,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.388222,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.3910918,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.3916187,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.3920887,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.3965287,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.3974805,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1789406878.3998787,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.4029865,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.4286208,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.433618,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.434973,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.435968,
+      "server": "taskdesk",
+      "tool": "create_task"
+    },
+    {
+      "at": 1789406878.441801,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.4424436,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    },
+    {
+      "at": 1789406878.4433887,
+      "server": "taskdesk",
+      "tool": "list_tasks"
+    }
+  ],
+  "summary": {
+    "projectId": "p_c9a07da2de72",
+    "readsProblem": "",
+    "tools": 4,
+    "records": [
+      "Task"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "io-readback",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "suiteShape": [
+    "happy_path"
+  ],
+  "budgetsMs": [
+    60000
+  ],
+  "ok": true
+}

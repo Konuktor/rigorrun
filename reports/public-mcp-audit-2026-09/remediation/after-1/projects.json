@@ -1,0 +1,26 @@
+{
+  "home-sqlite-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1",
+    "project": "p_8cd3f3aae15f"
+  },
+  "home-sqlite-w1b": {
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-sqlite-w1b",
+    "project": "p_826c3de861ed"
+  },
+  "home-email-gm-w1": {
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-w1",
+    "project": "p_ba22a0301d12"
+  },
+  "home-email-gm-fault": {
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-email-gm-fault",
+    "project": "p_1474a37f44e6"
+  },
+  "home-worktide-w2": {
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-worktide-w2",
+    "project": "p_f37eabbb2a62"
+  },
+  "home-worktide-w3": {
+    "home": "{REPO}/tmp/rigorrun-audit/after-homes/home-worktide-w3",
+    "project": "p_971216ad2250"
+  }
+}

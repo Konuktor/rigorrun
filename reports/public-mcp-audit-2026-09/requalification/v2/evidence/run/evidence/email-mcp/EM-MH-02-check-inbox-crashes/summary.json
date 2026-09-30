@@ -1,0 +1,161 @@
+{
+  "id": "EM-MH-02-check-inbox-crashes",
+  "target": "email-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.2,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 via MailHog",
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via mailhog service\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": true,
+                "status": "sent",
+                "service": "mailhog",
+                "note": "Check web UI at http://127.0.0.1:8025",
+                "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "check_inbox",
+            "args": {
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'check_inbox': LocalEmailService.check_inbox() takes from 1 to 4 positional arguments but 6 were given"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.22,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 via MailHog",
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via mailhog service\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": true,
+                "status": "sent",
+                "service": "mailhog",
+                "note": "Check web UI at http://127.0.0.1:8025",
+                "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "check_inbox",
+            "args": {
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'check_inbox': LocalEmailService.check_inbox() takes from 1 to 4 positional arguments but 6 were given"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+      "seconds": 1.19,
+      "result": {
+        "calls": [
+          {
+            "tool": "send_email",
+            "args": {
+              "to": "qa@example.test",
+              "subject": "Audit 17",
+              "body": "Audit message 17 via MailHog",
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "{\"success\":true,\"status\":\"sent\",\"service\":\"mailhog\",\"note\":\"Check web UI at http://127.0.0.1:8025\",\"message\":\"Email 'Audit 17' sent successfully to qa@example.test via mailhog service\"}"
+                }
+              ],
+              "structuredContent": {
+                "success": true,
+                "status": "sent",
+                "service": "mailhog",
+                "note": "Check web UI at http://127.0.0.1:8025",
+                "message": "Email 'Audit 17' sent successfully to qa@example.test via mailhog service"
+              },
+              "isError": false
+            }
+          },
+          {
+            "tool": "check_inbox",
+            "args": {
+              "service": "mailhog"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Error calling tool 'check_inbox': LocalEmailService.check_inbox() takes from 1 to 4 positional arguments but 6 were given"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

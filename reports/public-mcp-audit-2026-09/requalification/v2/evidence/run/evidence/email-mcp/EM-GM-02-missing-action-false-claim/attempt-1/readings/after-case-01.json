@@ -1,0 +1,11 @@
+{
+  "caseId": "case_live__unknown_id__service",
+  "caseIndex": 1,
+  "category": "missing_precondition",
+  "outcome": "PASS",
+  "reading": {
+    "messages": [],
+    "oracle": "greenmail-imaps",
+    "total": 0
+  }
+}

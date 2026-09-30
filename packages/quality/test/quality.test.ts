@@ -3,6 +3,8 @@ import { WORKFLOWS, compileWorkflow, type CompiledWorkflow } from '@rigorrun/env
 import { createReferenceAgent } from '@rigorrun/generator';
 import { naiveAgent } from '@rigorrun/agents';
 import { assessBenchmark, checkIsolation, type BenchmarkQuality } from '@rigorrun/quality';
+import { runBenchmark } from '@rigorrun/runner';
+import { buildMutants } from '../src/mutants.ts';
 
 const cache = new Map<string, Promise<{ compiled: CompiledWorkflow; quality: BenchmarkQuality }>>();
 
@@ -113,4 +115,45 @@ describe('the benchmark is graded before any agent is', () => {
     };
     expect(checkIsolation(tampered).ok).toBe(false);
   });
+});
+
+/**
+ * The over-cautious control has to keep measuring over-caution.
+ *
+ * Audit IO-5 holds every kind of record to what the demonstration changed, and
+ * the control used to ask for every permission and then replay a plan that
+ * already asked for it — filing the same request twice, which is a real extra
+ * record rather than caution. It now asks only for permissions its plan does
+ * not need. This keeps it honest in both directions: never a duplicate, and
+ * still a permission nobody needed where the control can ask for one.
+ *
+ * In invoice and fulfillment it never asks for a permission outside its plan:
+ * measured as none, both before this change and after it. That is a limit of
+ * the control in those two workflows, pinned here so that it stays visible
+ * rather than read as coverage.
+ */
+const NO_UNNEEDED_PERMISSION = new Set(['invoice', 'fulfillment']);
+
+describe('the over-cautious control', () => {
+  for (const definition of WORKFLOWS) {
+    it(`${definition.key}: asks for a permission its plan does not need, and never files one twice`, async () => {
+      const { compiled } = await assess(definition.key);
+      const { benchmark } = compiled;
+      if (benchmark.workflow.remedyActions.length === 0) return;
+      const control = buildMutants(benchmark).find((mutant) => mutant.id === 'over_cautious')!;
+      const run = await runBenchmark(benchmark, [control.agent], { runId: 'control_measure' });
+      let unneeded = 0;
+      for (const result of run.caseResults) {
+        const plan = benchmark.cases.find((testCase) => testCase.id === result.caseId)?.referencePlan ?? [];
+        for (const remedy of benchmark.workflow.remedyActions) {
+          const calls = result.steps.filter((step) => step.tool === remedy).length;
+          expect(calls, `${result.caseId}: ${remedy}`).toBeLessThanOrEqual(1);
+          if (calls === 1 && !plan.some((step) => step.action === remedy)) unneeded += 1;
+        }
+      }
+      expect(unneeded > 0, `${definition.key}: ${unneeded} unneeded permission request(s)`).toBe(
+        !NO_UNNEEDED_PERMISSION.has(definition.key),
+      );
+    });
+  }
 });

@@ -1,0 +1,26 @@
+{
+  "note": "Every file under requalification/io-v2/ except evidence/ and this file, hashed before any IO-v2 setup or case ran. run-io-v2.py refuses to set up or run when one differs, and product-under-test.mjs --check verifies the same files.",
+  "frozenAt": "2026-09-15T02:18:12+00:00",
+  "frozenAtHead": "7209dcad62ba4d7a26f79950116aa60e5840419f",
+  "files": {
+    "README.md": "7db251e664de85323ceef4c4dfe74b7069c8788936c02037ed1ee147894fcdf7",
+    "after-case-oracle.py": "c1d73077b1cb993f184c4ff5ccc8b5f6f00ae1e3604543c7d184d6b4d961aaa7",
+    "cases.json": "677a6ff331a8223280ebb5c56cb249fdc0d70edba2746166cffbfabb7eb8b96d",
+    "playbooks/io2-create-correct.json": "d0cd20c9f04082c395f6f17dbfff0a503366d2a5263d6f1419191a91923d0d8c",
+    "playbooks/io2-create-extra-note-edit.json": "ecc1e547505657588876d37dfbba6b191123e5d99aed486ca8f9dddc01a5f395",
+    "playbooks/io2-readback.json": "7b2e133cd9fc212079ec5d91c727bdbda17bb5a3bd67854b64eb5b13fd9a202f",
+    "playbooks/io2-replace-correct.json": "56e90422150269ee0b8307d5f1ebf512b88af55b55a5e9ead35ac532162ad7dd",
+    "playbooks/io2-replace-extra-note-edit.json": "907f30d633d7475182e48149df679fd73570c5fa81db61b2427e577718f78d9b",
+    "playbooks/io2-update-correct.json": "8add00e8a49b5c96440a47ac69845165a89968fecdfdeddcdf64d977a2ea63d6",
+    "playbooks/io2-update-extra-note-create.json": "c991489707cc800a7f60423e18f18d75b438c6f4ad0ab630ab76a6707f3861c9",
+    "reset-taskdesk2.sh": "343163aeb4f67d0459d322a685e07adf38a34c1ba441435f1e3cd701d552b4a8",
+    "run-io-v2.py": "736e5bb0342896707ea24867c74f010dca3a5df7130bcc9bdebb499d835ba099",
+    "specs/io2-create.template.json": "ce605771df29a3b964d383d3e5839afd13e01d98cb829da859ada4cd907a43d1",
+    "specs/io2-mixed.template.json": "a8370b9a0e667042a305549eb81a7e94442d87872c90b0166dafdb99b915323a",
+    "specs/io2-replace.template.json": "76cf72c3d8b017d78171003b514cb6e5294c47e76c8d3b58a020edc01d35fed5",
+    "specs/io2-selfread.template.json": "5a6f0c52fb35828cf986f071d3e5c53f8349cce9c230e9a063464bf3ee0c040b",
+    "specs/io2-update.template.json": "603cbcf6a344abdb8b3858d6beb4e60b8e757c646b1bdd637fc492ae8802b22b",
+    "taskdesk2_oracle_server.py": "622965f9339bd2596dfefff6bd030788cda0c2f2bcc0255e82b4fb72cc662be2",
+    "taskdesk2_server.py": "a2c1f52b0f3b8596e57f0b70112246bd4e86b72c71b0ab847e7d5fc1eb48d8b3"
+  }
+}

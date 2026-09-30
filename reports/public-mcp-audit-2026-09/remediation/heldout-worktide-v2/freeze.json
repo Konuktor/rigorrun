@@ -1,0 +1,27 @@
+{
+  "frozenAt": "a65b0e1ead93bb5c3c341ae1b2cb85ba96cb7a44",
+  "note": "Every file that defines a v2 case, hashed at the commit that added them, before any v2 case ran. run-heldout-v2.py refuses to run when one differs.",
+  "files": {
+    "README.md": "ebd1ae1994fecc2ea158625366403bb95fcec32b17946cdb92174081186876a3",
+    "cases.json": "6dd8c6840e32e64f6a4926e51cb4921a97c52d5805cc554fa6408c39b3315e55",
+    "journeys.json": "a1cbc7e4c4c09d4bf7b7d733cd559012bbd545c85b4bf1048491aabb2f2450b3",
+    "run-heldout-v2.py": "c8eafe55b8e054781230ce0fc8d0e40d7c07d83b6b579c0ba1d41951c1e89215",
+    "tools/rest-side-channel.py": "e68e84aeaaf06d143f270e490ba8bb8d7607bb93a2efdbfe1b3c5a6af8b1f9d4",
+    "probe/probe-target.py": "3a329bca2a9707e1d60b9e42203da41c9f0940911ff6fa565f2e7f6589ab25fb",
+    "probe/probe.json": "3ae4d56165a93e1fcd88a4f0023c21d13d1c876772e69735051d6b59efdd6f02",
+    "specs/j-m.json": "9827f5e2abb6f356954aa25efa6bd97accf70894098ea78a46214c2f245cb4b4",
+    "specs/j-t.json": "729827014bb0f99fa9d91e6e106c1b9bb8ef86983fbb65d55c6987e343a3a77e",
+    "specs/j-u.json": "a8bf47270e1bdab79888ad0a9abe90c399e9dd22cfab3a6374d8c281711151cb",
+    "playbooks/v2-one-long-timer-correct.json": "d34714f61d57a6f1c31da2eed1457102cac2830568a33283e1e84f295e5a9d67",
+    "playbooks/v2-one-long-timer.json": "4c804efc458846f74ce26fa86e032ee1297be300318d452022f0bd5ecfad1d55",
+    "playbooks/v2-one-minute-plus-entry-aud2.json": "390b7a1a8b1eae23de37c803a6e64d8a2e299b2d802ad15f6fc14379234c599b",
+    "playbooks/v2-one-minute-plus-entry-work1.json": "4d11b49a864bf268bd5dcffd838f9e0ebb21576805f285310fddb2e9ac03431e",
+    "playbooks/v2-one-minute-with-reads.json": "06b16388773b7ee3f538afa4586a2b5a3c3738d598ae865e11f9fa9719c127ca",
+    "playbooks/v2-one-minute.json": "eb2df5a8e7e7d281cb2c29a99d4ffdd5e9f12bd516ebd92ebccca402d2cbcffb",
+    "playbooks/v2-one-short-timer.json": "bd91aa23f28d50350ca2975957c3ff45b72baf5191c366244998484f4a614a70",
+    "playbooks/v2-side-entry-work1.json": "ea7300eea9e1690d066fd1f15e0aa7fd3583ce1bd23837bc3b7e60d82e29881a",
+    "playbooks/v2-three-separate-minutes.json": "0918bf211c8e7fb116d3ef0286eb5903693f2621ff400cb3a9348ef68ecae576",
+    "playbooks/v2-two-long-timers.json": "790e0c9fd4d1322bd03829b5adea0f963a1edf6049622e4a6939a4b794488e7a",
+    "playbooks/v2-two-separate-minutes.json": "56492cc585c3858f34b274713a1b753b4030425164bfc6c06054cc663ece78e6"
+  }
+}

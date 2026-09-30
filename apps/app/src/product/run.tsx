@@ -10,7 +10,7 @@
  */
 import { useEffect, useState } from 'react';
 import { Button, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
-import { Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
+import { Checkbox, Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
 import {
   api,
   type ActivationView,
@@ -30,13 +30,22 @@ export function ConnectAgent({
   onConnected: (project: ProjectView) => void;
 }) {
   const [name, setName] = useState('');
-  const [kind, setKind] = useState<'http' | 'process' | 'external'>('http');
+  // Black box first: it asks nothing of the agent but an address it already
+  // answers on, which is what a founder with an agent in the cloud has.
+  const [kind, setKind] = useState<'blackbox' | 'http' | 'process' | 'external'>('blackbox');
   /** Shown once, when the agent is made. There is no way to read it back. */
   const [key, setKey] = useState('');
   const [keyFor, setKeyFor] = useState('');
   const [endpoint, setEndpoint] = useState('http://127.0.0.1:8900/');
   const [command, setCommand] = useState('');
   const [args, setArgs] = useState('');
+  const [bbEndpoint, setBbEndpoint] = useState('');
+  const [bbHeader, setBbHeader] = useState('');
+  const [bbSecret, setBbSecret] = useState('');
+  const [bbTemplate, setBbTemplate] = useState('');
+  const [bbClaimPath, setBbClaimPath] = useState('output');
+  const [bbAgreed, setBbAgreed] = useState(false);
+  const remoteHost = hostOffThisMachine(bbEndpoint);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
@@ -46,7 +55,19 @@ export function ConnectAgent({
     try {
       const result = await api.addAgent(
         project.id,
-        kind === 'external'
+        kind === 'blackbox'
+          ? {
+              name: name.trim(),
+              blackBox: {
+                endpoint: bbEndpoint.trim(),
+                // Only the host the person looked at and agreed to, exactly.
+                allowedHosts: remoteHost && bbAgreed ? [remoteHost] : [],
+                headers: bbHeader.trim() && bbSecret.trim() ? { [bbHeader.trim()]: bbSecret.trim() } : {},
+                bodyTemplate: bbTemplate.trim() ? bbTemplate : null,
+                claimPath: bbClaimPath.trim() || 'output',
+              },
+            }
+          : kind === 'external'
           ? { name: name.trim(), driven: true }
           : kind === 'process'
             ? {
@@ -90,10 +111,11 @@ export function ConnectAgent({
               <Select
                 id={id}
                 value={kind}
-                onChange={(value) => setKind(value as 'http' | 'process' | 'external')}
+                onChange={(value) => setKind(value as 'blackbox' | 'http' | 'process' | 'external')}
                 testId="agent-kind"
                 options={[
-                  { value: 'http', label: 'It listens on an address' },
+                  { value: 'blackbox', label: 'It is running already — send it the work, then check the system' },
+                  { value: 'http', label: 'It listens on an address and calls tools through RigorRun' },
                   { value: 'process', label: 'It is a command on this machine' },
                   { value: 'external', label: 'RigorRun cannot start it — I will drive it' },
                 ]}
@@ -102,7 +124,24 @@ export function ConnectAgent({
           </Field>
           <div className="rounded-panel border border-line bg-inset px-3 py-2.5">
             <p className="text-meta font-medium text-secondary">What you need</p>
-            {kind === 'external' ? (
+            {kind === 'blackbox' ? (
+              <>
+                <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
+                  <li>
+                    An address your agent already takes work on — your staging API, a webhook, anywhere,
+                    including the cloud. Nothing about the agent changes.
+                  </li>
+                  <li>
+                    It works on the same system this project reads. RigorRun sends each case, waits for the
+                    answer, then reads the system through its own connection and judges what changed.
+                  </li>
+                  <li>
+                    RigorRun does not see its calls, so checks about their order are listed as not made.
+                    Everything the system holds afterwards is checked.
+                  </li>
+                </ul>
+              </>
+            ) : kind === 'external' ? (
               <>
                 <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
                   <li>
@@ -149,7 +188,61 @@ export function ConnectAgent({
               />
             )}
           </Field>
-          {kind === 'external' ? null : kind === 'http' ? (
+          {kind === 'blackbox' ? (
+            <>
+              <Field
+                label="Where does it take work?"
+                hint="RigorRun POSTs each case here. Off this machine it only uses https, never follows a redirect, and only goes to the host you agree to below."
+              >
+                {({ id, describedBy }) => (
+                  <TextInput
+                    id={id}
+                    describedBy={describedBy}
+                    value={bbEndpoint}
+                    onChange={(value) => {
+                      setBbEndpoint(value);
+                      setBbAgreed(false);
+                    }}
+                    placeholder="https://staging.example.com/agent/work"
+                    testId="blackbox-endpoint"
+                  />
+                )}
+              </Field>
+              {remoteHost ? (
+                <Checkbox
+                  checked={bbAgreed}
+                  onChange={setBbAgreed}
+                  label={`Send each case's work to ${remoteHost}`}
+                  hint="The work order can carry values read from the system this project connects to."
+                  testId="blackbox-agree"
+                />
+              ) : null}
+              <Field
+                label="Auth header (optional)"
+                hint="The header's name, and the name of a secret that holds its value. Set the value with npx rigorrun secrets set."
+              >
+                {({ id, describedBy }) => (
+                  <div className="flex gap-2">
+                    <TextInput id={id} describedBy={describedBy} value={bbHeader} onChange={setBbHeader} placeholder="authorization" testId="blackbox-header" />
+                    <TextInput value={bbSecret} onChange={setBbSecret} placeholder="STAGING_AGENT_TOKEN" testId="blackbox-secret" />
+                  </div>
+                )}
+              </Field>
+              <Field
+                label="Request body (optional)"
+                hint='Leave empty to send the rigorrun/task/1 envelope. Or write the JSON your endpoint already takes, with {{task.text}}, {{inputs.name}} or {{caseId}} where the case goes — e.g. {"message": "{{task.text}}"}.'
+              >
+                {({ id, describedBy }) => (
+                  <TextArea id={id} describedBy={describedBy} value={bbTemplate} onChange={setBbTemplate} rows={3} testId="blackbox-template" />
+                )}
+              </Field>
+              <Field label="Where is its reply in the answer?" hint="A dotted path, shown next to what actually happened and never scored.">
+                {({ id, describedBy }) => (
+                  <TextInput id={id} describedBy={describedBy} value={bbClaimPath} onChange={setBbClaimPath} testId="blackbox-claim" />
+                )}
+              </Field>
+            </>
+          ) : kind === 'external' ? null : kind === 'http' ? (
             <Field
               label="Where does it listen?"
               hint="On this machine by default, because an agent under test usually holds credentials for the system it is being tested against."
@@ -198,7 +291,11 @@ export function ConnectAgent({
           {problem ? <Problem>{problem}</Problem> : null}
           {key ? <TheKey value={key} agentId={keyFor} /> : null}
           <div>
-            <Button onClick={add} disabled={busy} testId="add-agent">
+            <Button
+              onClick={add}
+              disabled={busy || (kind === 'blackbox' && (!bbEndpoint.trim() || (remoteHost !== null && !bbAgreed)))}
+              testId="add-agent"
+            >
               {busy
                 ? 'Trying it…'
                 : kind === 'external'
@@ -220,6 +317,8 @@ export function ConnectAgent({
                   <span className="font-mono text-meta text-muted">
                     {agent.kind === 'http'
                       ? agent.endpoint
+                      : agent.kind === 'blackbox'
+                        ? `${agent.endpoint} · black box`
                       : agent.kind === 'external'
                         ? 'driven by you'
                         : [agent.command, ...agent.args].join(' ')}
@@ -564,6 +663,17 @@ function Verdict({ run }: { run: RunView }) {
         </dl>
       </section>
 
+      {run.suiteQuality && run.suiteQuality.warnings.length > 0 ? (
+        <section className="flex flex-col gap-2" data-testid="suite-quality">
+          <SectionLabel>What the suite’s own check said</SectionLabel>
+          {run.suiteQuality.warnings.map((warning) => (
+            <Panel key={warning}>
+              <p className="text-body text-secondary">{warning}</p>
+            </Panel>
+          ))}
+        </section>
+      ) : null}
+
       {run.limits.length > 0 ? (
         <section className="flex flex-col gap-2">
           <SectionLabel>What this system stopped RigorRun doing</SectionLabel>
@@ -702,7 +812,8 @@ function formatElapsed(ms: number): string {
  */
 function CaseRow({ entry }: { entry: CaseResultView }) {
   const [open, setOpen] = useState(false);
-  const passed = entry.taskSuccess && entry.policyCompliant;
+  const passed = entry.outcome === 'PASS';
+  const undecided = entry.outcome === 'ABSTAIN' || entry.outcome === 'HARNESS_FAILURE' || entry.outcome === 'TIMED_OUT';
   const failedChecks = entry.checks.filter((check) => check.status === 'FAIL');
 
   return (
@@ -714,9 +825,12 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
         data-testid={`case-${entry.caseId}`}
         aria-expanded={open}
       >
-        <StatusMark status={passed ? 'pass' : 'fail'} />
+        <StatusMark status={passed ? 'pass' : undecided ? 'undecided' : 'fail'} />
         <span className="min-w-0 flex-1 truncate text-body text-fg">{entry.caseName}</span>
         <Tag tone="neutral">{entry.category}</Tag>
+        {entry.outcome !== 'PASS' && entry.outcome !== 'FAIL' ? (
+          <Tag tone={entry.outcome === 'AGENT_FAILURE' ? 'fail' : 'warn'}>{entry.outcome.toLowerCase().replace('_', ' ')}</Tag>
+        ) : null}
         {entry.unsafeActions > 0 ? <Tag tone="fail">{entry.unsafeActions} unsafe</Tag> : null}
         <span className="text-meta text-muted">{open ? 'Hide' : 'What happened'}</span>
       </button>
@@ -1042,4 +1156,14 @@ export function AddAFailure({ project, onAdded }: { project: ProjectView; onAdde
       </div>
     </Panel>
   );
+}
+
+/** The host an address points off this machine at, or null for loopback or nonsense. */
+function hostOffThisMachine(raw: string): string | null {
+  try {
+    const host = new URL(raw.trim()).hostname.toLowerCase();
+    return ['localhost', '127.0.0.1', '::1', '[::1]'].includes(host) ? null : host;
+  } catch {
+    return null;
+  }
 }

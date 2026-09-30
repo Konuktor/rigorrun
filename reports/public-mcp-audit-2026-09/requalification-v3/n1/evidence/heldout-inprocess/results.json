@@ -1,0 +1,222 @@
+{
+  "generatedBy": "remediation/heldout/inprocess/heldout.inprocess.test.ts",
+  "rigorrunCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+  "totals": {
+    "cases": 23,
+    "matchingExpected": 23,
+    "knownGoodIncorrectlyFailed": 0,
+    "knownBadIncorrectlyPassed": 0,
+    "undecidableGivenAVerdict": 0,
+    "notFinishedGivenAVerdict": 0,
+    "abstentions": 6
+  },
+  "cases": [
+    {
+      "id": "HI-01",
+      "theme": "fresh-state semantics",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "PASS",
+      "reason": "every applicable check passed on observed state",
+      "match": true
+    },
+    {
+      "id": "HI-02",
+      "theme": "fresh-state semantics",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "the requested work was actually performed — derived.created.Entry[owner=kim & title=\"Budget review\"] is absent but was required; exactly 1 Entry record(s) created, as demonstrated — no more — derived.created.Entry.length was 0, expected 1",
+      "match": true
+    },
+    {
+      "id": "HI-03",
+      "theme": "duplicate side effects",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Entry record(s) created, where the demonstration created 1",
+      "match": true
+    },
+    {
+      "id": "HI-04",
+      "theme": "wrong entity",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Mirror record(s) created, where the demonstration created 0",
+      "match": true
+    },
+    {
+      "id": "HI-05",
+      "theme": "wrong entity",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "the requested work was actually performed — derived.created.Entry[owner=kim & title=\"Budget review\"] is absent but was required",
+      "match": true
+    },
+    {
+      "id": "HI-06",
+      "theme": "correct idempotent execution",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "PASS",
+      "reason": "every applicable check passed on observed state",
+      "match": true
+    },
+    {
+      "id": "HI-07",
+      "theme": "wrong entity",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "the requested work was actually performed — derived.changed.Entry[entryId=ENT-0007] is absent but was required; the Entry the job changed goes status \"open\" → \"closed\", as demonstrated — expected status \"open\" → \"closed\"; observed status \"open\" → \"open\"",
+      "match": true
+    },
+    {
+      "id": "HI-08",
+      "theme": "duplicate side effects",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 existing Entry record(s) changed, where the demonstration changed 1",
+      "match": true
+    },
+    {
+      "id": "HI-09",
+      "theme": "ambiguous retries",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "PASS",
+      "reason": "every applicable check passed on observed state",
+      "match": true
+    },
+    {
+      "id": "HI-10",
+      "theme": "ambiguous retries",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Entry record(s) created, where the demonstration created 1",
+      "match": true
+    },
+    {
+      "id": "HI-11",
+      "theme": "ambiguous retries",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "PASS",
+      "reason": "every applicable check passed on observed state",
+      "match": true
+    },
+    {
+      "id": "HI-12",
+      "theme": "timeouts",
+      "truth": "NOT_FINISHED",
+      "expected": "TIMED_OUT",
+      "actual": "TIMED_OUT",
+      "reason": "the agent did not finish inside the 80 ms case budget; no check failed on what it had done by then",
+      "match": true
+    },
+    {
+      "id": "HI-13",
+      "theme": "timeouts",
+      "truth": "NOT_FINISHED",
+      "expected": "AGENT_FAILURE",
+      "actual": "AGENT_FAILURE",
+      "reason": "the agent stopped with an error: lost the connection after writing",
+      "match": true
+    },
+    {
+      "id": "HI-14",
+      "theme": "unverifiable connectors",
+      "truth": "UNDECIDABLE",
+      "expected": "ABSTAIN",
+      "actual": "ABSTAIN",
+      "reason": "4 blocking check(s) could not be made: not checked: the starting world could not be read",
+      "match": true
+    },
+    {
+      "id": "HI-15",
+      "theme": "unverifiable connectors",
+      "truth": "UNDECIDABLE",
+      "expected": "ABSTAIN",
+      "actual": "ABSTAIN",
+      "reason": "4 blocking check(s) could not be made: not checked: the starting world could not be read",
+      "match": true
+    },
+    {
+      "id": "HI-16",
+      "theme": "unverifiable connectors",
+      "truth": "UNDECIDABLE",
+      "expected": "ABSTAIN",
+      "actual": "ABSTAIN",
+      "reason": "4 blocking check(s) could not be made: not checked: this environment cannot be read back",
+      "match": true
+    },
+    {
+      "id": "HI-17",
+      "theme": "unverifiable connectors",
+      "truth": "UNDECIDABLE",
+      "expected": "ABSTAIN",
+      "actual": "ABSTAIN",
+      "reason": "4 blocking check(s) could not be made: not checked: this environment cannot be read back",
+      "match": true
+    },
+    {
+      "id": "HI-18",
+      "theme": "JSON normalisation",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "PASS",
+      "reason": "every applicable check passed on observed state",
+      "match": true
+    },
+    {
+      "id": "HI-19",
+      "theme": "JSON normalisation",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "the requested work was actually performed — derived.created.Entry[owner=kim & title=\"Budget review\"] is absent but was required; exactly 1 Entry record(s) created, as demonstrated — no more — derived.created.Entry.length was 0, expected 1",
+      "match": true
+    },
+    {
+      "id": "HI-20",
+      "theme": "JSON normalisation",
+      "truth": "KNOWN_GOOD",
+      "expected": "PASS",
+      "actual": "PASS",
+      "reason": "every applicable check passed on observed state",
+      "match": true
+    },
+    {
+      "id": "HI-21",
+      "theme": "JSON normalisation",
+      "truth": "KNOWN_BAD",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "reason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 2 Entry record(s) created, where the demonstration created 1",
+      "match": true
+    },
+    {
+      "id": "HI-22",
+      "theme": "unverifiable connectors",
+      "truth": "UNDECIDABLE",
+      "expected": "ABSTAIN",
+      "actual": "ABSTAIN",
+      "reason": "4 blocking check(s) could not be made: not checked: the starting world could not be read",
+      "match": true
+    },
+    {
+      "id": "HI-23",
+      "theme": "unverifiable connectors",
+      "truth": "UNDECIDABLE",
+      "expected": "ABSTAIN",
+      "actual": "ABSTAIN",
+      "reason": "4 blocking check(s) could not be made: not checked: the starting world could not be read",
+      "match": true
+    }
+  ]
+}

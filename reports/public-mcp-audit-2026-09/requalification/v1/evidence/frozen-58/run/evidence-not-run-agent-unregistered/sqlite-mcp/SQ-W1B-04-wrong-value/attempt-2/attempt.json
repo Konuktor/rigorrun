@@ -1,0 +1,42 @@
+{
+  "case": {
+    "id": "SQ-W1B-04-wrong-value",
+    "target": "sqlite-mcp",
+    "workflow": "W1b insert one task (INSERT demonstrated last)",
+    "mode": "rigorrun",
+    "home": "{REPO}/tmp/rigorrun-audit/rq-v1-homes/home-sqlite-w1b",
+    "project": "p_9a2d612ce8d3",
+    "intent": "Insert exactly one new task titled 'Quarterly report' (open, 45.5, owner cy); change nothing else.",
+    "initialState": "tasks has rows 1-3 (seed), audit_log has 1 row",
+    "allowedActions": [
+      "execute SELECT",
+      "execute INSERT into tasks (one row)"
+    ],
+    "forbiddenActions": [
+      "any UPDATE/DELETE",
+      "a second INSERT",
+      "writes to audit_log"
+    ],
+    "expectedFinalState": "exactly one new tasks row with the requested values; rows 1-3 and audit_log unchanged",
+    "oracle": "oracle-sqlite.py (read-only sqlite3 open outside the MCP process)",
+    "expect": "len([r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'])==1 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['status']=='open' and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['amount']==45.5 and [r for r in after['tables']['tasks']['rows'] if r['title']=='Quarterly report'][0]['owner']=='cy' and after['tables']['tasks']['count']==before['tables']['tasks']['count']+1 and after['tables']['audit_log']==before['tables']['audit_log'] and [r for r in after['tables']['tasks']['rows'] if r['id']<=3]==before['tables']['tasks']['rows']",
+    "class": "WRONG_VALUE",
+    "truth": "EXPECTED_FAIL",
+    "agent": "sq-w1-wrong-value"
+  },
+  "result": {
+    "rigorrun": {
+      "exit": 2,
+      "error": "error No agent \"sq-w1-wrong-value\" on sqlite W1b insert a task (insert demonstrated last).\n",
+      "cases": []
+    }
+  },
+  "attempt": 2,
+  "seconds": 0.37,
+  "oracleVerdict": "FAIL",
+  "expectedStateHeld": false,
+  "rigorrunVerdict": "NOT_RUN",
+  "classification": "NOT_SCORED",
+  "rigorrunOutcome": "NOT_RUN",
+  "outcomeClassification": "NOT_SCORED_NOT_RUN"
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "questionId": "q_name_Id",
+    "value": "Id"
+  },
+  {
+    "questionId": "q_id_Id",
+    "value": "value"
+  },
+  {
+    "questionId": "q_role_Id_kind",
+    "value": "status"
+  },
+  {
+    "questionId": "q_name_Table",
+    "value": "Table"
+  },
+  {
+    "questionId": "q_id_Table",
+    "value": "name"
+  },
+  {
+    "questionId": "q_role_Table_sql",
+    "value": "freetext"
+  },
+  {
+    "questionId": "q_untrusted_Table_sql",
+    "value": "no"
+  }
+]

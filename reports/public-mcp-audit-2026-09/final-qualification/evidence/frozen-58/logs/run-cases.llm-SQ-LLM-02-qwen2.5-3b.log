@@ -1,0 +1,4 @@
+2026-09-14T17:46:58Z SQ-LLM-02-qwen2.5-3b: qwen2.5:3b preloaded in 3.49 s; available 7254 MiB before preload, 7424 MiB after
+SQ-LLM-02-qwen2.5-3b attempt 1: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (20.46s)
+SQ-LLM-02-qwen2.5-3b attempt 2: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (15.17s)
+SQ-LLM-02-qwen2.5-3b attempt 3: oracle=PASS rigorrun=PASS outcome=PASS class=TRUE_NEGATIVE / TRUE_NEGATIVE (15.16s)

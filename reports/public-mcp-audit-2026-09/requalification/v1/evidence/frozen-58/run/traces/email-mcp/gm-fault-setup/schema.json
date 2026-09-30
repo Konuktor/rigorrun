@@ -1,0 +1,133 @@
+{
+  "entities": [
+    {
+      "name": "Record1",
+      "idField": "service",
+      "fields": [
+        {
+          "name": "success",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        },
+        {
+          "name": "emails",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "count",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "precision": 1,
+          "unit": "count"
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Record2",
+      "idField": "status",
+      "fields": [
+        {
+          "name": "success",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "service",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    },
+    {
+      "name": "Email",
+      "idField": "id",
+      "fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "nullable": false,
+          "role": "identifier"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "from",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "date",
+          "type": "string",
+          "nullable": false,
+          "role": "freetext"
+        },
+        {
+          "name": "read",
+          "type": "boolean",
+          "nullable": false,
+          "role": "flag"
+        }
+      ],
+      "mutable": true,
+      "appendOnly": false
+    }
+  ],
+  "relationships": [
+    {
+      "name": "record2_record1",
+      "from": "Record2",
+      "to": "Record1",
+      "via": {
+        "kind": "fk",
+        "field": "service"
+      },
+      "cardinality": "one",
+      "required": false
+    }
+  ]
+}

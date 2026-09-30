@@ -1,0 +1,22 @@
+{
+  "name": "gm-wrong-recipient",
+  "steps": [
+    {
+      "tool": "send_email",
+      "args": {
+        "to": "agent@example.test",
+        "subject": "{inputs.subject}",
+        "body": "{inputs.body}",
+        "service": "default"
+      }
+    },
+    {
+      "tool": "check_inbox",
+      "args": {
+        "service": "default",
+        "limit": 50
+      }
+    }
+  ],
+  "report": "Sent one email to {inputs.to} with subject {inputs.subject}."
+}

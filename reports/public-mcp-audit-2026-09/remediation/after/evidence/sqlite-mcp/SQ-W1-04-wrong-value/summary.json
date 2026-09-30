@@ -1,0 +1,39 @@
+{
+  "id": "SQ-W1-04-wrong-value",
+  "target": "sqlite-mcp",
+  "truth": "EXPECTED_FAIL",
+  "mode": "rigorrun",
+  "attempts": [
+    {
+      "attempt": 1,
+      "seconds": 0.62,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "FAIL",
+      "classification": "TRUE_POSITIVE",
+      "rigorrunOutcome": "FAIL",
+      "outcomeClassification": "TRUE_POSITIVE"
+    },
+    {
+      "attempt": 2,
+      "seconds": 0.59,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "FAIL",
+      "classification": "TRUE_POSITIVE",
+      "rigorrunOutcome": "FAIL",
+      "outcomeClassification": "TRUE_POSITIVE"
+    },
+    {
+      "attempt": 3,
+      "seconds": 0.66,
+      "oracleVerdict": "FAIL",
+      "expectedStateHeld": false,
+      "rigorrunVerdict": "FAIL",
+      "classification": "TRUE_POSITIVE",
+      "rigorrunOutcome": "FAIL",
+      "outcomeClassification": "TRUE_POSITIVE"
+    }
+  ],
+  "reproduction": "3/3"
+}

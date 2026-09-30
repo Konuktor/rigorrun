@@ -73,6 +73,13 @@ export interface FieldSchema {
    * values are never interpolated into an assertion path.
    */
   untrusted?: boolean;
+  /**
+   * The field of an enclosing record this one's values add up to, as
+   * `Entity.field` — a report row's minutes and the report's total. A part of a
+   * total is a quantity, and never what names a record. Structural evidence
+   * from induction, shown to the person reviewing the schema.
+   */
+  totals?: string;
   /** Human label for the schema-driven UI. Never read by the compiler. */
   label?: string;
 }
@@ -97,6 +104,19 @@ export interface RelationshipSchema {
 export interface EntitySchema {
   name: string;
   idField: string;
+  /**
+   * The fields that together name one record, when no single field does — a
+   * report row named by its dimensions. Null is a value like any other. Absent
+   * means `idField` alone; when present, `idField` is its first field.
+   */
+  keyFields?: string[];
+  /**
+   * `unestablished` when nothing observed names one record: no field, and no
+   * small set of fields that stayed the same, told every record apart. Rows
+   * are then kept by their content so that none disappears, and a change to
+   * one cannot be told from its replacement.
+   */
+  identity?: 'unestablished';
   fields: FieldSchema[];
   /** Rows may be changed after creation. */
   mutable: boolean;
@@ -239,6 +259,17 @@ export function validateSchema(schema: EnvironmentSchema): SchemaProblem[] {
         message: `idField "${entity.idField}" is not among the declared fields`,
       });
     }
+    for (const key of entity.keyFields ?? []) {
+      if (!fieldNames.has(key)) {
+        problems.push({ path: `${entity.name}.${key}`, message: 'keyFields names a field that does not exist' });
+      }
+    }
+    if (entity.keyFields && entity.keyFields[0] !== entity.idField) {
+      problems.push({ path: entity.name, message: 'idField must be the first of keyFields' });
+    }
+    if (entity.keyFields && entity.identity === 'unestablished') {
+      problems.push({ path: entity.name, message: 'an entity named by keyFields has an identity' });
+    }
     if (entity.appendOnly && entity.mutable) {
       problems.push({ path: entity.name, message: 'an entity cannot be both appendOnly and mutable' });
     }
@@ -275,6 +306,14 @@ export function validateSchema(schema: EnvironmentSchema): SchemaProblem[] {
         problems.push({
           path,
           message: `foreign key "${field}" is not a field of ${holder.name}`,
+        });
+      }
+      // A foreign key carries one value, so what it points at must be named by one field.
+      const named = relationship.cardinality === 'one' ? to : from;
+      if (named && (named.keyFields !== undefined || named.identity === 'unestablished')) {
+        problems.push({
+          path,
+          message: `${named.name} is not named by a single field, so a foreign key cannot point at it`,
         });
       }
     } else {

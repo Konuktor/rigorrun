@@ -1,0 +1,30 @@
+{
+  "name": "taskdesk2: create one task, self-reported through a read that marks notes seen (no verifier)",
+  "goal": "Create exactly one task titled Quarterly report; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "{PYTHON}",
+    "args": ["{IO}/taskdesk2_server.py", "--db", "{STATE}/desk.db", "--faults", "{STATE}/faults.json", "--shadow", "{STATE}/shadow.json", "--calls-log", "{STATE}/calls.log", "--mark-seen-on-read"],
+    "url": "",
+    "secretNames": []
+  },
+  "safety": "local",
+  "readOnlyTools": ["list_tasks", "list_notes"],
+  "verifierReads": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "list_notes", "args": {} }
+  ],
+  "reset": { "kind": "none" },
+  "teach": [
+    { "tool": "list_tasks", "args": {} },
+    { "tool": "create_task", "args": { "title": "Quarterly report" } }
+  ],
+  "answers": {},
+  "review": { "confirm": [], "reject": [] },
+  "quality": false,
+  "agents": [
+    { "name": "io2-create-correct", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io2-create-correct.json", "{TRACES}"], "cwd": "{STATE}" },
+    { "name": "io2-create-extra-note-edit", "command": "{PYTHON}", "args": ["{AGENTS}/scripted-agent.py", "{PLAYBOOKS}/io2-create-extra-note-edit.json", "{TRACES}"], "cwd": "{STATE}" }
+  ]
+}
