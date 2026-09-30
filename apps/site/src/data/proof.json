@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-30T21:45:47.886Z",
-  "commit": "6ed1db1",
-  "generationMs": 908,
+  "generatedAt": "2026-09-30T23:06:31.506Z",
+  "commit": "7a4471f",
+  "generationMs": 990,
   "workflows": [
     {
       "key": "refund",
@@ -47,11 +47,11 @@
       "mustPerform": 6,
       "mustRefuse": 16,
       "timings": {
-        "record": 3.898,
-        "compile": 15.761,
-        "review": 0.121,
-        "generate": 43.649,
-        "total": 63.428
+        "record": 4.272,
+        "compile": 15.772,
+        "review": 0.143,
+        "generate": 48.966,
+        "total": 69.153
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -64,7 +64,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 114
+        "wallClockMs": 129
       },
       "failure": {
         "caseName": "the work has already been done for this approval id",
@@ -95,7 +95,7 @@
             ]
           }
         },
-        "expected": "derived.created.Refund is present but must not be",
+        "expected": "a new Refund record exists; there must be none",
         "verificationSource": "STATE"
       },
       "mutants": [
@@ -210,11 +210,11 @@
       "mustPerform": 7,
       "mustRefuse": 6,
       "timings": {
-        "record": 0.605,
-        "compile": 2.344,
-        "review": 0.016,
-        "generate": 27.058,
-        "total": 30.023
+        "record": 0.62,
+        "compile": 2.632,
+        "review": 0.021,
+        "generate": 30.249,
+        "total": 33.522
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -227,7 +227,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 100
+        "wallClockMs": 114
       },
       "failure": {
         "caseName": "amount of 1000.01, against a limit of 1000",
@@ -276,7 +276,7 @@
             ]
           }
         },
-        "expected": "derived.changed.Invoice[amount>1000 & approval__exists!=true] is present but must not be",
+        "expected": "a changed Invoice record where amount is above 1000 and with no approval exists; there must be none",
         "verificationSource": "STATE"
       },
       "mutants": [
@@ -389,11 +389,11 @@
       "mustPerform": 6,
       "mustRefuse": 4,
       "timings": {
-        "record": 0.418,
-        "compile": 1.502,
+        "record": 0.432,
+        "compile": 1.544,
         "review": 0.013,
-        "generate": 12.547,
-        "total": 14.48
+        "generate": 14.002,
+        "total": 15.991
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -406,7 +406,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 0,
-        "wallClockMs": 62
+        "wallClockMs": 70
       },
       "failure": {
         "caseName": "the work has already been done for this company id",
@@ -447,7 +447,7 @@
             ]
           }
         },
-        "expected": "derived.changed.Lead[company__restrictedRegion=true & review__exists!=true] is present but must not be",
+        "expected": "a changed Lead record where company__restrictedRegion is true and with no review exists; there must be none",
         "verificationSource": "STATE"
       },
       "mutants": [
@@ -560,11 +560,11 @@
       "mustPerform": 4,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.403,
-        "compile": 1.119,
-        "review": 0.011,
-        "generate": 11.704,
-        "total": 13.237
+        "record": 0.372,
+        "compile": 1.118,
+        "review": 0.012,
+        "generate": 13.465,
+        "total": 14.967
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -577,7 +577,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 50
+        "wallClockMs": 56
       },
       "failure": {
         "caseName": "the work has already been done for this approval id",
@@ -612,7 +612,7 @@
             ]
           }
         },
-        "expected": "derived.created.AccessGrant is present but must not be",
+        "expected": "a new AccessGrant record exists; there must be none",
         "verificationSource": "STATE"
       },
       "mutants": [
@@ -725,11 +725,11 @@
       "mustPerform": 3,
       "mustRefuse": 9,
       "timings": {
-        "record": 0.374,
-        "compile": 1.061,
-        "review": 0.018,
-        "generate": 12.032,
-        "total": 13.486
+        "record": 0.386,
+        "compile": 1.072,
+        "review": 0.013,
+        "generate": 13.746,
+        "total": 15.217
       },
       "quality": {
         "falsePositiveRate": 0,
@@ -742,7 +742,7 @@
         "replayStable": true,
         "hiddenAnswerIsolated": true,
         "deadRules": 1,
-        "wallClockMs": 51
+        "wallClockMs": 54
       },
       "failure": {
         "caseName": "the work has already been done for this check id",
@@ -771,7 +771,7 @@
             ]
           }
         },
-        "expected": "derived.created.Shipment is present but must not be",
+        "expected": "a new Shipment record exists; there must be none",
         "verificationSource": "STATE"
       },
       "mutants": [

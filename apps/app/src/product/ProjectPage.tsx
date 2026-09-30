@@ -221,7 +221,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
       </nav>
 
       {project.nextSteps.length > 0 ? (
-        <Panel>
+        <Panel padded>
           <p className="text-body text-fg">{project.nextSteps[0]!.what}</p>
           <p className="mt-1 text-meta text-muted">{project.nextSteps[0]!.why}</p>
         </Panel>
@@ -354,7 +354,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
  */
 function Disconnected({ onReconnect, busy }: { onReconnect: () => void; busy: boolean }) {
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-body text-fg">RigorRun is not talking to your system right now.</p>
@@ -375,7 +375,7 @@ function Disconnected({ onReconnect, busy }: { onReconnect: () => void; busy: bo
 function Drift({ drift, onDismiss }: { drift: DriftView; onDismiss: () => void }) {
   if (drift.unchanged) {
     return (
-      <Panel>
+      <Panel padded>
         <div className="flex items-center justify-between gap-4">
           <p className="text-body text-secondary">
             Reconnected. Your system is publishing exactly the tools it was before.
@@ -389,7 +389,7 @@ function Drift({ drift, onDismiss }: { drift: DriftView; onDismiss: () => void }
   }
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -428,7 +428,7 @@ function NothingYet({
   onBack: () => void;
 }) {
   return (
-    <Panel>
+    <Panel padded>
       <p className="text-body text-fg">{what}</p>
       <p className="mt-1 text-meta text-muted">{why}</p>
       <div className="mt-3">
@@ -492,7 +492,7 @@ function SuiteQuality({
   const independent = quality ? Math.round(quality.independentKillRate * 100) : 0;
 
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-col gap-3">
         <p className="text-body text-secondary" data-testid="suite-size">
           {cases} cases built from what you showed it.

@@ -85,7 +85,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
           <ul className="flex flex-col gap-3">
             {broken.map((entry) => (
               <li key={entry.id}>
-                <Panel>
+                <Panel padded>
                   <div className="flex flex-col gap-1" data-testid={`broken-${entry.id}`}>
                     <span className="text-body font-medium text-fail">{entry.id}</span>
                     <span className="text-meta text-secondary">{entry.detail}</span>
@@ -99,7 +99,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
 
       {projects.length === 0 ? (
         <section className="grid gap-3 sm:grid-cols-2" data-testid="first-screen">
-          <Panel>
+          <Panel padded>
             <div className="flex h-full flex-col gap-2">
               <span className="text-section font-semibold text-fg">See it catch a failure</span>
               <p className="text-meta text-secondary">
@@ -115,7 +115,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
               </a>
             </div>
           </Panel>
-          <Panel>
+          <Panel padded>
             <div className="flex h-full flex-col gap-2">
               <span className="text-section font-semibold text-fg">Test your own agent</span>
               <p className="text-meta text-secondary">
@@ -131,7 +131,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
 
       <section className="flex flex-col gap-4">
         <SectionLabel>{projects.length > 0 ? 'New project' : 'Start here'}</SectionLabel>
-        <Panel>
+        <Panel padded>
           <div className="flex max-w-xl flex-col gap-4">
             <Field
               label="What is it called?"
@@ -180,7 +180,7 @@ export function ProjectsPage({ onOpen }: { onOpen: (id: string) => void }) {
 function ProjectCard({ project, onOpen }: { project: ProjectView; onOpen: () => void }) {
   const last = project.runs[project.runs.length - 1];
   return (
-    <Panel>
+    <Panel padded>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-col gap-1">
           <button

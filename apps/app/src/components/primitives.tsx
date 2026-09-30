@@ -45,6 +45,7 @@ export function Panel({
   className = '',
   as: Tag = 'section',
   labelledBy,
+  padded = false,
 }: {
   title?: string;
   subtitle?: ReactNode;
@@ -53,6 +54,8 @@ export function Panel({
   className?: string;
   as?: 'section' | 'div';
   labelledBy?: string;
+  /** Inset the body. Off for bodies that pad themselves or run edge to edge, like tables. */
+  padded?: boolean;
 }) {
   return (
     <Tag
@@ -70,7 +73,7 @@ export function Panel({
           {action}
         </header>
       ) : null}
-      {children}
+      {padded ? <div className="h-full px-4 py-4 sm:px-5">{children}</div> : children}
     </Tag>
   );
 }
