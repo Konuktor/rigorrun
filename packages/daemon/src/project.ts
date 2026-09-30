@@ -368,6 +368,8 @@ export function budgetProblem(budgets: Budgets): string | null {
   return null;
 }
 
+export const SafetySchema = z.enum(['production', 'staging', 'local', 'ephemeral']);
+
 export const ProjectSchema = z.object({
   schemaVersion: z.literal(PROJECT_SCHEMA_VERSION),
   id: z.string(),
@@ -375,8 +377,13 @@ export const ProjectSchema = z.object({
   /** What the person is trying to prove an agent can do. */
   goal: z.string().default(''),
   connector: ConnectorSchema.nullable().default(null),
-  /** production / staging / local / ephemeral. Decides what may be written. */
-  safety: z.enum(['production', 'staging', 'local', 'ephemeral']).default('staging'),
+  /**
+   * production / staging / local / ephemeral. Decides what may be written.
+   *
+   * The default only fills in projects saved before the field existed; every
+   * way of connecting a system now requires the person to choose.
+   */
+  safety: SafetySchema.default('staging'),
   /** Tools a person has confirmed only read. Never the server's own opinion. */
   readOnlyTools: z.array(z.string()).default([]),
   verifierReads: z.array(VerifierReadSchema).default([]),

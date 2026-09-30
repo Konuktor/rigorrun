@@ -52,6 +52,24 @@ import { hasPayload, normalizeCallResult } from './result.ts';
 import { isVerifierTool, readsForVerdict } from './verified.ts';
 import { IdentityConflictError, stateFromPayloads } from './rows.ts';
 
+/**
+ * RigorRun was about to write to a system somebody marked production.
+ *
+ * The runner already refuses an agent's writes there. This covers the writes
+ * RigorRun makes on its own behalf — the reset before a demonstration and before
+ * every case, a generation probe, a teaching step — which no agent is present to
+ * be blamed for, and which would otherwise land on somebody's real day.
+ */
+export class ProductionWriteRefused extends Error {
+  constructor(readonly tool: string) {
+    super(
+      `${tool} writes, and this system is marked production, so RigorRun will not call it. ` +
+        'Point the project at a staging or scratch copy, or mark the tool read-only if it only reads.',
+    );
+    this.name = 'ProductionWriteRefused';
+  }
+}
+
 export class SystemEnvironment implements EnvironmentAdapter {
   readonly id: string;
   readonly name: string;
@@ -164,11 +182,17 @@ export class SystemEnvironment implements EnvironmentAdapter {
     };
   }
 
+  /** Production refuses every tool nobody confirmed only reads. */
+  private writesRefused(tool: string): boolean {
+    return this.config.safety === 'production' && !this.config.readOnlyTools.includes(tool);
+  }
+
   async reset(): Promise<void> {
     const strategy = this.config.reset;
     this.events = [];
     this.clock = 0;
     if (strategy.kind !== 'tool') return;
+    if (this.writesRefused(strategy.tool)) throw new ProductionWriteRefused(strategy.tool);
     const result = await this.connection.call(strategy.tool, strategy.args ?? {}, this.config.toolCallMs);
     if (!result.ok) {
       throw new Error(
@@ -248,6 +272,9 @@ export class SystemEnvironment implements EnvironmentAdapter {
           message: `${name} is how RigorRun checks the result; it is not something an agent can call.`,
         },
       };
+    }
+    if (this.writesRefused(name)) {
+      return { ok: false, error: { code: 'WRITE_REFUSED', message: new ProductionWriteRefused(name).message } };
     }
     const result = await this.connection.call(name, args, this.config.toolCallMs);
     this.clock += 1;

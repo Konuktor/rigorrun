@@ -572,6 +572,15 @@ export class Service {
       );
     }
 
+    if (project.safety === 'production') {
+      // Building a suite executes the job to work out what each case should
+      // end with, and probes which rules the system enforces itself. On a
+      // production system every one of those is a real write.
+      throw new Error(
+        'This system is marked production, and building a suite performs the job to work out ' +
+          'each expected result. Build it against a staging or scratch copy.',
+      );
+    }
     const schema = await this.schemaOf(project);
     const { fixture } = await this.registerFor(project, schema);
     const { benchmark } = await generateBenchmark(

@@ -125,6 +125,7 @@ export function Select({
   id,
   describedBy,
   testId,
+  placeholder,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -132,6 +133,8 @@ export function Select({
   id?: string;
   describedBy?: string | undefined;
   testId?: string;
+  /** Shown while nothing is chosen, and never itself a choice. */
+  placeholder?: string;
 }) {
   return (
     <select
@@ -142,6 +145,11 @@ export function Select({
       data-testid={testId}
       onChange={(event) => onChange(event.target.value)}
     >
+      {placeholder !== undefined ? (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      ) : null}
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}

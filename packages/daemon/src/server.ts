@@ -25,7 +25,7 @@ import { extname, join, normalize, resolve } from 'node:path';
 import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
-import { ConnectorSchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
+import { ConnectorSchema, SafetySchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
 import type { Service } from './service.ts';
 
 const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -332,11 +332,20 @@ export class Runner {
           400,
         );
       }
-      const connected = await service.connectEnvironment(
-        context.req.param('id'),
-        parsed.data,
-        body.safety ?? 'staging',
-      );
+      // No default. Whether RigorRun may write to a system is decided by the
+      // person who knows what it is, never filled in on their behalf.
+      const safety = SafetySchema.safeParse(body.safety);
+      if (!safety.success) {
+        return context.json(
+          {
+            error:
+              'Say what kind of system this is: production, staging, local or ephemeral. ' +
+              'RigorRun will not guess whether it may write to it.',
+          },
+          400,
+        );
+      }
+      const connected = await service.connectEnvironment(context.req.param('id'), parsed.data, safety.data);
       return context.json({
         project: summarise(connected.project),
         serverName: connected.serverName,

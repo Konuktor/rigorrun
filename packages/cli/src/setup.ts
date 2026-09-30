@@ -37,7 +37,10 @@ export const SetupSpecSchema = z.object({
   name: z.string().min(1),
   goal: z.string().default(''),
   connector: z.record(z.string(), z.unknown()),
-  safety: z.enum(['production', 'staging', 'local', 'ephemeral']).default('local'),
+  /** Required: whether RigorRun may write to a system is never assumed. */
+  safety: z.enum(['production', 'staging', 'local', 'ephemeral'], {
+    message: 'safety is required: production, staging, local or ephemeral. RigorRun will not guess whether it may write to a system.',
+  }),
   /** Secret name → the environment variable its value is read from. */
   secrets: z.record(z.string(), z.string()).default({}),
   readOnlyTools: z.array(z.string()).default([]),

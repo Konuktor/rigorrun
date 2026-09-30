@@ -34,6 +34,7 @@ import {
   type AnnotationMismatch,
   type SystemConnection,
   type SystemEnvironmentConfig,
+  ProductionWriteRefused,
 } from '@rigorrun/connector';
 import { OpenApiConnection } from '@rigorrun/env-openapi';
 import { BrowserConnection } from '@rigorrun/env-browser';
@@ -341,6 +342,14 @@ export class Workspace {
   async startDemonstration(project: Project): Promise<void> {
     const live = this.live.get(project.id);
     if (!live) throw new Error(`${project.name} is not connected.`);
+    if (project.safety === 'production') {
+      // Recording executes the job for real. On production that is a real
+      // refund, a real email — so it is refused before anything is called.
+      throw new Error(
+        'This system is marked production, and recording does the job for real. ' +
+          'Record against a staging or scratch copy, then point the finished suite wherever you like.',
+      );
+    }
     if (project.verifierReads.length === 0) {
       throw new Error(
         'Nominate at least one read before recording. Without one there is no way to see what ' +
@@ -457,6 +466,7 @@ export class Workspace {
     const claimsReadOnly =
       live.connection.discovery.tools.find((entry) => entry.name === tool)?.hints.readOnly === true;
     const vouchedReadOnly = project.readOnlyTools.includes(tool);
+    if (project.safety === 'production' && !vouchedReadOnly) throw new ProductionWriteRefused(tool);
     const watch = claimsReadOnly || !vouchedReadOnly;
     const before = watch ? await this.readPayloads(project) : undefined;
 
