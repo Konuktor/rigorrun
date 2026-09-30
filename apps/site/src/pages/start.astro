@@ -26,7 +26,7 @@ const steps = [
   },
   {
     title: 'Point it at your agent',
-    body: 'An HTTP endpoint, a command on this machine, or a key your own loop can pull work from. About ten lines if it already speaks MCP.',
+    body: 'Unchanged, wherever it runs: RigorRun sends each case\'s work to a URL your agent already serves and reads the result from your system, not from the agent. Or an HTTP endpoint, a command on this machine, or a key your own loop can pull work from.',
   },
   {
     title: 'Run it, and read the verdict',
@@ -56,6 +56,10 @@ const steps = [
           because there is no path by which they could.
         </p>
         <div class="mt-8"><Command command="npx rigorrun" size="lg" /></div>
+        <p class="mt-4 max-w-xl text-support text-muted">
+          Want to see what it catches first? <span class="font-mono text-support">npx rigorrun demo</span>
+          replays a real recorded run in a second, or <a class="rr-link" href="/replay">read it here</a>.
+        </p>
       </div>
 
       <aside class="rounded-panel border border-line bg-surface p-6">
