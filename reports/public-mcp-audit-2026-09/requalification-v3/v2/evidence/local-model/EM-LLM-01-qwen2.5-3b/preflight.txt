@@ -1,0 +1,77 @@
+== 2026-09-30T20:17:13Z
+== free -m
+               total        used        free      shared  buff/cache   available
+Mem:           15657        4924        3599         166        7641       10732
+Swap:          16050        7032        9018
+== swapon
+NAME           TYPE       SIZE USED PRIO
+/dev/nvme0n1p6 partition 15,7G 6,9G   -1
+== nvidia-smi
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce GTX 1650, 4096 MiB, 6 MiB
+== docker stats
+rr-audit-greenmail	290.9MiB / 15.29GiB
+rr-audit-mailhog	10.64MiB / 15.29GiB
+rr-audit-worktide-app-1	212.1MiB / 15.29GiB
+rr-audit-worktide-database-1	531.9MiB / 15.29GiB
+rr-audit-worktide-valkey-1	12.7MiB / 15.29GiB
+uptime-monitor-worker-1	0B / 0B
+uptime-monitor-api-1	51.31MiB / 15.29GiB
+uptime-monitor-simulator-1	22.09MiB / 15.29GiB
+uptime-monitor-frontend-1	12.06MiB / 15.29GiB
+saved-workouts-db	14.09MiB / 15.29GiB
+agent-gauntlet-db	16.59MiB / 15.29GiB
+mad_devs-reminder-worker-1	12.52MiB / 15.29GiB
+== top processes by RSS
+    PID   RSS COMMAND
+ 677536 535472 mysqld
+   7224 416884 claude
+ 458976 359068 chrome
+ 685902 303780 java
+   1095 265452 hermes
+ 207497 257700 chrome
+   7628 219284 chrome
+ 678426 211996 frankenphp
+  36797 142936 chrome
+ 381646 142828 chrome
+   7810 140956 chrome
+ 115684 140088 chrome
+  95686 127196 chrome
+   1558 120168 dockerd
+  10240 105604 chrome
+== ollama ps
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+== ollama show qwen2.5:3b
+  Model
+    architecture        qwen2     
+    parameters          3.1B      
+    context length      32768     
+    embedding length    2048      
+    quantization        Q4_K_M    
+
+  Capabilities
+    completion    
+    tools         
+
+  System
+    You are Qwen, created by Alibaba Cloud. You are a helpful assistant.    
+
+  License
+    Qwen RESEARCH LICENSE AGREEMENT                                     
+    Qwen RESEARCH LICENSE AGREEMENT Release Date: September 19, 2024    
+    ...                                                                 
+
+== ollama list
+NAME                       ID              SIZE      MODIFIED     
+gemma2:2b                  8ccf136fdd52    1.6 GB    3 weeks ago     
+qwen2.5:1.5b               65ec06548149    986 MB    6 weeks ago     
+llama3.2:1b                baf6a787fdff    1.3 GB    6 weeks ago     
+llama3.1:8b                46e0c10c039e    4.9 GB    6 weeks ago     
+kali-glm:latest            b5f6c9b8492d    -         6 weeks ago     
+glm-5.1:cloud              7aea7667808a    -         7 weeks ago     
+glm-5.2:cloud              7e916d58b325    -         8 weeks ago     
+nomic-embed-text:latest    0a109f422b47    274 MB    3 months ago    
+qwen2.5:3b                 357c53fb659c    1.9 GB    3 months ago    
+llama3.2:3b                a80c4f17acd5    2.0 GB    4 months ago    
+qwen3:8b                   500a1f067a9f    5.2 GB    4 months ago    
+qwen2.5:7b                 845dbda0ea48    4.7 GB    4 months ago    

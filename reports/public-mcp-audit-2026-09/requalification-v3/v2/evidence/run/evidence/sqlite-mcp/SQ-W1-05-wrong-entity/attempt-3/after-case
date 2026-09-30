@@ -1,0 +1,2 @@
+#!/bin/sh
+exec python3 /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/oracle-reading.py /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/evidence/sqlite-mcp/SQ-W1-05-wrong-entity/attempt-3

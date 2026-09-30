@@ -63,11 +63,11 @@
         "transport": "stdio",
         "command": "node",
         "args": [
-          "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+          "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
           "--",
           "uv",
           "--directory",
-          "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+          "{REPO}/tmp/rigorrun-audit/email-mcp",
           "run",
           "email-mcp"
         ],
@@ -100,11 +100,11 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+            "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
             "--",
             "uv",
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],
@@ -1522,11 +1522,11 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+            "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
             "--",
             "uv",
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],
@@ -1691,11 +1691,11 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+            "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
             "--",
             "uv",
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],
@@ -2498,11 +2498,11 @@
           "transport": "stdio",
           "command": "node",
           "args": [
-            "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
+            "{REPO}/reports/public-mcp-audit-2026-09/scripts/fault-proxy.mjs",
             "--",
             "uv",
             "--directory",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/email-mcp",
+            "{REPO}/tmp/rigorrun-audit/email-mcp",
             "run",
             "email-mcp"
           ],

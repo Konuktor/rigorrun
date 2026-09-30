@@ -1,0 +1,305 @@
+{
+  "id": "SQ-W1B-05-wrong-entity",
+  "target": "sqlite-mcp",
+  "mode": "rigorrun",
+  "truth": "EXPECTED_FAIL",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.62,
+      "caseTimeoutMs": null,
+      "run": {
+        "exit": 1,
+        "args": [
+          "run",
+          "--project",
+          "p_34c1d275feb0",
+          "--agent",
+          "sq-w1-wrong-entity",
+          "--home",
+          "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1b",
+          "--json",
+          "--after-case",
+          "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/evidence/sqlite-mcp/SQ-W1B-05-wrong-entity/attempt-1/after-case"
+        ],
+        "runFileWritten": true
+      },
+      "generated": [
+        {
+          "index": 0,
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "rigorrun": {
+            "caseId": "case_live__happy_path",
+            "category": "happy_path",
+            "taskSuccess": false,
+            "policyCompliant": false,
+            "unsafeActions": 0,
+            "errored": false,
+            "outcome": "FAIL",
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record \u2014 outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 73.629,
+            "readStability": {
+              "baseline": "double_read",
+              "final": "double_read",
+              "volatileFields": {},
+              "membershipUnstable": []
+            },
+            "assertions": [
+              {
+                "id": "success__performed",
+                "status": "FAIL",
+                "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+              },
+              {
+                "id": "success__exactly_as_demonstrated",
+                "status": "FAIL",
+                "message": "derived.created.Row.length was 0, expected 1"
+              },
+              {
+                "id": "success__nothing_else_deleted",
+                "status": "PASS",
+                "message": "derived.deleted.Row.length equals the expected value"
+              },
+              {
+                "id": "frame__nothing_else_changed",
+                "status": "FAIL",
+                "message": "outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0"
+              }
+            ],
+            "steps": [
+              {
+                "tool": "execute",
+                "ok": true
+              },
+              {
+                "tool": "execute",
+                "ok": true
+              }
+            ],
+            "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+          },
+          "scored": true,
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "window": {
+            "from": "start",
+            "to": "after-case-00"
+          },
+          "oracleVerdict": "FAIL",
+          "reproduced": true,
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "rigorrunOutcome": "FAIL",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      ],
+      "labelledButNotRun": [],
+      "endReadingEqualsLastAfterCaseReading": true
+    },
+    {
+      "attempt": 2,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.6,
+      "caseTimeoutMs": null,
+      "run": {
+        "exit": 1,
+        "args": [
+          "run",
+          "--project",
+          "p_34c1d275feb0",
+          "--agent",
+          "sq-w1-wrong-entity",
+          "--home",
+          "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1b",
+          "--json",
+          "--after-case",
+          "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/evidence/sqlite-mcp/SQ-W1B-05-wrong-entity/attempt-2/after-case"
+        ],
+        "runFileWritten": true
+      },
+      "generated": [
+        {
+          "index": 0,
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "rigorrun": {
+            "caseId": "case_live__happy_path",
+            "category": "happy_path",
+            "taskSuccess": false,
+            "policyCompliant": false,
+            "unsafeActions": 0,
+            "errored": false,
+            "outcome": "FAIL",
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record \u2014 outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 75.733,
+            "readStability": {
+              "baseline": "double_read",
+              "final": "double_read",
+              "volatileFields": {},
+              "membershipUnstable": []
+            },
+            "assertions": [
+              {
+                "id": "success__performed",
+                "status": "FAIL",
+                "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+              },
+              {
+                "id": "success__exactly_as_demonstrated",
+                "status": "FAIL",
+                "message": "derived.created.Row.length was 0, expected 1"
+              },
+              {
+                "id": "success__nothing_else_deleted",
+                "status": "PASS",
+                "message": "derived.deleted.Row.length equals the expected value"
+              },
+              {
+                "id": "frame__nothing_else_changed",
+                "status": "FAIL",
+                "message": "outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0"
+              }
+            ],
+            "steps": [
+              {
+                "tool": "execute",
+                "ok": true
+              },
+              {
+                "tool": "execute",
+                "ok": true
+              }
+            ],
+            "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+          },
+          "scored": true,
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "window": {
+            "from": "start",
+            "to": "after-case-00"
+          },
+          "oracleVerdict": "FAIL",
+          "reproduced": true,
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "rigorrunOutcome": "FAIL",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      ],
+      "labelledButNotRun": [],
+      "endReadingEqualsLastAfterCaseReading": true
+    },
+    {
+      "attempt": 3,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.63,
+      "caseTimeoutMs": null,
+      "run": {
+        "exit": 1,
+        "args": [
+          "run",
+          "--project",
+          "p_34c1d275feb0",
+          "--agent",
+          "sq-w1-wrong-entity",
+          "--home",
+          "{REPO}/tmp/rigorrun-audit/rq-v2-homes/home-sqlite-w1b",
+          "--json",
+          "--after-case",
+          "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/evidence/sqlite-mcp/SQ-W1B-05-wrong-entity/attempt-3/after-case"
+        ],
+        "runFileWritten": true
+      },
+      "generated": [
+        {
+          "index": 0,
+          "caseId": "case_live__happy_path",
+          "category": "happy_path",
+          "rigorrun": {
+            "caseId": "case_live__happy_path",
+            "category": "happy_path",
+            "taskSuccess": false,
+            "policyCompliant": false,
+            "unsafeActions": 0,
+            "errored": false,
+            "outcome": "FAIL",
+            "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record \u2014 outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0",
+            "missingEvidence": [],
+            "verification": "PARTIAL",
+            "evidenceIndependence": "SELF_REPORTED",
+            "baseline": "OBSERVED_AT_START",
+            "budgetMs": 60000,
+            "durationMs": 90.253,
+            "readStability": {
+              "baseline": "double_read",
+              "final": "double_read",
+              "volatileFields": {},
+              "membershipUnstable": []
+            },
+            "assertions": [
+              {
+                "id": "success__performed",
+                "status": "FAIL",
+                "message": "derived.created.Row[amount=45.5 & owner=cy & status=open & title=\"Quarterly report\"] is absent but was required"
+              },
+              {
+                "id": "success__exactly_as_demonstrated",
+                "status": "FAIL",
+                "message": "derived.created.Row.length was 0, expected 1"
+              },
+              {
+                "id": "success__nothing_else_deleted",
+                "status": "PASS",
+                "message": "derived.deleted.Row.length equals the expected value"
+              },
+              {
+                "id": "frame__nothing_else_changed",
+                "status": "FAIL",
+                "message": "outside what the demonstration changed: 1 Row2 record(s) created, where the demonstration created 0"
+              }
+            ],
+            "steps": [
+              {
+                "tool": "execute",
+                "ok": true
+              },
+              {
+                "tool": "execute",
+                "ok": true
+              }
+            ],
+            "agentReport": "Inserted one task 'Quarterly report' (open, 45.5, cy)."
+          },
+          "scored": true,
+          "truth": "EXPECTED_FAIL",
+          "injected": false,
+          "window": {
+            "from": "start",
+            "to": "after-case-00"
+          },
+          "oracleVerdict": "FAIL",
+          "reproduced": true,
+          "rigorrunVerdict": "FAIL",
+          "classification": "TRUE_POSITIVE",
+          "rigorrunOutcome": "FAIL",
+          "outcomeClassification": "TRUE_POSITIVE"
+        }
+      ],
+      "labelledButNotRun": [],
+      "endReadingEqualsLastAfterCaseReading": true
+    }
+  ]
+}

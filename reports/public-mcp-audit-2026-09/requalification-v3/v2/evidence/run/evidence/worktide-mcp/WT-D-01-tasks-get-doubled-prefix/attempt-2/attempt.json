@@ -1,0 +1,54 @@
+{
+  "case": {
+    "id": "WT-D-01-tasks-get-doubled-prefix",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "SCHEMA / TOOL ERROR (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "tasks.get by identifier must return the task",
+    "calls": [
+      {
+        "tool": "tasks.get",
+        "args": {
+          "task": "AUD-1"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True"
+  },
+  "attempt": 2,
+  "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+  "seconds": 0.28,
+  "result": {
+    "calls": [
+      {
+        "tool": "tasks.get",
+        "args": {
+          "task": "AUD-1"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[404] No route found for \"GET http://127.0.0.1:18081/v1/v1/tasks/01a09c48-960d-7a2b-9cb4-63b84ba76c74\""
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "oracleVerdict": "FAIL",
+  "scored": false
+}

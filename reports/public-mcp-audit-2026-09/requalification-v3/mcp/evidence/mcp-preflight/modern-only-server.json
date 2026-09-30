@@ -17,7 +17,7 @@
         "version": "1.0.0"
       }
     },
-    "rigorrunConnectError": "Could not reach the MCP server at python3 /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/mcp/modern_only_server.py: MCP error -32601: initialize is not supported: this server speaks MCP 2026-07-28 only"
+    "rigorrunConnectError": "Could not reach the MCP server at python3 {REPO}/reports/public-mcp-audit-2026-09/requalification-v3/mcp/modern_only_server.py: MCP error -32601: initialize is not supported: this server speaks MCP 2026-07-28 only"
   },
   "expected": "connect throws an error naming the refusal; nothing reaches a case or a verdict",
   "impact": "Compatibility with 2026-07-28-only servers is UNSUPPORTED; the failure is a connect error, not a test result."

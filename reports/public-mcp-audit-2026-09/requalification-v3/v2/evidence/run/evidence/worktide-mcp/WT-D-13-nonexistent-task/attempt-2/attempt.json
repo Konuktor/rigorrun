@@ -1,0 +1,54 @@
+{
+  "case": {
+    "id": "WT-D-13-nonexistent-task",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "BOUNDARY",
+    "truth": "EXPECTED_PASS",
+    "intent": "tasks.get on a missing identifier must be a clean not-found error",
+    "calls": [
+      {
+        "tool": "tasks.get",
+        "args": {
+          "task": "AUD-999"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError')==True and \"not found\" in calls[0]['result']['content'][0]['text']"
+  },
+  "attempt": 2,
+  "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+  "seconds": 0.31,
+  "result": {
+    "calls": [
+      {
+        "tool": "tasks.get",
+        "args": {
+          "task": "AUD-999"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Task \"AUD-999\" not found."
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "oracleVerdict": "PASS",
+  "scored": false
+}

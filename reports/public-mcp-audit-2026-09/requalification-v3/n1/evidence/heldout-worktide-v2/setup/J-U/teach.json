@@ -1,0 +1,54 @@
+[
+  {
+    "step": {
+      "tool": "time.runningTimer",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"running\": false\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "tool": "time.start",
+      "args": {
+        "description": "Desk review"
+      }
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"closedTimeEntryId\": null,\n  \"running\": true,\n  \"timerId\": \"01a0f41d-de74-742e-8637-2f7f555dadcd\",\n  \"startedAt\": \"2026-09-30T22:59:53+02:00\",\n  \"elapsedSeconds\": 0,\n  \"taskId\": null,\n  \"projectId\": null,\n  \"typeOfWorkId\": null,\n  \"description\": \"Desk review\",\n  \"isBillable\": true\n}"
+        }
+      ]
+    }
+  },
+  {
+    "step": {
+      "sleepSeconds": 61
+    }
+  },
+  {
+    "step": {
+      "tool": "time.stop",
+      "args": {}
+    },
+    "result": {
+      "ok": true,
+      "data": [
+        {
+          "type": "text",
+          "text": "{\n  \"timeEntryId\": \"01a0f41e-cedd-7375-8008-3503335d8aae\",\n  \"durationMinutes\": 1\n}"
+        }
+      ]
+    }
+  }
+]

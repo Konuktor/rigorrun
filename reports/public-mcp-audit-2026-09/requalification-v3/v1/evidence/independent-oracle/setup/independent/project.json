@@ -8,15 +8,15 @@
     "transport": "stdio",
     "command": "/usr/bin/python3",
     "args": [
-      "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_server.py",
+      "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_server.py",
       "--db",
-      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/tasks.db",
+      "{REPO}/tmp/rigorrun-audit/io-state/tasks.db",
       "--faults",
-      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/faults.json",
+      "{REPO}/tmp/rigorrun-audit/io-state/faults.json",
       "--shadow",
-      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/shadow.json",
+      "{REPO}/tmp/rigorrun-audit/io-state/shadow.json",
       "--calls-log",
-      "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/calls.log"
+      "{REPO}/tmp/rigorrun-audit/io-state/calls.log"
     ],
     "url": "",
     "auth": "header",
@@ -26,15 +26,15 @@
       "transport": "stdio",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_oracle_server.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/taskdesk_oracle_server.py",
         "--db",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/tasks.db",
+        "{REPO}/tmp/rigorrun-audit/io-state/tasks.db",
         "--down-flag",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/oracle-down.flag",
+        "{REPO}/tmp/rigorrun-audit/io-state/oracle-down.flag",
         "--empty-flag",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/oracle-empty.flag",
+        "{REPO}/tmp/rigorrun-audit/io-state/oracle-empty.flag",
         "--calls-log",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/calls.log"
+        "{REPO}/tmp/rigorrun-audit/io-state/calls.log"
       ],
       "url": "",
       "auth": "header",
@@ -92,11 +92,11 @@
       "kind": "process",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-correct.json",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/independent"
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-correct.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
-      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
       "confirmedByOperatorAt": "2026-09-30T20:04:04.271Z"
     },
     {
@@ -108,11 +108,11 @@
       "kind": "process",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-claim-only.json",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/independent"
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-claim-only.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
-      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
       "confirmedByOperatorAt": "2026-09-30T20:04:04.317Z"
     },
     {
@@ -124,11 +124,11 @@
       "kind": "process",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-duplicate.json",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/independent"
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-duplicate.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
-      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
       "confirmedByOperatorAt": "2026-09-30T20:04:04.354Z"
     },
     {
@@ -140,11 +140,11 @@
       "kind": "process",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-extra-update.json",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/independent"
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-extra-update.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
-      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
       "confirmedByOperatorAt": "2026-09-30T20:04:04.388Z"
     },
     {
@@ -156,11 +156,11 @@
       "kind": "process",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-correct-oracle-down.json",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/independent"
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-correct-oracle-down.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
-      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
       "confirmedByOperatorAt": "2026-09-30T20:04:04.424Z"
     },
     {
@@ -169,11 +169,11 @@
       "kind": "process",
       "command": "/usr/bin/python3",
       "args": [
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
-        "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-readback.json",
-        "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state/traces/independent"
+        "{REPO}/reports/public-mcp-audit-2026-09/scripts/agents/scripted-agent.py",
+        "{REPO}/reports/public-mcp-audit-2026-09/final-qualification/scripts/io/playbooks/io-readback.json",
+        "{REPO}/tmp/rigorrun-audit/io-state/traces/independent"
       ],
-      "cwd": "/home/erbol/RigorRun/tmp/rigorrun-audit/io-state",
+      "cwd": "{REPO}/tmp/rigorrun-audit/io-state",
       "confirmedByOperatorAt": "2026-09-30T20:04:04.460Z",
       "lastProbeAt": "2026-09-30T20:04:04.460Z",
       "lastProbeOk": true,

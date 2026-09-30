@@ -1,6 +1,6 @@
 frozen test sha256 0987c00d914ebe08f57654bc77ffbbae11f1dd8454974cecc8f7db4556897eef
 
- RUN  v4.1.11 /home/erbol/RigorRun
+ RUN  v4.1.11 {REPO}
 
  ✓ packages/runner/test/zz_heldout_rq.test.ts (8 tests) 299ms
 

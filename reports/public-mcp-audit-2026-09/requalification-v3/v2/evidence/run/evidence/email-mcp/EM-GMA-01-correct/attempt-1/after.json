@@ -1,0 +1,34 @@
+{
+  "messages": [
+    {
+      "body_sha256": "17114d413ba24830c47c5b46b8ff3243bd91b69a01ed498b47af45dddc8cc0cb",
+      "from": "agent@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Audit 17",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "17114d413ba24830c47c5b46b8ff3243bd91b69a01ed498b47af45dddc8cc0cb",
+      "from": "agent@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Audit 17",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "7b9f735d5deb7696403358c229cf00bdd1c793129888b469c7d5e95a7bf017f8",
+      "from": "agent@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Audit 17",
+      "to": "qa@example.test"
+    },
+    {
+      "body_sha256": "7b9f735d5deb7696403358c229cf00bdd1c793129888b469c7d5e95a7bf017f8",
+      "from": "agent@example.test",
+      "mailbox": "qa@example.test",
+      "subject": "Audit 17",
+      "to": "qa@example.test"
+    }
+  ],
+  "oracle": "greenmail-imaps",
+  "total": 4
+}

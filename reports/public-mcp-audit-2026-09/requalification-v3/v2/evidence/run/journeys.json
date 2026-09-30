@@ -8,7 +8,7 @@
     "out": "requalification-v3/v2/evidence/run/traces/sqlite-mcp/w1-setup",
     "reset": {
       "exit": 0,
-      "tail": "reset-sqlite: /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
+      "tail": "reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
     },
     "project": "p_ed382ed924a5",
     "ok": true,
@@ -57,7 +57,7 @@
     "out": "requalification-v3/v2/evidence/run/traces/sqlite-mcp/w1b-setup",
     "reset": {
       "exit": 0,
-      "tail": "reset-sqlite: /home/erbol/RigorRun/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
+      "tail": "reset-sqlite: {REPO}/reports/public-mcp-audit-2026-09/scripts/../../../tmp/rigorrun-audit/sqlite-mcp/audit.db recreated, 3 tasks"
     },
     "project": "p_34c1d275feb0",
     "ok": true,

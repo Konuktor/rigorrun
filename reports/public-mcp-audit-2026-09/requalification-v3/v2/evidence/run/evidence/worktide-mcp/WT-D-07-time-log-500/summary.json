@@ -1,0 +1,92 @@
+{
+  "id": "WT-D-07-time-log-500",
+  "target": "worktide-mcp",
+  "mode": "direct",
+  "truth": "EXPECTED_PASS",
+  "attempts": [
+    {
+      "attempt": 1,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.31,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.log",
+            "args": {
+              "startsAt": "2026-09-13T10:00:00+02:00",
+              "durationMinutes": 30,
+              "description": "audit log entry"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[500] Typed property App\\Entity\\TimeEntry::$user must not be accessed before initialization"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 2,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.29,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.log",
+            "args": {
+              "startsAt": "2026-09-13T10:00:00+02:00",
+              "durationMinutes": 30,
+              "description": "audit log entry"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[500] Typed property App\\Entity\\TimeEntry::$user must not be accessed before initialization"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    },
+    {
+      "attempt": 3,
+      "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+      "seconds": 0.25,
+      "result": {
+        "calls": [
+          {
+            "tool": "time.log",
+            "args": {
+              "startsAt": "2026-09-13T10:00:00+02:00",
+              "durationMinutes": 30,
+              "description": "audit log entry"
+            },
+            "result": {
+              "content": [
+                {
+                  "type": "text",
+                  "text": "[500] Typed property App\\Entity\\TimeEntry::$user must not be accessed before initialization"
+                }
+              ],
+              "isError": true
+            }
+          }
+        ]
+      },
+      "oracleVerdict": "FAIL",
+      "scored": false
+    }
+  ]
+}

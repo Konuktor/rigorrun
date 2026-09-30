@@ -1,0 +1,4 @@
+2026-09-30T20:37:50Z SQ-LLM-02-qwen2.5-3b: qwen2.5:3b preloaded in 1.31 s; available 11204 MiB before preload, 10917 MiB after
+SQ-LLM-02-qwen2.5-3b attempt 1: exit=0 happy_path:PASS/PASS/TRUE_NEGATIVE (16.2s)
+SQ-LLM-02-qwen2.5-3b attempt 2: exit=0 happy_path:PASS/PASS/TRUE_NEGATIVE (8.04s)
+SQ-LLM-02-qwen2.5-3b attempt 3: exit=0 happy_path:PASS/PASS/TRUE_NEGATIVE (8.05s)

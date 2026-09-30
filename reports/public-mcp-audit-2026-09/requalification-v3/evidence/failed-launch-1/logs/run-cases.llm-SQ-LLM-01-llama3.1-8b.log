@@ -1,11 +1,11 @@
 2026-09-30T20:08:08Z SQ-LLM-01-llama3.1-8b: llama3.1:8b preloaded in 8.38 s; available 7348 MiB before preload, 12191 MiB after
 Traceback (most recent call last):
-  File "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 252, in <module>
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 252, in <module>
     sys.exit(main())
              ~~~~^^
-  File "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 199, in main
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 199, in main
     projects = load(os.path.join(RUN, "projects.json"))
-  File "/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 65, in load
+  File "{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/scripts/run-v2.py", line 65, in load
     with open(path) as fh:
          ~~~~^^^^^^
-FileNotFoundError: [Errno 2] No such file or directory: '/home/erbol/RigorRun/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/projects.json'
+FileNotFoundError: [Errno 2] No such file or directory: '{REPO}/reports/public-mcp-audit-2026-09/requalification-v3/v2/evidence/run/projects.json'

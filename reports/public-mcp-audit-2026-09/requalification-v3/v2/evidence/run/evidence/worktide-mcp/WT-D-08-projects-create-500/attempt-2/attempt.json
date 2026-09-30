@@ -1,0 +1,56 @@
+{
+  "case": {
+    "id": "WT-D-08-projects-create-500",
+    "target": "worktide-mcp",
+    "mode": "direct",
+    "oracle": "oracle-worktide.py (REST with the audit token + direct MySQL)",
+    "initialState": "snapshot: project AUD with AUD-1..3 in Backlog, no running timer, 10 fixture time entries",
+    "env": {
+      "WORKTIDE_API_URL": "http://127.0.0.1:18081/v1",
+      "WORKTIDE_API_TOKEN": "{WORKTIDE_PAT}",
+      "WORKTIDE_WORKSPACE_ID": "{WORKTIDE_WORKSPACE}"
+    },
+    "server": [
+      "node",
+      "{REPO}/tmp/rigorrun-audit/worktide-mcp/dist/index.js"
+    ],
+    "class": "MISSING_ACTION (target)",
+    "truth": "EXPECTED_PASS",
+    "intent": "projects.create must create project MCPX",
+    "calls": [
+      {
+        "tool": "projects.create",
+        "args": {
+          "name": "MCP created project",
+          "key": "MCPX"
+        }
+      }
+    ],
+    "expect": "calls[0]['result'].get('isError') is not True and 'MCPX' in after['projects']"
+  },
+  "attempt": 2,
+  "productCommit": "28e8ec3209bc95bec8dc0d34eb1a057f3d522499",
+  "seconds": 0.34,
+  "result": {
+    "calls": [
+      {
+        "tool": "projects.create",
+        "args": {
+          "name": "MCP created project",
+          "key": "MCPX"
+        },
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "[500] Typed property App\\Entity\\Project::$workspace must not be accessed before initialization"
+            }
+          ],
+          "isError": true
+        }
+      }
+    ]
+  },
+  "oracleVerdict": "FAIL",
+  "scored": false
+}

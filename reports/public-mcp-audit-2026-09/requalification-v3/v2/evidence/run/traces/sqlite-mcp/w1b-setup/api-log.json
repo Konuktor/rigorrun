@@ -61,10 +61,10 @@
       "connector": {
         "kind": "mcp",
         "transport": "stdio",
-        "command": "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+        "command": "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
         "args": [
           "--database",
-          "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+          "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
           "--preset",
           "read-write"
         ],
@@ -82,10 +82,10 @@
         "connector": {
           "kind": "mcp",
           "transport": "stdio",
-          "command": "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+          "command": "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
           "args": [
             "--database",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+            "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
             "--preset",
             "read-write"
           ],
@@ -467,10 +467,10 @@
         "connector": {
           "kind": "mcp",
           "transport": "stdio",
-          "command": "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+          "command": "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
           "args": [
             "--database",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+            "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
             "--preset",
             "read-write"
           ],
@@ -712,10 +712,10 @@
         "connector": {
           "kind": "mcp",
           "transport": "stdio",
-          "command": "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+          "command": "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
           "args": [
             "--database",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+            "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
             "--preset",
             "read-write"
           ],
@@ -1387,10 +1387,10 @@
         "connector": {
           "kind": "mcp",
           "transport": "stdio",
-          "command": "/home/erbol/RigorRun/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
+          "command": "{REPO}/tmp/rigorrun-audit/toolchain/bin/mcp-server-sqlite",
           "args": [
             "--database",
-            "/home/erbol/RigorRun/tmp/rigorrun-audit/sqlite-mcp/audit.db",
+            "{REPO}/tmp/rigorrun-audit/sqlite-mcp/audit.db",
             "--preset",
             "read-write"
           ],
