@@ -38,6 +38,19 @@ export interface StateSnapshot {
   clock: number;
 }
 
+/**
+ * Writes `value` as an own entry named `key`, whatever the key is.
+ *
+ * Keys here come from data RigorRun does not control — record ids, payload
+ * fields from a system being audited. `target[key] = value` turns a key of
+ * "__proto__" into a write to the prototype: the record vanishes from the table,
+ * and whatever it held can leak into every object. Defining the property keeps
+ * it an ordinary entry that Object.keys, JSON and the verifier all see.
+ */
+export function setOwn<T>(target: Record<string, T>, key: string, value: T): void {
+  Object.defineProperty(target, key, { value, enumerable: true, writable: true, configurable: true });
+}
+
 export function emptyState(schema: EnvironmentSchema): CanonicalState {
   const entities: Record<string, Record<string, EntityRow>> = {};
   for (const entity of schema.entities) entities[entity.name] = {};
@@ -145,7 +158,7 @@ export function stateFromRows(
     if (keyed.length !== given.length) {
       throw new Error(`${entity.name} row is missing its id field "${entity.idField}"`);
     }
-    for (const [key, row] of keyed) table[key] = { ...row };
+    for (const [key, row] of keyed) setOwn(table, key, { ...row });
   }
   return state;
 }

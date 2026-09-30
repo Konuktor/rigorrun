@@ -37,6 +37,7 @@ import {
   type EntityRow,
   type EnvEvent,
   type StateSnapshot,
+  setOwn,
 } from './state.ts';
 
 export interface ActionContext {
@@ -260,8 +261,9 @@ export class InMemoryEnvironment implements EnvironmentAdapter {
           throw new Error(`Cannot insert into ${entityName} without "${entity.idField}".`);
         }
         const table = (this.state.entities[entityName] ??= {});
-        table[key] = { ...row };
-        return table[key] as EntityRow;
+        const stored = { ...row };
+        setOwn(table, key, stored);
+        return stored as EntityRow;
       },
       update: (entityName, id, patch) => {
         const existing = rowById(this.state, entityName, id);

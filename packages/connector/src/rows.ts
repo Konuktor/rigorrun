@@ -15,6 +15,7 @@ import {
   deepEqual,
   emptyState,
   keyedRows,
+  setOwn,
   type CanonicalState,
   type EntityRow,
   type EntitySchema,
@@ -110,7 +111,7 @@ export function stateFromPayloads(
         const kept = earlier === undefined ? row : oneRecord(entity, earlier, row);
         if (kept === undefined) throw new IdentityConflictError(entity.name, key, payloadIndex);
         inThisAnswer.set(key, kept);
-        table[key] = kept;
+        setOwn(table, key, kept);
       }
       state.entities[entity.name] = table;
     }

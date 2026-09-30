@@ -23,6 +23,7 @@
  * - An error is `error`, and carries no payload — a failed read is missing
  *   evidence, not an empty world.
  */
+import { setOwn } from '@rigorrun/environment';
 import type { CallResult } from './types.ts';
 
 export type NormalizedResultKind = 'structured' | 'json_text' | 'text' | 'empty' | 'error';
@@ -180,7 +181,7 @@ export function canonicalisePayload(value: unknown, depth = 0): unknown {
   const tagged = taggedScalar(object);
   if (tagged !== NOT_TAGGED) return tagged;
   const out: Record<string, unknown> = {};
-  for (const [key, entry] of Object.entries(object)) out[key] = canonicalisePayload(entry, depth + 1);
+  for (const [key, entry] of Object.entries(object)) setOwn(out, key, canonicalisePayload(entry, depth + 1));
   return out;
 }
 

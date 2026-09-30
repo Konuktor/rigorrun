@@ -311,8 +311,15 @@ function factValue(delta: StateDelta): unknown {
   }
 }
 
+/** Trailing full stops off, without a pattern that backtracks on a run of them. */
+function withoutTrailingDots(text: string): string {
+  let end = text.length;
+  while (end > 0 && text[end - 1] === '.') end -= 1;
+  return text.slice(0, end);
+}
+
 function goalStatement(context: Context, stated: string | undefined): string {
-  const said = stated?.trim().replace(/\.+$/, '');
+  const said = stated === undefined ? undefined : withoutTrailingDots(stated.trim());
   if (said && said.length > 0) return said;
   const definition = context.adapter.getActions().find((a) => a.name === context.primaryAction);
   const label = entityLabel(context.schema, context.focusEntity.name);
