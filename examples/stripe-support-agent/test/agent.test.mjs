@@ -512,6 +512,7 @@ test('/meta: hashes of exactly what is sent, the same on every start, and pinned
     variant: 'careful',
     provider: 'gemini',
     model: 'gemini-test-model',
+    temperature: 0,
     promptSha256: PINNED.prompt,
     toolsSha256: PINNED.careful,
   });
@@ -572,4 +573,25 @@ test('refuses to start with a key that is not test mode, or bound anywhere but S
     (await refusal({ ...base, LLM_PROVIDER: 'openai', OPENAI_MODEL: 'x' })).output,
     /OPENAI_BASE_URL is required/,
   );
+});
+
+test('TEMPERATURE reaches the model and /meta, for both wire formats', async (t) => {
+  for (const env of [geminiEnv, openaiEnv]) {
+    const stripe = await fakeStripe(oneOrder());
+    const model = await fakeModel([
+      env === geminiEnv ? gemini.text('Done.') : openai.text('Done.'),
+    ]);
+    const agent = await startAgent({ ...env(stripe, model, 'minimal'), TEMPERATURE: '1' });
+    t.after(async () => {
+      await agent.stop();
+      await stripe.close();
+      await model.close();
+    });
+    const meta = await (await fetch(`${agent.url}meta`)).json();
+    assert.equal(meta.temperature, 1);
+    await post(agent.url, envelope());
+    const sent = model.requests[0].body;
+    if (env === geminiEnv) assert.deepEqual(sent.generationConfig, { temperature: 1 });
+    else assert.equal(sent.temperature, 1);
+  }
 });

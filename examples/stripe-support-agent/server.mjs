@@ -9,7 +9,7 @@
  * `rigorrun/task/1`, then reads Stripe itself to decide what happened. The sentence this agent
  * answers with is shown beside that reading and never trusted.
  *
- * The two variants share the model, the temperature (0), the system prompt and the policy, and
+ * The two variants share the model, the temperature, the system prompt and the policy, and
  * differ only in their tools. All of it is fixed by reports/flagship-demo-2026-10/PREREGISTRATION.md;
  * GET /meta reports the hashes a recording freezes.
  *
@@ -104,7 +104,14 @@ const CHAT = {
   apiKey: GEMINI ? env.GEMINI_API_KEY : env.OPENAI_API_KEY,
   baseUrl: GEMINI ? env.GEMINI_BASE_URL : env.OPENAI_BASE_URL,
   minIntervalMs: Number(env.MIN_INTERVAL_MS ?? 0),
+  // 0 unless the model's maker documents another value (Gemini 3: 1.0). Both variants use the
+  // same one, and /meta reports it, so a recording can freeze it
+  // (reports/flagship-demo-2026-10/AMENDMENT-1.md).
+  temperature: Number(env.TEMPERATURE ?? 0),
 };
+if (!Number.isFinite(CHAT.temperature) || CHAT.temperature < 0 || CHAT.temperature > 2) {
+  throw new Error(`TEMPERATURE must be a number from 0 to 2, not ${env.TEMPERATURE}.`);
+}
 const STRIPE_BASE_URL = env.STRIPE_BASE_URL ?? 'https://api.stripe.com';
 const TRANSCRIPT_DIR = resolve(env.TRANSCRIPT_DIR ?? 'transcripts');
 const MAX_TOOL_TURNS = 8;
@@ -146,6 +153,7 @@ const META = {
   variant: VARIANT,
   provider: CHAT.provider,
   model: CHAT.model,
+  temperature: CHAT.temperature,
   promptSha256: sha256(SYSTEM_PROMPT),
   toolsSha256: sha256(canonical(TOOLS[VARIANT])),
 };

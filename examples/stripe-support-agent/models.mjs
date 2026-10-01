@@ -21,6 +21,7 @@
  * @property {string} [apiKey]  sent as a header, never logged
  * @property {string} [baseUrl]
  * @property {number} [minIntervalMs]  the least time between two requests, across all chats
+ * @property {number} [temperature]  0 unless the model's maker documents another value
  */
 
 /**
@@ -33,7 +34,7 @@ export function openChat(config, system, tools, firstTurn, log) {
 }
 
 /**
- * Gemini's generateContent with function declarations, at temperature 0. The model's turn joins
+ * Gemini's generateContent with function declarations, at the configured temperature. The model's turn joins
  * the history exactly as it came back: Gemini 3 models sign their function calls
  * (`thoughtSignature` on the part) and answer 400 if a signed part is dropped or rebuilt.
  * @param {ChatConfig} config @param {string} system @param {Tool[]} tools
@@ -54,7 +55,7 @@ function gemini(config, system, tools, firstTurn, log) {
         contents,
         tools: [{ functionDeclarations: tools }],
         toolConfig: { functionCallingConfig: { mode: 'AUTO' } },
-        generationConfig: { temperature: 0 },
+        generationConfig: { temperature: config.temperature ?? 0 },
       };
       const reply = await post(config, url, headers, body, log);
       const candidate = reply.candidates?.[0];
@@ -89,7 +90,7 @@ function gemini(config, system, tools, firstTurn, log) {
 }
 
 /**
- * OpenAI's chat completions with tools, at temperature 0: the same prompt and tools as Gemini
+ * OpenAI's chat completions with tools, at the configured temperature: the same prompt and tools as Gemini
  * gets, in a different wire format.
  * @param {ChatConfig} config @param {string} system @param {Tool[]} tools
  * @param {string} firstTurn @param {Log} log
@@ -114,7 +115,7 @@ function openai(config, system, tools, firstTurn, log) {
         messages,
         tools: functions,
         tool_choice: 'auto',
-        temperature: 0,
+        temperature: config.temperature ?? 0,
       };
       const choice = (await post(config, url, headers, body, log)).choices?.[0];
       if (!choice?.message) throw new Error('The model returned no choice.');

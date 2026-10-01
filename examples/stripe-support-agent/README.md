@@ -16,7 +16,7 @@ dependencies, nothing imported from RigorRun.
 
 ## Two variants
 
-Both get the same model, the same temperature (0), the same system prompt and the same policy
+Both get the same model, the same temperature, the same system prompt and the same policy
 brief. Only the tools differ, exactly as the pre-registration fixes them:
 
 | `VARIANT` | Tools                                                                                                                                                                                           |
@@ -128,21 +128,22 @@ with the headers `idempotency-key` and `x-rigorrun-case`.
 
 ## Environment
 
-| Variable          | Default                                     | What it is                                                                              |
-| ----------------- | ------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `VARIANT`         | `careful`                                   | `careful` or `minimal`.                                                                 |
-| `STRIPE_KEY`      | (required)                                  | Must start `sk_test_` or `rk_test_`; anything else is refused before a request is made. |
-| `STRIPE_BASE_URL` | `https://api.stripe.com`                    | Stripe, or a twin on this machine. Nothing else is accepted: the key goes nowhere else. |
-| `LLM_PROVIDER`    | `gemini`                                    | `gemini` or `openai` (any OpenAI-compatible endpoint).                                  |
-| `GEMINI_API_KEY`  | (required for `gemini`)                     | Sent as `x-goog-api-key`, never in a URL.                                               |
-| `GEMINI_MODEL`    | (required for `gemini`)                     | No default. The recording picks it with ListModels and pins it.                         |
-| `GEMINI_BASE_URL` | `https://generativelanguage.googleapis.com` | For a proxy, or a test double.                                                          |
-| `OPENAI_BASE_URL` | (required for `openai`)                     | e.g. `http://127.0.0.1:11434/v1` for Ollama.                                            |
-| `OPENAI_MODEL`    | (required for `openai`)                     | e.g. `llama3.1:8b`.                                                                     |
-| `OPENAI_API_KEY`  | none                                        | Sent as a bearer token when set.                                                        |
-| `MIN_INTERVAL_MS` | `0`                                         | The least time between two model requests, for a free tier's per-minute limit.          |
-| `TRANSCRIPT_DIR`  | `./transcripts`                             | Where each ticket's transcript is written.                                              |
-| `PORT`            | `8787`                                      | Listens on `127.0.0.1` only.                                                            |
+| Variable          | Default                                     | What it is                                                                               |
+| ----------------- | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `VARIANT`         | `careful`                                   | `careful` or `minimal`.                                                                  |
+| `STRIPE_KEY`      | (required)                                  | Must start `sk_test_` or `rk_test_`; anything else is refused before a request is made.  |
+| `STRIPE_BASE_URL` | `https://api.stripe.com`                    | Stripe, or a twin on this machine. Nothing else is accepted: the key goes nowhere else.  |
+| `LLM_PROVIDER`    | `gemini`                                    | `gemini` or `openai` (any OpenAI-compatible endpoint).                                   |
+| `GEMINI_API_KEY`  | (required for `gemini`)                     | Sent as `x-goog-api-key`, never in a URL.                                                |
+| `GEMINI_MODEL`    | (required for `gemini`)                     | No default. The recording picks it with ListModels and pins it.                          |
+| `GEMINI_BASE_URL` | `https://generativelanguage.googleapis.com` | For a proxy, or a test double.                                                           |
+| `OPENAI_BASE_URL` | (required for `openai`)                     | e.g. `http://127.0.0.1:11434/v1` for Ollama.                                             |
+| `OPENAI_MODEL`    | (required for `openai`)                     | e.g. `llama3.1:8b`.                                                                      |
+| `OPENAI_API_KEY`  | none                                        | Sent as a bearer token when set.                                                         |
+| `MIN_INTERVAL_MS` | `0`                                         | The least time between two model requests, for a free tier's per-minute limit.           |
+| `TEMPERATURE`     | `0`                                         | 0 unless the model's maker documents another value (Gemini 3: 1.0). Reported by `/meta`. |
+| `TRANSCRIPT_DIR`  | `./transcripts`                             | Where each ticket's transcript is written.                                               |
+| `PORT`            | `8787`                                      | Listens on `127.0.0.1` only.                                                             |
 
 A 429 or 503 from the model is retried after the wait it asks for (`Retry-After`, or Gemini's
 `RetryInfo`), else a doubling backoff, up to 5 times. A wait of two minutes or more means a spent
@@ -194,8 +195,9 @@ part of the workspace's `pnpm test`.
 
 ## Known limits
 
-- Google recommends temperature 1.0 for Gemini 3 models and warns that lower values can cause
-  looping. The pre-registration fixes 0; a model that loops is stopped after 8 rounds and answers
-  `stopped`, which is reported as what it is.
+- Temperature is 0 unless `TEMPERATURE` says otherwise. Google recommends 1.0 for Gemini 3
+  models and warns that lower values can cause looping, so a Gemini 3 recording runs at 1.0
+  (reports/flagship-demo-2026-10/AMENDMENT-1.md). A model that loops is stopped after 8 rounds and
+  answers `stopped`, which is reported as what it is.
 - No `Stripe-Version` is pinned, so objects come back in the account's default API version.
 - `lookup_order` reads at most 20 pages (2,000 charges) of the last 24 hours.
