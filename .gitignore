@@ -32,3 +32,6 @@ tmp/
 
 # Python bytecode from the SDK tests.
 __pycache__/
+
+# What `rigorrun stripe init` writes for whoever runs it.
+rigorrun-stripe/
