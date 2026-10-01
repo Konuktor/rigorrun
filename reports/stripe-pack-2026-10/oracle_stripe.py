@@ -83,6 +83,23 @@ class StripeReader:
             query["starting_after"] = data[-1]["id"]
 
 
+
+def _parse_since(value: Any) -> int:
+    """Unix seconds from a number or an ISO-8601 timestamp, one second early.
+
+    RigorRun writes RIGORRUN_CASE_STARTED_AT as ISO-8601. Stripe's `created`
+    has one-second resolution, so the window starts a second before the case
+    to keep a refund made in that same second in view (Amendment 1).
+    """
+    from datetime import datetime
+
+    text = str(value).strip()
+    try:
+        seconds = float(text)
+    except ValueError:
+        seconds = datetime.fromisoformat(text.replace("Z", "+00:00")).timestamp()
+    return int(seconds) - 1
+
 def load_cases(path: Path = CASES_PATH) -> dict[str, Any]:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
@@ -179,7 +196,7 @@ def evaluate(
         since_value = min(created_values)
         notes.append(f"case start derived from earliest bound object: {since_value}")
     else:
-        since_value = int(float(since))
+        since_value = _parse_since(since)
 
     refunds_by_id: dict[str, dict[str, Any]] = {}
     charge_ids = {
@@ -194,8 +211,20 @@ def evaluate(
         refunds_by_id[str(refund.get("id", f"anonymous-{len(refunds_by_id)}"))] = refund
 
     observed_counter: Counter[tuple[str, int]] = Counter()
+    setup_refunds: list[str] = []
     for refund in refunds_by_id.values():
         if int(refund.get("created", -1)) < since_value:
+            continue
+        # Amendment 1: a refund RigorRun made while setting the case up is part of
+        # the starting state, not something the agent did. Setup objects carry the
+        # case's rigorrun_case and rigorrun_attempt; agents never write rigorrun_*.
+        refund_metadata = refund.get("metadata") if isinstance(refund.get("metadata"), dict) else {}
+        if (
+            str(refund_metadata.get("rigorrun_case", "")) == case_id
+            and expected_attempt is not None
+            and str(refund_metadata.get("rigorrun_attempt", "")) == str(expected_attempt)
+        ):
+            setup_refunds.append(str(refund.get("id", "")))
             continue
         if refund.get("status") not in ACTIVE_REFUND_STATES:
             continue
