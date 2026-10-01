@@ -1458,7 +1458,8 @@
       ]
     },
     "next": [
-      "npx rigorrun stripe init --twin",
+      "npx rigorrun stripe twin                     # terminal 1, leave it running",
+      "npx rigorrun stripe init --twin --yes        # terminal 2",
       "https://docs.rigorrun.xyz/start/stripe/"
     ]
   },
