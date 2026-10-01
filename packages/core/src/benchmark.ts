@@ -90,6 +90,15 @@ export const BenchmarkCaseSchema = z.object({
     config: z.record(z.string(), z.string()).default({}),
     /** Arguments the agent is asked to work from. Public. */
     request: z.record(z.string(), z.unknown()).default({}),
+    /**
+     * PRIVATE. What to create before this case runs, for an environment whose
+     * seed is `materialized`, in that environment's own format.
+     *
+     * It says which records the case needs and what is true of them, so it
+     * gives the answer away as surely as the checks do. It reaches the
+     * environment and nothing else; `publicCaseView` never includes the seed.
+     */
+    recipe: z.unknown().optional(),
   }),
   task: AgentTaskSchema,
   /** PRIVATE. Never serialised into anything the agent can read. */
@@ -154,9 +163,7 @@ export const BenchmarkSchema = z.object({
    * case looks identical to a rule that is satisfied by everything, and the
    * difference is the whole question of whether the benchmark covers the job.
    */
-  notTestable: z
-    .array(z.object({ rule: z.string(), reason: z.string() }))
-    .default([]),
+  notTestable: z.array(z.object({ rule: z.string(), reason: z.string() })).default([]),
   projectionFocus: z.array(z.string()).default([]),
   /**
    * The shape of the job, carried so tooling can reason about the suite.

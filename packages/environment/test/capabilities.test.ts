@@ -56,7 +56,7 @@ describe('isolation between cases', () => {
     expect(isolationLevel(FULL_CAPABILITIES)).toBe('RESET');
   });
 
-  it('is only DECLARED when the reset is somebody else\'s promise', () => {
+  it("is only DECLARED when the reset is somebody else's promise", () => {
     // A nominated tool has never been called twice and compared. Reporting
     // that as RESET claimed a measurement nobody took.
     expect(isolationLevel(REALISTIC)).toBe('DECLARED');
@@ -102,14 +102,10 @@ describe('the limits shown to a person', () => {
   });
 
   it('reports every limit of an opaque production system at once', () => {
-    const ids = capabilityLimits(OPAQUE).map((limit) => limit.id).sort();
-    expect(ids).toEqual([
-      'induced_schema',
-      'no_reset',
-      'no_seed',
-      'no_state_read',
-      'production',
-    ]);
+    const ids = capabilityLimits(OPAQUE)
+      .map((limit) => limit.id)
+      .sort();
+    expect(ids).toEqual(['induced_schema', 'no_reset', 'no_seed', 'no_state_read', 'production']);
   });
 
   it('is written for reading, not for logging', () => {
@@ -117,5 +113,64 @@ describe('the limits shown to a person', () => {
       expect(limit.limit.length).toBeGreaterThan(30);
       expect(limit.limit).toMatch(/[a-z]\.$/);
     }
+  });
+});
+
+/** A system with no reset at all, where every case makes its own records. */
+const MATERIALIZED: EnvironmentCapabilities = {
+  discovery: 'declared-schema',
+  stateRead: 'designated-reads',
+  stateReadIndependence: 'independent',
+  seed: 'materialized',
+  reset: 'namespace',
+  events: 'proxy-log',
+  safety: 'staging',
+};
+
+describe('cases that make their own records', () => {
+  it('are isolated by construction, and say so rather than claiming a reset', () => {
+    expect(isolationLevel(MATERIALIZED)).toBe('FRESH_OBJECTS');
+    // Two resets compared say nothing about a namespace, which puts nothing
+    // back; a measurement must not be able to turn this into RESET.
+    expect(isolationLevel(MATERIALIZED, { stable: true, pathsStable: true })).toBe('FRESH_OBJECTS');
+  });
+
+  it('may be repeated, because every attempt starts from records of its own', () => {
+    expect(mayRepeatMutatingCases(MATERIALIZED)).toBe(true);
+  });
+
+  it('are not isolated by a namespace alone', () => {
+    // Reading only "this case's" records when the case created none is reading
+    // nothing, from a world every case shares.
+    const shared = { ...MATERIALIZED, seed: 'none' as const };
+    expect(isolationLevel(shared)).toBe('NONE');
+    expect(mayRepeatMutatingCases(shared)).toBe(false);
+  });
+
+  it('say their reads are scoped to the case, with no remedy to invent', () => {
+    const limits = capabilityLimits(MATERIALIZED);
+    expect(limits.map((limit) => limit.id)).toEqual(['scoped_state_read']);
+    expect(limits[0]?.remedy).toBe('');
+  });
+});
+
+describe('a simulated system', () => {
+  it('is named as one on every run against it', () => {
+    const limits = capabilityLimits({ ...MATERIALIZED, simulated: true });
+    const simulated = limits.find((limit) => limit.id === 'simulated');
+    expect(simulated?.limit).toMatch(/local twin, not the real system/);
+    expect(simulated?.remedy).toMatch(/real system/);
+  });
+
+  it('is never assumed: absent and false both mean the real system', () => {
+    for (const caps of [MATERIALIZED, { ...MATERIALIZED, simulated: false }, FULL_CAPABILITIES]) {
+      expect(capabilityLimits(caps).some((limit) => limit.id === 'simulated')).toBe(false);
+    }
+  });
+
+  it('does not change what else the run may claim', () => {
+    const twin = { ...MATERIALIZED, simulated: true };
+    expect(verificationStrength(twin)).toBe(verificationStrength(MATERIALIZED));
+    expect(isolationLevel(twin)).toBe('FRESH_OBJECTS');
   });
 });

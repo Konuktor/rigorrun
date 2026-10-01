@@ -20,8 +20,35 @@ import type {
 } from './schema.ts';
 import type { CanonicalState, EnvEvent, StateSnapshot } from './state.ts';
 import type { EnvironmentCapabilities } from './capabilities.ts';
+import type { PackBindings, PackCaseContext } from './pack.ts';
 
 export type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * What creating a case's records produced.
+ *
+ * `bindings` are the names the case's text and checks refer to, mapped to the
+ * identifiers the records were actually given; the runner binds the case with
+ * them before anything else sees it. `readScope` says, in one sentence, what
+ * the reads for this case will cover, and travels with the verdict so nobody
+ * has to guess what "the system" meant.
+ */
+export interface MaterializedCase {
+  bindings: PackBindings;
+  readScope: string;
+}
+
+/**
+ * What the system itself holds at the end of a case, in its own terms.
+ *
+ * Shown beside what the agent said it did, and never scored: the checks
+ * already judged the same state. `system` names whose account this is, and
+ * each line is one sentence a person can compare with the agent's claim.
+ */
+export interface Reality {
+  system: string;
+  lines: string[];
+}
 
 export interface ActionResult {
   ok: boolean;
@@ -167,6 +194,23 @@ export interface EnvironmentAdapter {
 
   snapshot(): MaybePromise<StateSnapshot>;
   restore(snapshot: StateSnapshot): MaybePromise<void>;
+
+  /**
+   * Creates this case's records from the recipe in its seed.
+   *
+   * Present exactly when `capabilities().seed` is `materialized`, and called
+   * after `reset()` in place of `seed()`, once per case and once per attempt:
+   * an attempt never reuses another's records. A throw means the case has no
+   * world to be judged in, which is a harness failure and never the agent's.
+   */
+  materialize?(seed: { recipe?: unknown }, ctx: PackCaseContext): Promise<MaterializedCase>;
+
+  /**
+   * The system's own account of what the case ended with, given the states
+   * read at either end. `undefined` when the environment has nothing to say
+   * beyond the checks.
+   */
+  describeReality?(seed: CanonicalState, final: CanonicalState): Reality | undefined;
 }
 
 /**
