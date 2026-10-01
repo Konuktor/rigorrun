@@ -21,7 +21,8 @@ npx rigorrun stripe init --twin --yes         # in another terminal
 ```
 
 `init` lists the refund policy's rules and asks you to confirm each one (`--yes` confirms all). Only
-a rule you confirm can fail your agent; the rest still run and are reported, and never gate. It then
+a rule you confirm can fail your agent: a rule you say no to is left out of the suite, and `init`
+names it. Each ticket's own outcome — the refund it is owed, or none — is always checked. It then
 creates the project and its suite — seven tickets and a $1.00 canary — and writes
 `rigorrun-stripe/ticket.example.json`: exactly what your agent will be sent, with example ids.
 

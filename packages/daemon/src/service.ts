@@ -679,9 +679,11 @@ export class Service {
    * person's confirmations are applied exactly as a review applies them. A
    * check that cites a rule then gates exactly when its rule is in force —
    * observed or confirmed — as a generated suite's checks do: a pack's author
-   * proposing a rule is not the person who runs the agent agreeing to it, and
-   * nothing unconfirmed fails an agent. A check citing no rule is left as the
-   * pack wrote it.
+   * proposing a rule is not the person who runs the agent agreeing to it. The
+   * runner fails a case on any check that fails, so a pack that promises an
+   * unconfirmed rule cannot fail an agent keeps the promise by leaving that
+   * rule's checks out; confirming such a rule here is refused. A check citing
+   * no rule is left as the pack wrote it.
    *
    * The suite is re-addressed to this project — its environment is the
    * project, as a generated suite's is — and its contract hash is the hash of
@@ -723,6 +725,22 @@ export class Service {
     if (unknownRules.length > 0) {
       throw new Error(
         `${pack.name}'s suite has no rule ${unknownRules.join(', ')}. Its rules: ${[...ruleIds].join(', ') || 'none'}.`,
+      );
+    }
+    // A pack may leave a rule nobody confirmed out of its cases, so that it
+    // cannot fail an agent. Confirming such a rule here, after the suite was
+    // built without it, would record a yes with no check behind it — a gate
+    // the person believes in that gates nothing — so it is refused.
+    const cited = new Set(
+      parsedBenchmark.data.cases.flatMap((testCase) =>
+        testCase.checks.flatMap((check) => (check.ruleId === undefined ? [] : [check.ruleId])),
+      ),
+    );
+    const unchecked = confirmedRuleIds.filter((id) => !cited.has(id));
+    if (unchecked.length > 0) {
+      throw new Error(
+        `${pack.name}'s suite has no check for ${unchecked.join(', ')}, so confirming it here ` +
+          'would gate nothing. Build the suite again with the rule confirmed.',
       );
     }
     for (const testCase of parsedBenchmark.data.cases) {

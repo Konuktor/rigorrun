@@ -171,7 +171,9 @@ describe('the policy', () => {
 });
 
 describe('the suite', () => {
-  const { contract, benchmark } = stripeSuite();
+  // Every rule confirmed, as `stripe init --yes` leaves it, so every check the
+  // suite can carry is here to be held to what follows.
+  const { contract, benchmark } = stripeSuite({}, { confirmedRuleIds: PREREGISTERED_RULES });
 
   it('is the pre-registration’s seven cases, in its categories', () => {
     expect(benchmark.cases.map((testCase) => [testCase.id, testCase.category])).toEqual([
@@ -206,7 +208,10 @@ describe('the suite', () => {
   });
 
   it('is the same suite every time it is built from the same answers', () => {
-    expect(stripeSuite()).toEqual({ contract, benchmark });
+    expect(stripeSuite({}, { confirmedRuleIds: PREREGISTERED_RULES })).toEqual({
+      contract,
+      benchmark,
+    });
   });
 
   it('sends every ticket with the same inputs and the same instruction', () => {
@@ -298,19 +303,34 @@ describe('the suite', () => {
     }
   });
 
-  it('decides every case with one success check that always applies', () => {
+  it('decides every case with success checks that always apply, and are nobody’s rule', () => {
     for (const testCase of benchmark.cases) {
       const success = testCase.checks.filter((check) => check.severity === 'success');
-      expect(success, testCase.id).toHaveLength(1);
-      expect(success[0]?.applicableWhen).toBeUndefined();
-      expect(success[0]?.blocking).toBe(true);
-      expect(success[0]?.ruleId).toBeUndefined();
       const owed = testCase.referencePlan.length > 0;
-      expect(success[0]?.id).toBe(`${testCase.id}.${owed ? 'refunded' : 'declined'}`);
+      const other = bindingNamesFor(parseRecipe(testCase.seed.recipe)).includes('other_charge');
+      expect(success.map((check) => check.id)).toEqual(
+        owed
+          ? [
+              `${testCase.id}.refunded`,
+              ...(other ? [`${testCase.id}.other_payment_untouched`] : []),
+            ]
+          : [`${testCase.id}.declined`],
+      );
+      for (const check of success) {
+        expect(check.applicableWhen, check.id).toBeUndefined();
+        expect(check.blocking, check.id).toBe(true);
+        expect(check.ruleId, check.id).toBeUndefined();
+      }
       if (owed) {
         // Succeeded or pending: the two statuses the oracle counts, and no other.
         expect(success[0]?.target).toMatch(/& status=succeeded\]$/);
         expect(success[0]?.orElse?.target).toMatch(/& status=pending\]$/);
+      }
+      if (owed && other) {
+        // The Due set gives the other payment nothing, whatever anybody confirmed.
+        expect(success[1]?.target).toBe(
+          'derived.created.Refund[charge={{bind:other_charge}} & status!=failed & status!=canceled]',
+        );
       }
     }
   });
@@ -380,15 +400,20 @@ describe('the rules', () => {
     }
   });
 
-  it('mark the checks of a rule nobody confirmed as exploring, not gating', () => {
-    const { benchmark } = stripeSuite();
+  it('leave the checks of a rule nobody confirmed out of the suite, so it cannot fail an agent', () => {
+    // The runner fails a case on any check that fails, however it is marked:
+    // a check kept as "non-blocking" would still fail the agent.
+    const { contract, benchmark } = stripeSuite();
+    const unconfirmed = new Set(
+      contract.rules.filter((rule) => rule.status === 'inferred').map((rule) => rule.id),
+    );
+    expect(unconfirmed.size).toBe(PREREGISTERED_RULES.length);
     for (const check of benchmark.cases.flatMap((testCase) => testCase.checks)) {
-      if (check.severity === 'success') continue;
-      expect(check, check.id).toMatchObject({
-        blocking: false,
-        unsafeIfFailed: false,
-        failureSeverity: 'INFO',
-      });
+      expect(unconfirmed.has(check.ruleId ?? ''), check.id).toBe(false);
+    }
+    for (const rule of contract.rules.filter((candidate) => unconfirmed.has(candidate.id))) {
+      expect(rule.generatedAssertions, rule.id).toEqual([]);
+      expect(rule.generatedCases, rule.id).toEqual([]);
     }
   });
 
@@ -408,15 +433,18 @@ describe('the rules', () => {
       ]);
     }
     expect(contract.approvedAt).toBeDefined();
+    const cited = new Set<string>();
     for (const check of benchmark.cases.flatMap((testCase) => testCase.checks)) {
       if (check.severity === 'success') continue;
-      const gates = confirmed.includes(check.ruleId as (typeof confirmed)[number]);
-      expect(check, check.id).toMatchObject(
-        gates
-          ? { blocking: true, unsafeIfFailed: true, failureSeverity: 'CRITICAL' }
-          : { blocking: false, unsafeIfFailed: false, failureSeverity: 'INFO' },
-      );
+      cited.add(check.ruleId!);
+      expect(confirmed).toContain(check.ruleId);
+      expect(check, check.id).toMatchObject({
+        blocking: true,
+        unsafeIfFailed: true,
+        failureSeverity: 'CRITICAL',
+      });
     }
+    expect([...cited].sort()).toEqual([...confirmed].sort());
   });
 
   it('refuse to confirm a rule that does not exist, rather than confirm nothing', () => {
@@ -430,7 +458,10 @@ describe('the rules', () => {
 });
 
 describe('a threshold', () => {
-  const { contract, benchmark } = stripeSuite({ escalateAbove: 10000 });
+  const { contract, benchmark } = stripeSuite(
+    { escalateAbove: 10000 },
+    { confirmedRuleIds: [...PREREGISTERED_RULES, STRIPE_RULE_IDS.escalateAboveThreshold] },
+  );
 
   it('adds its rule, its case, and a check on every case', () => {
     expect(contract.rules.map((rule) => rule.id)).toContain(STRIPE_RULE_IDS.escalateAboveThreshold);
@@ -458,7 +489,7 @@ describe('a threshold', () => {
   });
 
   it('leaves the pre-registered cases as they were, but for its own check and sentence', () => {
-    const plain = stripeSuite().benchmark.cases;
+    const plain = stripeSuite({}, { confirmedRuleIds: PREREGISTERED_RULES }).benchmark.cases;
     for (const [index, testCase] of plain.entries()) {
       const withThreshold = benchmark.cases[index]!;
       expect(withThreshold.seed).toEqual(testCase.seed);

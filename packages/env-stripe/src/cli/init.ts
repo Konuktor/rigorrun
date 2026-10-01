@@ -260,6 +260,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
 
   // ----------------------------------------------------------- the rules
   const confirmedRuleIds: string[] = [];
+  const leftOut: { id: string; statement: string }[] = [];
   for (const rule of stripeRules(policy)) {
     let yes = values.yes;
     if (!yes) {
@@ -270,6 +271,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
       say(`  ✓ ${rule.statement}`);
     }
     if (yes) confirmedRuleIds.push(rule.id);
+    else leftOut.push({ id: rule.id, statement: rule.statement });
   }
   const ruleCount = stripeRules(policy).length;
 
@@ -322,6 +324,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
           keySecret,
           safety,
           confirmedRuleIds,
+          leftOutRuleIds: leftOut.map((rule) => rule.id),
           rules: ruleCount,
           cases: caseIds,
           ticket: example ? ticketPath : null,
@@ -348,8 +351,13 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
   ])) {
     say(line);
   }
-  if (confirmedRuleIds.length < ruleCount) {
-    say('  (a rule you did not confirm still runs, and is reported, but never fails the agent)');
+  if (leftOut.length > 0) {
+    // Named, so the owner sees exactly what the suite does not hold their
+    // agent to. Their checks are not in it at all: a check that ran would fail
+    // the agent like any other, whatever it was marked.
+    say();
+    say('Left out — not checked, so they cannot fail your agent:');
+    for (const rule of leftOut) say(`  ${rule.statement}`);
   }
   say();
   say('Next');

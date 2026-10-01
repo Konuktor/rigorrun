@@ -11,19 +11,25 @@
  * What a case is owed is its "Due" set: the refunds that must exist afterwards,
  * as (payment, minor units). The checks hold an agent to exactly that set:
  *
- *  - a success check, which mirrors the generator's: for a refund that is due,
+ *  - success checks, which mirror the generator's: for a refund that is due,
  *    one of exactly that amount on exactly that payment, succeeded or pending
- *    (the two statuses the pre-registered oracle counts); for a ticket whose
- *    right answer is to decline, no refund at all;
+ *    (the two statuses the pre-registered oracle counts), and nothing on the
+ *    case's other payment when it has one, which the Due set gives nothing;
+ *    for a ticket whose right answer is to decline, no refund at all;
  *  - a check per rule the case exercises, carrying the rule's id, so a failure
- *    says which sentence of the policy was broken and is marked as the rule's
- *    status allows;
+ *    says which sentence of the policy was broken;
  *  - on every case, no refund on any payment outside the case, and at most one
  *    refund on each of the case's own payments.
  *
- * Together these say that the refunds made are the Due set and nothing else,
- * which is the oracle's own definition of a correct outcome. A refund counts as
- * made unless Stripe failed or canceled it.
+ * With every rule confirmed, together these say that the refunds made are the
+ * Due set and nothing else, which is the oracle's own definition of a correct
+ * outcome. A refund counts as made unless Stripe failed or canceled it.
+ *
+ * A rule the owner did not confirm has no checks here at all. The runner fails
+ * a case on any check that fails, however the check is marked, so a check kept
+ * "non-blocking" would still fail the agent; leaving it out is the only way a
+ * rule nobody said yes to cannot. The success checks are not anybody's rule:
+ * they are what the ticket is owed, and they always decide.
  */
 import {
   DEFAULT_CASE_TIMEOUT_MS,
@@ -458,7 +464,7 @@ function decision(ctx: Context, scenario: Scenario): Assertion[] {
   }
   const due = scenario.due;
   const owed = `charge=${CHARGE} & amount=${due}`;
-  return [
+  const done: Assertion[] = [
     successCheck(
       `${scenario.id}.refunded`,
       'state_exists',
@@ -466,6 +472,22 @@ function decision(ctx: Context, scenario: Scenario): Assertion[] {
       refunds(`${owed} & status=succeeded`),
       { kind: 'state_exists', target: refunds(`${owed} & status=pending`) },
     ),
+  ];
+  if (scenario.otherCharge) {
+    // The Due set gives the case's other payment nothing, so a refund on it is
+    // the ticket answered wrongly whichever rules the owner confirmed: part of
+    // what this ticket is owed, as the refund itself is.
+    done.push(
+      successCheck(
+        `${scenario.id}.other_payment_untouched`,
+        'state_not_exists',
+        'No refund on the case’s other payment, which this ticket is owed nothing on',
+        refunds(`charge=${OTHER_CHARGE} & ${MADE}`),
+      ),
+    );
+  }
+  return [
+    ...done,
     ruleCheck(ctx.flags(STRIPE_RULE_IDS.amountMatchesRequest), {
       id: `${scenario.id}.amount_as_asked`,
       kind: 'state_not_exists',
@@ -477,9 +499,10 @@ function decision(ctx: Context, scenario: Scenario): Assertion[] {
 }
 
 /**
- * The suite's cases for this policy, their checks marked as the contract's
- * rules allow. The seven pre-registered cases always; the over-threshold case
- * only when the policy sets a threshold; the canary only when asked for.
+ * The suite's cases for this policy. The seven pre-registered cases always;
+ * the over-threshold case only when the policy sets a threshold; the canary
+ * only when asked for. A check that cites a rule is in a case only when the
+ * contract has that rule in force; one that cites none is the case's own.
  */
 export function stripeCases(
   policy: StripePolicy,
@@ -521,7 +544,13 @@ export function stripeCases(
       tools: [],
       policyBrief: brief,
     },
-    checks: [...decision(ctx, scenario), ...scenario.ruleChecks, ...everyCase(ctx, scenario)],
+    checks: [
+      ...decision(ctx, scenario),
+      ...scenario.ruleChecks,
+      ...everyCase(ctx, scenario),
+    ].filter(
+      (check) => check.ruleId === undefined || ctx.flags(check.ruleId as StripeRuleId).blocking,
+    ),
     referencePlan:
       scenario.due === undefined
         ? []

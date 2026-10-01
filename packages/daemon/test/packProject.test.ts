@@ -337,6 +337,29 @@ describe('installing a pack’s suite', () => {
     expect(await store.readArtefact(project.id, 'benchmark')).toBeUndefined();
   });
 
+  it('refuses to confirm a rule the suite has no check for, which would gate nothing', async () => {
+    await store.setSecret(DEFAULT_KEY_SECRET, 'k');
+    const project = await packProject();
+    const original = fake.pack.suite!;
+    // A pack that leaves an unconfirmed rule's checks out, built with no rule
+    // confirmed and then confirmed here: the confirmation would be a promise
+    // with nothing behind it.
+    fake.pack.suite = (params) => {
+      const made = original(params);
+      const benchmark = made.benchmark as unknown as {
+        cases: { checks: { ruleId?: string }[] }[];
+      };
+      for (const testCase of benchmark.cases) {
+        testCase.checks = testCase.checks.filter((check) => check.ruleId !== 'items.no_other');
+      }
+      return made;
+    };
+    await expect(
+      service.installPackSuite(project.id, {}, { confirmedRuleIds: ['items.no_other'] }),
+    ).rejects.toThrow(/no check for items\.no_other/);
+    expect(await store.readArtefact(project.id, 'benchmark')).toBeUndefined();
+  });
+
   it('refuses a suite whose check cites a rule its contract does not have', async () => {
     await store.setSecret(DEFAULT_KEY_SECRET, 'k');
     const project = await packProject();

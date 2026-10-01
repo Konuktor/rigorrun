@@ -6,9 +6,10 @@
  * a demonstration, and they start `inferred` like every rule RigorRun proposes:
  * the pack's authors wrote them, but it is the project's owner who says this is
  * their policy too. `stripe init` asks, and `confirmRules` records the answer.
- * Until then each rule's checks still run and still show in a verdict, but they
- * are marked the way the compiler marks an unconfirmed rule's checks —
- * non-blocking, not unsafe, severity INFO — because nobody has said they gate.
+ * Until then the rule stays on the contract, where the owner can see it and
+ * say yes later, but its checks are left out of the suite: the runner fails a
+ * case on any check that fails, however it is marked, so a rule nobody said
+ * yes to can only be kept from failing an agent by not being checked at all.
  *
  * A rule here says what it means in general. Which payment and which amount a
  * ticket is about differ from case to case and only exist once a case's
@@ -363,8 +364,9 @@ export interface StripeCheckFlags {
  *
  * Mirrors the compiler: only a rule observed or confirmed, and not one Stripe
  * enforces by itself, may block; its failures are unsafe and CRITICAL, because
- * each of these rules guards money leaving the account. Anything else explores:
- * non-blocking, not unsafe, INFO.
+ * each of these rules guards money leaving the account. `blocking` false says
+ * the rule is not in force, and the suite then leaves its checks out (see
+ * scenarios.ts); the other marks are what such a check would have carried.
  */
 export function stripeCheckFlags(
   contract: EnvironmentContract,
