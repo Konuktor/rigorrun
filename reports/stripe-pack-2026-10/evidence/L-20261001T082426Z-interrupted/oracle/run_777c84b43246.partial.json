@@ -1,0 +1,1 @@
+{"attempt": "0", "case": "partial", "due": [{"amount": 2500, "charge": "ch_3ULfMA1DGsOQjaGX0c5Hquqh"}], "extra": [], "label": "PASS", "livemode_ok": true, "metadata_ok": true, "missing": [], "notes": [], "observed": [{"amount": 2500, "charge": "ch_3ULfMA1DGsOQjaGX0c5Hquqh"}]}
