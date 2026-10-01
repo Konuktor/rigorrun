@@ -328,7 +328,7 @@ export async function runConformance(options: ConformanceOptions): Promise<Confo
   await step(
     'refund.more_than_remains',
     { method: 'POST', path: '/v1/refunds', params: { charge: chargeId, amount: 4000 } },
-    (r) => error(r, 400, 'invalid_request_error', 'amount_too_large'),
+    (r) => error(r, 400, 'invalid_request_error'),
   );
   await step(
     'refund.amount_not_integer',
@@ -343,7 +343,7 @@ export async function runConformance(options: ConformanceOptions): Promise<Confo
   await step(
     'refund.no_charge_or_payment_intent',
     { method: 'POST', path: '/v1/refunds', params: { amount: 100 } },
-    (r) => error(r, 400, 'invalid_request_error', 'parameter_missing'),
+    (r) => error(r, 400, 'invalid_request_error'),
   );
   await step(
     'refund.unknown_charge',
@@ -767,7 +767,7 @@ class Normalizer {
       this.ids.set(value, placeholder);
       return placeholder;
     }
-    const path = value.replace(/\/(cus|pi|ch|re|dp)_[A-Za-z0-9]+/g, (segment) => {
+    const path = value.replace(/\/(cus|pi|ch|re|dp|du)_[A-Za-z0-9]+/g, (segment) => {
       return `/${this.text(segment.slice(1))}`;
     });
     return path.split(this.tag).join('<run>');

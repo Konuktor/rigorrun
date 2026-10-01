@@ -72,9 +72,7 @@ describe('the conformance script against the twin', () => {
     expect(new Set(errors)).toEqual(
       new Set([
         'parameter_unknown',
-        'amount_too_large',
         'parameter_invalid_integer',
-        'parameter_missing',
         'resource_missing',
         'charge_already_refunded',
         'charge_disputed',
@@ -126,7 +124,7 @@ describe('comparing with the golden file', () => {
     });
     expect(compareToGolden(recorded, first)).toEqual([
       'refund.more_than_remains.status: Stripe 402, this run 400',
-      'refund.more_than_remains.body.error.code: Stripe "balance_insufficient", this run "amount_too_large"',
+      'refund.more_than_remains.body.error.code: Stripe "balance_insufficient", this run null',
       'only.in.golden: in the golden file, not in this run',
     ]);
   });

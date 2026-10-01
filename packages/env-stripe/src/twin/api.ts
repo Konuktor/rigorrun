@@ -317,7 +317,8 @@ const createRefund: Route = {
       throw invalidRequest(
         'One of the following params should be provided for this request: payment_intent or ' +
           'charge.',
-        { code: 'parameter_missing' },
+        // Without a code or a param, as Stripe test mode answers it.
+        {},
       );
     }
     const input: RefundInput = { reason: reason ?? null, metadata: readMetadata(params) ?? {} };

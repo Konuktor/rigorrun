@@ -324,7 +324,8 @@ export class TwinModel {
       if (!charge) continue;
       charge.disputed = true;
       this.insert('dispute', {
-        id: twinId('dp'),
+        // Stripe's dispute ids start du_ (test/golden/stripe-live.json).
+        id: twinId('du'),
         object: 'dispute',
         amount: charge.amount,
         charge: charge.id,
@@ -584,7 +585,11 @@ export class TwinModel {
     this.settle();
     let charge: TwinCharge | undefined;
     if (input.charge !== undefined) {
-      charge = this.stored('charge', input.charge, 'charge');
+      // An unknown charge here is a 404 naming `id`, as Stripe answers it
+      // (test/golden/stripe-live.json, refund.unknown_charge).
+      const found = this.tables.charge.get(input.charge);
+      if (found === undefined) throw noSuch('charge', input.charge, 'id', 404);
+      charge = found;
     }
     if (input.paymentIntent !== undefined) {
       const intent = this.stored('payment_intent', input.paymentIntent, 'payment_intent');
@@ -622,7 +627,8 @@ export class TwinModel {
       throw invalidRequest(
         `Refund amount (${formatAmount(amount, charge.currency)}) is greater than unrefunded ` +
           `amount on charge (${formatAmount(remaining, charge.currency)})`,
-        { code: 'amount_too_large', param: 'amount' },
+        // Stripe test mode answers this one without a code (test/golden/stripe-live.json).
+        { param: 'amount' },
       );
     }
     charge.amount_refunded += amount;

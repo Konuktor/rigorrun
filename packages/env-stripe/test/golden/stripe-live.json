@@ -1,0 +1,1110 @@
+{
+  "about": "Stripe test mode, recorded by packages/env-stripe/scripts/conformance.ts --target live --write-golden. The authority for the twin: where the two disagree, the twin is fixed.",
+  "recordedAt": "2026-10-01T03:53:05.772Z",
+  "stripeVersion": "2025-12-15.clover",
+  "steps": [
+    {
+      "step": "balance",
+      "request": {
+        "method": "GET",
+        "path": "/v1/balance"
+      },
+      "status": 200,
+      "body": {
+        "object": "balance",
+        "livemode": false
+      }
+    },
+    {
+      "step": "auth.missing_key",
+      "request": {
+        "method": "GET",
+        "path": "/v1/balance",
+        "key": "(none)"
+      },
+      "status": 401,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": null,
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "auth.live_key",
+      "request": {
+        "method": "GET",
+        "path": "/v1/balance",
+        "key": "(a live key)"
+      },
+      "status": 401,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": null,
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "route.unknown",
+      "request": {
+        "method": "GET",
+        "path": "/v1/rigorrun_conformance_nothing"
+      },
+      "status": 404,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": null,
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "customer.create",
+      "request": {
+        "method": "POST",
+        "path": "/v1/customers",
+        "params": {
+          "email": "rr-conf-<run>@example.com",
+          "name": "RigorRun Conformance",
+          "metadata": {
+            "rigorrun_conformance": "<run>"
+          }
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<cus:1>",
+        "object": "customer",
+        "email": "rr-conf-<run>@example.com",
+        "name": "RigorRun Conformance",
+        "metadata": {
+          "rigorrun_conformance": "<run>"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "customer.unknown_parameter",
+      "request": {
+        "method": "POST",
+        "path": "/v1/customers",
+        "params": {
+          "email": "rr-conf-<run>@example.com",
+          "nickname": "x"
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "parameter_unknown",
+          "param": "nickname"
+        }
+      }
+    },
+    {
+      "step": "customer.retrieve",
+      "request": {
+        "method": "GET",
+        "path": "/v1/customers/<cus:1>"
+      },
+      "status": 200,
+      "body": {
+        "id": "<cus:1>",
+        "object": "customer",
+        "email": "rr-conf-<run>@example.com",
+        "name": "RigorRun Conformance",
+        "metadata": {
+          "rigorrun_conformance": "<run>"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "customers.by_email",
+      "request": {
+        "method": "GET",
+        "path": "/v1/customers",
+        "params": {
+          "email": "rr-conf-<run>@example.com"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/customers",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<cus:1>",
+            "object": "customer",
+            "email": "rr-conf-<run>@example.com",
+            "name": "RigorRun Conformance",
+            "metadata": {
+              "rigorrun_conformance": "<run>"
+            },
+            "created": "<ts>",
+            "livemode": false
+          }
+        ]
+      }
+    },
+    {
+      "step": "payment_intent.visa",
+      "request": {
+        "method": "POST",
+        "path": "/v1/payment_intents",
+        "params": {
+          "amount": 6000,
+          "currency": "usd",
+          "customer": "<cus:1>",
+          "payment_method": "pm_card_visa",
+          "payment_method_types": ["card"],
+          "confirm": true,
+          "metadata": {
+            "order_ref": "RR-CONF-<run>-A"
+          }
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<pi:1>",
+        "object": "payment_intent",
+        "amount": 6000,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "status": "succeeded",
+        "latest_charge": "<ch:1>",
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-A"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "payment_intent.retrieve_expanded",
+      "request": {
+        "method": "GET",
+        "path": "/v1/payment_intents/<pi:1>",
+        "params": {
+          "expand": ["latest_charge"]
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<pi:1>",
+        "object": "payment_intent",
+        "amount": 6000,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "status": "succeeded",
+        "latest_charge": {
+          "id": "<ch:1>",
+          "object": "charge",
+          "amount": 6000,
+          "amount_captured": 6000,
+          "amount_refunded": 0,
+          "refunded": false,
+          "disputed": false,
+          "captured": true,
+          "paid": true,
+          "currency": "usd",
+          "customer": "<cus:1>",
+          "payment_intent": "<pi:1>",
+          "status": "succeeded",
+          "metadata": {
+            "order_ref": "RR-CONF-<run>-A"
+          },
+          "created": "<ts>",
+          "livemode": false
+        },
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-A"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "charge.retrieve",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges/<ch:1>"
+      },
+      "status": 200,
+      "body": {
+        "id": "<ch:1>",
+        "object": "charge",
+        "amount": 6000,
+        "amount_captured": 6000,
+        "amount_refunded": 0,
+        "refunded": false,
+        "disputed": false,
+        "captured": true,
+        "paid": true,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "payment_intent": "<pi:1>",
+        "status": "succeeded",
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-A"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "charges.by_payment_intent",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges",
+        "params": {
+          "payment_intent": "<pi:1>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/charges",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<ch:1>",
+            "object": "charge",
+            "amount": 6000,
+            "amount_captured": 6000,
+            "amount_refunded": 0,
+            "refunded": false,
+            "disputed": false,
+            "captured": true,
+            "paid": true,
+            "currency": "usd",
+            "customer": "<cus:1>",
+            "payment_intent": "<pi:1>",
+            "status": "succeeded",
+            "metadata": {
+              "order_ref": "RR-CONF-<run>-A"
+            },
+            "created": "<ts>",
+            "livemode": false
+          }
+        ]
+      }
+    },
+    {
+      "step": "refund.partial",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": 2500,
+          "reason": "requested_by_customer",
+          "metadata": {
+            "rigorrun_conformance": "<run>"
+          }
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<re:1>",
+        "object": "refund",
+        "amount": 2500,
+        "charge": "<ch:1>",
+        "payment_intent": "<pi:1>",
+        "currency": "usd",
+        "status": "succeeded",
+        "reason": "requested_by_customer",
+        "metadata": {
+          "rigorrun_conformance": "<run>"
+        },
+        "created": "<ts>",
+        "livemode": "<absent>"
+      }
+    },
+    {
+      "step": "charge.after_partial_refund",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges/<ch:1>"
+      },
+      "status": 200,
+      "body": {
+        "id": "<ch:1>",
+        "object": "charge",
+        "amount": 6000,
+        "amount_captured": 6000,
+        "amount_refunded": 2500,
+        "refunded": false,
+        "disputed": false,
+        "captured": true,
+        "paid": true,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "payment_intent": "<pi:1>",
+        "status": "succeeded",
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-A"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "refund.more_than_remains",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": 4000
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": null,
+          "param": "amount"
+        }
+      }
+    },
+    {
+      "step": "refund.amount_not_integer",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": "25.00"
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "parameter_invalid_integer",
+          "param": "amount"
+        }
+      }
+    },
+    {
+      "step": "refund.amount_zero",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": 0
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "parameter_invalid_integer",
+          "param": "amount"
+        }
+      }
+    },
+    {
+      "step": "refund.no_charge_or_payment_intent",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "amount": 100
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": null,
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "refund.unknown_charge",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:2>"
+        }
+      },
+      "status": 404,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "resource_missing",
+          "param": "id"
+        }
+      }
+    },
+    {
+      "step": "refund.remainder_by_payment_intent",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "payment_intent": "<pi:1>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<re:2>",
+        "object": "refund",
+        "amount": 3500,
+        "charge": "<ch:1>",
+        "payment_intent": "<pi:1>",
+        "currency": "usd",
+        "status": "succeeded",
+        "reason": null,
+        "metadata": {},
+        "created": "<ts>",
+        "livemode": "<absent>"
+      }
+    },
+    {
+      "step": "charge.after_full_refund",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges/<ch:1>"
+      },
+      "status": 200,
+      "body": {
+        "id": "<ch:1>",
+        "object": "charge",
+        "amount": 6000,
+        "amount_captured": 6000,
+        "amount_refunded": 6000,
+        "refunded": true,
+        "disputed": false,
+        "captured": true,
+        "paid": true,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "payment_intent": "<pi:1>",
+        "status": "succeeded",
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-A"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "refund.nothing_left",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": 100
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "charge_already_refunded",
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "refunds.by_charge",
+      "request": {
+        "method": "GET",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/refunds",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<re:2>",
+            "object": "refund",
+            "amount": 3500,
+            "charge": "<ch:1>",
+            "payment_intent": "<pi:1>",
+            "currency": "usd",
+            "status": "succeeded",
+            "reason": null,
+            "metadata": {},
+            "created": "<ts>",
+            "livemode": "<absent>"
+          },
+          {
+            "id": "<re:1>",
+            "object": "refund",
+            "amount": 2500,
+            "charge": "<ch:1>",
+            "payment_intent": "<pi:1>",
+            "currency": "usd",
+            "status": "succeeded",
+            "reason": "requested_by_customer",
+            "metadata": {
+              "rigorrun_conformance": "<run>"
+            },
+            "created": "<ts>",
+            "livemode": "<absent>"
+          }
+        ]
+      }
+    },
+    {
+      "step": "refunds.page_1",
+      "request": {
+        "method": "GET",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "limit": 1
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/refunds",
+        "has_more": true,
+        "data": [
+          {
+            "id": "<re:2>",
+            "object": "refund",
+            "amount": 3500,
+            "charge": "<ch:1>",
+            "payment_intent": "<pi:1>",
+            "currency": "usd",
+            "status": "succeeded",
+            "reason": null,
+            "metadata": {},
+            "created": "<ts>",
+            "livemode": "<absent>"
+          }
+        ]
+      }
+    },
+    {
+      "step": "refunds.page_2",
+      "request": {
+        "method": "GET",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "limit": 1,
+          "starting_after": "<re:2>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/refunds",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<re:1>",
+            "object": "refund",
+            "amount": 2500,
+            "charge": "<ch:1>",
+            "payment_intent": "<pi:1>",
+            "currency": "usd",
+            "status": "succeeded",
+            "reason": "requested_by_customer",
+            "metadata": {
+              "rigorrun_conformance": "<run>"
+            },
+            "created": "<ts>",
+            "livemode": "<absent>"
+          }
+        ]
+      }
+    },
+    {
+      "step": "refunds.created_since",
+      "request": {
+        "method": "GET",
+        "path": "/v1/refunds",
+        "params": {
+          "created": {
+            "gte": "<ts>"
+          },
+          "limit": 100
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/refunds",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<re:2>",
+            "object": "refund",
+            "amount": 3500,
+            "charge": "<ch:1>",
+            "payment_intent": "<pi:1>",
+            "currency": "usd",
+            "status": "succeeded",
+            "reason": null,
+            "metadata": {},
+            "created": "<ts>",
+            "livemode": "<absent>"
+          },
+          {
+            "id": "<re:1>",
+            "object": "refund",
+            "amount": 2500,
+            "charge": "<ch:1>",
+            "payment_intent": "<pi:1>",
+            "currency": "usd",
+            "status": "succeeded",
+            "reason": "requested_by_customer",
+            "metadata": {
+              "rigorrun_conformance": "<run>"
+            },
+            "created": "<ts>",
+            "livemode": "<absent>"
+          }
+        ]
+      }
+    },
+    {
+      "step": "payment_intent.dispute_card",
+      "request": {
+        "method": "POST",
+        "path": "/v1/payment_intents",
+        "params": {
+          "amount": 4000,
+          "currency": "usd",
+          "customer": "<cus:1>",
+          "payment_method": "pm_card_createDispute",
+          "automatic_payment_methods": {
+            "enabled": true,
+            "allow_redirects": "never"
+          },
+          "confirm": true,
+          "metadata": {
+            "order_ref": "RR-CONF-<run>-B"
+          }
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<pi:2>",
+        "object": "payment_intent",
+        "amount": 4000,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "status": "succeeded",
+        "latest_charge": "<ch:3>",
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-B"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "charge.disputed",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges/<ch:3>"
+      },
+      "status": 200,
+      "body": {
+        "id": "<ch:3>",
+        "object": "charge",
+        "amount": 4000,
+        "amount_captured": 4000,
+        "amount_refunded": 0,
+        "refunded": false,
+        "disputed": true,
+        "captured": true,
+        "paid": true,
+        "currency": "usd",
+        "customer": "<cus:1>",
+        "payment_intent": "<pi:2>",
+        "status": "succeeded",
+        "metadata": {
+          "order_ref": "RR-CONF-<run>-B"
+        },
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "disputes.by_charge",
+      "request": {
+        "method": "GET",
+        "path": "/v1/disputes",
+        "params": {
+          "charge": "<ch:3>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/disputes",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<du:1>",
+            "object": "dispute",
+            "amount": 4000,
+            "charge": "<ch:3>",
+            "payment_intent": "<pi:2>",
+            "currency": "usd",
+            "status": "needs_response",
+            "reason": "fraudulent",
+            "created": "<ts>",
+            "livemode": false
+          }
+        ]
+      }
+    },
+    {
+      "step": "dispute.retrieve",
+      "request": {
+        "method": "GET",
+        "path": "/v1/disputes/<du:1>"
+      },
+      "status": 200,
+      "body": {
+        "id": "<du:1>",
+        "object": "dispute",
+        "amount": 4000,
+        "charge": "<ch:3>",
+        "payment_intent": "<pi:2>",
+        "currency": "usd",
+        "status": "needs_response",
+        "reason": "fraudulent",
+        "created": "<ts>",
+        "livemode": false
+      }
+    },
+    {
+      "step": "refund.disputed_charge",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:3>"
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "charge_disputed",
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "payment_intents.page_1",
+      "request": {
+        "method": "GET",
+        "path": "/v1/payment_intents",
+        "params": {
+          "customer": "<cus:1>",
+          "limit": 1
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/payment_intents",
+        "has_more": true,
+        "data": [
+          {
+            "id": "<pi:2>",
+            "object": "payment_intent",
+            "amount": 4000,
+            "currency": "usd",
+            "customer": "<cus:1>",
+            "status": "succeeded",
+            "latest_charge": "<ch:3>",
+            "metadata": {
+              "order_ref": "RR-CONF-<run>-B"
+            },
+            "created": "<ts>",
+            "livemode": false
+          }
+        ]
+      }
+    },
+    {
+      "step": "payment_intents.page_2",
+      "request": {
+        "method": "GET",
+        "path": "/v1/payment_intents",
+        "params": {
+          "customer": "<cus:1>",
+          "limit": 1,
+          "starting_after": "<pi:2>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/payment_intents",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<pi:1>",
+            "object": "payment_intent",
+            "amount": 6000,
+            "currency": "usd",
+            "customer": "<cus:1>",
+            "status": "succeeded",
+            "latest_charge": "<ch:1>",
+            "metadata": {
+              "order_ref": "RR-CONF-<run>-A"
+            },
+            "created": "<ts>",
+            "livemode": false
+          }
+        ]
+      }
+    },
+    {
+      "step": "charges.by_customer",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges",
+        "params": {
+          "customer": "<cus:1>"
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/charges",
+        "has_more": false,
+        "data": [
+          {
+            "id": "<ch:3>",
+            "object": "charge",
+            "amount": 4000,
+            "amount_captured": 4000,
+            "amount_refunded": 0,
+            "refunded": false,
+            "disputed": true,
+            "captured": true,
+            "paid": true,
+            "currency": "usd",
+            "customer": "<cus:1>",
+            "payment_intent": "<pi:2>",
+            "status": "succeeded",
+            "metadata": {
+              "order_ref": "RR-CONF-<run>-B"
+            },
+            "created": "<ts>",
+            "livemode": false
+          },
+          {
+            "id": "<ch:1>",
+            "object": "charge",
+            "amount": 6000,
+            "amount_captured": 6000,
+            "amount_refunded": 6000,
+            "refunded": true,
+            "disputed": false,
+            "captured": true,
+            "paid": true,
+            "currency": "usd",
+            "customer": "<cus:1>",
+            "payment_intent": "<pi:1>",
+            "status": "succeeded",
+            "metadata": {
+              "order_ref": "RR-CONF-<run>-A"
+            },
+            "created": "<ts>",
+            "livemode": false
+          }
+        ]
+      }
+    },
+    {
+      "step": "charges.created_before_customer",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges",
+        "params": {
+          "customer": "<cus:1>",
+          "created": {
+            "lt": "<ts>"
+          }
+        }
+      },
+      "status": 200,
+      "body": {
+        "object": "list",
+        "url": "/v1/charges",
+        "has_more": false,
+        "data": []
+      }
+    },
+    {
+      "step": "charge.unknown",
+      "request": {
+        "method": "GET",
+        "path": "/v1/charges/<ch:2>"
+      },
+      "status": 404,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "resource_missing",
+          "param": "id"
+        }
+      }
+    },
+    {
+      "step": "idempotency.first",
+      "request": {
+        "method": "POST",
+        "path": "/v1/customers",
+        "params": {
+          "email": "rr-conf-<run>-idem@example.com"
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<cus:2>",
+        "object": "customer",
+        "email": "rr-conf-<run>-idem@example.com",
+        "name": null,
+        "metadata": {},
+        "created": "<ts>",
+        "livemode": false
+      },
+      "headers": {
+        "idempotent-replayed": "<absent>"
+      }
+    },
+    {
+      "step": "idempotency.replay",
+      "request": {
+        "method": "POST",
+        "path": "/v1/customers",
+        "params": {
+          "email": "rr-conf-<run>-idem@example.com"
+        }
+      },
+      "status": 200,
+      "body": {
+        "id": "<cus:2>",
+        "object": "customer",
+        "email": "rr-conf-<run>-idem@example.com",
+        "name": null,
+        "metadata": {},
+        "created": "<ts>",
+        "livemode": false
+      },
+      "headers": {
+        "idempotent-replayed": "true"
+      }
+    },
+    {
+      "step": "idempotency.different_parameters",
+      "request": {
+        "method": "POST",
+        "path": "/v1/customers",
+        "params": {
+          "email": "rr-conf-<run>-idem@example.com",
+          "name": "Someone Else"
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "idempotency_error",
+          "code": null,
+          "param": null
+        }
+      }
+    },
+    {
+      "step": "idempotency.refusal_first",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": 100
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "charge_already_refunded",
+          "param": null
+        }
+      },
+      "headers": {
+        "idempotent-replayed": "<absent>"
+      }
+    },
+    {
+      "step": "idempotency.refusal_replayed",
+      "request": {
+        "method": "POST",
+        "path": "/v1/refunds",
+        "params": {
+          "charge": "<ch:1>",
+          "amount": 100
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": "charge_already_refunded",
+          "param": null
+        }
+      },
+      "headers": {
+        "idempotent-replayed": "true"
+      }
+    },
+    {
+      "step": "payment_intent.confirm_without_return_url",
+      "request": {
+        "method": "POST",
+        "path": "/v1/payment_intents",
+        "params": {
+          "amount": 1500,
+          "currency": "usd",
+          "customer": "<cus:1>",
+          "payment_method": "pm_card_visa",
+          "confirm": true
+        }
+      },
+      "status": 400,
+      "body": {
+        "error": {
+          "type": "invalid_request_error",
+          "code": null,
+          "param": null
+        }
+      }
+    }
+  ]
+}

@@ -598,11 +598,11 @@ describe('refunds', () => {
     expect(twin.model.all('refund')).toHaveLength(2);
   });
 
-  it('refuses more than what is left: amount_too_large', async () => {
+  it('refuses more than what is left, without a code, as Stripe does', async () => {
     const { charge } = await pay(6000);
     await call('POST', '/v1/refunds', { charge, amount: 2500 });
     const tooMuch = await call('POST', '/v1/refunds', { charge, amount: 3501 });
-    expectError(tooMuch, 400, 'amount_too_large', 'amount');
+    expectError(tooMuch, 400, undefined, 'amount');
     expect(at(tooMuch.body, 'error', 'message')).toBe(
       'Refund amount ($35.01) is greater than unrefunded amount on charge ($35.00)',
     );
@@ -667,12 +667,12 @@ describe('refunds', () => {
       'parameter_invalid_integer',
       'amount',
     );
-    expectError(await call('POST', '/v1/refunds', { amount: 100 }), 400, 'parameter_missing');
+    expectError(await call('POST', '/v1/refunds', { amount: 100 }), 400, undefined);
     expectError(
       await call('POST', '/v1/refunds', { charge: 'ch_nothere' }),
-      400,
+      404,
       'resource_missing',
-      'charge',
+      'id',
     );
     expectError(
       await call('POST', '/v1/refunds', { payment_intent: 'pi_nothere' }),
@@ -755,7 +755,7 @@ describe('disputes', () => {
       created: START / 1000 + 5,
       livemode: false,
     });
-    expect(dispute['id']).toMatch(/^dp_/);
+    expect(dispute['id']).toMatch(/^du_/);
     expect((await call('GET', `/v1/disputes/${String(dispute['id'])}`)).body['charge']).toBe(
       charge,
     );
