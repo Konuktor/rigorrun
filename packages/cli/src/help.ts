@@ -287,7 +287,10 @@ ADD OPTIONS
                                 {{task.instruction}}, {{task.policyBrief}} or
                                 {{inputs.<name>}} inside strings, instead of the
                                 envelope.
-      --completion <how>        response (default), poll or settle.
+      --completion <how>        When the agent's work counts as done:
+                                  response  when it answers (default); a 202 is not done
+                                  poll      when the statusUrl it answers with says so
+                                  settle    --settle seconds after it answers
       --claim-path <path>       Where its final message is in its answer, as a
                                 dotted path. Default output.
       --header <Name=secret>    A header whose value comes from the named secret

@@ -70,7 +70,9 @@ export function assertBlackBoxUrl(raw: string, allowedHosts: readonly string[]):
     throw new Error(`The agent's address must be http or https, not ${url.protocol}`);
   }
   if (url.username || url.password) {
-    throw new Error("The agent's address must not carry credentials. Put them in a header, from a secret.");
+    throw new Error(
+      "The agent's address must not carry credentials. Put them in a header, from a secret.",
+    );
   }
   const host = url.hostname.toLowerCase();
   if (LOOPBACK.has(host)) return url;
@@ -130,7 +132,8 @@ export function renderBody(template: string | null, envelope: TaskEnvelope): str
   };
   const body = template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_whole, path: string) => {
     const value = lookup(path);
-    if (value === undefined) throw new Error(`The body template names {{${path}}}, which this case does not have.`);
+    if (value === undefined)
+      throw new Error(`The body template names {{${path}}}, which this case does not have.`);
     const text = typeof value === 'string' ? value : JSON.stringify(value);
     return JSON.stringify(text).slice(1, -1);
   });
@@ -156,7 +159,8 @@ export function claimAt(answer: unknown, path: string): string {
 
 async function readJson(response: Response): Promise<unknown> {
   const text = await response.text();
-  if (text.length > MAX_RESPONSE_BYTES) throw new Error('The agent sent more than RigorRun will read.');
+  if (text.length > MAX_RESPONSE_BYTES)
+    throw new Error('The agent sent more than RigorRun will read.');
   if (!text.trim()) return {};
   try {
     return JSON.parse(text);
@@ -203,8 +207,16 @@ export async function probeBlackBox(
       }
       return { ok: true, detail: 'answers rigorrun/task/1' };
     }
-    const response = await fetch(url, { method: 'HEAD', redirect: 'error', headers, signal: AbortSignal.timeout(10_000) });
-    return { ok: true, detail: `reachable (answered ${response.status}); a case will show whether it does the work` };
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'error',
+      headers,
+      signal: AbortSignal.timeout(10_000),
+    });
+    return {
+      ok: true,
+      detail: `reachable (answered ${response.status}); a case will show whether it does the work`,
+    };
   } catch (error) {
     return { ok: false, problem: `Could not reach the endpoint: ${(error as Error).message}` };
   }
@@ -241,6 +253,17 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
       if (!response.ok && response.status !== 202) {
         throw new Error(`the agent's endpoint answered ${response.status}`);
       }
+      if (response.status === 202 && config.completion === 'response') {
+        // 202 says the work was accepted, not done. Reading the system now
+        // would judge it before it lands and fail a correct asynchronous
+        // agent, so the case ends as the agent not finishing — never a
+        // verdict — and says how to wait for it.
+        await response.body?.cancel();
+        throw new Error(
+          "the agent's endpoint answered 202 Accepted — the work is not done yet; add the agent " +
+            'with --completion poll (statusUrl) or --completion settle',
+        );
+      }
       let answer = await readJson(response);
 
       if (config.completion === 'poll') {
@@ -254,7 +277,8 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
         for (;;) {
           const status = (answer as { status?: unknown }).status;
           if (typeof status === 'string' && TERMINAL.has(status)) break;
-          if (Date.now() + POLL_INTERVAL_MS > deadline) throw new Error('the agent did not finish before the case budget');
+          if (Date.now() + POLL_INTERVAL_MS > deadline)
+            throw new Error('the agent did not finish before the case budget');
           await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
           const next = await fetch(poll, {
             redirect: 'error',
@@ -269,7 +293,9 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
       if (config.completion === 'settle') {
         // Fire-and-forget endpoints answer before the work is done. Waiting a
         // stated interval is the honest thing available; the result says so.
-        await new Promise((resolve) => setTimeout(resolve, Math.min(config.settleQuietMs, Math.max(0, deadline - Date.now()))));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.min(config.settleQuietMs, Math.max(0, deadline - Date.now()))),
+        );
       }
 
       const status = (answer as { status?: unknown }).status;
@@ -277,7 +303,9 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
       return {
         report:
           claim ||
-          (typeof status === 'string' ? `The agent reported ${status}.` : 'The agent answered without saying what it did.'),
+          (typeof status === 'string'
+            ? `The agent reported ${status}.`
+            : 'The agent answered without saying what it did.'),
         usage: null,
         costUsd: null,
         costNote: 'not reported by a black-box agent',

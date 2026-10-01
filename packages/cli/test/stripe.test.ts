@@ -668,6 +668,80 @@ describe('a rule left out at init, end to end', () => {
   });
 });
 
+describe('an agent that answers 202 Accepted', () => {
+  it('is an agent that did not finish, never a FAIL, when added to be read on its answer', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    // Queues the refund, answers 202, and makes it a moment later: a correct
+    // agent, read too early.
+    const url = await new Promise<string>((resolve) => {
+      const server = createServer((req, res) => {
+        let text = '';
+        req.on('data', (chunk) => (text += chunk));
+        req.on('end', () => {
+          const body = JSON.parse(text) as {
+            probe?: boolean;
+            task?: { inputs: Record<string, string> };
+          };
+          if (body.probe) {
+            res.writeHead(200, { 'content-type': 'application/json' });
+            return res.end(JSON.stringify({ ok: true }));
+          }
+          res.writeHead(202, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ status: 'queued' }));
+          const inputs = body.task!.inputs;
+          setTimeout(() => {
+            void fetch(`${twin.url}/v1/refunds`, {
+              method: 'POST',
+              headers: {
+                authorization: 'Bearer sk_test_agent_own_key',
+                'content-type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({ charge: inputs['payment']! }).toString(),
+            });
+          }, 25);
+        });
+      });
+      servers.push(server);
+      server.listen(0, '127.0.0.1', () => {
+        const address = server.address();
+        resolve(`http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}/`);
+      });
+    });
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'queue',
+      '--black-box',
+      url,
+      '--home',
+      home,
+    );
+    const { out } = await cli(
+      'run',
+      '--project',
+      projectId,
+      '--agent',
+      'queue',
+      '--case',
+      'full_refund',
+      '--json',
+      '--home',
+      home,
+    );
+    const result = JSON.parse(out.slice(out.indexOf('{'))) as {
+      caseResults: { outcome: string; outcomeReason: string }[];
+    };
+    const [only] = result.caseResults;
+    expect(only?.outcome).toBe('AGENT_FAILURE');
+    expect(only?.outcomeReason).toContain('answered 202 Accepted');
+    expect(only?.outcomeReason).toContain('--completion poll (statusUrl) or --completion settle');
+  });
+});
+
 describe('stripe twin', () => {
   it('prints its address alone on the first line, and stops when told', async () => {
     let stop!: () => void;
