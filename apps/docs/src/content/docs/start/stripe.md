@@ -7,8 +7,9 @@ Your agent reads a support ticket and issues refunds in Stripe. RigorRun sends i
 work with its own key, then reads Stripe with a key of its own and decides each case on what Stripe
 holds — never on what the agent says it did.
 
-Every case creates its own customer and payments, fresh for each attempt, so nothing one case does
-can leave a mark on the next, and no account needs resetting.
+Every case creates its own customer and payments, fresh for each attempt, so no account needs
+resetting and nothing one case does is judged as the next one's: a refund a slow agent makes on an
+earlier case's payment after that case timed out is shown where it landed, and never counted there.
 
 ## 1. Try it on the twin — no keys, about a minute
 
@@ -119,8 +120,10 @@ store committed or restored. The key arrives as `RIGORRUN_SECRET__STRIPE_TEST_KE
   everything about what Stripe holds afterwards is.
 - **A pending refund counts as made.** As the pre-registered oracle counts it. The verdict is sealed
   when the case ends; if Stripe later fails or cancels the refund, it stays PASS.
-- **Nobody else may write to the account during a run.** A refund made by anyone while a case runs is
-  read as the agent's, because a black-box agent's calls cannot be told apart from anybody else's.
+- **Nobody else may write to the account during a run.** A refund made by anyone while a case runs,
+  on a payment no case created, is read as the agent's, because a black-box agent's calls cannot be
+  told apart from anybody else's. A refund on a payment RigorRun created for another case is that
+  case's: shown, never counted here.
 - **A failed case can leave objects behind.** Stripe has no undo. If creating a case's records fails
   part-way, the harness failure names what was already created; nothing deletes it.
 - **The twin is a simulation.** A verdict against it is marked so, and is good evidence about your
