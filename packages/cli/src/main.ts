@@ -188,7 +188,10 @@ async function dispatch(argv: string[]): Promise<number> {
     const packs = packCommands(OWN_COMMANDS);
     if (packs.length > 0) {
       line('PACKS IN THIS BUILD');
-      for (const pack of packs) line(`  ${pack.id.padEnd(24)} ${pack.description}`);
+      // The first sentence: the rest belongs to the pack's own --help.
+      for (const pack of packs) {
+        line(`  ${pack.id.padEnd(24)} ${pack.description.split(/(?<=\.)\s/)[0]}`);
+      }
       line();
     }
     return 0;

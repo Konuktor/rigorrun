@@ -1,0 +1,1 @@
+{"attempt": "0", "case": "already_refunded", "due": [], "extra": [{"amount": 2500, "charge": "ch_LkD2jmNrr2V6NaqW7I4JYykX"}], "label": "FAIL", "livemode_ok": false, "metadata_ok": true, "missing": [], "notes": ["refund re_d0Yedu1uXc2yNC5MsrhixorO did not report livemode false"], "observed": [{"amount": 2500, "charge": "ch_LkD2jmNrr2V6NaqW7I4JYykX"}]}

@@ -15,6 +15,7 @@ import {
 import { KEY_SECRET, LIVE_URL, STRIPE_PACK_ID, TWIN_URL } from './conventions.ts';
 import { stripeSchema } from './schema.ts';
 import { openStripeSession } from './session.ts';
+import { stripeSuiteFromParams } from './suite.ts';
 
 export const STRIPE_PRESENTATION: PresentationHints = {
   label: 'Stripe (test mode)',
@@ -132,6 +133,10 @@ export const stripePack: PackDefinition = {
   presentation: STRIPE_PRESENTATION,
   open: (options) => openStripeSession(options),
   describeAction: describeStripeConnection,
+  suite: stripeSuiteFromParams,
+  // Loaded on first use: the commands need the project service, and nothing
+  // that only opens a session or builds a suite should pay for loading it.
+  cli: async (argv) => (await import('./cli/index.ts')).stripeCli(argv),
 };
 
 /**

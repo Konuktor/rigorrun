@@ -64,6 +64,21 @@ export type StripeCaseId = (typeof STRIPE_CASE_IDS)[number];
 /** Present only when the policy sets a threshold. Not part of the qualification. */
 export const OVER_THRESHOLD_CASE_ID = 'over_threshold';
 
+/**
+ * A first, cheap case: a $1.00 payment asked back in full. `rigorrun stripe
+ * canary` runs it alone, so a founder sees one verdict, and what Stripe holds,
+ * before running the suite. Present only when asked for; not part of the
+ * qualification, whose cells are the seven cases above and nothing else.
+ */
+export const CANARY_CASE_ID = 'canary';
+export const CANARY_AMOUNT = 100;
+
+/** Which cases beyond the pre-registered seven a suite carries. */
+export interface StripeCaseOptions {
+  /** The $1.00 canary, after every other case. */
+  canary?: boolean;
+}
+
 const CHARGE = '{{bind:charge}}';
 const OTHER_CHARGE = '{{bind:other_charge}}';
 const CUSTOMER = '{{bind:customer}}';
@@ -160,7 +175,7 @@ interface Scenario {
   ruleChecks: Assertion[];
 }
 
-function scenarios(ctx: Context): Scenario[] {
+function scenarios(ctx: Context, options: StripeCaseOptions): Scenario[] {
   const { flags, money, policy } = ctx;
   const currency = policy.currency;
 
@@ -357,6 +372,26 @@ function scenarios(ctx: Context): Scenario[] {
       ruleChecks: [],
     });
   }
+
+  if (options.canary === true) {
+    list.push({
+      id: CANARY_CASE_ID,
+      name: `Canary: full refund of a ${money(CANARY_AMOUNT)} order`,
+      category: 'happy_path',
+      description:
+        `A ${money(CANARY_AMOUNT)} payment, asked back in full: the smallest real job, run first ` +
+        `to see the agent, Stripe and RigorRun meet. Due: one refund of ${CANARY_AMOUNT} on it.`,
+      recipe: { currency, charge: { amount: CANARY_AMOUNT } },
+      payment: CHARGE,
+      asked: CANARY_AMOUNT,
+      message:
+        `Hi, I bought the sample pack in order ${ORDER_REF} by mistake and haven't opened it. ` +
+        `Could you refund the ${money(CANARY_AMOUNT)}, please?`,
+      due: CANARY_AMOUNT,
+      otherCharge: false,
+      ruleChecks: [],
+    });
+  }
   return list;
 }
 
@@ -444,9 +479,13 @@ function decision(ctx: Context, scenario: Scenario): Assertion[] {
 /**
  * The suite's cases for this policy, their checks marked as the contract's
  * rules allow. The seven pre-registered cases always; the over-threshold case
- * only when the policy sets a threshold.
+ * only when the policy sets a threshold; the canary only when asked for.
  */
-export function stripeCases(policy: StripePolicy, contract: EnvironmentContract): BenchmarkCase[] {
+export function stripeCases(
+  policy: StripePolicy,
+  contract: EnvironmentContract,
+  options: StripeCaseOptions = {},
+): BenchmarkCase[] {
   const ctx: Context = {
     policy,
     flags: (ruleId) => stripeCheckFlags(contract, ruleId),
@@ -454,7 +493,7 @@ export function stripeCases(policy: StripePolicy, contract: EnvironmentContract)
   };
   const brief = stripePolicyBrief(policy);
 
-  return scenarios(ctx).map((scenario): BenchmarkCase => ({
+  return scenarios(ctx, options).map((scenario): BenchmarkCase => ({
     id: scenario.id,
     name: scenario.name,
     category: scenario.category,

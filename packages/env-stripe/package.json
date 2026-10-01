@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@rigorrun/core": "workspace:*",
+    "@rigorrun/daemon": "workspace:*",
     "@rigorrun/environment": "workspace:*",
+    "@rigorrun/proxy": "workspace:*",
+    "@rigorrun/report": "workspace:*",
     "zod": "^4.1.12"
   }
 }
