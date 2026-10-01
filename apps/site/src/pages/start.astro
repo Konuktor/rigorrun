@@ -1,16 +1,80 @@
 ---
+/**
+ * The founder's path, in the order it is walked: see a recording, try the
+ * Stripe pack on the twin, move to test mode, connect the agent as it is, run
+ * the canary, gate, and put the gate in CI. The general path — your own
+ * system through MCP, OpenAPI or a browser — follows it, unchanged.
+ */
 import Base from '../layouts/Base.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Command from '../components/Command.astro';
 import Button from '../components/Button.astro';
-import { DOCS_URL, RELEASE_LABEL } from '../site';
+import { DOCS_URL, RELEASE_LABEL, REPO_URL } from '../site';
 
-const steps = [
+const EXAMPLE_AGENT = `${REPO_URL}/tree/master/examples/stripe-support-agent`;
+const CI_GUIDE = `${REPO_URL}/blob/master/docs/CI.md`;
+const STRIPE_DOCS = `${DOCS_URL}/start/stripe`;
+
+interface Step {
+  title: string;
+  body: string;
+  /** The commands or the snippet, shown as they are typed. */
+  code?: string;
+  link?: { href: string; label: string };
+}
+
+const steps: Step[] = [
+  {
+    title: 'See a recorded run',
+    body: 'Before anything touches your setup: a real run, replayed offline, with what the agent said beside what the system showed. No keys, no account.',
+    code: 'npx rigorrun demo',
+    link: { href: '/replay', label: 'Or read it here' },
+  },
+  {
+    title: 'Try the Stripe pack on the twin',
+    body: 'The twin is a local copy of the part of Stripe’s API the cases use. It runs on this machine, accepts any test key and reaches nothing. Start it, leave it running, and set up the pack against it. Every verdict on the twin says so.',
+    code: `npx rigorrun stripe twin
+npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes`,
+  },
+  {
+    title: 'Move to your Stripe test mode',
+    body: 'Give RigorRun a test key of its own; it lives in this machine’s secret store, never in the project. Only test keys are accepted: the key is checked before any request is sent, and Stripe must then confirm it is not in live mode. A dedicated Sandbox, used by nothing else during a run, is recommended.',
+    code: `export STRIPE_TEST_KEY=sk_test_…
+npx rigorrun stripe init --key-env STRIPE_TEST_KEY`,
+  },
+  {
+    title: 'Point it at your agent, unchanged',
+    body: 'RigorRun posts each ticket to a URL your agent already serves, waits for its answer and records the sentence as the agent’s claim. Your agent talks to Stripe with its own key and never sees RigorRun’s. The example agent shows the whole contract in one file.',
+    code: `npx rigorrun agent add --project <id> --name support \\
+  --black-box http://127.0.0.1:8787/ --claim-path message`,
+    link: { href: EXAMPLE_AGENT, label: 'The example Stripe support agent' },
+  },
+  {
+    title: 'Run the canary',
+    body: 'One small full refund through your agent, end to end, before the full suite: the first verdict you read is about the plumbing, not the policy.',
+    code: 'npx rigorrun stripe canary --project <id>',
+  },
+  {
+    title: 'Run the gate',
+    body: 'Every ticket, a verdict for each beside what Stripe holds, and an exit code: 0 passed, 1 the agent failed, 2 the setup is wrong, 3 too little could be established to say.',
+    code: 'npx rigorrun gate --project <id> --report report.html',
+  },
+  {
+    title: 'Put the gate in CI',
+    body: 'The GitHub Action runs the same gate as a step in your workflow, publishes its summary and uploads the HTML report.',
+    code: `- name: RigorRun gate
+  uses: Konuktor/rigorrun@v0.4.0
+  with:
+    project: \${{ vars.RIGORRUN_PROJECT }}`,
+    link: { href: CI_GUIDE, label: 'The CI guide' },
+  },
+];
+
+const general = [
   {
     title: 'Start the runner',
-    body: 'One command. It prints a URL with a single-use pairing code and opens your browser. On a headless box, the printed URL is the whole interface.',
-    command: 'npx rigorrun',
+    body: 'It prints a URL with a single-use pairing code and opens your browser. On a headless box, the printed URL is the whole interface.',
   },
   {
     title: 'Connect your system',
@@ -18,48 +82,31 @@ const steps = [
   },
   {
     title: 'Do the job once',
-    body: 'RigorRun reads your system before you start and again when you finish, and works out what the rules must be from what changed.',
+    body: 'RigorRun reads your system before you start and again when you finish, and works out what the rules must be from what changed. You rule on each one; a rule you reject cannot fail your agent.',
   },
   {
-    title: 'Rule on what it worked out',
-    body: 'It shows you the evidence behind each proposed rule so you can disagree with the evidence rather than with a verdict. A rule you reject cannot fail your agent.',
-  },
-  {
-    title: 'Point it at your agent',
-    body: 'Unchanged, wherever it runs: RigorRun sends each case\'s work to a URL your agent already serves and reads the result from your system, not from the agent. Or an HTTP endpoint, a command on this machine, or a key your own loop can pull work from.',
-  },
-  {
-    title: 'Run it, and read the verdict',
-    body: 'Safe to ship — yes, conditional or no — with how strongly each answer could be verified, and what could not be checked at all.',
-  },
-  {
-    title: 'Gate the next change',
-    body: 'The same suite from the command line, with a non-zero exit when the bar is missed, so a regression stops the build.',
-    command: 'rigorrun gate --project <id>',
+    title: 'Point it at your agent, and gate',
+    body: 'The same black-box connection as above, the same verdicts, and the same gate.',
   },
 ];
 ---
+
 <Base
   title="Get started"
-  description="One command starts RigorRun on your machine. Connect your system, do the job once, connect your agent, read the verdict. Node 20.11 or newer; nothing to sign up for."
+  description="Try RigorRun on a recorded run, then on your own Stripe support agent: a local Stripe twin with no keys, your Stripe test mode, your agent connected unchanged, a canary, a gate and a GitHub Action. Node 20.11 or newer; nothing to sign up for."
 >
   <Section>
     <div class="grid gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
       <div>
         <Eyebrow>{RELEASE_LABEL}</Eyebrow>
-        <h1 class="mt-4 text-display font-medium text-balance">Testing your own agent.</h1>
+        <h1 class="mt-4 text-display font-medium text-balance">
+          From a recorded run to a gate on your own agent.
+        </h1>
         <p class="mt-6 max-w-xl text-lead text-secondary">
-          This part runs on your machine, and that is not a preference. Your MCP server, your
-          internal API, your staging box — a page served over <span class="font-mono text-support">https</span>
-          cannot reach any of them, so the interface for this work is served by a small local process
-          instead. Your credentials, your recordings and your systems never touch our infrastructure,
-          because there is no path by which they could.
+          The path for an agent that issues Stripe refunds. Everything runs on your machine; there is
+          no account, and nothing here sends your keys or your agent’s answers to us.
         </p>
-        <div class="mt-8"><Command command="npx rigorrun" size="lg" /></div>
-        <p class="mt-4 max-w-xl text-support text-muted">
-          Want to see what it catches first? <span class="font-mono text-support">npx rigorrun demo</span>
-          replays a real recorded run in a second, or <a class="rr-link" href="/replay">read it here</a>.
-        </p>
+        <div class="mt-8"><Command command="npx rigorrun demo" size="lg" /></div>
       </div>
 
       <aside class="rounded-panel border border-line bg-surface p-6">
@@ -67,21 +114,21 @@ const steps = [
         <ul class="mt-4 space-y-3 text-support text-secondary">
           <li><span class="text-fg">Node 20.11 or newer.</span> Nothing else to install.</li>
           <li>
-            <span class="text-fg">A system it is safe to change.</span> Staging, a scratch instance,
-            or a local copy.
+            <span class="text-fg">Your agent, reachable over HTTP.</span> It receives each ticket as a
+            JSON envelope and answers with one sentence about what it did.
           </li>
           <li>
-            <span class="text-fg">A way to read that system back.</span> One operation RigorRun can
-            call afterwards to see what changed. Without one it can still watch, but every verdict
-            will say <span class="font-mono">OBSERVATIONAL</span>.
+            <span class="text-fg">A Stripe test key, when you leave the twin.</span> Two, in fact: one
+            for RigorRun and one your agent already uses.
           </li>
           <li>
             <span class="text-fg">Docker, only for <span class="font-mono">rigorrun verify</span>.</span>
-            Not needed for anything else.
+            Not needed for any of this.
           </li>
         </ul>
-        <div class="mt-6 border-t border-line pt-5">
-          <Button href={DOCS_URL} variant="secondary" external>Read the docs</Button>
+        <div class="mt-6 flex flex-wrap gap-3 border-t border-line pt-5">
+          <Button href={STRIPE_DOCS} variant="secondary" external>The Stripe guide</Button>
+          <Button href={DOCS_URL} variant="ghost" external>All docs</Button>
         </div>
       </aside>
     </div>
@@ -91,22 +138,62 @@ const steps = [
     <ol class="ruled rounded-panel border border-line bg-surface">
       {
         steps.map((step, index) => (
-          <li class="flex flex-col gap-4 p-6 sm:flex-row sm:gap-8">
-            <span class="shrink-0 font-mono text-support text-accent sm:w-10">
-              {String(index + 1).padStart(2, '0')}
-            </span>
-            <div class="min-w-0 flex-1">
+          <li class="grid gap-4 p-6 sm:grid-cols-[2rem_1fr] sm:gap-x-4 lg:grid-cols-[2rem_1fr_1.1fr] lg:gap-x-10">
+            <span class="pt-1 font-mono text-support text-accent">{index + 1}</span>
+            <div class="min-w-0">
               <h2 class="text-title font-medium">{step.title}</h2>
-              <p class="mt-2 max-w-2xl text-support text-secondary">{step.body}</p>
-              {step.command && (
-                <div class="mt-4">
-                  <Command command={step.command} />
-                </div>
+              <p class="mt-2 max-w-xl text-support text-secondary">{step.body}</p>
+              {step.link && (
+                <p class="mt-3 text-support">
+                  <a class="rr-link" href={step.link.href}>
+                    {step.link.label}
+                  </a>
+                </p>
+              )}
+            </div>
+            <div class="min-w-0 sm:col-start-2 lg:col-start-auto">
+              {step.code && (
+                <pre
+                  data-theme="ink"
+                  class:list={[
+                    'rounded-well border border-line bg-canvas px-4 py-3 font-mono text-meta leading-relaxed text-fg',
+                    // A shell command wraps on a phone rather than hiding its end
+                    // off to the side; YAML keeps its lines, because a wrapped
+                    // line there reads as a different indentation.
+                    !step.code.startsWith('- ') && 'whitespace-pre-wrap [overflow-wrap:anywhere] sm:whitespace-pre',
+                  ]}
+                  tabindex="0"
+                  role="region"
+                  aria-label={`Commands for: ${step.title}`}
+                ><code>{step.code}</code></pre>
               )}
             </div>
           </li>
         ))
       }
     </ol>
+  </Section>
+
+  <Section ruled tight>
+    <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <div>
+        <h2 class="text-title font-medium">Not on Stripe?</h2>
+        <p class="mt-3 max-w-sm text-support text-secondary">
+          The same verdicts for any system RigorRun can reach and read back, set up in a local
+          interface instead of a pack.
+        </p>
+        <div class="mt-6"><Command command="npx rigorrun" /></div>
+      </div>
+      <ol class="space-y-5">
+        {
+          general.map((step) => (
+            <li>
+              <h3 class="text-section font-semibold">{step.title}</h3>
+              <p class="mt-1.5 text-support text-secondary">{step.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
   </Section>
 </Base>

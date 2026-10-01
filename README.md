@@ -2,24 +2,49 @@
 
 # RigorRun
 
-**Your agent said it worked. RigorRun checks what it actually did.**
+**Your agent moves money. You're checking it by reading the transcript.**
 
-Acceptance testing for AI agents that take real actions. Show RigorRun a job once; it builds an
-executable acceptance suite and verifies your agent against the state of the system it changed.
+RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a local
+twin with no keys — and shows what actually happened beside what the agent said it did. Open
+source, runs on your machine, no account.
 
-[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [Evidence](https://rigorrun.xyz/evidence) · [npm](https://www.npmjs.com/package/rigorrun)
+[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [A recorded run, case by case](https://rigorrun.xyz/replay) · [npm](https://www.npmjs.com/package/rigorrun)
 
 </div>
+
+```bash
+npx rigorrun demo
+```
+
+Replays a recorded run offline: what the agent said, beside what the system held afterwards. No
+keys, no account. The same run is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
+
+## Your Stripe agent, unchanged
+
+```bash
+npx rigorrun stripe twin                                         # a local Stripe twin; leave it running
+npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes      # the Stripe pack's tickets, as a project
+npx rigorrun agent add --project <id> --black-box <agent URL>    # your agent, as it already runs
+npx rigorrun gate --project <id> --report report.html            # exit 1 when a case fails
+```
+
+RigorRun posts each ticket to your agent's endpoint, then reads Stripe with its own key; the
+verdict comes from what Stripe holds, never from what the agent said. Every verdict is `PARTIAL`
+and prints what was read. Against your Stripe test mode, `stripe init` takes a test key instead of
+`--twin` — live keys are refused. Start with [the Stripe guide](https://docs.rigorrun.xyz/start/stripe)
+and [the example agent](examples/stripe-support-agent); CI is one step
+(`uses: Konuktor/rigorrun@v0.4.0`, see [docs/CI.md](docs/CI.md)).
+
+Not on Stripe? This opens a local interface for any system RigorRun can reach and read back — an
+MCP server, an HTTP API, or a web application:
 
 ```bash
 npx rigorrun
 ```
 
-To see what it catches first: `npx rigorrun demo` replays a real recorded run, offline, in a second.
-
 ---
 
-This is the development repository. If you want to *use* RigorRun, the command above is the whole
+This is the development repository. If you want to _use_ RigorRun, the commands above are the whole
 install and [the documentation](https://docs.rigorrun.xyz) is the place to start. What follows is
 for people working on it.
 

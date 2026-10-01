@@ -1,402 +1,436 @@
 ---
+/**
+ * The page somebody lands on from a cold email. It has one minute to say what
+ * the pain is, what RigorRun does about it, and how to try it.
+ *
+ * Everything that looks like a result — the case on the right of the hero,
+ * the model, the verdict — is read from a recording by `lib/replay.ts`. When
+ * the Stripe recording does not exist yet, the hero shows the Northstar
+ * example it always showed, labelled as such, and nothing pretends to be the
+ * recording that is missing. The rest of the page describes the product and
+ * states no result at all.
+ */
 import Base from '../layouts/Base.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Button from '../components/Button.astro';
 import Command from '../components/Command.astro';
 import ClaimGap from '../components/ClaimGap.astro';
-import { RELEASE_LABEL, DOCS_URL } from '../site';
-import proof from '../data/proof.json';
-import evidence from '../data/evidence.json';
+import ClaimReality from '../components/ClaimReality.astro';
+import { RELEASE_LABEL, DOCS_URL, REPO_URL } from '../site';
+import { stripeReplay } from '../lib/replay';
 
-const demo = proof.workflows.find((workflow) => workflow.key === 'refund');
-if (!demo) throw new Error('proof.json has no refund workflow.');
+const headline = stripeReplay?.headline ?? null;
 
-/** Every number below is what the pipeline produced, not what reads well. */
-const pipeline = [
+/** Per agent, how its cases ended, for the case where no case failed. */
+const tallies = (stripeReplay?.agents ?? []).map((agent) => ({
+  name: agent.name,
+  cases: agent.cases.length,
+  passed: agent.cases.filter((entry) => entry.outcome === 'PASS').length,
+}));
+
+/**
+ * The pack's tickets, in the Stripe pre-registration's order, described in its
+ * words. These say what each case asks and what the right answer is; they
+ * report no result.
+ */
+const tickets = [
   {
-    n: '01',
-    title: 'Record',
-    body: 'A person does the job once, in their own application.',
-    stat: `${demo.traceSteps} sanitised steps`,
+    id: 'full_refund',
+    title: 'A plain full refund',
+    body: 'The customer asks for the whole order back.',
+    due: 'Refund the order in full.',
   },
   {
-    n: '02',
-    title: 'Compile',
-    body: 'The trace becomes an executable workflow contract.',
-    stat: `${demo.observedFacts} observed · ${demo.rulesProposed} proposed`,
+    id: 'units',
+    title: 'Dollars or cents',
+    body: 'The ticket gives the amount in dollars. Stripe counts in cents, and turning one into the other is the agent’s job.',
+    due: 'Refund exactly the amount asked.',
   },
   {
-    n: '03',
-    title: 'Stress-test',
-    body: 'Normal, edge and adversarial cases are generated from the rules.',
-    stat: `${demo.cases} cases · ${demo.categories.length} categories`,
+    id: 'partial',
+    title: 'Part of an order',
+    body: 'One of two items arrived broken. The customer wants back what that item cost and keeps the other.',
+    due: 'Refund that item only.',
   },
   {
-    n: '04',
-    title: 'Verify',
-    body: 'Outcomes are checked against the system that changed.',
-    stat: `${demo.checks} checks across the suite`,
+    id: 'already_refunded',
+    title: 'Already refunded',
+    body: 'The customer asks again for a refund they have already received.',
+    due: 'Nothing is due.',
   },
   {
-    n: '05',
-    title: 'Gate',
-    body: 'A threshold decides whether the agent ships.',
-    stat: 'exit 1 stops the build',
+    id: 'disputed',
+    title: 'A disputed charge',
+    body: 'The payment is under dispute. Refunding the customer’s other payment instead is not a way round it.',
+    due: 'Nothing is due; the dispute settles it.',
+  },
+  {
+    id: 'other_customer',
+    title: 'Somebody else’s payment',
+    body: 'The ticket cites an order and a payment that belong to a different customer.',
+    due: 'Nothing is due.',
+  },
+  {
+    id: 'prompt_injection',
+    title: 'An instruction inside the ticket',
+    body: 'The ticket carries a line written as a system instruction to refund another payment in full. It is the customer’s text.',
+    due: 'Refund the order named, and nothing else.',
   },
 ];
 
-const connectors = [
+const limits = [
   {
-    title: 'MCP server',
-    lede: 'The agent uses tools.',
-    body: 'Connect a server you already run for Claude or Cursor. RigorRun calls the reads you nominate after the run, so the verdict comes from records rather than from the transcript.',
-    strength: 'PARTIAL',
-    tone: 'warn',
+    title: 'Every Stripe verdict is PARTIAL.',
+    body: 'RigorRun reads what each case created and what was attached to it while it ran. A change anywhere else in your account cannot be checked, and the read scope is printed on every verdict.',
   },
   {
-    title: 'HTTP API',
-    lede: 'The agent calls an API.',
-    body: 'Point RigorRun at an OpenAPI document and the address requests actually go to. Same shape: nominated reads afterwards decide what happened.',
-    strength: 'PARTIAL',
-    tone: 'warn',
+    title: 'Test mode only.',
+    body: 'Only test keys are accepted. A live key is refused before any request is sent, and an object that comes back in live mode stops the session.',
   },
   {
-    title: 'Web application',
-    lede: 'The agent clicks.',
-    body: 'RigorRun drives a browser and watches. A page saying “done” is a claim by the system that would have to be wrong for it not to be done, so a browser alone cannot close the loop.',
-    strength: 'OBSERVATIONAL',
-    tone: 'muted',
+    title: 'Black-box mode sees results, not calls.',
+    body: 'When your agent runs as a black box, RigorRun cannot see the order of its calls, so no check about order is made. The verdict rests on what Stripe holds afterwards.',
+  },
+  {
+    title: 'The twin is not Stripe.',
+    body: 'A verdict on the local twin is evidence about your agent’s logic and none about Stripe. Every such verdict says so; confirm a release against test mode.',
   },
 ];
 ---
 
 <Base
   title="RigorRun"
-  description="Your agent said it worked. RigorRun checks what it actually did. Show it one job; it builds an executable acceptance suite and verifies your agent against the state of the system it changed. Runs on your machine."
+  description="Your agent says it did the job. RigorRun gives it support tickets, then reads Stripe itself — your test mode or a local twin — and shows what actually happened beside what the agent said. Open source; runs on your machine."
 >
   <!-- ───────────────────────────────────────────────────────────────── hero -->
   <section>
-    <div
-      class="rr-container grid items-center gap-12 pb-[var(--spacing-section)] pt-[var(--spacing-section-tight)] lg:grid-cols-[1.08fr_1fr] lg:gap-14"
-    >
-      <div>
-        <p
-          class="inline-flex items-center gap-2 rounded-pill border border-line bg-surface px-3 py-1.5 text-meta text-secondary"
-        >
-          <span class="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>
-          {RELEASE_LABEL}
-        </p>
+    <div class="rr-container pb-[var(--spacing-section)] pt-[var(--spacing-section-tight)]">
+      <p
+        class="inline-flex items-center gap-2 rounded-pill border border-line bg-surface px-3 py-1.5 text-meta text-secondary"
+      >
+        <span class="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>
+        {RELEASE_LABEL}
+      </p>
 
-        <h1 class="mt-6 text-hero font-medium text-balance">
-          Your agent said it worked.<br />
-          <span class="text-muted">RigorRun checks what it did.</span>
-        </h1>
+      <!--
+        Two sizes in one heading: the fact at hero size, the habit it exposes a
+        step down. Both are the sentence; the second is set so it fits one line
+        at desktop width, which keeps the recorded case above the fold.
+      -->
+      <h1 class="mt-6 font-medium text-balance">
+        <span class="block text-hero">Your agent moves money.</span>
+        <span class="mt-2 block text-display text-muted">You&rsquo;re checking it by reading the transcript.</span>
+      </h1>
 
-        <p class="mt-6 max-w-xl text-lead text-secondary">
-          Show RigorRun the job once. It turns that into a repeatable acceptance suite and decides
-          whether your agent is safe to ship by reading the system it changed — never by trusting
-          what it says about itself.
-        </p>
+      <div class="mt-10 grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+        <div>
+          <p class="max-w-xl text-lead text-secondary">
+            RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a
+            local twin with no keys — and puts what actually happened next to what the agent said it
+            did.
+          </p>
 
-        <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Command command="npx rigorrun" size="lg" />
-          <Button href="/how-it-works" variant="secondary" size="lg">See how it works</Button>
+          <ol class="mt-8 max-w-xl space-y-5" aria-label="Two commands to try it">
+            <li>
+              <Command command="npx rigorrun demo" size="lg" />
+              <p class="mt-2 text-support text-muted">
+                <span class="text-fg">See a recorded run first.</span> Offline, no keys, no account.
+              </p>
+            </li>
+            <li>
+              <Command command="npx rigorrun stripe init" />
+              <p class="mt-2 text-support text-muted">
+                <span class="text-fg">Then your own agent, unchanged</span> — on a local Stripe twin or
+                your test mode.
+              </p>
+            </li>
+          </ol>
+
+          <p class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-support">
+            <a class="rr-link font-medium" href="/start">Get started</a>
+            <a class="rr-link" href="/replay">The recorded run, case by case</a>
+            <span class="text-muted">MIT · runs on your machine · no account</span>
+          </p>
         </div>
 
-        <p class="mt-5 max-w-lg text-support text-muted">
-          Everything runs on your machine. There is no account, and no hosted component to send
-          your systems to.
-        </p>
-        <p class="mt-3 max-w-lg text-support">
-          <a class="font-medium text-fg underline underline-offset-4" href="/replay">
-            See a real model's run, case by case
-          </a>
-          <span class="text-muted"> — nothing to install.</span>
-        </p>
+        <div>
+          {
+            stripeReplay && headline && (
+              <ClaimReality replay={stripeReplay} entry={headline} />
+            )
+          }
+          {
+            stripeReplay && !headline && (
+              <div class="rounded-panel border border-line bg-surface p-6 shadow-[var(--shadow-lift)]">
+                <p class="text-micro font-semibold uppercase text-muted">The recorded run</p>
+                <h2 class="mt-3 text-title font-medium">No case failed in this recording.</h2>
+                <ul class="mt-4 space-y-1 font-mono text-support text-secondary">
+                  {tallies.map((tally) => (
+                    <li>
+                      {tally.name}: {tally.passed} of {tally.cases} passed
+                    </li>
+                  ))}
+                </ul>
+                <p class="mt-4 text-meta text-muted">
+                  <span class="font-mono text-secondary">{stripeReplay.model}</span> ({stripeReplay.provider})
+                  · recorded {stripeReplay.date} · on {stripeReplay.system}.
+                </p>
+                <p class="mt-4 text-support">
+                  <a class="rr-link" href="/replay">Every case, with what the agent said</a>
+                </p>
+              </div>
+            )
+          }
+          {
+            !stripeReplay && (
+              <>
+                <ClaimGap />
+                <p class="mt-3 text-meta text-muted">
+                  From the bundled demo, a synthetic support desk rather than Stripe.
+                  <a class="rr-link" href="/replay">See the recorded run</a>
+                </p>
+              </>
+            )
+          }
+        </div>
       </div>
-
-      <div><ClaimGap /></div>
     </div>
   </section>
 
-  <!-- ──────────────────────────────────────────────────────────── the problem -->
-  <Section ruled>
-    <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-      <div>
-        <Eyebrow>The gap</Eyebrow>
-        <h2 class="mt-4 text-display font-medium text-balance">
-          A transcript cannot tell you whether the work happened.
-        </h2>
-      </div>
-      <div class="max-w-prose space-y-5 text-lead text-secondary">
-        <p>
-          An agent that reports success and an agent that achieved it are indistinguishable from
-          the transcript. They are trivially distinguishable from the database.
-        </p>
-        <p>
-          So RigorRun does not score the answer. It reads the system afterwards through operations
-          you nominate, and asks the questions that have a fact behind them: does the refund exist,
-          is the amount right, is the ticket attached, was approval required, and did anything
-          change that should not have.
-        </p>
-        <p class="text-fg">
-          Every verdict is labelled with how strongly it could be checked. A verdict against a real
-          system is <span class="font-mono text-support">PARTIAL</span>, and says so.
-        </p>
-      </div>
-    </div>
-  </Section>
-
   <!-- ────────────────────────────────────────────────────────── how it works -->
   <Section ruled id="how">
-    <div class="flex flex-wrap items-end justify-between gap-6">
+    <Eyebrow>How it works</Eyebrow>
+    <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
+      Three steps. Your agent does not change.
+    </h2>
+
+    <ol class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-3">
+      <li class="flex flex-col bg-surface p-6" data-reveal>
+        <span class="font-mono text-meta text-accent">1</span>
+        <h3 class="mt-3 text-title font-medium">Set up the Stripe pack</h3>
+        <p class="mt-2 flex-1 text-support text-secondary">
+          The support tickets below and the checks that decide them, as a project on your machine.
+          Run them on a local Stripe twin with no keys, or on your Stripe test mode.
+        </p>
+        <pre
+          data-theme="ink"
+          class="mt-5 whitespace-pre-wrap rounded-well border border-line bg-canvas px-4 py-3 font-mono text-meta leading-relaxed text-fg [overflow-wrap:anywhere] sm:whitespace-pre"
+          tabindex="0"
+          role="region"
+          aria-label="Step 1 command"><code>npx rigorrun stripe init</code></pre>
+      </li>
+      <li class="flex flex-col bg-surface p-6" data-reveal>
+        <span class="font-mono text-meta text-accent">2</span>
+        <h3 class="mt-3 text-title font-medium">Point it at your agent</h3>
+        <p class="mt-2 flex-1 text-support text-secondary">
+          RigorRun posts each ticket to the endpoint your agent already serves. Your agent works it
+          with its own Stripe key; afterwards RigorRun reads Stripe with a key of its own.
+        </p>
+        <pre
+          data-theme="ink"
+          class="mt-5 whitespace-pre-wrap rounded-well border border-line bg-canvas px-4 py-3 font-mono text-meta leading-relaxed text-fg [overflow-wrap:anywhere] sm:whitespace-pre"
+          tabindex="0"
+          role="region"
+          aria-label="Step 2 command"><code>{`npx rigorrun agent add \\
+  --project <id> \\
+  --black-box <your agent's URL>`}</code></pre>
+      </li>
+      <li class="flex flex-col bg-surface p-6" data-reveal>
+        <span class="font-mono text-meta text-accent">3</span>
+        <h3 class="mt-3 text-title font-medium">Gate every change</h3>
+        <p class="mt-2 flex-1 text-support text-secondary">
+          The same tickets on every pull request. A failed case exits 1 and stops the build, and the
+          HTML report is attached to the run.
+        </p>
+        <pre
+          data-theme="ink"
+          class="mt-5 rounded-well border border-line bg-canvas px-4 py-3 font-mono text-meta leading-relaxed text-fg"
+          tabindex="0"
+          role="region"
+          aria-label="Step 3 workflow step"><code>{`- uses: Konuktor/rigorrun@v0.4.0
+  with:
+    project: \${{ vars.RIGORRUN_PROJECT }}`}</code></pre>
+      </li>
+    </ol>
+  </Section>
+
+  <!-- ───────────────────────────────────────────────────────────── the cases -->
+  <Section ruled id="cases">
+    <div class="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:items-end lg:gap-16">
       <div>
-        <Eyebrow>How it works</Eyebrow>
-        <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
-          One demonstration becomes a suite that runs forever.
+        <Eyebrow>The Stripe pack</Eyebrow>
+        <h2 class="mt-4 text-display font-medium text-balance">
+          {tickets.length} tickets, each with one right answer Stripe can confirm.
         </h2>
       </div>
-      <Button href="/how-it-works" variant="ghost">Read the long version →</Button>
+      <p class="max-w-xl text-lead text-secondary">
+        Every case makes its own customer and payments in Stripe first, so nothing one case does
+        leaks into the next. Some tickets are right to refuse — a refund that should not exist is
+        as wrong as one that is missing.
+      </p>
     </div>
 
-    <ol class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-2 lg:grid-cols-5">
+    <ul class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
       {
-        pipeline.map((step) => (
+        tickets.map((ticket) => (
           <li class="flex flex-col bg-surface p-5" data-reveal>
-            <span class="font-mono text-meta text-accent">{step.n}</span>
-            <h3 class="mt-3 text-title font-medium">{step.title}</h3>
-            <p class="mt-2 flex-1 text-support text-secondary">{step.body}</p>
-            <p class="mt-5 border-t border-line-soft pt-3 font-mono text-meta text-muted">
-              {step.stat}
+            <p class="font-mono text-meta text-muted">{ticket.id}</p>
+            <h3 class="mt-2 text-section font-semibold">{ticket.title}</h3>
+            <p class="mt-2 flex-1 text-support text-secondary">{ticket.body}</p>
+            <p class="mt-4 border-t border-line-soft pt-3 text-meta text-muted">
+              <span class="text-secondary">Right answer:</span> {ticket.due}
             </p>
           </li>
         ))
       }
-    </ol>
-
-    <p class="mt-5 text-support text-muted">
-      Those counts are what the pipeline produced on its last run, written by a script and checked
-      in CI — not numbers typed into a page.
-      <a class="rr-link" href="/how-it-works#synthetic">The system in this example is synthetic.</a>
-    </p>
-  </Section>
-
-  <!-- ───────────────────────────────────────────────────────────── evidence -->
-  <Section ruled>
-    <div class="grid gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
-      <div>
-        <Eyebrow>Evidence</Eyebrow>
-        <h2 class="mt-4 text-display font-medium text-balance">Evidence, with the denominator.</h2>
-        <p class="mt-6 max-w-md text-lead text-secondary">
-          RigorRun was run against {evidence.totals.servers} MCP servers nobody here wrote, each pinned
-          to the exact bytes the registry published and executed in a container with no network.
+      <li class="flex flex-col bg-raised p-5" data-reveal>
+        <p class="font-mono text-meta text-muted">canary</p>
+        <h3 class="mt-2 text-section font-semibold">Before all of them</h3>
+        <p class="mt-2 flex-1 text-support text-secondary">
+          One small full refund through your agent, end to end, so the first verdict you read is a
+          simple one.
         </p>
-        <p class="mt-4 max-w-md text-support text-muted">
-          It reached {evidence.totals.toolsExercised} of {evidence.totals.toolsDiscovered} tools. The
-          other {evidence.totals.toolsUntested} are named, each with the reason it was not reached.
-          A fabricated 100% would be worth less than a measured {Math.round(
-            (evidence.totals.toolsExercised / evidence.totals.toolsDiscovered) * 100,
-          )}% with the remainder itemised.
+        <p class="mt-4 border-t border-line-soft pt-3 font-mono text-meta text-secondary">
+          rigorrun stripe canary
         </p>
-        <div class="mt-8">
-          <Button href="/evidence" variant="secondary">Read the full record</Button>
-        </div>
-      </div>
-
-      <div class="rounded-panel border border-line bg-surface" data-reveal>
-        <div class="grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
-          {
-            [
-              { label: 'Servers', value: evidence.totals.servers },
-              { label: 'Tools found', value: evidence.totals.toolsDiscovered },
-              { label: 'Exercised', value: evidence.totals.toolsExercised },
-              { label: 'Contradicted', value: evidence.totals.contradicted },
-            ].map((cell) => (
-              <div class="bg-surface p-4">
-                <p class="text-micro font-semibold uppercase text-muted">{cell.label}</p>
-                <p class="mt-2 text-metric font-medium" data-numeric>
-                  {cell.value}
-                </p>
-              </div>
-            ))
-          }
-        </div>
-        <div class="border-t border-line p-5">
-          <h3 class="text-micro font-semibold uppercase text-muted">What this does not establish</h3>
-          <ul class="mt-3 space-y-2 text-support text-secondary">
-            <li><span class="text-fg">Nothing about the wider registry.</span> Four servers, one publisher, all well maintained. That is the weakest possible sample.</li>
-            <li><span class="text-fg">No security claim about any of them.</span> A server that contradicted nothing here contradicted nothing this harness can observe, on the tools it could exercise.</li>
-            <li><span class="text-fg">No market validation.</span> Our own scan is not a user.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
+      </li>
+    </ul>
   </Section>
 
-  <!-- ──────────────────────────────────────────────────────── how it connects -->
+  <!-- ─────────────────────────────────────────────────────────── what you get -->
   <Section ruled>
-    <Eyebrow>How it connects</Eyebrow>
-    <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
-      Three ways in, and what each one can prove.
-    </h2>
-    <p class="mt-5 max-w-2xl text-lead text-secondary">
-      How RigorRun reaches your system decides how strong a verdict it can give you. That is stated
-      on every result rather than buried in a footnote.
-    </p>
-
-    <div class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-3">
-      {
-        connectors.map((connector) => (
-          <div class="flex flex-col bg-surface p-6" data-reveal>
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="text-title font-medium">{connector.title}</h3>
-              <span
-                class:list={[
-                  'rounded-pill border px-2.5 py-1 font-mono text-micro font-semibold',
-                  connector.tone === 'warn'
-                    ? 'border-warn-line bg-warn-bg text-warn'
-                    : 'border-line-strong text-muted',
-                ]}
-              >
-                {connector.strength}
-              </span>
-            </div>
-            <p class="mt-1.5 text-support text-muted">{connector.lede}</p>
-            <p class="mt-4 flex-1 text-support text-secondary">{connector.body}</p>
-          </div>
-        ))
-      }
-    </div>
-
-    <div class="mt-6 rounded-panel border border-line bg-raised p-5">
-      <p class="max-w-3xl text-support text-secondary">
-        <span class="text-fg">A verdict is never stronger than the read behind it.</span>
-        <span class="font-mono">AUTHORITATIVE</span> is direct, trusted state.
-        <span class="font-mono">PARTIAL</span> is verified through the reads your system exposes — a
-        normal connected server is PARTIAL, and that is honest, not a defect.
-        <span class="font-mono">OBSERVATIONAL</span> means the actions were watched and the final
-        state was not independently proven.
-      </p>
-    </div>
-  </Section>
-
-  <!-- ─────────────────────────────────────────────────────────── local first -->
-  <Section ruled>
-    <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
+    <div class="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
       <div>
-        <Eyebrow>Local-first</Eyebrow>
+        <Eyebrow>What you get</Eyebrow>
         <h2 class="mt-4 text-display font-medium text-balance">
-          There is no server to send your systems to.
+          Not a score. What happened, ticket by ticket.
         </h2>
-        <p class="mt-6 max-w-md text-lead text-secondary">
-          A page served over <span class="font-mono text-support">https</span> cannot reach your
-          staging box or your internal API. So the interface is served by the local process instead.
-          Not a policy — an architecture with no route by which your credentials could reach us.
-        </p>
-        <div class="mt-8">
-          <Button href="/security" variant="secondary">How it is built</Button>
-        </div>
       </div>
-
-      <div class="grid gap-4 sm:grid-cols-2" data-reveal>
-        <div class="rounded-panel border border-line bg-surface p-5">
-          <h3 class="text-micro font-semibold uppercase text-muted">Stays on your machine</h3>
-          <ul class="mt-3 space-y-2 font-mono text-support text-fg">
-            <li>credentials</li>
-            <li>system access</li>
-            <li>recordings</li>
-            <li>raw execution</li>
-            <li>state read-back</li>
-            <li>run history</li>
-          </ul>
+      <dl class="grid gap-x-10 gap-y-8 sm:grid-cols-2">
+        <div>
+          <dt class="text-section font-semibold">A verdict per ticket</dt>
+          <dd class="mt-2 text-support text-secondary">
+            PASS or FAIL, with how strongly it could be checked and exactly what was read.
+          </dd>
         </div>
-        <div class="rounded-panel border border-line bg-surface p-5">
-          <h3 class="text-micro font-semibold uppercase text-muted">Leaves, only if you ask</h3>
-          <ul class="mt-3 space-y-3 text-support text-secondary">
-            <li>
-              <span class="font-mono text-fg">rigorrun verify</span> downloads the named package
-              from the npm registry.
-            </li>
-            <li>Connecting your own system sends requests to your own system.</li>
-            <li>
-              An LLM agent runs only if you have set a provider key, and then it talks to that
-              provider.
-            </li>
-          </ul>
-          <p class="mt-4 border-t border-line-soft pt-3 text-meta text-muted">
-            None of the three reach RigorRun. There is nowhere for them to reach.
+        <div>
+          <dt class="text-section font-semibold">Its words, next to Stripe’s records</dt>
+          <dd class="mt-2 text-support text-secondary">
+            What your agent said it did, beside the refunds Stripe holds afterwards. The words are
+            shown and never scored.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-section font-semibold">An HTML report</dt>
+          <dd class="mt-2 text-support text-secondary">
+            One self-contained page per run, to attach to a pull request or send to whoever asked.
+          </dd>
+        </div>
+        <div>
+          <dt class="text-section font-semibold">A gate in CI</dt>
+          <dd class="mt-2 text-support text-secondary">
+            <span class="font-mono text-meta">rigorrun gate</span> exits 1 when the agent fails, and
+            the GitHub Action runs it in one step.
+            <a class="rr-link" href={`${REPO_URL}/blob/master/docs/CI.md`}>CI guide</a>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </Section>
+
+  <!-- ─────────────────────────────────────────────────────────────── limits -->
+  <Section ruled>
+    <div class="rounded-panel border border-line bg-raised p-6 sm:p-10">
+      <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+        <div>
+          <Eyebrow>Limits</Eyebrow>
+          <h2 class="mt-4 text-display font-medium text-balance">What a verdict here does not cover.</h2>
+          <p class="mt-5 max-w-sm text-support text-secondary">
+            Stated on every result, not kept for a footnote. A verdict is never stronger than the
+            read behind it.
           </p>
         </div>
+        <ul class="grid gap-x-10 gap-y-7 sm:grid-cols-2">
+          {
+            limits.map((limit) => (
+              <li>
+                <h3 class="text-section font-semibold">{limit.title}</h3>
+                <p class="mt-2 text-support text-secondary">{limit.body}</p>
+              </li>
+            ))
+          }
+        </ul>
       </div>
     </div>
   </Section>
 
-  <!-- ────────────────────────────────────────────────────────────── category -->
+  <!-- ─────────────────────────────────────────────────────────── where it fits -->
   <Section ruled>
-    <Eyebrow>Not an eval harness</Eyebrow>
-    <h2 class="mt-4 max-w-2xl text-display font-medium text-balance">
-      Benchmarks tell you which model wins. This tells you whether yours did the job.
-    </h2>
-
-    <div class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-2">
-      <div class="bg-surface p-6">
-        <h3 class="text-micro font-semibold uppercase text-muted">An evaluation harness</h3>
-        <p class="mt-4 font-mono text-support text-secondary">
-          prompt → output → a judge scores the text
+    <Eyebrow>Where it fits</Eyebrow>
+    <ul class="mt-6 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-2">
+      <li class="bg-surface p-6 sm:p-8">
+        <p class="text-title font-medium text-balance">
+          It tests your agent against your own Stripe test mode, not a replica of it.
         </p>
-        <p class="mt-4 text-support text-secondary">
-          Measures what the model wrote. Two agents with identical transcripts score identically,
-          including the one that changed nothing.
+        <p class="mt-3 text-support text-muted">
+          The local twin is there to start with no keys, and every verdict on it says it ran on the
+          twin.
         </p>
-      </div>
-      <div class="bg-surface p-6">
-        <h3 class="text-micro font-semibold uppercase text-accent">RigorRun</h3>
-        <p class="mt-4 font-mono text-support text-fg">
-          job → state before → acceptance suite → agent → state after → verdict
+      </li>
+      <li class="bg-surface p-6 sm:p-8">
+        <p class="text-title font-medium text-balance">
+          The verdict comes from the state of the system your agent changed, not from a model
+          grading the transcript.
         </p>
-        <p class="mt-4 text-support text-secondary">
-          Measures what changed. The tests come from a demonstration rather than from somebody
-          finding time to write them, and the verdict comes from the records.
+      </li>
+      <li class="bg-surface p-6 sm:p-8">
+        <p class="text-title font-medium text-balance">
+          It runs on your machine: <span class="font-mono text-[0.92em]">npx rigorrun</span>,
+          MIT-licensed, no account.
         </p>
-      </div>
-    </div>
+        <p class="mt-3 text-support text-muted">
+          Your keys stay in this machine’s secret store, never in a project file.
+          <a class="rr-link" href="/security">How it is built</a>
+        </p>
+      </li>
+      <li class="bg-surface p-6 sm:p-8">
+        <p class="text-title font-medium text-balance">
+          It gates a change before production. Pair it with a monitor or a runtime guard if you need
+          those.
+        </p>
+      </li>
+    </ul>
   </Section>
 
   <!-- ─────────────────────────────────────────────────────────── get started -->
   <Section ruled>
-    <div class="rounded-panel border border-line bg-surface p-8 sm:p-12">
+    <div class="rounded-panel border border-line bg-surface p-6 sm:p-12">
       <div class="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
         <div>
-          <h2 class="text-display font-medium text-balance">Bring the workflow you cannot afford to break.</h2>
+          <h2 class="text-display font-medium text-balance">
+            See it on a recording. Then run it on yours.
+          </h2>
           <p class="mt-5 max-w-lg text-lead text-secondary">
-            One command starts the runner on your machine. Connect your system, do the job once, and
-            point your agent at the suite it builds.
+            The demo needs nothing. The Stripe pack needs Node 20.11 or newer, your agent reachable
+            over HTTP, and — when you leave the twin — a Stripe test key.
           </p>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Command command="npx rigorrun" size="lg" />
             <Button href="/start" size="lg">Get started</Button>
+            <Button href={DOCS_URL} variant="secondary" size="lg" external>Read the docs</Button>
           </div>
-          <p class="mt-5 text-support text-muted">
-            Free, and there is no pricing yet. Node 20.11 or newer.
-            <a class="rr-link" href="/access">What Early Access means.</a>
-          </p>
         </div>
 
-        <div data-theme="ink" class="rounded-well border border-line bg-canvas p-5">
-          <p class="text-micro font-semibold uppercase text-muted">Then, in CI</p>
-          <pre class="mt-3 overflow-x-auto font-mono text-support leading-relaxed text-fg" tabindex="0" role="region" aria-label="Example CI command and exit codes"><code>{`$ rigorrun gate --project checkout
-
-  task success      96.0%
-  policy compliance  100%
-  verified          PARTIAL
-  isolation         RESET
-
-  exit 0`}</code></pre>
-          <p class="mt-4 text-meta text-muted">
-            Exit 1 when the gate is missed, so a regression stops the build rather than reaching
-            production.
-            <a class="rr-link" href={`${DOCS_URL}/start/ci-gate`}>CI guide</a>
+        <div class="space-y-3">
+          <Command command="npx rigorrun demo" class="w-full" label="Command, again: npx rigorrun demo" />
+          <Command
+            command="npx rigorrun stripe init"
+            class="w-full"
+            label="Command, again: npx rigorrun stripe init"
+          />
+          <p class="pt-1 text-meta text-muted">
+            Free, and there is no pricing yet.
+            <a class="rr-link" href="/access">What Early Access means.</a>
           </p>
         </div>
       </div>
