@@ -36,3 +36,12 @@
   - RigorRun's client already did this (`packages/env-stripe/src/client.ts`).
   - Nothing that decides a label or a verdict changed. 70 harness tests still pass.
   - Stage L is run again in full.
+- **Stage L, fourth counted run: stopped on purpose after 4 cells.**
+  - The cold-founder walkthrough had just found two first-run defects in the product: a late write
+    by a timed-out agent was counted against the next case, and the per-case budget was too short
+    for a model calling tools.
+  - Fixing them changes `packages/`, so any stage run at the old tree would not qualify the release.
+  - The 4 cells are kept in `evidence/L-20261001T085948Z-stopped/`.
+  - After the fix, stages T and L and the black-box qualification are run again, at the new product
+    tree, with new freeze files. Every earlier counted result stays published under the tree it was
+    run against.
