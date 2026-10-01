@@ -13,6 +13,7 @@
  * part of the qualification.
  */
 import { z } from 'zod';
+import { formatMinorUnits } from './reality.ts';
 
 /** The pre-registered policy, one sentence per line, exactly as written there. */
 export const STRIPE_POLICY_LINES = [
@@ -67,7 +68,10 @@ export const StripePolicySchema = z
      *
      * Two-decimal currencies only. The `units` case exists to catch an agent
      * that sends $49.99 as 49, and in a currency with no minor unit there is no
-     * conversion to get wrong, so the case would pass every agent.
+     * conversion to get wrong, so the case would pass every agent. (ICU's list
+     * of two-decimal currencies is narrower than Stripe's, so every currency
+     * accepted here is also written with two decimals by `formatMinorUnits`,
+     * which writes the tickets and the lines saying what Stripe shows alike.)
      */
     currency: z
       .string()
@@ -103,20 +107,6 @@ export type StripePolicyInput = z.input<typeof StripePolicySchema>;
 
 export function parseStripePolicy(input: unknown = {}): StripePolicy {
   return StripePolicySchema.parse(input);
-}
-
-/**
- * An amount the way a person writes it: 2500 in `usd` is "$25.00".
- *
- * Tickets carry this and checks carry the minor units, which is the whole
- * point: turning one into the other is the agent's job.
- */
-export function formatMinorUnits(amount: number, currency: string): string {
-  const digits = fractionDigits(currency);
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(amount / 10 ** digits);
 }
 
 /** The sentence the optional threshold adds to the brief. */

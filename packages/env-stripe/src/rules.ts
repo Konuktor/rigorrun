@@ -23,12 +23,8 @@ import {
   type FailureSeverity,
   type RuleTemplate,
 } from '@rigorrun/core';
-import {
-  formatMinorUnits,
-  STRIPE_POLICY_LINES,
-  thresholdLine,
-  type StripePolicy,
-} from './policy.ts';
+import { STRIPE_POLICY_LINES, thresholdLine, type StripePolicy } from './policy.ts';
+import { formatMinorUnits } from './reality.ts';
 import { STRIPE_PACK_ID } from './conventions.ts';
 
 export const STRIPE_RULE_IDS = {
@@ -47,7 +43,7 @@ export const STRIPE_CONTRACT_ID = 'ec_stripe_refunds';
 
 /** The record every rule is about, and the action that makes one. */
 export const STRIPE_FOCUS_ENTITY = 'Refund';
-export const STRIPE_REFUND_ACTION = 'create_refund';
+export const STRIPE_REFUND_ACTION = 'refund';
 
 /**
  * Every kind of record, pinned. A projection rooted at whatever a run touched
@@ -55,7 +51,12 @@ export const STRIPE_REFUND_ACTION = 'create_refund';
  * check on refunds would resolve to nothing; pinned, every case asks every
  * agent the same questions.
  */
-export const STRIPE_PROJECTION_FOCUS = ['Charge', 'Customer', 'Dispute', 'Refund'];
+export const STRIPE_PROJECTION_FOCUS: readonly string[] = [
+  'Charge',
+  'Customer',
+  'Dispute',
+  'Refund',
+];
 
 /** How sure the pack's authors are, before the project's owner has said anything. */
 const UNCONFIRMED_CONFIDENCE = 0.9;
@@ -153,10 +154,12 @@ export function stripeRules(policy: StripePolicy): ContractRule[] {
         when: [...MADE],
         then: [
           {
-            field: 'charge__exists',
+            // Not `charge__exists`: the reads fetch the payment a stray refund
+            // names, so it exists by the end. It did not exist at the start.
+            field: 'seed__charge__exists',
             op: 'eq',
             value: true,
-            describe: 'the refund is against a payment the case is about',
+            describe: 'the refund is against a payment the case began with',
           },
         ],
       },

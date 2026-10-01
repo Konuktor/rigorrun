@@ -11,9 +11,12 @@
  * It starts the way every command RigorRun starts does (@rigorrun/exec): the
  * program itself, never a shell, with no arguments, a minimal environment rather
  * than all of this one, and stated as typed by the operator. What identifies the
- * case arrives as RIGORRUN_* variables.
+ * case arrives as RIGORRUN_* variables: which run, agent, case and attempt, when
+ * the case started, and — for a case whose records were created for it — the
+ * identifiers they were given, as JSON in RIGORRUN_CASE_BINDINGS, so the program
+ * can read the very records the case was about.
  */
-import type { CaseResult } from '@rigorrun/core';
+import { CASE_BINDINGS_ENV, type CaseResult } from '@rigorrun/core';
 import { runCommand } from '@rigorrun/exec';
 import { CliError } from './io.ts';
 
@@ -36,12 +39,25 @@ export function afterCaseHook(program: string): AfterCase {
           RIGORRUN_CASE_INDEX: String(index),
           RIGORRUN_CASE_OUTCOME: result.outcome ?? '',
           RIGORRUN_CASE_CATEGORY: result.category,
+          RIGORRUN_CASE_STARTED_AT: result.startedAt,
+          // Absent rather than guessed for a run recorded before attempts were.
+          ...(result.attempt !== undefined
+            ? { RIGORRUN_CASE_ATTEMPT: String(result.attempt) }
+            : {}),
+          // Only a case whose records were made has bindings. An empty object
+          // would claim it had none, which is a different thing.
+          ...(result.materialized
+            ? { [CASE_BINDINGS_ENV]: JSON.stringify(result.materialized) }
+            : {}),
         },
         timeoutMs: AFTER_CASE_TIMEOUT_MS,
         provenance: 'operator-configured',
       });
     } catch (error) {
-      throw new CliError(`--after-case could not run after ${result.caseId}: ${(error as Error).message}`, 2);
+      throw new CliError(
+        `--after-case could not run after ${result.caseId}: ${(error as Error).message}`,
+        2,
+      );
     }
 
     // Standard output belongs to the run itself, which may be --json.

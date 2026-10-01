@@ -6,41 +6,42 @@
  * cases and which of the 56 cells must fail. This test builds each cell's
  * world by hand — the records the case's recipe makes, with ids shaped like
  * Stripe's, then the refunds that agent's behaviour leaves — and has the real
- * runner decide it: the same projection, the same verifier and the same
- * classification a run uses. Nothing here re-implements a verdict.
+ * runner decide it, through the Stripe pack's own environment: the runner
+ * materializes the case, binds it to the ids it is given, reads the world
+ * before and after the agent, and projects, verifies and classifies as a run
+ * does. Only Stripe is replaced, by the hand-built world; nothing here
+ * re-implements a verdict.
  *
  * Two labels are checked for every cell. The oracle's — the refunds made,
  * succeeded or pending, as (payment, amount), against the case's Due set —
  * proves the hand-built world is the behaviour the agents table describes.
  * RigorRun's must then equal the expected verdict, with no abstention.
  *
- * The runner binds a materialized case's tokens to the ids the pack reports
- * before the agent starts. These worlds are built rather than materialized, so
- * the test binds each case itself, with `bindCase`, and hands the runner the
- * bound case over an environment that reads the hand-built world back.
+ * suite.pack.test.ts runs the same cells again with Stripe's API faked instead,
+ * so the pack's own materializing and reading build the worlds.
  */
 import { createHash } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { bindCase, type Benchmark, type BenchmarkCase } from '@rigorrun/core';
+import type { Benchmark } from '@rigorrun/core';
 import {
+  PackEnvironment,
   clearEnvironments,
   cloneState,
+  emptyState,
   registerEnvironment,
   stateFromRows,
-  type ActionResult,
   type CanonicalState,
-  type EnvironmentAdapter,
-  type EnvironmentCapabilities,
-  type PresentationHints,
-  type StateSnapshot,
+  type PackSession,
 } from '@rigorrun/environment';
 import type { AgentAdapter } from '@rigorrun/agents';
 import { runBenchmark } from '@rigorrun/runner';
 import {
   STRIPE_CASE_IDS,
+  STRIPE_PACK_ID,
   STRIPE_RULE_IDS,
   bindingNamesFor,
   parseRecipe,
+  stripePack,
   stripeSchema,
   stripeSuite,
   type Recipe,
@@ -230,6 +231,18 @@ function materialize(caseId: string, recipe: Recipe, attempt = 0): Built {
   };
 }
 
+/** Somebody else's payment, in nobody's case. */
+const OUTSIDE = {
+  id: 'ch_3QoutsideTheCase0000000',
+  customer: 'cus_OutsiderXy12Zw',
+  payment_intent: 'pi_3QoutsideTheCase0000000',
+  amount: 5000,
+  amount_refunded: 0,
+  refunded: false,
+  disputed: false,
+  status: 'succeeded',
+};
+
 /**
  * The world after the agent: the refunds it made, and the payments they were
  * made against, as Stripe keeps them. A refund Stripe would refuse is a
@@ -243,6 +256,7 @@ function afterRefunds(
   made.forEach((refund, index) => {
     const chargeId = refund.charge ?? built.charges[refund.role!];
     if (chargeId === undefined) throw new Error(`this case has no ${refund.role}`);
+    if (chargeId === OUTSIDE.id) state.entities['Charge']![OUTSIDE.id] = { ...OUTSIDE };
     const payment = state.entities['Charge']?.[chargeId];
     const status = refund.status ?? 'succeeded';
     if (payment) {
@@ -283,110 +297,93 @@ function oracle(built: Built, final: CanonicalState, caseId: string): Verdict {
 
 // ------------------------------------------------------------ the real runner
 
-const CELL_ENVIRONMENT = 'stripe-suite-cells';
-let world: CanonicalState = { entities: {} };
+type Made = Parameters<typeof afterRefunds>[1];
+
+/** The cell being run: what its agent leaves, and the worlds it was judged between. */
+interface Cell {
+  leaves: (built: Built) => Made;
+  built?: Built;
+  final?: CanonicalState;
+}
+let cell: Cell = { leaves: () => [] };
+let world: CanonicalState = emptyState(stripeSchema);
 
 /**
- * Reads back whatever world the cell set, as a pack environment reads Stripe:
- * designated reads, independent of the agent, its calls unseen.
+ * The pack's session, with the hand-built world in place of Stripe: the
+ * runner asks it to materialize the case, binds the case to what it reports,
+ * and reads the world back before and after the agent, as it does for Stripe.
  */
-class CellEnvironment implements EnvironmentAdapter {
-  readonly id = CELL_ENVIRONMENT;
-  readonly name = 'Stripe (built by hand)';
-  readonly description = 'The records a case would hold, read back for the runner.';
-  capabilities(): EnvironmentCapabilities {
+const handBuilt: PackSession = {
+  system: 'Stripe (built by hand)',
+  safety: 'staging',
+  simulated: false,
+  async materialize(recipe, ctx) {
+    const built = materialize(ctx.caseId, parseRecipe(recipe), ctx.attempt);
+    cell.built = built;
+    world = built.baseline;
     return {
-      discovery: 'declared-schema',
-      stateRead: 'designated-reads',
-      stateReadIndependence: 'independent',
-      seed: 'none',
-      reset: 'namespace',
-      events: 'proxy-log',
-      safety: 'staging',
+      bindings: built.bindings,
+      scope: { description: 'The records built by hand for this cell.', data: null },
     };
-  }
-  describeEntities() {
-    return stripeSchema;
-  }
-  getActions() {
-    return [];
-  }
-  describeCaseConfig() {
-    return [];
-  }
-  describePresentation(): PresentationHints {
-    return {
-      label: 'Stripe',
-      tagline: 'test mode',
-      accent: '#635bff',
-      mark: 'S',
-      navEntities: ['Refund', 'Charge', 'Customer', 'Dispute'],
-      focusEntity: 'Refund',
-    };
-  }
-  reset() {}
-  seed() {
-    throw new Error('the cells read a world; they never install one');
-  }
-  getState() {
-    return cloneState(world);
-  }
-  getEvents() {
-    return [];
-  }
-  executeAction(): ActionResult {
+  },
+  async read(scope) {
+    return scope === null ? emptyState(stripeSchema) : cloneState(world);
+  },
+  actions: () => [],
+  async execute() {
     return {
       ok: false,
       error: { code: 'NO_ACTIONS', message: 'a black-box agent calls Stripe itself' },
     };
-  }
-  snapshot(): StateSnapshot {
-    return { state: cloneState(world), events: [], config: {}, clock: 0 };
-  }
-  restore() {
-    throw new Error('the cells never restore');
-  }
-}
+  },
+  async close() {},
+};
 
-/** A black-box agent whose work is already known: when it runs, the world becomes `final`. */
-function agentLeaving(id: string, final: CanonicalState, claim: string): AgentAdapter {
+/** A black-box agent that leaves the refunds its cell says, given the records its case was given. */
+function scripted(id: string): AgentAdapter {
   return {
     id,
     name: id,
     kind: 'blackbox',
     description: `scripted: ${id}`,
     async execute() {
-      world = final;
-      return { report: claim, costUsd: 0, costNote: 'no model calls — scripted' };
+      const built = cell.built!;
+      cell.final = afterRefunds(built, cell.leaves(built));
+      world = cell.final;
+      // The liar's line; nothing scores it.
+      return { report: 'Refunded $25.00.', costUsd: 0, costNote: 'no model calls — scripted' };
     },
   };
 }
 
 async function decide(
   benchmark: Benchmark,
-  bound: BenchmarkCase,
-  baseline: CanonicalState,
-  agent: AgentAdapter,
+  caseId: string,
+  agentId: string,
+  leaves: Cell['leaves'],
 ) {
-  world = baseline;
-  const run = await runBenchmark(
-    { ...benchmark, environment: CELL_ENVIRONMENT, cases: [bound] },
-    [agent],
-    { runId: `run_${bound.id}_${agent.id}`, now: () => new Date('2026-10-01T12:00:00.000Z') },
-  );
+  cell = { leaves };
+  const testCase = benchmark.cases.find((candidate) => candidate.id === caseId)!;
+  const run = await runBenchmark({ ...benchmark, cases: [testCase] }, [scripted(agentId)], {
+    runId: `run_${caseId}_${agentId}`,
+    now: () => new Date('2026-10-01T12:00:00.000Z'),
+  });
   expect(run.verification).toBe('PARTIAL');
+  expect(run.isolation).toBe('FRESH_OBJECTS');
   const [result] = run.caseResults;
   expect(result?.observation).toBe('state-only');
-  return result!;
+  expect(result?.baseline).toBe('MATERIALIZED');
+  expect(result?.materialized).toEqual(cell.built!.bindings);
+  return { result: result!, oracle: oracle(cell.built!, cell.final!, caseId) };
 }
 
 beforeAll(() => {
   clearEnvironments();
   registerEnvironment({
-    id: CELL_ENVIRONMENT,
-    name: 'Stripe (built by hand)',
-    description: 'The records a case would hold.',
-    create: () => new CellEnvironment(),
+    id: STRIPE_PACK_ID,
+    name: stripePack.name,
+    description: stripePack.description,
+    create: () => new PackEnvironment(stripePack, handBuilt),
     fixtures: [],
   });
 });
@@ -429,20 +426,11 @@ describe.each([
         );
         expect(recipe.olderCharge?.amount ?? recipe.otherCustomer?.charge.amount).toBe(setup.other);
 
-        const built = materialize(caseId, recipe);
-        const made = AGENTS[agentId]!(caseId, built).map(([role, amount]) => ({ role, amount }));
-        const final = afterRefunds(built, made);
-        expect(
-          oracle(built, final, caseId),
-          'the behaviour is the one the agents table describes',
-        ).toBe(expected(agentId, caseId));
-
-        const bound = bindCase(testCase, built.bindings);
-        const result = await decide(
-          benchmark,
-          bound,
-          built.baseline,
-          agentLeaving(agentId, final, agentId === 'liar' ? 'Refunded $25.00.' : 'Done.'),
+        const { result, oracle: label } = await decide(benchmark, caseId, agentId, (built) =>
+          AGENTS[agentId]!(caseId, built).map(([role, amount]) => ({ role, amount })),
+        );
+        expect(label, 'the behaviour is the one the agents table describes').toBe(
+          expected(agentId, caseId),
         );
         expect(result.outcome, result.outcomeReason).toBe(expected(agentId, caseId));
       });
@@ -454,22 +442,7 @@ describe.each([
 
 describe('worlds the agents table does not script', () => {
   const { benchmark } = stripeSuite({}, { confirmedRuleIds: ALL_RULES });
-  const bound = (caseId: string) => {
-    const testCase = benchmark.cases.find((candidate) => candidate.id === caseId)!;
-    const built = materialize(caseId, parseRecipe(testCase.seed.recipe), 1);
-    return { built, bound: bindCase(testCase, built.bindings) };
-  };
-  const verdict = async (caseId: string, made: Parameters<typeof afterRefunds>[1]) => {
-    const { built, bound: testCase } = bound(caseId);
-    const final = afterRefunds(built, made);
-    const result = await decide(
-      benchmark,
-      testCase,
-      built.baseline,
-      agentLeaving('probe', final, 'Done.'),
-    );
-    return { result, oracle: oracle(built, final, caseId) };
-  };
+  const verdict = (caseId: string, made: Made) => decide(benchmark, caseId, 'probe', () => made);
 
   it('counts a due refund that is still pending', async () => {
     const { result, oracle: label } = await verdict('full_refund', [
@@ -489,9 +462,12 @@ describe('worlds the agents table does not script', () => {
   });
 
   it('fails a refund on a payment outside the case, though the due one was made', async () => {
+    // As the reads see it: the stray refund turns up in the account-wide
+    // window, and the payment it names is fetched then, so it exists at the
+    // end and did not at the start.
     const { result, oracle: label } = await verdict('full_refund', [
       { role: 'charge', amount: 2500 },
-      { charge: 'ch_3QunrelatedPayment00000', amount: 999 },
+      { charge: OUTSIDE.id, amount: 999 },
     ]);
     expect(label).toBe('FAIL');
     expect(result.outcome).toBe('FAIL');

@@ -19,10 +19,23 @@ import type { CaseResult, RunResult } from '@rigorrun/core';
  * time so the full report keeps its readable evidence.
  */
 const RECORD_ID = /\b[A-Z]{2,6}-\d{3,}\b/g;
+/**
+ * The other common shape of an identifier a system issues: a short lowercase
+ * prefix, an underscore, and a token with at least one digit in it (rec_0042,
+ * ab_3Fz9Q). Requiring the digit keeps ordinary snake_case words readable.
+ */
+const PREFIXED_ID = /\b[a-z]{1,8}_(?=[A-Za-z0-9]*\d)[A-Za-z0-9]{3,}\b/g;
+const EMAIL = /[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g;
 const MONEY = /\$\d[\d,]*(?:\.\d{1,2})?/g;
 
+const WITHHELD = '(withheld from the published report)';
+
 export function maskPrivateText(text: string): string {
-  return text.replace(RECORD_ID, '\u2039id\u203a').replace(MONEY, '$\u2039amount\u203a');
+  return text
+    .replace(EMAIL, '\u2039address\u203a')
+    .replace(RECORD_ID, '\u2039id\u203a')
+    .replace(PREFIXED_ID, '\u2039id\u203a')
+    .replace(MONEY, '$\u2039amount\u203a');
 }
 
 export function sanitizeRunResult(run: RunResult): RunResult {
@@ -33,10 +46,17 @@ export function sanitizeRunResult(run: RunResult): RunResult {
 }
 
 function sanitizeCaseResult(result: CaseResult, index: number): CaseResult {
+  // The identifiers a case's records were created under are the private
+  // workflow's own record identifiers, so they go with the task inputs.
+  const { materialized: _materialized, ...kept } = result;
   return {
-    ...result,
+    ...kept,
     // Case names describe the customer's own business process.
     caseName: `Case ${index + 1}`,
+    // The reason quotes the failed checks' messages, which name the records
+    // they looked at — the bound identifiers of a materialized case above all.
+    outcomeReason: maskPrivateText(result.outcomeReason),
+    ...(result.error !== undefined ? { error: maskPrivateText(result.error) } : {}),
     // Tool arguments and results carry customer data verbatim.
     steps: result.steps.map((step) => ({
       index: step.index,
@@ -66,9 +86,16 @@ function sanitizeCaseResult(result: CaseResult, index: number): CaseResult {
       verificationSource: assertion.verificationSource,
       failureSeverity: assertion.failureSeverity,
       blocking: assertion.blocking,
-      message: '(withheld from the published report)',
+      message: WITHHELD,
     })),
-    agentReport: '(withheld from the published report)',
+    agentReport: WITHHELD,
+    // What the system showed is a reading of the customer's records, as the
+    // final state summary is, so its sentences go too. Whose account it was
+    // stays, so the published page still says that one was taken.
+    ...(result.reality ? { reality: { system: result.reality.system, lines: [WITHHELD] } } : {}),
+    // What the reads covered is a statement about the verdict, and is kept;
+    // any identifier written into it is masked like a check description's.
+    ...(result.readScope ? { readScope: maskPrivateText(result.readScope) } : {}),
     finalStateSummary: {},
   };
 }
@@ -81,6 +108,8 @@ export const SANITIZATION_NOTES = [
   'Tool arguments and tool results are removed; only the tool name and outcome remain.',
   'Assertion evidence (observed and expected values) is removed; only PASS/FAIL/ERROR remains.',
   'Agent prose reports are removed.',
+  'What the system showed at the end of each case is removed; only whose account it was remains.',
+  'The identifiers each case\u2019s records were created under are removed, and any inside a read scope are masked.',
   'Final state summaries are removed.',
   'Scores, category labels, agent labels, hashes and timestamps are kept.',
 ] as const;

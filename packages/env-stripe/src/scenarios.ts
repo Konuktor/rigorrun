@@ -34,12 +34,12 @@ import {
   type EnvironmentContract,
 } from '@rigorrun/core';
 import {
-  formatMinorUnits,
   OVER_THRESHOLD_MARGIN,
   STRIPE_TICKET_INSTRUCTION,
   stripePolicyBrief,
   type StripePolicy,
 } from './policy.ts';
+import { formatMinorUnits } from './reality.ts';
 import type { RecipeInput } from './recipe.ts';
 import {
   STRIPE_REFUND_ACTION,

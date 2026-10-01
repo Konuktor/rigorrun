@@ -25,10 +25,12 @@ import {
   LARGEST_DUE_REFUND,
   OVER_THRESHOLD_CASE_ID,
   REFUND_STATUSES,
+  STRIPE_ACTIONS,
   STRIPE_CASE_IDS,
   STRIPE_PACK_ID,
   STRIPE_POLICY_BRIEF,
   STRIPE_POLICY_LINES,
+  STRIPE_REFUND_ACTION,
   STRIPE_RULE_IDS,
   STRIPE_TICKET_INSTRUCTION,
   bindingNamesFor,
@@ -151,10 +153,12 @@ describe('the policy', () => {
     expect(() => parseStripePolicy({ escalateAbove: LARGEST_DUE_REFUND })).not.toThrow();
   });
 
-  it('writes an amount the way a person does', () => {
+  it('writes a ticket’s amount as the lines saying what Stripe shows do', () => {
     expect(formatMinorUnits(2500, 'usd')).toBe('$25.00');
     expect(formatMinorUnits(4999, 'usd')).toBe('$49.99');
-    expect(formatMinorUnits(2500, 'eur')).toBe('€25.00');
+    const euro = stripeSuite({ currency: 'eur' }).benchmark.cases[0]!;
+    expect(euro.task.inputs['amount']).toBe(formatMinorUnits(2500, 'eur'));
+    expect(parseRecipe(euro.seed.recipe).currency).toBe('eur');
   });
 
   it('adds one sentence for a threshold, after the pre-registered ones', () => {
@@ -330,6 +334,17 @@ describe('the suite', () => {
     }
     for (const rule of contract.rules)
       expect(rule.generatedAssertions.length, rule.id).toBeGreaterThan(0);
+  });
+
+  it('plans a due refund as the pack’s own refund action takes it', () => {
+    const refund = STRIPE_ACTIONS.find((action) => action.name === STRIPE_REFUND_ACTION);
+    expect(refund?.readOnly).toBe(false);
+    expect(contract.primaryAction).toBe(STRIPE_REFUND_ACTION);
+    const params = new Set(refund?.params.map((param) => param.name));
+    for (const step of benchmark.cases.flatMap((testCase) => testCase.referencePlan)) {
+      expect(step.action).toBe(STRIPE_REFUND_ACTION);
+      for (const name of Object.keys(step.args)) expect(params).toContain(name);
+    }
   });
 
   it('keeps every case valid on its own', () => {
