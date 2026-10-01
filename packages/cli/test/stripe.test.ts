@@ -1142,6 +1142,66 @@ describe('gate --project and --agent', () => {
   });
 });
 
+describe('doctor on a Stripe project', () => {
+  it('finds nothing wrong with a working twin project, and probes a black box the way agent add does', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    const url = await refundingAgent();
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'my-agent',
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+
+    const { code, out } = await cli('doctor', '--home', home);
+    const project = out.slice(out.indexOf('Stripe refunds (twin)'));
+    expect(project).not.toContain('problem');
+    expect(project).toMatch(/system\s+ok\s+The Stripe twin/);
+    // A pack reads each case's records with its own key: no nominated reads, no reset.
+    expect(project).toMatch(/reads\s+ok\s+.*with its own key, stored as stripe_twin_key/);
+    expect(project).toMatch(/isolation\s+ok\s+fresh records for every case and attempt/);
+    expect(project).toMatch(/agent my-agent\s+ok\s+answering/);
+    expect(project).not.toContain('nothing could be verified');
+    expect(code).toBe(0);
+  });
+
+  it('still says so when the black box does not answer, or the pack’s key is missing', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    const url = await refundingAgent();
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'gone',
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+    for (const server of servers.splice(0)) await new Promise((resolve) => server.close(resolve));
+    await new ProjectStore(home).deleteSecret(TWIN_KEY_SECRET);
+
+    const { code, out } = await cli('doctor', '--home', home);
+    expect(code).toBe(2);
+    expect(out).toMatch(/credentials\s+problem\s+stripe_twin_key not set on this machine/);
+    expect(out).toMatch(/agent gone\s+problem\s+Could not reach the endpoint/);
+  });
+});
+
 describe('stripe twin', () => {
   it('prints its address alone on the first line, and stops when told', async () => {
     let stop!: () => void;
