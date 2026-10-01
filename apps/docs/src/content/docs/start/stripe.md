@@ -103,6 +103,8 @@ store committed or restored. The key arrives as `RIGORRUN_SECRET__STRIPE_TEST_KE
   This is always checked; it is what the policy's "and nothing else" means.
 - **State only.** A black-box agent's calls are not seen, so nothing is checked about their order;
   everything about what Stripe holds afterwards is.
+- **A failed case can leave objects behind.** Stripe has no undo. If creating a case's records fails
+  part-way, the harness failure names what was already created; nothing deletes it.
 - **The twin is a simulation.** A verdict against it is marked so, and is good evidence about your
   agent's logic and none about Stripe. Confirm a release against test mode.
 - **Live mode is never used.** Not by RigorRun's key, which must be a test key Stripe confirms, and

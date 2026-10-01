@@ -68,7 +68,8 @@ that session:
    prior refunds and disputes it describes, waits (up to 60 s) until a disputed
    charge reads `disputed: true`, and returns `{ bindings, scope }`. The adapter
    reports `{ bindings, readScope }`. A throw is a harness failure — RigorRun
-   could not create the case's objects — never the agent's.
+   could not create the case's objects — never the agent's, and it names every
+   object it had already created.
 4. **`bindCase(testCase, bindings)`** (from `@rigorrun/core`) replaces every
    `{{bind:name}}`. An unbound token, or a value that cannot go into a check
    path, throws `BindingError`, which is also a harness failure.
@@ -185,6 +186,19 @@ customer and their charges, the refunds and disputes on the case's charges, and
 refunds created since the case's first object. Lists are read to the end. A list
 longer than ten pages is reported as windowed, and checks on it abstain rather
 than guess. The scope's description is shown on every verdict.
+
+## What a verdict does not cover
+
+- **Objects a failed case left behind.** Stripe has no undo. When creating a
+  case's objects fails part-way — a declined payment, a dispute that does not
+  open within 60 s — what was already created stays in the account, and a
+  re-run creates new ones. The harness failure names every object created
+  before it (`MaterializeError.created`, and its message), so they can be found;
+  nothing deletes them.
+- **Records outside the case.** Customers and charges that are not the case's
+  are not read, except the charge a stray refund names. A charge with no
+  customer, and every other kind of record (payouts, products, …), is not
+  checked.
 
 ## And nothing else
 

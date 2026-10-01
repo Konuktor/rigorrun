@@ -60,11 +60,26 @@ export const StripeScopeDataSchema = z
   .strict();
 export type StripeScopeData = z.infer<typeof StripeScopeDataSchema>;
 
-/** A case's objects could not be created. Always a harness failure. */
+/** One object a case created in Stripe, and what it was for. */
+export interface CreatedObject {
+  what: string;
+  id: string;
+}
+
+/**
+ * A case's objects could not be created. Always a harness failure.
+ *
+ * Stripe has no undo, so whatever was created before the failure stays there.
+ * `created` names it, and so does the message — which is what a harness
+ * failure shows — so a person can find every object a failed case left.
+ */
 export class MaterializeError extends Error {
-  constructor(message: string, options?: { cause?: unknown }) {
+  readonly created: readonly CreatedObject[];
+
+  constructor(message: string, options?: { cause?: unknown; created?: readonly CreatedObject[] }) {
     super(message, options);
     this.name = 'MaterializeError';
+    this.created = options?.created ?? [];
   }
 }
 
@@ -99,8 +114,35 @@ export async function materializeCase(
   deps: MaterializeDeps,
 ): Promise<PackMaterialization> {
   const recipe = readRecipe(recipeInput, ctx);
-  const metadata = caseMetadata(ctx);
   const writer = new Writer(deps, ctx);
+  try {
+    return await createAll(recipe, ctx, deps, writer);
+  } catch (error) {
+    throw leftBehind(error, writer.created);
+  }
+}
+
+/**
+ * A failure to create, with what had been created by then named on it. A
+ * failure that is not about creating — a live-mode stop above all — passes
+ * through untouched.
+ */
+function leftBehind(error: unknown, created: readonly CreatedObject[]): unknown {
+  if (!(error instanceof MaterializeError) || created.length === 0) return error;
+  const list = created.map((entry) => `${entry.what} ${entry.id}`).join(', ');
+  return new MaterializeError(
+    `${error.message} Already created for this case, and left in Stripe: ${list}.`,
+    { cause: error.cause ?? error, created: [...created] },
+  );
+}
+
+async function createAll(
+  recipe: Recipe,
+  ctx: PackCaseContext,
+  deps: MaterializeDeps,
+  writer: Writer,
+): Promise<PackMaterialization> {
+  const metadata = caseMetadata(ctx);
 
   const email = emailFor(ctx, 'customer');
   const customer = await writer.post<StripeCustomer>(
@@ -260,6 +302,7 @@ async function pay(
       `Stripe confirmed ${spec.what} (${intent.id}) and reported no charge for it.`,
     );
   }
+  writer.made(`the charge of ${spec.what}`, charge.id);
   if (charge.status !== 'succeeded') {
     throw new MaterializeError(
       `The charge for ${spec.what} (${charge.id}) is "${charge.status}", not "succeeded".`,
@@ -314,6 +357,9 @@ async function waitForDispute(
 
 /** The client, with every failure turned into a sentence about what could not be made. */
 class Writer {
+  /** Every object created so far, in order: what is left in Stripe if a later step fails. */
+  readonly created: CreatedObject[] = [];
+
   constructor(
     private readonly deps: MaterializeDeps,
     private readonly ctx: PackCaseContext,
@@ -321,11 +367,20 @@ class Writer {
 
   async post<T>(path: string, params: StripeParams, step: string, what: string): Promise<T> {
     const key = idempotencyKey(this.ctx, step);
+    let answer: T;
     try {
-      return await this.deps.client.post<T>(path, params, { idempotencyKey: key });
+      answer = await this.deps.client.post<T>(path, params, { idempotencyKey: key });
     } catch (error) {
       throw this.explain(error, `create ${what}`);
     }
+    const id = (answer as { id?: unknown } | null)?.id;
+    if (typeof id === 'string') this.made(what, id);
+    return answer;
+  }
+
+  /** Notes an object that now exists because of this case. */
+  made(what: string, id: string): void {
+    if (!this.created.some((entry) => entry.id === id)) this.created.push({ what, id });
   }
 
   async get<T>(path: string, what: string): Promise<T> {

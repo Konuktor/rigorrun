@@ -282,6 +282,49 @@ describe('what cannot be created is a harness failure that says why', () => {
     );
   });
 
+  it('names what it had already created, so the harness failure says what was left behind', async () => {
+    const { fake, deps } = setup();
+    fake.enqueue({
+      match: (call) => call.path === '/v1/payment_intents',
+      status: 402,
+      body: { error: { type: 'card_error', code: 'card_declined', message: 'Declined.' } },
+    });
+    const failure = materializeCase({ charge: { amount: 2500 } }, ctx, deps);
+    await expect(failure).rejects.toBeInstanceOf(MaterializeError);
+    const error = (await failure.catch((thrown: unknown) => thrown)) as MaterializeError;
+    const [customer] = [...fake.customers.keys()];
+    expect(error.message).toMatch(/card_declined/);
+    expect(error.message).toContain(
+      `Already created for this case, and left in Stripe: the customer who writes in ${customer}.`,
+    );
+    expect(error.created).toEqual([{ what: 'the customer who writes in', id: customer }]);
+  });
+
+  it('names the customer, payment and charge a dispute that never opened left behind', async () => {
+    const { fake, deps } = setup({ disputeAfterPolls: 'never' });
+    const error = (await materializeCase(
+      { charge: { amount: 4000, disputed: true } },
+      ctx,
+      deps,
+    ).catch((thrown: unknown) => thrown)) as MaterializeError;
+    expect(error).toBeInstanceOf(MaterializeError);
+    const ids = [...fake.customers.keys(), ...fake.intents.keys(), ...fake.charges.keys()];
+    expect(ids).toHaveLength(3);
+    for (const id of ids) expect(error.message).toContain(id);
+    expect(error.created.map((entry) => entry.id).sort()).toEqual([...ids].sort());
+  });
+
+  it('adds nothing when nothing was created', async () => {
+    const { deps } = setup();
+    const error = (await materializeCase(
+      { charge: { amount: 2500, colour: 'red' } },
+      ctx,
+      deps,
+    ).catch((thrown: unknown) => thrown)) as MaterializeError;
+    expect(error.message).not.toContain('Already created');
+    expect(error.created).toEqual([]);
+  });
+
   it('a refusal from Stripe, named', async () => {
     const { fake, deps } = setup();
     fake.enqueue({
