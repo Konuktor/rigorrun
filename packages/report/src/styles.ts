@@ -58,6 +58,7 @@ td.num,th.num{text-align:right}
 .cell.fail{background:rgba(255,107,107,.16);color:var(--fail)}
 .cell.undecided{background:rgba(255,196,0,.16);color:#d9a400}
 .cell.unsafe{background:rgba(255,107,107,.3);color:#fff;outline:1px solid var(--fail)}
+.permission-matrix td.cell{display:table-cell;width:auto;height:auto;border-radius:0;white-space:nowrap}
 pre{background:#0e1116;border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;
   font-family:var(--mono);font-size:11.5px;line-height:1.5;margin:6px 0}
 .timeline{list-style:none;margin:8px 0 0;padding:0;font-family:var(--mono);font-size:11.5px}
