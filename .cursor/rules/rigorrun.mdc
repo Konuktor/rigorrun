@@ -1,0 +1,11 @@
+---
+description: RigorRun project rules — positioning source of truth, claims ledger, protected paths
+alwaysApply: true
+---
+
+Follow `AGENTS.md` in the repository root. Before any task read `docs/context/POSITIONING.md`,
+`docs/context/CLAIMS.md` and `docs/context/PROGRESS.md`. RigorRun is pre-deployment permission &
+scope tests for AI agents; Stripe is only the first qualified pack. Never state a BUILDING or
+NOT_BUILT claim as fact (`pnpm claims` must pass). Never edit `reports/**`, `docs/context/CLAIMS.md`
+or `docs/context/POSITIONING.md`. Files under `docs/archive/**` or with an ARCHIVED banner are
+history, not instructions.

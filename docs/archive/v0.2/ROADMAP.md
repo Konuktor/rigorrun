@@ -1,3 +1,8 @@
+> **ARCHIVED — v0.2 positioning ("do the job once"), kept as history.** It is not how RigorRun
+> is positioned now and must not be used as a source for copy or plans. Current positioning:
+> [`docs/context/POSITIONING.md`](../../context/POSITIONING.md); what may be claimed:
+> [`docs/context/CLAIMS.md`](../../context/CLAIMS.md).
+
 # Roadmap
 
 What exists, what does not, and what comes next. The point of this page is that
@@ -39,7 +44,7 @@ two packages that import nothing from RigorRun.
   says it is damaged rather than disappearing, a copy taken before any
   migration, and servers a crash left running ended by the next start.
 - Projects that can leave the machine — `backup`, `restore`, `export-project`,
-  `import-project` — carrying credential *names* and never values, and inert
+  `import-project` — carrying credential _names_ and never values, and inert
   on arrival until somebody has read the command their connector would run.
 
 **The engine underneath**, unchanged and still true: one compiler over five
@@ -74,7 +79,7 @@ copying it is a reasonable install until there is a reason it is not.
 
 ~~**No trace import, and no OpenTelemetry ingest.**~~ Built —
 `docs/TRACE_IMPORT.md`. An OpenTelemetry trace of a production failure becomes a
-permanent case, with only the *situation* taken from the trace and what should
+permanent case, with only the _situation_ taken from the trace and what should
 have happened computed from the confirmed rules. What is missing: importing
 RigorRun's own run artefacts, and any way to recover a starting state from
 telemetry — which is not an oversight, because telemetry describes what an agent
@@ -161,7 +166,7 @@ to decide anything on the generated cases. Reported on `/proof`, not fixed.
 ## Explicitly not planned
 
 - A public model leaderboard. The value is that the benchmark is private.
-- Production trace ingestion as the primary input. Working *before* there is
+- Production trace ingestion as the primary input. Working _before_ there is
   traffic is the whole idea.
 - A model that writes test cases.
 - Production observability. Different product, different buyer.

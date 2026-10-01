@@ -1,3 +1,8 @@
+> **ARCHIVED — v0.2 positioning ("do the job once"), kept as history.** It is not how RigorRun
+> is positioned now and must not be used as a source for copy or plans. Current positioning:
+> [`docs/context/POSITIONING.md`](../../context/POSITIONING.md); what may be claimed:
+> [`docs/context/CLAIMS.md`](../../context/CLAIMS.md).
+
 # RigorRun — product
 
 **Do the job once. Test every agent forever.**

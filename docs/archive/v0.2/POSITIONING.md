@@ -1,3 +1,8 @@
+> **ARCHIVED — v0.2 positioning ("do the job once"), kept as history.** It is not how RigorRun
+> is positioned now and must not be used as a source for copy or plans. Current positioning:
+> [`docs/context/POSITIONING.md`](../../context/POSITIONING.md); what may be claimed:
+> [`docs/context/CLAIMS.md`](../../context/CLAIMS.md).
+
 # Positioning
 
 Settled before the redesign, so the design had something to be true to.
@@ -72,16 +77,16 @@ an API, or clicks — because that is a question a person can answer on their fi
 
 Words that carry meaning and must be used precisely:
 
-| | |
-| --- | --- |
-| **Project** | One job, in one system. |
-| **Contract** | What RigorRun worked out from the demonstration. |
-| **Rule** | `observed`, `inferred`, `confirmed` or `rejected`. Only the first and third may block. |
-| **Case** | One scenario, in one of ten categories. |
-| **Check** | One assertion about what should be true afterwards. |
-| **Verification strength** | `AUTHORITATIVE`, `PARTIAL`, `OBSERVATIONAL`. What was read, not how confident anybody is. |
-| **Isolation** | `RESET`, `PARTIAL`, `DECLARED`, `NONE`. Whether cases started clean, and whether that was observed or believed. |
-| **Verdict** | `YES`, `CONDITIONAL`, `NO`. Conditional is not a softer yes. |
+|                           |                                                                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Project**               | One job, in one system.                                                                                         |
+| **Contract**              | What RigorRun worked out from the demonstration.                                                                |
+| **Rule**                  | `observed`, `inferred`, `confirmed` or `rejected`. Only the first and third may block.                          |
+| **Case**                  | One scenario, in one of ten categories.                                                                         |
+| **Check**                 | One assertion about what should be true afterwards.                                                             |
+| **Verification strength** | `AUTHORITATIVE`, `PARTIAL`, `OBSERVATIONAL`. What was read, not how confident anybody is.                       |
+| **Isolation**             | `RESET`, `PARTIAL`, `DECLARED`, `NONE`. Whether cases started clean, and whether that was observed or believed. |
+| **Verdict**               | `YES`, `CONDITIONAL`, `NO`. Conditional is not a softer yes.                                                    |
 
 ## Sentences that are allowed
 

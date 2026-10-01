@@ -27,6 +27,7 @@ const LOCAL = [
   ['contrast', 'node', ['scripts/check-contrast.mjs'], 'design tokens meet WCAG contrast'],
   ['lint', 'pnpm', ['lint'], 'eslint'],
   ['domain', 'node', ['scripts/check-domain-leak.mjs'], 'no workflow leaked into generic code'],
+  ['claims', 'pnpm', ['claims'], 'public copy states only qualified claims as fact'],
   ['typecheck', 'pnpm', ['typecheck'], 'tsc --noEmit'],
   ['unit', 'pnpm', ['test'], 'unit and integration tests'],
   ['build', 'pnpm', ['build'], 'all apps and the CLI build'],

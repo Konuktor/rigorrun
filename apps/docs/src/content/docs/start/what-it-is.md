@@ -1,23 +1,27 @@
 ---
 title: What RigorRun is
-description: RigorRun turns one human demonstration into an executable acceptance suite, then verifies an agent against the state of the system rather than its own account of what it did.
+description: RigorRun tests an AI agent that takes real actions — first of all a support agent that issues Stripe refunds — by reading the system afterwards, never by trusting what the agent said it did.
 ---
 
-You have an agent that calls tools. You need to know whether it can do a real job in your real
-system without doing something unsafe — and you need to know again next week, after somebody
-changes a prompt.
+You have an agent that takes real actions — most often, a support agent that issues refunds in
+Stripe. You need to know whether it does the right thing on the tickets that matter: the refund
+that is owed and nothing else, no refund on a disputed payment, never somebody else's payment,
+never the same item twice. And you need to know again next week, after somebody changes the model
+or the prompt.
 
-RigorRun watches a person do that job once, reads the system before and after, works out what the
-rules must be, asks about what it can only guess, and turns the answers into an executable
-acceptance suite. Then it runs your agent against it and reads your system to find out what
-actually happened.
+RigorRun sends your agent support tickets, lets it work with its own key, then reads Stripe itself
+— your test mode, or a local twin with no keys — and decides each ticket on what Stripe holds
+afterwards. What the agent said it did is shown beside that, labelled, and never scored.
 
 ```
-most tools:   you write the tests   →  the tool runs them
-  RigorRun:   you do the job once   →  RigorRun writes the tests
+transcript evals:   read what the agent said  →  a person or a model grades it
+        RigorRun:   read Stripe afterwards    →  what it did, beside what it said
 ```
 
-## Why not just score the output
+Start with [Test a Stripe refund agent](/start/stripe/): a local twin, your agent over HTTP, a
+canary and a gate.
+
+## Why not just score the transcript
 
 An agent that reports success and an agent that achieved it are indistinguishable from the
 transcript. They are trivially distinguishable from the database.
@@ -25,6 +29,13 @@ transcript. They are trivially distinguishable from the database.
 That is the whole argument. An evaluation harness measures what the model wrote; RigorRun compares
 system state before and after, through read operations you nominate. The agent's own account of
 what it did is displayed on every result, labelled, and never scored.
+
+## Beyond Stripe
+
+For a system with no pack, RigorRun builds the suite from a demonstration: connect the system (an
+MCP server, an HTTP API from OpenAPI, or a web application), do the job once, and RigorRun reads the
+system before and after, works out what the rules must be and asks about what it can only guess.
+[Your first project](/start/first-project/) walks it.
 
 ## What it is not
 
