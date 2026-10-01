@@ -58,14 +58,46 @@ def git_commit() -> str:
     return result.stdout.strip()
 
 
+def product_tree() -> str:
+    """The git tree of packages/ at HEAD: the product, and nothing else.
+
+    A stage is frozen on this rather than on HEAD, so the evidence of stage T
+    can be committed before stage L runs without invalidating L, while any
+    change to the product does (dev-log.md, before the freeze).
+    """
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD:packages"],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain", "--", "packages"],
+        cwd=ROOT,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    ).stdout.strip()
+    if dirty:
+        raise RuntimeError("packages/ has uncommitted changes; the product under test must be committed")
+    return result.stdout.strip()
+
+
+def freeze_path_for(stage: str) -> Path:
+    return ROOT / f"freeze-{stage}.json"
+
+
 def freeze(stage: str) -> Path:
-    path = ROOT / "freeze.json"
+    path = freeze_path_for(stage)
     if path.exists():
         raise RuntimeError(f"{path} already exists; counted evidence is immutable")
     record = {
-        "schema": "rigorrun/stripe-qualification-freeze/1",
+        "schema": "rigorrun/stripe-qualification-freeze/2",
         "stage": stage,
         "product_commit": git_commit(),
+        "product_tree": product_tree(),
         "frozen_at": datetime.now(timezone.utc).isoformat(),
     }
     write_json(path, record)
@@ -316,17 +348,17 @@ def run_stage(stage: str, dev: bool, attempts: int = 3) -> Path:
         raise RuntimeError("--attempts must be at least 1")
     if not dev and attempts != len(ATTEMPTS):
         raise RuntimeError(f"counted stages require exactly {len(ATTEMPTS)} attempts")
-    freeze_path = ROOT / "freeze.json"
-    if dev and freeze_path.exists():
-        raise RuntimeError("development runs are forbidden after freeze.json exists")
+    freeze_path = freeze_path_for(stage)
+    if dev and any(freeze_path_for(s).exists() for s in ("T", "L")):
+        raise RuntimeError("development runs are forbidden once a stage is frozen")
     if not dev:
         if not freeze_path.exists():
-            raise RuntimeError("counted runs require freeze first")
+            raise RuntimeError(f"counted runs require freeze --stage {stage} first")
         frozen = read_json(freeze_path)
         if frozen.get("stage") != stage:
-            raise RuntimeError(f"freeze.json is for stage {frozen.get('stage')}, not {stage}")
-        if frozen.get("product_commit") != git_commit():
-            raise RuntimeError("the product commit differs from freeze.json; this stage is invalid")
+            raise RuntimeError(f"{freeze_path.name} is for stage {frozen.get('stage')}, not {stage}")
+        if frozen.get("product_tree") != product_tree():
+            raise RuntimeError(f"the product (packages/) differs from {freeze_path.name}; this stage is invalid")
 
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output_dir = ROOT / ("dev-runs" if dev else "evidence") / f"{stage}-{timestamp}"
@@ -714,12 +746,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             stage = args.stage
             if stage is None:
-                freeze_path = ROOT / "freeze.json"
-                if not freeze_path.exists():
-                    raise RuntimeError("aggregate needs --stage when freeze.json is absent")
-                stage = str(read_json(freeze_path).get("stage", ""))
-                if stage not in {"T", "L"}:
-                    raise RuntimeError("freeze.json does not identify stage T or L")
+                raise RuntimeError("aggregate needs --stage T or L")
             records = args.records
             if records is None:
                 candidates = sorted((ROOT / "evidence").glob(f"{stage}-*/cells.jsonl"))
