@@ -41,7 +41,13 @@ import {
 } from '@rigorrun/environment';
 import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
-import { createBlackBoxAgent, probeBlackBox, type BlackBoxCompletion } from './blackBoxAgent.ts';
+import {
+  createBlackBoxAgent,
+  probeBlackBox,
+  redactEndpoint,
+  refuseCredentialInQuery,
+  type BlackBoxCompletion,
+} from './blackBoxAgent.ts';
 import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
@@ -62,7 +68,7 @@ import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
   BudgetsSchema,
   budgetProblem,
-  describeAgent,
+  agentAddress,
   newProject,
   type AgentConfig,
   ConnectorSchema,
@@ -825,6 +831,9 @@ export class Service {
     let key: string | undefined;
     if ('blackBox' in input) {
       const spec = input.blackBox;
+      // Refused before it is probed or stored, whichever way it arrived: the
+      // address goes into the project file and into every listing of agents.
+      refuseCredentialInQuery(spec.endpoint);
       const allowedHosts = (spec.allowedHosts ?? [])
         .map((host) => host.trim().toLowerCase())
         .filter(Boolean);
@@ -907,10 +916,10 @@ export class Service {
       };
     }
 
-    const same = describeAgent(agent);
+    const same = agentAddress(agent);
     const updated: Project = {
       ...project,
-      agents: [...project.agents.filter((entry) => describeAgent(entry) !== same), agent],
+      agents: [...project.agents.filter((entry) => agentAddress(entry) !== same), agent],
       timings: {
         ...project.timings,
         agentConnectedAt:
@@ -1308,7 +1317,7 @@ export class Service {
     if (config.kind === 'blackbox') {
       if (config.remoteConfirmedAt === null) {
         throw new Error(
-          `${config.name} sends each case's work to ${config.endpoint}, and nobody on this machine has ` +
+          `${config.name} sends each case's work to ${redactEndpoint(config.endpoint)}, and nobody on this machine has ` +
             'agreed to that. It came from an imported project rather than from you. Open it and confirm first.',
         );
       }

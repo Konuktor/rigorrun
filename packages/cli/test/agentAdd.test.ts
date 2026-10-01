@@ -150,6 +150,23 @@ describe('agent add --black-box', () => {
     expect(listed.out).toContain(`${endpoint} (black box)`);
   });
 
+  it('never prints the query of an address it lists', async () => {
+    const project = await withService((service) => service.createProject({ name: 'Query' }));
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      project.id,
+      '--home',
+      home,
+      '--black-box',
+      'http://127.0.0.1:9/task?tenant=acme-private',
+    );
+    const listed = await cli('agent', 'list', '--project', project.id, '--home', home);
+    expect(listed.out).toContain('http://127.0.0.1:9/task?… (black box)');
+    expect(listed.out).not.toContain('acme-private');
+  });
+
   it('stores an agent that does not answer yet, and exits 1 so a script can tell', async () => {
     const project = await withService((service) => service.createProject({ name: 'Not running' }));
     const { code, out } = await cli(
@@ -183,6 +200,16 @@ describe('agent add --black-box', () => {
       'a completion RigorRun does not know',
       ['--black-box', 'http://127.0.0.1:9/', '--completion', 'whenever'],
       /completion/,
+    ],
+    [
+      'a credential-shaped parameter in its query',
+      ['--black-box', 'http://127.0.0.1:9/run?api_key=sk-pasted-credential'],
+      /credential in its query \(api_key\)/,
+    ],
+    [
+      'a key-shaped value in its query, whatever the parameter is called',
+      ['--black-box', 'http://127.0.0.1:9/run?tenant=sk_test_sk-pasted-credential'],
+      /credential in its query \(tenant\)/,
     ],
     [
       'a header without a secret name',

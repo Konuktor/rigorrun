@@ -13,10 +13,12 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import type { AgentRunInput } from '@rigorrun/agents';
 import {
   TASK_PROTOCOL,
+  assertBlackBoxEndpoint,
   assertBlackBoxUrl,
   claimAt,
   createBlackBoxAgent,
   probeBlackBox,
+  redactEndpoint,
   renderBody,
   taskEnvelope,
 } from '../src/blackBoxAgent.ts';
@@ -96,6 +98,65 @@ describe('where the work may go', () => {
     expect(() =>
       assertBlackBoxUrl('https://user:pw@agent.example.com/', ['agent.example.com']),
     ).toThrow(/credentials/);
+  });
+});
+
+describe('credentials in the address', () => {
+  it.each([
+    'https://agent.example.com/run?api_key=x',
+    'https://agent.example.com/run?apiKey=x',
+    'https://agent.example.com/run?x-api-key=x',
+    'https://agent.example.com/run?key=x',
+    'https://agent.example.com/run?token=x',
+    'https://agent.example.com/run?access_token=x',
+    'https://agent.example.com/run?client_secret=x',
+    'https://agent.example.com/run?password=x',
+    'https://agent.example.com/run?auth=x',
+    'https://agent.example.com/run?signature=x',
+    'https://agent.example.com/run?sig=x',
+    'https://agent.example.com/run?tenant=sk_test_51abc',
+    'https://agent.example.com/run?tenant=rk_live_51abc',
+    'https://agent.example.com/run?tenant=pk_test_51abc',
+    'https://agent.example.com/run?hook=whsec_abc',
+  ])('refuses %s as an agent’s address, without echoing the value', (endpoint) => {
+    expect(() => assertBlackBoxEndpoint(endpoint, ['agent.example.com'])).toThrow(
+      /credential in its query/,
+    );
+    try {
+      assertBlackBoxEndpoint(endpoint, ['agent.example.com']);
+    } catch (error) {
+      expect((error as Error).message).not.toMatch(/=x\b|_51abc|whsec_abc/);
+    }
+    expect(() =>
+      createBlackBoxAgent({ ...base, endpoint, allowedHosts: ['agent.example.com'] }),
+    ).toThrow(/credential in its query/);
+  });
+
+  it('allows a query that carries none', () => {
+    const url = assertBlackBoxEndpoint('https://agent.example.com/run?tenant=acme&mode=fast', [
+      'agent.example.com',
+    ]);
+    expect(url.searchParams.get('tenant')).toBe('acme');
+  });
+
+  it('reports the refusal from the probe, before any request', async () => {
+    const probe = await probeBlackBox({
+      endpoint: 'http://127.0.0.1:9/run?token=abc',
+      allowedHosts: [],
+      bodyTemplate: null,
+    });
+    expect(probe).toMatchObject({ ok: false });
+    expect(probe.ok ? '' : probe.problem).toMatch(/credential in its query/);
+  });
+
+  it('shows an address without its query wherever an agent is described', () => {
+    expect(redactEndpoint('https://agent.example.com/run?tenant=acme')).toBe(
+      'https://agent.example.com/run?…',
+    );
+    expect(redactEndpoint('https://agent.example.com/run#frag')).toBe(
+      'https://agent.example.com/run#…',
+    );
+    expect(redactEndpoint('https://agent.example.com/run')).toBe('https://agent.example.com/run');
   });
 });
 

@@ -87,6 +87,89 @@ export function assertBlackBoxUrl(raw: string, allowedHosts: readonly string[]):
   return url;
 }
 
+/**
+ * Words in a query parameter's name that say its value is a credential.
+ * Matched as whole words of the name, so `api_key`, `apiKey`, `x-api-key` and
+ * `client_secret` are all caught and `author` is not.
+ */
+const CREDENTIAL_WORDS = new Set([
+  'key',
+  'token',
+  'secret',
+  'password',
+  'auth',
+  'signature',
+  'sig',
+]);
+/** Names that run the words together. */
+const CREDENTIAL_NAMES = new Set(['apikey', 'accesstoken']);
+/** Values shaped like an API key or a webhook signing secret, whatever the parameter is called. */
+const CREDENTIAL_VALUE = /^(?:sk|rk|pk)_|^whsec_/;
+
+function isCredentialName(name: string): boolean {
+  const words = name
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  return words.some((word) => CREDENTIAL_WORDS.has(word)) || CREDENTIAL_NAMES.has(words.join(''));
+}
+
+/**
+ * The first query parameter of an address that carries a credential, by its
+ * name or by the shape of its value; undefined when none does, or when the
+ * text is not an address at all (which is refused elsewhere, in its own words).
+ */
+export function credentialInQuery(raw: string): string | undefined {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return undefined;
+  }
+  for (const [name, value] of url.searchParams) {
+    if (isCredentialName(name) || CREDENTIAL_VALUE.test(value)) return name;
+  }
+  return undefined;
+}
+
+/**
+ * Refuses an agent's address with a credential in its query. The address is
+ * stored in the project — a file meant to be copied — and printed wherever the
+ * agent is listed, so a credential there would end up in both. Only the name
+ * is repeated, never the value.
+ */
+export function refuseCredentialInQuery(raw: string): void {
+  const name = credentialInQuery(raw);
+  if (name === undefined) return;
+  throw new Error(
+    `The agent's address carries a credential in its query (${name}). An address is stored in ` +
+      'the project and printed wherever the agent is listed; send the credential in a header from ' +
+      'a secret instead (--header Name=secret_name).',
+  );
+}
+
+/**
+ * An agent's own address: one RigorRun may send work to, with no credential in
+ * its query. A status address an answer names is held only to the first: it is
+ * never stored or printed, and a signed one is ordinary.
+ */
+export function assertBlackBoxEndpoint(raw: string, allowedHosts: readonly string[]): URL {
+  const url = assertBlackBoxUrl(raw, allowedHosts);
+  refuseCredentialInQuery(raw);
+  return url;
+}
+
+/**
+ * An address as a person is shown it: without its query or fragment, whole.
+ * A parameter's name is not a reliable sign of whether its value is private,
+ * so none of them is shown.
+ */
+export function redactEndpoint(endpoint: string): string {
+  const cut = endpoint.search(/[?#]/);
+  return cut === -1 ? endpoint : `${endpoint.slice(0, cut)}${endpoint[cut]}…`;
+}
+
 /** What one case asks of the agent, as the envelope and as plain text. */
 export interface TaskEnvelope {
   protocol: typeof TASK_PROTOCOL;
@@ -184,7 +267,7 @@ export async function probeBlackBox(
 ): Promise<{ ok: true; detail: string } | { ok: false; problem: string }> {
   let url: URL;
   try {
-    url = assertBlackBoxUrl(config.endpoint, config.allowedHosts);
+    url = assertBlackBoxEndpoint(config.endpoint, config.allowedHosts);
   } catch (error) {
     return { ok: false, problem: (error as Error).message };
   }
@@ -223,7 +306,7 @@ export async function probeBlackBox(
 }
 
 export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
-  const url = assertBlackBoxUrl(config.endpoint, config.allowedHosts);
+  const url = assertBlackBoxEndpoint(config.endpoint, config.allowedHosts);
 
   return {
     id: config.id,
