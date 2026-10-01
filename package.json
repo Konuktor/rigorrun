@@ -31,7 +31,7 @@
     "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
     "e2e:public": "playwright test --config e2e/playwright.public.config.ts",
     "deploy:crm": "pnpm build:crm && wrangler pages deploy apps/demo-crm/dist --project-name rigorrun-crm --branch main --commit-dirty=true",
-    "deploy:all": "pnpm deploy:crm && pnpm deploy:ops && pnpm deploy:site",
+    "deploy:all": "pnpm deploy:crm && pnpm deploy:ops && pnpm deploy:site && pnpm deploy:docs",
     "assets": "node scripts/capture-assets.mjs",
     "a11y": "playwright test --config e2e/playwright.a11y.config.ts",
     "smoke:prod": "playwright test --config e2e/playwright.smoke.config.ts",

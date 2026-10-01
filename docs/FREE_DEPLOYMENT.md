@@ -54,13 +54,20 @@ Currently deployed:
 | | |
 | --- | --- |
 | Landing, quickstart and the bundled example | <https://rigorrun.xyz> |
+| Documentation | <https://docs.rigorrun.xyz> (Pages project `rigorrun-docs`) |
 | Northstar Support | <https://rigorrun-crm.pages.dev> |
 | Four schema-driven systems | <https://rigorrun-ops.pages.dev> |
 
-Deploy them with `pnpm deploy:web`, `pnpm deploy:crm`, `pnpm deploy:ops`, or all
-three with `pnpm deploy:all`. Cloudflare Pages Free serves static assets with no
-request limit and no card, and none of these three has a server component that
-could cost anything.
+Deploy them with `pnpm deploy:site`, `pnpm deploy:docs`, `pnpm deploy:crm`,
+`pnpm deploy:ops`, or all four with `pnpm deploy:all`. Cloudflare Pages Free
+serves static assets with no request limit and no card, and none of these has a
+server component that could cost anything.
+
+`docs.rigorrun.xyz` is a Worker custom domain (`apps/docs/domain-worker`) that
+forwards to `rigorrun-docs.pages.dev`. A Pages custom domain needs a CNAME the
+deploy token cannot create; a Worker custom domain creates its own record. The
+docs themselves are still deployed to Pages by `pnpm deploy:docs`; the Worker
+only changes if the origin does (`wrangler deploy` in that directory).
 
 ## Custom domain
 

@@ -1,0 +1,7 @@
+{
+  "name": "rigorrun-docs-domain",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-01",
+  "routes": [{ "pattern": "docs.rigorrun.xyz", "custom_domain": true }],
+  "workers_dev": false
+}
