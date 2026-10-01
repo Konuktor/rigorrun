@@ -1,0 +1,62 @@
+{
+  "note": "Written before the counted run (PREREGISTRATION.md, AMENDMENT-1.md). run_bb.py run refuses when a harness file differs, when a commit since productCommit changes anything outside this qualification's generated outputs, or when a project's suite or happy_path case differs.",
+  "frozenAt": "2026-10-01T02:18:23+00:00",
+  "productCommit": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+  "branch": "wt/s4-blackbox",
+  "harnessFiles": {
+    "reports/blackbox-qualification-2026-10/AMENDMENT-1.md": "7730d9f0bb47fdc0076da77b486481a832f6908830545e5ee4190d56df2a91e0",
+    "reports/blackbox-qualification-2026-10/PREREGISTRATION.md": "1dbad72f012c4b1bdb643574df96779cd91481c4718553a499efdb591ec43572",
+    "reports/blackbox-qualification-2026-10/agents/blackbox_agent.py": "80748f9c4fc50291574e9b764823f4f4b2222594fe977ef4503f90176e7f77ac",
+    "reports/blackbox-qualification-2026-10/run_bb.py": "2ee00a04fb93eee4f0f25406bc9286e3307346893603fd42801754a2c39f79c1",
+    "reports/blackbox-qualification-2026-10/specs/bb-create.template.json": "aceda124de9bb87579fbaa1d60d7f4e45bee712c59d15e3de1fced852af2d7ec",
+    "reports/blackbox-qualification-2026-10/specs/bb-update.template.json": "5608dcfc56943b8e5970cb9d4739fde29ed072f8bfa1dce0b58107d005b9070f",
+    "reports/public-mcp-audit-2026-09/remediation/scripts/run-cases-after.py": "ed1c5f01f2610978db01748c1444ad16e27dd3ff202dc3d665fd4c5ac8199050",
+    "reports/public-mcp-audit-2026-09/requalification-v3/io-v2/after-case-oracle.py": "c1d73077b1cb993f184c4ff5ccc8b5f6f00ae1e3604543c7d184d6b4d961aaa7",
+    "reports/public-mcp-audit-2026-09/requalification-v3/io-v2/reset-taskdesk2.sh": "343163aeb4f67d0459d322a685e07adf38a34c1ba441435f1e3cd701d552b4a8",
+    "reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_oracle_server.py": "622965f9339bd2596dfefff6bd030788cda0c2f2bcc0255e82b4fb72cc662be2",
+    "reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_server.py": "a2c1f52b0f3b8596e57f0b70112246bd4e86b72c71b0ab847e7d5fc1eb48d8b3",
+    "reports/public-mcp-audit-2026-09/scripts/oracle-sqlite.py": "69e957e7054ccc1134e5df5cb90a3f8afd15d987aedd93ce9d62de3fd2c49b05",
+    "reports/public-mcp-audit-2026-09/scripts/run-cases.py": "44eed3ad570f5fdc871226b3882499bfb4cd3837d413ad110421e73786a43481"
+  },
+  "projects": {
+    "update": {
+      "projectId": "p_77afb2b5ff98",
+      "home": "../../../../tmp/claude-1000/-home-erbol/42fbeb78-2e0e-4d95-8987-9e9230a3e1ec/scratchpad/rehearsal/state/counted/homes/update",
+      "happyPathCaseId": "case_live__happy_path",
+      "happyPathIndex": 0,
+      "suiteShape": [
+        "happy_path",
+        "malformed_input",
+        "missing_precondition"
+      ],
+      "benchmarkSha256": "e4d3d3a6c265f42fc4f18f6e94b63381b1cb454605b3bdf6d793200d3b820d34",
+      "agents": {
+        "correct": "a_5a3e9420",
+        "wrong_value": "a_325fa0e6",
+        "wrong_entity": "a_3d93b9ac",
+        "did_nothing": "a_27f74589",
+        "extra_note": "a_0b12134e",
+        "second_write": "a_a0fdcd96"
+      }
+    },
+    "create": {
+      "projectId": "p_593a6ad54b10",
+      "home": "../../../../tmp/claude-1000/-home-erbol/42fbeb78-2e0e-4d95-8987-9e9230a3e1ec/scratchpad/rehearsal/state/counted/homes/create",
+      "happyPathCaseId": "case_live__happy_path",
+      "happyPathIndex": 0,
+      "suiteShape": [
+        "happy_path"
+      ],
+      "benchmarkSha256": "dc19820071dcb3555571fab2bb604c7f265e68bd5ab7cbea97d7de97068efb5d",
+      "agents": {
+        "correct": "a_6c6057fa",
+        "wrong_value": "a_b19aca83",
+        "wrong_entity": "a_83d52558",
+        "did_nothing": "a_754dba1c",
+        "extra_note": "a_869f98a0",
+        "second_write": "a_ab0c0e49"
+      }
+    }
+  },
+  "cells": 36
+}

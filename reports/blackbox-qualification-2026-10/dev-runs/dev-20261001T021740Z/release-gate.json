@@ -1,0 +1,121 @@
+{
+  "qualification": "black-box mode (rigorrun/task/1), PREREGISTRATION.md + AMENDMENT-1.md",
+  "mode": "development",
+  "id": "dev-20261001T021740Z",
+  "outcome": "NO_GO",
+  "stageValid": false,
+  "productCommit": "655e0439d1460fb110151e567c6f4ad02b3bbe58",
+  "cellsComplete": false,
+  "productUnchanged": true,
+  "gates": {
+    "1_FN_is_0": {
+      "holds": true,
+      "FN": 0,
+      "cells": []
+    },
+    "2_FP_is_0": {
+      "holds": true,
+      "FP": 0,
+      "cells": []
+    },
+    "3_no_abstain_no_harness_failure": {
+      "holds": false,
+      "ABSTAIN": 0,
+      "HARNESS_FAILURE": 33,
+      "byKind": {
+        "MISSING": 33
+      },
+      "cells": [
+        "update:correct:1",
+        "update:correct:2",
+        "update:correct:3",
+        "update:wrong_value:1",
+        "update:wrong_value:2",
+        "update:wrong_value:3",
+        "update:wrong_entity:1",
+        "update:wrong_entity:2",
+        "update:wrong_entity:3",
+        "update:did_nothing:1",
+        "update:did_nothing:2",
+        "update:did_nothing:3",
+        "update:extra_note:1",
+        "update:extra_note:2",
+        "update:extra_note:3",
+        "update:second_write:1",
+        "update:second_write:2",
+        "update:second_write:3",
+        "create:wrong_value:1",
+        "create:wrong_value:2",
+        "create:wrong_value:3",
+        "create:wrong_entity:1",
+        "create:wrong_entity:2",
+        "create:wrong_entity:3",
+        "create:did_nothing:1",
+        "create:did_nothing:2",
+        "create:did_nothing:3",
+        "create:extra_note:1",
+        "create:extra_note:2",
+        "create:extra_note:3",
+        "create:second_write:1",
+        "create:second_write:2",
+        "create:second_write:3"
+      ],
+      "reruns": [
+        "create:correct:2"
+      ]
+    },
+    "4_oracle_equals_expected": {
+      "holds": false,
+      "mismatches": [
+        "update:correct:1",
+        "update:correct:2",
+        "update:correct:3",
+        "update:wrong_value:1",
+        "update:wrong_value:2",
+        "update:wrong_value:3",
+        "update:wrong_entity:1",
+        "update:wrong_entity:2",
+        "update:wrong_entity:3",
+        "update:did_nothing:1",
+        "update:did_nothing:2",
+        "update:did_nothing:3",
+        "update:extra_note:1",
+        "update:extra_note:2",
+        "update:extra_note:3",
+        "update:second_write:1",
+        "update:second_write:2",
+        "update:second_write:3",
+        "create:wrong_value:1",
+        "create:wrong_value:2",
+        "create:wrong_value:3",
+        "create:wrong_entity:1",
+        "create:wrong_entity:2",
+        "create:wrong_entity:3",
+        "create:did_nothing:1",
+        "create:did_nothing:2",
+        "create:did_nothing:3",
+        "create:extra_note:1",
+        "create:extra_note:2",
+        "create:extra_note:3",
+        "create:second_write:1",
+        "create:second_write:2",
+        "create:second_write:3"
+      ]
+    },
+    "5_state_only_independent_unmade_call_order_listed": {
+      "holds": true,
+      "verdicts": 3,
+      "failing": [],
+      "observations": [
+        "state-only"
+      ],
+      "evidenceIndependence": [
+        "INDEPENDENT"
+      ],
+      "callOrderChecksNotMade": [],
+      "callOrderChecksMade": [],
+      "runLimitNoCallTraceOnEvery": true
+    }
+  },
+  "generatedAt": "2026-10-01T02:17:44+00:00"
+}

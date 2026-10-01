@@ -1,0 +1,32 @@
+{
+  "mode": "counted",
+  "id": "counted",
+  "startedAt": "2026-10-01T02:18:23+00:00",
+  "productCommitAtStart": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+  "branch": "wt/s4-blackbox",
+  "dirtyPathsAtStart": [],
+  "cells": [
+    "update:correct",
+    "update:wrong_value",
+    "update:wrong_entity",
+    "update:did_nothing",
+    "update:extra_note",
+    "update:second_write",
+    "create:correct",
+    "create:wrong_value",
+    "create:wrong_entity",
+    "create:did_nothing",
+    "create:extra_note",
+    "create:second_write"
+  ],
+  "reruns": [],
+  "resumed": false,
+  "finishedAt": "2026-10-01T02:19:06+00:00",
+  "seconds": 42.6,
+  "productCommitAtEnd": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+  "freeze": {
+    "productCommit": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+    "frozenAt": "2026-10-01T02:18:23+00:00"
+  },
+  "productChangedDuringRun": []
+}
