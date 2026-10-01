@@ -239,7 +239,10 @@ function idOf(value: unknown): string | null {
   return null;
 }
 
-/** Only the schema's fields: nothing else Stripe sends can be judged by accident. */
+/**
+ * Only the schema's fields: nothing else Stripe sends can be judged by
+ * accident. Of a charge's metadata, only the order reference is kept.
+ */
 function customerRow(customer: StripeCustomer): EntityRow & { id: string } {
   return { id: customer.id, email: customer.email ?? null, name: customer.name ?? null };
 }
@@ -254,6 +257,7 @@ function chargeRow(charge: StripeCharge): EntityRow & { id: string } {
     refunded: charge.refunded,
     disputed: charge.disputed,
     status: charge.status,
+    order_ref: charge.metadata?.['order_ref'] ?? null,
   };
 }
 

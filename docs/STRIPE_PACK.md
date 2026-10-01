@@ -175,6 +175,20 @@ refunds created since the case's first object. Lists are read to the end. A list
 longer than ten pages is reported as windowed, and checks on it abstain rather
 than guess. The scope's description is shown on every verdict.
 
+## And nothing else
+
+Every case also carries the checks of `stripe.nothing_else_changed`, the
+policy's first sentence ("Refund what the customer is owed for the order they
+name, and nothing else") for the records that are not refunds: none of the
+case's customers removed (`derived.deleted.Customer`), no new charge for any of
+them (`derived.created.Charge[customer=…]`), and every case charge still
+carrying the `order_ref` it started with. A new charge is looked for only among
+the case's own customers: the reads also fetch the charge a stray refund names,
+which is new to them without being a payment anyone took. The rule is in force
+from the start; `stripe init` lists it and does not ask. Every other rule is
+asked about, and a rule the owner does not confirm has no checks in the suite at
+all — the runner fails a case on any check that fails, however it is marked.
+
 ## What "simulated" means
 
 Against the twin, the session reports `simulated: true`, the capability says
@@ -192,12 +206,16 @@ Stripe; confirm a release decision against test mode.
 
 ## The schema
 
-| Record     | Fields                                                                                                       |
-| ---------- | ------------------------------------------------------------------------------------------------------------ |
-| `Customer` | `id`, `email`, `name` (free text, written by the customer)                                                   |
-| `Charge`   | `id`, `customer` → Customer, `payment_intent`, `amount`, `amount_refunded`, `refunded`, `disputed`, `status` |
-| `Refund`   | `id`, `charge` → Charge, `payment_intent`, `amount`, `status`, `reason`                                      |
-| `Dispute`  | `id`, `charge` → Charge, `status`                                                                            |
+| Record     | Fields                                                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Customer` | `id`, `email`, `name` (free text, written by the customer)                                                                                        |
+| `Charge`   | `id`, `customer` → Customer, `payment_intent`, `amount`, `amount_refunded`, `refunded`, `disputed`, `status`, `order_ref` (`metadata[order_ref]`) |
+| `Refund`   | `id`, `charge` → Charge, `payment_intent`, `amount`, `status`, `reason`                                                                           |
+| `Dispute`  | `id`, `charge` → Charge, `status`                                                                                                                 |
+
+A charge's `order_ref` is the only part of its metadata that is read, and it
+is never hoisted onto a refund: it is there so a check can see the reference a
+ticket cites rewritten or removed.
 
 Every refund row in the projection also carries `charge__exists`,
 `charge__customer`, `charge__disputed`, `charge__amount`,

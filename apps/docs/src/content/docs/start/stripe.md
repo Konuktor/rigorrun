@@ -96,6 +96,9 @@ store committed or restored. The key arrives as `RIGORRUN_SECRET__STRIPE_TEST_KE
 - **`PARTIAL`, by design.** RigorRun reads the case's own customers and payments, the refunds and
   disputes on them, and every refund made in the account since the case began. Changes anywhere
   else are not checked. Every verdict prints what its reads covered.
+- **And nothing else.** Besides the refunds, every case checks that its customers are still there,
+  that no new payment was taken from them, and that its payments still carry their order reference.
+  This is always checked; it is what the policy's "and nothing else" means.
 - **State only.** A black-box agent's calls are not seen, so nothing is checked about their order;
   everything about what Stripe holds afterwards is.
 - **The twin is a simulation.** A verdict against it is marked so, and is good evidence about your

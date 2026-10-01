@@ -126,6 +126,18 @@ export class FakeStripe {
     return { customer: customer.id, charge: charge.id };
   }
 
+  /** A new succeeded payment from an existing customer, as an agent with its own key could take one. */
+  charge(customer: string, amount: number): string {
+    return this.makeCharge(customer, amount, 'usd', {}, 'pm_card_visa').id;
+  }
+
+  /** What Stripe answers for a customer once it is deleted: a stub that says so. */
+  deleteCustomer(id: string): void {
+    const customer = this.customers.get(id);
+    if (!customer) throw new Error(`no customer ${id}`);
+    this.customers.set(id, { id, object: 'customer', deleted: true, created: customer.created });
+  }
+
   /** A refund made directly, as an agent with its own key would make one. */
   refund(charge: string, amount?: number): string {
     const [status, body] = this.createRefund({

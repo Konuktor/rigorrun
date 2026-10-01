@@ -18,6 +18,9 @@
  *  - `charge__disputed` — whether that payment was under dispute;
  *  - `charge__amount`, `charge__amount_refunded`, `charge__status`, and the
  *    same for the starting world as `seed__charge__…`.
+ *
+ * A Charge row also carries `order_ref`, from the charge's metadata, so that a
+ * check can see the reference a ticket is looked up by rewritten or removed.
  */
 import type {
   EntitySchema,
@@ -132,6 +135,11 @@ export const stripeSchema: EnvironmentSchema = {
       flag('refunded', 'Fully refunded'),
       flag('disputed', 'Disputed'),
       status(CHARGE_STATUSES),
+      // The order reference a ticket cites, as `metadata[order_ref]` holds it.
+      // Read so that rewriting or removing it is seen; never hoisted onto
+      // another record or compared with one, only checked against the
+      // reference the case made.
+      { name: 'order_ref', type: 'string', nullable: true, label: 'Order reference' },
     ]),
     entity('Refund', 'refund', [
       id(),

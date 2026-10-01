@@ -247,6 +247,11 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
 
   const where = twin ? `local twin at ${address}` : 'your Stripe test mode';
   const human = !values.json;
+  // A rule already in force is what the policy says outright, and is listed
+  // rather than asked about; every other one waits for the owner's yes.
+  const rules = stripeRules(policy);
+  const inForce = rules.filter((rule) => rule.status !== 'inferred');
+  const toAsk = rules.filter((rule) => rule.status === 'inferred');
   if (human) {
     say(`Stripe pack · ${where}`);
     say(
@@ -255,13 +260,16 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
         : '  key   test mode, confirmed by Stripe',
     );
     say();
+    say('Every ticket is held to');
+    for (const rule of inForce) say(`  ${rule.statement}`);
+    say();
     say('Rules — only the ones you confirm can fail your agent');
   }
 
   // ----------------------------------------------------------- the rules
   const confirmedRuleIds: string[] = [];
   const leftOut: { id: string; statement: string }[] = [];
-  for (const rule of stripeRules(policy)) {
+  for (const rule of toAsk) {
     let yes = values.yes;
     if (!yes) {
       say(`  ${rule.statement}`);
@@ -273,7 +281,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
     if (yes) confirmedRuleIds.push(rule.id);
     else leftOut.push({ id: rule.id, statement: rule.statement });
   }
-  const ruleCount = stripeRules(policy).length;
+  const ruleCount = toAsk.length;
 
   // ----------------------------------------------------- now it is stored
   const name = values.name ?? (twin ? 'Stripe refunds (twin)' : 'Stripe refunds');
@@ -325,6 +333,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
           safety,
           confirmedRuleIds,
           leftOutRuleIds: leftOut.map((rule) => rule.id),
+          inForceRuleIds: inForce.map((rule) => rule.id),
           rules: ruleCount,
           cases: caseIds,
           ticket: example ? ticketPath : null,
@@ -344,7 +353,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
     ['project', `${id}  ${name}`],
     [
       'suite',
-      `${tickets} tickets and a ${formatMinorUnits(CANARY_AMOUNT, policy.currency)} canary · ${confirmedRuleIds.length} of ${ruleCount} rules confirmed`,
+      `${tickets} tickets and a ${formatMinorUnits(CANARY_AMOUNT, policy.currency)} canary · ${confirmedRuleIds.length} of ${ruleCount} rules confirmed · ${inForce.length} always checked`,
     ],
     ['key', `stored as ${keySecret} in this machine's secret store, not in the project`],
     ...(example ? [['ticket', `${shownTicket} — what your agent will be sent`] as const] : []),
