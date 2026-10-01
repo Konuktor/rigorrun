@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_b6110311dbfd",
+  "name": "Create a task titled \"Order badges\"; change nothing else.",
+  "description": "Compiled from one recorded execution in taskdesk2 black box: create one task, verified independently over tasks and notes.",
+  "goal": "Create a task titled \"Order badges\"; change nothing else",
+  "environmentId": "p_b6110311dbfd",
+  "sourceTraceId": "trace_p_b6110311dbfd",
+  "primaryAction": "create_task",
+  "focusEntity": "Task",
+  "focusScope": "created",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "create_task": {
+      "title": "Order badges"
+    }
+  },
+  "projectionFocus": [
+    "Task"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Task 4 was created",
+      "key": "Task.4",
+      "value": {
+        "id": 4,
+        "title": "Order badges",
+        "status": "open"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Task 4 was created"
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "title",
+      "param": "title",
+      "mode": "equals",
+      "demonstrated": "Order badges"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "expectedFrame": {
+    "entities": {
+      "Note": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      },
+      "Task": {
+        "preExistingRows": 3,
+        "created": 1,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      }
+    }
+  },
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-10-01T13:35:54.445Z",
+  "approvedAt": "2026-10-01T13:35:54.462Z"
+}

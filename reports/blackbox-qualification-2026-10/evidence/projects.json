@@ -1,0 +1,52 @@
+{
+  "update": {
+    "job": "update",
+    "home": "tmp/rigorrun-audit/bbq/counted/homes/update",
+    "projectId": "p_ada269ec3d3f",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path",
+      "malformed_input",
+      "missing_precondition"
+    ],
+    "caseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ],
+    "benchmarkSha256": "5faf4c85797482090d8f9588454c0ac59c852d0641e4401adfcd21731033bb0f",
+    "productCommit": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+    "agents": {
+      "correct": "a_15446770",
+      "wrong_value": "a_5cb21c0a",
+      "wrong_entity": "a_02d2012f",
+      "did_nothing": "a_ed82b384",
+      "extra_note": "a_f9ae36b9",
+      "second_write": "a_a2434095"
+    }
+  },
+  "create": {
+    "job": "create",
+    "home": "tmp/rigorrun-audit/bbq/counted/homes/create",
+    "projectId": "p_b6110311dbfd",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path"
+    ],
+    "caseIds": [
+      "case_live__happy_path"
+    ],
+    "benchmarkSha256": "43172db4b98fab167fee20a9c2b6199888794f106a4d7166883ae6cfd0ce5b1e",
+    "productCommit": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+    "agents": {
+      "correct": "a_343b21ce",
+      "wrong_value": "a_36d2003f",
+      "wrong_entity": "a_da78e3d8",
+      "did_nothing": "a_627ef84e",
+      "extra_note": "a_f6120ca2",
+      "second_write": "a_28938c62"
+    }
+  }
+}
