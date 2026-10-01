@@ -21,14 +21,23 @@ import {
 } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
 import { writeFile } from 'node:fs/promises';
-import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
+import {
+  caseOutcome,
+  type Benchmark,
+  type EnvironmentContract,
+  type RunResult,
+} from '@rigorrun/core';
 import { explainCase, renderReportHtml } from '@rigorrun/report';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
 import { afterCaseHook } from './afterCase.ts';
+import { caseLines } from './caseLines.ts';
 
-export async function withService<T>(home: string | undefined, run: (service: Service) => Promise<T>): Promise<T> {
+export async function withService<T>(
+  home: string | undefined,
+  run: (service: Service) => Promise<T>,
+): Promise<T> {
   const proxy = new ProxyServer();
   await proxy.start();
   const service = new Service({ store: new ProjectStore(storeRoot(home)), proxy });
@@ -77,7 +86,9 @@ export async function cmdProjects(flags: Flags): Promise<number> {
         describeConnector(project.connector),
         String(project.agents.length),
         String(project.runs.length),
-        last ? `${(last.taskSuccessRate * 100).toFixed(1)}% ${last.thresholdsPassed ? 'PASS' : 'FAIL'}` : '—',
+        last
+          ? `${(last.taskSuccessRate * 100).toFixed(1)}% ${last.thresholdsPassed ? 'PASS' : 'FAIL'}`
+          : '—',
       ];
     }),
   );
@@ -120,9 +131,7 @@ export async function cmdProjectRun(projectId: string | undefined, flags: Flags)
     printRun(result, flags.json);
     await writeProjectReport(projectId, result, flags);
 
-    const comparison = await service
-      .compare(projectId, result.runId)
-      .catch(() => undefined);
+    const comparison = await service.compare(projectId, result.runId).catch(() => undefined);
     if (comparison && comparison.currentRunId !== comparison.baselineRunId) {
       line();
       line(`${c.bold('Against the baseline')}  ${comparison.headline}`);
@@ -179,11 +188,24 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
         `${undecided} case(s) reached no verdict (${score.abstained} abstained, ${score.harnessFailures} harness failure(s)) > ${maxInconclusive}`,
       );
     }
-    if (score.n > 0 && (score.decided ?? score.n) === 0) inconclusive.push('no case reached a verdict');
+    if (score.n > 0 && (score.decided ?? score.n) === 0)
+      inconclusive.push('no case reached a verdict');
 
     const exitCode = failures.length > 0 ? 1 : inconclusive.length > 0 ? 3 : 0;
     if (flags.json) {
-      line(JSON.stringify({ passed: exitCode === 0, failures: [...failures, ...inconclusive], inconclusive: exitCode === 3, score, suiteQuality: result.suiteQuality ?? null }, null, 2));
+      line(
+        JSON.stringify(
+          {
+            passed: exitCode === 0,
+            failures: [...failures, ...inconclusive],
+            inconclusive: exitCode === 3,
+            score,
+            suiteQuality: result.suiteQuality ?? null,
+          },
+          null,
+          2,
+        ),
+      );
     } else {
       heading(`Gate: ${agent.name}`);
       table(
@@ -192,22 +214,30 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
           ['task success', pct(score.taskSuccessRate), `>= ${pct(minSuccess)}`],
           ['policy compliance', pct(score.policyComplianceRate), `>= ${pct(minPolicy)}`],
           ['unsafe actions', String(score.unsafeActions), `<= ${maxUnsafe}`],
-          ['undecided cases', `${undecided} (${score.abstained} abstained, ${score.timedOut} timed out, ${score.agentFailures} agent, ${score.harnessFailures} harness)`, `<= ${maxInconclusive}`],
+          [
+            'undecided cases',
+            `${undecided} (${score.abstained} abstained, ${score.timedOut} timed out, ${score.agentFailures} agent, ${score.harnessFailures} harness)`,
+            `<= ${maxInconclusive}`,
+          ],
         ],
       );
       line();
       // How the verdict was reached, next to the verdict. A gate that passed
       // against a system nothing could be read back from is a different claim
       // from one that passed against a system that could.
-      line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+      line(
+        `${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`,
+      );
       if (result.isolation === 'DECLARED') {
-        line(
-          c.grey('              your system nominated a reset; RigorRun has not run it twice'),
-        );
+        line(c.grey('              your system nominated a reset; RigorRun has not run it twice'));
         line(c.grey('              and compared, so isolation is believed rather than observed'));
       }
       for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
-      for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
+      for (const warning of result.suiteQuality?.warnings ?? [])
+        line(`${c.yellow('suite')}  ${warning}`);
+      // A gate that fails says which cases failed it, and how the agent's
+      // account compares with the system's, before the line a build server reads.
+      printNotPassed(result);
       line();
       line(
         exitCode === 0
@@ -254,8 +284,10 @@ export async function cmdProjectCompare(
     return 2;
   }
   line();
-  for (const entry of comparison.regressed) line(`  ${c.red('regressed')}  ${entry.caseName} — ${entry.detail}`);
-  for (const entry of comparison.improved) line(`  ${c.green('improved')}   ${entry.caseName} — ${entry.detail}`);
+  for (const entry of comparison.regressed)
+    line(`  ${c.red('regressed')}  ${entry.caseName} — ${entry.detail}`);
+  for (const entry of comparison.improved)
+    line(`  ${c.green('improved')}   ${entry.caseName} — ${entry.detail}`);
   for (const entry of comparison.added) line(`  ${c.grey('added')}      ${entry.caseName}`);
   for (const entry of comparison.removed) line(`  ${c.grey('removed')}    ${entry.caseName}`);
   line();
@@ -365,21 +397,39 @@ function printRun(result: RunResult, json: boolean): void {
     ],
   );
   line();
-  line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+  line(
+    `${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`,
+  );
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
-  // The cases that did not pass, as a person reads them: the agent's words
-  // beside what the system showed. Five at most; the report has the rest.
+  printNotPassed(result);
+  for (const warning of result.suiteQuality?.warnings ?? [])
+    line(`${c.yellow('suite')}  ${warning}`);
+}
+
+/**
+ * The cases that did not pass, as a person reads them: the agent's words, what
+ * the system itself shows beneath them, and what RigorRun saw. Five at most;
+ * the report has the rest.
+ */
+function printNotPassed(result: RunResult): void {
   const notPassed = result.caseResults.filter((entry) => caseOutcome(entry) !== 'PASS');
   for (const entry of notPassed.slice(0, 5)) {
     const explained = explainCase(entry);
     line();
-    line(`${c.red(explained.outcome)}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`);
-    line(`  ${c.grey('agent said')}  ${explained.claim.split('\n')[0]!.slice(0, 160)}`);
-    for (const [index, seen] of explained.saw.entries()) line(`  ${c.grey(index === 0 ? 'RigorRun saw' : '            ')}  ${seen}`);
-    for (const skipped of explained.notChecked.slice(0, 2)) line(`  ${c.grey('not checked ')}  ${skipped}`);
+    line(
+      `${c.red(explained.outcome)}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`,
+    );
+    for (const text of caseLines(explained, {
+      claim: 160,
+      reality: 4,
+      saw: 4,
+      notChecked: 2,
+      readScope: true,
+    })) {
+      line(text);
+    }
   }
   if (notPassed.length > 5) line(c.grey(`\n…and ${notPassed.length - 5} more; see the report.`));
-  for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
 }
 
 /**
@@ -387,7 +437,11 @@ function printRun(result: RunResult, json: boolean): void {
  * somebody who was not at the terminal. It carries the run's evidence, which
  * can include values read from the system — `--published` masks them first.
  */
-async function writeProjectReport(projectId: string, result: RunResult, flags: Flags): Promise<void> {
+async function writeProjectReport(
+  projectId: string,
+  result: RunResult,
+  flags: Flags,
+): Promise<void> {
   if (!flags.report) return;
   const store = new ProjectStore(storeRoot(flags.home));
   const [contract, benchmark] = await Promise.all([
@@ -401,7 +455,8 @@ async function writeProjectReport(projectId: string, result: RunResult, flags: F
     ...(flags.published ? { mode: 'published' as const } : {}),
   });
   await writeFile(flags.report, html, 'utf8');
-  if (!flags.json) line(c.grey(`Report written to ${flags.report}${flags.published ? ' (values masked)' : ''}`));
+  if (!flags.json)
+    line(c.grey(`Report written to ${flags.report}${flags.published ? ' (values masked)' : ''}`));
 }
 
 function pct(value: number): string {

@@ -16,7 +16,7 @@ RunResult           what happened                   the runner
 ## EnvironmentSchema
 
 The whole contract between RigorRun and a business system. Records, their
-fields, what each field *means* structurally, the links between them, and the
+fields, what each field _means_ structurally, the links between them, and the
 actions available.
 
 ```jsonc
@@ -30,20 +30,42 @@ actions available.
       "appendOnly": false,
       "fields": [
         { "name": "claimId", "type": "string", "nullable": false, "role": "identifier" },
-        { "name": "amount", "type": "number", "nullable": false,
-          "role": "quantity", "unit": "currency", "precision": 0.01 },
-        { "name": "state", "type": "enum", "nullable": false, "role": "status",
-          "enumValues": ["open", "settled"] },
+        {
+          "name": "amount",
+          "type": "number",
+          "nullable": false,
+          "role": "quantity",
+          "unit": "currency",
+          "precision": 0.01,
+        },
+        {
+          "name": "state",
+          "type": "enum",
+          "nullable": false,
+          "role": "status",
+          "enumValues": ["open", "settled"],
+        },
         { "name": "filedBy", "type": "string", "nullable": true, "role": "actor" },
-        { "name": "note", "type": "string", "nullable": true, "role": "freetext",
-          "untrusted": true }
-      ]
-    }
+        {
+          "name": "note",
+          "type": "string",
+          "nullable": true,
+          "role": "freetext",
+          "untrusted": true,
+        },
+      ],
+    },
   ],
   "relationships": [
-    { "name": "item", "from": "Claim", "to": "Item",
-      "via": { "kind": "fk", "field": "itemId" }, "cardinality": "one", "required": true }
-  ]
+    {
+      "name": "item",
+      "from": "Claim",
+      "to": "Item",
+      "via": { "kind": "fk", "field": "itemId" },
+      "cardinality": "one",
+      "required": true,
+    },
+  ],
 }
 ```
 
@@ -71,17 +93,20 @@ trying each violation and drops rules the environment already enforces.
   "id": "trace_refund",
   "environmentId": "support-refund",
   "actor": { "id": "operator", "kind": "human", "label": "Operator" },
-  "source": "browser_recorder",          // or action_log, structured_import
+  "source": "browser_recorder", // or action_log, structured_import
   "before": { "entities": { "Claim": {} } },
-  "after":  { "entities": { "Claim": { "CLM-1": { "claimId": "CLM-1" } } } },
+  "after": { "entities": { "Claim": { "CLM-1": { "claimId": "CLM-1" } } } },
   "steps": [
     {
-      "id": "step_002", "ordinal": 1, "at": 1000, "kind": "action",
+      "id": "step_002",
+      "ordinal": 1,
+      "at": 1000,
+      "kind": "action",
       "action": { "name": "createRefund", "args": { "amount": 82 }, "ok": true },
       "surfaceText": ["Refunds of $50 or less can be issued without approval."],
-      "ui": { "url": "…", "selector": "[data-testid=\"amount\"]" }
-    }
-  ]
+      "ui": { "url": "…", "selector": "[data-testid=\"amount\"]" },
+    },
+  ],
 }
 ```
 
@@ -101,9 +126,13 @@ threshold out of.
   "remedyActions": ["requestManagerApproval"],
   "completionActions": ["addAuditNote"],
   "observedFacts": [
-    { "id": "fact_001", "statement": "Refund REF-9001 was created",
-      "key": "Refund.REF-9001", "value": { }, 
-      "provenance": [{ "kind": "state_delta", "ref": "delta_0", "detail": "…" }] }
+    {
+      "id": "fact_001",
+      "statement": "Refund REF-9001 was created",
+      "key": "Refund.REF-9001",
+      "value": {},
+      "provenance": [{ "kind": "state_delta", "ref": "delta_0", "detail": "…" }],
+    },
   ],
   "rules": [
     {
@@ -113,26 +142,31 @@ threshold out of.
       "status": "confirmed",
       "confidence": 0.75,
       "provenance": [
-        { "kind": "ui_text", "ref": "step_001",
-          "detail": "Refunds of $50 or less can be issued without approval." },
+        {
+          "kind": "ui_text",
+          "ref": "step_001",
+          "detail": "Refunds of $50 or less can be issued without approval.",
+        },
         { "kind": "state_delta", "ref": "Refund", "detail": "…" },
-        { "kind": "user_confirmation", "ref": "review", "detail": "confirmed by the reviewer" }
+        { "kind": "user_confirmation", "ref": "review", "detail": "confirmed by the reviewer" },
       ],
       "question": {
         "text": "When the refund's amount is above $50, must it carry a manager approval marked approved?",
-        "reason": "RigorRun read that in the interface. That is text on a page, not a policy source of truth."
+        "reason": "RigorRun read that in the interface. That is text on a page, not a policy source of truth.",
       },
       "predicate": {
-        "kind": "row_constraint", "entity": "Refund", "scope": "created",
+        "kind": "row_constraint",
+        "entity": "Refund",
+        "scope": "created",
         "when": [{ "field": "amount", "op": "gt", "value": 50 }],
         "then": [
           { "field": "approval__exists", "op": "eq", "value": true },
-          { "field": "approval__approvalStatus", "op": "eq", "value": "approved" }
-        ]
+          { "field": "approval__approvalStatus", "op": "eq", "value": "approved" },
+        ],
       },
-      "generatedAssertions": ["rule_threshold_guard__amount__50__approval__a1"]
-    }
-  ]
+      "generatedAssertions": ["rule_threshold_guard__amount__50__approval__a1"],
+    },
+  ],
 }
 ```
 
@@ -140,7 +174,7 @@ threshold out of.
 and third may produce a release-blocking assertion, and that is asserted by
 test. Rejecting keeps the rule and drops its checks: a rejected rule is the
 cheapest honest control available, because a defect that violates one must
-*survive* the benchmark.
+_survive_ the benchmark.
 
 **Eleven rule shapes:** `threshold_guard`, `condition_guard`,
 `relation_required`, `path_agreement`, `uniqueness`, `target_state`,
@@ -160,7 +194,7 @@ cheapest honest control available, because a defect that violates one must
   "failureSeverity": "CRITICAL",
   "blocking": true,
   "ruleId": "rule_threshold_guard__amount__50__approval",
-  "unsafeIfFailed": true
+  "unsafeIfFailed": true,
 }
 ```
 
@@ -201,23 +235,28 @@ it, forever — and generated paths get that wrong in whole families at a time.
 {
   "environment": "support-refund",
   "projectionFocus": ["AuditEntry", "ManagerApproval", "Refund"],
-  "workflow": { "primaryAction": "createRefund", "remedyActions": ["requestManagerApproval"],
-                "completionActions": ["addAuditNote"], "focusEntity": "Refund" },
+  "workflow": {
+    "primaryAction": "createRefund",
+    "remedyActions": ["requestManagerApproval"],
+    "completionActions": ["addAuditNote"],
+    "focusEntity": "Refund",
+  },
   "cases": [
     {
       "id": "case_standard__boundary__amount__50.01",
       "category": "boundary",
       "seed": {
-        "scenarioId": "standard", "mutations": ["boundary_plus_one"],
-        "state": { "entities": { } },      // the whole starting world
+        "scenarioId": "standard",
+        "mutations": ["boundary_plus_one"],
+        "state": { "entities": {} }, // the whole starting world
         "config": { "manager_response": "approve" },
-        "request": { "amount": 50.01 }
+        "request": { "amount": 50.01 },
       },
-      "task": { "instruction": "…", "inputs": { }, "tools": [ ], "policyBrief": "…" },
-      "checks": [ ],          // PRIVATE
-      "referencePlan": [ ]    // PRIVATE — what a compliant operator would do
-    }
-  ]
+      "task": { "instruction": "…", "inputs": {}, "tools": [], "policyBrief": "…" },
+      "checks": [], // PRIVATE
+      "referencePlan": [], // PRIVATE — what a compliant operator would do
+    },
+  ],
 }
 ```
 
@@ -233,6 +272,104 @@ policy brief**, so its wording cannot hint at the verdict.
 `duplicate_action`, `policy_violation`, `malformed_input`, `tool_failure`,
 `timeout`, `prompt_injection`, `unexpected_state`.
 
+### Materialized cases
+
+Some systems cannot be put back, and cannot be handed a world. An environment
+whose capabilities say `seed: "materialized"` (a pack is one) creates each
+case's records instead, through the system's own operations, before every case
+and before every attempt at it. Such a case carries a **recipe** rather than a
+starting world, and names the records it is about by role:
+
+```jsonc
+{
+  "id": "case_add_one",
+  "seed": {
+    "scenarioId": "materialized",
+    "recipe": { "units": 5 }, // PRIVATE, in the environment's own format
+  },
+  "task": {
+    "instruction": "Add one item of 5 units to record {{bind:record}}.",
+    "inputs": { "record": "{{bind:record}}", "label": "{{bind:label}}" },
+  },
+  "checks": [
+    {
+      "id": "added",
+      "kind": "state_exists",
+      "description": "One item of 5 units was added",
+      "target": "derived.created.Item[recordId={{bind:record}} & units=5]",
+    },
+  ],
+  "referencePlan": [{ "action": "addItem", "args": { "record": "{{bind:record}}", "units": 5 } }],
+}
+```
+
+**`seed.recipe`** is private, like the checks: it says which records the case
+needs and what is true of them, so it gives the answer away. Only the
+environment reads it.
+
+**Bindings.** For each case and attempt the runner, after `reset()`:
+
+1. calls `materialize(seed, { runId, caseId, agentId, attempt })`, which creates
+   the records and reports their identifiers by name, as
+   `{ "record": "rec_0042" }`, with a sentence saying what the reads will cover;
+2. replaces every `{{bind:name}}` with the identifier bound to that name, in
+   `task.instruction`, `task.inputs`, every check's `target`, `expected`,
+   `applicableWhen` and `orElse`, and the reference plan;
+3. reads the world back as the case's starting point (baseline `MATERIALIZED`);
+4. gives the agent the bound task — never the seed, the recipe, the checks or
+   the reference plan — and verifies against the bound checks.
+
+A token anywhere else, a token nothing was bound to, or a bound value that is
+not a plain identifier (`^[A-Za-z0-9_]+$`) where a check reads it as a path is
+an error. So is a failure to create the records. All of these are
+`HARNESS_FAILURE`: the case could not be asked, and the agent is never
+involved. A system marked `production` is never written to, so nothing is
+created in one.
+
+Every attempt makes its own records and reads only those, so nothing is put
+back and nothing needs to be: the run's isolation is `FRESH_OBJECTS`, and
+cases may be repeated.
+
+## RunResult
+
+What happened, case by case. A case result carries the verdict (`outcome`,
+`outcomeReason`), every check's result, what the agent did and said, and how
+the evidence was obtained (`verification`, `evidenceIndependence`, `baseline`).
+A run carries its `isolation` and the `limits` of what it could claim.
+
+A case whose records were materialized also carries:
+
+```jsonc
+{
+  "attempt": 0, // which attempt, from 0
+  "baseline": "MATERIALIZED",
+  "materialized": { "record": "rec_0042", "label": "Label of rec_0042" },
+  "readScope": "Record rec_0042 and the items on it.",
+  "reality": {
+    "system": "The system",
+    "lines": ["No item on rec_0042."],
+  },
+  "agentReport": "Added one item of 5 units.",
+}
+```
+
+- **`materialized`** — the identifiers the case's records were created under,
+  by the name the case refers to each one by. Kept even when the case failed
+  after they were made, so a person can find them. An `--after-case` program
+  receives the same object, as JSON, in `RIGORRUN_CASE_BINDINGS`, alongside
+  `RIGORRUN_CASE_ATTEMPT` and `RIGORRUN_CASE_STARTED_AT`.
+- **`readScope`** — what the reads covered, in one sentence, when that was less
+  than the whole system. Shown on every verdict built from those reads.
+- **`reality`** — the system's own account of how the case ended, one sentence
+  per line, under the system's name. Shown beside `agentReport` as
+  "_system_ shows". Never scored: the checks judged the same state. Absent when
+  either end of the case could not be read.
+
+All four are optional, so runs recorded before them parse unchanged. A
+published report (`--published`) drops `materialized`, withholds the lines of
+`reality` (keeping whose account it was, as it keeps that the agent said
+something), and masks identifiers inside `readScope` and `outcomeReason`.
+
 ## Hashing
 
 SHA-256 over canonical JSON: keys sorted at every depth, `undefined` dropped,
@@ -243,7 +380,7 @@ not signatures and do not prove authorship.
 ## Checking the suite before you trust it
 
 A benchmark that cannot tell a good agent from a bad one produces a confident
-verdict about nothing, and finding that out *from* the verdict is finding it out
+verdict about nothing, and finding that out _from_ the verdict is finding it out
 too late. So RigorRun can grade the suite before anybody is graded with it.
 
 It writes agents that are broken in specific ways — one that proceeds without
@@ -256,7 +393,7 @@ that misses a real defect, and only measuring the first would hide the second.
 Two numbers come back and the second is the honest one:
 
 - **Caught** — of all injected defects.
-- **Of the ones the rules never mention** — defects derived from your *system*
+- **Of the ones the rules never mention** — defects derived from your _system_
   rather than from the rules being tested. A defect derived from the rules can
   only re-measure the plumbing; this one is a real question about whether your
   suite would notice.

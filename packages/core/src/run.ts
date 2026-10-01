@@ -86,6 +86,13 @@ export const CaseResultSchema = z.object({
   category: CaseCategorySchema,
   agentId: z.string(),
   correlationId: z.string(),
+  /**
+   * Which attempt at the case this was, from 0. Optional so that runs recorded
+   * before it existed still parse. An environment that materializes writes the
+   * same number onto every record it creates for the attempt, so a reader can
+   * tell which records belong to which result.
+   */
+  attempt: z.number().int().nonnegative().optional(),
   startedAt: z.string(),
   finishedAt: z.string(),
   durationMs: z.number().nonnegative(),
