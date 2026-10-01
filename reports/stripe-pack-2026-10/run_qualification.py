@@ -162,11 +162,8 @@ class _CliHarness:
 
         RigorRun hands the hook a minimal environment, so where Stripe is and
         which key the oracle reads with are written into the hook (the key in
-        a 0600 file beside it, never into the evidence).  The case start is
-        converted from ISO-8601 to Unix seconds here: oracle_stripe.py's own
-        command line reads RIGORRUN_CASE_STARTED_AT with float(), which fails
-        on the ISO-8601 RigorRun writes; evaluate() parses either form the
-        same way, so passing --since changes nothing it computes.
+        a 0600 file beside it, never into the evidence). The oracle reads the
+        ISO-8601 RIGORRUN_CASE_STARTED_AT directly from that environment.
         """
         key_file = self.tmp / "oracle.key"
         key_file.write_text(self.oracle_key, encoding="utf-8")
@@ -179,14 +176,11 @@ class _CliHarness:
                 [
                     "#!/usr/bin/env python3",
                     "import os, subprocess, sys",
-                    "from datetime import datetime",
                     f"env = dict(os.environ, STRIPE_BASE_URL={self.base_url!r}, PYTHONDONTWRITEBYTECODE='1')",
                     f"env['ORACLE_STRIPE_KEY'] = open({str(key_file)!r}).read().strip()",
-                    "started = os.environ['RIGORRUN_CASE_STARTED_AT']",
-                    "since = datetime.fromisoformat(started.replace('Z', '+00:00')).timestamp()",
                     "name = os.environ['RIGORRUN_RUN_ID'] + '.' + os.environ['RIGORRUN_CASE_ID'] + '.json'",
                     f"out = os.path.join({str(records)!r}, name)",
-                    f"done = subprocess.run([sys.executable, {str(ROOT / 'oracle_stripe.py')!r}, '--since', repr(since), '--out', out], env=env)",
+                    f"done = subprocess.run([sys.executable, {str(ROOT / 'oracle_stripe.py')!r}, '--out', out], env=env)",
                     "sys.exit(done.returncode)",
                     "",
                 ]
@@ -317,7 +311,11 @@ def run_cell_adapter(
     return harness.run_cell(agent, case, attempt)
 
 
-def run_stage(stage: str, dev: bool) -> Path:
+def run_stage(stage: str, dev: bool, attempts: int = 3) -> Path:
+    if attempts < 1:
+        raise RuntimeError("--attempts must be at least 1")
+    if not dev and attempts != len(ATTEMPTS):
+        raise RuntimeError(f"counted stages require exactly {len(ATTEMPTS)} attempts")
     freeze_path = ROOT / "freeze.json"
     if dev and freeze_path.exists():
         raise RuntimeError("development runs are forbidden after freeze.json exists")
@@ -335,9 +333,9 @@ def run_stage(stage: str, dev: bool) -> Path:
     output_dir.mkdir(parents=True, exist_ok=False)
     records_path = output_dir / "cells.jsonl"
     cases = tuple(read_json(CASES_PATH)["cases"])
-    attempts: Iterable[int] = range(1) if dev else ATTEMPTS
+    attempt_numbers: Iterable[int] = range(attempts)
     with records_path.open("w", encoding="utf-8") as handle:
-        for attempt in attempts:
+        for attempt in attempt_numbers:
             for agent in AGENTS:
                 for case in cases:
                     result = run_cell_adapter(agent, case, attempt, stage=stage, output_dir=output_dir)
@@ -412,16 +410,6 @@ def classify(oracle_label: str, rigorrun_verdict: str) -> str:
     raise ValueError(f"unknown oracle label: {oracle_label!r}")
 
 
-def _walk(value: Any) -> Iterable[tuple[str, Any]]:
-    if isinstance(value, dict):
-        for key, child in value.items():
-            yield str(key), child
-            yield from _walk(child)
-    elif isinstance(value, list):
-        for child in value:
-            yield from _walk(child)
-
-
 def _load_result_for(record: dict[str, Any], records_path: Path) -> dict[str, Any]:
     inline = record.get("run_result")
     if isinstance(inline, dict):
@@ -445,22 +433,27 @@ def evidence_contract(record: dict[str, Any], run_result: dict[str, Any]) -> tup
     final_record = {
         key: value for key, value in record.items() if key not in {"rerun", "oracle_record"}
     }
-    combined = {"record": final_record, "run_result": run_result}
-    pairs = list(_walk(combined))
+    case_results = run_result.get("caseResults")
+    if not isinstance(case_results, list):
+        case_results = []
+    # Inline fields remain accepted for hand-authored/legacy records, but the
+    # real result contract is caseResults[*].{observation,verification,readScope}.
+    sources = [final_record, *(item for item in case_results if isinstance(item, dict))]
     observation_values: list[str] = []
     strength_values: list[str] = []
     scope_values: list[Any] = []
-    for key, value in pairs:
-        folded = key.lower().replace("_", "").replace("-", "")
-        if folded in {"observation", "observationmode"}:
-            if isinstance(value, list):
-                observation_values.extend(str(item) for item in value)
-            else:
-                observation_values.append(str(value))
-        elif folded in {"verificationstrength", "strength"}:
-            strength_values.append(str(value))
-        elif folded in {"readscope", "scopedescription"}:
-            scope_values.append(value)
+    for source in sources:
+        observation = source.get("observation", source.get("observationMode"))
+        if isinstance(observation, list):
+            observation_values.extend(str(item) for item in observation)
+        elif observation is not None:
+            observation_values.append(str(observation))
+        strength = source.get("verification", source.get("verificationStrength"))
+        if strength is not None:
+            strength_values.append(str(strength))
+        scope = source.get("readScope", source.get("scopeDescription"))
+        if scope is not None:
+            scope_values.append(scope)
     problems: list[str] = []
     if not any(value.lower() == "state-only" for value in observation_values):
         problems.append("missing observation state-only")
@@ -473,6 +466,38 @@ def evidence_contract(record: dict[str, Any], run_result: dict[str, Any]) -> tup
 
 def _cell_id(record: dict[str, Any]) -> str:
     return f"{record.get('agent')}/{record.get('case')}/{record.get('attempt')}"
+
+
+def _reality_lines(run_result: dict[str, Any]) -> list[str]:
+    case_results = run_result.get("caseResults")
+    if not isinstance(case_results, list):
+        return []
+    lines: list[str] = []
+    for case_result in case_results:
+        if not isinstance(case_result, dict):
+            continue
+        reality = case_result.get("reality")
+        if not isinstance(reality, dict) or not isinstance(reality.get("lines"), list):
+            continue
+        lines.extend(str(line) for line in reality["lines"] if isinstance(line, str))
+    return lines
+
+
+def _diagnostic_terms(item: dict[str, Any]) -> set[str]:
+    terms: set[str] = set()
+    charge = item.get("charge")
+    if charge not in (None, ""):
+        terms.add(str(charge))
+    amount = item.get("amount")
+    if amount not in (None, ""):
+        terms.add(str(amount))
+        try:
+            minor_units = int(amount)
+        except (TypeError, ValueError):
+            pass
+        else:
+            terms.add(f"${minor_units / 100:.2f}")
+    return terms
 
 
 def aggregate(records_path: Path, stage: str, output_dir: Path) -> dict[str, Any]:
@@ -514,20 +539,16 @@ def aggregate(records_path: Path, stage: str, output_dir: Path) -> dict[str, Any
             livemode_failures.append(_cell_id(raw))
 
         if classification == "TP":
-            reality_text = " ".join(
-                str(value)
-                for key, value in _walk({"record": raw, "run_result": result})
-                if key.lower().replace("_", "") in {"reality", "stripeshows"}
-            )
-            wrong_values = [
-                str(item.get("amount")) + " " + str(item.get("charge"))
-                for item in oracle.get("extra", [])
+            reality_lines = _reality_lines(result)
+            wrong_parts = {
+                part
+                for field in ("extra", "missing")
+                for item in oracle.get(field, [])
                 if isinstance(item, dict)
-            ]
-            if "stripe shows" not in reality_text.lower() or (
-                wrong_values and not any(
-                    str(part) in reality_text for value in wrong_values for part in value.split()
-                )
+                for part in _diagnostic_terms(item)
+            }
+            if not wrong_parts or not any(
+                part in line for line in reality_lines for part in wrong_parts
             ):
                 diagnostic_defects.append(_cell_id(raw))
 
@@ -542,14 +563,23 @@ def aggregate(records_path: Path, stage: str, output_dir: Path) -> dict[str, Any
             }
         )
 
-    required = {(agent, case, attempt) for agent in AGENTS for case in table["cases"] for attempt in ATTEMPTS}
+    recorded_attempts = {attempt for _agent, _case, attempt in seen}
+    required = {
+        (agent, case, attempt)
+        for agent in AGENTS
+        for case in table["cases"]
+        for attempt in recorded_attempts
+    }
     missing_cells = sorted(f"{agent}/{case}/{attempt}" for agent, case, attempt in required - set(seen))
     duplicate_cells = sorted(
         f"{agent}/{case}/{attempt}" for (agent, case, attempt), count in seen.items() if count != 1
     )
     counts = Counter(cell["classification"] for cell in cells)
     verdict_counts = Counter(cell["rigorrun_verdict"] for cell in cells)
-    complete = not missing_cells and not duplicate_cells and len(cells) == len(required)
+    complete = bool(recorded_attempts) and not missing_cells and not duplicate_cells and len(cells) == len(required)
+    development_run = "dev-runs" in records_path.parts
+    attempt_count_ok = development_run or recorded_attempts == set(ATTEMPTS)
+    expected_cell_count = len(required) if development_run else len(AGENTS) * len(table["cases"]) * len(ATTEMPTS)
 
     gates = [
         {"id": 1, "name": "FN = 0", "pass": counts["FN"] == 0, "count": counts["FN"]},
@@ -557,11 +587,18 @@ def aggregate(records_path: Path, stage: str, output_dir: Path) -> dict[str, Any
         {
             "id": 3,
             "name": "No ABSTAIN or HARNESS_FAILURE after rerun",
-            "pass": verdict_counts["ABSTAIN"] == 0 and verdict_counts["HARNESS_FAILURE"] == 0 and complete,
+            "pass": (
+                verdict_counts["ABSTAIN"] == 0
+                and verdict_counts["HARNESS_FAILURE"] == 0
+                and complete
+                and attempt_count_ok
+            ),
             "abstain": verdict_counts["ABSTAIN"],
             "harness_failure": verdict_counts["HARNESS_FAILURE"],
             "missing_cells": missing_cells,
             "duplicate_cells": duplicate_cells,
+            "attempts": sorted(recorded_attempts),
+            "required_attempts": "from records" if development_run else list(ATTEMPTS),
         },
         {
             "id": 4,
@@ -601,7 +638,7 @@ def aggregate(records_path: Path, stage: str, output_dir: Path) -> dict[str, Any
         "decision": decision,
         "counts": {
             "cells": len(cells),
-            "expected_cells": len(required),
+            "expected_cells": expected_cell_count,
             **{name: counts[name] for name in ("TP", "FN", "FP", "TN", "NOT_SCORED")},
             "ABSTAIN": verdict_counts["ABSTAIN"],
             "HARNESS_FAILURE": verdict_counts["HARNESS_FAILURE"],
@@ -623,7 +660,7 @@ def render_report(gate: dict[str, Any]) -> str:
     lines = [
         "# Stripe pack qualification report",
         "",
-        f"Stage: **{gate['stage']}**  ",
+        f"Stage: **{gate['stage']}**",
         f"Decision: **{gate['decision']}**",
         "",
         "## Classification",
@@ -659,6 +696,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--dev", action="store_true")
     run_parser.add_argument("--stage", choices=("T", "L"), required=True)
+    run_parser.add_argument("--attempts", type=int, default=3)
     aggregate_parser = subparsers.add_parser("aggregate")
     aggregate_parser.add_argument("--stage", choices=("T", "L"))
     aggregate_parser.add_argument("--records", type=Path)
@@ -672,7 +710,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "freeze":
             print(freeze(args.stage))
         elif args.command == "run":
-            print(run_stage(args.stage, args.dev))
+            print(run_stage(args.stage, args.dev, args.attempts))
         else:
             stage = args.stage
             if stage is None:

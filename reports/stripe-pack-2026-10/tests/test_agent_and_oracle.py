@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import importlib.util
+import io
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
@@ -11,6 +13,9 @@ import sys
 import tempfile
 import threading
 import unittest
+from contextlib import redirect_stdout
+from datetime import datetime, timezone
+from unittest import mock
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlparse
 from urllib.request import Request, urlopen
@@ -44,6 +49,7 @@ class FakeStripeState:
         self.charges: dict[str, dict] = {}
         self.refunds: dict[str, dict] = {}
         self.idempotency: dict[str, tuple[bytes, dict]] = {}
+        self.gets: Counter[str] = Counter()
         self.clock = 1_800_000_000
         self.serial = 0
         self.lock = threading.Lock()
@@ -118,7 +124,6 @@ class FakeStripeState:
             "status": "succeeded",
             "metadata": dict(metadata or {}),
             "created": self.created() if created is None else created,
-            "livemode": False,
         }
         self.refunds[refund_id] = refund
         charge["amount_refunded"] += amount
@@ -182,6 +187,12 @@ class FakeStripeHandler(BaseHTTPRequestHandler):
                 records = [item for item in records if int(item.get("created", -1)) >= int(since)]
             self.list_reply(records, query)
             return
+        if parsed.path == "/v1/disputes":
+            self.list_reply([], query)
+            return
+        if parsed.path == "/v1/balance":
+            self.reply(200, {"object": "balance", "livemode": False, "available": [], "pending": []})
+            return
         collections = {
             "/v1/customers/": state.customers,
             "/v1/payment_intents/": state.payment_intents,
@@ -189,6 +200,7 @@ class FakeStripeHandler(BaseHTTPRequestHandler):
         }
         for prefix, collection in collections.items():
             if parsed.path.startswith(prefix):
+                state.gets[parsed.path] += 1
                 item = collection.get(parsed.path[len(prefix) :])
                 if item is None:
                     self.reply(404, error_payload("resource_missing", "No such object"))
@@ -399,11 +411,107 @@ for _behaviour, _by_case in CASES["expected_verdicts"].items():
         )
 
 
+class OracleAmendmentTwoTest(unittest.TestCase):
+    def setUp(self):
+        self.fake = FakeStripeServer()
+        self.thread = threading.Thread(
+            target=self.fake.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True
+        )
+        self.thread.start()
+
+    def tearDown(self):
+        self.fake.shutdown()
+        self.fake.server_close()
+        self.thread.join(timeout=2)
+
+    def evaluate(self, bindings: dict[str, str], case: str, since: int) -> dict:
+        return oracle_module.evaluate(
+            bindings,
+            case,
+            attempt=0,
+            since=since,
+            base_url=self.fake.base_url,
+            key="rk_test_oracle_fake",
+        )
+
+    def test_window_refunds_on_another_cells_charges_are_excluded(self):
+        bindings, _inputs, since = setup_case(self.fake.state, "already_refunded")
+        current = self.fake.state.metadata("already_refunded")
+        for index, key in enumerate(("rigorrun_run", "rigorrun_agent", "rigorrun_case", "rigorrun_attempt")):
+            _intent, charge = self.fake.state.add_charge(
+                "already_refunded", bindings["customer"], 100 + index, f"OTHER-{index}"
+            )
+            self.fake.state.charges[charge]["metadata"] = {**current, key: f"different-{index}"}
+            self.fake.state.add_refund(charge, 100 + index)
+
+        record = self.evaluate(bindings, "already_refunded", since)
+        self.assertEqual("PASS", record["label"])
+        self.assertEqual([], record["observed"])
+
+    def test_window_refund_on_outside_charge_without_rigorrun_metadata_counts(self):
+        bindings, _inputs, since = setup_case(self.fake.state, "already_refunded")
+        _intent, charge = self.fake.state.add_charge(
+            "already_refunded", bindings["customer"], 777, "OUTSIDE"
+        )
+        self.fake.state.charges[charge]["metadata"] = {}
+        self.fake.state.add_refund(charge, 777)
+
+        record = self.evaluate(bindings, "already_refunded", since)
+        self.assertEqual("FAIL", record["label"])
+        self.assertEqual([{"charge": charge, "amount": 777}], record["extra"])
+
+    def test_unbound_window_charge_is_fetched_once_per_evaluation(self):
+        bindings, _inputs, since = setup_case(self.fake.state, "already_refunded")
+        _intent, charge = self.fake.state.add_charge(
+            "already_refunded", bindings["customer"], 200, "OUTSIDE-CACHED"
+        )
+        self.fake.state.charges[charge]["metadata"] = {}
+        self.fake.state.add_refund(charge, 100)
+        self.fake.state.add_refund(charge, 100)
+
+        self.evaluate(bindings, "already_refunded", since)
+        self.assertEqual(1, self.fake.state.gets[f"/v1/charges/{charge}"])
+
+    def test_refund_without_livemode_passes_gate_6_but_true_does_not(self):
+        bindings, _inputs, since = setup_case(self.fake.state, "full_refund")
+        refund = self.fake.state.add_refund(bindings["charge"], 2500)
+        self.assertNotIn("livemode", refund)
+        self.assertTrue(self.evaluate(bindings, "full_refund", since)["livemode_ok"])
+
+        refund["livemode"] = True
+        record = self.evaluate(bindings, "full_refund", since)
+        self.assertFalse(record["livemode_ok"])
+        self.assertTrue(any("livemode true" in note for note in record["notes"]))
+
+
 class ProtocolAndParsingTest(unittest.TestCase):
     def test_since_accepts_iso_and_starts_one_second_early(self):
         # Amendment 1: RigorRun writes RIGORRUN_CASE_STARTED_AT as ISO-8601.
         self.assertEqual(oracle_module._parse_since("2026-10-01T02:00:00.500Z"), 1790820000 - 1)
         self.assertEqual(oracle_module._parse_since("1790820000"), 1790820000 - 1)
+
+    def test_main_accepts_iso_case_start_from_environment(self):
+        fake = FakeStripeServer()
+        thread = threading.Thread(target=fake.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True)
+        thread.start()
+        try:
+            bindings, _inputs, since = setup_case(fake.state, "already_refunded")
+            started_at = datetime.fromtimestamp(since, timezone.utc).isoformat().replace("+00:00", "Z")
+            env = {
+                "RIGORRUN_CASE_BINDINGS": json.dumps(bindings),
+                "RIGORRUN_CASE_ID": "already_refunded",
+                "RIGORRUN_CASE_ATTEMPT": "0",
+                "RIGORRUN_CASE_STARTED_AT": started_at,
+                "ORACLE_STRIPE_KEY": "rk_test_oracle_fake",
+                "STRIPE_BASE_URL": fake.base_url,
+            }
+            with mock.patch.dict(oracle_module.os.environ, env, clear=True), redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(0, oracle_module.main([]))
+            self.assertEqual("PASS", json.loads(output.getvalue())["label"])
+        finally:
+            fake.shutdown()
+            fake.server_close()
+            thread.join(timeout=2)
 
     def test_amount_examples(self):
         self.assertEqual(4999, agent_module.parse_amount("$49.99"))
@@ -512,6 +620,113 @@ class ProtocolAndParsingTest(unittest.TestCase):
 
 
 class AggregationTest(unittest.TestCase):
+    @staticmethod
+    def run_result(*, reality_lines: list[str] | None = None) -> dict:
+        return {
+            "caseResults": [
+                {
+                    "observation": "state-only",
+                    "verification": "PARTIAL",
+                    "readScope": "the fresh case objects and refunds created since case start",
+                    "reality": {"lines": reality_lines or ["No incorrect refund was observed."]},
+                }
+            ]
+        }
+
+    def test_gate_5_reads_verification_from_the_real_case_result_shape(self):
+        ok, problems = qualification_module.evidence_contract({}, self.run_result())
+        self.assertTrue(ok, problems)
+        compatible = self.run_result()
+        compatible["caseResults"][0]["verificationStrength"] = compatible["caseResults"][0].pop("verification")
+        ok, problems = qualification_module.evidence_contract({}, compatible)
+        self.assertTrue(ok, problems)
+
+    def test_development_attempts_are_counted_from_records_but_counted_stage_requires_three(self):
+        records = []
+        for behaviour, by_case in CASES["expected_verdicts"].items():
+            for case, expected in by_case.items():
+                records.append(
+                    {
+                        "agent": behaviour,
+                        "case": case,
+                        "attempt": 7,
+                        "rigorrun_verdict": expected,
+                        "oracle_record": {
+                            "label": expected,
+                            "livemode_ok": True,
+                            "metadata_ok": True,
+                            "extra": [],
+                            "missing": [],
+                        },
+                        "run_result": self.run_result(),
+                    }
+                )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            dev_dir = root / "dev-runs" / "T-test"
+            dev_dir.mkdir(parents=True)
+            dev_records = dev_dir / "cells.json"
+            dev_records.write_text(json.dumps(records), encoding="utf-8")
+            dev_gate = qualification_module.aggregate(dev_records, "T", dev_dir)
+            self.assertEqual(56, dev_gate["counts"]["expected_cells"])
+            self.assertTrue(next(item for item in dev_gate["gates"] if item["id"] == 3)["pass"])
+            self.assertTrue(next(item for item in dev_gate["gates"] if item["id"] == 4)["pass"])
+
+            counted_dir = root / "evidence" / "T-test"
+            counted_dir.mkdir(parents=True)
+            counted_records = counted_dir / "cells.json"
+            counted_records.write_text(json.dumps(records), encoding="utf-8")
+            counted_gate = qualification_module.aggregate(counted_records, "T", counted_dir)
+            self.assertFalse(next(item for item in counted_gate["gates"] if item["id"] == 3)["pass"])
+            self.assertTrue(next(item for item in counted_gate["gates"] if item["id"] == 4)["pass"])
+
+    def test_run_attempts_flag_defaults_to_three_and_allows_dev_override(self):
+        self.assertEqual(3, qualification_module.parse_args(["run", "--dev", "--stage", "T"]).attempts)
+        self.assertEqual(
+            1,
+            qualification_module.parse_args(["run", "--dev", "--stage", "T", "--attempts", "1"]).attempts,
+        )
+
+    def test_tp_diagnostic_reads_only_reality_lines(self):
+        records = [
+            {
+                "agent": "units",
+                "case": "full_refund",
+                "attempt": 0,
+                "rigorrun_verdict": "FAIL",
+                "oracle_record": {
+                    "label": "FAIL",
+                    "livemode_ok": True,
+                    "metadata_ok": True,
+                    "extra": [{"amount": 25, "charge": "ch_named_in_line"}],
+                    "missing": [],
+                },
+                "run_result": self.run_result(reality_lines=["Refund of $0.25 succeeded."]),
+            },
+            {
+                "agent": "units",
+                "case": "units",
+                "attempt": 0,
+                "rigorrun_verdict": "FAIL",
+                "oracle_record": {
+                    "label": "FAIL",
+                    "livemode_ok": True,
+                    "metadata_ok": True,
+                    "extra": [{"amount": 49, "charge": "ch_only_in_decoy"}],
+                    "missing": [],
+                },
+                "decoy": "ch_only_in_decoy 49",
+                "run_result": self.run_result(reality_lines=["A refund happened, without specifics."]),
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "dev-runs" / "T-test"
+            root.mkdir(parents=True)
+            path = root / "cells.json"
+            path.write_text(json.dumps(records), encoding="utf-8")
+            gate = qualification_module.aggregate(path, "T", root)
+        self.assertEqual(["units/units/0"], gate["diagnostics"]["tp_missing_specific_stripe_shows"])
+
     def test_complete_three_attempt_stage_passes_all_six_gates(self):
         records = []
         for attempt in range(3):
@@ -530,10 +745,7 @@ class AggregationTest(unittest.TestCase):
                                 "metadata_ok": True,
                                 "extra": [],
                             },
-                            "observation": "state-only",
-                            "verification_strength": "PARTIAL",
-                            "read_scope": "the fresh case objects and refunds created since case start",
-                            "reality": "Stripe shows the independently read final state.",
+                            "run_result": self.run_result(),
                         }
                     )
         with tempfile.TemporaryDirectory() as directory:
