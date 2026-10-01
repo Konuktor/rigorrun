@@ -471,40 +471,58 @@ function printHeadline(replay: VariantReplay, variant: string, result: CaseResul
     line(c.grey(text));
   }
 
-  const rows: [label: string, text: string][] = [];
+  // Each row: its label, its text, and how many lines it may wrap to. The
+  // ticket is one line; what the agent said and what the system shows are the
+  // point of the replay, so they wrap rather than lose their ends.
+  const rows: [label: string, text: string, lines: number][] = [];
   const work = taskSummary(replay, result);
-  if (work !== undefined) rows.push([replay.presentation.task.label, work]);
+  if (work !== undefined) rows.push([replay.presentation.task.label, work, 1]);
   rows.push([
     'The agent said',
     ownAccount(result)
-      ? `"${result.agentReport.trim().split('\n')[0]}"`
+      ? `"${result.agentReport.trim().replace(/\s+/g, ' ')}"`
       : '(nothing of its own: it gave no sentence)',
+    CLAIM_LINES,
   ]);
   const reality = result.reality;
   if (reality && reality.lines.length > 0) {
     const shown = reality.lines.slice(0, REALITY_LINES);
-    shown.forEach((text, index) => rows.push([index === 0 ? `${reality.system} shows` : '', text]));
+    shown.forEach((text, index) =>
+      rows.push([index === 0 ? `${reality.system} shows` : '', text, REALITY_WRAP]),
+    );
     if (reality.lines.length > shown.length) {
-      rows.push(['', c.grey(`and ${reality.lines.length - shown.length} more`)]);
+      rows.push(['', `and ${reality.lines.length - shown.length} more`, 1]);
     }
   }
   const outcome = caseOutcome(result);
   const strength = [result.verification ?? replay.run.verification, result.evidenceIndependence];
-  rows.push([
-    'Verdict',
-    [colourVerdict(outcome), ...strength.filter((part) => part !== undefined)].join(' · '),
-  ]);
+  const verdict = [outcome, ...strength.filter((part) => part !== undefined)].join(' · ');
+  rows.push(['Verdict', verdict, 1]);
   const saw = explained.saw[0];
-  if (saw !== undefined) rows.push(['RigorRun saw', saw]);
+  if (saw !== undefined) rows.push(['RigorRun saw', saw, SAW_WRAP]);
 
   const width = Math.max(...rows.map(([label]) => label.length));
+  const room = WIDTH - width - 2;
   line();
-  for (const [label, text] of rows) {
-    const prefix = `${label.padEnd(width)}  `;
-    // The verdict is a few words already coloured; everything else is cut to fit.
-    line(`${c.grey(prefix)}${label === 'Verdict' ? text : clip(text, WIDTH - prefix.length)}`);
+  for (const [label, text, most] of rows) {
+    const wrapped = wrap(text, room);
+    const shown = wrapped.slice(0, most);
+    if (wrapped.length > most) {
+      shown[most - 1] = clip(`${shown[most - 1]} ${wrapped[most]}`, room);
+    }
+    shown.forEach((part, index) => {
+      const gutter = c.grey(`${(index === 0 ? label : '').padEnd(width)}  `);
+      // Only the verdict's first word is coloured: the outcome.
+      const body = label === 'Verdict' ? part.replace(outcome, colourVerdict(outcome)) : part;
+      line(`${gutter}${body}`);
+    });
   }
 }
+
+/** How many lines what the agent said, each system line, and the first finding may wrap to. */
+const CLAIM_LINES = 3;
+const REALITY_WRAP = 3;
+const SAW_WRAP = 2;
 
 /**
  * The work the agent was given, in one line: the inputs the recording names,
@@ -551,16 +569,19 @@ function printMatrix(variants: readonly ShownVariant[], headline: CaseResult | u
     Math.max('Every case'.length, ...names.map((n) => n.length)),
   );
 
-  line(
-    `${c.bold('Every case'.padEnd(shownWidth + 2))}  ${variants.map((variant) => c.bold(variant.name.padEnd(column))).join('  ')}`,
+  const header = variants.map((variant, index) =>
+    index === variants.length - 1 ? variant.name : variant.name.padEnd(column),
   );
+  line(c.bold(`${'Every case'.padEnd(shownWidth + 2)}  ${header.join('  ')}`));
   caseIds.forEach((caseId, index) => {
     const marked = headline?.caseId === caseId ? '›' : ' ';
     const name = clip(names[index] ?? caseId, shownWidth).padEnd(shownWidth);
-    const cells = variants.map((variant) =>
-      colourVerdict(verdictOf(variant, caseId).padEnd(column)),
-    );
-    line(`${marked} ${name}  ${cells.join('  ')}`.trimEnd());
+    const cells = variants.map((variant, position) => {
+      const verdict = verdictOf(variant, caseId);
+      const padded = position === variants.length - 1 ? verdict : verdict.padEnd(column);
+      return padded.replace(verdict, colourVerdict(verdict));
+    });
+    line(`${marked} ${name}  ${cells.join('  ')}`);
   });
 }
 

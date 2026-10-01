@@ -342,6 +342,22 @@ describe('the replay as printed', () => {
     expect(out.text()).not.toContain('simulated');
   });
 
+  it('wraps what the agent said and what the system shows rather than cutting them off', async () => {
+    const replay = await recording({ minimal: ['units'] });
+    const units = replay.run.caseResults.find(
+      (entry) => entry.agentId === AGENTS.minimal && entry.caseId === 'units',
+    )!;
+    const said = `Synthetic ${'long '.repeat(30)}sentence ending here.`;
+    (units as { agentReport: string }).agentReport = said;
+    units.reality!.lines = [`Synthetic ${'wide '.repeat(25)}system line ending here.`];
+    replay.resultHash = hashRun(replay.run);
+    const out = captured();
+    printReplay(replay);
+    const flat = out.text().replace(/\n\s+/g, ' ');
+    expect(flat).toContain('sentence ending here."');
+    expect(flat).toContain('system line ending here.');
+  });
+
   it('says a pilot is a pilot, and not evidence', async () => {
     const out = captured();
     printReplay(await recording({ minimal: ['units'] }, { pilot: true }));
