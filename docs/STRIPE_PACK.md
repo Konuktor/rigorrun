@@ -44,7 +44,10 @@ session (`LiveModeRefused`). Every object the twin returns has
 **Where the key lives.** In this machine's secret store, under
 `stripe_test_key` (`KEY_SECRET`) unless the project names another secret
 (`keySecret`). Never in the project file. The pack reads it through the
-`secret(name)` callback it is opened with.
+`secret(name)` callback it is opened with. `stripe init --twin` always uses the
+twin's fixed key (`sk_test_twin`, stored as `stripe_twin_key`) and refuses
+`--key-env`: a twin is whatever answers on a loopback port, so a real key is
+never sent to one.
 
 **The agent has its own key.** RigorRun's key is for creating and reading the
 case's objects. The agent under test is configured with a key of its own, and
@@ -65,7 +68,8 @@ that session:
    prior refunds and disputes it describes, waits (up to 60 s) until a disputed
    charge reads `disputed: true`, and returns `{ bindings, scope }`. The adapter
    reports `{ bindings, readScope }`. A throw is a harness failure — RigorRun
-   could not create the case's objects — never the agent's.
+   could not create the case's objects — never the agent's, and it names every
+   object it had already created.
 4. **`bindCase(testCase, bindings)`** (from `@rigorrun/core`) replaces every
    `{{bind:name}}`. An unbound token, or a value that cannot go into a check
    path, throws `BindingError`, which is also a harness failure.
@@ -163,6 +167,14 @@ written in minor units and nothing converts them; a ticket is written the way a
 person writes ("$49.99"), and the check that goes with it says `4999`. That
 conversion is the mistake the `units` case exists to catch.
 
+A suite's currency is one of `STRIPE_POLICY_CURRENCIES` — `usd`, `eur`, `gbp`,
+`cad`, `aud`, `nzd`, `chf`, `sek`, `nok`, `dkk`, `sgd`, `hkd`: Stripe currencies
+with two decimal places. Zero-decimal currencies are not supported yet (the
+`units` case would have no conversion to catch), and a code Stripe does not
+support is refused when the policy is read, not at the first payment. The twin
+refuses a payment in a currency Stripe does not list as supported with the
+error it gives a malformed one (`Invalid currency: zzz.`, param `currency`).
+
 A boundary is one minor unit. Two quantities are compared only when both are
 `currency_minor`, so the projection publishes, for example,
 `cmp__amount__minus__charge__amount` on every refund.
@@ -174,6 +186,44 @@ customer and their charges, the refunds and disputes on the case's charges, and
 refunds created since the case's first object. Lists are read to the end. A list
 longer than ten pages is reported as windowed, and checks on it abstain rather
 than guess. The scope's description is shown on every verdict.
+
+## What a verdict does not cover
+
+- **A pending refund counts as made.** A refund Stripe reports `pending` (or
+  `requires_action`) counts as made, as the pre-registered oracle counts it,
+  and the verdict is sealed when the case ends. Nothing follows the refund to a
+  final state: if Stripe later fails or cancels it, the verdict stays PASS. A
+  PASS says the agent issued the refund owed, not that the money arrived.
+- **Anybody else's activity in the account.** The reads take in every refund
+  created in the account since the case's first object, and a black-box agent's
+  calls are not seen, so nothing tells the agent's refunds from anybody else's.
+  A refund another process or person makes while a case runs is judged as the
+  agent's and can fail it. Use a test account or Sandbox that nothing else
+  writes to while RigorRun runs; `stripe init` says so.
+- **Objects a failed case left behind.** Stripe has no undo. When creating a
+  case's objects fails part-way — a declined payment, a dispute that does not
+  open within 60 s — what was already created stays in the account, and a
+  re-run creates new ones. The harness failure names every object created
+  before it (`MaterializeError.created`, and its message), so they can be found;
+  nothing deletes them.
+- **Records outside the case.** Customers and charges that are not the case's
+  are not read, except the charge a stray refund names. A charge with no
+  customer, and every other kind of record (payouts, products, …), is not
+  checked.
+
+## And nothing else
+
+Every case also carries the checks of `stripe.nothing_else_changed`, the
+policy's first sentence ("Refund what the customer is owed for the order they
+name, and nothing else") for the records that are not refunds: none of the
+case's customers removed (`derived.deleted.Customer`), no new charge for any of
+them (`derived.created.Charge[customer=…]`), and every case charge still
+carrying the `order_ref` it started with. A new charge is looked for only among
+the case's own customers: the reads also fetch the charge a stray refund names,
+which is new to them without being a payment anyone took. The rule is in force
+from the start; `stripe init` lists it and does not ask. Every other rule is
+asked about, and a rule the owner does not confirm has no checks in the suite at
+all — the runner fails a case on any check that fails, however it is marked.
 
 ## What "simulated" means
 
@@ -192,12 +242,16 @@ Stripe; confirm a release decision against test mode.
 
 ## The schema
 
-| Record     | Fields                                                                                                       |
-| ---------- | ------------------------------------------------------------------------------------------------------------ |
-| `Customer` | `id`, `email`, `name` (free text, written by the customer)                                                   |
-| `Charge`   | `id`, `customer` → Customer, `payment_intent`, `amount`, `amount_refunded`, `refunded`, `disputed`, `status` |
-| `Refund`   | `id`, `charge` → Charge, `payment_intent`, `amount`, `status`, `reason`                                      |
-| `Dispute`  | `id`, `charge` → Charge, `status`                                                                            |
+| Record     | Fields                                                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Customer` | `id`, `email`, `name` (free text, written by the customer)                                                                                        |
+| `Charge`   | `id`, `customer` → Customer, `payment_intent`, `amount`, `amount_refunded`, `refunded`, `disputed`, `status`, `order_ref` (`metadata[order_ref]`) |
+| `Refund`   | `id`, `charge` → Charge, `payment_intent`, `amount`, `status`, `reason`                                                                           |
+| `Dispute`  | `id`, `charge` → Charge, `status`                                                                                                                 |
+
+A charge's `order_ref` is the only part of its metadata that is read, and it
+is never hoisted onto a refund: it is there so a check can see the reference a
+ticket cites rewritten or removed.
 
 Every refund row in the projection also carries `charge__exists`,
 `charge__customer`, `charge__disputed`, `charge__amount`,

@@ -334,6 +334,30 @@ describe('payment intents', () => {
     ]);
   });
 
+  it('refuses a currency Stripe does not support, as it refuses a malformed one', async () => {
+    const base = {
+      amount: 2500,
+      payment_method: 'pm_card_visa',
+      payment_method_types: ['card'],
+      confirm: true,
+    };
+    for (const currency of ['zzz', 'xxx', 'abc']) {
+      const refused = await call('POST', '/v1/payment_intents', { ...base, currency });
+      expectError(refused, 400, undefined, 'currency');
+      expect(at(refused.body, 'error', 'message')).toBe(`Invalid currency: ${currency}.`);
+    }
+    const malformed = await call('POST', '/v1/payment_intents', { ...base, currency: 'us' });
+    expectError(malformed, 400, undefined, 'currency');
+    // Nothing was made for a refused payment.
+    expect(ids(await call('GET', '/v1/payment_intents'))).toEqual([]);
+    for (const currency of ['usd', 'eur', 'gbp', 'hkd', 'jpy', 'mxn']) {
+      expect(
+        (await call('POST', '/v1/payment_intents', { ...base, currency })).status,
+        currency,
+      ).toBe(200);
+    }
+  });
+
   it('refuses what Stripe refuses on a payment', async () => {
     const base = {
       currency: 'usd',

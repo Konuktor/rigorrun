@@ -41,7 +41,13 @@ import {
 } from '@rigorrun/environment';
 import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
-import { createBlackBoxAgent, probeBlackBox, type BlackBoxCompletion } from './blackBoxAgent.ts';
+import {
+  createBlackBoxAgent,
+  probeBlackBox,
+  redactEndpoint,
+  refuseCredentialInQuery,
+  type BlackBoxCompletion,
+} from './blackBoxAgent.ts';
 import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
@@ -62,7 +68,7 @@ import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
   BudgetsSchema,
   budgetProblem,
-  describeAgent,
+  agentAddress,
   newProject,
   type AgentConfig,
   ConnectorSchema,
@@ -679,9 +685,11 @@ export class Service {
    * person's confirmations are applied exactly as a review applies them. A
    * check that cites a rule then gates exactly when its rule is in force —
    * observed or confirmed — as a generated suite's checks do: a pack's author
-   * proposing a rule is not the person who runs the agent agreeing to it, and
-   * nothing unconfirmed fails an agent. A check citing no rule is left as the
-   * pack wrote it.
+   * proposing a rule is not the person who runs the agent agreeing to it. The
+   * runner fails a case on any check that fails, so a pack that promises an
+   * unconfirmed rule cannot fail an agent keeps the promise by leaving that
+   * rule's checks out; confirming such a rule here is refused. A check citing
+   * no rule is left as the pack wrote it.
    *
    * The suite is re-addressed to this project — its environment is the
    * project, as a generated suite's is — and its contract hash is the hash of
@@ -723,6 +731,22 @@ export class Service {
     if (unknownRules.length > 0) {
       throw new Error(
         `${pack.name}'s suite has no rule ${unknownRules.join(', ')}. Its rules: ${[...ruleIds].join(', ') || 'none'}.`,
+      );
+    }
+    // A pack may leave a rule nobody confirmed out of its cases, so that it
+    // cannot fail an agent. Confirming such a rule here, after the suite was
+    // built without it, would record a yes with no check behind it — a gate
+    // the person believes in that gates nothing — so it is refused.
+    const cited = new Set(
+      parsedBenchmark.data.cases.flatMap((testCase) =>
+        testCase.checks.flatMap((check) => (check.ruleId === undefined ? [] : [check.ruleId])),
+      ),
+    );
+    const unchecked = confirmedRuleIds.filter((id) => !cited.has(id));
+    if (unchecked.length > 0) {
+      throw new Error(
+        `${pack.name}'s suite has no check for ${unchecked.join(', ')}, so confirming it here ` +
+          'would gate nothing. Build the suite again with the rule confirmed.',
       );
     }
     for (const testCase of parsedBenchmark.data.cases) {
@@ -807,6 +831,9 @@ export class Service {
     let key: string | undefined;
     if ('blackBox' in input) {
       const spec = input.blackBox;
+      // Refused before it is probed or stored, whichever way it arrived: the
+      // address goes into the project file and into every listing of agents.
+      refuseCredentialInQuery(spec.endpoint);
       const allowedHosts = (spec.allowedHosts ?? [])
         .map((host) => host.trim().toLowerCase())
         .filter(Boolean);
@@ -889,10 +916,10 @@ export class Service {
       };
     }
 
-    const same = describeAgent(agent);
+    const same = agentAddress(agent);
     const updated: Project = {
       ...project,
-      agents: [...project.agents.filter((entry) => describeAgent(entry) !== same), agent],
+      agents: [...project.agents.filter((entry) => agentAddress(entry) !== same), agent],
       timings: {
         ...project.timings,
         agentConnectedAt:
@@ -1296,7 +1323,7 @@ export class Service {
     if (config.kind === 'blackbox') {
       if (config.remoteConfirmedAt === null) {
         throw new Error(
-          `${config.name} sends each case's work to ${config.endpoint}, and nobody on this machine has ` +
+          `${config.name} sends each case's work to ${redactEndpoint(config.endpoint)}, and nobody on this machine has ` +
             'agreed to that. It came from an imported project rather than from you. Open it and confirm first.',
         );
       }

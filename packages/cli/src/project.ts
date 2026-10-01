@@ -191,6 +191,21 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     if (score.n > 0 && (score.decided ?? score.n) === 0)
       inconclusive.push('no case reached a verdict');
 
+    // A gate over some of the suite's cases says nothing about the rest, and
+    // an agent can pass the ones chosen and fail the ones left out. Useful to
+    // look at; never a release verdict. A subset that fails still fails.
+    const suite = await new ProjectStore(storeRoot(flags.home)).readArtefact<Benchmark>(
+      projectId,
+      'benchmark',
+    );
+    const selectedCases = [...new Set(result.caseResults.map((entry) => entry.caseId))];
+    const suiteCaseCount = suite?.cases.length ?? selectedCases.length;
+    if ((flags.caseIds?.length ?? 0) > 0 && selectedCases.length < suiteCaseCount) {
+      inconclusive.push(
+        `gate over ${selectedCases.length} of ${suiteCaseCount} cases is not a release verdict; run without --case`,
+      );
+    }
+
     const exitCode = failures.length > 0 ? 1 : inconclusive.length > 0 ? 3 : 0;
     if (flags.json) {
       line(
@@ -200,6 +215,9 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
             failures: [...failures, ...inconclusive],
             inconclusive: exitCode === 3,
             score,
+            selectedCases,
+            suiteCaseCount,
+            limits: result.limits,
             suiteQuality: result.suiteQuality ?? null,
           },
           null,

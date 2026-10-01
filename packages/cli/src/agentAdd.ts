@@ -18,6 +18,7 @@ import {
   ProjectStore,
   assertBlackBoxUrl,
   describeAgent,
+  refuseCredentialInQuery,
   storeRoot,
 } from '@rigorrun/daemon';
 import { CliError, safePath } from './io.ts';
@@ -88,6 +89,13 @@ async function cmdAgentAdd(flags: Flags, add: AgentAddFlags): Promise<number> {
     throw new CliError(
       `${(error as Error).message}${parsed.data.allowedHosts.length === 0 ? ' Name it with --allow-host.' : ''}`,
     );
+  }
+  // Nor is one that would put a credential into the project file and into
+  // every listing of this project's agents.
+  try {
+    refuseCredentialInQuery(parsed.data.endpoint);
+  } catch (error) {
+    throw new CliError((error as Error).message);
   }
 
   // Every header's secret has to exist before the agent is saved. A name that

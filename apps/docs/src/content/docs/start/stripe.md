@@ -21,7 +21,8 @@ npx rigorrun stripe init --twin --yes         # in another terminal
 ```
 
 `init` lists the refund policy's rules and asks you to confirm each one (`--yes` confirms all). Only
-a rule you confirm can fail your agent; the rest still run and are reported, and never gate. It then
+a rule you confirm can fail your agent: a rule you say no to is left out of the suite, and `init`
+names it. Each ticket's own outcome — the refund it is owed, or none — is always checked. It then
 creates the project and its suite — seven tickets and a $1.00 canary — and writes
 `rigorrun-stripe/ticket.example.json`: exactly what your agent will be sent, with example ids.
 
@@ -82,7 +83,9 @@ Runs every case and exits `0` when the agent clears the bar, `1` when it does no
 for each case, what the agent said beside what Stripe holds: an agent that sent `$25.00` as `25`
 fails with _Refund re_… of $0.25 on ch_… (a $25.00 charge)_.
 
-`--case <id>` runs only the cases you name; such a run never becomes the baseline.
+`--case <id>` runs only the cases you name; such a run never becomes the baseline. `gate --case` is
+never a release verdict: it exits `3` (inconclusive) unless a named case fails, and its `--json`
+says which cases ran (`selectedCases`) out of how many (`suiteCaseCount`).
 
 ## 6. In CI
 
@@ -95,8 +98,17 @@ store committed or restored. The key arrives as `RIGORRUN_SECRET__STRIPE_TEST_KE
 - **`PARTIAL`, by design.** RigorRun reads the case's own customers and payments, the refunds and
   disputes on them, and every refund made in the account since the case began. Changes anywhere
   else are not checked. Every verdict prints what its reads covered.
+- **And nothing else.** Besides the refunds, every case checks that its customers are still there,
+  that no new payment was taken from them, and that its payments still carry their order reference.
+  This is always checked; it is what the policy's "and nothing else" means.
 - **State only.** A black-box agent's calls are not seen, so nothing is checked about their order;
   everything about what Stripe holds afterwards is.
+- **A pending refund counts as made.** As the pre-registered oracle counts it. The verdict is sealed
+  when the case ends; if Stripe later fails or cancels the refund, it stays PASS.
+- **Nobody else may write to the account during a run.** A refund made by anyone while a case runs is
+  read as the agent's, because a black-box agent's calls cannot be told apart from anybody else's.
+- **A failed case can leave objects behind.** Stripe has no undo. If creating a case's records fails
+  part-way, the harness failure names what was already created; nothing deletes it.
 - **The twin is a simulation.** A verdict against it is marked so, and is good evidence about your
   agent's logic and none about Stripe. Confirm a release against test mode.
 - **Live mode is never used.** Not by RigorRun's key, which must be a test key Stripe confirms, and

@@ -45,6 +45,11 @@ Or in a setup spec:
 Header values are **secret names**, never values: set the value once with
 `npx rigorrun secrets set STAGING_AGENT_TOKEN`, or in CI as `RIGORRUN_SECRET__STAGING_AGENT_TOKEN`.
 
+The address is stored in the project, so it may not carry a credential: one whose query has a
+parameter named like `key`, `api_key`, `token`, `secret`, `password`, `auth`, `signature` or `sig`,
+or a value starting `sk_`, `rk_`, `pk_` or `whsec_`, is refused. Wherever an agent is listed, its
+address is shown without its query.
+
 ## What RigorRun sends
 
 With no `bodyTemplate`, each case arrives as `rigorrun/task/1`:
@@ -72,11 +77,11 @@ a ticket containing a quote cannot rewrite the request around it.
 
 ## When it is finished
 
-| `completion` | Your endpoint | RigorRun |
-| --- | --- | --- |
-| `response` (default) | answers when the work is done | reads the system after the answer |
-| `poll` | answers `202 {"statusUrl": "…"}` | polls the status address (same host rules) until `completed`, `failed` or `declined` |
-| `settle` | answers straight away and works afterwards | waits `settleQuietMs`, then reads the system |
+| `completion`         | Your endpoint                              | RigorRun                                                                                                         |
+| -------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `response` (default) | answers when the work is done              | reads the system after the answer; a `202 Accepted` ends the case as the agent not finishing, never as a verdict |
+| `poll`               | answers `202 {"statusUrl": "…"}`           | polls the status address (same host rules) until `completed`, `failed` or `declined`                             |
+| `settle`             | answers straight away and works afterwards | waits `settleQuietMs`, then reads the system                                                                     |
 
 Whatever it answers at `claimPath` is recorded as the agent's claim and shown next to what the system
 holds.

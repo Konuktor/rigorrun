@@ -21,6 +21,7 @@ import {
   DEFAULT_TOOL_CALL_TIMEOUT_MS,
 } from '@rigorrun/core';
 import { getPack, hasPack, type PackConnectionConfig } from '@rigorrun/environment';
+import { redactEndpoint } from './blackBoxAgent.ts';
 
 export const PROJECT_SCHEMA_VERSION = 1;
 
@@ -407,11 +408,25 @@ export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 export type HttpAgentConfig = z.infer<typeof HttpAgentSchema>;
 export type ProcessAgentConfigured = z.infer<typeof ProcessAgentSchema>;
 
-/** How to reach this agent, in one line. */
+/**
+ * How to reach this agent, in one line, for a person to read. An address is
+ * shown without its query: whatever is in one is not for a terminal or a log.
+ */
 export function describeAgent(agent: AgentConfig): string {
-  if (agent.kind === 'http') return agent.endpoint;
+  if (agent.kind === 'http') return redactEndpoint(agent.endpoint);
   // Not reached: RigorRun does not reach this one, which is the whole point of
   // it. The id is what distinguishes two of them on the same project.
+  if (agent.kind === 'external') return `driven by you (${agent.id})`;
+  if (agent.kind === 'blackbox') return `${redactEndpoint(agent.endpoint)} (black box)`;
+  return `${agent.command} ${agent.args.join(' ')}`.trim();
+}
+
+/**
+ * Where this agent is, in full: what makes two agents the same one. Never
+ * shown; `describeAgent` is what a person sees.
+ */
+export function agentAddress(agent: AgentConfig): string {
+  if (agent.kind === 'http') return agent.endpoint;
   if (agent.kind === 'external') return `driven by you (${agent.id})`;
   if (agent.kind === 'blackbox') return `${agent.endpoint} (black box)`;
   return `${agent.command} ${agent.args.join(' ')}`.trim();

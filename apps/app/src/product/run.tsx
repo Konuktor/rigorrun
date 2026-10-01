@@ -350,9 +350,9 @@ export function ConnectAgent({
                   <span className="text-body text-fg">{agent.name}</span>
                   <span className="font-mono text-meta text-muted">
                     {agent.kind === 'http'
-                      ? agent.endpoint
+                      ? withoutQuery(agent.endpoint)
                       : agent.kind === 'blackbox'
-                        ? `${agent.endpoint} · black box`
+                        ? `${withoutQuery(agent.endpoint)} · black box`
                         : agent.kind === 'external'
                           ? 'driven by you'
                           : [agent.command, ...agent.args].join(' ')}
@@ -393,6 +393,15 @@ export function ConnectAgent({
  * unless somebody can see which case is open and how far along it is. This is
  * the difference between "it is stuck" and "it is on case nine of twelve".
  */
+/**
+ * An agent's address as it is shown: without its query or fragment, as the
+ * command line shows it, because whatever is in one is not for a screen.
+ */
+function withoutQuery(endpoint: string): string {
+  const cut = endpoint.search(/[?#]/);
+  return cut === -1 ? endpoint : `${endpoint.slice(0, cut)}${endpoint[cut]}…`;
+}
+
 function Waiting({ projectId, agentId }: { projectId: string; agentId: string }) {
   const [waiting, setWaiting] = useState<WaitingView | null>(null);
 

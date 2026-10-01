@@ -43,7 +43,10 @@ export const STRIPE_SUITE_ID = 'bm_stripe_refunds';
 export const STRIPE_SUITE_WRITTEN = '2026-10-01T00:00:00.000Z';
 
 export interface StripeSuiteOptions {
-  /** Rules the owner said yes to. The rest stay `inferred`, and their checks do not block. */
+  /**
+   * Rules the owner said yes to. The rest stay `inferred` on the contract, and
+   * their checks are left out of the cases, so they cannot fail an agent.
+   */
   confirmedRuleIds?: readonly string[];
   /** When the suite was made, and when the rules were confirmed. */
   createdAt?: string;
@@ -65,7 +68,8 @@ export function stripeSuite(
   const cases = stripeCases(parsed, reviewed, { canary: options.canary === true });
 
   // Each rule names the checks and the cases it produced, so a failure can be
-  // traced from the verdict back to the sentence of the policy it broke.
+  // traced from the verdict back to the sentence of the policy it broke. A
+  // rule nobody confirmed produced none.
   const contract = parseEnvironmentContract({
     ...reviewed,
     rules: reviewed.rules.map((rule) => {

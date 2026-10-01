@@ -56,10 +56,13 @@ OPTIONS
       --key-env <NAME>          Test mode: the environment variable holding your
                                 test key (sk_test_… or rk_test_…). Default ${DEFAULT_KEY_ENV}.
                                 Read from the environment, never from a flag.
+                                Refused with --twin, which always uses its own key.
       --safety <kind>           staging, ephemeral or local. Required for test
                                 mode; the twin is local. Never production.
       --name <name>             The project's name.
-      --currency <code>         The cases' currency, with two decimals. Default usd.
+      --currency <code>         The cases' currency: usd (default), eur, gbp, cad,
+                                aud, nzd, chf, sek, nok, dkk, sgd or hkd. Zero-
+                                decimal currencies are not supported yet.
       --escalate-above <amount> Refunds above this wait for a person, e.g. $100.
                                 Adds one rule and one case.
       --yes                     Confirm every rule without asking. Needed when
@@ -187,7 +190,15 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
 
   // ------------------------------------------------- refused before anything
   const twin = values.twin !== undefined;
-  const keyEnv = values['key-env'] ?? (twin ? undefined : DEFAULT_KEY_ENV);
+  if (twin && values['key-env'] !== undefined) {
+    // Refused rather than ignored: a twin is whatever answers on a loopback
+    // port, and a real test key sent there would be handed to that process.
+    throw new UsageError(
+      "--twin uses the twin's own key, never yours: drop --key-env. A real key is only ever " +
+        'sent to Stripe itself (stripe init --key-env NAME --safety staging).',
+    );
+  }
+  const keyEnv = twin ? undefined : (values['key-env'] ?? DEFAULT_KEY_ENV);
   const key = keyEnv === undefined ? TWIN_AGENT_KEY : process.env[keyEnv];
   if (key === undefined || key.trim() === '') {
     throw new UsageError(
@@ -247,6 +258,11 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
 
   const where = twin ? `local twin at ${address}` : 'your Stripe test mode';
   const human = !values.json;
+  // A rule already in force is what the policy says outright, and is listed
+  // rather than asked about; every other one waits for the owner's yes.
+  const rules = stripeRules(policy);
+  const inForce = rules.filter((rule) => rule.status !== 'inferred');
+  const toAsk = rules.filter((rule) => rule.status === 'inferred');
   if (human) {
     say(`Stripe pack · ${where}`);
     say(
@@ -254,13 +270,20 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
         ? '  key   any test key works here; nothing reaches Stripe'
         : '  key   test mode, confirmed by Stripe',
     );
+    // The reads take in every refund made in the account while a case runs,
+    // and an agent's calls cannot be told from anybody else's.
+    say('  Use a test account or Sandbox that nothing else writes to while RigorRun runs.');
+    say();
+    say('Every ticket is held to');
+    for (const rule of inForce) say(`  ${rule.statement}`);
     say();
     say('Rules — only the ones you confirm can fail your agent');
   }
 
   // ----------------------------------------------------------- the rules
   const confirmedRuleIds: string[] = [];
-  for (const rule of stripeRules(policy)) {
+  const leftOut: { id: string; statement: string }[] = [];
+  for (const rule of toAsk) {
     let yes = values.yes;
     if (!yes) {
       say(`  ${rule.statement}`);
@@ -270,8 +293,9 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
       say(`  ✓ ${rule.statement}`);
     }
     if (yes) confirmedRuleIds.push(rule.id);
+    else leftOut.push({ id: rule.id, statement: rule.statement });
   }
-  const ruleCount = stripeRules(policy).length;
+  const ruleCount = toAsk.length;
 
   // ----------------------------------------------------- now it is stored
   const name = values.name ?? (twin ? 'Stripe refunds (twin)' : 'Stripe refunds');
@@ -322,6 +346,8 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
           keySecret,
           safety,
           confirmedRuleIds,
+          leftOutRuleIds: leftOut.map((rule) => rule.id),
+          inForceRuleIds: inForce.map((rule) => rule.id),
           rules: ruleCount,
           cases: caseIds,
           ticket: example ? ticketPath : null,
@@ -341,15 +367,20 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
     ['project', `${id}  ${name}`],
     [
       'suite',
-      `${tickets} tickets and a ${formatMinorUnits(CANARY_AMOUNT, policy.currency)} canary · ${confirmedRuleIds.length} of ${ruleCount} rules confirmed`,
+      `${tickets} tickets and a ${formatMinorUnits(CANARY_AMOUNT, policy.currency)} canary · ${confirmedRuleIds.length} of ${ruleCount} rules confirmed · ${inForce.length} always checked`,
     ],
     ['key', `stored as ${keySecret} in this machine's secret store, not in the project`],
     ...(example ? [['ticket', `${shownTicket} — what your agent will be sent`] as const] : []),
   ])) {
     say(line);
   }
-  if (confirmedRuleIds.length < ruleCount) {
-    say('  (a rule you did not confirm still runs, and is reported, but never fails the agent)');
+  if (leftOut.length > 0) {
+    // Named, so the owner sees exactly what the suite does not hold their
+    // agent to. Their checks are not in it at all: a check that ran would fail
+    // the agent like any other, whatever it was marked.
+    say();
+    say('Left out — not checked, so they cannot fail your agent:');
+    for (const rule of leftOut) say(`  ${rule.statement}`);
   }
   say();
   say('Next');

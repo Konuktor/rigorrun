@@ -61,6 +61,8 @@ describe('reading a case', () => {
       refunded: false,
       disputed: false,
       status: 'succeeded',
+      // Of its metadata, only the reference the ticket cites.
+      order_ref: bindings['order_ref'],
     });
     const refunds = Object.values(state.entities['Refund'] ?? {});
     expect(refunds).toHaveLength(1);

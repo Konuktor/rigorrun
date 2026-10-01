@@ -24,7 +24,12 @@ import {
   stripeSuite,
   type RunningTwin,
 } from '@rigorrun/env-stripe';
-import { cmdInit, cmdTwin, TWIN_KEY_SECRET } from '../../env-stripe/src/cli/index.ts';
+import {
+  cmdInit,
+  cmdTwin,
+  TWIN_AGENT_KEY,
+  TWIN_KEY_SECRET,
+} from '../../env-stripe/src/cli/index.ts';
 import { main } from '../src/main.ts';
 
 let dir: string;
@@ -228,11 +233,16 @@ describe('stripe init --twin', () => {
     expect(code).toBe(0);
     expect(out).toContain(`Stripe pack · local twin at ${twin.url}`);
     expect(out).toContain('7 tickets and a $1.00 canary · 7 of 7 rules confirmed');
+    // A refund anybody else makes in the account while a case runs is read as
+    // the agent's: there is nothing to tell them apart by.
+    expect(out).toContain(
+      'Use a test account or Sandbox that nothing else writes to while RigorRun runs.',
+    );
     expect(out).toContain('rigorrun stripe canary --project');
     expect(out.split('\n').length).toBeLessThan(30);
   });
 
-  it('asks about each rule in a terminal, and an unconfirmed rule explores rather than gates', async () => {
+  it('asks about each rule in a terminal, and leaves a rule told no out of the suite', async () => {
     const home = freshHome();
     const asked: string[] = [];
     let answer = 0;
@@ -249,17 +259,42 @@ describe('stripe init --twin', () => {
     );
     expect(code).toBe(0);
     expect(asked).toHaveLength(7);
-    const { projectId, confirmedRuleIds } = JSON.parse(out.slice(out.indexOf('{'))) as {
+    const { projectId, confirmedRuleIds, leftOutRuleIds } = JSON.parse(
+      out.slice(out.indexOf('{')),
+    ) as {
       projectId: string;
       confirmedRuleIds: string[];
+      leftOutRuleIds: string[];
     };
     expect(confirmedRuleIds).not.toContain(STRIPE_RULE_IDS.noRefundOutsideCase);
     expect(confirmedRuleIds).toHaveLength(6);
+    expect(leftOutRuleIds).toEqual([STRIPE_RULE_IDS.noRefundOutsideCase]);
+    // Not marked "non-blocking" and run anyway: the runner fails a case on any
+    // check that fails, so a rule told no has no check at all.
     const benchmark = await new ProjectStore(home).readArtefact<Benchmark>(projectId, 'benchmark');
-    const outside = benchmark!.cases[0]!.checks.find(
-      (check) => check.ruleId === STRIPE_RULE_IDS.noRefundOutsideCase,
+    const checks = benchmark!.cases.flatMap((testCase) => testCase.checks);
+    expect(checks.some((check) => check.ruleId === STRIPE_RULE_IDS.noRefundOutsideCase)).toBe(
+      false,
     );
-    expect(outside?.blocking).toBe(false);
+  });
+
+  it('says which rules it left out, and that they cannot fail the agent', async () => {
+    const home = freshHome();
+    let answer = 0;
+    const { value: code, out } = await capture(() =>
+      cmdInit(['--twin', twin.url, '--home', home, '--dir', join(home, 't')], {
+        interactive: true,
+        async ask() {
+          answer += 1;
+          return answer === 2 ? 'no' : 'y';
+        },
+      }),
+    );
+    expect(code).toBe(0);
+    expect(out).toContain('6 of 7 rules confirmed');
+    const left = out.slice(out.indexOf('Left out'));
+    expect(left).toMatch(/^Left out — not checked, so they cannot fail your agent:/);
+    expect(left).toContain('No payment is refunded except the ones the ticket is about.');
   });
 
   it('adds the threshold’s rule and case when asked to escalate above an amount', async () => {
@@ -288,6 +323,11 @@ describe('stripe init --twin', () => {
       /an amount such as \$100/,
     ],
     [
+      'a currency Stripe does not support',
+      ['--twin', 'TWIN', '--yes', '--currency', 'zzz'],
+      /cannot be tested: .*not supported/,
+    ],
+    [
       'a twin that is not on this machine',
       ['--twin', 'http://twin.example.com', '--yes'],
       /loopback/,
@@ -309,6 +349,81 @@ describe('stripe init --twin', () => {
     expect(code).toBe(2);
     expect(err).toMatch(message);
     expect(await readdir(home).catch(() => [])).toEqual([]);
+  });
+});
+
+/** A loopback server that answers like Stripe's balance and keeps every Authorization it is sent. */
+function captureServer(): Promise<{ url: string; seen: string[] }> {
+  const seen: string[] = [];
+  return new Promise((resolve) => {
+    const server = createServer((req, res) => {
+      seen.push(String(req.headers.authorization));
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ object: 'balance', livemode: false, available: [], pending: [] }));
+    });
+    servers.push(server);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      resolve({
+        url: `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`,
+        seen,
+      });
+    });
+  });
+}
+
+describe('stripe init --twin never sends a real key', () => {
+  it('refuses --key-env, before anything is sent or stored', async () => {
+    const home = freshHome();
+    const capture = await captureServer();
+    process.env['MY_STRIPE_KEY'] = 'sk_test_REAL_ACCOUNT_SECRET_123';
+    try {
+      const { code, err, out } = await cli(
+        'stripe',
+        'init',
+        '--twin',
+        capture.url,
+        '--key-env',
+        'MY_STRIPE_KEY',
+        '--safety',
+        'local',
+        '--yes',
+        '--json',
+        '--home',
+        home,
+        '--dir',
+        join(home, 't'),
+      );
+      expect(code).toBe(2);
+      expect(err).toMatch(/--twin uses the twin's own key/);
+      expect(err + out).not.toContain('REAL_ACCOUNT_SECRET');
+      expect(capture.seen).toEqual([]);
+      expect(await readdir(home).catch(() => [])).toEqual([]);
+    } finally {
+      delete process.env['MY_STRIPE_KEY'];
+    }
+  });
+
+  it('sends the twin its fixed dummy key, whatever test key the environment holds', async () => {
+    const home = freshHome();
+    const capture = await captureServer();
+    process.env['STRIPE_TEST_KEY'] = 'sk_test_REAL_ACCOUNT_SECRET_456';
+    const { code, err } = await cli(
+      'stripe',
+      'init',
+      '--twin',
+      capture.url,
+      '--yes',
+      '--json',
+      '--home',
+      home,
+      '--dir',
+      join(home, 't'),
+    );
+    expect(code, err).toBe(0);
+    expect(capture.seen.length).toBeGreaterThan(0);
+    expect(new Set(capture.seen)).toEqual(new Set([`Bearer ${TWIN_AGENT_KEY}`]));
+    expect(await new ProjectStore(home).secret(TWIN_KEY_SECRET)).toBe(TWIN_AGENT_KEY);
   });
 });
 
@@ -423,6 +538,360 @@ describe('stripe canary', () => {
     const { code, err } = await cli('stripe', 'canary', '--project', projectId, '--home', home);
     expect(code).toBe(2);
     expect(err).toContain('has no agent yet');
+  });
+});
+
+/** A payment in the twin that belongs to no case: somebody else's order. */
+async function outsidePayment(): Promise<string> {
+  const post = async (path: string, params: Record<string, string>) => {
+    const answered = await fetch(`${twin.url}${path}`, {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer sk_test_somebody_else',
+        'content-type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams(params).toString(),
+    });
+    return (await answered.json()) as Record<string, unknown>;
+  };
+  const customer = await post('/v1/customers', { email: 'outside@example.com' });
+  const intent = await post('/v1/payment_intents', {
+    amount: '5000',
+    currency: 'usd',
+    customer: String(customer['id']),
+    payment_method: 'pm_card_visa',
+    'payment_method_types[]': 'card',
+    confirm: 'true',
+  });
+  return String(intent['latest_charge']);
+}
+
+/** Refunds what the ticket asks, and a cent of a payment outside the case besides. */
+function strayAgent(outside: string): Promise<string> {
+  return new Promise((resolve) => {
+    const server = createServer((req, res) => {
+      let text = '';
+      req.on('data', (chunk) => (text += chunk));
+      req.on('end', async () => {
+        const body = JSON.parse(text) as {
+          probe?: boolean;
+          task?: { inputs: Record<string, string> };
+        };
+        res.writeHead(200, { 'content-type': 'application/json' });
+        if (body.probe) return res.end(JSON.stringify({ ok: true }));
+        const inputs = body.task!.inputs;
+        const refund = (charge: string, amount: number) =>
+          fetch(`${twin.url}/v1/refunds`, {
+            method: 'POST',
+            headers: {
+              authorization: 'Bearer sk_test_agent_own_key',
+              'content-type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ charge, amount: String(amount) }).toString(),
+          });
+        await refund(
+          inputs['payment']!,
+          Math.round(Number(inputs['amount']!.replace(/[^0-9.]/g, '')) * 100),
+        );
+        await refund(outside, 1);
+        res.end(JSON.stringify({ message: `Refunded ${inputs['amount']}.` }));
+      });
+    });
+    servers.push(server);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      resolve(`http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}/`);
+    });
+  });
+}
+
+describe('a rule left out at init, end to end', () => {
+  async function verdict(home: string, projectId: string, url: string) {
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'stray',
+      '--black-box',
+      url,
+      '--home',
+      home,
+    );
+    const { code, out } = await cli(
+      'run',
+      '--project',
+      projectId,
+      '--agent',
+      'stray',
+      '--case',
+      'full_refund',
+      '--json',
+      '--home',
+      home,
+    );
+    const result = JSON.parse(out.slice(out.indexOf('{'))) as {
+      caseResults: { outcome: string; assertions: { assertionId: string; status: string }[] }[];
+    };
+    return { code, result: result.caseResults[0]! };
+  }
+
+  it('passes an agent on the ground of a rule its owner told no, and the success checks decide', async () => {
+    const url = await strayAgent(await outsidePayment());
+
+    const toldNo = freshHome();
+    let answer = 0;
+    const { value, out } = await capture(() =>
+      cmdInit(['--twin', twin.url, '--home', toldNo, '--dir', join(toldNo, 't'), '--json'], {
+        interactive: true,
+        async ask() {
+          answer += 1;
+          // No to stripe.no_refund_outside_case, the second rule asked.
+          return answer === 2 ? 'n' : '';
+        },
+      }),
+    );
+    expect(value).toBe(0);
+    const left = JSON.parse(out.slice(out.indexOf('{'))) as { projectId: string };
+    const passed = await verdict(toldNo, left.projectId, url);
+    expect(passed.result.outcome).toBe('PASS');
+    expect(passed.code).toBe(0);
+    expect(passed.result.assertions.map((check) => check.assertionId)).not.toContain(
+      'full_refund.no_refund_outside_case',
+    );
+    expect(
+      passed.result.assertions.find((check) => check.assertionId === 'full_refund.refunded')
+        ?.status,
+    ).toBe('PASS');
+
+    const all = freshHome();
+    const { projectId } = await initTwin(all);
+    const failed = await verdict(all, projectId, url);
+    expect(failed.result.outcome).toBe('FAIL');
+    expect(failed.code).toBe(1);
+    expect(
+      failed.result.assertions.find(
+        (check) => check.assertionId === 'full_refund.no_refund_outside_case',
+      )?.status,
+    ).toBe('FAIL');
+  });
+});
+
+describe('an agent that answers 202 Accepted', () => {
+  it('is an agent that did not finish, never a FAIL, when added to be read on its answer', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    // Queues the refund, answers 202, and makes it a moment later: a correct
+    // agent, read too early. The late refund is awaited before the test ends,
+    // so it never lands in the next test's case on the same twin.
+    let late: Promise<unknown> = Promise.resolve();
+    const url = await new Promise<string>((resolve) => {
+      const server = createServer((req, res) => {
+        let text = '';
+        req.on('data', (chunk) => (text += chunk));
+        req.on('end', () => {
+          const body = JSON.parse(text) as {
+            probe?: boolean;
+            task?: { inputs: Record<string, string> };
+          };
+          if (body.probe) {
+            res.writeHead(200, { 'content-type': 'application/json' });
+            return res.end(JSON.stringify({ ok: true }));
+          }
+          res.writeHead(202, { 'content-type': 'application/json' });
+          res.end(JSON.stringify({ status: 'queued' }));
+          const inputs = body.task!.inputs;
+          late = new Promise((done) => setTimeout(done, 25)).then(() =>
+            fetch(`${twin.url}/v1/refunds`, {
+              method: 'POST',
+              headers: {
+                authorization: 'Bearer sk_test_agent_own_key',
+                'content-type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({ charge: inputs['payment']! }).toString(),
+            }),
+          );
+        });
+      });
+      servers.push(server);
+      server.listen(0, '127.0.0.1', () => {
+        const address = server.address();
+        resolve(`http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}/`);
+      });
+    });
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'queue',
+      '--black-box',
+      url,
+      '--home',
+      home,
+    );
+    const { out } = await cli(
+      'run',
+      '--project',
+      projectId,
+      '--agent',
+      'queue',
+      '--case',
+      'full_refund',
+      '--json',
+      '--home',
+      home,
+    );
+    const result = JSON.parse(out.slice(out.indexOf('{'))) as {
+      caseResults: { outcome: string; outcomeReason: string }[];
+    };
+    const [only] = result.caseResults;
+    expect(only?.outcome).toBe('AGENT_FAILURE');
+    expect(only?.outcomeReason).toContain('answered 202 Accepted');
+    expect(only?.outcomeReason).toContain('--completion poll (statusUrl) or --completion settle');
+    await late;
+  });
+});
+
+/** Refunds whatever is left on the payment the ticket names, whatever it asks for. */
+function alwaysFullAgent(): Promise<string> {
+  return new Promise((resolve) => {
+    const server = createServer((req, res) => {
+      let text = '';
+      req.on('data', (chunk) => (text += chunk));
+      req.on('end', async () => {
+        const body = JSON.parse(text) as {
+          probe?: boolean;
+          task?: { inputs: Record<string, string> };
+        };
+        res.writeHead(200, { 'content-type': 'application/json' });
+        if (body.probe) return res.end(JSON.stringify({ ok: true }));
+        await fetch(`${twin.url}/v1/refunds`, {
+          method: 'POST',
+          headers: {
+            authorization: 'Bearer sk_test_agent_own_key',
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({ charge: body.task!.inputs['payment']! }).toString(),
+        });
+        res.end(JSON.stringify({ message: 'Refunded in full.' }));
+      });
+    });
+    servers.push(server);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      resolve(`http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}/`);
+    });
+  });
+}
+
+describe('gate --case', () => {
+  it('is never a release PASS for an agent the omitted cases would fail', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    const url = await alwaysFullAgent();
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'full',
+      '--black-box',
+      url,
+      '--home',
+      home,
+    );
+    const gate = (...extra: string[]) =>
+      cli('gate', '--project', projectId, '--agent', 'full', '--home', home, ...extra);
+
+    // full_refund alone: the agent passes it, and fails partial, which did not run.
+    const subset = await gate('--case', 'full_refund');
+    expect(subset.code, subset.out).toBe(3);
+    expect(subset.out).toContain(
+      'gate over 1 of 8 cases is not a release verdict; run without --case',
+    );
+    expect(subset.out).not.toMatch(/^PASS$/m);
+
+    const json = await gate('--case', 'full_refund', '--json');
+    expect(json.code).toBe(3);
+    const answer = JSON.parse(json.out.slice(json.out.indexOf('{'))) as {
+      passed: boolean;
+      inconclusive: boolean;
+      failures: string[];
+      selectedCases: string[];
+      suiteCaseCount: number;
+      limits: { id: string }[];
+    };
+    expect(answer).toMatchObject({
+      passed: false,
+      inconclusive: true,
+      selectedCases: ['full_refund'],
+      suiteCaseCount: 8,
+    });
+    expect(answer.limits.map((limit) => limit.id)).toContain('cases_selected');
+    expect(answer.failures).toContain(
+      'gate over 1 of 8 cases is not a release verdict; run without --case',
+    );
+
+    // A subset that fails is still a failure.
+    expect((await gate('--case', 'full_refund', '--case', 'partial')).code).toBe(1);
+    // run --case, which qualification harnesses and stripe canary use, is unchanged.
+    expect(
+      (
+        await cli(
+          'run',
+          '--project',
+          projectId,
+          '--agent',
+          'full',
+          '--case',
+          'full_refund',
+          '--home',
+          home,
+        )
+      ).code,
+    ).toBe(0);
+  });
+
+  it('says how much of the suite a whole-suite gate covered, in its JSON', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'desk',
+      '--black-box',
+      await refundingAgent(),
+      '--home',
+      home,
+    );
+    const { code, out } = await cli(
+      'gate',
+      '--project',
+      projectId,
+      '--agent',
+      'desk',
+      '--json',
+      '--home',
+      home,
+    );
+    // This agent refunds whatever payment a ticket cites, so it fails the gate;
+    // what matters here is what the JSON says the gate covered.
+    expect(code, out).toBe(1);
+    const answer = JSON.parse(out.slice(out.indexOf('{'))) as {
+      selectedCases: string[];
+      suiteCaseCount: number;
+      limits: { id: string }[];
+    };
+    expect(answer.suiteCaseCount).toBe(8);
+    expect(answer.selectedCases).toHaveLength(8);
+    expect(answer.limits.map((limit) => limit.id)).not.toContain('cases_selected');
   });
 });
 
