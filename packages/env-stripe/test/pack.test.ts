@@ -17,18 +17,19 @@ import {
   registerStripePack,
   stripePack,
   stripeSchema,
+  stripeSuiteFromParams,
 } from '../src/index.ts';
 
 afterEach(() => clearPacks());
 
 describe('the Stripe pack', () => {
-  it('is named, carries the schema, and leaves its suite and command line to their own modules', () => {
+  it('is named, carries the schema, and ships its own suite and command line', () => {
     expect(stripePack.id).toBe(STRIPE_PACK_ID);
     expect(stripePack.name).toBe('Stripe (test mode)');
     expect(stripePack.schema).toBe(stripeSchema);
     expect(validateSchema(stripePack.schema)).toEqual([]);
-    expect(stripePack.suite).toBeUndefined();
-    expect(stripePack.cli).toBeUndefined();
+    expect(stripePack.suite).toBe(stripeSuiteFromParams);
+    expect(typeof stripePack.cli).toBe('function');
   });
 
   it('presents only entities and actions it has', () => {

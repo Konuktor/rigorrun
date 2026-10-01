@@ -44,10 +44,17 @@ PROJECTS
                            which store you actually got.
 
 PACKS
-  <pack> ...               A system RigorRun ships its own client for has its
-                           own commands, named by the pack's id as the first
-                           word. \`rigorrun <pack> --help\` lists them; the
-                           packs in this build are listed at the end of this page.
+  stripe twin              A local twin of Stripe's API, to try it with no keys.
+  stripe init              A project that tests a refund agent against Stripe
+                           test mode (--key-env) or the twin (--twin): checks
+                           the key is a test key, asks you to confirm each rule,
+                           installs the suite. Live mode is never used.
+  stripe canary --project <id>
+                           One $1.00 refund, before the whole suite.
+  <pack> ...               Every pack has its own commands, named by the pack's
+                           id as the first word. \`rigorrun <pack> --help\`
+                           lists them; the packs in this build are listed at
+                           the end of this page.
 
 MOVING WORK AROUND
   backup                   Copy this whole workspace. Never your credentials.
@@ -148,6 +155,8 @@ EXAMPLES
   rigorrun run --project p_1a2b3c
   rigorrun gate --project p_1a2b3c --min-success 0.95
   rigorrun gate --project p_1a2b3c --case case_one
+  rigorrun stripe twin                         then, in another terminal:
+  rigorrun stripe init --twin --yes
   rigorrun agent add --project p_1a2b3c --black-box http://127.0.0.1:8080/task
   rigorrun compare-runs --project p_1a2b3c run_9f8e7d
 
@@ -293,6 +302,24 @@ EXIT CODES
   1  added, but it did not answer; the reason is printed
   2  refused, and nothing was stored: no such project, an address RigorRun
      will not send work to, or a header secret that is not set`,
+
+  stripe: `rigorrun stripe twin|init|canary - test a refund agent against Stripe
+
+The Stripe pack's own commands. \`rigorrun stripe --help\` and
+\`rigorrun stripe <command> --help\` describe each in full.
+
+  rigorrun stripe twin                     A local twin of Stripe's API. No keys;
+                                           any sk_test_… key works against it.
+  rigorrun stripe init --twin --yes        A project against the twin.
+  rigorrun stripe init --safety staging    A project against your test mode, with
+                                           the key in $STRIPE_TEST_KEY (--key-env).
+  rigorrun stripe canary --project <id>    One $1.00 refund, before the suite.
+
+Keys must be test-mode keys (sk_test_…, rk_test_…), and Stripe confirms the
+mode before anything is stored. The key lives in this machine's secret store,
+never in the project. Each case creates its own customer and payments, and
+RigorRun reads them back with its own key; a verdict says PARTIAL, with what
+the reads covered.`,
 
   record: `rigorrun record - receive a trace from the Chrome recorder
 

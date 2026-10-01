@@ -12,6 +12,7 @@
  * registry, and knows nothing about what business it is for.
  */
 import { getPack, hasPack, listPacks } from '@rigorrun/environment';
+import { registerStripePack } from '@rigorrun/env-stripe';
 
 /**
  * One registration per pack this build includes, run once at startup.
@@ -20,7 +21,7 @@ import { getPack, hasPack, listPacks } from '@rigorrun/environment';
  * is handed, so which packs exist is decided when RigorRun is built, never by
  * a file or a flag somebody passes in.
  */
-const BUILT_IN: readonly (() => void)[] = [];
+const BUILT_IN: readonly (() => unknown)[] = [registerStripePack];
 
 let registered = false;
 

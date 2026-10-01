@@ -317,7 +317,8 @@ class AgentHandler(BaseHTTPRequestHandler):
             self.reply(400, {"status": "error", "message": "Unsupported protocol."})
             return
         if envelope.get("probe") is True:
-            self.reply(200, {"status": "ready", "message": "ready"})
+            # rigorrun/task/1 answers a probe with {"ok": true}, without doing any work.
+            self.reply(200, {"ok": True, "status": "ready", "message": "ready"})
             return
 
         calls: list[dict[str, Any]] = []
@@ -327,7 +328,10 @@ class AgentHandler(BaseHTTPRequestHandler):
                 envelope,
                 self.server.base_url,
                 self.server.key,
-                self.headers.get("x-rigorrun-case", ""),
+                # RigorRun's idempotency-key is new for every attempt. The case id
+                # alone repeats across agents, attempts and runs on one account, and
+                # Stripe refuses a key reused with different parameters.
+                self.headers.get("idempotency-key") or self.headers.get("x-rigorrun-case", ""),
             )
             status = 200
         except (ValueError, TypeError, KeyError) as error:

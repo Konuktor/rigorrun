@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Freeze, drive, and aggregate the Stripe-pack qualification.
 
-Only :func:`run_cell_adapter` knows that the product under test has a CLI.  The
-CLI is being built concurrently, so that function intentionally stops with a
-precise integration error until the lead supplies its final arguments.  The
-aggregator is complete and consumes one JSON object per cell.
+Only :func:`run_cell_adapter` (and the harness it keeps per stage) knows that
+the product under test has a CLI; it drives that CLI as a person would.  The
+aggregator consumes one JSON object per cell.
 """
 
 from __future__ import annotations
@@ -73,6 +72,221 @@ def freeze(stage: str) -> Path:
     return path
 
 
+class _CliHarness:
+    """What :func:`run_cell_adapter` keeps for a whole stage.
+
+    One Stripe (the twin it starts itself for stage T, test mode for stage L),
+    one project made by ``rigorrun stripe init``, one running scripted agent per
+    behaviour added with ``rigorrun agent add``, and the after-case hook that
+    runs the oracle.  Everything RigorRun stores lives in a temporary home,
+    removed at exit; the evidence (each cell's run result, each oracle record,
+    the agents' traces, the init output) is copied under the stage's output
+    directory.
+    """
+
+    def __init__(self, stage: str, output_dir: Path):
+        import atexit
+        import socket
+        import tempfile
+
+        self._socket = socket
+        self.stage = stage
+        self.output_dir = output_dir
+        self.repo = ROOT.parents[1]
+        self.cli = [str(self.repo / "node_modules" / ".bin" / "tsx"), str(self.repo / "packages" / "cli" / "src" / "bin.ts")]
+        self.tmp = Path(tempfile.mkdtemp(prefix="rigorrun-stripe-qualification-"))
+        self.processes: list[subprocess.Popen[str]] = []
+        self.agents: dict[str, str] = {}
+        atexit.register(self.close)
+        self.env = {
+            **os.environ,
+            "RIGORRUN_HOME": str(self.tmp / "home"),
+            # A file in the temporary home, never this machine's keychain.
+            "RIGORRUN_SECRET_BACKEND": "file",
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "NO_COLOR": "1",
+        }
+        if stage == "T":
+            self.base_url = self._start_twin()
+            # The twin accepts any test key; each party still uses its own.
+            self.agent_key = "sk_test_scripted_agent"
+            self.oracle_key = "sk_test_oracle"
+            init = ["stripe", "init", "--twin", self.base_url]
+        else:
+            if not os.environ.get("STRIPE_TEST_KEY", "").startswith(("sk_test_", "rk_test_")):
+                raise RuntimeError("stage L needs STRIPE_TEST_KEY: a test-mode key for RigorRun")
+            self.base_url = "https://api.stripe.com"
+            self.agent_key = os.environ.get("STRIPE_AGENT_KEY") or os.environ["STRIPE_TEST_KEY"]
+            self.oracle_key = os.environ.get("ORACLE_STRIPE_KEY") or os.environ["STRIPE_TEST_KEY"]
+            init = ["stripe", "init", "--key-env", "STRIPE_TEST_KEY", "--safety", "staging"]
+        made = self._cli(
+            [*init, "--yes", "--name", f"Stripe qualification {stage}", "--dir", str(self.tmp / "ticket"), "--json"]
+        )
+        write_json(output_dir / "setup" / "init.json", json.loads(made))
+        self.project = json.loads(made)["projectId"]
+        self.hook = self._write_hook()
+
+    def _cli(self, args: list[str], *, ok: tuple[int, ...] = (0,)) -> str:
+        done = subprocess.run(
+            [*self.cli, *args], cwd=self.tmp, env=self.env, text=True, capture_output=True, timeout=900
+        )
+        if done.returncode not in ok:
+            raise RuntimeError(
+                f"rigorrun {' '.join(args[:2])} exited {done.returncode}: {(done.stderr or done.stdout).strip()[-2000:]}"
+            )
+        return done.stdout
+
+    def _free_port(self) -> int:
+        with self._socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            return int(probe.getsockname()[1])
+
+    def _start_twin(self) -> str:
+        twin = subprocess.Popen(
+            [*self.cli, "stripe", "twin", "--port", "0"],
+            cwd=self.tmp,
+            env=self.env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+        self.processes.append(twin)
+        assert twin.stdout is not None
+        url = twin.stdout.readline().strip()
+        if not url.startswith("http://127.0.0.1:"):
+            raise RuntimeError(f"rigorrun stripe twin did not print its address (got {url!r})")
+        return url
+
+    def _write_hook(self) -> Path:
+        """The oracle, as RigorRun's --after-case program.
+
+        RigorRun hands the hook a minimal environment, so where Stripe is and
+        which key the oracle reads with are written into the hook (the key in
+        a 0600 file beside it, never into the evidence).  The case start is
+        converted from ISO-8601 to Unix seconds here: oracle_stripe.py's own
+        command line reads RIGORRUN_CASE_STARTED_AT with float(), which fails
+        on the ISO-8601 RigorRun writes; evaluate() parses either form the
+        same way, so passing --since changes nothing it computes.
+        """
+        key_file = self.tmp / "oracle.key"
+        key_file.write_text(self.oracle_key, encoding="utf-8")
+        key_file.chmod(0o600)
+        records = self.output_dir / "oracle"
+        records.mkdir(parents=True, exist_ok=True)
+        hook = self.tmp / "oracle_hook.py"
+        hook.write_text(
+            "\n".join(
+                [
+                    "#!/usr/bin/env python3",
+                    "import os, subprocess, sys",
+                    "from datetime import datetime",
+                    f"env = dict(os.environ, STRIPE_BASE_URL={self.base_url!r}, PYTHONDONTWRITEBYTECODE='1')",
+                    f"env['ORACLE_STRIPE_KEY'] = open({str(key_file)!r}).read().strip()",
+                    "started = os.environ['RIGORRUN_CASE_STARTED_AT']",
+                    "since = datetime.fromisoformat(started.replace('Z', '+00:00')).timestamp()",
+                    "name = os.environ['RIGORRUN_RUN_ID'] + '.' + os.environ['RIGORRUN_CASE_ID'] + '.json'",
+                    f"out = os.path.join({str(records)!r}, name)",
+                    f"done = subprocess.run([sys.executable, {str(ROOT / 'oracle_stripe.py')!r}, '--since', repr(since), '--out', out], env=env)",
+                    "sys.exit(done.returncode)",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        hook.chmod(0o755)
+        return hook
+
+    def agent(self, behaviour: str) -> str:
+        if behaviour in self.agents:
+            return self.agents[behaviour]
+        import time
+        from urllib.request import Request, urlopen
+
+        port = self._free_port()
+        traces = self.output_dir / "traces"
+        traces.mkdir(parents=True, exist_ok=True)
+        process = subprocess.Popen(
+            [
+                sys.executable,
+                str(self.repo / "fixtures" / "external" / "stripe-scripted-agent" / "agent.py"),
+                "--port", str(port), "--behaviour", behaviour, "--trace", str(traces / f"{behaviour}.jsonl"),
+            ],
+            env={**self.env, "STRIPE_BASE_URL": self.base_url, "STRIPE_KEY": self.agent_key},
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self.processes.append(process)
+        url = f"http://127.0.0.1:{port}/"
+        probe = json.dumps({"protocol": "rigorrun/task/1", "probe": True}).encode()
+        for _ in range(100):
+            try:
+                with urlopen(Request(url, data=probe, method="POST"), timeout=1):
+                    break
+            except OSError:
+                time.sleep(0.1)
+        else:
+            raise RuntimeError(f"the {behaviour} agent did not start")
+        self._cli(
+            ["agent", "add", "--project", self.project, "--name", behaviour,
+             "--black-box", url, "--claim-path", "message", "--quiet"]
+        )
+        self.agents[behaviour] = url
+        return url
+
+    # Stripe's ``created`` has one-second resolution and the oracle opens its
+    # account-wide window one second before the case starts (Amendment 1), so
+    # a cell that starts under two seconds after the previous one ended sees
+    # that cell's refunds as its own.  Each cell waits until it cannot.
+    CELL_GAP_SECONDS = 2.1
+
+    def run_cell(self, agent: str, case: str, attempt: int) -> dict[str, Any]:
+        import time
+
+        self.agent(agent)
+        wait = getattr(self, "_last_cell_end", 0.0) + self.CELL_GAP_SECONDS - time.time()
+        if wait > 0:
+            time.sleep(wait)
+        try:
+            return self._run_cell(agent, case, attempt)
+        finally:
+            self._last_cell_end = time.time()
+
+    def _run_cell(self, agent: str, case: str, attempt: int) -> dict[str, Any]:
+        stdout = self._cli(
+            ["run", "--project", self.project, "--agent", agent, "--case", case,
+             "--after-case", str(self.hook), "--json"],
+            ok=(0, 1),
+        )
+        result, _end = json.JSONDecoder().raw_decode(stdout[stdout.index("{"):])
+        [case_result] = result["caseResults"]
+        if case_result["caseId"] != case:
+            raise RuntimeError(f"asked for {case}, RigorRun ran {case_result['caseId']}")
+        run_path = self.output_dir / "runs" / f"{agent}.{case}.{attempt}.{result['runId']}.json"
+        write_json(run_path, result)
+        oracle_path = self.output_dir / "oracle" / f"{result['runId']}.{case}.json"
+        return {
+            "rigorrun_verdict": case_result["outcome"],
+            "run_result_path": os.path.relpath(run_path, self.output_dir),
+            "oracle_record": read_json(oracle_path),
+        }
+
+    def close(self) -> None:
+        import shutil
+
+        for process in self.processes:
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+        self.processes = []
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+
+_HARNESSES: dict[tuple[str, Path], _CliHarness] = {}
+
+
 def run_cell_adapter(
     agent: str,
     case: str,
@@ -86,24 +300,21 @@ def run_cell_adapter(
     Return exactly ``{rigorrun_verdict, run_result_path, oracle_record}``.
     ``oracle_record`` is the parsed JSON emitted by ``oracle_stripe.py``.
 
-    Once the concurrently-built CLI is final, this is the only function to
-    edit.  Its command flow is expected to be, without assuming any unfinished
-    option names::
-
-        rigorrun stripe init …
-        rigorrun agent add --black-box …
-        rigorrun run|gate --project … --after-case …
-
-    Materialize a fresh case for this agent/attempt, start the matching
-    ``agent.py --behaviour``, configure claimPath ``message``, and preserve the
-    full run result plus after-case oracle JSON under ``output_dir``.  Do not
-    infer the RigorRun verdict from the oracle.
+    Through the real CLI, as a person would: once per stage ``rigorrun stripe
+    twin`` (stage T) and ``rigorrun stripe init … --yes``; once per behaviour
+    ``agent.py --behaviour`` started with its own key and ``rigorrun agent add
+    --black-box … --claim-path message``; then per cell ``rigorrun run
+    --project … --agent <behaviour> --case <case> --after-case <oracle hook>
+    --json``.  Every cell materializes its own records.  The verdict is the
+    one case result's ``outcome`` as RigorRun recorded it, never inferred from
+    the oracle; the full run result and the oracle's record are kept under
+    ``output_dir``.
     """
-    del agent, case, attempt, stage, output_dir
-    raise RuntimeError(
-        "run_cell_adapter awaits the final Stripe CLI argument contract; "
-        "aggregate is ready for adapter-produced cell records"
-    )
+    key = (stage, output_dir)
+    harness = _HARNESSES.get(key)
+    if harness is None:
+        harness = _HARNESSES[key] = _CliHarness(stage, output_dir)
+    return harness.run_cell(agent, case, attempt)
 
 
 def run_stage(stage: str, dev: bool) -> Path:

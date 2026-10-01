@@ -47,6 +47,8 @@ export interface StripeSuiteOptions {
   confirmedRuleIds?: readonly string[];
   /** When the suite was made, and when the rules were confirmed. */
   createdAt?: string;
+  /** Add the $1.00 canary case after every other one. Not a qualification case. */
+  canary?: boolean;
 }
 
 export function stripeSuite(
@@ -60,7 +62,7 @@ export function stripeSuite(
     options.confirmedRuleIds ?? [],
     createdAt,
   );
-  const cases = stripeCases(parsed, reviewed);
+  const cases = stripeCases(parsed, reviewed, { canary: options.canary === true });
 
   // Each rule names the checks and the cases it produced, so a failure can be
   // traced from the verdict back to the sentence of the policy it broke.
@@ -114,6 +116,7 @@ export const StripeSuiteParamsSchema = z
     policy: StripePolicySchema.optional(),
     confirmedRuleIds: z.array(z.string().min(1)).default([]),
     createdAt: z.string().min(1).optional(),
+    canary: z.boolean().default(false),
   })
   .strict();
 export type StripeSuiteParams = z.input<typeof StripeSuiteParamsSchema>;
@@ -123,6 +126,7 @@ export function stripeSuiteFromParams(params: unknown = {}): PackSuite {
   const parsed = StripeSuiteParamsSchema.parse(params ?? {});
   return stripeSuite(parsed.policy ?? {}, {
     confirmedRuleIds: parsed.confirmedRuleIds,
+    canary: parsed.canary,
     ...(parsed.createdAt === undefined ? {} : { createdAt: parsed.createdAt }),
   });
 }

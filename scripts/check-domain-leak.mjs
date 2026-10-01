@@ -74,6 +74,11 @@ const ALLOWED = new Map([
     'packages/cli/src/help.ts',
     'documents the bundled example, including the real path to its files',
   ],
+  [
+    'packages/cli/src/packs.ts',
+    'the static list of packs this build ships: one import and one registration per pack, and ' +
+      'nothing else that names one. Routing in the same file goes by registry id.',
+  ],
 ]);
 
 /**

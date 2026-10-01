@@ -64,6 +64,21 @@ rigorrun gate --project <id> --case <case-id>          # only the cases you name
 rigorrun agent add --project <id> --black-box <url>    # connect an agent from a script; probed first
 ```
 
+## A Stripe refund agent
+
+```bash
+rigorrun stripe twin                          # a local twin of Stripe's API; no keys
+rigorrun stripe init --twin --yes             # or: STRIPE_TEST_KEY=sk_test_… rigorrun stripe init --safety staging
+rigorrun agent add --project <id> --name my-agent --black-box <url> --claim-path message
+rigorrun stripe canary --project <id> --agent my-agent
+rigorrun gate --project <id> --report report.html
+```
+
+Every case creates its own customer and payments; RigorRun reads them back with its own test key
+and judges the agent on what Stripe holds. Keys must be test-mode keys, confirmed by Stripe before
+anything is stored; live mode is never used. Verdicts are `PARTIAL` and print what their reads
+covered. [The walkthrough](https://docs.rigorrun.xyz/start/stripe/).
+
 ## Verify a published MCP server
 
 An MCP server can annotate a tool `readOnlyHint: true`. Nothing checks that, and agents use it to
