@@ -12,6 +12,10 @@ source, runs on your machine, no account.
 
 </div>
 
+<p align="center">
+  <a href="https://rigorrun.xyz/media/demo.mp4"><img src="apps/site/public/media/demo.gif" width="960" alt="npx rigorrun demo in a terminal — what the agent said beside what Stripe shows — then the recorded run on rigorrun.xyz/replay"></a>
+</p>
+
 ```bash
 npx rigorrun demo
 ```
