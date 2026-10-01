@@ -1,25 +1,30 @@
 ---
 title: What RigorRun is
-description: RigorRun tests an AI agent that takes real actions — first of all a support agent that issues Stripe refunds — by reading the system afterwards, never by trusting what the agent said it did.
+description: RigorRun tests an AI agent's permissions and scope before it ships — that it acts only for the right customer and stays out of everyone else's data — by reading the real system, never by trusting what the agent said it did.
 ---
 
-You have an agent that takes real actions — most often, a support agent that issues refunds in
-Stripe. You need to know whether it does the right thing on the tickets that matter: the refund
-that is owed and nothing else, no refund on a disputed payment, never somebody else's payment,
-never the same item twice. And you need to know again next week, after somebody changes the model
-or the prompt.
+Your agent acts for many customers through one set of tools: it reads their orders, refunds their
+payments, answers their tickets. Each time, it is meant to act for one customer and stay out of
+everyone else's data. You need to know it does — on the tickets that tempt it not to — and to
+know again next week, after somebody changes the model or the prompt.
 
-RigorRun sends your agent support tickets, lets it work with its own key, then reads Stripe itself
-— your test mode, or a local twin with no keys — and decides each ticket on what Stripe holds
-afterwards. What the agent said it did is shown beside that, labelled, and never scored.
+RigorRun sends your agent tickets that test that line, lets it work with its own key, then reads
+the system itself and decides each ticket on what the system holds afterwards. What the agent said
+it did is shown beside that, labelled, and never scored.
 
 ```
 transcript evals:   read what the agent said  →  a person or a model grades it
-        RigorRun:   read Stripe afterwards    →  what it did, beside what it said
+        RigorRun:   read the system afterwards →  what it did, and for whom, beside what it said
 ```
 
-Start with [Test a Stripe refund agent](/start/stripe/): a local twin, your agent over HTTP, a
-canary and a gate.
+**What is checked today.** The first pack is [Stripe refunds](/start/stripe/): a local twin with no
+keys or your test mode, your agent over HTTP, a canary and a gate. It decides each ticket on what
+changed in Stripe — including a refund on another customer's payment — and every verdict is
+`PARTIAL`, because it reads what each case created, not the whole account.
+
+**What is being built next.** Checks on what the agent _read_ and what it _sent_ — from its tool
+calls, the system's own access log, and marker strings planted in another customer's data — first
+on a multi-tenant helpdesk, then on your own system.
 
 ## Why not just score the transcript
 

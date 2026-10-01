@@ -39,7 +39,8 @@ import { CONTACT_EMAIL, contactHref } from '../site';
         <ul class="mt-4 space-y-3 text-support text-secondary">
           <li>
             <span class="text-fg">There is no cohort.</span> No waitlist, no invitation, no
-            application, and no group of design partners you would be joining.
+            application. I am looking for 3–5 design partners — teams whose agent acts for many
+            customers — and none has joined yet.
           </li>
           <li>
             <span class="text-fg">There are no customers.</span> No external team has run this yet.
@@ -57,14 +58,15 @@ import { CONTACT_EMAIL, contactHref } from '../site';
   <Section ruled tight>
     <div class="rounded-panel border border-line bg-surface p-8 sm:p-10">
       <h2 class="max-w-2xl text-display font-medium text-balance">
-        Bring one workflow your agent cannot afford to break.
+        Bring the agent that acts for your customers.
       </h2>
       <p class="mt-5 max-w-2xl text-lead text-secondary">
-        Install it and run it; nothing needs to be arranged first. If you want the awkward version of
-        the conversation — what it could not verify, and why — that is the more useful one.
+        Run the recorded demo first; nothing needs to be arranged. Then I will write the first
+        permission tests for your agent with you, on your staging, and show you what could not be
+        verified as well as what could.
       </p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Command command="npx rigorrun" size="lg" />
+        <Command command="npx rigorrun demo" size="lg" />
         <Button href={contactHref(CONTACT_EMAIL)} size="lg">Talk to me</Button>
       </div>
     </div>
