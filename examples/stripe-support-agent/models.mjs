@@ -117,7 +117,26 @@ function openai(config, system, tools, firstTurn, log) {
         tool_choice: 'auto',
         temperature: config.temperature ?? 0,
       };
-      const choice = (await post(config, url, headers, body, log)).choices?.[0];
+      let reply = await post(config, url, headers, body, log, { toolUseFailed: true });
+      // The provider refused the model's tool call before anything ran (a Groq 400
+      // `tool_use_failed`: arguments that do not match the tool's schema). Like most agent
+      // frameworks, tell the model what was wrong and let it call again — at most twice.
+      for (let retry = 0; reply?.toolUseFailed && retry < 2; retry++) {
+        log('tool_call_rejected', { retry, error: reply.toolUseFailed });
+        messages.push({
+          role: 'user',
+          content:
+            `Your last tool call was rejected before it ran: ${reply.toolUseFailed.message} ` +
+            'Call the tool again with arguments that match its schema.',
+        });
+        reply = await post(config, url, headers, body, log, { toolUseFailed: true });
+      }
+      if (reply?.toolUseFailed) {
+        throw new Error(
+          `${config.provider} rejected the tool call: ${reply.toolUseFailed.message}`,
+        );
+      }
+      const choice = reply.choices?.[0];
       if (!choice?.message) throw new Error('The model returned no choice.');
       messages.push(choice.message);
       return {
@@ -159,7 +178,7 @@ let nextSlot = 0;
  * @param {object} body @param {Log} log
  * @returns {Promise<any>}
  */
-async function post(config, url, headers, body, log) {
+async function post(config, url, headers, body, log, { toolUseFailed = false } = {}) {
   for (let attempt = 0; ; attempt++) {
     const slot = Math.max(Date.now(), nextSlot);
     nextSlot = slot + (config.minIntervalMs ?? 0);
@@ -188,6 +207,11 @@ async function post(config, url, headers, body, log) {
     const reply = parseJson(text, { unparsed: text.slice(0, 4000) });
     log('llm_response', { status: response.status, attempt, body: reply });
     if (response.ok) return reply;
+    if (toolUseFailed && response.status === 400 && reply?.error?.code === 'tool_use_failed') {
+      return {
+        toolUseFailed: { message: String(reply.error.message ?? ''), code: 'tool_use_failed' },
+      };
+    }
 
     const retryAfter = Number(response.headers.get('retry-after') ?? NaN);
     const retryInfo = reply?.error?.details?.find((/** @type {any} */ d) => d?.retryDelay);
