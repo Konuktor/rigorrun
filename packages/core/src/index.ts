@@ -14,6 +14,7 @@ export * from './frame.ts';
 export * from './environmentContract.ts';
 export * from './budgets.ts';
 export * from './benchmark.ts';
+export * from './bindings.ts';
 export * from './run.ts';
 export * from './record.ts';
 
@@ -27,4 +28,4 @@ export * from './record.ts';
  * record recorded a harness that was never released. Kept in step with
  * package.json by `packages/cli/test/package.test.ts`.
  */
-export const RIGORRUN_VERSION = '0.3.1';
+export const RIGORRUN_VERSION = '0.4.0';

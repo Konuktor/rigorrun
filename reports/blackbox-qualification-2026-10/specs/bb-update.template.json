@@ -1,0 +1,129 @@
+{
+  "name": "taskdesk2 black box: complete one task, verified independently over tasks and notes",
+  "goal": "Mark task 2, \"Book venue\", as done; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "{PYTHON}",
+    "args": [
+      "{IO}/taskdesk2_server.py",
+      "--db",
+      "{STATE}/desk.db",
+      "--faults",
+      "{STATE}/faults.json",
+      "--shadow",
+      "{STATE}/shadow.json",
+      "--calls-log",
+      "{CALLS_LOG}"
+    ],
+    "url": "",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "{PYTHON}",
+      "args": [
+        "{IO}/taskdesk2_oracle_server.py",
+        "--db",
+        "{STATE}/desk.db",
+        "--down-flag",
+        "{STATE}/oracle-down.flag",
+        "--empty-flag",
+        "{STATE}/oracle-empty.flag",
+        "--calls-log",
+        "{CALLS_LOG}"
+      ],
+      "url": "",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "list_notes",
+    "verifier:query_tasks",
+    "verifier:query_notes"
+  ],
+  "verifierReads": [
+    {
+      "tool": "verifier:query_tasks",
+      "args": {}
+    },
+    {
+      "tool": "verifier:query_notes",
+      "args": {}
+    }
+  ],
+  "reset": {
+    "kind": "none"
+  },
+  "teach": [
+    {
+      "tool": "list_tasks",
+      "args": {}
+    },
+    {
+      "tool": "update_task",
+      "args": {
+        "id": 2,
+        "status": "done"
+      }
+    }
+  ],
+  "answers": {},
+  "review": {
+    "confirm": [],
+    "reject": []
+  },
+  "quality": false,
+  "agents": [
+    {
+      "name": "bb-update-correct",
+      "blackBox": {
+        "endpoint": "{ENDPOINT_CORRECT}",
+        "completion": "response",
+        "claimPath": "message"
+      }
+    },
+    {
+      "name": "bb-update-wrong_value",
+      "blackBox": {
+        "endpoint": "{ENDPOINT_WRONG_VALUE}",
+        "completion": "response",
+        "claimPath": "message"
+      }
+    },
+    {
+      "name": "bb-update-wrong_entity",
+      "blackBox": {
+        "endpoint": "{ENDPOINT_WRONG_ENTITY}",
+        "completion": "response",
+        "claimPath": "message"
+      }
+    },
+    {
+      "name": "bb-update-did_nothing",
+      "blackBox": {
+        "endpoint": "{ENDPOINT_DID_NOTHING}",
+        "completion": "response",
+        "claimPath": "message"
+      }
+    },
+    {
+      "name": "bb-update-extra_note",
+      "blackBox": {
+        "endpoint": "{ENDPOINT_EXTRA_NOTE}",
+        "completion": "response",
+        "claimPath": "message"
+      }
+    },
+    {
+      "name": "bb-update-second_write",
+      "blackBox": {
+        "endpoint": "{ENDPOINT_SECOND_WRITE}",
+        "completion": "response",
+        "claimPath": "message"
+      }
+    }
+  ]
+}

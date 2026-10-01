@@ -1,12 +1,15 @@
 ---
 title: A black-box agent
-description: Your agent as it is, wherever it runs. RigorRun sends it the work, then reads the system itself and judges what changed.
+description: Your agent with no change to its code, wherever it runs. RigorRun sends it the work, then reads the system itself and judges what changed.
 ---
 
-The fastest way to test an agent you already have. Nothing about it changes: it keeps its own
-tools, its own SDKs and its own deployment — your laptop, staging, the cloud. RigorRun posts each
-case's work to an address the agent already takes work on, waits for the answer, and then reads the
-system through **its own connection** to decide what actually happened.
+The fastest way to test an agent you already have, with no change to its code: it keeps its own
+tools, its own SDKs, its own credentials and its own deployment — your laptop, staging, the cloud.
+RigorRun posts each case's work to the endpoint the agent already serves (in your request shape,
+with a [body template](#what-rigorrun-sends)), waits for the answer, and then reads the system
+through **its own connection** to decide what actually happened. What the agent must share with
+RigorRun is the system: the same staging database, or the same Stripe test account — or, for
+Stripe's local twin, a Stripe base URL pointed at the twin.
 
 That makes every verdict `INDEPENDENT`: the agent never touched the connection the result was read
 through, and its own account of what it did is shown next to the evidence and never scored.
@@ -45,6 +48,11 @@ Or in a setup spec:
 Header values are **secret names**, never values: set the value once with
 `npx rigorrun secrets set STAGING_AGENT_TOKEN`, or in CI as `RIGORRUN_SECRET__STAGING_AGENT_TOKEN`.
 
+The address is stored in the project, so it may not carry a credential: one whose query has a
+parameter named like `key`, `api_key`, `token`, `secret`, `password`, `auth`, `signature` or `sig`,
+or a value starting `sk_`, `rk_`, `pk_` or `whsec_`, is refused. Wherever an agent is listed, its
+address is shown without its query.
+
 ## What RigorRun sends
 
 With no `bodyTemplate`, each case arrives as `rigorrun/task/1`:
@@ -72,11 +80,11 @@ a ticket containing a quote cannot rewrite the request around it.
 
 ## When it is finished
 
-| `completion` | Your endpoint | RigorRun |
-| --- | --- | --- |
-| `response` (default) | answers when the work is done | reads the system after the answer |
-| `poll` | answers `202 {"statusUrl": "…"}` | polls the status address (same host rules) until `completed`, `failed` or `declined` |
-| `settle` | answers straight away and works afterwards | waits `settleQuietMs`, then reads the system |
+| `completion`         | Your endpoint                              | RigorRun                                                                                                         |
+| -------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| `response` (default) | answers when the work is done              | reads the system after the answer; a `202 Accepted` ends the case as the agent not finishing, never as a verdict |
+| `poll`               | answers `202 {"statusUrl": "…"}`           | polls the status address (same host rules) until `completed`, `failed` or `declined`                             |
+| `settle`             | answers straight away and works afterwards | waits `settleQuietMs`, then reads the system                                                                     |
 
 Whatever it answers at `claimPath` is recorded as the agent's claim and shown next to what the system
 holds.

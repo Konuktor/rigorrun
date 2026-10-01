@@ -39,17 +39,25 @@ import {
 import { OpenApiConnection } from '@rigorrun/env-openapi';
 import { BrowserConnection } from '@rigorrun/env-browser';
 import type { ActionLogEntry } from '@rigorrun/core';
-import type { CanonicalState, EnvironmentSchema } from '@rigorrun/environment';
+import {
+  getPack,
+  type CanonicalState,
+  type EnvironmentAdapter,
+  type EnvironmentSchema,
+} from '@rigorrun/environment';
 import { basename, join } from 'node:path';
 import {
   describeConnectorAction,
+  packConnectionConfig,
   secretNamesOf,
   type Project,
   type DirectConnector,
+  type PackConnector,
 } from './project.ts';
 import { forgetChild, noteChild } from './orphans.ts';
 import { openInBrowser } from './openUrl.ts';
-import type { ProjectStore } from './store.ts';
+import { PackConnection } from './packConnection.ts';
+import { secretEnvName, type ProjectStore } from './store.ts';
 
 /**
  * A demonstration somebody is in the middle of giving.
@@ -152,6 +160,7 @@ export class Workspace {
     const connector = project.connector;
     if (!connector) throw new Error(`${project.name} has no system connected yet.`);
 
+    if (connector.kind === 'pack') return this.openPack(project, connector);
     if (connector.kind === 'browser') {
       const secrets = await this.secretsFor(project);
       // A verifier is opened first and handed over, so the browser owns closing
@@ -181,6 +190,35 @@ export class Workspace {
       await primary.close().catch(() => undefined);
       throw error;
     }
+  }
+
+  /**
+   * Opens a pack's session, once, for every case of whatever comes next.
+   *
+   * The pack asks for its credential by name through `secret()`, and asks
+   * synchronously, while this machine's store answers asynchronously — a
+   * keychain is a separate process. So the values are fetched first: the one
+   * secret the project names, or, when it names none and the pack's own
+   * default applies, every name this store holds, because which name that
+   * default is belongs to the pack. Values handed over in the environment
+   * (`RIGORRUN_SECRET__<NAME>`) are read at the moment the pack asks, exactly
+   * as the store would read them: a stored value wins, the environment only
+   * fills what nobody stored.
+   */
+  private async openPack(project: Project, connector: PackConnector): Promise<PackConnection> {
+    const pack = getPack(connector.pack);
+    const names = connector.keySecret ? [connector.keySecret] : await this.store.secretNames();
+    const stored = new Map<string, string>();
+    for (const name of names) {
+      const value = await this.store.secret(name);
+      if (value !== undefined) stored.set(name, value);
+    }
+    const started = Date.now();
+    const session = await pack.open({
+      ...packConnectionConfig(connector),
+      secret: (name) => stored.get(name) ?? (process.env[secretEnvName(name)] || undefined),
+    });
+    return new PackConnection(pack, session, project.safety, Date.now() - started);
   }
 
   /** One connector, already narrowed, with its credentials already fetched. */
@@ -312,10 +350,14 @@ export class Workspace {
    *
    * Built fresh each time. The runner requires a new adapter per case, and a
    * shared one would let a case inherit the previous one's recorded events.
+   * A pack's adapter is built over the session the connection holds, and
+   * describes the pack's own schema whatever is passed here: a pack declares
+   * its records rather than having them induced.
    */
-  environment(project: Project, schema: EnvironmentSchema): SystemEnvironment {
+  environment(project: Project, schema: EnvironmentSchema): EnvironmentAdapter {
     const connection = this.connectionFor(project.id);
     if (!connection) throw new Error(`${project.name} is not connected.`);
+    if (connection instanceof PackConnection) return connection.environment();
     return new SystemEnvironment(connection, schema, environmentConfig(project));
   }
 
@@ -342,6 +384,14 @@ export class Workspace {
   async startDemonstration(project: Project): Promise<void> {
     const live = this.live.get(project.id);
     if (!live) throw new Error(`${project.name} is not connected.`);
+    if (project.connector?.kind === 'pack') {
+      // A pack's suite comes with it. A demonstration here would record a job
+      // nothing downstream reads, after somebody had spent the effort on it.
+      throw new Error(
+        `${project.name} is connected through a pack, which ships its own suite, so there is no job ` +
+          "to demonstrate. Install the pack's suite instead.",
+      );
+    }
     if (project.safety === 'production') {
       // Recording executes the job for real. On production that is a real
       // refund, a real email — so it is refused before anything is called.
@@ -413,7 +463,10 @@ export class Workspace {
         await live.connection.call(read.tool, read.args, project.budgets.toolCallMs),
       );
       if (hasPayload(normalized)) {
-        answers.push({ read: `${index}:${read.tool}:${JSON.stringify(read.args ?? {})}`, payload: normalized.payload });
+        answers.push({
+          read: `${index}:${read.tool}:${JSON.stringify(read.args ?? {})}`,
+          payload: normalized.payload,
+        });
       }
     }
     return answers;
@@ -527,9 +580,7 @@ export class Workspace {
   }
 
   /** Ends the recording and works out what the records are. */
-  async finishDemonstration(
-    project: Project,
-  ): Promise<{
+  async finishDemonstration(project: Project): Promise<{
     before: CanonicalState;
     after: CanonicalState;
     induced: InducedSchema;

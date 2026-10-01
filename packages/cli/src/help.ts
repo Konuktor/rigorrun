@@ -5,7 +5,22 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.3.1';
+export const VERSION = '0.4.0';
+
+/**
+ * The bundled recordings `rigorrun demo` replays, named here with the rest of
+ * what documents them: this is the one file in the command line allowed to
+ * name a bundled example (see scripts/check-domain-leak.mjs).
+ *
+ * The flagship recording is made under
+ * reports/flagship-demo-2026-10/PREREGISTRATION.md by
+ * `scripts/record-stripe-replay.ts`. `build.mjs` bundles it when it exists, and
+ * `rigorrun demo` then replays it rather than the synthetic example.
+ */
+export const FLAGSHIP_REPLAY_FILE = 'stripe-replay.json';
+
+/** `rigorrun demo --northstar`: the synthetic example's recording, whatever else is bundled. */
+export const BUNDLED_EXAMPLE_FLAG = 'northstar';
 
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
@@ -34,9 +49,27 @@ PROJECTS
   gate --project <id>      Same, but exit non-zero if it misses the bar.
   compare-runs --project <id> <runId>
                            Say what changed since the baseline run.
+  agent add --project <id> --black-box <url>
+                           Connect an agent that answers on an address and
+                           does each case's work itself. It is probed first.
+  agent list --project <id>
+                           The agents on a project, and whether they answer.
   secrets list|set|remove  Credentials, which never leave this machine. Kept in
                            your OS keychain where there is one; \`doctor\` says
                            which store you actually got.
+
+PACKS
+  stripe twin              A local twin of Stripe's API, to try it with no keys.
+  stripe init              A project that tests a refund agent against Stripe
+                           test mode (--key-env) or the twin (--twin): checks
+                           the key is a test key, asks you to confirm each rule,
+                           installs the suite. Live mode is never used.
+  stripe canary --project <id>
+                           One $1.00 refund, before the whole suite.
+  <pack> ...               Every pack has its own commands, named by the pack's
+                           id as the first word. \`rigorrun <pack> --help\`
+                           lists them; the packs in this build are listed at
+                           the end of this page.
 
 MOVING WORK AROUND
   backup                   Copy this whole workspace. Never your credentials.
@@ -87,7 +120,9 @@ COMMON OPTIONS
   -v, --version            Print the version.
 
 RUN / GATE OPTIONS
-      --agent <id>              Which agent. Defaults to the last connected.
+      --agent <id>              Which agent, by name or id. run: the last connected
+                                when not given. gate: optional when the project has
+                                one agent, required when it has several.
       --min-success <0..1>      Minimum task success. Default 0.95.
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
@@ -95,7 +130,13 @@ RUN / GATE OPTIONS
       --report <path>           Also write the run as one self-contained HTML page.
       --published               With --report: mask values read from the system.
       --case-timeout <ms>       Wall-clock budget per case for this run.
-                                Default: the suite's own (60000 when generated).
+                                Default: the suite's own — 300000 (5 min) for
+                                the Stripe pack, 60000 for a generated suite.
+      --case <id>               With --project: run only this case. Repeatable.
+                                An id the suite does not have stops the run
+                                before it starts; the result says which cases
+                                it covered, and never becomes the baseline.
+                                gate over some cases is never a PASS: exit 3.
       --after-case <program>    Run a program (a path or a name; no shell, no
                                 arguments) after each case has finished and
                                 before the next starts, outside the case budget.
@@ -132,6 +173,10 @@ EXAMPLES
   rigorrun projects
   rigorrun run --project p_1a2b3c
   rigorrun gate --project p_1a2b3c --min-success 0.95
+  rigorrun run --project p_1a2b3c --case case_one
+  rigorrun stripe twin                         then, in another terminal:
+  rigorrun stripe init --twin --yes
+  rigorrun agent add --project p_1a2b3c --black-box http://127.0.0.1:8080/task
   rigorrun compare-runs --project p_1a2b3c run_9f8e7d
 
   rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
@@ -182,18 +227,28 @@ REQUIRES
 
   demo: `rigorrun demo - see what RigorRun catches, in a few seconds
 
-By default, replays a real recorded run: a real model, working the bundled
-synthetic support system, with its own report beside what the system showed
-afterwards. Offline, no key, no model. The recording carries a hash of the run
-it holds and is refused if it does not match. It says which model, when and at
-which commit.
+By default, replays a real recorded run, offline: no key, no model, no
+network. Each recording carries a hash of the run it holds and is refused if
+it does not match, and says which model, when and at which commit.
+
+When this build carries the flagship recording, that is the one replayed: the
+reference support agent, in two variants, on the Stripe pack's seven cases
+(Stripe test mode, or the local twin, labelled simulated), recorded under
+reports/flagship-demo-2026-10/PREREGISTRATION.md, with the model's
+temperature. It shows the headline case that document's rule picks — the
+ticket, what the agent said, what Stripe shows, the verdict — then every case
+for both variants. Otherwise, and always
+with --northstar, it replays a real model working the bundled synthetic
+support system (Northstar Support).
 
 --live runs the whole pipeline now instead: compiles the bundled recorded
 workflow into a contract, generates the benchmark, runs the demo agents and the
 reference implementation against it, and writes artefacts to .rigorrun/.
 
 OPTIONS
-      --live           Run the pipeline now rather than replay the recording.
+      --northstar      Replay the synthetic example's recording, even when the
+                       flagship recording is bundled.
+      --live           Run the pipeline now rather than replay a recording.
       --report <path>  Also write an HTML report of every case.
       --published      With --report: a copy with identifiers masked.
       --json           Print the recording (or, with --live, the run) as JSON.
@@ -216,14 +271,21 @@ OPTIONS
       --json         Print a summary instead of the project id.
       --quiet        Suppress progress.
 `,
-  gate: `rigorrun gate <benchmark.json> - fail a build on an unreliable agent
+  gate: `rigorrun gate --project <id> - fail a build on an unreliable agent
 
-Runs one agent against a benchmark and applies release thresholds.
+  rigorrun gate --project <id> [--agent <name>] [--report report.html]
+  rigorrun gate <benchmark.json> --agent <id>      the older file pipeline
+
+Runs one agent against the project's suite and applies release thresholds.
 Exits 0 when every threshold is met, 1 when any is missed, 2 on a
 configuration error, 3 when too many cases reached no verdict.
 
 OPTIONS
-      --agent <id>                  Required. The agent to gate.
+      --project <id>                The project whose suite and agent to gate.
+      --agent <id>                  The agent to gate, by name or id. With --project:
+                                    optional when the project has one agent; when it
+                                    has several, required, and the gate refuses to
+                                    guess. With a benchmark file: required.
       --allow-reference             Permit --agent reference. It is handed the
                                     answer, so the gate passes by construction
                                     and measures the suite, not an agent.
@@ -233,12 +295,73 @@ OPTIONS
       --max-unsafe <n>              Default 0
       --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
       --case-timeout <ms>           Wall-clock budget per case. Default: the suite's
+                                    own — 300000 (5 min) for the Stripe pack, 60000
+                                    for a generated suite. Slow models need minutes.
+      --case <id>                   With --project: only this case. Repeatable.
       --after-case <program>        Run a program (no shell, no arguments) after each
                                     case, before the next. A failure stops the run
                                     with exit 2.
       --repeats <n>                 Attempts per case. Default 1.
       --report <path>               Also write an HTML report.
 `,
+  agent: `rigorrun agent add|list --project <id> - the agents on a project
+
+agent add connects a black-box agent: one that answers on an address and does
+each case's work itself, wherever it runs, while RigorRun reads the system
+afterwards through its own connection. It is sent the rigorrun/task/1 envelope
+(or your --body-template) and probed before it is called connected.
+
+  rigorrun agent add --project <id> --black-box <url> [options]
+  rigorrun agent list --project <id>
+
+ADD OPTIONS
+      --black-box <url>         Required. Where the agent answers. Loopback over
+                                http or https; anything else over https, and
+                                only a host named with --allow-host.
+      --name <name>             What to call it in results.
+      --allow-host <host>       A host outside this machine the work may be sent
+                                to. Exact names only. Repeatable.
+      --body-template <file>    A JSON body with {{caseId}}, {{task.text}},
+                                {{task.instruction}}, {{task.policyBrief}} or
+                                {{inputs.<name>}} inside strings, instead of the
+                                envelope.
+      --completion <how>        When the agent's work counts as done:
+                                  response  when it answers (default); a 202 is not done
+                                  poll      when the statusUrl it answers with says so
+                                  settle    --settle seconds after it answers
+      --claim-path <path>       Where its final message is in its answer, as a
+                                dotted path. Default output.
+      --header <Name=secret>    A header whose value comes from the named secret
+                                on this machine, never typed here. Repeatable.
+      --settle <s>              With --completion settle: how long to wait after
+                                it answers, for work it finishes afterwards.
+                                Default 5.
+      --json                    Print the stored agent.
+
+EXIT CODES
+  0  added, and it answered the probe
+  1  added, but it did not answer; the reason is printed
+  2  refused, and nothing was stored: no such project, an address RigorRun
+     will not send work to, or a header secret that is not set`,
+
+  stripe: `rigorrun stripe twin|init|canary - test a refund agent against Stripe
+
+The Stripe pack's own commands. \`rigorrun stripe --help\` and
+\`rigorrun stripe <command> --help\` describe each in full.
+
+  rigorrun stripe twin                     A local twin of Stripe's API. No keys;
+                                           any sk_test_… key works against it.
+  rigorrun stripe init --twin --yes        A project against the twin.
+  rigorrun stripe init --safety staging    A project against your test mode, with
+                                           the key in $STRIPE_TEST_KEY (--key-env).
+  rigorrun stripe canary --project <id>    One $1.00 refund, before the suite.
+
+Keys must be test-mode keys (sk_test_…, rk_test_…), and Stripe confirms the
+mode before anything is stored. The key lives in this machine's secret store,
+never in the project. Each case creates its own customer and payments, and
+RigorRun reads them back with its own key; a verdict says PARTIAL, with what
+the reads covered.`,
+
   record: `rigorrun record - receive a trace from the Chrome recorder
 
 Starts a loopback-only HTTP listener that accepts a single sanitised workflow

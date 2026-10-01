@@ -22,11 +22,22 @@ import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
-import { z } from 'zod';
-import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
+import {
+  caseOutcome,
+  type Benchmark,
+  type EnvironmentContract,
+  type RunResult,
+} from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
-import { ConnectorSchema, SafetySchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
+import {
+  BlackBoxRequestSchema,
+  ConnectorSchema,
+  SafetySchema,
+  nextSteps,
+  timeToFirstVerdictMs,
+  type Project,
+} from './project.ts';
 import type { Service } from './service.ts';
 
 const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -49,17 +60,6 @@ export interface RunnerOptions {
   uiDir?: string;
   port?: number;
 }
-
-/** A black-box agent as the interface or the API describes it. */
-const BlackBoxRequestSchema = z.object({
-  endpoint: z.string().min(1, 'an endpoint is required'),
-  allowedHosts: z.array(z.string()).default([]),
-  headers: z.record(z.string(), z.string()).default({}),
-  bodyTemplate: z.string().nullable().default(null),
-  completion: z.enum(['response', 'poll', 'settle']).default('response'),
-  claimPath: z.string().default('output'),
-  settleQuietMs: z.number().int().positive().max(600_000).default(5000),
-});
 
 export class Runner {
   readonly pairing = new Pairing();
@@ -275,14 +275,14 @@ export class Runner {
       const project = await service.readProject(context.req.param('id'));
       const [contract, benchmark, discovery, induced, recorded, activation, quality] =
         await Promise.all([
-        service.artefact<EnvironmentContract>(project.id, 'contract'),
-        service.artefact<Benchmark>(project.id, 'benchmark'),
-        service.discovery(project.id),
-        service.artefact<{ questions: unknown[] }>(project.id, 'induced'),
-        service.recordingState(project.id),
-        service.activation.summary(project.id),
-        service.quality(project.id),
-      ]);
+          service.artefact<EnvironmentContract>(project.id, 'contract'),
+          service.artefact<Benchmark>(project.id, 'benchmark'),
+          service.discovery(project.id),
+          service.artefact<{ questions: unknown[] }>(project.id, 'induced'),
+          service.recordingState(project.id),
+          service.activation.summary(project.id),
+          service.quality(project.id),
+        ]);
       return context.json({
         project: summarise(project),
         contract: contract ?? null,
@@ -340,7 +340,9 @@ export class Runner {
       const parsed = ConnectorSchema.safeParse(body.connector);
       if (!parsed.success) {
         return context.json(
-          { error: `That is not a connector RigorRun understands: ${parsed.error.issues[0]?.message ?? 'unknown shape'}` },
+          {
+            error: `That is not a connector RigorRun understands: ${parsed.error.issues[0]?.message ?? 'unknown shape'}`,
+          },
           400,
         );
       }
@@ -357,7 +359,11 @@ export class Runner {
           400,
         );
       }
-      const connected = await service.connectEnvironment(context.req.param('id'), parsed.data, safety.data);
+      const connected = await service.connectEnvironment(
+        context.req.param('id'),
+        parsed.data,
+        safety.data,
+      );
       return context.json({
         project: summarise(connected.project),
         serverName: connected.serverName,
@@ -387,11 +393,7 @@ export class Runner {
 
     app.post('/api/projects/:id/teach/call', async (context) => {
       const body = await context.req.json<{ tool: string; args?: Record<string, unknown> }>();
-      const result = await service.teachStep(
-        context.req.param('id'),
-        body.tool,
-        body.args ?? {},
-      );
+      const result = await service.teachStep(context.req.param('id'), body.tool, body.args ?? {});
       return context.json(result);
     });
 
@@ -441,6 +443,28 @@ export class Runner {
       });
     });
 
+    // A pack's own suite, built from the answers it asked for. The rules a
+    // person confirms are named here; every other rule stays a proposal.
+    app.post('/api/projects/:id/pack-suite', async (context) => {
+      const body = await context.req.json<{ params?: unknown; confirmedRuleIds?: unknown }>();
+      const confirmedRuleIds = Array.isArray(body.confirmedRuleIds)
+        ? body.confirmedRuleIds.filter((entry): entry is string => typeof entry === 'string')
+        : [];
+      const { contract, benchmark } = await service.installPackSuite(
+        context.req.param('id'),
+        body.params,
+        { confirmedRuleIds },
+      );
+      return context.json({
+        contract,
+        cases: benchmark.cases.map((entry) => ({
+          id: entry.id,
+          name: entry.name,
+          category: entry.category,
+        })),
+      });
+    });
+
     // ------------------------------------------------------------- agents
 
     app.post('/api/projects/:id/agents', async (context) => {
@@ -459,11 +483,16 @@ export class Runner {
         const parsed = BlackBoxRequestSchema.safeParse(body.blackBox);
         if (!parsed.success) {
           return context.json(
-            { error: `That black-box agent is incomplete: ${parsed.error.issues[0]?.message ?? 'unknown shape'}` },
+            {
+              error: `That black-box agent is incomplete: ${parsed.error.issues[0]?.message ?? 'unknown shape'}`,
+            },
             400,
           );
         }
-        const added = await service.addAgent(context.req.param('id'), { name, blackBox: parsed.data });
+        const added = await service.addAgent(context.req.param('id'), {
+          name,
+          blackBox: parsed.data,
+        });
         return context.json({ project: summarise(added.project), agent: added.agent });
       }
       if (body.driven === true) {
@@ -548,8 +577,11 @@ export class Runner {
     // --------------------------------------------------------------- runs
 
     app.post('/api/projects/:id/runs', async (context) => {
-      const body = await context.req.json<{ agentId: string }>();
-      const result = await service.runAgent(context.req.param('id'), body.agentId);
+      const body = await context.req.json<{ agentId: string; caseIds?: unknown }>();
+      const caseIds = Array.isArray(body.caseIds)
+        ? body.caseIds.filter((entry): entry is string => typeof entry === 'string')
+        : [];
+      const result = await service.runAgent(context.req.param('id'), body.agentId, { caseIds });
       return context.json({ run: publicRun(result) });
     });
 
@@ -722,6 +754,20 @@ function publicRun(run: RunResult) {
       verification: entry.verification ?? run.verification,
       evidenceIndependence: entry.evidenceIndependence ?? 'SELF_REPORTED',
       baseline: entry.baseline ?? 'INSTALLED_SEED',
+      // A case that made its own records: which attempt, what they were, what
+      // the reads covered, and the system's own account of how it ended — the
+      // lines the case view sets beside what the agent said.
+      ...(entry.attempt === undefined ? {} : { attempt: entry.attempt }),
+      ...(entry.materialized ? { materialized: entry.materialized } : {}),
+      ...(entry.readScope ? { readScope: entry.readScope } : {}),
+      ...(entry.reality
+        ? {
+            reality: {
+              system: entry.reality.system,
+              lines: entry.reality.lines.slice(0, 40).map((text) => clipValue(text) as string),
+            },
+          }
+        : {}),
 
       // Everything below is the evidence for the line above. It was all
       // recorded already and none of it reached the screen, so a failure was a

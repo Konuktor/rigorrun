@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "ec_p_277bc6f19ee8",
+  "name": "Mark task 2, \"Book venue\", as done; change nothing else.",
+  "description": "Compiled from one recorded execution in taskdesk2 black box: complete one task, verified independently over tasks and notes.",
+  "goal": "Mark task 2, \"Book venue\", as done; change nothing else",
+  "environmentId": "p_277bc6f19ee8",
+  "sourceTraceId": "trace_p_277bc6f19ee8",
+  "primaryAction": "update_task",
+  "focusEntity": "Task",
+  "focusScope": "changed",
+  "remedyActions": [],
+  "completionActions": [],
+  "demonstratedArgs": {
+    "update_task": {
+      "id": 2,
+      "status": "done"
+    }
+  },
+  "projectionFocus": [
+    "Task"
+  ],
+  "observedFacts": [
+    {
+      "id": "fact_001",
+      "statement": "Task 2: status changed \"open\" → \"done\"",
+      "key": "Task.status",
+      "value": {
+        "from": "open",
+        "to": "done"
+      },
+      "provenance": [
+        {
+          "kind": "state_delta",
+          "ref": "delta_0",
+          "detail": "Task 2: status changed \"open\" → \"done\""
+        }
+      ]
+    }
+  ],
+  "argumentBindings": [
+    {
+      "field": "id",
+      "param": "id",
+      "mode": "equals",
+      "demonstrated": 2
+    },
+    {
+      "field": "status",
+      "param": "status",
+      "mode": "equals",
+      "demonstrated": "done"
+    }
+  ],
+  "expectedDeltaCount": 1,
+  "expectedDeletedCount": 0,
+  "expectedCreatedCount": 0,
+  "expectedFrame": {
+    "entities": {
+      "Note": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 0,
+        "updatedFields": [],
+        "identity": "named"
+      },
+      "Task": {
+        "preExistingRows": 3,
+        "created": 0,
+        "deleted": 0,
+        "updatedRows": 1,
+        "updatedFields": [
+          "status"
+        ],
+        "identity": "named"
+      }
+    }
+  },
+  "rules": [],
+  "successAssertions": [],
+  "policyAssertions": [],
+  "createdAt": "2026-10-01T09:52:58.487Z",
+  "approvedAt": "2026-10-01T09:52:58.500Z"
+}

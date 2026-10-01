@@ -51,7 +51,10 @@ test.describe('every route', () => {
         'content',
         'summary_large_image',
       );
-      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /og\.png$/);
+      await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+        'content',
+        /og\.png$/,
+      );
 
       await expect(page.locator('main')).toBeVisible();
       await expect(page.getByRole('contentinfo')).toBeVisible();
@@ -69,7 +72,7 @@ test.describe('the page arrives without JavaScript', () => {
    */
   test('the home page is readable with scripting disabled', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('said it worked');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('reading the transcript');
     await expect(page.getByText('npx rigorrun').first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Evidence' }).first()).toBeVisible();
   });
@@ -85,7 +88,9 @@ test.describe('the page arrives without JavaScript', () => {
     await page.goto('/');
     const hidden = await page
       .locator('[data-reveal]')
-      .evaluateAll((nodes) => nodes.filter((node) => getComputedStyle(node).opacity !== '1').length);
+      .evaluateAll(
+        (nodes) => nodes.filter((node) => getComputedStyle(node).opacity !== '1').length,
+      );
     expect(hidden).toBe(0);
   });
 });
@@ -146,6 +151,25 @@ test.describe('claims that must not drift', () => {
   test('a verdict against a real system is not described as authoritative', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText(/is\s+PARTIAL/).first()).toBeVisible();
+  });
+
+  /*
+   * The recorded run is the only place a verdict, a model or an agent's words
+   * may come from, and it is shown with the hash that proves it unedited.
+   */
+  test('the recorded run carries the hash of the run it shows', async ({ page }) => {
+    await page.goto('/replay');
+    await expect(page.getByRole('heading', { name: 'Checking this page' })).toBeVisible();
+    await expect(page.getByText(/^[0-9a-f]{64}$/)).toBeVisible();
+  });
+
+  test('a case shown on the home page names its model and its date', async ({ page }) => {
+    await page.goto('/');
+    const card = page.getByTestId('claim-reality');
+    // Without the Stripe recording there is no such card, and nothing stands in for it.
+    if ((await card.count()) === 0) return;
+    await expect(card).toContainText(/recorded \d{4}-\d{2}-\d{2}/);
+    await expect(card.locator('[data-outcome]')).toHaveAttribute('data-outcome', /^(PASS|FAIL)$/);
   });
 
   test('the access page claims no customers and no pricing', async ({ page }) => {

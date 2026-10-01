@@ -1,0 +1,1 @@
+{"attempt": "0", "case": "disputed", "due": [], "extra": [{"amount": 2500, "charge": "ch_nQWdGLCoVWEcgszia805sY8K"}], "label": "FAIL", "livemode_ok": false, "metadata_ok": true, "missing": [], "notes": ["refund re_NIucZ53HaX2RB8zwGOaH08xL did not report livemode false"], "observed": [{"amount": 2500, "charge": "ch_nQWdGLCoVWEcgszia805sY8K"}]}

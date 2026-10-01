@@ -62,29 +62,29 @@ export function ConnectAgent({
                 endpoint: bbEndpoint.trim(),
                 // Only the host the person looked at and agreed to, exactly.
                 allowedHosts: remoteHost && bbAgreed ? [remoteHost] : [],
-                headers: bbHeader.trim() && bbSecret.trim() ? { [bbHeader.trim()]: bbSecret.trim() } : {},
+                headers:
+                  bbHeader.trim() && bbSecret.trim() ? { [bbHeader.trim()]: bbSecret.trim() } : {},
                 bodyTemplate: bbTemplate.trim() ? bbTemplate : null,
                 claimPath: bbClaimPath.trim() || 'output',
               },
             }
           : kind === 'external'
-          ? { name: name.trim(), driven: true }
-          : kind === 'process'
-            ? {
-                name: name.trim(),
-                command: command.trim(),
-                args: args
-                  .split('\n')
-                  .map((line) => line.trim())
-                  .filter(Boolean),
-              }
-            : { name: name.trim(), endpoint: endpoint.trim() },
+            ? { name: name.trim(), driven: true }
+            : kind === 'process'
+              ? {
+                  name: name.trim(),
+                  command: command.trim(),
+                  args: args
+                    .split('\n')
+                    .map((line) => line.trim())
+                    .filter(Boolean),
+                }
+              : { name: name.trim(), endpoint: endpoint.trim() },
       );
       if (result.key) {
         setKey(result.key);
         setKeyFor(result.agent.id);
-      }
-      else if (!result.agent.lastProbeOk) {
+      } else if (!result.agent.lastProbeOk) {
         // Saved, because the endpoint is worth keeping while it is fixed, but
         // never presented as connected. A driven agent is a different case:
         // there is nothing to probe, so not answering yet is not a problem.
@@ -114,8 +114,14 @@ export function ConnectAgent({
                 onChange={(value) => setKind(value as 'blackbox' | 'http' | 'process' | 'external')}
                 testId="agent-kind"
                 options={[
-                  { value: 'blackbox', label: 'It is running already — send it the work, then check the system' },
-                  { value: 'http', label: 'It listens on an address and calls tools through RigorRun' },
+                  {
+                    value: 'blackbox',
+                    label: 'It is running already — send it the work, then check the system',
+                  },
+                  {
+                    value: 'http',
+                    label: 'It listens on an address and calls tools through RigorRun',
+                  },
                   { value: 'process', label: 'It is a command on this machine' },
                   { value: 'external', label: 'RigorRun cannot start it — I will drive it' },
                 ]}
@@ -128,16 +134,17 @@ export function ConnectAgent({
               <>
                 <ul className="mt-1 flex list-disc flex-col gap-1 pl-5 text-meta text-muted">
                   <li>
-                    An address your agent already takes work on — your staging API, a webhook, anywhere,
-                    including the cloud. Nothing about the agent changes.
+                    An address your agent already takes work on — your staging API, a webhook,
+                    anywhere, including the cloud. Nothing about the agent changes.
                   </li>
                   <li>
-                    It works on the same system this project reads. RigorRun sends each case, waits for the
-                    answer, then reads the system through its own connection and judges what changed.
+                    It works on the same system this project reads. RigorRun sends each case, waits
+                    for the answer, then reads the system through its own connection and judges what
+                    changed.
                   </li>
                   <li>
-                    RigorRun does not see its calls, so checks about their order are listed as not made.
-                    Everything the system holds afterwards is checked.
+                    RigorRun does not see its calls, so checks about their order are listed as not
+                    made. Everything the system holds afterwards is checked.
                   </li>
                 </ul>
               </>
@@ -150,13 +157,13 @@ export function ConnectAgent({
                   </li>
                   <li>
                     It asks what to do, works through the address it is handed, and says when it is
-                    finished. RigorRun never calls it, so it can live behind a login, in a
-                    notebook, or anywhere that will not take a request from this machine.
+                    finished. RigorRun never calls it, so it can live behind a login, in a notebook,
+                    or anywhere that will not take a request from this machine.
                   </li>
                 </ul>
                 <p className="mt-2 text-meta text-muted">
-                  Next: RigorRun gives you a key. It is shown once, and it is what your loop uses
-                  to ask for work.
+                  Next: RigorRun gives you a key. It is shown once, and it is what your loop uses to
+                  ask for work.
                 </p>
               </>
             ) : (
@@ -166,8 +173,8 @@ export function ConnectAgent({
                     Your agent running and listening on an address — on this machine by default.
                   </li>
                   <li>
-                    It has to answer one small request saying it is there. If it already speaks
-                    MCP, that plus about ten lines is the whole integration.
+                    It has to answer one small request saying it is there. If it already speaks MCP,
+                    that plus about ten lines is the whole integration.
                   </li>
                 </ul>
                 <p className="mt-2 text-meta text-muted">
@@ -223,8 +230,20 @@ export function ConnectAgent({
               >
                 {({ id, describedBy }) => (
                   <div className="flex gap-2">
-                    <TextInput id={id} describedBy={describedBy} value={bbHeader} onChange={setBbHeader} placeholder="authorization" testId="blackbox-header" />
-                    <TextInput value={bbSecret} onChange={setBbSecret} placeholder="STAGING_AGENT_TOKEN" testId="blackbox-secret" />
+                    <TextInput
+                      id={id}
+                      describedBy={describedBy}
+                      value={bbHeader}
+                      onChange={setBbHeader}
+                      placeholder="authorization"
+                      testId="blackbox-header"
+                    />
+                    <TextInput
+                      value={bbSecret}
+                      onChange={setBbSecret}
+                      placeholder="STAGING_AGENT_TOKEN"
+                      testId="blackbox-secret"
+                    />
                   </div>
                 )}
               </Field>
@@ -233,12 +252,28 @@ export function ConnectAgent({
                 hint='Leave empty to send the rigorrun/task/1 envelope. Or write the JSON your endpoint already takes, with {{task.text}}, {{inputs.name}} or {{caseId}} where the case goes — e.g. {"message": "{{task.text}}"}.'
               >
                 {({ id, describedBy }) => (
-                  <TextArea id={id} describedBy={describedBy} value={bbTemplate} onChange={setBbTemplate} rows={3} testId="blackbox-template" />
+                  <TextArea
+                    id={id}
+                    describedBy={describedBy}
+                    value={bbTemplate}
+                    onChange={setBbTemplate}
+                    rows={3}
+                    testId="blackbox-template"
+                  />
                 )}
               </Field>
-              <Field label="Where is its reply in the answer?" hint="A dotted path, shown next to what actually happened and never scored.">
+              <Field
+                label="Where is its reply in the answer?"
+                hint="A dotted path, shown next to what actually happened and never scored."
+              >
                 {({ id, describedBy }) => (
-                  <TextInput id={id} describedBy={describedBy} value={bbClaimPath} onChange={setBbClaimPath} testId="blackbox-claim" />
+                  <TextInput
+                    id={id}
+                    describedBy={describedBy}
+                    value={bbClaimPath}
+                    onChange={setBbClaimPath}
+                    testId="blackbox-claim"
+                  />
                 )}
               </Field>
             </>
@@ -293,14 +328,13 @@ export function ConnectAgent({
           <div>
             <Button
               onClick={add}
-              disabled={busy || (kind === 'blackbox' && (!bbEndpoint.trim() || (remoteHost !== null && !bbAgreed)))}
+              disabled={
+                busy ||
+                (kind === 'blackbox' && (!bbEndpoint.trim() || (remoteHost !== null && !bbAgreed)))
+              }
               testId="add-agent"
             >
-              {busy
-                ? 'Trying it…'
-                : kind === 'external'
-                  ? 'Make a key'
-                  : 'Check it answers'}
+              {busy ? 'Trying it…' : kind === 'external' ? 'Make a key' : 'Check it answers'}
             </Button>
           </div>
         </div>
@@ -316,12 +350,12 @@ export function ConnectAgent({
                   <span className="text-body text-fg">{agent.name}</span>
                   <span className="font-mono text-meta text-muted">
                     {agent.kind === 'http'
-                      ? agent.endpoint
+                      ? withoutQuery(agent.endpoint)
                       : agent.kind === 'blackbox'
-                        ? `${agent.endpoint} · black box`
-                      : agent.kind === 'external'
-                        ? 'driven by you'
-                        : [agent.command, ...agent.args].join(' ')}
+                        ? `${withoutQuery(agent.endpoint)} · black box`
+                        : agent.kind === 'external'
+                          ? 'driven by you'
+                          : [agent.command, ...agent.args].join(' ')}
                   </span>
                 </div>
                 {agent.lastProbeOk ? (
@@ -359,6 +393,15 @@ export function ConnectAgent({
  * unless somebody can see which case is open and how far along it is. This is
  * the difference between "it is stuck" and "it is on case nine of twelve".
  */
+/**
+ * An agent's address as it is shown: without its query or fragment, as the
+ * command line shows it, because whatever is in one is not for a screen.
+ */
+function withoutQuery(endpoint: string): string {
+  const cut = endpoint.search(/[?#]/);
+  return cut === -1 ? endpoint : `${endpoint.slice(0, cut)}${endpoint[cut]}…`;
+}
+
 function Waiting({ projectId, agentId }: { projectId: string; agentId: string }) {
   const [waiting, setWaiting] = useState<WaitingView | null>(null);
 
@@ -419,10 +462,9 @@ function TheKey({ value, agentId }: { value: string; agentId: string }) {
         file. It lets your agent ask for work and say it is finished, and nothing else.
       </p>
       <p className="mt-2 text-meta text-muted">
-        Your loop asks{' '}
-        <code className="font-mono text-fg">GET /api/drive/{agentId}</code> for work and posts to{' '}
-        <code className="font-mono text-fg">/api/drive/{agentId}/finished</code> when it is done,
-        both with that key as a bearer header.
+        Your loop asks <code className="font-mono text-fg">GET /api/drive/{agentId}</code> for work
+        and posts to <code className="font-mono text-fg">/api/drive/{agentId}/finished</code> when
+        it is done, both with that key as a bearer header.
       </p>
     </div>
   );
@@ -583,10 +625,7 @@ function Verdict({ run }: { run: RunView }) {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <SectionLabel>Safe to ship?</SectionLabel>
-              <p
-                className={`mt-1.5 text-verdict font-medium ${tone.text}`}
-                data-testid="verdict"
-              >
+              <p className={`mt-1.5 text-verdict font-medium ${tone.text}`} data-testid="verdict">
                 {shipping.answer}
               </p>
             </div>
@@ -813,7 +852,10 @@ function formatElapsed(ms: number): string {
 function CaseRow({ entry }: { entry: CaseResultView }) {
   const [open, setOpen] = useState(false);
   const passed = entry.outcome === 'PASS';
-  const undecided = entry.outcome === 'ABSTAIN' || entry.outcome === 'HARNESS_FAILURE' || entry.outcome === 'TIMED_OUT';
+  const undecided =
+    entry.outcome === 'ABSTAIN' ||
+    entry.outcome === 'HARNESS_FAILURE' ||
+    entry.outcome === 'TIMED_OUT';
   const failedChecks = entry.checks.filter((check) => check.status === 'FAIL');
 
   return (
@@ -829,7 +871,9 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
         <span className="min-w-0 flex-1 truncate text-body text-fg">{entry.caseName}</span>
         <Tag tone="neutral">{entry.category}</Tag>
         {entry.outcome !== 'PASS' && entry.outcome !== 'FAIL' ? (
-          <Tag tone={entry.outcome === 'AGENT_FAILURE' ? 'fail' : 'warn'}>{entry.outcome.toLowerCase().replace('_', ' ')}</Tag>
+          <Tag tone={entry.outcome === 'AGENT_FAILURE' ? 'fail' : 'warn'}>
+            {entry.outcome.toLowerCase().replace('_', ' ')}
+          </Tag>
         ) : null}
         {entry.unsafeActions > 0 ? <Tag tone="fail">{entry.unsafeActions} unsafe</Tag> : null}
         <span className="text-meta text-muted">{open ? 'Hide' : 'What happened'}</span>
@@ -890,7 +934,24 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
             ) : null}
           </Evidence>
 
+          {entry.reality && entry.reality.lines.length > 0 ? (
+            // The system's own sentences, set apart from the raw reading below
+            // so they can be read against the agent's claim. Never scored.
+            <Evidence label={`What ${entry.reality.system} shows`}>
+              <ul className="flex flex-col gap-1">
+                {entry.reality.lines.map((text, index) => (
+                  <li key={index} className="text-meta text-secondary">
+                    {text}
+                  </li>
+                ))}
+              </ul>
+            </Evidence>
+          ) : null}
+
           <Evidence label="What your system said afterwards">
+            {entry.readScope ? (
+              <p className="text-meta text-muted">Read: {entry.readScope}</p>
+            ) : null}
             {Object.keys(entry.finalState).length === 0 ? (
               <p className="text-meta text-muted">
                 Nothing was read back. This verdict rests on what was seen to happen, not on your

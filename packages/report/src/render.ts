@@ -72,7 +72,7 @@ function masthead(run: RunResult, generatedAt: string, mode: string): string {
   return `<header class="masthead">
   <div>
     <div class="brand"><span class="mark">RR</span><h1>RigorRun</h1></div>
-    <div class="tagline">Private agent benchmark${mode === 'published' ? ' · published (sanitised)' : ''}</div>
+    <div class="tagline">Agent acceptance run${mode === 'published' ? ' · published (sanitised)' : ''}</div>
   </div>
   <div class="mono dim" style="text-align:right">
     <div>Workflow: <span style="color:var(--fg)">${esc(run.benchmarkName)}</span></div>
@@ -84,6 +84,10 @@ function masthead(run: RunResult, generatedAt: string, mode: string): string {
 
 function comparison(run: RunResult): string {
   const n = run.scores[0]?.n ?? 0;
+  // A black box's calls are its own; RigorRun counts no steps it never saw.
+  const blackBox = new Set(
+    run.agents.filter((agent) => agent.kind === 'blackbox').map((agent) => agent.id),
+  );
   const rows = run.scores
     .map(
       (s) => `<tr>
@@ -93,7 +97,7 @@ function comparison(run: RunResult): string {
       <td class="num">${s.unsafeActions === 0 ? `<span class="tag pass">0</span>` : `<span class="tag fail">${s.unsafeActions}</span>`}</td>
       <td class="num">${fmtMs(s.medianLatencyMs)}</td>
       <td class="num">${fmtMs(s.p95LatencyMs)}</td>
-      <td class="num">${s.avgSteps.toFixed(1)}</td>
+      <td class="num">${blackBox.has(s.agentId) ? '—' : s.avgSteps.toFixed(1)}</td>
       <td class="num">${esc(costLabel(s))}</td>
       <td>${s.thresholdsPassed ? '<span class="tag pass">PASS</span>' : '<span class="tag fail">FAIL</span>'}</td>
     </tr>`,
@@ -190,8 +194,8 @@ function reliability(run: RunResult): string {
         ${metric('Task success', pct(s.taskSuccessRate), `95% CI ${pct(s.taskSuccessInterval.lower)}–${pct(s.taskSuccessInterval.upper)}, n=${s.n}`)}
         ${metric('Policy compliance', pct(s.policyComplianceRate), `${s.policyViolations} violation(s)`)}
         ${metric('Unsafe actions', String(s.unsafeActions), 'failed checks flagged unsafe')}
-        ${metric('Error rate', pct(s.errorRate), 'agent or adapter failures')}
-        ${metric('No verdict', String(s.abstained + s.harnessFailures), `${s.abstained} abstained · ${s.timedOut} timed out · ${s.harnessFailures} harness`)}
+        ${metric('Error rate', pct(s.errorRate), `${s.timedOut} timed out · ${s.agentFailures} agent failure(s) · ${s.harnessFailures} harness`)}
+        ${metric('No verdict', String(s.abstained + s.harnessFailures), `${s.abstained} abstained · ${s.harnessFailures} harness`)}
         ${metric('Median latency', fmtMs(s.medianLatencyMs), `avg ${fmtMs(s.avgLatencyMs)} · p95 ${fmtMs(s.p95LatencyMs)}`)}
         ${metric('Cost', costLabel(s), esc(s.costNote))}
       </div>
@@ -249,6 +253,14 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
   <div class="body">
     ${claimVersusReality(result)}
     ${result.outcomeReason ? `<p class="mono dim">${esc(result.outcomeReason)}</p>` : ''}
+    ${result.readScope ? `<p class="mono dim">Read: ${esc(result.readScope)}</p>` : ''}
+    ${
+      result.materialized && Object.keys(result.materialized).length > 0
+        ? `<p class="mono dim">Created for this case: ${Object.entries(result.materialized)
+            .map(([name, value]) => `${esc(name)} ${esc(value)}`)
+            .join(' · ')}</p>`
+        : ''
+    }
     ${result.missingEvidence.length > 0 ? `<p class="mono dim">Missing evidence: ${result.missingEvidence.map(esc).join(', ')}</p>` : ''}
     <div class="grid cols-2">
       <div>
@@ -290,12 +302,23 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
 </div>`;
 }
 
-/** What the agent said, beside what RigorRun saw — the first thing a reader needs. */
+/**
+ * What the agent said, beside what the system itself shows and what RigorRun
+ * saw — the first thing a reader needs. The system's lines are its own words,
+ * taken from the result, so this stays the same for every system.
+ */
 function claimVersusReality(result: CaseResult): string {
   const explanation = explainCase(result);
-  if (explanation.saw.length === 0 && explanation.notChecked.length === 0) return '';
-  return `<div class="grid cols-2" style="margin-bottom:12px">
+  const reality =
+    explanation.reality && explanation.reality.lines.length > 0 ? explanation.reality : undefined;
+  if (explanation.saw.length === 0 && explanation.notChecked.length === 0 && !reality) return '';
+  return `<div class="grid ${reality ? 'cols-3' : 'cols-2'}" style="margin-bottom:12px">
       <div><h3>The agent said</h3><blockquote>${esc(explanation.claim)}</blockquote></div>
+      ${
+        reality
+          ? `<div><h3>${esc(reality.system)} shows</h3><ul>${reality.lines.map((line) => `<li>${esc(line)}</li>`).join('')}</ul></div>`
+          : ''
+      }
       <div><h3>RigorRun saw</h3>
         ${explanation.saw.length > 0 ? `<ul>${explanation.saw.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>` : '<p class="dim">No check failed.</p>'}
         ${explanation.notChecked.length > 0 ? `<p class="dim">Not checked: ${explanation.notChecked.map(esc).join('; ')}</p>` : ''}
@@ -394,6 +417,7 @@ function metadata(
     <dt>Verification</dt><dd>${esc(run.verification)}</dd>
     <dt>Isolation</dt><dd>${esc(run.isolation)}</dd>
     ${run.limits.map((limit) => `<dt>Limit</dt><dd>${esc(limit.limit)}${limit.remedy ? ` <span class="dim">${esc(limit.remedy)}</span>` : ''}</dd>`).join('')}
+    ${readScopes(run)}
     ${(run.suiteQuality?.warnings ?? []).map((warning) => `<dt>Suite quality</dt><dd>${esc(warning)}</dd>`).join('')}
   </dl>
   <p class="dim mono" style="margin-top:10px">
@@ -408,6 +432,29 @@ function metadata(
       : ''
   }
 </div>`;
+}
+
+const READ_SCOPES_SHOWN = 3;
+
+/**
+ * What the reads covered, beside the limits, because it is one: a verdict
+ * built from scoped reads says nothing about the rest of the system. Each case
+ * usually has a sentence of its own, naming its own records, so only the first
+ * few are listed here; every failure above carries its own.
+ */
+function readScopes(run: RunResult): string {
+  const scopes = [
+    ...new Set(run.caseResults.flatMap((entry) => (entry.readScope ? [entry.readScope] : []))),
+  ];
+  if (scopes.length === 0) return '';
+  const shown = scopes
+    .slice(0, READ_SCOPES_SHOWN)
+    .map((scope) => `<dt>Read</dt><dd>${esc(scope)}</dd>`);
+  const more = scopes.length - READ_SCOPES_SHOWN;
+  return [
+    ...shown,
+    ...(more > 0 ? [`<dt>Read</dt><dd class="dim">and ${more} more</dd>`] : []),
+  ].join('');
 }
 
 function evaluatorTag(evaluator: string): string {

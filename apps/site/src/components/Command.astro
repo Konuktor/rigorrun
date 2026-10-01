@@ -4,8 +4,14 @@
  * take away with them. It is a real button with real state — copying without
  * saying so leaves somebody clicking twice.
  */
-interface Props { command: string; class?: string; size?: 'md' | 'lg' }
-const { command, class: className = '', size = 'md' } = Astro.props;
+interface Props {
+  command: string;
+  class?: string;
+  size?: 'md' | 'lg';
+  /** The region's name, when the same command appears twice on a page. */
+  label?: string;
+}
+const { command, class: className = '', size = 'md', label } = Astro.props;
 const type = size === 'lg' ? 'text-[1.0625rem]' : 'text-[0.9375rem]';
 ---
 <div
@@ -22,7 +28,7 @@ const type = size === 'lg' ? 'text-[1.0625rem]' : 'text-[0.9375rem]';
     class={`overflow-x-auto font-mono ${type} text-fg`}
     tabindex="0"
     role="region"
-    aria-label={`Command: ${command}`}
+    aria-label={label ?? `Command: ${command}`}
     ><span class="select-none text-muted" aria-hidden="true">$ </span>{command}</code
   >
   <button

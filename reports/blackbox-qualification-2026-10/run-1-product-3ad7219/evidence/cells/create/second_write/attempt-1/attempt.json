@@ -1,0 +1,209 @@
+{
+  "job": "create",
+  "agent": "bb-create-second_write",
+  "behaviour": "second_write",
+  "attempt": 1,
+  "rerun": false,
+  "mode": "counted",
+  "devRun": null,
+  "productCommit": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+  "at": "2026-10-01T13:36:37+00:00",
+  "seconds": 1.02,
+  "expected": "FAIL",
+  "oracleVerdict": "FAIL",
+  "oracleProblems": [
+    "2 new task(s), not exactly one"
+  ],
+  "oracleMatchesExpected": true,
+  "rigorrunOutcome": "FAIL",
+  "label": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "harnessFailures": [],
+  "gate5": {
+    "observation": "state-only",
+    "evidenceIndependence": "INDEPENDENT",
+    "runLimitNoCallTrace": "Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. Every check on what the system holds afterwards was, on a reading the agent never touched.",
+    "callOrderChecks": [],
+    "callOrderChecksNotMade": [],
+    "callOrderChecksMade": [],
+    "stateChecks": [
+      "success__performed",
+      "success__exactly_as_demonstrated",
+      "success__nothing_else_deleted",
+      "frame__nothing_else_changed"
+    ],
+    "holds": true
+  },
+  "selection": {
+    "happyPathCaseId": "case_live__happy_path",
+    "index": 0,
+    "runCaseIds": [
+      "case_live__happy_path"
+    ]
+  },
+  "rigorrun": {
+    "exit": 1,
+    "runId": "run_13c21cf52feb",
+    "verification": "PARTIAL",
+    "limits": [
+      "partial_state_read",
+      "no_reset",
+      "no_seed",
+      "induced_schema",
+      "no_call_trace",
+      "suite_quality_unassessed"
+    ],
+    "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record \u2014 outside what the demonstration changed: 2 Task record(s) created, where the demonstration created 1",
+    "agentReport": "Done.",
+    "baseline": "OBSERVED_AT_START",
+    "missingEvidence": [],
+    "steps": 0,
+    "actions": 0,
+    "assertions": [
+      {
+        "id": "success__performed",
+        "kind": "state_exists",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "a new Task record where title is Order badges exists, as required"
+      },
+      {
+        "id": "success__exactly_as_demonstrated",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "FAIL",
+        "blocking": true,
+        "message": "2 new Task records; expected 1"
+      },
+      {
+        "id": "success__nothing_else_deleted",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.deleted.Task.length equals the expected value"
+      },
+      {
+        "id": "frame__nothing_else_changed",
+        "kind": "state_frame",
+        "source": "STATE",
+        "status": "FAIL",
+        "blocking": true,
+        "message": "outside what the demonstration changed: 2 Task record(s) created, where the demonstration created 1"
+      }
+    ],
+    "otherCases": [],
+    "errorTail": []
+  },
+  "state": {
+    "beforeIsSeed": true,
+    "qualifiedCaseChangesFromSeed": {
+      "tasks": {
+        "created": [
+          {
+            "id": 4,
+            "status": "open",
+            "title": "Order badges"
+          },
+          {
+            "id": 5,
+            "status": "open",
+            "title": "Order badges"
+          }
+        ],
+        "changed": [],
+        "deleted": []
+      },
+      "notes": {
+        "created": [],
+        "changed": [],
+        "deleted": []
+      }
+    },
+    "wholeRunOracleVerdict": "FAIL",
+    "wholeRunChangesFromSeed": {
+      "tasks": {
+        "created": [
+          {
+            "id": 4,
+            "status": "open",
+            "title": "Order badges"
+          },
+          {
+            "id": 5,
+            "status": "open",
+            "title": "Order badges"
+          }
+        ],
+        "changed": [],
+        "deleted": []
+      },
+      "notes": {
+        "created": [],
+        "changed": [],
+        "deleted": []
+      }
+    }
+  },
+  "agentTrace": {
+    "caseId": "case_live__happy_path",
+    "calls": [
+      {
+        "tool": "create_task",
+        "args": {
+          "title": "Order badges"
+        },
+        "ok": true,
+        "result": {
+          "task": {
+            "id": 4,
+            "title": "Order badges",
+            "status": "open"
+          }
+        }
+      },
+      {
+        "tool": "create_task",
+        "args": {
+          "title": "Order badges"
+        },
+        "ok": true,
+        "result": {
+          "task": {
+            "id": 5,
+            "title": "Order badges",
+            "status": "open"
+          }
+        }
+      }
+    ],
+    "problems": [],
+    "tasksReceived": [
+      "case_live__happy_path"
+    ]
+  },
+  "serverCalls": {
+    "rigorrunConnectorCalls": [],
+    "verifierAnswered": {
+      "query_tasks": 5,
+      "query_notes": 5
+    },
+    "agentConnectionCalls": [
+      {
+        "tool": "create_task",
+        "args": {
+          "title": "Order badges"
+        }
+      },
+      {
+        "tool": "create_task",
+        "args": {
+          "title": "Order badges"
+        }
+      }
+    ]
+  },
+  "verifierOnly": true,
+  "evidenceDir": "reports/blackbox-qualification-2026-10/evidence/cells/create/second_write/attempt-1"
+}

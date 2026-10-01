@@ -1,0 +1,147 @@
+name: RigorRun gate
+description: Run a RigorRun acceptance gate, publish its summary, and upload its HTML report.
+
+inputs:
+  project:
+    description: Project id to pass to rigorrun gate --project.
+    required: true
+  agent:
+    description: The agent to gate, by name or id. Needed only when the project has more than one.
+    required: false
+    default: ''
+  version:
+    description: Published rigorrun package version to run.
+    required: false
+    default: '0.4.0'
+  min-success:
+    description: Optional minimum task-success rate from 0 to 1.
+    required: false
+    default: ''
+  report:
+    description: Path for the self-contained HTML report.
+    required: false
+    default: rigorrun-report.html
+  rigorrun-home:
+    description: Directory containing the RigorRun project store.
+    required: false
+    default: ${{ github.workspace }}/.rigorrun
+  node-version:
+    description: Node.js version used to run RigorRun.
+    required: false
+    default: '22'
+  cli:
+    description: Optional local CLI command for development and action self-tests.
+    required: false
+    default: ''
+
+outputs:
+  verdict:
+    description: PASS, FAIL, INCONCLUSIVE, or ERROR.
+    value: ${{ steps.gate.outputs.verdict }}
+  exit-code:
+    description: RigorRun gate exit code (0 pass, 1 fail, 2 error, 3 inconclusive).
+    value: ${{ steps.gate.outputs.exit-code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Run RigorRun gate
+      id: gate
+      shell: bash
+      env:
+        INPUT_AGENT: ${{ inputs.agent }}
+        INPUT_CLI: ${{ inputs.cli }}
+        INPUT_MIN_SUCCESS: ${{ inputs.min-success }}
+        INPUT_PROJECT: ${{ inputs.project }}
+        INPUT_REPORT: ${{ inputs.report }}
+        INPUT_VERSION: ${{ inputs.version }}
+        RIGORRUN_HOME: ${{ inputs.rigorrun-home }}
+      run: |
+        set -u
+        set -o pipefail
+
+        if [[ -n "$INPUT_CLI" ]]; then
+          read -r -a rigorrun_command <<< "$INPUT_CLI"
+        else
+          rigorrun_command=(npx --yes "rigorrun@$INPUT_VERSION")
+        fi
+
+        if [[ ${#rigorrun_command[@]} -eq 0 ]]; then
+          echo "The cli input did not contain a command." >&2
+          gate_code=2
+          log_path="$(mktemp "$RUNNER_TEMP/rigorrun-gate.XXXXXX.log")"
+          echo "error The cli input did not contain a command." | tee "$log_path"
+        else
+          gate_arguments=(gate --project "$INPUT_PROJECT" --report "$INPUT_REPORT")
+          if [[ -n "$INPUT_AGENT" ]]; then
+            gate_arguments+=(--agent "$INPUT_AGENT")
+          fi
+          if [[ -n "$INPUT_MIN_SUCCESS" ]]; then
+            gate_arguments+=(--min-success "$INPUT_MIN_SUCCESS")
+          fi
+
+          log_path="$(mktemp "$RUNNER_TEMP/rigorrun-gate.XXXXXX.log")"
+          set +e
+          "${rigorrun_command[@]}" "${gate_arguments[@]}" 2>&1 | tee "$log_path"
+          gate_code=${PIPESTATUS[0]}
+          set -e
+        fi
+
+        case "$gate_code" in
+          0) verdict=PASS ;;
+          1) verdict=FAIL ;;
+          3) verdict=INCONCLUSIVE ;;
+          *) verdict=ERROR ;;
+        esac
+
+        task_success="$(awk '$1 == "task" && $2 == "success" { print $3; exit }' "$log_path" 2>/dev/null || true)"
+        policy_compliance="$(awk '$1 == "policy" && $2 == "compliance" { print $3; exit }' "$log_path" 2>/dev/null || true)"
+        unsafe_actions="$(awk '$1 == "unsafe" && $2 == "actions" { print $3; exit }' "$log_path" 2>/dev/null || true)"
+        undecided_cases="$(awk '$1 == "undecided" && $2 == "cases" { print $3; exit }' "$log_path" 2>/dev/null || true)"
+        case_count="$(sed -nE 's/.*n=([0-9]+) cases.*/\1/p' "$log_path" 2>/dev/null | head -n 1 || true)"
+
+        if [[ -f "$INPUT_REPORT" ]]; then
+          report_exists=true
+          report_note="\`$INPUT_REPORT\`"
+        else
+          report_exists=false
+          report_note="\`$INPUT_REPORT\` (not created)"
+        fi
+        report_note="${report_note//$'\r'/ }"
+        report_note="${report_note//$'\n'/ }"
+
+        {
+          echo "### RigorRun gate"
+          echo
+          echo "**Verdict: $verdict** (exit code \`$gate_code\`)"
+          [[ -n "$case_count" ]] && echo "- Cases: $case_count"
+          [[ -n "$task_success" ]] && echo "- Task success: $task_success"
+          [[ -n "$policy_compliance" ]] && echo "- Policy compliance: $policy_compliance"
+          [[ -n "$unsafe_actions" ]] && echo "- Unsafe actions: $unsafe_actions"
+          [[ -n "$undecided_cases" ]] && echo "- Undecided cases: $undecided_cases"
+          echo "- Report: $report_note"
+        } >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "exit-code=$gate_code" >> "$GITHUB_OUTPUT"
+        echo "report-exists=$report_exists" >> "$GITHUB_OUTPUT"
+
+    - name: Upload RigorRun report
+      if: ${{ always() && steps.gate.outputs.report-exists == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: rigorrun-report-${{ github.job }}-${{ github.action }}
+        path: ${{ inputs.report }}
+        if-no-files-found: error
+
+    - name: Preserve gate result
+      if: ${{ always() && steps.gate.outputs.exit-code != '0' }}
+      shell: bash
+      env:
+        GATE_EXIT_CODE: ${{ steps.gate.outputs.exit-code }}
+      run: exit "$GATE_EXIT_CODE"

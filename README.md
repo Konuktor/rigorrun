@@ -2,24 +2,64 @@
 
 # RigorRun
 
-**Your agent said it worked. RigorRun checks what it actually did.**
+**Your agent moves money. You're checking it by reading the transcript.**
 
-Acceptance testing for AI agents that take real actions. Show RigorRun a job once; it builds an
-executable acceptance suite and verifies your agent against the state of the system it changed.
+RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a local
+twin with no keys — and shows what actually happened beside what the agent said it did. Open
+source, runs on your machine, no account.
 
-[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [Evidence](https://rigorrun.xyz/evidence) · [npm](https://www.npmjs.com/package/rigorrun)
+[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [A recorded run, case by case](https://rigorrun.xyz/replay) · [npm](https://www.npmjs.com/package/rigorrun)
 
 </div>
+
+<p align="center">
+  <a href="https://rigorrun.xyz/media/demo.mp4"><img src="apps/site/public/media/demo.gif" width="960" alt="npx rigorrun demo in a terminal — what the agent said beside what Stripe shows — then the recorded run on rigorrun.xyz/replay"></a>
+</p>
+
+```bash
+npx rigorrun demo
+```
+
+Replays a recorded run offline: what the agent said, beside what the system held afterwards. No
+keys, no account. The same run is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
+
+## Your Stripe agent, no code changes
+
+```bash
+npx rigorrun stripe twin                                   # a local Stripe twin; leave it running
+npx rigorrun stripe init --twin --yes                      # the Stripe pack's tickets, as a project
+npx rigorrun agent add --project <id> --name my-agent \
+  --black-box <agent URL> --claim-path message             # your agent's endpoint, as it runs today
+npx rigorrun gate --project <id> --report report.html      # exit 1 when a case fails
+```
+
+No change to your agent's code: RigorRun sends each ticket to the endpoint your agent already
+serves (map your request shape with `--body-template`; `--claim-path` names the field its answer's
+sentence is in) and reads Stripe itself. Your agent keeps its own Stripe test key — or, for the
+local twin, its Stripe base URL points at the twin. The verdict comes from what Stripe holds, never
+from what the agent said. Every verdict is `PARTIAL`
+and prints what was read. Against your Stripe test mode, `stripe init` takes a test key instead of
+`--twin` — live keys are refused. Start with [the Stripe guide](https://docs.rigorrun.xyz/start/stripe)
+and [the example agent](examples/stripe-support-agent); CI is one step
+(`uses: Konuktor/rigorrun@v0.4.0`, see [docs/CI.md](docs/CI.md)).
+
+**How we know the verdicts are right.** Before this release the Stripe pack was qualified against a
+protocol written before any code: 8 scripted agents (1 correct, 7 with one defect each) × 7 tickets ×
+3 attempts, each verdict checked against an independent oracle that reads Stripe directly. On the
+local twin and on Stripe test mode: 168 and 168 cells, no false pass and no false fail. Black-box
+mode on its own system: 36 cells, none either.
+([Stripe evidence](reports/stripe-pack-2026-10) · [black-box evidence](reports/blackbox-qualification-2026-10))
+
+Not on Stripe? This opens a local interface for any system RigorRun can reach and read back — an
+MCP server, an HTTP API, or a web application:
 
 ```bash
 npx rigorrun
 ```
 
-To see what it catches first: `npx rigorrun demo` replays a real recorded run, offline, in a second.
-
 ---
 
-This is the development repository. If you want to *use* RigorRun, the command above is the whole
+This is the development repository. If you want to _use_ RigorRun, the commands above are the whole
 install and [the documentation](https://docs.rigorrun.xyz) is the place to start. What follows is
 for people working on it.
 
@@ -72,18 +112,18 @@ line builds before it serves.
 pnpm release:verify       # everything below, in order, on this machine
 ```
 
-| | |
-| --- | --- |
-| `pnpm lint` · `pnpm typecheck` | the usual |
-| `pnpm test` | 847 unit tests |
-| `pnpm contrast` | every token pair against its WCAG requirement |
-| `pnpm domain` | no business noun in generic code, across 26 directories |
-| `pnpm e2e` · `pnpm a11y` · `pnpm visual` · `pnpm cross` | the interface |
-| `pnpm e2e:external` | **a stranger connects their own system and their own agent** |
-| `pnpm e2e:restart` | SIGKILL survival, and a damaged file reported rather than dropped |
-| `pnpm verify:package` | clean-room install of the tarball, then the full journey against it |
-| `pnpm gate1` | clean machine → a verification record, one command, no browser |
-| `pnpm contact` | whether the addresses the site publishes can receive mail |
+|                                                         |                                                                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------- |
+| `pnpm lint` · `pnpm typecheck`                          | the usual                                                           |
+| `pnpm test`                                             | 847 unit tests                                                      |
+| `pnpm contrast`                                         | every token pair against its WCAG requirement                       |
+| `pnpm domain`                                           | no business noun in generic code, across 26 directories             |
+| `pnpm e2e` · `pnpm a11y` · `pnpm visual` · `pnpm cross` | the interface                                                       |
+| `pnpm e2e:external`                                     | **a stranger connects their own system and their own agent**        |
+| `pnpm e2e:restart`                                      | SIGKILL survival, and a damaged file reported rather than dropped   |
+| `pnpm verify:package`                                   | clean-room install of the tarball, then the full journey against it |
+| `pnpm gate1`                                            | clean machine → a verification record, one command, no browser      |
+| `pnpm contact`                                          | whether the addresses the site publishes can receive mail           |
 
 Two of these matter more than the rest. `e2e:external` and `verify:package` measure whether somebody
 who has never seen this source can use RigorRun; everything else measures whether RigorRun works on

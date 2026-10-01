@@ -74,6 +74,11 @@ const ALLOWED = new Map([
     'packages/cli/src/help.ts',
     'documents the bundled example, including the real path to its files',
   ],
+  [
+    'packages/cli/src/packs.ts',
+    'the static list of packs this build ships: one import and one registration per pack, and ' +
+      'nothing else that names one. Routing in the same file goes by registry id.',
+  ],
 ]);
 
 /**
@@ -105,6 +110,9 @@ const DOMAIN_TERMS = [
   'booking',
   'organiser',
   'deposit',
+  // A vendor a pack is for. Its name, like its nouns, belongs in its own
+  // package; generic code reaches a pack by the id a project stores.
+  'stripe',
 ];
 
 const pattern = new RegExp(`\\b(${DOMAIN_TERMS.join('|')})s?\\b`, 'gi');
@@ -157,7 +165,7 @@ const ALLOWED_SHAPES = new Map([
     "displays a field the schema declares only as `unit: 'currency'` — which " +
       'currency is not something the schema carries. The renderer picks one to ' +
       'draw with; nothing downstream depends on the choice, because a boundary ' +
-      "step comes from `precision`, not from the symbol.",
+      'step comes from `precision`, not from the symbol.',
   ],
 ]);
 
@@ -245,7 +253,12 @@ for (const dir of GENERIC) {
     code.split('\n').forEach((line, index) => {
       if (!ALLOWED.has(where)) {
         for (const match of line.matchAll(pattern)) {
-          findings.push({ file: where, line: index + 1, term: match[0], text: line.trim().slice(0, 110) });
+          findings.push({
+            file: where,
+            line: index + 1,
+            term: match[0],
+            text: line.trim().slice(0, 110),
+          });
         }
       }
       if (!ALLOWED_SHAPES.has(where)) {

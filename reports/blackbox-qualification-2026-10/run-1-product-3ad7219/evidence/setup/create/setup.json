@@ -1,0 +1,157 @@
+{
+  "job": "create",
+  "spec": "specs/bb-create.template.json",
+  "exit": 0,
+  "seconds": 1.12,
+  "productCommit": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+  "branch": "release/0.4.0",
+  "dirtyPaths": [],
+  "at": "2026-10-01T13:35:54+00:00",
+  "summary": {
+    "projectId": "p_b6110311dbfd",
+    "readsProblem": "",
+    "readsIgnored": [],
+    "tools": 10,
+    "records": [
+      "Task",
+      "Note"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "bb-create-correct",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-wrong_value",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-wrong_entity",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-did_nothing",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-extra_note",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-second_write",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "callsDuringSetup": 29,
+  "artefacts": "reports/blackbox-qualification-2026-10/evidence/setup/create",
+  "errorTail": [],
+  "suiteShape": [
+    "happy_path"
+  ],
+  "caseIds": [
+    "case_live__happy_path"
+  ],
+  "checks": {
+    "case_live__happy_path": [
+      {
+        "id": "success__performed",
+        "kind": "state_exists",
+        "severity": "success",
+        "source": "STATE"
+      },
+      {
+        "id": "success__exactly_as_demonstrated",
+        "kind": "state_equals",
+        "severity": "success",
+        "source": "STATE"
+      },
+      {
+        "id": "success__nothing_else_deleted",
+        "kind": "state_equals",
+        "severity": "success",
+        "source": "STATE"
+      },
+      {
+        "id": "frame__nothing_else_changed",
+        "kind": "state_frame",
+        "severity": "invariant",
+        "source": "STATE"
+      }
+    ]
+  },
+  "happyPath": {
+    "id": "case_live__happy_path",
+    "index": 0,
+    "instruction": "You are working in taskdesk2 black box: create one task, verified independently over tasks and notes. Create a task titled \"Order badges\"; change nothing else. Use the available tools to inspect the system before you act. Follow the policy below. If the policy does not permit this work, do not perform it \u2014 declining is a correct outcome. If it does, also carry out the steps the policy requires alongside the work itself. The work order that comes with this task carries its inputs; where the goal above names a different value, the work order takes precedence.",
+    "inputs": {
+      "title": "Order badges"
+    }
+  },
+  "agents": {
+    "bb-create-correct": {
+      "id": "a_343b21ce",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47621/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-wrong_value": {
+      "id": "a_36d2003f",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47622/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-wrong_entity": {
+      "id": "a_da78e3d8",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47623/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-did_nothing": {
+      "id": "a_627ef84e",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47624/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-extra_note": {
+      "id": "a_f6120ca2",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47625/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-second_write": {
+      "id": "a_28938c62",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47626/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    }
+  },
+  "validity": [],
+  "happyPathValid": true,
+  "ok": true
+}

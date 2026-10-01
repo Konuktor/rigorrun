@@ -1,0 +1,52 @@
+{
+  "update": {
+    "job": "update",
+    "home": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021434Z/homes/update",
+    "projectId": "p_7f0108978499",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path",
+      "malformed_input",
+      "missing_precondition"
+    ],
+    "caseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ],
+    "benchmarkSha256": "0b698db113aca51b6c98fe785d65655e843c801ba8080d11f6116fd3062e4ce8",
+    "productCommit": "655e0439d1460fb110151e567c6f4ad02b3bbe58",
+    "agents": {
+      "correct": "a_8d2b777d",
+      "wrong_value": "a_49947656",
+      "wrong_entity": "a_129fdeeb",
+      "did_nothing": "a_ba29674b",
+      "extra_note": "a_b893a0bd",
+      "second_write": "a_c0f398bc"
+    }
+  },
+  "create": {
+    "job": "create",
+    "home": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021434Z/homes/create",
+    "projectId": "p_00bbd1840ac4",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path"
+    ],
+    "caseIds": [
+      "case_live__happy_path"
+    ],
+    "benchmarkSha256": "56e0d4509a5207121d9f343c1ff205ccc7617618f75b94f4c3340b1293ff828d",
+    "productCommit": "655e0439d1460fb110151e567c6f4ad02b3bbe58",
+    "agents": {
+      "correct": "a_16df7b95",
+      "wrong_value": "a_43e0d2e5",
+      "wrong_entity": "a_d16b7d3d",
+      "did_nothing": "a_78710250",
+      "extra_note": "a_398b5d9e",
+      "second_write": "a_910a3b04"
+    }
+  }
+}

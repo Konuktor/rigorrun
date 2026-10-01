@@ -70,7 +70,9 @@ export function assertBlackBoxUrl(raw: string, allowedHosts: readonly string[]):
     throw new Error(`The agent's address must be http or https, not ${url.protocol}`);
   }
   if (url.username || url.password) {
-    throw new Error("The agent's address must not carry credentials. Put them in a header, from a secret.");
+    throw new Error(
+      "The agent's address must not carry credentials. Put them in a header, from a secret.",
+    );
   }
   const host = url.hostname.toLowerCase();
   if (LOOPBACK.has(host)) return url;
@@ -83,6 +85,89 @@ export function assertBlackBoxUrl(raw: string, allowedHosts: readonly string[]):
     );
   }
   return url;
+}
+
+/**
+ * Words in a query parameter's name that say its value is a credential.
+ * Matched as whole words of the name, so `api_key`, `apiKey`, `x-api-key` and
+ * `client_secret` are all caught and `author` is not.
+ */
+const CREDENTIAL_WORDS = new Set([
+  'key',
+  'token',
+  'secret',
+  'password',
+  'auth',
+  'signature',
+  'sig',
+]);
+/** Names that run the words together. */
+const CREDENTIAL_NAMES = new Set(['apikey', 'accesstoken']);
+/** Values shaped like an API key or a webhook signing secret, whatever the parameter is called. */
+const CREDENTIAL_VALUE = /^(?:sk|rk|pk)_|^whsec_/;
+
+function isCredentialName(name: string): boolean {
+  const words = name
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  return words.some((word) => CREDENTIAL_WORDS.has(word)) || CREDENTIAL_NAMES.has(words.join(''));
+}
+
+/**
+ * The first query parameter of an address that carries a credential, by its
+ * name or by the shape of its value; undefined when none does, or when the
+ * text is not an address at all (which is refused elsewhere, in its own words).
+ */
+export function credentialInQuery(raw: string): string | undefined {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return undefined;
+  }
+  for (const [name, value] of url.searchParams) {
+    if (isCredentialName(name) || CREDENTIAL_VALUE.test(value)) return name;
+  }
+  return undefined;
+}
+
+/**
+ * Refuses an agent's address with a credential in its query. The address is
+ * stored in the project — a file meant to be copied — and printed wherever the
+ * agent is listed, so a credential there would end up in both. Only the name
+ * is repeated, never the value.
+ */
+export function refuseCredentialInQuery(raw: string): void {
+  const name = credentialInQuery(raw);
+  if (name === undefined) return;
+  throw new Error(
+    `The agent's address carries a credential in its query (${name}). An address is stored in ` +
+      'the project and printed wherever the agent is listed; send the credential in a header from ' +
+      'a secret instead (--header Name=secret_name).',
+  );
+}
+
+/**
+ * An agent's own address: one RigorRun may send work to, with no credential in
+ * its query. A status address an answer names is held only to the first: it is
+ * never stored or printed, and a signed one is ordinary.
+ */
+export function assertBlackBoxEndpoint(raw: string, allowedHosts: readonly string[]): URL {
+  const url = assertBlackBoxUrl(raw, allowedHosts);
+  refuseCredentialInQuery(raw);
+  return url;
+}
+
+/**
+ * An address as a person is shown it: without its query or fragment, whole.
+ * A parameter's name is not a reliable sign of whether its value is private,
+ * so none of them is shown.
+ */
+export function redactEndpoint(endpoint: string): string {
+  const cut = endpoint.search(/[?#]/);
+  return cut === -1 ? endpoint : `${endpoint.slice(0, cut)}${endpoint[cut]}…`;
 }
 
 /** What one case asks of the agent, as the envelope and as plain text. */
@@ -130,7 +215,8 @@ export function renderBody(template: string | null, envelope: TaskEnvelope): str
   };
   const body = template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_whole, path: string) => {
     const value = lookup(path);
-    if (value === undefined) throw new Error(`The body template names {{${path}}}, which this case does not have.`);
+    if (value === undefined)
+      throw new Error(`The body template names {{${path}}}, which this case does not have.`);
     const text = typeof value === 'string' ? value : JSON.stringify(value);
     return JSON.stringify(text).slice(1, -1);
   });
@@ -156,7 +242,8 @@ export function claimAt(answer: unknown, path: string): string {
 
 async function readJson(response: Response): Promise<unknown> {
   const text = await response.text();
-  if (text.length > MAX_RESPONSE_BYTES) throw new Error('The agent sent more than RigorRun will read.');
+  if (text.length > MAX_RESPONSE_BYTES)
+    throw new Error('The agent sent more than RigorRun will read.');
   if (!text.trim()) return {};
   try {
     return JSON.parse(text);
@@ -180,7 +267,7 @@ export async function probeBlackBox(
 ): Promise<{ ok: true; detail: string } | { ok: false; problem: string }> {
   let url: URL;
   try {
-    url = assertBlackBoxUrl(config.endpoint, config.allowedHosts);
+    url = assertBlackBoxEndpoint(config.endpoint, config.allowedHosts);
   } catch (error) {
     return { ok: false, problem: (error as Error).message };
   }
@@ -203,15 +290,23 @@ export async function probeBlackBox(
       }
       return { ok: true, detail: 'answers rigorrun/task/1' };
     }
-    const response = await fetch(url, { method: 'HEAD', redirect: 'error', headers, signal: AbortSignal.timeout(10_000) });
-    return { ok: true, detail: `reachable (answered ${response.status}); a case will show whether it does the work` };
+    const response = await fetch(url, {
+      method: 'HEAD',
+      redirect: 'error',
+      headers,
+      signal: AbortSignal.timeout(10_000),
+    });
+    return {
+      ok: true,
+      detail: `reachable (answered ${response.status}); a case will show whether it does the work`,
+    };
   } catch (error) {
     return { ok: false, problem: `Could not reach the endpoint: ${(error as Error).message}` };
   }
 }
 
 export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
-  const url = assertBlackBoxUrl(config.endpoint, config.allowedHosts);
+  const url = assertBlackBoxEndpoint(config.endpoint, config.allowedHosts);
 
   return {
     id: config.id,
@@ -241,6 +336,17 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
       if (!response.ok && response.status !== 202) {
         throw new Error(`the agent's endpoint answered ${response.status}`);
       }
+      if (response.status === 202 && config.completion === 'response') {
+        // 202 says the work was accepted, not done. Reading the system now
+        // would judge it before it lands and fail a correct asynchronous
+        // agent, so the case ends as the agent not finishing — never a
+        // verdict — and says how to wait for it.
+        await response.body?.cancel();
+        throw new Error(
+          "the agent's endpoint answered 202 Accepted — the work is not done yet; add the agent " +
+            'with --completion poll (statusUrl) or --completion settle',
+        );
+      }
       let answer = await readJson(response);
 
       if (config.completion === 'poll') {
@@ -254,7 +360,8 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
         for (;;) {
           const status = (answer as { status?: unknown }).status;
           if (typeof status === 'string' && TERMINAL.has(status)) break;
-          if (Date.now() + POLL_INTERVAL_MS > deadline) throw new Error('the agent did not finish before the case budget');
+          if (Date.now() + POLL_INTERVAL_MS > deadline)
+            throw new Error('the agent did not finish before the case budget');
           await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
           const next = await fetch(poll, {
             redirect: 'error',
@@ -269,7 +376,9 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
       if (config.completion === 'settle') {
         // Fire-and-forget endpoints answer before the work is done. Waiting a
         // stated interval is the honest thing available; the result says so.
-        await new Promise((resolve) => setTimeout(resolve, Math.min(config.settleQuietMs, Math.max(0, deadline - Date.now()))));
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.min(config.settleQuietMs, Math.max(0, deadline - Date.now()))),
+        );
       }
 
       const status = (answer as { status?: unknown }).status;
@@ -277,7 +386,9 @@ export function createBlackBoxAgent(config: BlackBoxAgentConfig): AgentAdapter {
       return {
         report:
           claim ||
-          (typeof status === 'string' ? `The agent reported ${status}.` : 'The agent answered without saying what it did.'),
+          (typeof status === 'string'
+            ? `The agent reported ${status}.`
+            : 'The agent answered without saying what it did.'),
         usage: null,
         costUsd: null,
         costNote: 'not reported by a black-box agent',

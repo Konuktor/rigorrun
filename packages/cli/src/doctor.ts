@@ -11,10 +11,11 @@
  * secrets and never prints one, and it reports a project's connector without
  * its credentials.
  */
-import { ProjectStore, Service, storeRoot, nextSteps } from '@rigorrun/daemon';
+import { ProjectStore, Service, storeRoot, nextSteps, secretNamesOf } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
 import { inspectRuntime } from '@rigorrun/sandbox';
-import { describeAgent, probeAgent, probeProcessAgent } from '@rigorrun/daemon';
+import { describeAgent, probeAgent, probeBlackBox, probeProcessAgent } from '@rigorrun/daemon';
+import { getPack, hasPack } from '@rigorrun/environment';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
 
@@ -40,7 +41,11 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
   let projects: Awaited<ReturnType<ProjectStore['list']>> = [];
   try {
     projects = await store.list();
-    checks.push({ what: 'project store', ok: true, detail: `${home} · ${projects.length} project(s)` });
+    checks.push({
+      what: 'project store',
+      ok: true,
+      detail: `${home} · ${projects.length} project(s)`,
+    });
   } catch (error) {
     checks.push({ what: 'project store', ok: false, detail: (error as Error).message });
   }
@@ -107,7 +112,11 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
       own.push({ what: 'system', ok: false, detail: 'nothing connected yet' });
     } else {
       const missing = [];
-      for (const name of project.connector.secretNames) {
+      const names =
+        project.connector.kind === 'pack'
+          ? secretNamesOf(project.connector)
+          : project.connector.secretNames;
+      for (const name of names) {
         if ((await store.secret(name)) === undefined) missing.push(name);
       }
       if (missing.length > 0) {
@@ -134,23 +143,43 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
       }
     }
 
-    own.push({
-      what: 'verifier reads',
-      ok: project.verifierReads.length > 0,
-      detail:
-        project.verifierReads.length > 0
-          ? project.verifierReads.map((read) => read.tool).join(', ')
-          : 'none — nothing could be verified',
-    });
+    if (project.connector?.kind === 'pack') {
+      // A pack reads each case's records through its own client and makes
+      // fresh ones for every case, so it has no nominated reads and no reset
+      // to be missing; asking for them would send somebody to do work that
+      // cannot be used. Its key is the credential checked above.
+      const connector = project.connector;
+      const pack = hasPack(connector.pack) ? getPack(connector.pack).name : connector.pack;
+      const key = secretNamesOf(connector)[0];
+      own.push({
+        what: 'reads',
+        ok: true,
+        detail: `${pack} reads each case's records with its own key${key ? `, stored as ${key}` : ''}`,
+      });
+      own.push({
+        what: 'isolation',
+        ok: true,
+        detail: 'fresh records for every case and attempt; nothing to reset',
+      });
+    } else {
+      own.push({
+        what: 'verifier reads',
+        ok: project.verifierReads.length > 0,
+        detail:
+          project.verifierReads.length > 0
+            ? project.verifierReads.map((read) => read.tool).join(', ')
+            : 'none — nothing could be verified',
+      });
 
-    own.push({
-      what: 'reset',
-      ok: project.reset.kind === 'tool',
-      detail:
-        project.reset.kind === 'tool'
-          ? project.reset.tool
-          : 'none — cases cannot be isolated, repeats are off',
-    });
+      own.push({
+        what: 'reset',
+        ok: project.reset.kind === 'tool',
+        detail:
+          project.reset.kind === 'tool'
+            ? project.reset.tool
+            : 'none — cases cannot be isolated, repeats are off',
+      });
+    }
 
     for (const agent of project.agents) {
       // Probed for real, both kinds. `doctor` exists to answer "would a run
@@ -175,7 +204,17 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
               args: agent.args,
               ...(agent.cwd ? { cwd: agent.cwd } : {}),
             })
-          : await probeAgent({ endpoint: agent.endpoint });
+          : agent.kind === 'blackbox'
+            ? // The probe `agent add` makes: a black box is sent the probe
+              // envelope (or, with a body template, only reached), never the
+              // HTTP agent protocol it does not speak.
+              await probeBlackBox({
+                endpoint: agent.endpoint,
+                allowedHosts: agent.allowedHosts,
+                bodyTemplate: agent.bodyTemplate,
+                headers: () => headerValues(store, agent.headers),
+              })
+            : await probeAgent({ endpoint: agent.endpoint });
       own.push({
         what: `agent ${agent.name}`,
         ok: probe.ok,
@@ -207,6 +246,22 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
     (check) => check.ok === false,
   );
   return failed ? 2 : 0;
+}
+
+/** A black box's headers, from the secrets they name; a missing one is a failed probe, said. */
+async function headerValues(
+  store: ProjectStore,
+  byName: Record<string, string>,
+): Promise<Record<string, string>> {
+  const out: Record<string, string> = {};
+  for (const [header, secretName] of Object.entries(byName)) {
+    const value = await store.secret(secretName);
+    if (value === undefined) {
+      throw new Error(`the ${header} header comes from the secret ${secretName}, which is not set`);
+    }
+    out[header] = value;
+  }
+  return out;
 }
 
 function printChecks(checks: readonly Check[]): void {

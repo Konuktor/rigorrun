@@ -21,14 +21,23 @@ import {
 } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
 import { writeFile } from 'node:fs/promises';
-import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
-import { explainCase, renderReportHtml } from '@rigorrun/report';
+import {
+  caseOutcome,
+  type Benchmark,
+  type EnvironmentContract,
+  type RunResult,
+} from '@rigorrun/core';
+import { explainCase, renderReportHtml, timeoutAdvice } from '@rigorrun/report';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
 import { afterCaseHook } from './afterCase.ts';
+import { caseLines } from './caseLines.ts';
 
-async function withService<T>(home: string | undefined, run: (service: Service) => Promise<T>): Promise<T> {
+export async function withService<T>(
+  home: string | undefined,
+  run: (service: Service) => Promise<T>,
+): Promise<T> {
   const proxy = new ProxyServer();
   await proxy.start();
   const service = new Service({ store: new ProjectStore(storeRoot(home)), proxy });
@@ -40,11 +49,15 @@ async function withService<T>(home: string | undefined, run: (service: Service) 
   }
 }
 
-/** What the flags ask of a project run: a budget per case, and a command after each one. */
+/**
+ * What the flags ask of a project run: a budget per case, a command after each
+ * one, and which cases.
+ */
 function runOptions(flags: Flags): Parameters<Service['runAgent']>[2] {
   return {
     ...(flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {}),
     ...(flags.afterCase !== undefined ? { afterCase: afterCaseHook(flags.afterCase) } : {}),
+    ...(flags.caseIds && flags.caseIds.length > 0 ? { caseIds: flags.caseIds } : {}),
   };
 }
 
@@ -73,7 +86,9 @@ export async function cmdProjects(flags: Flags): Promise<number> {
         describeConnector(project.connector),
         String(project.agents.length),
         String(project.runs.length),
-        last ? `${(last.taskSuccessRate * 100).toFixed(1)}% ${last.thresholdsPassed ? 'PASS' : 'FAIL'}` : '—',
+        last
+          ? `${(last.taskSuccessRate * 100).toFixed(1)}% ${last.thresholdsPassed ? 'PASS' : 'FAIL'}`
+          : '—',
       ];
     }),
   );
@@ -116,9 +131,7 @@ export async function cmdProjectRun(projectId: string | undefined, flags: Flags)
     printRun(result, flags.json);
     await writeProjectReport(projectId, result, flags);
 
-    const comparison = await service
-      .compare(projectId, result.runId)
-      .catch(() => undefined);
+    const comparison = await service.compare(projectId, result.runId).catch(() => undefined);
     if (comparison && comparison.currentRunId !== comparison.baselineRunId) {
       line();
       line(`${c.bold('Against the baseline')}  ${comparison.headline}`);
@@ -139,10 +152,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     const project = await service.readProject(projectId).catch(() => {
       throw new CliError(`No project "${projectId}" on this machine.`);
     });
-    const agent = flags.agent[0]
-      ? project.agents.find((entry) => entry.id === flags.agent[0] || entry.name === flags.agent[0])
-      : project.agents[project.agents.length - 1];
-    if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
+    const agent = agentToGate(project, projectId, flags.agent[0]);
 
     const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     await writeProjectReport(projectId, result, flags);
@@ -175,11 +185,42 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
         `${undecided} case(s) reached no verdict (${score.abstained} abstained, ${score.harnessFailures} harness failure(s)) > ${maxInconclusive}`,
       );
     }
-    if (score.n > 0 && (score.decided ?? score.n) === 0) inconclusive.push('no case reached a verdict');
+    if (score.n > 0 && (score.decided ?? score.n) === 0)
+      inconclusive.push('no case reached a verdict');
+
+    // A gate over some of the suite's cases says nothing about the rest, and
+    // an agent can pass the ones chosen and fail the ones left out. Useful to
+    // look at; never a release verdict. A subset that fails still fails.
+    const suite = await new ProjectStore(storeRoot(flags.home)).readArtefact<Benchmark>(
+      projectId,
+      'benchmark',
+    );
+    const selectedCases = [...new Set(result.caseResults.map((entry) => entry.caseId))];
+    const suiteCaseCount = suite?.cases.length ?? selectedCases.length;
+    if ((flags.caseIds?.length ?? 0) > 0 && selectedCases.length < suiteCaseCount) {
+      inconclusive.push(
+        `gate over ${selectedCases.length} of ${suiteCaseCount} cases is not a release verdict; run without --case`,
+      );
+    }
 
     const exitCode = failures.length > 0 ? 1 : inconclusive.length > 0 ? 3 : 0;
     if (flags.json) {
-      line(JSON.stringify({ passed: exitCode === 0, failures: [...failures, ...inconclusive], inconclusive: exitCode === 3, score, suiteQuality: result.suiteQuality ?? null }, null, 2));
+      line(
+        JSON.stringify(
+          {
+            passed: exitCode === 0,
+            failures: [...failures, ...inconclusive],
+            inconclusive: exitCode === 3,
+            score,
+            selectedCases,
+            suiteCaseCount,
+            limits: result.limits,
+            suiteQuality: result.suiteQuality ?? null,
+          },
+          null,
+          2,
+        ),
+      );
     } else {
       heading(`Gate: ${agent.name}`);
       table(
@@ -188,22 +229,53 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
           ['task success', pct(score.taskSuccessRate), `>= ${pct(minSuccess)}`],
           ['policy compliance', pct(score.policyComplianceRate), `>= ${pct(minPolicy)}`],
           ['unsafe actions', String(score.unsafeActions), `<= ${maxUnsafe}`],
-          ['undecided cases', `${undecided} (${score.abstained} abstained, ${score.timedOut} timed out, ${score.agentFailures} agent, ${score.harnessFailures} harness)`, `<= ${maxInconclusive}`],
+          // Only what reached no verdict at all. The GitHub Action reads the
+          // count as the third word of this row.
+          [
+            'undecided cases',
+            `${undecided} (${score.abstained} abstained, ${plural(score.harnessFailures, 'harness failure')})`,
+            `<= ${maxInconclusive}`,
+          ],
+          // Decided, as not done: on their own row so they are never read as
+          // part of the undecided count beside them.
+          [
+            'timed out or failed',
+            `${score.timedOut + score.agentFailures} (${score.timedOut} timed out, ${plural(score.agentFailures, 'agent failure')})`,
+            'counted as not done',
+          ],
         ],
       );
+      line();
+      line(
+        `${c.grey('undecided')}  a case RigorRun could not decide: it abstained for lack of evidence, ` +
+          'or its own harness failed. A case that timed out or where the agent failed is decided, ' +
+          'as not done.',
+      );
+      if (score.timedOut > 0) {
+        const budgets = result.caseResults.flatMap((entry) =>
+          caseOutcome(entry) === 'TIMED_OUT' && entry.budgetMs !== undefined
+            ? [entry.budgetMs]
+            : [],
+        );
+        line(timeoutAdvice(budgets.length > 0 ? Math.max(...budgets) : undefined));
+      }
       line();
       // How the verdict was reached, next to the verdict. A gate that passed
       // against a system nothing could be read back from is a different claim
       // from one that passed against a system that could.
-      line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+      line(
+        `${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`,
+      );
       if (result.isolation === 'DECLARED') {
-        line(
-          c.grey('              your system nominated a reset; RigorRun has not run it twice'),
-        );
+        line(c.grey('              your system nominated a reset; RigorRun has not run it twice'));
         line(c.grey('              and compared, so isolation is believed rather than observed'));
       }
       for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
-      for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
+      for (const warning of result.suiteQuality?.warnings ?? [])
+        line(`${c.yellow('suite')}  ${warning}`);
+      // A gate that fails says which cases failed it, and how the agent's
+      // account compares with the system's, before the line a build server reads.
+      printNotPassed(result);
       line();
       line(
         exitCode === 0
@@ -215,6 +287,40 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     }
     return exitCode;
   });
+}
+
+/**
+ * The agent a gate is about. With one agent on the project there is nothing to
+ * choose; with several, a gate never picks one for you — a build that passes on
+ * whichever agent was added last is a build gated on the wrong thing.
+ */
+function agentToGate(
+  project: { name: string; agents: { id: string; name: string }[] },
+  projectId: string,
+  wanted: string | undefined,
+): { id: string; name: string } {
+  const names = project.agents.map((entry) => entry.name).join(', ');
+  if (wanted) {
+    const found = project.agents.find((entry) => entry.id === wanted || entry.name === wanted);
+    if (found) return found;
+    throw new CliError(
+      project.agents.length === 0
+        ? `No agent "${wanted}" on ${project.name}; it has none yet.`
+        : `No agent "${wanted}" on ${project.name}. Its agents: ${names}.`,
+    );
+  }
+  const [only, ...others] = project.agents;
+  if (!only) {
+    throw new CliError(
+      `${project.name} has no agent to gate. Add one: rigorrun agent add --project ${projectId} --black-box <url>`,
+    );
+  }
+  if (others.length > 0) {
+    throw new CliError(
+      `${project.name} has ${project.agents.length} agents; say which one to gate with --agent <name>: ${names}.`,
+    );
+  }
+  return only;
 }
 
 export async function cmdProjectCompare(
@@ -250,8 +356,10 @@ export async function cmdProjectCompare(
     return 2;
   }
   line();
-  for (const entry of comparison.regressed) line(`  ${c.red('regressed')}  ${entry.caseName} — ${entry.detail}`);
-  for (const entry of comparison.improved) line(`  ${c.green('improved')}   ${entry.caseName} — ${entry.detail}`);
+  for (const entry of comparison.regressed)
+    line(`  ${c.red('regressed')}  ${entry.caseName} — ${entry.detail}`);
+  for (const entry of comparison.improved)
+    line(`  ${c.green('improved')}   ${entry.caseName} — ${entry.detail}`);
   for (const entry of comparison.added) line(`  ${c.grey('added')}      ${entry.caseName}`);
   for (const entry of comparison.removed) line(`  ${c.grey('removed')}    ${entry.caseName}`);
   line();
@@ -361,21 +469,39 @@ function printRun(result: RunResult, json: boolean): void {
     ],
   );
   line();
-  line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+  line(
+    `${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`,
+  );
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
-  // The cases that did not pass, as a person reads them: the agent's words
-  // beside what the system showed. Five at most; the report has the rest.
+  printNotPassed(result);
+  for (const warning of result.suiteQuality?.warnings ?? [])
+    line(`${c.yellow('suite')}  ${warning}`);
+}
+
+/**
+ * The cases that did not pass, as a person reads them: the agent's words, what
+ * the system itself shows beneath them, and what RigorRun saw. Five at most;
+ * the report has the rest.
+ */
+function printNotPassed(result: RunResult): void {
   const notPassed = result.caseResults.filter((entry) => caseOutcome(entry) !== 'PASS');
   for (const entry of notPassed.slice(0, 5)) {
     const explained = explainCase(entry);
     line();
-    line(`${c.red(explained.outcome)}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`);
-    line(`  ${c.grey('agent said')}  ${explained.claim.split('\n')[0]!.slice(0, 160)}`);
-    for (const [index, seen] of explained.saw.entries()) line(`  ${c.grey(index === 0 ? 'RigorRun saw' : '            ')}  ${seen}`);
-    for (const skipped of explained.notChecked.slice(0, 2)) line(`  ${c.grey('not checked ')}  ${skipped}`);
+    line(
+      `${c.red(explained.outcome)}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`,
+    );
+    for (const text of caseLines(explained, {
+      claim: 160,
+      reality: 4,
+      saw: 4,
+      notChecked: 2,
+      readScope: true,
+    })) {
+      line(text);
+    }
   }
   if (notPassed.length > 5) line(c.grey(`\n…and ${notPassed.length - 5} more; see the report.`));
-  for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
 }
 
 /**
@@ -383,7 +509,11 @@ function printRun(result: RunResult, json: boolean): void {
  * somebody who was not at the terminal. It carries the run's evidence, which
  * can include values read from the system — `--published` masks them first.
  */
-async function writeProjectReport(projectId: string, result: RunResult, flags: Flags): Promise<void> {
+async function writeProjectReport(
+  projectId: string,
+  result: RunResult,
+  flags: Flags,
+): Promise<void> {
   if (!flags.report) return;
   const store = new ProjectStore(storeRoot(flags.home));
   const [contract, benchmark] = await Promise.all([
@@ -397,11 +527,17 @@ async function writeProjectReport(projectId: string, result: RunResult, flags: F
     ...(flags.published ? { mode: 'published' as const } : {}),
   });
   await writeFile(flags.report, html, 'utf8');
-  if (!flags.json) line(c.grey(`Report written to ${flags.report}${flags.published ? ' (values masked)' : ''}`));
+  if (!flags.json)
+    line(c.grey(`Report written to ${flags.report}${flags.published ? ' (values masked)' : ''}`));
 }
 
 function pct(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
+}
+
+/** "0 harness failures", "1 agent failure". */
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`;
 }
 
 export function reportTimeToValue(home: string | undefined, projectId: string): Promise<void> {

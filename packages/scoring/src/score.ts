@@ -5,7 +5,13 @@
  * verdict follows from the configured thresholds rather than from a preference
  * for a particular agent.
  */
-import { caseOutcome, isDecided, type AgentScore, type CaseResult, type Thresholds } from '@rigorrun/core';
+import {
+  caseOutcome,
+  isDecided,
+  type AgentScore,
+  type CaseResult,
+  type Thresholds,
+} from '@rigorrun/core';
 import { mean, median, passAtK, percentile, round4, wilsonInterval } from './stats.ts';
 
 export interface AgentIdentity {
@@ -148,7 +154,12 @@ export interface Verdict {
  */
 export function decideVerdict(scores: AgentScore[]): Verdict {
   if (scores.length === 0) {
-    return { winnerAgentId: null, outcome: 'INCONCLUSIVE', summary: 'No agents were run.', rationale: [] };
+    return {
+      winnerAgentId: null,
+      outcome: 'INCONCLUSIVE',
+      summary: 'No agents were run.',
+      rationale: [],
+    };
   }
 
   const ranked = [...scores].sort((a, b) => {
@@ -180,9 +191,12 @@ export function decideVerdict(scores: AgentScore[]): Verdict {
     `${best.agentName} ${best.thresholdsPassed ? 'meets' : 'does NOT meet'} the configured release thresholds.`,
   );
   if (best.abstained + best.harnessFailures + best.timedOut + best.agentFailures > 0) {
+    // Timed out and agent failures are verdicts (not done), so they are said
+    // as part of the decided count, never beside the cases that reached none.
     rationale.push(
-      `${best.decided ?? best.n} of ${best.n} cases reached a verdict: ${best.abstained} abstained for lack of evidence, ` +
-        `${best.timedOut} timed out, ${best.agentFailures} agent failure(s), ${best.harnessFailures} harness failure(s).`,
+      `${best.decided ?? best.n} of ${best.n} cases reached a verdict, ${best.timedOut} of them by timing out ` +
+        `and ${best.agentFailures} by an agent failure, both counted as not done; ` +
+        `${best.abstained} abstained for lack of evidence and ${best.harnessFailures} harness failure(s) reached none.`,
     );
   }
   rationale.push(
@@ -201,7 +215,10 @@ export function decideVerdict(scores: AgentScore[]): Verdict {
     return {
       winnerAgentId: null,
       outcome: 'FAIL',
-      summary: `No agent met the release thresholds. Best of the group was ${best.agentName}.`,
+      summary:
+        scores.length === 1
+          ? `${best.agentName} did not meet the release thresholds.`
+          : `No agent met the release thresholds. Best of the group was ${best.agentName}.`,
       rationale,
     };
   }

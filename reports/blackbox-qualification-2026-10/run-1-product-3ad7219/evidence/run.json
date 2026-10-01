@@ -1,0 +1,32 @@
+{
+  "mode": "counted",
+  "id": "counted",
+  "startedAt": "2026-10-01T13:35:54+00:00",
+  "productCommitAtStart": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+  "branch": "release/0.4.0",
+  "dirtyPathsAtStart": [],
+  "cells": [
+    "update:correct",
+    "update:wrong_value",
+    "update:wrong_entity",
+    "update:did_nothing",
+    "update:extra_note",
+    "update:second_write",
+    "create:correct",
+    "create:wrong_value",
+    "create:wrong_entity",
+    "create:did_nothing",
+    "create:extra_note",
+    "create:second_write"
+  ],
+  "reruns": [],
+  "resumed": false,
+  "finishedAt": "2026-10-01T13:36:39+00:00",
+  "seconds": 44.9,
+  "productCommitAtEnd": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+  "freeze": {
+    "productCommit": "20417cfa46d2964e20e5aa6d7d5fa32da97c0fb8",
+    "frozenAt": "2026-10-01T13:35:54+00:00"
+  },
+  "productChangedDuringRun": []
+}

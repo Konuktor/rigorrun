@@ -1,0 +1,233 @@
+{
+  "job": "update",
+  "agent": "bb-update-wrong_entity",
+  "behaviour": "wrong_entity",
+  "attempt": 1,
+  "rerun": false,
+  "mode": "counted",
+  "devRun": null,
+  "productCommit": "80f53415257947c94716ec63734d61158f495172",
+  "at": "2026-10-01T09:53:10+00:00",
+  "seconds": 1.24,
+  "expected": "FAIL",
+  "oracleVerdict": "FAIL",
+  "oracleProblems": [
+    "tasks are not the seed with task 2 done"
+  ],
+  "oracleMatchesExpected": true,
+  "rigorrunOutcome": "FAIL",
+  "label": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "harnessFailures": [],
+  "gate5": {
+    "observation": "state-only",
+    "evidenceIndependence": "INDEPENDENT",
+    "runLimitNoCallTrace": "Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. Every check on what the system holds afterwards was, on a reading the agent never touched.",
+    "callOrderChecks": [],
+    "callOrderChecksNotMade": [],
+    "callOrderChecksMade": [],
+    "stateChecks": [
+      "success__performed",
+      "success__exactly_as_demonstrated",
+      "success__nothing_else_deleted",
+      "success__nothing_else_created",
+      "frame__nothing_else_changed"
+    ],
+    "holds": true
+  },
+  "selection": {
+    "happyPathCaseId": "case_live__happy_path",
+    "index": 0,
+    "runCaseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ]
+  },
+  "rigorrun": {
+    "exit": 1,
+    "runId": "run_6cc3391289df",
+    "verification": "PARTIAL",
+    "limits": [
+      "partial_state_read",
+      "no_reset",
+      "no_seed",
+      "induced_schema",
+      "no_call_trace",
+      "suite_quality_unassessed"
+    ],
+    "outcomeReason": "the requested work was actually performed \u2014 no changed Task record where id is 2 and status is done; one was required",
+    "agentReport": "Done.",
+    "baseline": "OBSERVED_AT_START",
+    "missingEvidence": [],
+    "steps": 0,
+    "actions": 0,
+    "assertions": [
+      {
+        "id": "success__performed",
+        "kind": "state_exists",
+        "source": "STATE",
+        "status": "FAIL",
+        "blocking": true,
+        "message": "no changed Task record where id is 2 and status is done; one was required"
+      },
+      {
+        "id": "success__exactly_as_demonstrated",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.changed.Task.length equals the expected value"
+      },
+      {
+        "id": "success__nothing_else_deleted",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.deleted.Task.length equals the expected value"
+      },
+      {
+        "id": "success__nothing_else_created",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.created.Task.length equals the expected value"
+      },
+      {
+        "id": "frame__nothing_else_changed",
+        "kind": "state_frame",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "nothing changed beyond what the demonstration changed"
+      }
+    ],
+    "otherCases": [
+      {
+        "caseId": "case_live__malformed__id",
+        "category": "malformed_input",
+        "outcome": "PASS"
+      },
+      {
+        "caseId": "case_live__unknown_id__id",
+        "category": "missing_precondition",
+        "outcome": "PASS"
+      }
+    ],
+    "errorTail": []
+  },
+  "state": {
+    "beforeIsSeed": true,
+    "qualifiedCaseChangesFromSeed": {
+      "tasks": {
+        "created": [],
+        "changed": [
+          {
+            "before": {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            "after": {
+              "id": 1,
+              "status": "done",
+              "title": "Renew domain"
+            }
+          }
+        ],
+        "deleted": []
+      },
+      "notes": {
+        "created": [],
+        "changed": [],
+        "deleted": []
+      }
+    },
+    "wholeRunOracleVerdict": "FAIL",
+    "wholeRunChangesFromSeed": {
+      "tasks": {
+        "created": [],
+        "changed": [
+          {
+            "before": {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            "after": {
+              "id": 1,
+              "status": "done",
+              "title": "Renew domain"
+            }
+          }
+        ],
+        "deleted": []
+      },
+      "notes": {
+        "created": [],
+        "changed": [],
+        "deleted": []
+      }
+    }
+  },
+  "agentTrace": {
+    "caseId": "case_live__happy_path",
+    "calls": [
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 1,
+          "status": "done"
+        },
+        "ok": true,
+        "result": {
+          "task": {
+            "id": 1,
+            "title": "Renew domain",
+            "status": "done"
+          }
+        }
+      }
+    ],
+    "problems": [],
+    "tasksReceived": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ]
+  },
+  "serverCalls": {
+    "rigorrunConnectorCalls": [],
+    "verifierAnswered": {
+      "query_tasks": 13,
+      "query_notes": 13
+    },
+    "agentConnectionCalls": [
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 1,
+          "status": "done"
+        }
+      },
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 1,
+          "status": "done"
+        }
+      },
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 1,
+          "status": "done"
+        }
+      }
+    ]
+  },
+  "verifierOnly": true,
+  "evidenceDir": "reports/blackbox-qualification-2026-10/evidence/cells/update/wrong_entity/attempt-1"
+}

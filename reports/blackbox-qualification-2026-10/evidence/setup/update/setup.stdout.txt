@@ -1,0 +1,51 @@
+{
+  "projectId": "p_277bc6f19ee8",
+  "readsProblem": "",
+  "readsIgnored": [],
+  "tools": 10,
+  "records": [
+    "Task",
+    "Note"
+  ],
+  "rules": {
+    "total": 0,
+    "confirmed": 0,
+    "rejected": 0
+  },
+  "cases": 3,
+  "quality": null,
+  "agents": [
+    {
+      "name": "bb-update-correct",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "bb-update-wrong_value",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "bb-update-wrong_entity",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "bb-update-did_nothing",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "bb-update-extra_note",
+      "ok": true,
+      "problem": ""
+    },
+    {
+      "name": "bb-update-second_write",
+      "ok": true,
+      "problem": ""
+    }
+  ]
+}
+
+--- stderr ---

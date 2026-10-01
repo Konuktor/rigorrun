@@ -1,0 +1,29 @@
+{
+  "update": {
+    "job": "update",
+    "home": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021418Z/homes/update",
+    "projectId": "p_e0cc7926ce38",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path",
+      "malformed_input",
+      "missing_precondition"
+    ],
+    "caseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ],
+    "benchmarkSha256": "af5c91ba91ebf7a03117c0d1dd9ff232a25a3a696d1e551573531954a78baccb",
+    "productCommit": "655e0439d1460fb110151e567c6f4ad02b3bbe58",
+    "agents": {
+      "correct": "a_024456fa",
+      "wrong_value": "a_d86d0a58",
+      "wrong_entity": "a_00ad3fec",
+      "did_nothing": "a_03d11b7a",
+      "extra_note": "a_d34b133d",
+      "second_write": "a_b449f116"
+    }
+  }
+}

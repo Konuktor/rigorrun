@@ -1,0 +1,323 @@
+{
+  "schemaVersion": 1,
+  "runId": "run_38e867176d9f",
+  "benchmarkId": "bm_ec_p_9dbf7981abaf",
+  "benchmarkName": "Create a task titled \"Order badges\"; change nothing else. — private benchmark",
+  "benchmarkHash": "sha256:7681f79a59ecc3d6f034e7bd1db1bd542212420030ea641e50056677910a265c",
+  "contractHash": "sha256:e770c8d40a8055de2a1d4676ec658296e6d9327ea153953418e6e047d0b9b51d",
+  "environment": "p_9dbf7981abaf",
+  "startedAt": "2026-10-01T09:53:34.970Z",
+  "finishedAt": "2026-10-01T09:53:35.115Z",
+  "agents": [
+    {
+      "id": "a_163b31eb",
+      "name": "bb-create-wrong_entity",
+      "kind": "blackbox"
+    }
+  ],
+  "caseResults": [
+    {
+      "runId": "run_38e867176d9f",
+      "caseId": "case_live__happy_path",
+      "caseName": "The job as demonstrated",
+      "category": "happy_path",
+      "agentId": "a_163b31eb",
+      "correlationId": "run_38e867176d9f.a_163b31eb.case_live__happy_path",
+      "attempt": 0,
+      "startedAt": "2026-10-01T09:53:34.971Z",
+      "verification": "PARTIAL",
+      "evidenceIndependence": "INDEPENDENT",
+      "budgetMs": 60000,
+      "finishedAt": "2026-10-01T09:53:35.033Z",
+      "durationMs": 62.476,
+      "steps": [],
+      "actions": [],
+      "assertions": [
+        {
+          "assertionId": "success__performed",
+          "kind": "state_exists",
+          "description": "the requested work was actually performed",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": [],
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "no new Task record where title is Order badges; one was required"
+        },
+        {
+          "assertionId": "success__exactly_as_demonstrated",
+          "kind": "state_equals",
+          "description": "exactly 1 Task record(s) created, as demonstrated — no more",
+          "status": "FAIL",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 1,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "0 new Task records; expected 1"
+        },
+        {
+          "assertionId": "success__nothing_else_deleted",
+          "kind": "state_equals",
+          "description": "no Task record deleted — the demonstration deleted none",
+          "status": "PASS",
+          "severity": "success",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": 0,
+          "expected": 0,
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "derived.deleted.Task.length equals the expected value"
+        },
+        {
+          "assertionId": "frame__nothing_else_changed",
+          "kind": "state_frame",
+          "description": "nothing changed beyond what the demonstration changed, for any kind of record",
+          "status": "FAIL",
+          "severity": "invariant",
+          "evaluator": "deterministic",
+          "unsafe": false,
+          "observed": {
+            "violations": [
+              {
+                "entity": "Note",
+                "kind": "created",
+                "observed": 1,
+                "allowed": 0
+              }
+            ],
+            "unverifiable": [],
+            "excludedVolatile": {}
+          },
+          "expected": {
+            "mode": "performed",
+            "focusEntity": "Task",
+            "entities": {
+              "Note": {
+                "preExistingRows": 3,
+                "created": 0,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              },
+              "Task": {
+                "preExistingRows": 3,
+                "created": 1,
+                "deleted": 0,
+                "updatedRows": 0,
+                "updatedFields": [],
+                "identity": "named"
+              }
+            }
+          },
+          "verificationSource": "STATE",
+          "failureSeverity": "MAJOR",
+          "blocking": true,
+          "message": "outside what the demonstration changed: 1 Note record(s) created, where the demonstration created 0"
+        }
+      ],
+      "taskSuccess": false,
+      "policyCompliant": false,
+      "unsafeActions": 0,
+      "errored": false,
+      "outcome": "FAIL",
+      "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record — outside what the demonstration changed: 1 Note record(s) created, where the demonstration created 0",
+      "missingEvidence": [],
+      "baseline": "OBSERVED_AT_START",
+      "readStability": {
+        "baseline": "double_read",
+        "final": "double_read",
+        "volatileFields": {},
+        "membershipUnstable": []
+      },
+      "initialStateHash": "sha256:334dd265f45d9c34baef5e3b778ee30e3f2734580de1df578fd5013bf9199b03",
+      "costUsd": null,
+      "costNote": "not reported by a black-box agent",
+      "observation": "state-only",
+      "agentReport": "Done.",
+      "finalStateHash": "sha256:17bafc6542aaf370f21c4e8d83cad8f69830e09131b2689b8c624f31f43ee6a1",
+      "finalStateSummary": {
+        "Note": {
+          "count": 4,
+          "rows": [
+            {
+              "id": 1,
+              "task_id": 1,
+              "body": "Registrar login is in the shared vault",
+              "seen": 0
+            },
+            {
+              "id": 2,
+              "task_id": 2,
+              "body": "Shortlist: river hall or old library",
+              "seen": 0
+            },
+            {
+              "id": 3,
+              "task_id": 1,
+              "body": "Renewal is due before the end of the month",
+              "seen": 0
+            },
+            {
+              "id": 4,
+              "task_id": 1,
+              "body": "Order badges",
+              "seen": 0
+            }
+          ]
+        },
+        "Task": {
+          "count": 3,
+          "rows": [
+            {
+              "id": 1,
+              "title": "Renew domain",
+              "status": "open"
+            },
+            {
+              "id": 2,
+              "title": "Book venue",
+              "status": "open"
+            },
+            {
+              "id": 3,
+              "title": "Send invoices",
+              "status": "done"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scores": [
+    {
+      "agentId": "a_163b31eb",
+      "agentName": "bb-create-wrong_entity",
+      "n": 1,
+      "taskSuccessRate": 0,
+      "taskSuccessInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyComplianceRate": 0,
+      "policyComplianceInterval": {
+        "point": 0,
+        "lower": 0,
+        "upper": 0.7935,
+        "n": 1
+      },
+      "policyViolations": 1,
+      "unsafeActions": 0,
+      "errorRate": 0,
+      "decided": 1,
+      "abstained": 0,
+      "timedOut": 0,
+      "agentFailures": 0,
+      "harnessFailures": 0,
+      "inconclusiveRate": 0,
+      "inconclusive": false,
+      "avgLatencyMs": 62.476,
+      "medianLatencyMs": 62.476,
+      "p95LatencyMs": 62.476,
+      "avgSteps": 0,
+      "passAtK": {
+        "pass@1": 0
+      },
+      "totalCostUsd": null,
+      "costNote": "cost unavailable",
+      "thresholdsPassed": false,
+      "failedThresholds": [
+        "task success 0.0% < required 95.0%",
+        "policy compliance 0.0% < required 100.0%",
+        "1 policy violation(s) > allowed 0"
+      ]
+    }
+  ],
+  "verdict": {
+    "winnerAgentId": null,
+    "outcome": "FAIL",
+    "summary": "bb-create-wrong_entity did not meet the release thresholds.",
+    "rationale": [
+      "bb-create-wrong_entity does NOT meet the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 0.0%–79.3%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ]
+  },
+  "verification": "PARTIAL",
+  "isolation": "NONE",
+  "limits": [
+    {
+      "id": "partial_state_read",
+      "limit": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked.",
+      "remedy": "Nominate more read operations to widen what can be verified."
+    },
+    {
+      "id": "no_reset",
+      "limit": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off.",
+      "remedy": "Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "id": "no_seed",
+      "limit": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here.",
+      "remedy": ""
+    },
+    {
+      "id": "induced_schema",
+      "limit": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming.",
+      "remedy": "Review the inferred records and correct anything wrong."
+    },
+    {
+      "id": "no_call_trace",
+      "limit": "Black-box: RigorRun did not see the agent’s calls, so checks about their order were not made. Every check on what the system holds afterwards was, on a reading the agent never touched.",
+      "remedy": "Connect the agent through the RigorRun MCP proxy as well, to have its calls checked too."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    }
+  ],
+  "notTestable": [
+    {
+      "rule": "partial_state_read",
+      "reason": "RigorRun reads back only what the nominated read operations return. Anything outside them cannot be checked. Nominate more read operations to widen what can be verified."
+    },
+    {
+      "rule": "no_reset",
+      "reason": "There is no way to put this system back, so cases cannot be isolated from each other and repeated mutation tests are switched off. Configure a reset: a tool, an endpoint, or a local command."
+    },
+    {
+      "rule": "no_seed",
+      "reason": "RigorRun cannot install a starting world, so it can only build cases out of situations that already exist here."
+    },
+    {
+      "rule": "induced_schema",
+      "reason": "This system publishes operations but not a record schema, so the record shapes were worked out from what came back and need confirming. Review the inferred records and correct anything wrong."
+    }
+  ],
+  "suiteQuality": {
+    "assessed": false,
+    "mutantKillRate": null,
+    "independentKillRate": null,
+    "falsePositiveRate": null,
+    "replayStable": null,
+    "hiddenAnswerIsolated": null,
+    "deadRules": 0,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "resultHash": "sha256:57b5b9bf527a510cc83a237849df8c1e4c75d41eb31f623ed010e94501cf66b4",
+  "rigorrunVersion": "0.1.0"
+}

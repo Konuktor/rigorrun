@@ -14,9 +14,16 @@
  * Integrity: the agent is handed `publicCaseView(testCase)` and a bounded tool
  * channel. `testCase.checks` is read afterwards, by the verifier, and never
  * travels through anything the agent can see.
+ *
+ * An environment that cannot install a world materializes one instead: after
+ * the reset it creates the case's records from the recipe in the case's seed,
+ * and reports the identifiers they were given. The case is bound to those
+ * before the agent or the verifier sees any of it, so both work from the same
+ * records, and every attempt gets records of its own.
  */
 import {
   RUN_SCHEMA_VERSION,
+  bindCase,
   hashValue,
   prefixedId,
   publicCaseView,
@@ -44,6 +51,10 @@ import {
   verificationStrength,
   type CanonicalState,
   type EnvironmentAdapter,
+  type EnvironmentCapabilities,
+  type MaterializedCase,
+  type PackCaseContext,
+  type Reality,
 } from '@rigorrun/environment';
 import { verify } from '@rigorrun/verifier';
 import { decideVerdict, scoreAgent } from '@rigorrun/scoring';
@@ -79,6 +90,14 @@ export interface RunOptions {
    * hides a suite that cannot separate a good agent from a bad one.
    */
   suiteQuality?: SuiteQuality;
+  /**
+   * The name of the pack whose own suite this is, when it is one. The suite
+   * check measures suites induced from a demonstration and is refused for a
+   * pack's, which is written and qualified with the pack. Telling somebody to
+   * run a check they cannot run would be a remedy that does not exist, so a
+   * pack's unassessed suite is reported as what it is instead.
+   */
+  suiteFromPack?: string;
   version?: string;
 }
 
@@ -114,7 +133,8 @@ export async function runBenchmark(
   if (repeats !== requested) {
     limits.push({
       id: 'repeats_clamped',
-      limit: `Asked for ${requested} attempts per case, ran 1: without a reset every attempt ` +
+      limit:
+        `Asked for ${requested} attempts per case, ran 1: without a reset every attempt ` +
         'after the first would start from the last one\u2019s leftovers.',
       remedy: 'Configure a reset for this environment.',
     });
@@ -135,11 +155,22 @@ export async function runBenchmark(
       limit:
         'Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. ' +
         'Every check on what the system holds afterwards was, on a reading the agent never touched.',
-      remedy: 'Connect the agent through the RigorRun MCP proxy as well, to have its calls checked too.',
+      remedy:
+        'Connect the agent through the RigorRun MCP proxy as well, to have its calls checked too.',
     });
   }
 
-  if (options.suiteQuality && !options.suiteQuality.assessed) {
+  if (options.suiteFromPack !== undefined && !options.suiteQuality?.assessed) {
+    limits.push({
+      id: 'suite_from_pack',
+      limit:
+        `The suite was written and qualified with the ${options.suiteFromPack} pack, not induced ` +
+        'from a demonstration, so the suite check, which measures induced suites, was not run on it.',
+      remedy:
+        'What the suite was shown to catch is in the pack’s pre-registered qualification, ' +
+        'not in this run.',
+    });
+  } else if (options.suiteQuality && !options.suiteQuality.assessed) {
     limits.push({
       id: 'suite_quality_unassessed',
       limit: 'Nobody has checked whether this suite can tell a correct agent from a broken one.',
@@ -165,7 +196,15 @@ export async function runBenchmark(
           caseId: testCase.id,
           caseName: testCase.name,
         });
-        const result = await executeCase(benchmark, runId, testCase, agent, now, options.caseTimeoutMs);
+        const result = await executeCase(
+          benchmark,
+          runId,
+          testCase,
+          agent,
+          now,
+          options.caseTimeoutMs,
+          attempt,
+        );
         caseResults.push(result);
         await options.onProgress?.({ type: 'case_finished', runId, result });
       }
@@ -231,6 +270,8 @@ class AgentTimeoutError extends Error {
  *   the suite was generated: that snapshot already contains whatever the
  *   demonstration produced, so a correct agent that repeats the job looks like
  *   it did nothing, and any drift since looks like the agent's work.
+ * - MATERIALIZED: the adapter created the case's records, so the world was
+ *   read back afterwards — what was made, rather than what was asked for.
  * - UNAVAILABLE: nothing could be read. The delta cannot be computed, so any
  *   check that needs it is unverifiable and the case abstains.
  *
@@ -241,7 +282,7 @@ class AgentTimeoutError extends Error {
  */
 interface Baseline {
   state: CanonicalState;
-  source: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
+  source: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'MATERIALIZED' | 'UNAVAILABLE';
   missing: string[];
   /** What the two starting readings proved, when the case reads twice. */
   stability?: Record<string, EntityReadStability>;
@@ -253,21 +294,25 @@ async function establishBaseline(
   readTwice: boolean,
 ): Promise<Baseline> {
   const capabilities = adapter.capabilities();
-  const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
-  if (capabilities.seed !== 'none') {
+  // Materialized records were made before this was called. Nothing is
+  // installed over them: what the system holds now is the starting world.
+  const materialized = capabilities.seed === 'materialized';
+  if (!materialized && capabilities.seed !== 'none') {
+    const seedState = (testCase.seed.state ?? { entities: {} }) as CanonicalState;
     await adapter.seed(seedState, testCase.seed.config);
     return { state: seedState, source: 'INSTALLED_SEED', missing: [] };
   }
   if (capabilities.stateRead === 'none') {
     return { state: { entities: {} }, source: 'UNAVAILABLE', missing: ['no_state_read'] };
   }
+  const source = materialized ? 'MATERIALIZED' : 'OBSERVED_AT_START';
   try {
     const first = await adapter.getState();
-    if (!readTwice) return { state: first, source: 'OBSERVED_AT_START', missing: [] };
+    if (!readTwice) return { state: first, source, missing: [] };
     const second = await adapter.getState();
     return {
       state: withWindows(second, first),
-      source: 'OBSERVED_AT_START',
+      source,
       missing: [],
       stability: readStability(adapter.describeEntities(), first, second),
     };
@@ -290,6 +335,7 @@ async function executeCase(
   agent: AgentAdapter,
   now: () => Date,
   budgetOverrideMs: number | undefined,
+  attempt: number,
 ): Promise<CaseResult> {
   const adapter = createEnvironment(benchmark.environment);
   const budgetMs = budgetOverrideMs ?? testCase.timeoutMs;
@@ -308,7 +354,8 @@ async function executeCase(
   // so a field the reads themselves change is proved rather than assumed. Only
   // such a case: a benchmark compiled before frames keeps its exact reads.
   const readTwice =
-    capabilities.stateRead !== 'none' && testCase.checks.some((check) => check.kind === 'state_frame');
+    capabilities.stateRead !== 'none' &&
+    testCase.checks.some((check) => check.kind === 'state_frame');
   const skeleton = {
     runId,
     caseId: testCase.id,
@@ -316,11 +363,19 @@ async function executeCase(
     category: testCase.category,
     agentId: agent.id,
     correlationId: `${runId}.${agent.id}.${testCase.id}`,
+    attempt,
     startedAt,
     verification,
     evidenceIndependence: independence,
     budgetMs,
   };
+
+  // What was created for this case, once anything was. Carried onto every
+  // result from then on, a harness failure included, so a person can always
+  // find the records a case made — even the ones it never got to use.
+  let made: MaterializedCase | undefined;
+  const madeRecord = (): Pick<CaseResult, 'materialized' | 'readScope'> =>
+    made ? { materialized: { ...made.bindings }, readScope: made.readScope } : {};
 
   // A harness that cannot put the world in order has nothing to grade. That
   // is a fact about the run, recorded as one, never as a failure of the agent.
@@ -340,6 +395,7 @@ async function executeCase(
     outcomeReason: `RigorRun could not ${stage}: ${(error as Error).message}`,
     missingEvidence: [`harness:${stage}`],
     baseline: 'UNAVAILABLE',
+    ...madeRecord(),
     initialStateHash: '',
     costUsd: null,
     costNote: 'cost unavailable',
@@ -354,9 +410,33 @@ async function executeCase(
     return harnessFailure('reset the environment', error);
   }
 
+  // The case everything below works from. For a materialized world it is the
+  // case bound to the records just made; otherwise it is the case as written.
+  let bound: BenchmarkCase = testCase;
+  if (capabilities.seed === 'materialized') {
+    try {
+      made = await materializeCase(adapter, capabilities, testCase, {
+        runId,
+        caseId: testCase.id,
+        agentId: agent.id,
+        attempt,
+      });
+    } catch (error) {
+      return harnessFailure("create the case's records", error);
+    }
+    // A token nothing was bound to, or a value that would change what a check
+    // asks, means the case cannot be asked at all. Its author or the
+    // environment is at fault, and the agent has not been involved yet.
+    try {
+      bound = bindCase(testCase, made.bindings);
+    } catch (error) {
+      return harnessFailure('bind the case to its records', error);
+    }
+  }
+
   let baseline: Baseline;
   try {
-    baseline = await establishBaseline(adapter, testCase, readTwice);
+    baseline = await establishBaseline(adapter, bound, readTwice);
   } catch (error) {
     return harnessFailure('establish the starting world', error);
   }
@@ -373,12 +453,15 @@ async function executeCase(
 
   const steps: AgentStep[] = [];
   let pendingNote: string | null = null;
-  let stepBudget = testCase.maxSteps;
+  let stepBudget = bound.maxSteps;
 
   const env: AgentEnvironment = {
     async call(tool: string, args: Record<string, unknown> = {}): Promise<ToolResult> {
       if (stepBudget <= 0) {
-        return { ok: false, error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' } };
+        return {
+          ok: false,
+          error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' },
+        };
       }
       stepBudget -= 1;
       if (writeGuard?.has(tool)) {
@@ -447,9 +530,13 @@ async function executeCase(
   let costNote = 'cost unavailable';
 
   try {
+    // The bound case's public half, and nothing else of it: never the seed or
+    // its recipe, the checks or the reference plan. A black-box agent receives
+    // exactly this too, through the same input, and works on the records it
+    // names with access of its own.
     const output = await withTimeout(
       agent.execute(
-        { caseId: testCase.id, task: publicCaseView(testCase).task, maxSteps: testCase.maxSteps },
+        { caseId: bound.id, task: publicCaseView(bound).task, maxSteps: bound.maxSteps },
         env,
       ),
       budgetMs,
@@ -522,7 +609,7 @@ async function executeCase(
   // listed as not made, and do not hold the verdict hostage.
   const blackBox = agent.kind === 'blackbox';
   const summary = verify(
-    testCase.checks,
+    bound.checks,
     {
       state: finalState,
       derived: {
@@ -556,6 +643,13 @@ async function executeCase(
 
   const { outcome, outcomeReason } = classify(agentOutcome, summary, errorMessage, budgetMs);
 
+  // The system's own account of how the case ended, to show beside the
+  // agent's. Only from two readings that both answered: described from a world
+  // that could not be read, it would state as fact what nobody saw.
+  const reality = stateUnverifiable
+    ? undefined
+    : describeReality(adapter, initialState, finalState, missingEvidence);
+
   // A frame check that could not rule says why, in the same stable terms as
   // every other piece of missing evidence.
   const frameResult = summary.results.find((result) => result.kind === 'state_frame');
@@ -571,15 +665,13 @@ async function executeCase(
     finishedAt,
     durationMs: round3(durationMs),
     steps,
-    actions: events.map(
-      (event): ObservedEvent => ({
-        type: event.type,
-        at: event.at,
-        payload: event.payload,
-        ok: event.ok,
-        ...(event.error ? { error: event.error } : {}),
-      }),
-    ),
+    actions: events.map((event): ObservedEvent => ({
+      type: event.type,
+      at: event.at,
+      payload: event.payload,
+      ok: event.ok,
+      ...(event.error ? { error: event.error } : {}),
+    })),
     assertions: summary.results,
     taskSuccess: !errored && summary.taskSuccess,
     policyCompliant: summary.policyCompliant,
@@ -590,6 +682,8 @@ async function executeCase(
     outcomeReason,
     missingEvidence,
     baseline: baseline.source,
+    ...madeRecord(),
+    ...(reality ? { reality } : {}),
     ...(readTwice
       ? {
           readStability: {
@@ -641,7 +735,10 @@ function classify(
   if (summary.unsafeActions > 0) {
     return {
       outcome: 'FAIL',
-      outcomeReason: `${summary.unsafeActions} unsafe action(s): ${failed.filter((r) => r.unsafe).map((r) => r.description).join('; ')}`,
+      outcomeReason: `${summary.unsafeActions} unsafe action(s): ${failed
+        .filter((r) => r.unsafe)
+        .map((r) => r.description)
+        .join('; ')}`,
     };
   }
   // A broken rule is the agent's doing whether or not it finished. A success
@@ -683,10 +780,60 @@ function classify(
     // done. That is not a pass.
     return {
       outcome: 'ABSTAIN',
-      outcomeReason: 'no applicable success check: nothing could establish whether the work was done',
+      outcomeReason:
+        'no applicable success check: nothing could establish whether the work was done',
     };
   }
   return { outcome: 'PASS', outcomeReason: 'every applicable check passed on observed state' };
+}
+
+/**
+ * Creates this case's records, as the environment that declared it can.
+ *
+ * Creating records is a write RigorRun makes on its own behalf, before any
+ * agent is there to answer for it, so a system marked production is refused
+ * here whatever the adapter itself would have done.
+ */
+async function materializeCase(
+  adapter: EnvironmentAdapter,
+  capabilities: EnvironmentCapabilities,
+  testCase: BenchmarkCase,
+  ctx: PackCaseContext,
+): Promise<MaterializedCase> {
+  if (!mayMutateAtAll(capabilities)) {
+    throw new Error(
+      'this system is marked production, and every case of this suite creates records in it',
+    );
+  }
+  if (!adapter.materialize) {
+    throw new Error(
+      `${adapter.name} says its cases create their own records, but offers no way to create them`,
+    );
+  }
+  return adapter.materialize(testCase.seed, ctx);
+}
+
+/**
+ * The system's account of how the case ended, copied out of the adapter.
+ *
+ * It is never scored, so an adapter that throws while writing it costs the
+ * reader the account and nothing else: the verdict stands, and the gap is
+ * named among what is missing.
+ */
+function describeReality(
+  adapter: EnvironmentAdapter,
+  seed: CanonicalState,
+  final: CanonicalState,
+  missingEvidence: string[],
+): Reality | undefined {
+  if (!adapter.describeReality) return undefined;
+  try {
+    const reality = adapter.describeReality(seed, final);
+    return reality ? { system: reality.system, lines: [...reality.lines] } : undefined;
+  } catch {
+    missingEvidence.push('reality_unavailable');
+    return undefined;
+  }
 }
 
 function mutatingActionNames(adapter: EnvironmentAdapter): string[] {

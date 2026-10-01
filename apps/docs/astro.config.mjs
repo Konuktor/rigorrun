@@ -25,9 +25,7 @@ export default defineConfig({
       logo: { src: './src/assets/mark.svg', replacesTitle: false },
       favicon: '/favicon.svg',
       customCss: ['./src/styles/docs.css'],
-      social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/Konuktor/rigorrun' },
-      ],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Konuktor/rigorrun' }],
       editLink: {
         baseUrl: 'https://github.com/Konuktor/rigorrun/edit/master/apps/docs/',
       },
@@ -47,6 +45,7 @@ export default defineConfig({
             { label: 'Your first project', slug: 'start/first-project' },
             { label: 'Your first agent run', slug: 'start/first-run' },
             { label: 'Gate a build', slug: 'start/ci-gate' },
+            { label: 'Test a Stripe refund agent', slug: 'start/stripe' },
           ],
         },
         {

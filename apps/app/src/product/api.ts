@@ -202,7 +202,12 @@ export interface RunView {
     falsePositiveRate: number | null;
     warnings: string[];
   } | null;
-  verdict: { winnerAgentId: string | null; summary: string; rationale: string[]; outcome?: 'PASS' | 'FAIL' | 'INCONCLUSIVE' };
+  verdict: {
+    winnerAgentId: string | null;
+    summary: string;
+    rationale: string[];
+    outcome?: 'PASS' | 'FAIL' | 'INCONCLUSIVE';
+  };
   scores: {
     agentId: string;
     agentName: string;
@@ -229,7 +234,14 @@ export interface CaseResultView {
   missingEvidence: string[];
   verification: string;
   evidenceIndependence: 'INDEPENDENT' | 'SELF_REPORTED' | 'NONE';
-  baseline: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'UNAVAILABLE';
+  baseline: 'INSTALLED_SEED' | 'OBSERVED_AT_START' | 'MATERIALIZED' | 'UNAVAILABLE';
+  /** What the reads behind this verdict covered, when that was less than everything. */
+  readScope?: string;
+  /**
+   * The system's own account of how the case ended, in its own words, for
+   * setting beside the agent's. Never scored.
+   */
+  reality?: { system: string; lines: string[] };
   steps: { tool: string; args: Record<string, unknown>; ok: boolean; error: string }[];
   stepsOmitted: number;
   finalState: Record<string, unknown>;
@@ -274,7 +286,13 @@ export interface ImportedTraceView {
   traceId: string;
   name: string;
   durationMs: number;
-  calls: { tool: string; args: Record<string, unknown>; ok: boolean; error?: string; recognisedBy: string }[];
+  calls: {
+    tool: string;
+    args: Record<string, unknown>;
+    ok: boolean;
+    error?: string;
+    recognisedBy: string;
+  }[];
   failures: { name: string; message: string }[];
   /** Spans it did not understand. Reported rather than hidden. */
   unrecognised: number;
@@ -340,7 +358,8 @@ export const api = {
     }
   },
 
-  projects: () => request<{ projects: ProjectView[]; broken: BrokenProjectView[] }>('/api/projects'),
+  projects: () =>
+    request<{ projects: ProjectView[]; broken: BrokenProjectView[] }>('/api/projects'),
   createProject: (name: string, goal: string) =>
     post<{ project: ProjectView }>('/api/projects', { name, goal }),
   project: (id: string) =>

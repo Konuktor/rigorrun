@@ -10,7 +10,9 @@
  * parts a machine can check are not lies.
  */
 import { describe, expect, it } from 'vitest';
+import { spawn } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { AGENT_PROTOCOL_V2 } from '@rigorrun/agent-sdk';
@@ -64,7 +66,11 @@ describe('the commands the docs promise', () => {
 
   it('are the ones the docs actually mention', async () => {
     const ci = await read('CI.md');
-    for (const command of ['rigorrun projects', 'rigorrun run --project', 'rigorrun gate --project']) {
+    for (const command of [
+      'rigorrun projects',
+      'rigorrun run --project',
+      'rigorrun gate --project',
+    ]) {
       expect(ci).toContain(command);
     }
   });
@@ -213,7 +219,16 @@ describe('the example bundle in the docs', () => {
     expect(example.projects[0]?.connector).toBe('mcp:stdio');
     // The whole funnel, so it shows what a complete session looks like.
     expect(example.activation.stages.map((stage) => stage.code)).toEqual([
-      'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9',
+      'A0',
+      'A1',
+      'A2',
+      'A3',
+      'A4',
+      'A5',
+      'A6',
+      'A7',
+      'A8',
+      'A9',
     ]);
 
     const text = await read('examples/feedback-bundle.json');
@@ -232,5 +247,124 @@ describe('every doc the getting-started page links to', () => {
     for (const link of new Set(links)) {
       expect(names, `GETTING_STARTED.md links to ${link}`).toContain(link);
     }
+  });
+});
+
+describe('the Stripe example’s commands', () => {
+  const readme = () =>
+    readFile(join(repoRoot, 'examples', 'stripe-support-agent', 'README.md'), 'utf8');
+
+  /** Each bash block, with its line continuations joined. */
+  const bashBlocks = (text: string): string[] =>
+    [...text.matchAll(/```bash\n([\s\S]*?)```/g)].map((match) =>
+      match[1]!.replace(/\\\n\s*/g, ' '),
+    );
+
+  /** The variables a block sets, by `export` or in front of the command, as written. */
+  function environmentOf(block: string): Record<string, string> {
+    const env: Record<string, string> = {};
+    for (const raw of block.split('\n')) {
+      const code = raw.replace(/#.*$/, '').trim();
+      for (const word of code.replace(/^export\s+/, '').split(/\s+/)) {
+        const set = /^([A-Z_]+)=(\S*)$/.exec(word);
+        if (!set) break;
+        // `…` is where the reader puts a value only they have.
+        env[set[1]!] = set[2]!.replace('…', 'placeholder');
+      }
+    }
+    return env;
+  }
+
+  /** Starts the agent with exactly that environment, and returns what it said first. */
+  function startWith(env: Record<string, string>): Promise<string> {
+    return new Promise((resolve) => {
+      const child = spawn(process.execPath, ['examples/stripe-support-agent/server.mjs'], {
+        cwd: repoRoot,
+        // Nothing inherited: a variable the README forgets is a variable missing here too.
+        env: { PATH: process.env['PATH'] ?? '', ...env, PORT: '0', TRANSCRIPT_DIR: tmpdir() },
+      });
+      let said = '';
+      const done = () => {
+        child.kill();
+        resolve(said.trim());
+      };
+      child.stdout.on('data', (chunk) => {
+        said += String(chunk);
+        done();
+      });
+      child.stderr.on('data', (chunk) => (said += String(chunk)));
+      child.on('exit', done);
+    });
+  }
+
+  it('start the agent as written, every one of them', async () => {
+    const starts = bashBlocks(await readme()).filter((block) => block.includes('server.mjs'));
+    expect(starts.length).toBeGreaterThanOrEqual(3);
+    for (const block of starts) {
+      expect(await startWith(environmentOf(block)), block).toMatch(/^stripe-support-agent \(/);
+    }
+  }, 30_000);
+
+  it('point the agent at the twin, and say where the code comes from first', async () => {
+    const text = await readme();
+    expect(text).toContain('### Point it at the twin');
+    const clone = text.indexOf('git clone https://github.com/Konuktor/rigorrun');
+    expect(clone).toBeGreaterThan(-1);
+    expect(clone).toBeLessThan(text.indexOf('node examples/stripe-support-agent/server.mjs'));
+    expect(text).toContain('STRIPE_KEY=sk_test_twin STRIPE_BASE_URL=http://127.0.0.1:12112');
+  });
+});
+
+describe('what the docs say about changing your agent', () => {
+  // "Unchanged" was not true as written: the agent needs an endpoint RigorRun
+  // can send a ticket to, and on the twin its Stripe address changes. What
+  // does not change is its code.
+  const PAGES = [
+    'README.md',
+    'packages/cli/README.md',
+    'apps/site/src/pages/index.astro',
+    'apps/site/src/pages/start.astro',
+    'apps/docs/src/content/docs/start/stripe.md',
+    'apps/docs/src/content/docs/agents/black-box.md',
+  ];
+
+  it('never call the agent "unchanged", and say what stays the same instead', async () => {
+    for (const page of PAGES) {
+      const text = await readFile(join(repoRoot, page), 'utf8');
+      expect(text, page).not.toMatch(/agent[^.\n]{0,40}\bunchanged|\bunchanged[^.\n]{0,20}agent/i);
+      expect(text, page).toMatch(/no (change to (your agent's|its) code|code changes)/i);
+    }
+  });
+
+  it('name the body template and the twin’s address wherever the Stripe path is set out', async () => {
+    for (const page of [
+      'README.md',
+      'packages/cli/README.md',
+      'apps/docs/src/content/docs/start/stripe.md',
+    ]) {
+      const text = await readFile(join(repoRoot, page), 'utf8');
+      expect(text, page).toContain('--body-template');
+      expect(text, page).toMatch(/base URL (points|at the twin)/);
+    }
+  });
+});
+
+describe('the first-run page', () => {
+  const page = () =>
+    readFile(
+      join(repoRoot, 'apps', 'docs', 'src', 'content', 'docs', 'start', 'first-run.md'),
+      'utf8',
+    );
+
+  it('offers the black-box way in that the Stripe guide recommends', async () => {
+    const text = await page();
+    expect(text).toContain('[a black-box agent](/agents/black-box/)');
+  });
+
+  it('places the "Safe to ship?" headline where it is printed, and says what the gate prints', async () => {
+    const text = await page();
+    expect(text).toMatch(/In the interface, the headline/);
+    // The gate's last line, as the command line prints it.
+    expect(text.replace(/\s+/g, ' ')).toMatch(/`PASS`, `FAIL` or `INCONCLUSIVE`/);
   });
 });

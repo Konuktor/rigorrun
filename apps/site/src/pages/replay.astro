@@ -1,88 +1,175 @@
 ---
 /**
- * The recorded run `rigorrun demo` replays, every case of it, for somebody who
- * has not installed anything.
+ * A recorded run, every case of it, for somebody who has not installed
+ * anything.
  *
- * The page reads the same file the CLI bundles and refuses to build if the run
- * in it no longer matches the hash it was recorded with, exactly as the CLI
- * refuses to show it. Nothing here is typed by hand: the counts, the model, the
- * agent's words and the checks are all read from the recording.
+ * The flagship Stripe recording when it exists, the Northstar run
+ * `rigorrun demo` bundles until then — both through `lib/replay.ts`, which
+ * refuses to build the page if the run in the file no longer matches the hash
+ * it was recorded with, exactly as the CLI refuses to show it. Nothing here is
+ * typed by hand: the counts, the model, the agent's words, what the system
+ * showed and the verdicts are all read from the recording.
  */
-import { createHash } from 'node:crypto';
 import Base from '../layouts/Base.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Command from '../components/Command.astro';
 import Button from '../components/Button.astro';
-import replay from '../../../../fixtures/replays/demo-replay.json';
+import CaseRow from '../components/CaseRow.astro';
+import ClaimReality from '../components/ClaimReality.astro';
+import {
+  replay,
+  HEADLINE_ORDER,
+  STRIPE_CASE_ORDER,
+  VARIANT_DESCRIPTIONS,
+  type CaseView,
+} from '../lib/replay';
+import { REPO_URL } from '../site';
 
-if (createHash('sha256').update(JSON.stringify(replay.run)).digest('hex') !== replay.resultHash) {
-  throw new Error('fixtures/replays/demo-replay.json does not match its resultHash; re-record it rather than edit it.');
-}
+const stripe = replay.source === 'stripe';
+const cases = replay.cases;
+const count = (list: readonly CaseView[], outcome: string) =>
+  list.filter((entry) => entry.outcome === outcome).length;
+const undecided = (list: readonly CaseView[]) =>
+  list.filter((entry) => entry.outcome !== 'PASS' && entry.outcome !== 'FAIL').length;
+const unsafe = (list: readonly CaseView[]) =>
+  list.reduce((sum, entry) => sum + entry.unsafeActions, 0);
 
-// Written by the LLM adapter, not the model, when the model uses every step.
-const STEP_BUDGET_REPORT = 'The model ran out of its step budget before reporting a result.';
+const commit = replay.commit.slice(0, 7);
+const blackBox = cases.length > 0 && cases.every((entry) => entry.observation === 'state-only');
+const temperature = replay.temperature === null ? '' : `, temperature ${replay.temperature}`;
 
-type Check = (typeof replay.run.caseResults)[number]['assertions'][number];
-const failing = (checks: Check[]) => {
-  const failed = checks.filter((check) => check.status === 'FAIL' || check.status === 'ERROR');
-  return [...failed.filter((check) => check.unsafe), ...failed.filter((check) => !check.unsafe)];
+/** The Stripe recording lists every agent's cases in the pre-registration's own order. */
+const rank = (caseId: string) => {
+  const index = (STRIPE_CASE_ORDER as readonly string[]).indexOf(caseId);
+  return index === -1 ? STRIPE_CASE_ORDER.length : index;
 };
+const agents = replay.agents.map((agent) => ({
+  ...agent,
+  ordered: [...agent.cases].sort((a, b) => rank(a.caseId) - rank(b.caseId) || a.attempt - b.attempt),
+}));
 
-const cases = replay.run.caseResults;
-const passed = cases.filter((entry) => entry.outcome === 'PASS');
-const failed = cases
+// The Northstar run, as this page always showed it: failures first, worst first.
+const failedFirst = cases
   .filter((entry) => entry.outcome === 'FAIL')
   .sort((a, b) => b.unsafeActions - a.unsafeActions);
-const unsafe = cases.reduce((sum, entry) => sum + entry.unsafeActions, 0);
-const recorded = replay.recordedAt.slice(0, 10);
-const commit = replay.commit.slice(0, 7);
+const passedRest = cases.filter((entry) => entry.outcome !== 'FAIL');
 const categories = new Set(cases.map((entry) => entry.category)).size;
+
+const realityName = stripe
+  ? replay.simulated
+    ? 'the local Stripe twin showed'
+    : 'Stripe showed'
+  : 'the system held afterwards';
+const headlineRule = HEADLINE_ORDER.map((id) => id.replaceAll('_', ' ')).join(', ');
+const preregistration = `${REPO_URL}/blob/master/reports/flagship-demo-2026-10/PREREGISTRATION.md`;
+const simulatedLimit = replay.limits.find((limit) => limit.id === 'simulated');
 ---
+
 <Base
   title="A recorded run"
-  description={`${replay.model} worked a support job ${cases.length} times against a synthetic system. What it said, beside what the system held afterwards, for every case.`}
+  description={stripe
+    ? `${replay.model} worked ${cases.length} support tickets on ${replay.system}, recorded ${replay.date}. What the agent said beside what ${realityName}, for every case.`
+    : `${replay.model} worked a support job ${cases.length} times against a synthetic system. What it said, beside what the system held afterwards, for every case.`}
 >
   <Section>
     <div class="max-w-3xl">
       <Eyebrow>A recorded run</Eyebrow>
       <h1 class="mt-4 text-display font-medium text-balance">
-        What the model said, and what the system held afterwards.
+        {
+          stripe
+            ? `What the agent said, and what ${realityName}.`
+            : 'What the model said, and what the system held afterwards.'
+        }
       </h1>
-      <p class="mt-6 text-lead text-secondary">
-        A real model, <span class="font-mono text-support">{replay.model}</span>, worked a refund
-        job in {replay.system}: the job as it was shown once, and {cases.length - 1} cases RigorRun
-        generated from it across {categories} kinds — a limit boundary, a duplicate request, an
-        instruction hidden in a ticket, a manager who says no. Every verdict below was read from the
-        system after the model finished. What the model said is shown beside it and never scored.
-      </p>
+      {
+        stripe ? (
+          <p class="mt-6 text-lead text-secondary">
+            <span class="font-mono text-support">{replay.model}</span> ({replay.provider}) drove a
+            support agent through the Stripe pack’s tickets on {replay.system}{blackBox && ', connected as a black box'}.
+            After each ticket RigorRun read{' '}
+            {replay.simulated ? 'the twin' : 'Stripe'} itself, and the verdict comes from that read. What the agent said is shown beside it and
+            never scored. Passes are shown as well as failures.
+          </p>
+        ) : (
+          <p class="mt-6 text-lead text-secondary">
+            A real model, <span class="font-mono text-support">{replay.model}</span>, worked a refund
+            job in {replay.system}: the job as it was shown once, and {cases.length - 1} cases
+            RigorRun generated from it across {categories} kinds — a limit boundary, a duplicate
+            request, an instruction hidden in a ticket, a manager who says no. Every verdict below was
+            read from the system after the model finished. What the model said is shown beside it and
+            never scored.
+          </p>
+        )
+      }
     </div>
 
-    <dl class="mt-10 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-panel border border-line bg-line sm:grid-cols-4">
-      <div class="bg-surface px-4 py-3">
-        <dt class="text-micro uppercase text-muted">Cases</dt>
-        <dd class="mt-1 text-title font-semibold">{cases.length}</dd>
-      </div>
-      <div class="bg-surface px-4 py-3">
-        <dt class="text-micro uppercase text-muted">Passed</dt>
-        <dd class="mt-1 text-title font-semibold text-pass">{passed.length}</dd>
-      </div>
-      <div class="bg-surface px-4 py-3">
-        <dt class="text-micro uppercase text-muted">Failed</dt>
-        <dd class="mt-1 text-title font-semibold text-fail">{failed.length}</dd>
-      </div>
-      <div class="bg-surface px-4 py-3">
-        <dt class="text-micro uppercase text-muted">Unsafe actions</dt>
-        <dd class="mt-1 text-title font-semibold text-fail">{unsafe}</dd>
-      </div>
-    </dl>
+    <div
+      class="mt-10 max-w-3xl overflow-x-auto rounded-panel border border-line bg-surface"
+      tabindex="0"
+      role="region"
+      aria-label="Outcomes per agent"
+    >
+      <table class="w-full text-left">
+        <caption class="sr-only">Outcomes per agent, read from the recording</caption>
+        <thead>
+          <tr class="border-b border-line">
+            <th scope="col" class="py-2.5 pl-4 pr-2 align-bottom text-micro font-semibold uppercase text-muted sm:px-4">Agent</th>
+            <th scope="col" class="px-1.5 py-2.5 align-bottom text-micro font-semibold uppercase text-muted sm:px-4">Cases</th>
+            <th scope="col" class="px-1.5 py-2.5 align-bottom text-micro font-semibold uppercase text-muted sm:px-4">Passed</th>
+            <th scope="col" class="px-1.5 py-2.5 align-bottom text-micro font-semibold uppercase text-muted sm:px-4">Failed</th>
+            {
+              undecided(cases) > 0 && (
+                <th scope="col" class="px-1.5 py-2.5 align-bottom text-micro font-semibold uppercase text-muted sm:px-4">
+                  No verdict
+                </th>
+              )
+            }
+            <th scope="col" class="px-1.5 py-2.5 align-bottom text-micro font-semibold uppercase text-muted sm:px-4">Unsafe actions</th>
+          </tr>
+        </thead>
+        <tbody class="ruled">
+          {
+            replay.agents.map((agent) => (
+              <tr>
+                <th scope="row" class="py-3 pl-4 pr-2 font-mono text-support font-medium text-fg sm:px-4">
+                  {agent.name}
+                </th>
+                <td class="px-1.5 py-3 text-metric-sm font-semibold sm:px-4 sm:text-title">{agent.cases.length}</td>
+                <td class="px-1.5 py-3 text-metric-sm font-semibold sm:px-4 sm:text-title text-pass">{count(agent.cases, 'PASS')}</td>
+                <td class="px-1.5 py-3 text-metric-sm font-semibold sm:px-4 sm:text-title text-fail">{count(agent.cases, 'FAIL')}</td>
+                {undecided(cases) > 0 && (
+                  <td class="px-1.5 py-3 text-metric-sm font-semibold sm:px-4 sm:text-title text-warn">{undecided(agent.cases)}</td>
+                )}
+                <td class="px-1.5 py-3 text-metric-sm font-semibold sm:px-4 sm:text-title">{unsafe(agent.cases)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
 
     <p class="mt-6 max-w-3xl text-support text-muted">
-      {replay.model} ({replay.provider}), recorded {recorded} at commit
-      <a class="font-mono underline" href={`https://github.com/Konuktor/rigorrun/commit/${replay.commit}`}>{commit}</a>.
-      A small model on a laptop is a weak agent, and live results vary between runs; the point is
-      the right-hand column, which does not depend on either.
+      {replay.model} ({replay.provider}{temperature}), recorded {replay.date} at commit
+      <a class="font-mono underline" href={`${REPO_URL}/commit/${replay.commit}`}>{commit}</a>, on
+      {replay.system}.
+      {
+        stripe
+          ? replay.temperature !== null && replay.temperature > 0
+            ? 'At a non-zero temperature the same tickets can end differently on another run; the point is the right-hand column, which reports what did happen on this one.'
+            : 'Live results vary between runs; the point is the right-hand column, which reports what did happen on this one.'
+          : 'A small model on a laptop is a weak agent, and live results vary between runs; the point is the right-hand column, which does not depend on either.'
+      }
     </p>
+
+    {
+      simulatedLimit && (
+        <p class="mt-4 max-w-3xl rounded-panel border border-line-strong bg-raised px-4 py-3 text-support text-fg">
+          <span class="font-semibold">Simulated.</span> {simulatedLimit.limit}
+          {simulatedLimit.remedy && <span class="text-secondary"> {simulatedLimit.remedy}</span>}
+        </p>
+      )
+    }
 
     <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
       <Command command="npx rigorrun demo" />
@@ -90,81 +177,148 @@ const categories = new Set(cases.map((entry) => entry.category)).size;
     </div>
   </Section>
 
-  <Section ruled>
-    <h2 class="text-title font-medium">The {failed.length} cases it failed</h2>
-    <p class="mt-2 max-w-3xl text-support text-secondary">
-      Worst first, by the number of unsafe actions the system recorded.
-    </p>
+  {
+    stripe && (
+      <Section ruled>
+        <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+          <div>
+            <h2 class="text-title font-medium">The headline case</h2>
+            <p class="mt-3 text-support text-secondary">
+              Chosen by a rule written before anything was recorded: the first failure of{' '}
+              <span class="font-mono">minimal</span> in the order {headlineRule}; if{' '}
+              <span class="font-mono">minimal</span> failed nothing, the first failure of{' '}
+              <span class="font-mono">careful</span> in the same order.
+            </p>
+            <p class="mt-3 text-support">
+              <a class="rr-link" href={preregistration}>
+                The pre-registration
+              </a>
+            </p>
+          </div>
+          <div>
+            {replay.headline ? (
+              <ClaimReality replay={replay} entry={replay.headline} link={false} />
+            ) : (
+              <p class="rounded-panel border border-line bg-surface p-6 text-lead text-fg">
+                Neither agent failed any case in this recording.
+              </p>
+            )}
+          </div>
+        </div>
+      </Section>
+    )
+  }
 
-    <ol class="mt-8 space-y-4">
-      {failed.map((entry) => {
-        const checks = failing(entry.assertions);
-        const own = entry.agentReport.trim() !== STEP_BUDGET_REPORT;
-        return (
-          <li class="overflow-hidden rounded-panel border border-line bg-surface">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line px-5 py-3">
-              <span class="rounded-pill border border-fail-line bg-fail-bg px-2 py-0.5 text-micro font-semibold uppercase text-fail">
-                Fail
-              </span>
-              <h3 class="text-support font-semibold text-fg">{entry.caseName}</h3>
-              <span class="text-meta text-muted">
-                {entry.category.replaceAll('_', ' ')}
-                {entry.unsafeActions > 0 && ` · ${entry.unsafeActions} unsafe`}
-              </span>
-            </div>
-            <div class="grid md:grid-cols-2">
-              <div class="border-b border-line p-5 md:border-b-0 md:border-r">
-                <h4 class="text-micro font-semibold uppercase text-muted">The model said</h4>
-                {own ? (
-                  <p class="mt-2 font-mono text-meta text-fg">&ldquo;{entry.agentReport.trim()}&rdquo;</p>
-                ) : (
-                  <p class="mt-2 text-meta text-muted">
-                    Nothing: it used every step it had without reporting a result.
-                  </p>
-                )}
-              </div>
-              <div data-theme="ink" class="bg-canvas p-5">
-                <h4 class="text-micro font-semibold uppercase text-muted">The system held</h4>
-                <ul class="mt-2 space-y-2">
-                  {checks.map((check) => (
-                    <li class="text-meta text-fg">
-                      {check.unsafe && <span class="font-semibold text-fail">Unsafe · </span>}
-                      <span class="text-secondary">{check.description}</span>
-                      <span class="block font-mono text-fg">{check.message}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
-  </Section>
+  {
+    stripe &&
+      agents.map((agent) => (
+        <Section ruled>
+          <div class="max-w-3xl">
+            <h2 class="text-title font-medium">
+              Agent <span class="font-mono">{agent.name}</span>
+            </h2>
+            {agent.variant && (
+              <p class="mt-2 text-support text-secondary">
+                {VARIANT_DESCRIPTIONS[agent.variant].replace(/^./, (first) => first.toUpperCase())}
+              </p>
+            )}
+            <p class="mt-2 text-support text-muted">
+              {[
+                `${count(agent.cases, 'PASS')} passed`,
+                `${count(agent.cases, 'FAIL')} failed`,
+                ...(undecided(agent.cases) > 0 ? [`${undecided(agent.cases)} with no verdict`] : []),
+              ].join(', ')}{' '}
+              of {agent.cases.length}, listed in the pre-registration’s order.
+            </p>
+          </div>
+          <ol class="mt-8 space-y-4">
+            {agent.ordered.map((entry) => (
+              <CaseRow entry={entry} level={3} headline={entry === replay.headline} />
+            ))}
+          </ol>
+        </Section>
+      ))
+  }
 
-  <Section ruled>
-    <h2 class="text-title font-medium">The {passed.length} cases it passed</h2>
-    <ul class="mt-6 max-w-3xl space-y-3">
-      {passed.map((entry) => (
-        <li class="text-support">
-          <span class="font-semibold text-pass">Pass</span>
-          <span class="text-fg"> {entry.caseName}</span>
-          <span class="block font-mono text-meta text-muted">&ldquo;{entry.agentReport.trim().split('\n')[0]}&rdquo;</span>
-        </li>
-      ))}
-    </ul>
-  </Section>
+  {
+    !stripe && (
+      <Section ruled>
+        <h2 class="text-title font-medium">The {failedFirst.length} cases it failed</h2>
+        <p class="mt-2 max-w-3xl text-support text-secondary">
+          Worst first, by the number of unsafe actions the system recorded.
+        </p>
+        <ol class="mt-8 space-y-4">
+          {failedFirst.map((entry) => (
+            <CaseRow entry={entry} level={3} />
+          ))}
+        </ol>
+      </Section>
+    )
+  }
+
+  {
+    !stripe && (
+      <Section ruled>
+        <h2 class="text-title font-medium">The {passedRest.length} cases it did not fail</h2>
+        <ul class="mt-6 max-w-3xl space-y-3">
+          {passedRest.map((entry) => (
+            <li class="text-support">
+              <span class:list={['font-semibold', entry.outcome === 'PASS' ? 'text-pass' : 'text-warn']}>
+                {entry.outcome === 'PASS' ? 'Pass' : entry.outcome.replaceAll('_', ' ').toLowerCase()}
+              </span>
+              <span class="text-fg"> {entry.caseName}</span>
+              {entry.said && (
+                <span class="block font-mono text-meta text-muted">
+                  &ldquo;{entry.said.split('\n')[0]}&rdquo;
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Section>
+    )
+  }
+
+  {
+    replay.discarded.length > 0 && (
+      <Section ruled tight>
+        <div class="max-w-3xl">
+          <h2 class="text-title font-medium">Recordings discarded before this one</h2>
+          <p class="mt-2 text-support text-secondary">
+            A recording that cannot complete because of a harness failure is discarded whole and made
+            again. These are the ones that were, as the recording lists them.
+          </p>
+          <ul class="mt-4 space-y-2">
+            {replay.discarded.map((entry) => (
+              <li class="break-words font-mono text-meta text-secondary">
+                {typeof entry === 'string' ? entry : JSON.stringify(entry)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Section>
+    )
+  }
 
   <Section ruled>
     <div class="max-w-3xl">
       <h2 class="text-title font-medium">Checking this page</h2>
       <p class="mt-3 text-support text-secondary">
-        The recording carries the SHA-256 of the run it holds,
+        The recording,
+        <a class="rr-link font-mono text-meta" href={`${REPO_URL}/blob/master/${replay.path}`}>{replay.path}</a>,
+        carries the SHA-256 of the run it holds,
         <span class="break-all font-mono text-meta">{replay.resultHash}</span>. This page is not built
-        if the run does not match it, and <span class="font-mono text-meta">rigorrun demo</span> will
-        not show it. <span class="font-mono text-meta">npx rigorrun demo --json</span> prints the
-        whole recording, and <span class="font-mono text-meta">npx rigorrun demo --live</span> runs the
-        pipeline on your machine now.
+        if the run does not match it.
+        {
+          !stripe && (
+            <>
+              <span class="font-mono text-meta">rigorrun demo</span> will not show it either.
+              <span class="font-mono text-meta">npx rigorrun demo --json</span> prints the whole
+              recording, and <span class="font-mono text-meta">npx rigorrun demo --live</span> runs the
+              pipeline on your machine now.
+            </>
+          )
+        }
       </p>
     </div>
   </Section>

@@ -1,6 +1,6 @@
 {
   "name": "rigorrun",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Acceptance testing for tool-using AI agents. Connect your system, show it one job, connect your agent, get a trustworthy pass or fail.",
   "keywords": [
     "mcp",
@@ -51,6 +51,7 @@
     "@rigorrun/core": "workspace:*",
     "@rigorrun/daemon": "workspace:*",
     "@rigorrun/env-mcp": "workspace:*",
+    "@rigorrun/env-stripe": "workspace:*",
     "@rigorrun/environment": "workspace:*",
     "@rigorrun/environments": "workspace:*",
     "@rigorrun/exec": "workspace:*",

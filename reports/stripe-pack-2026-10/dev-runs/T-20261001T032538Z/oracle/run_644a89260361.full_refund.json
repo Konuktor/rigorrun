@@ -1,0 +1,1 @@
+{"attempt": "0", "case": "full_refund", "due": [{"amount": 2500, "charge": "ch_uWZ4NvGcD4lR23QzVGuR0mNH"}], "extra": [], "label": "PASS", "livemode_ok": false, "metadata_ok": true, "missing": [], "notes": ["refund re_x1qW0lkc4eMrUiVJcRVOAEWK did not report livemode false"], "observed": [{"amount": 2500, "charge": "ch_uWZ4NvGcD4lR23QzVGuR0mNH"}]}

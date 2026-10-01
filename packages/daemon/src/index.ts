@@ -17,3 +17,4 @@ export * from './drivenAgent.ts';
 export * from './service.ts';
 export * from './pairing.ts';
 export * from './server.ts';
+export * from './packConnection.ts';

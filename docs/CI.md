@@ -7,12 +7,12 @@ no person.
 
 ## Exit codes
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Passed. |
-| `1` | The agent failed, or the gate was not met. |
-| `2` | Something is wrong with the setup. |
-| `3` | It ran, but too many cases reached no verdict: RigorRun abstained for lack of evidence, or the harness failed. Raise `--max-inconclusive` only if you mean it. |
+| Code | Meaning                                                                                                                                                        |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | Passed.                                                                                                                                                        |
+| `1`  | The agent failed, or the gate was not met.                                                                                                                     |
+| `2`  | Something is wrong with the setup.                                                                                                                             |
+| `3`  | It ran, but too many cases reached no verdict: RigorRun abstained for lack of evidence, or the harness failed. Raise `--max-inconclusive` only if you mean it. |
 
 A build server cannot tell those apart from prose, so `2` never means "the agent
 was bad" — it means RigorRun could not run the question — and `3` never means
@@ -67,7 +67,41 @@ A gate that passed against a system nothing could be read back from is a
 different claim from one that passed against a system that could, so both
 travel together.
 
-## GitHub Actions
+## GitHub Action
+
+```yaml
+- name: RigorRun gate
+  uses: Konuktor/rigorrun@v0.4.0
+  with:
+    project: ${{ vars.RIGORRUN_PROJECT }}
+    version: 0.4.0
+    min-success: '0.95'
+    report: rigorrun-report.html
+    node-version: 22
+  env:
+    RIGORRUN_SECRET__DESK_TOKEN: ${{ secrets.DESK_TOKEN }}
+```
+
+The action runs the pinned CLI version, writes a Markdown gate summary even
+when the gate fails, and uploads the HTML report as a workflow artifact.
+
+| Input           | Required | Default                             | Meaning                                                                                      |
+| --------------- | -------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| `project`       | Yes      | —                                   | Project id passed to `gate --project`.                                                       |
+| `version`       | No       | `0.4.0`                             | Exact npm package version. The action never defaults to `latest`.                            |
+| `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                                                    |
+| `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.                                       |
+| `rigorrun-home` | No       | `${{ github.workspace }}/.rigorrun` | Project store, exported as `RIGORRUN_HOME`.                                                  |
+| `node-version`  | No       | `22`                                | Node.js version installed by the action.                                                     |
+| `cli`           | No       | —                                   | Local CLI command for action development, for example `pnpm rigorrun`; normally leave empty. |
+
+The `verdict` output is `PASS`, `FAIL`, `INCONCLUSIVE`, or `ERROR`. The
+`exit-code` output preserves RigorRun's numeric gate code. Credentials named by
+the project are supplied on the action step as
+`RIGORRUN_SECRET__<NAME>: ${{ secrets.NAME }}`. The action does not print the
+environment.
+
+### Without the action
 
 ```yaml
 name: agent acceptance
@@ -87,7 +121,7 @@ jobs:
       - run: docker compose up -d staging
 
       - run: npx rigorrun gate --project ${{ vars.RIGORRUN_PROJECT }}
-             --min-success 0.95
+          --min-success 0.95
         env:
           RIGORRUN_HOME: ${{ github.workspace }}/.rigorrun
           # A credential the project names DESK_TOKEN arrives as

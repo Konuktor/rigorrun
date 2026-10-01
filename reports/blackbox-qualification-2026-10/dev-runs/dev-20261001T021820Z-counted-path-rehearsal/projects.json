@@ -1,0 +1,52 @@
+{
+  "update": {
+    "job": "update",
+    "home": "../../../../tmp/claude-1000/-home-erbol/42fbeb78-2e0e-4d95-8987-9e9230a3e1ec/scratchpad/rehearsal/state/counted/homes/update",
+    "projectId": "p_77afb2b5ff98",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path",
+      "malformed_input",
+      "missing_precondition"
+    ],
+    "caseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ],
+    "benchmarkSha256": "e4d3d3a6c265f42fc4f18f6e94b63381b1cb454605b3bdf6d793200d3b820d34",
+    "productCommit": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+    "agents": {
+      "correct": "a_5a3e9420",
+      "wrong_value": "a_325fa0e6",
+      "wrong_entity": "a_3d93b9ac",
+      "did_nothing": "a_27f74589",
+      "extra_note": "a_0b12134e",
+      "second_write": "a_a0fdcd96"
+    }
+  },
+  "create": {
+    "job": "create",
+    "home": "../../../../tmp/claude-1000/-home-erbol/42fbeb78-2e0e-4d95-8987-9e9230a3e1ec/scratchpad/rehearsal/state/counted/homes/create",
+    "projectId": "p_593a6ad54b10",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path"
+    ],
+    "caseIds": [
+      "case_live__happy_path"
+    ],
+    "benchmarkSha256": "dc19820071dcb3555571fab2bb604c7f265e68bd5ab7cbea97d7de97068efb5d",
+    "productCommit": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+    "agents": {
+      "correct": "a_6c6057fa",
+      "wrong_value": "a_b19aca83",
+      "wrong_entity": "a_83d52558",
+      "did_nothing": "a_754dba1c",
+      "extra_note": "a_869f98a0",
+      "second_write": "a_ab0c0e49"
+    }
+  }
+}

@@ -15,7 +15,13 @@
  * forgotten in a serialiser, a file has to be opened on purpose.
  */
 import { z } from 'zod';
-import { BUDGET_MARGIN_MS, DEFAULT_CASE_TIMEOUT_MS, DEFAULT_TOOL_CALL_TIMEOUT_MS } from '@rigorrun/core';
+import {
+  BUDGET_MARGIN_MS,
+  DEFAULT_CASE_TIMEOUT_MS,
+  DEFAULT_TOOL_CALL_TIMEOUT_MS,
+} from '@rigorrun/core';
+import { getPack, hasPack, type PackConnectionConfig } from '@rigorrun/environment';
+import { redactEndpoint } from './blackBoxAgent.ts';
 
 export const PROJECT_SCHEMA_VERSION = 1;
 
@@ -91,7 +97,10 @@ const OpenApiConnectorBaseSchema = z.object({
  * OpenAPI document it is what makes a verdict independent of the connection
  * the agent used (audit R-2). Its tools are nominated as `verifier:<tool>`.
  */
-const VerifierConnectorSchema = z.discriminatedUnion('kind', [McpConnectorBaseSchema, OpenApiConnectorBaseSchema]);
+const VerifierConnectorSchema = z.discriminatedUnion('kind', [
+  McpConnectorBaseSchema,
+  OpenApiConnectorBaseSchema,
+]);
 
 // Optional rather than defaulted on these two, so a project written before a
 // verifier existed — or written by hand — needs no new field to be valid.
@@ -104,8 +113,7 @@ export const OpenApiConnectorSchema = OpenApiConnectorBaseSchema.extend({
 
 /** A connector that opens one connection: what a verifier may be. */
 export type DirectConnector =
-  | z.infer<typeof McpConnectorBaseSchema>
-  | z.infer<typeof OpenApiConnectorBaseSchema>;
+  z.infer<typeof McpConnectorBaseSchema> | z.infer<typeof OpenApiConnectorBaseSchema>;
 
 export const BrowserConnectorSchema = z.object({
   kind: z.literal('browser'),
@@ -127,6 +135,34 @@ export const BrowserConnectorSchema = z.object({
 });
 
 /**
+ * A system RigorRun ships its own client for — see `@rigorrun/environment`'s
+ * `pack.ts`.
+ *
+ * Everything the client needs beyond this is the pack's own business, so the
+ * project names the pack and says how to reach it and nothing more. In
+ * particular there is no command here and no header: the code that runs is
+ * code RigorRun shipped, registered by id, and the credential is a secret
+ * *name* like every other.
+ *
+ * `mode` has no default. Whether a run talks to the pack's local twin or to
+ * the real system is a decision about where records get created, and RigorRun
+ * does not make it on anybody's behalf.
+ */
+export const PackConnectorSchema = z.object({
+  kind: z.literal('pack'),
+  /** The registered pack's id. */
+  pack: z.string().min(1),
+  mode: z.enum(['twin', 'live']),
+  /** Where the system answers. Absent means the pack's own default for the mode. */
+  baseUrl: z.string().min(1).optional(),
+  /** The secret holding the credential. Absent means the pack's own default name. */
+  keySecret: z.string().min(1).optional(),
+  /** Settings only this pack understands. The pack validates them when it opens. */
+  options: z.unknown().optional(),
+});
+export type PackConnector = z.infer<typeof PackConnectorSchema>;
+
+/**
  * How this project reaches the system under test.
  *
  * A tagged union rather than one object with every field on it. The flat shape
@@ -140,6 +176,7 @@ export const ConnectorSchema = z.discriminatedUnion('kind', [
   McpConnectorSchema,
   OpenApiConnectorSchema,
   BrowserConnectorSchema,
+  PackConnectorSchema,
 ]);
 export type Connector = z.infer<typeof ConnectorSchema>;
 /**
@@ -160,6 +197,9 @@ export type OpenApiConnector = z.infer<typeof OpenApiConnectorSchema>;
  * being told their credential is missing when it is sitting right there.
  */
 export function secretNamesOf(connector: Connector | DirectConnector): string[] {
+  // A pack names at most one credential itself. When it names none, the
+  // pack's own default applies, and which name that is belongs to the pack.
+  if (connector.kind === 'pack') return connector.keySecret ? [connector.keySecret] : [];
   const names = [...connector.secretNames];
   if (connector.kind === 'openapi' && connector.oauth) {
     names.push(connector.oauth.clientIdSecret, connector.oauth.clientSecretSecret);
@@ -173,7 +213,14 @@ export function secretNamesOf(connector: Connector | DirectConnector): string[] 
 /** One line naming what a project connects to, for a list or a diagnostic. */
 export function describeConnector(connector: Connector | null): string {
   if (!connector) return 'not connected';
-  const verified = connector.kind !== 'browser' && connector.verifier ? ' · independently verified' : '';
+  if (connector.kind === 'pack') {
+    // The pack's own name where this build has it. A project can outlive the
+    // pack it was made with, and a listing must still say what it was.
+    const name = hasPack(connector.pack) ? getPack(connector.pack).name : connector.pack;
+    return `Pack · ${name} · ${connector.mode === 'twin' ? 'local twin' : 'live'}`;
+  }
+  const verified =
+    connector.kind !== 'browser' && connector.verifier ? ' · independently verified' : '';
   if (connector.kind === 'mcp') {
     return (
       (connector.transport === 'http' && connector.auth === 'oauth'
@@ -194,6 +241,14 @@ export function describeConnector(connector: Connector | null): string {
  * nobody can act on.
  */
 export function describeConnectorAction(connector: Connector): string {
+  if (connector.kind === 'pack') {
+    // Only the pack knows which address it will call and with what, so the
+    // whole truth has to come from it.
+    if (!hasPack(connector.pack)) {
+      return `open the "${connector.pack}" pack, which this build of RigorRun does not include`;
+    }
+    return getPack(connector.pack).describeAction(packConnectionConfig(connector));
+  }
   const own = describeOneConnectorAction(connector);
   // Opening a project with a verifier runs two things. The confirmation for an
   // imported project has to name both, or it is not the whole truth.
@@ -203,7 +258,9 @@ export function describeConnectorAction(connector: Connector): string {
   return own;
 }
 
-function describeOneConnectorAction(connector: Connector | DirectConnector): string {
+function describeOneConnectorAction(
+  connector: Exclude<Connector, PackConnector> | DirectConnector,
+): string {
   if (connector.kind === 'browser') {
     return `open a browser at ${connector.startUrl}`;
   }
@@ -218,6 +275,16 @@ function describeOneConnectorAction(connector: Connector | DirectConnector): str
   return connector.auth === 'oauth'
     ? `open ${connector.url}, and sign in to it in a browser if it asks`
     : `open ${connector.url}`;
+}
+
+/** A pack connector as the pack itself is handed it: names and settings, never values. */
+export function packConnectionConfig(connector: PackConnector): PackConnectionConfig {
+  return {
+    mode: connector.mode,
+    baseUrl: connector.baseUrl,
+    keySecret: connector.keySecret,
+    options: connector.options,
+  };
 }
 
 export const VerifierReadSchema = z.object({
@@ -314,6 +381,23 @@ export const BlackBoxAgentSchema = z.object({
   settleQuietMs: z.number().int().positive().default(5000),
 });
 
+/**
+ * A black-box agent as a person describes one — in the interface, through the
+ * API, or on the command line — before it is probed and stored.
+ *
+ * One schema for every way in, so the same mistake is refused the same way
+ * wherever it is typed.
+ */
+export const BlackBoxRequestSchema = z.object({
+  endpoint: z.string().min(1, 'an endpoint is required'),
+  allowedHosts: z.array(z.string()).default([]),
+  headers: z.record(z.string(), z.string()).default({}),
+  bodyTemplate: z.string().nullable().default(null),
+  completion: z.enum(['response', 'poll', 'settle']).default('response'),
+  claimPath: z.string().default('output'),
+  settleQuietMs: z.number().int().positive().max(600_000).default(5000),
+});
+
 export const AgentConfigSchema = z.discriminatedUnion('kind', [
   HttpAgentSchema,
   ProcessAgentSchema,
@@ -324,11 +408,25 @@ export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 export type HttpAgentConfig = z.infer<typeof HttpAgentSchema>;
 export type ProcessAgentConfigured = z.infer<typeof ProcessAgentSchema>;
 
-/** How to reach this agent, in one line. */
+/**
+ * How to reach this agent, in one line, for a person to read. An address is
+ * shown without its query: whatever is in one is not for a terminal or a log.
+ */
 export function describeAgent(agent: AgentConfig): string {
-  if (agent.kind === 'http') return agent.endpoint;
+  if (agent.kind === 'http') return redactEndpoint(agent.endpoint);
   // Not reached: RigorRun does not reach this one, which is the whole point of
   // it. The id is what distinguishes two of them on the same project.
+  if (agent.kind === 'external') return `driven by you (${agent.id})`;
+  if (agent.kind === 'blackbox') return `${redactEndpoint(agent.endpoint)} (black box)`;
+  return `${agent.command} ${agent.args.join(' ')}`.trim();
+}
+
+/**
+ * Where this agent is, in full: what makes two agents the same one. Never
+ * shown; `describeAgent` is what a person sees.
+ */
+export function agentAddress(agent: AgentConfig): string {
+  if (agent.kind === 'http') return agent.endpoint;
   if (agent.kind === 'external') return `driven by you (${agent.id})`;
   if (agent.kind === 'blackbox') return `${agent.endpoint} (black box)`;
   return `${agent.command} ${agent.args.join(' ')}`.trim();
@@ -458,7 +556,12 @@ export function parseProject(input: unknown): Project {
   return ProjectSchema.parse(input);
 }
 
-export function newProject(input: { id: string; name: string; goal?: string; now: string }): Project {
+export function newProject(input: {
+  id: string;
+  name: string;
+  goal?: string;
+  now: string;
+}): Project {
   return ProjectSchema.parse({
     schemaVersion: PROJECT_SCHEMA_VERSION,
     id: input.id,
@@ -499,14 +602,18 @@ export function nextSteps(project: Project): NextStep[] {
     });
     return steps;
   }
-  if (project.verifierReads.length === 0) {
+  // A pack reads what each case created through its own client, and ships
+  // its own suite, so there is nothing to nominate and no job to demonstrate.
+  // Asking for either would send somebody to do work that cannot be used.
+  const pack = project.connector.kind === 'pack';
+  if (!pack && project.verifierReads.length === 0) {
     steps.push({
       id: 'nominate_reads',
       what: 'Say which of your tools RigorRun can use to check what happened.',
       why: 'It calls them after your agent finishes, to look at your system rather than believe the agent.',
     });
   }
-  if (project.timings.workflowRecordedAt === null) {
+  if (!pack && project.timings.workflowRecordedAt === null) {
     steps.push({
       id: 'teach_a_job',
       what: 'Do the job once, so RigorRun can watch.',
@@ -514,11 +621,19 @@ export function nextSteps(project: Project): NextStep[] {
     });
   }
   if (project.timings.benchmarkGeneratedAt === null) {
-    steps.push({
-      id: 'generate',
-      what: 'Check what RigorRun worked out, then build the tests.',
-      why: 'Nothing it only guessed can fail your agent until you have said yes to it.',
-    });
+    steps.push(
+      pack
+        ? {
+            id: 'install_suite',
+            what: "Answer the pack's questions and install the suite it ships with.",
+            why: 'Its rules are proposals until you confirm them, and nothing unconfirmed can fail your agent.',
+          }
+        : {
+            id: 'generate',
+            what: 'Check what RigorRun worked out, then build the tests.',
+            why: 'Nothing it only guessed can fail your agent until you have said yes to it.',
+          },
+    );
   }
   if (project.agents.length === 0) {
     steps.push({

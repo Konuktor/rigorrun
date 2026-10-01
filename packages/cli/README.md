@@ -2,27 +2,46 @@
 
 # RigorRun
 
-**Your agent said it worked. RigorRun checks what it actually did.**
+**Your agent moves money. You're checking it by reading the transcript.**
 
-Show RigorRun a job once. It turns that into a repeatable acceptance suite and decides whether your
-agent is safe to ship by reading the system it changed — never by trusting what it says about itself.
+RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a local
+twin with no keys — and shows what actually happened beside what the agent said it did. The verdict
+comes from the state of the system your agent changed, never from what it says about itself.
 
-**Early Access · v0.3** — parts of it are honestly unfinished, and they are listed rather than hidden.
+**Early Access** — parts of it are honestly unfinished, and they are listed rather than hidden.
 
-[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [Evidence](https://rigorrun.xyz/evidence) · [What is and is not built](https://rigorrun.xyz/what-is-built)
+[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [A recorded run](https://rigorrun.xyz/replay) · [What is and is not built](https://rigorrun.xyz/what-is-built)
 
 </div>
 
 ```bash
-npx rigorrun demo    # a real recorded run, replayed offline in a second
-npx rigorrun         # your own system and agent, in the local interface
+npx rigorrun demo    # a recorded run, replayed offline; no keys, no account
 ```
 
-`demo` replays a real model working a bundled support desk: what it said beside what the system held
+`demo` replays a real model working a support desk: what it said beside what the system held
 afterwards. The same run, case by case, is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
 
-`npx rigorrun` opens a local interface. Everything runs on your machine: there is no account, and no
-hosted component to send your systems to.
+### Your Stripe agent, no code changes
+
+```bash
+npx rigorrun stripe twin                                   # a local Stripe twin; leave it running
+npx rigorrun stripe init --twin --yes                      # the Stripe pack's tickets, as a project
+npx rigorrun agent add --project <id> --name my-agent \
+  --black-box <agent URL> --claim-path message             # your agent's endpoint, as it runs today
+npx rigorrun gate --project <id> --report report.html      # exit 1 when a case fails
+```
+
+No change to your agent's code: RigorRun sends each ticket to the endpoint your agent already
+serves (map your request shape with `--body-template`) and reads Stripe itself. Your agent keeps its
+own Stripe test key — or, for the local twin, its Stripe base URL points at the twin.
+
+Against your Stripe test mode, `stripe init` takes a test key instead of `--twin`; live keys are
+refused. The [Stripe guide](https://docs.rigorrun.xyz/start/stripe) has the whole path, including
+the canary and the GitHub Action.
+
+`npx rigorrun` opens a local interface for any other system RigorRun can reach and read back.
+Everything runs on your machine: there is no account, and no hosted component to send your systems
+to.
 
 ---
 
@@ -49,8 +68,9 @@ most tools:   you write the tests   →  the tool runs them
    be.
 3. **Rule on what it worked out.** It shows the evidence behind each proposed rule. A rule you
    reject cannot fail your agent.
-4. **Connect your agent** — unchanged, wherever it runs: RigorRun sends each case's work to a URL it
-   already serves and reads the result from your system (a black box). Or an HTTP endpoint, a local
+4. **Connect your agent** — no change to its code, wherever it runs: RigorRun sends each case's work
+   to the endpoint it already serves (map your request shape with `--body-template`) and reads the
+   result from your system (a black box). Or an HTTP endpoint, a local
    command, or your own loop pulling work.
 5. **Run it.** A verdict, with how strongly each answer could be verified.
 6. **Gate the next change** in CI.
@@ -60,7 +80,24 @@ available from the command line, which is the half CI needs.
 
 ```bash
 rigorrun gate --project <id>     # exit 1 stops the build
+rigorrun gate --project <id> --case <case-id>          # only the cases you name; never the baseline
+rigorrun agent add --project <id> --black-box <url>    # connect an agent from a script; probed first
 ```
+
+## A Stripe refund agent
+
+```bash
+rigorrun stripe twin                          # a local twin of Stripe's API; no keys
+rigorrun stripe init --twin --yes             # or: STRIPE_TEST_KEY=sk_test_… rigorrun stripe init --safety staging
+rigorrun agent add --project <id> --name my-agent --black-box <url> --claim-path message
+rigorrun stripe canary --project <id> --agent my-agent
+rigorrun gate --project <id> --report report.html
+```
+
+Every case creates its own customer and payments; RigorRun reads them back with its own test key
+and judges the agent on what Stripe holds. Keys must be test-mode keys, confirmed by Stripe before
+anything is stored; live mode is never used. Verdicts are `PARTIAL` and print what their reads
+covered. [The walkthrough](https://docs.rigorrun.xyz/start/stripe/).
 
 ## Verify a published MCP server
 

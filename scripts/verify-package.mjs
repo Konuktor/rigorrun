@@ -23,8 +23,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const pkgDir = join(root, 'packages', 'cli');
 /** What actually gets packed: assembled by build.mjs, no workspace wiring. */
 const stageDir = join(pkgDir, 'package');
-/** A tarball bigger than this is a mistake somebody should have to justify. */
-const MAX_PACKED_KB = 600;
+/**
+ * A tarball bigger than this is a mistake somebody should have to justify.
+ * 600 → 700 at 0.4.0: `rigorrun demo` now ships two recorded runs (the Stripe
+ * one and the Northstar one, about 25kB packed together), so it plays offline.
+ */
+const MAX_PACKED_KB = 700;
 
 const ESC = String.fromCharCode(27);
 const red = (t) => `${ESC}[31m${t}${ESC}[0m`;
