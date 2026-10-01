@@ -18,6 +18,7 @@ import { explainCase } from '@rigorrun/report';
 // Bundled into the published CLI by esbuild, so the default demo needs no file,
 // no network and no model at the other end.
 import recorded from '../../../fixtures/replays/demo-replay.json' with { type: 'json' };
+import { caseLines, clip } from './caseLines.ts';
 import { CliError } from './io.ts';
 import { c, heading, line } from './ui.ts';
 
@@ -48,13 +49,20 @@ export function hashRun(run: RunResult): string {
 }
 
 export function verifyReplay(replay: Replay): void {
-  if (replay.format !== REPLAY_FORMAT) throw new CliError(`Unknown replay format ${String(replay.format)}.`);
+  if (replay.format !== REPLAY_FORMAT)
+    throw new CliError(`Unknown replay format ${String(replay.format)}.`);
   if (hashRun(replay.run) !== replay.resultHash) {
-    throw new CliError('The bundled replay does not match the hash it was recorded with, so it is not shown.');
+    throw new CliError(
+      'The bundled replay does not match the hash it was recorded with, so it is not shown.',
+    );
   }
 }
 
-/** The replay, as a person reads it: which cases, and the agent's words beside what the system showed. */
+/**
+ * The replay, as a person reads it: which cases, and the agent's words beside
+ * what the system showed — the checks' findings, and the system's own account
+ * where the recording carries one.
+ */
 export function printReplay(replay: Replay, options: { show?: number; list?: number } = {}): void {
   verifyReplay(replay);
   const run = replay.run;
@@ -65,8 +73,16 @@ export function printReplay(replay: Replay, options: { show?: number; list?: num
   const unsafe = cases.reduce((sum, entry) => sum + entry.unsafeActions, 0);
 
   heading('RigorRun — a recorded run, replayed');
-  line(c.grey(`${replay.model} (${replay.provider}) against ${replay.system}, recorded ${replay.recordedAt.slice(0, 10)} at ${replay.commit.slice(0, 7)}.`));
-  line(c.grey('A real run, replayed offline. Live results vary between runs; `rigorrun demo --live` runs one now.'));
+  line(
+    c.grey(
+      `${replay.model} (${replay.provider}) against ${replay.system}, recorded ${replay.recordedAt.slice(0, 10)} at ${replay.commit.slice(0, 7)}.`,
+    ),
+  );
+  line(
+    c.grey(
+      'A real run, replayed offline. Live results vary between runs; `rigorrun demo --live` runs one now.',
+    ),
+  );
   line();
   line(
     `${cases.length} cases   ${c.green(`${count('PASS')} passed`)}   ${c.red(`${count('FAIL')} failed`)}` +
@@ -83,12 +99,18 @@ export function printReplay(replay: Replay, options: { show?: number; list?: num
   for (const entry of inFull) {
     const explained = explainCase(entry);
     line();
-    line(`${c.red('FAIL')}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`);
-    line(`  ${c.grey('agent said  ')}  ${clip(explained.claim.split('\n')[0]!, 220)}`);
-    for (const [index, seen] of explained.saw.slice(0, SAW_LINES).entries()) {
-      line(`  ${c.grey(index === 0 ? 'RigorRun saw' : '            ')}  ${seen}`);
+    line(
+      `${c.red('FAIL')}  ${entry.caseName}${explained.evidence ? c.grey(`  (${explained.evidence})`) : ''}`,
+    );
+    for (const text of caseLines(explained, {
+      claim: 220,
+      reality: REALITY_LINES,
+      saw: SAW_LINES,
+      notChecked: 0,
+      readScope: false,
+    })) {
+      line(text);
     }
-    if (explained.saw.length > SAW_LINES) line(`  ${' '.repeat(12)}  ${c.grey(`and ${explained.saw.length - SAW_LINES} more`)}`);
   }
 
   // The rest, a line each: the first thing that went wrong, as the check put it.
@@ -100,18 +122,29 @@ export function printReplay(replay: Replay, options: { show?: number; list?: num
     for (const entry of listed) {
       const failing = entry.assertions.filter((a) => a.status === 'FAIL' || a.status === 'ERROR');
       const first = failing.find((a) => a.unsafe) ?? failing[0];
-      line(`  ${c.red('x')} ${entry.caseName}${first ? c.grey(`  ${clip(first.message, 110)}`) : ''}`);
+      line(
+        `  ${c.red('x')} ${entry.caseName}${first ? c.grey(`  ${clip(first.message, 110)}`) : ''}`,
+      );
     }
   }
   if (rest.length > listed.length) line(c.grey(`  and ${rest.length - listed.length} more.`));
   line();
-  line(c.grey('`rigorrun demo --report demo.html` writes every case, with its evidence, to one page.'));
-  line(c.grey(`Verification ${run.verification}. The agent's words are shown beside the evidence and never scored.`));
+  line(
+    c.grey('`rigorrun demo --report demo.html` writes every case, with its evidence, to one page.'),
+  );
+  line(
+    c.grey(
+      `Verification ${run.verification}. The agent's words are shown beside the evidence and never scored.`,
+    ),
+  );
   line();
-  line(`${c.bold('Your own agent')}  npx rigorrun   — connect a system, show it the job once, send your agent the work.`);
+  line(
+    `${c.bold('Your own agent')}  npx rigorrun   — connect a system, show it the job once, send your agent the work.`,
+  );
 }
 
 const SAW_LINES = 2;
+const REALITY_LINES = 3;
 
 /**
  * Whether the report is the agent's own. An LLM agent that runs out of steps
@@ -121,10 +154,6 @@ const SAW_LINES = 2;
 function ownAccount(entry: CaseResult): boolean {
   const report = entry.agentReport.trim();
   return report.length > 0 && report !== STEP_BUDGET_REPORT;
-}
-
-function clip(text: string, max: number): string {
-  return text.length <= max ? text : `${text.slice(0, max - 1)}…`;
 }
 
 function worstOfEachKind(failed: readonly CaseResult[]): CaseResult[] {

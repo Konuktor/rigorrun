@@ -13,7 +13,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { CaseResult } from '@rigorrun/core';
+import { CASE_BINDINGS_ENV, type CaseResult } from '@rigorrun/core';
 import { afterCaseHook } from '../src/afterCase.ts';
 import { main } from '../src/main.ts';
 
@@ -41,6 +41,7 @@ const finished = (over: Partial<CaseResult>): CaseResult =>
     caseId: 'case_live__happy_path',
     category: 'happy_path',
     outcome: 'PASS',
+    startedAt: '2026-10-01T00:00:00.000Z',
     ...over,
   }) as CaseResult;
 
@@ -60,15 +61,80 @@ describe('afterCaseHook', () => {
     try {
       const hook = afterCaseHook(recorder);
       await hook(finished({ caseId: 'case_a' }), 0);
-      await hook(finished({ caseId: 'case_b', category: 'missing_precondition', outcome: 'FAIL' }), 1);
+      await hook(
+        finished({ caseId: 'case_b', category: 'missing_precondition', outcome: 'FAIL' }),
+        1,
+      );
     } finally {
       delete process.env['RIGORRUN_UNRELATED_TOKEN'];
     }
-    const lines = (await readFile(out, 'utf8')).trim().split('\n').map((entry) => JSON.parse(entry) as Record<string, string>);
+    const lines = (await readFile(out, 'utf8'))
+      .trim()
+      .split('\n')
+      .map((entry) => JSON.parse(entry) as Record<string, string>);
     expect(lines).toEqual([
-      { RIGORRUN_RUN_ID: 'run_1', RIGORRUN_AGENT_ID: 'agent_1', RIGORRUN_CASE_ID: 'case_a', RIGORRUN_CASE_INDEX: '0', RIGORRUN_CASE_OUTCOME: 'PASS', RIGORRUN_CASE_CATEGORY: 'happy_path' },
-      { RIGORRUN_RUN_ID: 'run_1', RIGORRUN_AGENT_ID: 'agent_1', RIGORRUN_CASE_ID: 'case_b', RIGORRUN_CASE_INDEX: '1', RIGORRUN_CASE_OUTCOME: 'FAIL', RIGORRUN_CASE_CATEGORY: 'missing_precondition' },
+      {
+        RIGORRUN_RUN_ID: 'run_1',
+        RIGORRUN_AGENT_ID: 'agent_1',
+        RIGORRUN_CASE_ID: 'case_a',
+        RIGORRUN_CASE_INDEX: '0',
+        RIGORRUN_CASE_OUTCOME: 'PASS',
+        RIGORRUN_CASE_CATEGORY: 'happy_path',
+      },
+      {
+        RIGORRUN_RUN_ID: 'run_1',
+        RIGORRUN_AGENT_ID: 'agent_1',
+        RIGORRUN_CASE_ID: 'case_b',
+        RIGORRUN_CASE_INDEX: '1',
+        RIGORRUN_CASE_OUTCOME: 'FAIL',
+        RIGORRUN_CASE_CATEGORY: 'missing_precondition',
+      },
     ]);
+  });
+
+  it('hands over the records a case was bound to, with the attempt and when it started', async () => {
+    const out = join(dir, 'bound.jsonl');
+    const recorder = await program(
+      'bound.cjs',
+      [
+        '#!/usr/bin/env node',
+        "const fs = require('node:fs');",
+        `const keys = ["RIGORRUN_CASE_ID", "RIGORRUN_CASE_ATTEMPT", "RIGORRUN_CASE_STARTED_AT", ${JSON.stringify(CASE_BINDINGS_ENV)}];`,
+        `fs.appendFileSync(${JSON.stringify(out)}, JSON.stringify(Object.fromEntries(keys.map((k) => [k, process.env[k] ?? null]))) + "\\n");`,
+      ].join('\n'),
+    );
+    const hook = afterCaseHook(recorder);
+    await hook(
+      finished({
+        caseId: 'case_a',
+        attempt: 2,
+        startedAt: '2026-10-01T01:02:03.000Z',
+        materialized: { record: 'rec_0001', label: 'a label, with "quotes"' },
+      }),
+      0,
+    );
+    // A case that was not materialized has no bindings, and is not told it has empty ones.
+    await hook(finished({ caseId: 'case_b' }), 1);
+    const lines = (await readFile(out, 'utf8'))
+      .trim()
+      .split('\n')
+      .map((entry) => JSON.parse(entry) as Record<string, string | null>);
+    expect(lines[0]).toEqual({
+      RIGORRUN_CASE_ID: 'case_a',
+      RIGORRUN_CASE_ATTEMPT: '2',
+      RIGORRUN_CASE_STARTED_AT: '2026-10-01T01:02:03.000Z',
+      [CASE_BINDINGS_ENV]: JSON.stringify({ record: 'rec_0001', label: 'a label, with "quotes"' }),
+    });
+    expect(JSON.parse(lines[0]![CASE_BINDINGS_ENV]!)).toEqual({
+      record: 'rec_0001',
+      label: 'a label, with "quotes"',
+    });
+    expect(lines[1]).toEqual({
+      RIGORRUN_CASE_ID: 'case_b',
+      RIGORRUN_CASE_ATTEMPT: null,
+      RIGORRUN_CASE_STARTED_AT: '2026-10-01T00:00:00.000Z',
+      [CASE_BINDINGS_ENV]: null,
+    });
   });
 
   it('stops the run with exit code 2, naming the case, when the program fails', async () => {
@@ -80,7 +146,9 @@ describe('afterCaseHook', () => {
   });
 
   it('refuses a shell command line, because it never runs one', async () => {
-    await expect(afterCaseHook('echo reading | cat')(finished({ caseId: 'case_a' }), 0)).rejects.toMatchObject({
+    await expect(
+      afterCaseHook('echo reading | cat')(finished({ caseId: 'case_a' }), 0),
+    ).rejects.toMatchObject({
       exitCode: 2,
       message: expect.stringMatching(/shell punctuation/),
     });
