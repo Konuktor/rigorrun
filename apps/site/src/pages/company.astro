@@ -7,24 +7,24 @@ import { FOUNDER, CONTACT_EMAIL, REPO_URL, VERSION, contactHref, contactLabel } 
 ---
 <Base
   title="Company"
-  description="RigorRun is built by Erbol Tahirov. Acceptance infrastructure for agents that take real actions — what it is, where it is, and what has not happened yet."
+  description="RigorRun is built by Erbol Tahirov: permission and scope tests for agents that act for many customers, decided from the real system — where it is, and what has not happened yet."
 >
   <Section>
     <div class="rr-prose-width">
       <Eyebrow>Company</Eyebrow>
       <h1 class="mt-4 text-display font-medium text-balance">
-        Agents are being given permission to change things. Almost nothing checks that they did.
+        An agent acts for many customers. Its permissions have to keep each one separate.
       </h1>
       <p class="mt-7 text-lead text-secondary">
-        Software teams have had a way to answer "did this change break the thing that matters" for
-        forty years. It is called an acceptance test, and it works because a machine can look at the
-        result. Agents arrived without one. The tools that exist score what the model wrote, which is
-        the one artefact that cannot tell you whether the work happened.
+        RigorRun tests whether an agent that acts for many customers through the same tools stays with
+        the one it is acting for. The verdict is decided from the real system: what changed, and for
+        whom, after the agent finished. What the agent said is shown beside that evidence and never
+        scored.
       </p>
       <p class="mt-5 text-lead text-secondary">
-        RigorRun is the missing half: watch a person do the job once, derive what the rules must be,
-        and then verify an agent against the state of the system rather than its own account of
-        itself.
+        Stripe refunds are the qualified pack available now. The founder is looking for 3–5 design
+        partners whose agents act across customer boundaries, so the checks being built next start
+        with the permissions their systems actually have to enforce.
       </p>
     </div>
   </Section>
@@ -50,6 +50,19 @@ import { FOUNDER, CONTACT_EMAIL, REPO_URL, VERSION, contactHref, contactLabel } 
       <div>
         <h2 class="text-title font-medium">Where it actually is</h2>
         <dl class="mt-5 ruled rounded-panel border border-line bg-surface">
+          <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:gap-6">
+            <dt class="w-40 shrink-0 text-micro font-semibold uppercase text-muted">Verified against</dt>
+            <dd class="text-support text-secondary">
+              <a
+                class="rr-link"
+                href="https://github.com/Konuktor/rigorrun/tree/master/reports/stripe-pack-2026-10"
+              >Stripe refunds</a>: 168 cells on the local twin and 168 on Stripe test mode, with no
+              false pass or false fail; <a
+                class="rr-link"
+                href="https://github.com/Konuktor/rigorrun/tree/master/reports/blackbox-qualification-2026-10"
+              >black-box mode</a>, 36 of 36 cells.
+            </dd>
+          </div>
           {
             [
               ['Published', `rigorrun@${VERSION} on npm, MIT, with SLSA build provenance`],
