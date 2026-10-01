@@ -153,7 +153,7 @@ let nextSlot = 0;
 /**
  * One model request: paced `minIntervalMs` apart across every chat in the process, and retried on
  * 429 and 503 after the wait the provider asks for (Retry-After seconds, or Gemini's RetryInfo), else a
- * doubling backoff. Anything else that is not a 2xx throws: a model that could not be reached is a
+ * doubling backoff; a transport failure (DNS, a dropped connection) is retried the same way. Anything else that is not a 2xx throws: a model that could not be reached is a
  * harness failure, never a verdict about the agent.
  * @param {ChatConfig} config @param {URL} url @param {Record<string, string>} headers
  * @param {object} body @param {Log} log
@@ -165,12 +165,25 @@ async function post(config, url, headers, body, log) {
     nextSlot = slot + (config.minIntervalMs ?? 0);
     while (Date.now() < slot) await sleep(slot - Date.now());
     log('llm_request', { url: url.href, attempt, body });
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', ...headers },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(180_000),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', ...headers },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(180_000),
+      });
+    } catch (error) {
+      // A dropped connection or a failed DNS lookup on this machine is not the model's answer:
+      // try again after a doubling wait, a few times, then give up as a harness failure.
+      const transport = !(error instanceof Error && error.name === 'TimeoutError');
+      log('llm_transport_error', { attempt, error: String(error) });
+      if (transport && attempt < 5) {
+        await sleep(1000 * 2 ** attempt);
+        continue;
+      }
+      throw error;
+    }
     const text = await response.text();
     const reply = parseJson(text, { unparsed: text.slice(0, 4000) });
     log('llm_response', { status: response.status, attempt, body: reply });

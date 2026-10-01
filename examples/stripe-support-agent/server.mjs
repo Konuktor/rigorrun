@@ -195,8 +195,21 @@ async function stripe(method, path, log, { query, form, idempotencyKey } = {}) {
     ...(form && { 'content-type': 'application/x-www-form-urlencoded' }),
     ...(idempotencyKey && { 'idempotency-key': idempotencyKey }),
   };
-  const signal = AbortSignal.timeout(30_000);
-  const response = await fetch(url, { method, headers, body, redirect: 'error', signal });
+  // A read is safe to repeat, and so is a write that carries its Idempotency-Key: Stripe replays it
+  // rather than doing it twice. A transport failure (DNS, a dropped connection) is retried for those.
+  const repeatable = method === 'GET' || Boolean(idempotencyKey);
+  let response;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const signal = AbortSignal.timeout(30_000);
+      response = await fetch(url, { method, headers, body, redirect: 'error', signal });
+      break;
+    } catch (error) {
+      log('stripe_transport_error', { method, path: url.pathname, attempt, error: String(error) });
+      if (!repeatable || attempt >= 5) throw error;
+      await new Promise((done) => setTimeout(done, 1000 * 2 ** attempt));
+    }
+  }
   log('stripe', {
     method,
     path: url.pathname + url.search,
