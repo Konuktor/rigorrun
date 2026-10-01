@@ -18,6 +18,7 @@
  * API and a message about building one. There is no second step.
  */
 import { build } from 'esbuild';
+import { createHash } from 'node:crypto';
 import { chmod, cp, mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
@@ -72,6 +73,41 @@ await build({
   logLevel: 'warning',
 });
 await chmod(join(here, 'dist', 'rigorrun.mjs'), 0o755);
+
+// The flagship recording, when there is one.
+//
+// `rigorrun demo` replays it in preference to the synthetic example's, which
+// esbuild bundles above. It does not exist until it has been recorded under
+// reports/flagship-demo-2026-10/PREREGISTRATION.md, and a build before then is
+// a normal build: the demo replays the synthetic example. When it exists it
+// travels beside the bundle in `dist/`, where `src/replay.ts` looks for it,
+// and only if its run still matches the hash it was recorded with — an edited
+// recording is refused here rather than shipped and refused on somebody's
+// machine.
+const flagshipName = 'stripe-replay.json';
+const flagshipSource = join(root, 'fixtures', 'replays', flagshipName);
+const flagshipText = await readFile(flagshipSource, 'utf8').catch(() => undefined);
+if (flagshipText === undefined) {
+  console.log(`no ${flagshipName} to bundle; \`rigorrun demo\` replays the synthetic example`);
+} else {
+  const flagship = JSON.parse(flagshipText);
+  const hash = createHash('sha256').update(JSON.stringify(flagship.run)).digest('hex');
+  if (flagship.pilot === true) {
+    console.error(
+      `fixtures/replays/${flagshipName} is a pilot run, which is never evidence. Not bundled.`,
+    );
+    process.exit(1);
+  }
+  if (flagship.format !== 'rigorrun/replay/1' || hash !== flagship.resultHash) {
+    console.error(
+      `fixtures/replays/${flagshipName} does not match the hash it was recorded with.\n` +
+        'Re-record it rather than edit it; an edited recording is not shipped.',
+    );
+    process.exit(1);
+  }
+  await writeFile(join(here, 'dist', flagshipName), flagshipText);
+  console.log(`bundled the flagship recording (${flagship.model}, ${flagship.recordedAt})`);
+}
 
 // The interface.
 //

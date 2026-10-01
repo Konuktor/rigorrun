@@ -1109,9 +1109,15 @@ export class Service {
                 },
               }
             : {}),
-          suiteQuality: suiteQualityOf(
-            await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality'),
-          ),
+          // A pack's suite is refused the suite check, so it is never "unassessed"
+          // in the sense that has a remedy: it was qualified with the pack.
+          ...(pack
+            ? { suiteQuality: packSuiteQuality(pack.name), suiteFromPack: pack.name }
+            : {
+                suiteQuality: suiteQualityOf(
+                  await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality'),
+                ),
+              }),
         },
       );
     } catch (error) {
@@ -1566,6 +1572,30 @@ function payloadsAreEmpty(payloads: readonly unknown[]): boolean {
 
   for (const payload of payloads) walk(payload, 0);
   return sawContainer && !sawContent;
+}
+
+/**
+ * What a verdict carries about a suite that came with a pack.
+ *
+ * The suite check is refused for a pack's suite (`refuseForPack`): it measures
+ * suites induced from a demonstration, and a pack's is written by hand and
+ * qualified with the pack. So it is not assessed here, and the one warning
+ * says why, rather than repeating the unassessed suite's advice to run a check
+ * that will not run.
+ */
+export function packSuiteQuality(packName: string): SuiteQuality {
+  return {
+    assessed: false,
+    mutantKillRate: null,
+    independentKillRate: null,
+    falsePositiveRate: null,
+    replayStable: null,
+    hiddenAnswerIsolated: null,
+    deadRules: 0,
+    warnings: [
+      `this suite came with the ${packName} pack and was qualified with it, not by RigorRun's suite check, which measures suites induced from a demonstration`,
+    ],
+  };
 }
 
 /**

@@ -31,9 +31,17 @@ import { envFromProcess } from '@rigorrun/providers';
 import { pct } from '@rigorrun/scoring';
 import { CliError, readJson, writeJson, writeText, workspaceDir } from './io.ts';
 import { c, fmtMs, heading, line, ruleTag, statusTag, table } from './ui.ts';
-import { VERSION } from './help.ts';
+import { BUNDLED_EXAMPLE_FLAG, VERSION } from './help.ts';
 import { afterCaseHook } from './afterCase.ts';
-import { bundledReplay, printReplay, verifyReplay } from './replay.ts';
+import {
+  bundledReplay,
+  flagshipReplay,
+  isBundledExample,
+  printReplay,
+  readReplayFile,
+  verifyReplay,
+  type Replay,
+} from './replay.ts';
 
 export interface Flags {
   out?: string | undefined;
@@ -41,6 +49,14 @@ export interface Flags {
   workflow?: string | undefined;
   /** `rigorrun demo --live`: run the pipeline now instead of replaying the recorded run. */
   live?: boolean | undefined;
+  /** `rigorrun demo`: replay the bundled synthetic example even when the flagship is bundled. */
+  bundledExample?: boolean | undefined;
+  /**
+   * `rigorrun demo --replay <file>`: replay a recording from disk, held to the
+   * same checks as a bundled one. Undocumented: it is for looking at a
+   * recording before it is bundled, not something a newcomer needs.
+   */
+  replayFile?: string | undefined;
   agent: string[];
   repeats?: number | undefined;
   report?: string | undefined;
@@ -160,7 +176,7 @@ export async function cmdDemo(flags: Flags): Promise<number> {
  * and a verdict on the screen in the time it takes to read one.
  */
 async function cmdDemoReplay(flags: Flags): Promise<number> {
-  const replay = bundledReplay();
+  const replay = await chosenReplay(flags);
   if (flags.json) {
     verifyReplay(replay);
     line(JSON.stringify(replay, null, 2));
@@ -172,7 +188,9 @@ async function cmdDemoReplay(flags: Flags): Promise<number> {
       flags.report,
       renderReportHtml(replay.run, {
         generatedAt: replay.recordedAt,
-        syntheticEnvironment: true,
+        // Only the bundled example's system is fabricated; a flagship recording
+        // ran against a real system or its twin, and its run says which.
+        syntheticEnvironment: isBundledExample(replay),
         ...(flags.published ? { mode: 'published' as const } : {}),
       }),
     );
@@ -180,6 +198,20 @@ async function cmdDemoReplay(flags: Flags): Promise<number> {
     line(`${c.bold('Report')}  ${flags.report}`);
   }
   return 0;
+}
+
+/**
+ * Which recording `rigorrun demo` replays: one named on the command line, the
+ * synthetic example when asked for by name, and otherwise the flagship
+ * recording when this build carries it.
+ */
+async function chosenReplay(flags: Flags): Promise<Replay> {
+  if (flags.replayFile !== undefined && flags.bundledExample) {
+    throw new CliError(`Choose one recording: --replay <file> or --${BUNDLED_EXAMPLE_FLAG}.`);
+  }
+  if (flags.replayFile !== undefined) return readReplayFile(flags.replayFile);
+  if (flags.bundledExample) return bundledReplay();
+  return (await flagshipReplay()) ?? bundledReplay();
 }
 
 /** `rigorrun environments` — what this installation can point at. */

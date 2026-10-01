@@ -12,7 +12,7 @@
  */
 import { parseArgs } from 'node:util';
 import { CliError } from './io.ts';
-import { COMMAND_HELP, HELP, VERSION } from './help.ts';
+import { BUNDLED_EXAMPLE_FLAG, COMMAND_HELP, HELP, VERSION } from './help.ts';
 import { errorLine, line } from './ui.ts';
 import {
   cmdAgents,
@@ -142,6 +142,10 @@ async function dispatch(argv: string[]): Promise<number> {
         'allow-reference': { type: 'boolean', default: false },
         // demo only: run the pipeline now rather than replay the recorded run.
         live: { type: 'boolean', default: false },
+        // demo only: the synthetic example's recording, by its name (help.ts),
+        // and, undocumented, a recording from a file.
+        [BUNDLED_EXAMPLE_FLAG]: { type: 'boolean', default: false },
+        replay: { type: 'string' },
         'min-success': { type: 'string' },
         'min-policy': { type: 'string' },
         'max-policy-violations': { type: 'string' },
@@ -205,6 +209,8 @@ async function dispatch(argv: string[]): Promise<number> {
     out: values.out,
     workflow: values.workflow,
     live: values.live ?? false,
+    bundledExample: values[BUNDLED_EXAMPLE_FLAG] ?? false,
+    replayFile: values.replay,
     agent: values.agent ?? [],
     repeats: numberFlag(values.repeats, 'repeats'),
     report: values.report,
