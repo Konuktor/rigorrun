@@ -426,12 +426,26 @@ function containment(
   observation: Observation,
 ): Outcome {
   const resolution = resolvePath(observation, target);
+  if (!resolution.found) {
+    return {
+      status: 'UNVERIFIABLE',
+      observed: null,
+      message: `not checked: ${target} was not found`,
+    };
+  }
   const value = resolution.value;
   let contains = false;
   if (typeof value === 'string' && typeof expected === 'string') {
     contains = value.includes(expected);
   } else if (Array.isArray(value)) {
-    contains = value.some((entry) => deepEqual(entry, expected));
+    contains = value.some(
+      (entry) =>
+        deepEqual(entry, expected) ||
+        (typeof expected === 'string' &&
+          typeof entry === 'object' &&
+          entry !== null &&
+          JSON.stringify(entry)?.includes(expected) === true),
+    );
   } else if (value !== null && value !== undefined) {
     contains = JSON.stringify(value).includes(String(expected));
   }

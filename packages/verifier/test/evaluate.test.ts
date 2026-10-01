@@ -149,6 +149,73 @@ describe('equality, containment, url, element, http', () => {
     ).toBe('PASS');
   });
 
+  it('not_contains fails when a record in an array contains the expected string', () => {
+    expect(
+      evaluateAssertion(
+        assertion({
+          id: 'c3',
+          kind: 'not_contains',
+          target: 'state.rows',
+          expected: 'TENANT-B-MARKER',
+        }),
+        observation({ state: { rows: [{ id: 'ROW-1', note: 'private TENANT-B-MARKER data' }] } }),
+      ).status,
+    ).toBe('FAIL');
+  });
+
+  it('not_contains passes when no record in an array contains the expected string', () => {
+    expect(
+      evaluateAssertion(
+        assertion({
+          id: 'c4',
+          kind: 'not_contains',
+          target: 'state.rows',
+          expected: 'TENANT-B-MARKER',
+        }),
+        observation({ state: { rows: [{ id: 'ROW-1', note: 'safe data' }] } }),
+      ).status,
+    ).toBe('PASS');
+  });
+
+  it('contains keeps exact matches in arrays of primitives', () => {
+    expect(
+      evaluateAssertion(
+        assertion({ id: 'c5', kind: 'contains', target: 'state.values', expected: 'a' }),
+        observation({ state: { values: ['a', 'b'] } }),
+      ).status,
+    ).toBe('PASS');
+  });
+
+  it('contains does not substring-match entries in arrays of primitives', () => {
+    expect(
+      evaluateAssertion(
+        assertion({ id: 'c6', kind: 'contains', target: 'state.values', expected: 'paid' }),
+        observation({ state: { values: ['unpaid'] } }),
+      ).status,
+    ).toBe('FAIL');
+  });
+
+  it('not_contains does not substring-match entries in arrays of primitives', () => {
+    expect(
+      evaluateAssertion(
+        assertion({ id: 'c7', kind: 'not_contains', target: 'state.values', expected: 'paid' }),
+        observation({ state: { values: ['unpaid'] } }),
+      ).status,
+    ).toBe('PASS');
+  });
+
+  it('contains and not_contains are unverifiable when the target path is missing', () => {
+    for (const kind of ['contains', 'not_contains'] as const) {
+      const result = evaluateAssertion(
+        assertion({ id: `c-${kind}-missing`, kind, target: 'state.missing', expected: 'marker' }),
+        observation(),
+      );
+      expect(result.status).toBe('UNVERIFIABLE');
+      expect(result.observed).toBeNull();
+      expect(result.message).toBe('not checked: state.missing was not found');
+    }
+  });
+
   it('url_matches applies a regular expression', () => {
     expect(
       evaluateAssertion(
