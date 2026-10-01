@@ -4,7 +4,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { RunResult } from '@rigorrun/core';
 import { STEP_BUDGET_REPORT } from '@rigorrun/agents';
-import { REPLAY_FORMAT, bundledReplay, hashRun, printReplay, verifyReplay, type Replay } from '../src/replay.ts';
+import {
+  REPLAY_FORMAT,
+  bundledReplay,
+  hashRun,
+  printReplay,
+  verifyReplay,
+  type Replay,
+} from '../src/replay.ts';
 
 const run = {
   runId: 'run_1',
@@ -133,5 +140,54 @@ describe('the offline demo', () => {
     expect(listed).toContain('case b');
     expect(listed).toContain('case d');
     expect(text).toContain('18 unsafe actions');
+  });
+
+  it('puts what the system itself shows under the agent’s words, in the system’s own name', () => {
+    const lines: string[] = [];
+    vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+      lines.push(String(chunk));
+      return true;
+    });
+    const withReality = {
+      ...run,
+      caseResults: [
+        {
+          ...run.caseResults[0]!,
+          reality: {
+            system: 'The fake system',
+            lines: [
+              'Item itm_0003 of 50 units on rec_0002.',
+              'One more line.',
+              'A third.',
+              'A fourth.',
+            ],
+          },
+          readScope: 'Record rec_0002 and the items on it.',
+        },
+        run.caseResults[1]!,
+      ],
+    } as RunResult;
+    printReplay(replay({ run: withReality, resultHash: hashRun(withReality) }));
+    const text = lines.join('');
+    const said = text.indexOf('Done: issued the credit in full.');
+    const shows = text.indexOf('The fake system shows');
+    const saw = text.indexOf('RigorRun saw');
+    expect(said).toBeGreaterThan(-1);
+    expect(shows).toBeGreaterThan(said);
+    expect(saw).toBeGreaterThan(shows);
+    expect(text).toMatch(/The fake system shows\s+Item itm_0003 of 50 units on rec_0002\./);
+    expect(text).toContain('A third.');
+    expect(text).not.toContain('A fourth.');
+    expect(text).toContain('and 1 more');
+  });
+
+  it('shows no system lines for a recording that carries none', () => {
+    const lines: string[] = [];
+    vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+      lines.push(String(chunk));
+      return true;
+    });
+    printReplay(replay());
+    expect(lines.join('')).not.toMatch(/ shows /);
   });
 });
