@@ -13,7 +13,7 @@ test.describe('production smoke', () => {
   test('the home page serves and renders', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('moves money');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('acts for one customer');
     await expect(page.getByTestId('nav-cta')).toBeVisible();
   });
 

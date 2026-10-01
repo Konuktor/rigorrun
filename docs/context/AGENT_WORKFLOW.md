@@ -26,12 +26,12 @@
    - Codex — **one run at a time** (single-use refresh tokens):
      ```sh
      codex exec -C ~/RigorRun-agents/codex-<id> -s workspace-write --ignore-user-config --ignore-rules \
-       -m gpt-5.6-sol -o ~/RigorRun-agents/codex-<id>.last.md "$(cat docs/context/tasks/<id>.md)"
+       -m gpt-5.6-sol -o ~/RigorRun-agents/codex-<id>.last.md "$(cat docs/context/tasks/<id>.md)" < /dev/null
      ```
    - Cursor — may run beside Codex:
      ```sh
      cursor-agent -p --output-format text --workspace ~/RigorRun-agents/cursor-<id> --trust --force \
-       --sandbox enabled "$(cat docs/context/tasks/<id>.md)" > ~/RigorRun-agents/cursor-<id>.log
+       --sandbox enabled "$(cat docs/context/tasks/<id>.md)" < /dev/null > ~/RigorRun-agents/cursor-<id>.log
      ```
 4. **Review — Claude, never the agent's own word.**
    - `git -C <worktree> diff <base>...` read in full; nothing outside the brief's files.
@@ -42,6 +42,15 @@
 5. **Land or return.** Merge into the base branch (squash, message ends with the agent's name), or
    send the agent back with the review notes appended to the brief. Remove the worktree after.
 6. **Record.** Claude updates [PROGRESS.md](PROGRESS.md): task, agent, status, commit, "verified by".
+
+## Gotchas (learned)
+
+- **Always close stdin** (`< /dev/null`). In the background `codex exec` otherwise prints "Reading
+  additional input from stdin..." and waits forever (2026-10-02).
+- **Stop a hung agent by PID**, never `pkill -f "<pattern>"`: the pattern also matches the shell
+  running the command and kills it.
+- A review round-trip is a new `codex exec` with the review notes as the prompt, in the same
+  worktree; the brief file stays as written.
 
 ## Rules every agent reads (also in `AGENTS.md`)
 
