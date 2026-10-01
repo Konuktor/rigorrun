@@ -19,3 +19,7 @@
     The interrupted run is published beside the full one and is never replaced by it.
   - Timestamps in this directory come from a machine whose clock was corrected during the day
     (dual-boot RTC). The evidence directory names are not in time order; `cells.jsonl` order is.
+- Stage L, second counted run, did not start. `rigorrun stripe init` could not reach
+  api.stripe.com within 10 s ("Connect Timeout") because this machine's network dropped for a
+  moment. No cell ran (`evidence/L-20261001T084730Z-failed-to-start/`, empty). Started again at once,
+  at the same frozen product.
