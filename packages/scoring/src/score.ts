@@ -215,7 +215,10 @@ export function decideVerdict(scores: AgentScore[]): Verdict {
     return {
       winnerAgentId: null,
       outcome: 'FAIL',
-      summary: `No agent met the release thresholds. Best of the group was ${best.agentName}.`,
+      summary:
+        scores.length === 1
+          ? `${best.agentName} did not meet the release thresholds.`
+          : `No agent met the release thresholds. Best of the group was ${best.agentName}.`,
       rationale,
     };
   }

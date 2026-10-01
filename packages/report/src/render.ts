@@ -72,7 +72,7 @@ function masthead(run: RunResult, generatedAt: string, mode: string): string {
   return `<header class="masthead">
   <div>
     <div class="brand"><span class="mark">RR</span><h1>RigorRun</h1></div>
-    <div class="tagline">Private agent benchmark${mode === 'published' ? ' · published (sanitised)' : ''}</div>
+    <div class="tagline">Agent acceptance run${mode === 'published' ? ' · published (sanitised)' : ''}</div>
   </div>
   <div class="mono dim" style="text-align:right">
     <div>Workflow: <span style="color:var(--fg)">${esc(run.benchmarkName)}</span></div>
@@ -84,6 +84,10 @@ function masthead(run: RunResult, generatedAt: string, mode: string): string {
 
 function comparison(run: RunResult): string {
   const n = run.scores[0]?.n ?? 0;
+  // A black box's calls are its own; RigorRun counts no steps it never saw.
+  const blackBox = new Set(
+    run.agents.filter((agent) => agent.kind === 'blackbox').map((agent) => agent.id),
+  );
   const rows = run.scores
     .map(
       (s) => `<tr>
@@ -93,7 +97,7 @@ function comparison(run: RunResult): string {
       <td class="num">${s.unsafeActions === 0 ? `<span class="tag pass">0</span>` : `<span class="tag fail">${s.unsafeActions}</span>`}</td>
       <td class="num">${fmtMs(s.medianLatencyMs)}</td>
       <td class="num">${fmtMs(s.p95LatencyMs)}</td>
-      <td class="num">${s.avgSteps.toFixed(1)}</td>
+      <td class="num">${blackBox.has(s.agentId) ? '—' : s.avgSteps.toFixed(1)}</td>
       <td class="num">${esc(costLabel(s))}</td>
       <td>${s.thresholdsPassed ? '<span class="tag pass">PASS</span>' : '<span class="tag fail">FAIL</span>'}</td>
     </tr>`,
@@ -190,8 +194,8 @@ function reliability(run: RunResult): string {
         ${metric('Task success', pct(s.taskSuccessRate), `95% CI ${pct(s.taskSuccessInterval.lower)}–${pct(s.taskSuccessInterval.upper)}, n=${s.n}`)}
         ${metric('Policy compliance', pct(s.policyComplianceRate), `${s.policyViolations} violation(s)`)}
         ${metric('Unsafe actions', String(s.unsafeActions), 'failed checks flagged unsafe')}
-        ${metric('Error rate', pct(s.errorRate), 'agent or adapter failures')}
-        ${metric('No verdict', String(s.abstained + s.harnessFailures), `${s.abstained} abstained · ${s.timedOut} timed out · ${s.harnessFailures} harness`)}
+        ${metric('Error rate', pct(s.errorRate), `${s.timedOut} timed out · ${s.agentFailures} agent failure(s) · ${s.harnessFailures} harness`)}
+        ${metric('No verdict', String(s.abstained + s.harnessFailures), `${s.abstained} abstained · ${s.harnessFailures} harness`)}
         ${metric('Median latency', fmtMs(s.medianLatencyMs), `avg ${fmtMs(s.avgLatencyMs)} · p95 ${fmtMs(s.p95LatencyMs)}`)}
         ${metric('Cost', costLabel(s), esc(s.costNote))}
       </div>

@@ -53,3 +53,16 @@ describe('the verdict on a run with timeouts', () => {
     );
   });
 });
+
+describe('the verdict on a run of one agent', () => {
+  it('says that agent missed the bar, not that it was the best of a group of one', () => {
+    const score = scoreAgent(
+      { id: 'a', name: 'slow' },
+      [result('one', 'TIMED_OUT'), result('two', 'PASS')],
+      thresholds,
+    );
+    const verdict = decideVerdict([score]);
+    expect(verdict.outcome).toBe('FAIL');
+    expect(verdict.summary).toBe('slow did not meet the release thresholds.');
+  });
+});
