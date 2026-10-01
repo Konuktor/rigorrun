@@ -223,17 +223,17 @@ const limits = [
                   class="block aspect-video w-full rounded-panel border border-line bg-inset"
                   width="1280"
                   height="720"
-                  autoplay
                   muted
                   loop
                   playsinline
                   controls
+                  preload="none"
                   poster={demoVideo.poster}
                   aria-label="The demo, filmed: npx rigorrun demo in a terminal, then the recorded run on this site."
                   data-demo-video
                 >
-                  {demoVideo.webm && <source src="/media/demo.webm" type="video/webm" />}
-                  <source src="/media/demo.mp4" type="video/mp4" />
+                  {demoVideo.webm && <source data-src="/media/demo.webm" type="video/webm" />}
+                  <source data-src="/media/demo.mp4" type="video/mp4" />
                 </video>
                 <figcaption class="mt-2 text-meta text-muted">
                   <a class="rr-link" href="/media/demo.mp4">Watch the 60-second run</a>
@@ -247,13 +247,33 @@ const limits = [
   </section>
 
   <script>
-    // Somebody who has asked for less motion gets the poster and the controls,
-    // not a loop that starts on its own.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      for (const video of document.querySelectorAll<HTMLVideoElement>('[data-demo-video]')) {
-        video.removeAttribute('autoplay');
-        video.pause();
+    // The video is a few megabytes, so the page loads with its poster and the
+    // file is fetched only once the video is on screen: the first paint stays
+    // within the page's transfer budget (e2e/perf.spec.ts). Somebody who has
+    // asked for less motion gets the poster and the controls, and the file
+    // loads when they press play, never a loop that starts on its own.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const load = (video: HTMLVideoElement) => {
+      for (const source of video.querySelectorAll<HTMLSourceElement>('source[data-src]')) {
+        source.src = source.dataset['src'] ?? '';
+        source.removeAttribute('data-src');
       }
+      video.load();
+    };
+    for (const video of document.querySelectorAll<HTMLVideoElement>('[data-demo-video]')) {
+      if (reduce) {
+        video.addEventListener('play', () => video.querySelector('source[data-src]') && load(video), {
+          once: true,
+        });
+        continue;
+      }
+      const seen = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        seen.disconnect();
+        load(video);
+        void video.play().catch(() => {});
+      });
+      seen.observe(video);
     }
   </script>
 
