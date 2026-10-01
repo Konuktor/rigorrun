@@ -1,0 +1,97 @@
+---
+/**
+ * One case of a recording, as a row of the replay: the verdict, what the agent
+ * said, and what the system showed — the system's own sentences when the run
+ * has them, otherwise the checks that did not hold.
+ */
+import Verdict from './Verdict.astro';
+import type { CaseView } from '../lib/replay';
+
+interface Props {
+  entry: CaseView;
+  /** Marks the row as the pre-registered headline case. */
+  headline?: boolean;
+  /** The case name's heading level, so the row fits the page's outline. */
+  level?: 3 | 4;
+}
+const { entry, headline = false, level = 4 } = Astro.props;
+const Name = `h${level}` as 'h3' | 'h4';
+const Part = `h${level + 1}` as 'h4' | 'h5';
+
+const hasReality = entry.reality.length > 0;
+const heading = hasReality
+  ? `${entry.realitySystem ?? 'The system'} shows`
+  : entry.findings.length > 0
+    ? 'The system held'
+    : null;
+---
+
+<li
+  class:list={[
+    'overflow-hidden rounded-panel border bg-surface',
+    headline ? 'border-line-strong' : 'border-line',
+  ]}
+  id={`case-${entry.agentId}-${entry.caseId}`}
+>
+  <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line px-5 py-3">
+    <Verdict outcome={entry.outcome} size="sm" />
+    <Name class="text-support font-semibold text-fg">{entry.caseName}</Name>
+    <span class="font-mono text-meta text-muted">
+      {entry.caseId}
+      {entry.unsafeActions > 0 && ` · ${entry.unsafeActions} unsafe`}
+    </span>
+    {
+      headline && (
+        <span class="ml-auto rounded-pill border border-line-strong px-2 py-0.5 text-micro font-semibold uppercase text-secondary">
+          Headline case
+        </span>
+      )
+    }
+  </div>
+  <div class:list={['grid', heading && 'md:grid-cols-2']}>
+    <div class:list={['p-5', heading && 'border-b border-line md:border-b-0 md:border-r']}>
+      <Part class="text-micro font-semibold uppercase text-muted">The agent said</Part>
+      {
+        entry.said ? (
+          <p class="mt-2 text-support text-fg">&ldquo;{entry.said}&rdquo;</p>
+        ) : (
+          <p class="mt-2 text-meta text-muted">
+            {entry.outOfSteps
+              ? 'Nothing: it used every step it had without reporting a result.'
+              : 'Nothing: it gave no account of what it did.'}
+          </p>
+        )
+      }
+    </div>
+    {
+      heading && (
+        <div data-theme="ink" class="bg-canvas p-5">
+          <Part class="text-micro font-semibold uppercase text-muted">{heading}</Part>
+          {hasReality ? (
+            <ul class="mt-2 space-y-1.5 font-mono text-meta text-fg">
+              {entry.reality.map((text) => (
+                <li class="break-words">{text}</li>
+              ))}
+            </ul>
+          ) : (
+            <ul class="mt-2 space-y-2">
+              {entry.findings.map((finding) => (
+                <li class="text-meta text-fg">
+                  {finding.unsafe && <span class="font-semibold text-fail">Unsafe · </span>}
+                  <span class="text-secondary">{finding.description}</span>
+                  <span class="block break-words font-mono text-fg">{finding.message}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )
+    }
+  </div>
+  <div class="border-t border-line-soft px-5 py-2.5 text-meta text-muted">
+    <span class="font-mono text-micro text-secondary">
+      {[entry.verification, entry.independence, entry.observation].filter(Boolean).join(' · ')}
+    </span>
+    {entry.readScope && <span class="mt-1 block">Read scope: {entry.readScope}</span>}
+  </div>
+</li>

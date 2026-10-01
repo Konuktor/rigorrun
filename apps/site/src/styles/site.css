@@ -32,6 +32,51 @@
   }
 
   /*
+   * A theme switched on an element has to re-resolve the colour tokens there.
+   *
+   * `@theme` declares `--color-canvas: var(--rr-canvas)` once, on `:root`, and
+   * a custom property's `var()` is resolved where it is declared: every element
+   * below inherits the *paper* value, whatever `--rr-canvas` it sets itself. So
+   * a `data-theme="ink"` well — the command box, the system's half of a
+   * claim-versus-reality card — rendered as paper, the opposite of what every
+   * comment on it says it is for. Declaring the mapping again on each themed
+   * element makes it resolve against that element's own `--rr-*` values.
+   */
+  [data-theme] {
+    --color-canvas: var(--rr-canvas);
+    --color-surface: var(--rr-surface);
+    --color-raised: var(--rr-raised);
+    --color-overlay: var(--rr-overlay);
+    --color-inset: var(--rr-inset);
+    --color-inset-fg: var(--rr-inset-fg);
+    --color-inset-muted: var(--rr-inset-muted);
+    --color-line: var(--rr-line);
+    --color-line-strong: var(--rr-line-strong);
+    --color-line-soft: var(--rr-line-soft);
+    --color-fg: var(--rr-fg);
+    --color-secondary: var(--rr-secondary);
+    --color-muted: var(--rr-muted);
+    --color-disabled: var(--rr-disabled);
+    --color-accent: var(--rr-accent);
+    --color-accent-fg: var(--rr-accent-fg);
+    --color-accent-bg: var(--rr-accent-bg);
+    --color-accent-line: var(--rr-accent-line);
+    --color-pass: var(--rr-pass);
+    --color-fail: var(--rr-fail);
+    --color-warn: var(--rr-warn);
+    --color-pass-bg: var(--rr-pass-bg);
+    --color-fail-bg: var(--rr-fail-bg);
+    --color-warn-bg: var(--rr-warn-bg);
+    --color-pass-line: var(--rr-pass-line);
+    --color-fail-line: var(--rr-fail-line);
+    --color-warn-line: var(--rr-warn-line);
+    --shadow-overlay: var(--rr-shadow-overlay);
+    --shadow-raised: var(--rr-shadow-raised);
+    --shadow-lift: var(--rr-shadow-lift);
+    color: var(--color-fg);
+  }
+
+  /*
    * A grid or flex child is `min-width: auto` by default, which means it
    * refuses to shrink below its content. A wide <pre> inside one therefore
    * widens the whole track and pushes the page sideways, and `overflow-x` on

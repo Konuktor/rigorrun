@@ -1,0 +1,34 @@
+---
+/**
+ * A case's outcome, as the recording states it.
+ *
+ * Status is never carried by colour alone: every outcome has a shape and a
+ * word as well as a tone, the way `StatusMark` does it in the product. Only an
+ * outcome read from a recording may be passed in here: green and red on this
+ * site mean a verdict somebody can check, never emphasis.
+ */
+interface Props {
+  outcome: string;
+  size?: 'sm' | 'md' | 'lg';
+}
+const { outcome, size = 'md' } = Astro.props;
+
+const looks: Record<string, { mark: string; tone: string; label: string }> = {
+  PASS: { mark: '✓', tone: 'border-pass-line bg-pass-bg text-pass', label: 'Pass' },
+  FAIL: { mark: '✕', tone: 'border-fail-line bg-fail-bg text-fail', label: 'Fail' },
+};
+const look = looks[outcome] ?? {
+  mark: '!',
+  tone: 'border-warn-line bg-warn-bg text-warn',
+  label: outcome.replaceAll('_', ' ').toLowerCase(),
+};
+const pad = { sm: 'px-2 py-0.5 text-micro', md: 'px-2.5 py-1 text-micro', lg: 'px-3 py-1.5 text-support' }[size];
+---
+
+<span
+  data-outcome={outcome}
+  class={`inline-flex shrink-0 items-center gap-1.5 rounded-pill border font-mono font-semibold uppercase ${pad} ${look.tone}`}
+>
+  <span aria-hidden="true">{look.mark}</span>
+  {look.label}
+</span>

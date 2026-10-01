@@ -2,27 +2,41 @@
 
 # RigorRun
 
-**Your agent said it worked. RigorRun checks what it actually did.**
+**Your agent moves money. You're checking it by reading the transcript.**
 
-Show RigorRun a job once. It turns that into a repeatable acceptance suite and decides whether your
-agent is safe to ship by reading the system it changed — never by trusting what it says about itself.
+RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a local
+twin with no keys — and shows what actually happened beside what the agent said it did. The verdict
+comes from the state of the system your agent changed, never from what it says about itself.
 
-**Early Access · v0.3** — parts of it are honestly unfinished, and they are listed rather than hidden.
+**Early Access** — parts of it are honestly unfinished, and they are listed rather than hidden.
 
-[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [Evidence](https://rigorrun.xyz/evidence) · [What is and is not built](https://rigorrun.xyz/what-is-built)
+[rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [A recorded run](https://rigorrun.xyz/replay) · [What is and is not built](https://rigorrun.xyz/what-is-built)
 
 </div>
 
 ```bash
-npx rigorrun demo    # a real recorded run, replayed offline in a second
-npx rigorrun         # your own system and agent, in the local interface
+npx rigorrun demo    # a recorded run, replayed offline; no keys, no account
 ```
 
-`demo` replays a real model working a bundled support desk: what it said beside what the system held
+`demo` replays a real model working a support desk: what it said beside what the system held
 afterwards. The same run, case by case, is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
 
-`npx rigorrun` opens a local interface. Everything runs on your machine: there is no account, and no
-hosted component to send your systems to.
+### Your Stripe agent, unchanged
+
+```bash
+npx rigorrun stripe twin                                         # a local Stripe twin; leave it running
+npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes      # the Stripe pack's tickets, as a project
+npx rigorrun agent add --project <id> --black-box <agent URL>    # your agent, as it already runs
+npx rigorrun gate --project <id> --report report.html            # exit 1 when a case fails
+```
+
+Against your Stripe test mode, `stripe init` takes a test key instead of `--twin`; live keys are
+refused. The [Stripe guide](https://docs.rigorrun.xyz/start/stripe) has the whole path, including
+the canary and the GitHub Action.
+
+`npx rigorrun` opens a local interface for any other system RigorRun can reach and read back.
+Everything runs on your machine: there is no account, and no hosted component to send your systems
+to.
 
 ---
 

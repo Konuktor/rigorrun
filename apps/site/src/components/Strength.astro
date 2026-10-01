@@ -1,0 +1,53 @@
+---
+/**
+ * How strongly a verdict could be checked, as the recording labels it, with
+ * what each label means. The labels come from the recording; the meanings are
+ * the product's own definitions, so a reader never has to guess whether
+ * PARTIAL is an apology or a measurement.
+ */
+interface Props {
+  verification: string;
+  independence: string | null;
+  /** Print the meaning of each label underneath. */
+  legend?: boolean;
+  /** The legend sits on an ink surface. */
+  class?: string;
+}
+const { verification, independence, legend = false, class: className = '' } = Astro.props;
+
+const meanings: Record<string, string> = {
+  AUTHORITATIVE: 'direct, trusted state was read.',
+  PARTIAL: 'verified through reads that do not cover the whole system.',
+  OBSERVATIONAL: 'the actions were watched; the final state was not independently read.',
+  INDEPENDENT: 'read through RigorRun’s own connection, not the one the agent used.',
+  SELF_REPORTED: 'read through the same connection the agent used.',
+  NONE: 'nothing could be read back.',
+};
+const labels = [verification, independence].filter((label): label is string => Boolean(label));
+---
+
+<div class={className}>
+  <p class="flex flex-wrap items-center gap-1.5">
+    {
+      labels.map((label) => (
+        <span class="rounded-pill border border-line-strong px-2 py-0.5 font-mono text-micro font-semibold text-secondary">
+          {label}
+        </span>
+      ))
+    }
+  </p>
+  {
+    legend && (
+      <dl class="mt-2 space-y-0.5 text-meta text-muted">
+        {labels
+          .filter((label) => meanings[label])
+          .map((label) => (
+            <div>
+              <dt class="inline font-mono text-secondary">{label}</dt>
+              <dd class="inline"> — {meanings[label]}</dd>
+            </div>
+          ))}
+      </dl>
+    )
+  }
+</div>
