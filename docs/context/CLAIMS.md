@@ -100,7 +100,7 @@ hedges: "being built with design partners" is still a claim that partners exist.
     { "claim": "B-READS", "pattern": "\\bcross[- ](tenant|customer|org)\\s+reads?\\b" },
     {
       "claim": "B-LEAKS",
-      "pattern": "\\b(never|doesn'?t|does not|didn'?t)\\s+(send|sends|leak|leaks|exfiltrates?)\\b"
+      "pattern": "\\b(never|doesn'?t|does not|didn'?t)\\s+(send|sends|leak|leaks|exfiltrates?)\\b[^.]{0,50}\\b((another|other|wrong)\\s+(customer|tenant|org|organi[sz]ation|user|patient)|data|records)"
     },
     {
       "claim": "B-LEAKS",

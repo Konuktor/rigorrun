@@ -83,6 +83,7 @@ export function check(text, config) {
 function selfTest(config) {
   const bad = [
     'RigorRun never reads another customer’s data.',
+    'Your agent never sends another customer’s records anywhere.',
     "It detects leaks of another tenant's records.",
     'Built with our design partners.',
     'Being built with design partners: reads and leaks.',
@@ -100,6 +101,7 @@ function selfTest(config) {
     'QuickBooks and NetSuite packs are not built yet.',
     'It is not a guarantee that your agent is safe.',
     'Cases repeat and never see each other.',
+    'Never send from Gmail or from any other address.',
   ];
   let failures = 0;
   for (const line of bad) {
