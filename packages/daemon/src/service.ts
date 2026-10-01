@@ -45,8 +45,18 @@ import { createBlackBoxAgent, probeBlackBox, type BlackBoxCompletion } from './b
 import { ExternalDriver, newAgentKey, keyMatches } from './drivenAgent.ts';
 import { createProcessAgent, probeProcessAgent } from './processAgent.ts';
 import type { ProxyServer } from '@rigorrun/proxy';
-import { induceSchema, type DiscoveredTool, type PayloadObservation, type SchemaQuestion } from '@rigorrun/mcp';
-import { hasPayload, normalizeCallResult, readsForVerdict, type ReadCall } from '@rigorrun/connector';
+import {
+  induceSchema,
+  type DiscoveredTool,
+  type PayloadObservation,
+  type SchemaQuestion,
+} from '@rigorrun/mcp';
+import {
+  hasPayload,
+  normalizeCallResult,
+  readsForVerdict,
+  type ReadCall,
+} from '@rigorrun/connector';
 import { pagedReadAdvice } from './pagedReads.ts';
 import { BUDGET_MARGIN_MS } from '@rigorrun/core';
 import {
@@ -276,7 +286,12 @@ export class Service {
     const problem = budgetProblem(budgets);
     if (problem) throw new Error(problem);
     const pack = packOf(project);
-    if (pack && (input.verifierReads.length > 0 || input.readOnlyTools.length > 0 || input.reset.kind !== 'none')) {
+    if (
+      pack &&
+      (input.verifierReads.length > 0 ||
+        input.readOnlyTools.length > 0 ||
+        input.reset.kind !== 'none')
+    ) {
       // Accepting these would store settings nothing reads, and a person
       // looking at them later would believe they were in force.
       throw new Error(
@@ -379,8 +394,7 @@ export class Service {
       if (hasPayload(normalized)) {
         observations.push({ tool: read.tool, payload: normalized.payload });
         calls.push({ tool: read.tool, args: read.args });
-      }
-      else if (normalized.kind === 'text') prose.push(read.tool);
+      } else if (normalized.kind === 'text') prose.push(read.tool);
       else sawEmpty = true;
     }
     if (failed.length > 0) {
@@ -403,7 +417,10 @@ export class Service {
     // the moment somebody demonstrates a job — reporting that as a problem
     // would be sending people to fix something that is not broken, which is
     // the mistake this whole probe exists to stop making.
-    if (prose.length === 0 && (sawEmpty || payloadsAreEmpty(observations.map((entry) => entry.payload)))) {
+    if (
+      prose.length === 0 &&
+      (sawEmpty || payloadsAreEmpty(observations.map((entry) => entry.payload)))
+    ) {
       return (
         'These reads answered, and there is nothing in this system yet, so RigorRun cannot tell ' +
         'what its records look like. That is fine — it will work them out from what your ' +
@@ -472,7 +489,10 @@ export class Service {
     }>(projectId, 'demonstration');
     return {
       inProgress: saved !== undefined,
-      steps: (saved?.entries ?? []).map((entry) => ({ tool: entry.action, ok: entry.ok !== false })),
+      steps: (saved?.entries ?? []).map((entry) => ({
+        tool: entry.action,
+        ok: entry.ok !== false,
+      })),
     };
   }
 
@@ -546,7 +566,9 @@ export class Service {
     answers: { questionId: string; value: string }[],
   ): Promise<Project> {
     const project = await this.store.read(projectId);
-    const merged = new Map(project.schemaAnswers.map((answer) => [answer.questionId, answer.value]));
+    const merged = new Map(
+      project.schemaAnswers.map((answer) => [answer.questionId, answer.value]),
+    );
     for (const answer of answers) merged.set(answer.questionId, answer.value);
     const updated: Project = {
       ...project,
@@ -684,11 +706,15 @@ export class Service {
     const made = pack.suite(params);
     const parsedContract = EnvironmentContractSchema.safeParse(made.contract);
     if (!parsedContract.success) {
-      throw new Error(`${pack.name} produced a contract RigorRun cannot use: ${firstIssue(parsedContract.error)}`);
+      throw new Error(
+        `${pack.name} produced a contract RigorRun cannot use: ${firstIssue(parsedContract.error)}`,
+      );
     }
     const parsedBenchmark = BenchmarkSchema.safeParse(made.benchmark);
     if (!parsedBenchmark.success) {
-      throw new Error(`${pack.name} produced a suite RigorRun cannot use: ${firstIssue(parsedBenchmark.error)}`);
+      throw new Error(
+        `${pack.name} produced a suite RigorRun cannot use: ${firstIssue(parsedBenchmark.error)}`,
+      );
     }
 
     const ruleIds = new Set(parsedContract.data.rules.map((rule) => rule.id));
@@ -718,7 +744,9 @@ export class Service {
       this.now().toISOString(),
     );
     const inForce = new Set(
-      contract.rules.filter((rule) => rule.status === 'observed' || rule.status === 'confirmed').map((rule) => rule.id),
+      contract.rules
+        .filter((rule) => rule.status === 'observed' || rule.status === 'confirmed')
+        .map((rule) => rule.id),
     );
     const benchmark: Benchmark = {
       ...parsedBenchmark.data,
@@ -779,7 +807,9 @@ export class Service {
     let key: string | undefined;
     if ('blackBox' in input) {
       const spec = input.blackBox;
-      const allowedHosts = (spec.allowedHosts ?? []).map((host) => host.trim().toLowerCase()).filter(Boolean);
+      const allowedHosts = (spec.allowedHosts ?? [])
+        .map((host) => host.trim().toLowerCase())
+        .filter(Boolean);
       const headers = spec.headers ?? {};
       const probe = await probeBlackBox({
         endpoint: spec.endpoint,
@@ -873,7 +903,8 @@ export class Service {
     };
     await this.store.write(updated);
     if (agent.lastProbeOk) await this.activation.stage('agent_connected', projectId);
-    else if (agent.kind !== 'external') await this.activation.attempt('agent_probe_failed', projectId);
+    else if (agent.kind !== 'external')
+      await this.activation.attempt('agent_probe_failed', projectId);
     // The key is returned here and never again. It is in the credential store,
     // and there is deliberately no command or endpoint that prints one back.
     return { project: updated, agent, ...(key === undefined ? {} : { key }) };
@@ -896,6 +927,18 @@ export class Service {
    */
   async assessSuite(projectId: string): Promise<BenchmarkQuality> {
     const project = await this.store.read(projectId);
+    const pack = packOf(project);
+    if (pack) {
+      // The synthetic agents replay each case's reference plan as written,
+      // and a pack's plans name records only the case's own materialization
+      // can supply. Run here, every one of them would fail for that reason
+      // alone, and the score would describe the check rather than the suite.
+      throw new Error(
+        `${pack.name}'s suite is written by hand and qualified with the pack, not checked with ` +
+          'synthetic agents: their plans refer to records each case creates for itself, which a ' +
+          'replayed plan never has. Run a known-correct agent against it instead.',
+      );
+    }
     const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
     const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
     if (!benchmark || !contract) throw new Error('There is no suite to check yet.');
@@ -1005,7 +1048,10 @@ export class Service {
   ): Promise<RunResult> {
     const project = await this.store.read(projectId);
     if (options.caseTimeoutMs !== undefined) {
-      const problem = budgetProblem({ toolCallMs: project.budgets.toolCallMs, caseMs: options.caseTimeoutMs });
+      const problem = budgetProblem({
+        toolCallMs: project.budgets.toolCallMs,
+        caseMs: options.caseTimeoutMs,
+      });
       if (problem) throw new Error(problem);
     }
     const suite = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
@@ -1063,7 +1109,9 @@ export class Service {
                 },
               }
             : {}),
-          suiteQuality: suiteQualityOf(await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality')),
+          suiteQuality: suiteQualityOf(
+            await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality'),
+          ),
         },
       );
     } catch (error) {
@@ -1092,7 +1140,8 @@ export class Service {
             (total, entry) =>
               total +
               entry.assertions.filter(
-                (assertion) => assertion.status === 'FAIL' && assertion.failureSeverity === 'CRITICAL',
+                (assertion) =>
+                  assertion.status === 'FAIL' && assertion.failureSeverity === 'CRITICAL',
               ).length,
             0,
           ),
@@ -1124,7 +1173,11 @@ export class Service {
   }
 
   /** What changed since the baseline, or since a named run. */
-  async compare(projectId: string, currentRunId: string, baselineRunId?: string): Promise<RunComparison> {
+  async compare(
+    projectId: string,
+    currentRunId: string,
+    baselineRunId?: string,
+  ): Promise<RunComparison> {
     const project = await this.store.read(projectId);
     const baselineId = baselineRunId ?? project.baselineRunId;
     if (!baselineId) throw new Error('There is nothing to compare against yet.');
@@ -1165,7 +1218,10 @@ export class Service {
    * constant-time, and the stored key is read from the credential store rather
    * than the project, which never holds one.
    */
-  async driverFor(agentId: string, key: string): Promise<{ project: Project; agent: AgentConfig } | null> {
+  async driverFor(
+    agentId: string,
+    key: string,
+  ): Promise<{ project: Project; agent: AgentConfig } | null> {
     if (!key) return null;
     const { projects } = await this.listAllProjects();
     for (const project of projects) {
@@ -1208,7 +1264,10 @@ export class Service {
     await this.activation.stage('agent_connected', projectId);
   }
 
-  adapterFor(config: AgentConfig, options: { total?: number; caseBudgetMs?: number } = {}): AgentAdapter {
+  adapterFor(
+    config: AgentConfig,
+    options: { total?: number; caseBudgetMs?: number } = {},
+  ): AgentAdapter {
     // An agent's own timeout is only ever raised, never lowered: at least its
     // usual allowance, and at least the case budget plus a margin, so that a
     // slow case ends as TIMED_OUT by the runner rather than as a killed agent.
@@ -1246,7 +1305,9 @@ export class Service {
         claimPath: config.claimPath,
         settleQuietMs: config.settleQuietMs,
         timeoutMs:
-          options.caseBudgetMs !== undefined ? Math.max(floorMs, options.caseBudgetMs + BUDGET_MARGIN_MS) : floorMs,
+          options.caseBudgetMs !== undefined
+            ? Math.max(floorMs, options.caseBudgetMs + BUDGET_MARGIN_MS)
+            : floorMs,
       });
     }
     if (config.kind === 'process') {
@@ -1394,7 +1455,9 @@ function refuseForPack(project: Project, what: string): void {
 function firstIssue(error: { issues: { path: PropertyKey[]; message: string }[] }): string {
   const issue = error.issues[0];
   if (!issue) return 'unknown shape';
-  return issue.path.length > 0 ? `${issue.path.map(String).join('.')}: ${issue.message}` : issue.message;
+  return issue.path.length > 0
+    ? `${issue.path.map(String).join('.')}: ${issue.message}`
+    : issue.message;
 }
 
 /**
@@ -1426,7 +1489,11 @@ export function selectCases(benchmark: Benchmark, caseIds: readonly string[]): B
  * result's own hash is resealed over the added limit, exactly as the runner
  * sealed it.
  */
-async function withSubsetLimit(result: RunResult, suite: Benchmark, ran: Benchmark): Promise<RunResult> {
+async function withSubsetLimit(
+  result: RunResult,
+  suite: Benchmark,
+  ran: Benchmark,
+): Promise<RunResult> {
   const ids = ran.cases.map((entry) => entry.id);
   const limited: RunResult = {
     ...result,
@@ -1519,7 +1586,9 @@ export function suiteQualityOf(quality: BenchmarkQuality | undefined): SuiteQual
       replayStable: null,
       hiddenAnswerIsolated: null,
       deadRules: 0,
-      warnings: ['this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one'],
+      warnings: [
+        'this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one',
+      ],
     };
   }
   const percent = (value: number) => `${Math.round(value * 100)}%`;
@@ -1527,13 +1596,17 @@ export function suiteQualityOf(quality: BenchmarkQuality | undefined): SuiteQual
   const falsePositiveRate = typeof measured === 'number' ? measured : null;
   const warnings: string[] = [];
   if (falsePositiveRate !== null && falsePositiveRate > 0) {
-    warnings.push(`the reference implementation fails ${percent(falsePositiveRate)} of cases, so a correct agent can be failed`);
+    warnings.push(
+      `the reference implementation fails ${percent(falsePositiveRate)} of cases, so a correct agent can be failed`,
+    );
   }
   if (quality.mutantKillRate < 1) {
     warnings.push(`it caught ${percent(quality.mutantKillRate)} of deliberately broken agents`);
   }
   if (quality.independentKillRate < 1) {
-    warnings.push(`it caught ${percent(quality.independentKillRate)} of the defects its rules never mention`);
+    warnings.push(
+      `it caught ${percent(quality.independentKillRate)} of the defects its rules never mention`,
+    );
   }
   if (!quality.replayStable) warnings.push('the same agent did not get the same verdict twice');
   if (!quality.hiddenAnswerIsolated) warnings.push('an expected answer is visible to the agent');

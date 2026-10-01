@@ -140,7 +140,11 @@ export async function cmdRestore(
     );
   }
   line();
-  line(c.grey('  Credentials are not in a backup. Set them again with `npx rigorrun secrets set <name>`.'));
+  line(
+    c.grey(
+      '  Credentials are not in a backup. Set them again with `npx rigorrun secrets set <name>`.',
+    ),
+  );
   return 0;
 }
 

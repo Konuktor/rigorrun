@@ -40,7 +40,11 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
   let projects: Awaited<ReturnType<ProjectStore['list']>> = [];
   try {
     projects = await store.list();
-    checks.push({ what: 'project store', ok: true, detail: `${home} · ${projects.length} project(s)` });
+    checks.push({
+      what: 'project store',
+      ok: true,
+      detail: `${home} · ${projects.length} project(s)`,
+    });
   } catch (error) {
     checks.push({ what: 'project store', ok: false, detail: (error as Error).message });
   }
@@ -108,7 +112,9 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
     } else {
       const missing = [];
       const names =
-        project.connector.kind === 'pack' ? secretNamesOf(project.connector) : project.connector.secretNames;
+        project.connector.kind === 'pack'
+          ? secretNamesOf(project.connector)
+          : project.connector.secretNames;
       for (const name of names) {
         if ((await store.secret(name)) === undefined) missing.push(name);
       }

@@ -28,13 +28,7 @@ import {
   type Flags,
 } from './commands.ts';
 import { cmdPrivacyInspect } from './scaffold.ts';
-import {
-  cmdBackup,
-  cmdExportProject,
-  cmdImportProject,
-  cmdRestore,
-  cmdTrust,
-} from './backup.ts';
+import { cmdBackup, cmdExportProject, cmdImportProject, cmdRestore, cmdTrust } from './backup.ts';
 import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
@@ -231,8 +225,12 @@ async function dispatch(argv: string[]): Promise<number> {
 
   // A benchmark file has no project to narrow, and a flag that is accepted and
   // then ignored is a run that covers more than somebody asked for.
-  if ((command === 'run' || command === 'gate') && !flags.project && (flags.caseIds?.length ?? 0) > 0) {
-    throw new CliError('--case selects cases of a project\'s suite. Use it with --project <id>.');
+  if (
+    (command === 'run' || command === 'gate') &&
+    !flags.project &&
+    (flags.caseIds?.length ?? 0) > 0
+  ) {
+    throw new CliError("--case selects cases of a project's suite. Use it with --project <id>.");
   }
 
   switch (command) {

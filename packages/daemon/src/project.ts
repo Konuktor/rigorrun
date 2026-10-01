@@ -15,7 +15,11 @@
  * forgotten in a serialiser, a file has to be opened on purpose.
  */
 import { z } from 'zod';
-import { BUDGET_MARGIN_MS, DEFAULT_CASE_TIMEOUT_MS, DEFAULT_TOOL_CALL_TIMEOUT_MS } from '@rigorrun/core';
+import {
+  BUDGET_MARGIN_MS,
+  DEFAULT_CASE_TIMEOUT_MS,
+  DEFAULT_TOOL_CALL_TIMEOUT_MS,
+} from '@rigorrun/core';
 import { getPack, hasPack, type PackConnectionConfig } from '@rigorrun/environment';
 
 export const PROJECT_SCHEMA_VERSION = 1;
@@ -92,7 +96,10 @@ const OpenApiConnectorBaseSchema = z.object({
  * OpenAPI document it is what makes a verdict independent of the connection
  * the agent used (audit R-2). Its tools are nominated as `verifier:<tool>`.
  */
-const VerifierConnectorSchema = z.discriminatedUnion('kind', [McpConnectorBaseSchema, OpenApiConnectorBaseSchema]);
+const VerifierConnectorSchema = z.discriminatedUnion('kind', [
+  McpConnectorBaseSchema,
+  OpenApiConnectorBaseSchema,
+]);
 
 // Optional rather than defaulted on these two, so a project written before a
 // verifier existed — or written by hand — needs no new field to be valid.
@@ -105,8 +112,7 @@ export const OpenApiConnectorSchema = OpenApiConnectorBaseSchema.extend({
 
 /** A connector that opens one connection: what a verifier may be. */
 export type DirectConnector =
-  | z.infer<typeof McpConnectorBaseSchema>
-  | z.infer<typeof OpenApiConnectorBaseSchema>;
+  z.infer<typeof McpConnectorBaseSchema> | z.infer<typeof OpenApiConnectorBaseSchema>;
 
 export const BrowserConnectorSchema = z.object({
   kind: z.literal('browser'),
@@ -212,7 +218,8 @@ export function describeConnector(connector: Connector | null): string {
     const name = hasPack(connector.pack) ? getPack(connector.pack).name : connector.pack;
     return `Pack · ${name} · ${connector.mode === 'twin' ? 'local twin' : 'live'}`;
   }
-  const verified = connector.kind !== 'browser' && connector.verifier ? ' · independently verified' : '';
+  const verified =
+    connector.kind !== 'browser' && connector.verifier ? ' · independently verified' : '';
   if (connector.kind === 'mcp') {
     return (
       (connector.transport === 'http' && connector.auth === 'oauth'
@@ -250,7 +257,9 @@ export function describeConnectorAction(connector: Connector): string {
   return own;
 }
 
-function describeOneConnectorAction(connector: Exclude<Connector, PackConnector> | DirectConnector): string {
+function describeOneConnectorAction(
+  connector: Exclude<Connector, PackConnector> | DirectConnector,
+): string {
   if (connector.kind === 'browser') {
     return `open a browser at ${connector.startUrl}`;
   }
@@ -532,7 +541,12 @@ export function parseProject(input: unknown): Project {
   return ProjectSchema.parse(input);
 }
 
-export function newProject(input: { id: string; name: string; goal?: string; now: string }): Project {
+export function newProject(input: {
+  id: string;
+  name: string;
+  goal?: string;
+  now: string;
+}): Project {
   return ProjectSchema.parse({
     schemaVersion: PROJECT_SCHEMA_VERSION,
     id: input.id,
@@ -596,7 +610,7 @@ export function nextSteps(project: Project): NextStep[] {
       pack
         ? {
             id: 'install_suite',
-            what: 'Answer the pack\'s questions and install the suite it ships with.',
+            what: "Answer the pack's questions and install the suite it ships with.",
             why: 'Its rules are proposals until you confirm them, and nothing unconfirmed can fail your agent.',
           }
         : {

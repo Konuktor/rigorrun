@@ -389,7 +389,7 @@ export class Workspace {
       // nothing downstream reads, after somebody had spent the effort on it.
       throw new Error(
         `${project.name} is connected through a pack, which ships its own suite, so there is no job ` +
-          'to demonstrate. Install the pack\'s suite instead.',
+          "to demonstrate. Install the pack's suite instead.",
       );
     }
     if (project.safety === 'production') {
@@ -463,7 +463,10 @@ export class Workspace {
         await live.connection.call(read.tool, read.args, project.budgets.toolCallMs),
       );
       if (hasPayload(normalized)) {
-        answers.push({ read: `${index}:${read.tool}:${JSON.stringify(read.args ?? {})}`, payload: normalized.payload });
+        answers.push({
+          read: `${index}:${read.tool}:${JSON.stringify(read.args ?? {})}`,
+          payload: normalized.payload,
+        });
       }
     }
     return answers;
@@ -577,9 +580,7 @@ export class Workspace {
   }
 
   /** Ends the recording and works out what the records are. */
-  async finishDemonstration(
-    project: Project,
-  ): Promise<{
+  async finishDemonstration(project: Project): Promise<{
     before: CanonicalState;
     after: CanonicalState;
     induced: InducedSchema;

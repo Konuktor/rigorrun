@@ -39,18 +39,25 @@ export interface AgentAddFlags {
   settleSeconds?: number | undefined;
 }
 
-export async function cmdAgent(action: string | undefined, flags: Flags, add: AgentAddFlags): Promise<number> {
+export async function cmdAgent(
+  action: string | undefined,
+  flags: Flags,
+  add: AgentAddFlags,
+): Promise<number> {
   if (action === 'add') return cmdAgentAdd(flags, add);
   if (action === 'list') return cmdAgentList(flags);
-  throw new CliError('Try `rigorrun agent add --project <id> --black-box <url>` or `rigorrun agent list --project <id>`.');
+  throw new CliError(
+    'Try `rigorrun agent add --project <id> --black-box <url>` or `rigorrun agent list --project <id>`.',
+  );
 }
 
 async function cmdAgentAdd(flags: Flags, add: AgentAddFlags): Promise<number> {
   const projectId = flags.project;
-  if (!projectId) throw new CliError('Which project? Try `rigorrun agent add --project <id> --black-box <url>`.');
+  if (!projectId)
+    throw new CliError('Which project? Try `rigorrun agent add --project <id> --black-box <url>`.');
   if (!add.blackBox) {
     throw new CliError(
-      'Say where the agent answers: `--black-box <url>`. It is sent each case\'s work there and does it itself.',
+      "Say where the agent answers: `--black-box <url>`. It is sent each case's work there and does it itself.",
     );
   }
 
@@ -61,12 +68,16 @@ async function cmdAgentAdd(flags: Flags, add: AgentAddFlags): Promise<number> {
     bodyTemplate: add.bodyTemplate === undefined ? null : await bodyTemplateFrom(add.bodyTemplate),
     ...(add.completion === undefined ? {} : { completion: add.completion }),
     ...(add.claimPath === undefined ? {} : { claimPath: add.claimPath }),
-    ...(add.settleSeconds === undefined ? {} : { settleQuietMs: Math.round(add.settleSeconds * 1000) }),
+    ...(add.settleSeconds === undefined
+      ? {}
+      : { settleQuietMs: Math.round(add.settleSeconds * 1000) }),
   });
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const where = issue && issue.path.length > 0 ? `${issue.path.map(String).join('.')}: ` : '';
-    throw new CliError(`That black-box agent is incomplete: ${where}${issue?.message ?? 'unknown shape'}`);
+    throw new CliError(
+      `That black-box agent is incomplete: ${where}${issue?.message ?? 'unknown shape'}`,
+    );
   }
   // Refused before anything is stored. The probe would record the same
   // problem on a saved agent; an address RigorRun will never send work to is
@@ -142,7 +153,9 @@ async function cmdAgentList(flags: Flags): Promise<number> {
         agent.name,
         agent.kind,
         describeAgent(agent),
-        agent.lastProbeOk ? 'yes' : `no${agent.lastProbeProblem ? ` — ${agent.lastProbeProblem}` : ''}`,
+        agent.lastProbeOk
+          ? 'yes'
+          : `no${agent.lastProbeProblem ? ` — ${agent.lastProbeProblem}` : ''}`,
       ]),
     );
     return 0;

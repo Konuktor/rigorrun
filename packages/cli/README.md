@@ -60,6 +60,8 @@ available from the command line, which is the half CI needs.
 
 ```bash
 rigorrun gate --project <id>     # exit 1 stops the build
+rigorrun gate --project <id> --case <case-id>          # only the cases you name; never the baseline
+rigorrun agent add --project <id> --black-box <url>    # connect an agent from a script; probed first
 ```
 
 ## Verify a published MCP server

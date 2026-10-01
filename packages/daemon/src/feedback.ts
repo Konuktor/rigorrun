@@ -121,7 +121,9 @@ export async function buildFeedbackBundle(input: {
     },
     workspace: {
       format: meta?.version ?? null,
-      ageDays: meta ? Math.round((now().getTime() - Date.parse(meta.createdAt)) / 86_400_000) : null,
+      ageDays: meta
+        ? Math.round((now().getTime() - Date.parse(meta.createdAt)) / 86_400_000)
+        : null,
     },
     activation: summary,
     projects,

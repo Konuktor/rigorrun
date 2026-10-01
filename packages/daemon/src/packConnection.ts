@@ -142,8 +142,16 @@ function heldTo(session: PackSession, projectSafety: SafetyMode): PackSession {
  */
 function toolOf(action: ActionDefinition): DiscoveredTool {
   const risk: RiskAssessment = action.readOnly
-    ? { level: 'read', source: 'server-hint', rationale: 'The pack declares this operation only reads. Unverified.' }
-    : { level: 'write', source: 'server-hint', rationale: 'The pack declares this operation writes.' };
+    ? {
+        level: 'read',
+        source: 'server-hint',
+        rationale: 'The pack declares this operation only reads. Unverified.',
+      }
+    : {
+        level: 'write',
+        source: 'server-hint',
+        rationale: 'The pack declares this operation writes.',
+      };
   return {
     name: action.name,
     description: action.description,

@@ -52,7 +52,9 @@ export async function routeToPack(
 }
 
 /** The packs a person can address by name on the command line, for `--help`. */
-export function packCommands(ownCommands: ReadonlySet<string>): { id: string; description: string }[] {
+export function packCommands(
+  ownCommands: ReadonlySet<string>,
+): { id: string; description: string }[] {
   return listPacks()
     .filter((pack) => pack.cli !== undefined && !ownCommands.has(pack.id))
     .map((pack) => ({ id: pack.id, description: pack.description }));
