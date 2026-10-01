@@ -23,3 +23,16 @@
   api.stripe.com within 10 s ("Connect Timeout") because this machine's network dropped for a
   moment. No cell ran (`evidence/L-20261001T084730Z-failed-to-start/`, empty). Started again at once,
   at the same frozen product.
+- **Stage L, third counted run: interrupted.** It stopped after 31 cells, when the oracle's request
+  for `already_refunded` failed DNS resolution on this machine ("Temporary failure in name
+  resolution"). The 31 cells all agree: 25 TN, 6 TP, 0 FN, 0 FP. They are kept whole in
+  `evidence/L-20261001T084824Z-interrupted/`.
+- **Harness hardening, made at the same frozen product, in response to that interruption.** The
+  oracle and the scripted agents now retry transport failures — DNS, dropped connections, timeouts —
+  up to five times, waiting 1, 2, 4, 8 and 16 s.
+  - These are reads, or writes that carry their Idempotency-Key, so a repeat cannot double an
+    action.
+  - Stripe's own answers are never retried, except 429 as before.
+  - RigorRun's client already did this (`packages/env-stripe/src/client.ts`).
+  - Nothing that decides a label or a verdict changed. 70 harness tests still pass.
+  - Stage L is run again in full.

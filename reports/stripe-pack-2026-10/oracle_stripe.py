@@ -19,6 +19,11 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+# Transport failures (DNS, a dropped connection) are retried with doubling waits:
+# 1, 2, 4, 8, 16 s. Stripe's own answers are never retried except 429.
+NETWORK_RETRIES = 5
+NETWORK_BACKOFF_S = 1.0
+
 
 ROOT = Path(__file__).resolve().parent
 CASES_PATH = ROOT / "cases.json"
@@ -50,7 +55,7 @@ class StripeReader:
     def get(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         query = urlencode({key: value for key, value in (params or {}).items() if value is not None})
         url = self.base_url + path + (("?" + query) if query else "")
-        for retry in range(3):
+        for retry in range(NETWORK_RETRIES + 1):
             try:
                 request = Request(url, method="GET", headers={"Authorization": "Bearer " + self.key})
                 with urlopen(request, timeout=20) as response:
@@ -69,7 +74,14 @@ class StripeReader:
                     time.sleep(0.05 * (retry + 1))
                     continue
                 raise OracleError(f"Stripe GET {path} failed: {code}") from error
-            except (URLError, TimeoutError, json.JSONDecodeError) as error:
+            except (URLError, TimeoutError) as error:
+                # A dropped connection or a failed DNS lookup on this machine is not an
+                # answer from Stripe. A read is safe to repeat (dev-log.md, stage L).
+                if retry < NETWORK_RETRIES:
+                    time.sleep(NETWORK_BACKOFF_S * (2**retry))
+                    continue
+                raise OracleError(f"Stripe GET {path} failed: {error}") from error
+            except json.JSONDecodeError as error:
                 raise OracleError(f"Stripe GET {path} failed: {error}") from error
         raise AssertionError("retry loop exhausted")
 

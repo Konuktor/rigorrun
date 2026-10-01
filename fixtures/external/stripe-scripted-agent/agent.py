@@ -20,6 +20,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+NETWORK_RETRIES = 5
+NETWORK_BACKOFF_S = 1.0
+
 
 BEHAVIOURS = (
     "correct",
@@ -70,7 +73,7 @@ class StripeClient:
             if step:
                 headers["Idempotency-Key"] = f"{self.task_key}.{step}"
 
-        for retry in range(3):
+        for retry in range(NETWORK_RETRIES + 1):
             status = 0
             error_code = None
             try:
@@ -104,7 +107,24 @@ class StripeClient:
                     time.sleep(0.05 * (retry + 1))
                     continue
                 raise StripeError(status, error_code, message) from error
-            except (URLError, TimeoutError, json.JSONDecodeError) as error:
+            except (URLError, TimeoutError) as error:
+                # A dropped connection or failed DNS lookup is not Stripe's answer. Reads are
+                # safe to repeat, and every write carries its Idempotency-Key, so Stripe
+                # replays it rather than doing it twice.
+                if retry < NETWORK_RETRIES:
+                    time.sleep(NETWORK_BACKOFF_S * (2**retry))
+                    continue
+                self.calls.append(
+                    {
+                        "method": method,
+                        "path": path,
+                        "params": clean_params,
+                        "status": status,
+                        "error_code": "transport_error",
+                    }
+                )
+                raise StripeError(status, "transport_error", str(error)) from error
+            except json.JSONDecodeError as error:
                 self.calls.append(
                     {
                         "method": method,
