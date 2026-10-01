@@ -1,0 +1,134 @@
+name: Action self-test
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  action-selftest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Set up an offline project
+        id: project
+        shell: bash
+        env:
+          RIGORRUN_HOME: ${{ runner.temp }}/rigorrun-action-home
+        run: |
+          node --input-type=module <<'NODE'
+          import { writeFile } from 'node:fs/promises';
+          import { join } from 'node:path';
+
+          const root = process.env.GITHUB_WORKSPACE;
+          const spec = {
+            name: 'GitHub Action self-test base',
+            goal: 'Confirm a held booking.',
+            connector: {
+              kind: 'mcp',
+              transport: 'stdio',
+              command: join(root, 'node_modules', '.bin', 'tsx'),
+              args: [join(root, 'fixtures', 'external', 'mcp-venue-desk', 'src', 'stdio.ts')],
+              secretNames: [],
+            },
+            safety: 'ephemeral',
+            readOnlyTools: ['list_venues', 'list_organisers', 'find_bookings', 'get_booking'],
+            verifierReads: [
+              { tool: 'find_bookings' },
+              { tool: 'list_venues' },
+              { tool: 'list_organisers' },
+            ],
+            reset: { kind: 'tool', tool: 'reset_desk' },
+            teach: [
+              { tool: 'find_bookings', args: {} },
+              { tool: 'get_booking', args: { bookingId: 'BKG-4001' } },
+              {
+                tool: 'record_signoff',
+                args: { bookingId: 'BKG-4001', approver: 'Dana Whitlock' },
+              },
+              { tool: 'confirm_booking', args: { bookingId: 'BKG-4001' } },
+            ],
+            answers: {
+              q_unit_Booking_depositAmount: 'currency',
+              q_role_Booking_signedOffBy: 'actor',
+              q_untrusted_Booking_note: 'yes',
+            },
+            agents: [
+              {
+                name: 'booking-agent-process',
+                command: join(root, 'node_modules', '.bin', 'tsx'),
+                args: [join(root, 'fixtures', 'external', 'process-agent', 'src', 'main.ts')],
+                cwd: root,
+              },
+            ],
+          };
+          await Promise.all([
+            writeFile(
+              join(process.env.RUNNER_TEMP, 'rigorrun-action-pass.json'),
+              JSON.stringify({ ...spec, name: 'GitHub Action pass', review: { confirm: [] } }),
+            ),
+            writeFile(
+              join(process.env.RUNNER_TEMP, 'rigorrun-action-fail.json'),
+              JSON.stringify({ ...spec, name: 'GitHub Action fail', review: { confirm: ['.'] } }),
+            ),
+          ]);
+          NODE
+
+          pass_json="$(pnpm exec tsx packages/cli/src/bin.ts setup "$RUNNER_TEMP/rigorrun-action-pass.json" --home "$RIGORRUN_HOME" --json --quiet)"
+          fail_json="$(pnpm exec tsx packages/cli/src/bin.ts setup "$RUNNER_TEMP/rigorrun-action-fail.json" --home "$RIGORRUN_HOME" --json --quiet)"
+          pass_id="$(node -e 'const chunks=[]; process.stdin.on("data", c => chunks.push(c)).on("end", () => process.stdout.write(JSON.parse(Buffer.concat(chunks)).projectId))' <<< "$pass_json")"
+          fail_id="$(node -e 'const chunks=[]; process.stdin.on("data", c => chunks.push(c)).on("end", () => process.stdout.write(JSON.parse(Buffer.concat(chunks)).projectId))' <<< "$fail_json")"
+          echo "pass-project-id=$pass_id" >> "$GITHUB_OUTPUT"
+          echo "fail-project-id=$fail_id" >> "$GITHUB_OUTPUT"
+
+      - name: A passing project passes the action
+        id: passing
+        uses: ./
+        with:
+          project: ${{ steps.project.outputs.pass-project-id }}
+          cli: pnpm rigorrun
+          min-success: '0'
+          report: ${{ runner.temp }}/rigorrun-pass.html
+          rigorrun-home: ${{ runner.temp }}/rigorrun-action-home
+
+      - name: A failing project fails the action
+        id: failing
+        continue-on-error: true
+        uses: ./
+        env:
+          RIGORRUN_AGENT_BEHAVIOUR: careless
+        with:
+          project: ${{ steps.project.outputs.fail-project-id }}
+          cli: pnpm rigorrun
+          min-success: '0'
+          report: ${{ runner.temp }}/rigorrun-fail.html
+          rigorrun-home: ${{ runner.temp }}/rigorrun-action-home
+
+      - name: Assert action outputs and outcomes
+        if: always()
+        shell: bash
+        env:
+          FAIL_EXIT_CODE: ${{ steps.failing.outputs.exit-code }}
+          FAIL_OUTCOME: ${{ steps.failing.outcome }}
+          FAIL_VERDICT: ${{ steps.failing.outputs.verdict }}
+          PASS_EXIT_CODE: ${{ steps.passing.outputs.exit-code }}
+          PASS_OUTCOME: ${{ steps.passing.outcome }}
+          PASS_VERDICT: ${{ steps.passing.outputs.verdict }}
+        run: |
+          test "$PASS_OUTCOME" = success
+          test "$PASS_EXIT_CODE" = 0
+          test "$PASS_VERDICT" = PASS
+          test "$FAIL_OUTCOME" = failure
+          test "$FAIL_EXIT_CODE" = 1
+          test "$FAIL_VERDICT" = FAIL
