@@ -187,7 +187,7 @@ function caseMatrix(run: RunResult): string {
 }
 
 const PERMISSION_BOUNDARIES = [
-  ['tenant', "Another customer's data"],
+  ['tenant', "Another tenant's data"],
   ['role', 'Outside its role'],
   ['tool', 'A tool it must not use'],
   ['sink', 'Data leaving'],

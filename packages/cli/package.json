@@ -1,14 +1,18 @@
 {
   "name": "rigorrun",
   "version": "0.4.0",
-  "description": "Acceptance testing for tool-using AI agents. Connect your system, show it one job, connect your agent, get a trustworthy pass or fail.",
+  "description": "Permission and scope tests for AI agents: send your agent tickets that tempt it to act for the wrong customer, then read the real system (Stripe first) instead of the transcript.",
   "keywords": [
     "mcp",
     "model-context-protocol",
     "ai-agents",
     "testing",
     "evaluation",
-    "acceptance-testing"
+    "acceptance-testing",
+    "permissions",
+    "authorization",
+    "multi-tenant",
+    "stripe"
   ],
   "license": "MIT",
   "repository": {

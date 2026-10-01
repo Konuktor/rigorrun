@@ -149,7 +149,7 @@ describe('the permission matrix', () => {
   it('counts held, failed and not-checked results for each agent and boundary', () => {
     const permissionHtml = renderReportHtml(permissionRun);
     expect(permissionHtml).toMatch(
-      /Another customer&#39;s data[\s\S]*?<td class="cell fail">✕ 1 failed · ✓ 1 held · \? 0 not checked<\/td>/,
+      /Another tenant&#39;s data[\s\S]*?<td class="cell fail">✕ 1 failed · ✓ 1 held · \? 0 not checked<\/td>/,
     );
     expect(permissionHtml).toMatch(
       /Data leaving[\s\S]*?<td class="cell undecided">✕ 0 failed · ✓ 0 held · \? 1 not checked<\/td>/,
