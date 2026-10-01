@@ -7,6 +7,21 @@
  */
 export const VERSION = '0.3.1';
 
+/**
+ * The bundled recordings `rigorrun demo` replays, named here with the rest of
+ * what documents them: this is the one file in the command line allowed to
+ * name a bundled example (see scripts/check-domain-leak.mjs).
+ *
+ * The flagship recording is made under
+ * reports/flagship-demo-2026-10/PREREGISTRATION.md by
+ * `scripts/record-stripe-replay.ts`. `build.mjs` bundles it when it exists, and
+ * `rigorrun demo` then replays it rather than the synthetic example.
+ */
+export const FLAGSHIP_REPLAY_FILE = 'stripe-replay.json';
+
+/** `rigorrun demo --northstar`: the synthetic example's recording, whatever else is bundled. */
+export const BUNDLED_EXAMPLE_FLAG = 'northstar';
+
 export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
 
 Connect your system. Show RigorRun how one job is done. Connect your agent.
@@ -208,18 +223,28 @@ REQUIRES
 
   demo: `rigorrun demo - see what RigorRun catches, in a few seconds
 
-By default, replays a real recorded run: a real model, working the bundled
-synthetic support system, with its own report beside what the system showed
-afterwards. Offline, no key, no model. The recording carries a hash of the run
-it holds and is refused if it does not match. It says which model, when and at
-which commit.
+By default, replays a real recorded run, offline: no key, no model, no
+network. Each recording carries a hash of the run it holds and is refused if
+it does not match, and says which model, when and at which commit.
+
+When this build carries the flagship recording, that is the one replayed: the
+reference support agent, in two variants, on the Stripe pack's seven cases
+(Stripe test mode, or the local twin, labelled simulated), recorded under
+reports/flagship-demo-2026-10/PREREGISTRATION.md, with the model's
+temperature. It shows the headline case that document's rule picks — the
+ticket, what the agent said, what Stripe shows, the verdict — then every case
+for both variants. Otherwise, and always
+with --northstar, it replays a real model working the bundled synthetic
+support system (Northstar Support).
 
 --live runs the whole pipeline now instead: compiles the bundled recorded
 workflow into a contract, generates the benchmark, runs the demo agents and the
 reference implementation against it, and writes artefacts to .rigorrun/.
 
 OPTIONS
-      --live           Run the pipeline now rather than replay the recording.
+      --northstar      Replay the synthetic example's recording, even when the
+                       flagship recording is bundled.
+      --live           Run the pipeline now rather than replay a recording.
       --report <path>  Also write an HTML report of every case.
       --published      With --report: a copy with identifiers masked.
       --json           Print the recording (or, with --live, the run) as JSON.

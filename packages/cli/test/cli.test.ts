@@ -86,7 +86,9 @@ describe('help and version', () => {
 
 describe('the default demo', () => {
   it('replays the bundled recording offline, and says where it came from', async () => {
-    const { code, out } = await cli('demo');
+    // By name: once the flagship recording is bundled, a bare `demo` replays
+    // that one instead (replay.stripe.test.ts).
+    const { code, out } = await cli('demo', '--northstar');
     expect(code).toBe(0);
     expect(out).toContain('a recorded run, replayed');
     expect(out).toMatch(/recorded \d{4}-\d{2}-\d{2} at [0-9a-f]{7}/);

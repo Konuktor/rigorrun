@@ -90,6 +90,14 @@ export interface RunOptions {
    * hides a suite that cannot separate a good agent from a bad one.
    */
   suiteQuality?: SuiteQuality;
+  /**
+   * The name of the pack whose own suite this is, when it is one. The suite
+   * check measures suites induced from a demonstration and is refused for a
+   * pack's, which is written and qualified with the pack. Telling somebody to
+   * run a check they cannot run would be a remedy that does not exist, so a
+   * pack's unassessed suite is reported as what it is instead.
+   */
+  suiteFromPack?: string;
   version?: string;
 }
 
@@ -152,7 +160,17 @@ export async function runBenchmark(
     });
   }
 
-  if (options.suiteQuality && !options.suiteQuality.assessed) {
+  if (options.suiteFromPack !== undefined && !options.suiteQuality?.assessed) {
+    limits.push({
+      id: 'suite_from_pack',
+      limit:
+        `The suite was written and qualified with the ${options.suiteFromPack} pack, not induced ` +
+        'from a demonstration, so the suite check, which measures induced suites, was not run on it.',
+      remedy:
+        'What the suite was shown to catch is in the pack’s pre-registered qualification, ' +
+        'not in this run.',
+    });
+  } else if (options.suiteQuality && !options.suiteQuality.assessed) {
     limits.push({
       id: 'suite_quality_unassessed',
       limit: 'Nobody has checked whether this suite can tell a correct agent from a broken one.',

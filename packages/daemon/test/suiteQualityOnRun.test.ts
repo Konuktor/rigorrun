@@ -9,14 +9,21 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { BenchmarkQuality } from '@rigorrun/quality';
-import { suiteQualityOf } from '../src/service.ts';
+import { packSuiteQuality, suiteQualityOf } from '../src/service.ts';
 
 function quality(overrides: Partial<BenchmarkQuality>): BenchmarkQuality {
   return {
     benchmarkId: 'bm_x',
     cases: 3,
     measures: [
-      { id: 'false_positive_rate', label: 'fp', meaning: '', value: 0, kind: 'rate', discriminating: true },
+      {
+        id: 'false_positive_rate',
+        label: 'fp',
+        meaning: '',
+        value: 0,
+        kind: 'rate',
+        discriminating: true,
+      },
     ],
     mutants: [],
     mutantKillRate: 1,
@@ -45,7 +52,16 @@ describe('suiteQualityOf', () => {
     const summary = suiteQualityOf(
       quality({
         // The audit's two sqlite journeys: false positive rate 1, kill rate 0.
-        measures: [{ id: 'false_positive_rate', label: 'fp', meaning: '', value: 1, kind: 'rate', discriminating: true }],
+        measures: [
+          {
+            id: 'false_positive_rate',
+            label: 'fp',
+            meaning: '',
+            value: 1,
+            kind: 'rate',
+            discriminating: true,
+          },
+        ],
         mutantKillRate: 0,
         independentKillRate: 0,
         replayStable: false,
@@ -59,5 +75,17 @@ describe('suiteQualityOf', () => {
     expect(summary.warnings[0]).toMatch(/reference implementation fails 100%/);
     expect(summary.warnings.join(' ')).toMatch(/caught 0% of deliberately broken agents/);
     expect(summary.warnings.join(' ')).toMatch(/2 confirmed rule\(s\) are never exercised/);
+  });
+});
+
+describe('packSuiteQuality', () => {
+  it('says a pack’s suite was qualified with the pack, not that it was never checked', () => {
+    const summary = packSuiteQuality('The fake pack');
+    expect(summary.assessed).toBe(false);
+    expect(summary.warnings).toHaveLength(1);
+    expect(summary.warnings[0]).toContain(
+      'came with the The fake pack pack and was qualified with it',
+    );
+    expect(summary.warnings.join(' ')).not.toMatch(/not been quality-checked/);
   });
 });
