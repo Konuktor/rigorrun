@@ -9,8 +9,9 @@
 - **Phase:** Step A (context, guardrails, agents) → Phase 0 (repositioned site and email).
 - **Outreach:** paused since 2026-10-02 (D-004). 5 sent on 2026-10-01 (Calltree, Minimal AI, Open,
   Parahelp, Quivr). Resumes after the Phase 0 deploy.
-- **Released:** `rigorrun` 0.4.0 (2026-10-01). Qualified tree `aee8fe5`; any change under
-  `packages/` needs a re-qualification before the next release.
+- **Released:** `rigorrun` 0.4.0 (2026-10-01), qualified tree `aee8fe5`. **0.5.0 candidate:**
+  `engine/0.5.0`, tree `27d40a8`, re-qualified T and L on 2026-10-02 — waiting for the founder's
+  "yes" to release. Any further change under `packages/` needs another re-qualification.
 - **Working branches:** `positioning/permissions` (Phase 0, no `packages/` changes) and
   `engine/0.5.0` (Phase 1; has T-001). Agents work in `~/RigorRun-agents/<agent>-<task>`.
 
@@ -51,7 +52,7 @@
 | 1-7  | Permission matrix in the HTML report; report footer (T-004)                                                         | 1     | codex          | done (codex T-004 + claude review: published reports keep the boundary)                                                                               | ad9fbf3                               | claude: report 43/43; rendered the flagship run with tags                                                                  |
 | 1-8  | Stripe suite: tools, principal, scope checks on `other_customer`; goldens                                           | 1     | claude         | done, narrowed: Stripe checks tagged with their boundary; no principal or new kinds in the Stripe suite (would change what black-box agents are sent) | d1e7c26                               | claude: suite tests; full suite                                                                                            |
 | 1-9  | CLI copy (help, npm description, CLI README, replay end line)                                                       | 1     | cursor/claude  | done                                                                                                                                                  | c8b5b75                               | claude: pnpm verify (lint, typecheck, domain, claims, 1813 tests, build)                                                   |
-| 1-10 | Pre-registered Stripe re-qualification at the 0.5.0 tree (T then L)                                                 | 1     | claude         | doing: pre-registered (e6b14f8); Stage T running; Stage L next                                                                                        | reports/stripe-requal-0.5.0           | —                                                                                                                          |
+| 1-10 | Pre-registered Stripe re-qualification at the 0.5.0 tree (T then L)                                                 | 1     | claude         | done: GO_TWIN and GO_LIVE (168 + 168, TP 39 / TN 129, FP 0, FN 0)                                                                                     | 1771d2a on engine/0.5.0               | claude: aggregate per pre-registration; tag diagnostic 0 mismatches                                                        |
 | 2-1  | Larch Helpdesk MCP fixture (T-003)                                                                                  | 2     | codex          | done                                                                                                                                                  | d92c813 on engine/0.5.0               | claude: fixture tests 12/12, external-imports, lint                                                                        |
 | —    | Allow-list enforcement in the runner                                                                                | 1     | claude         | dropped                                                                                                                                               | —                                     | it broke a careful agent that reads before retrying (runner/test/retry.test.ts); scope tests use `tool_not_called` instead |
 
@@ -62,6 +63,10 @@
 | 2026-09-28 | 5    | 0       | 0     | 0      | 0               |
 
 ## Log
+
+- **2026-10-02 (early morning)** — 0.5.0 candidate re-qualified (`reports/stripe-requal-0.5.0`):
+  Stage T GO_TWIN and Stage L GO_LIVE, 168 cells each, TP 39 / TN 129, no false pass or fail, no
+  re-runs; boundary-tag diagnostic clean. Not released: needs the founder's "yes".
 
 - **2026-10-02 (night)** — Phase 0 complete on `positioning/permissions` (site, docs, README, OG,
   video, llms.txt, emails v2 drafted); not deployed — waiting for the founder. Phase 1 engine on
