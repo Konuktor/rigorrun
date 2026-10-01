@@ -29,3 +29,6 @@ apps/*/.astro/
 
 # Audit scratch: upstream clones and disposable state, never committed.
 tmp/
+
+# Python bytecode from the SDK tests.
+__pycache__/
