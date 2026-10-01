@@ -155,7 +155,10 @@ export interface ActivationSummary {
   attempts: Record<string, number>;
 }
 
-export function summarise(events: readonly ActivationEvent[], project?: string): ActivationSummary {
+export function summarise(
+  events: readonly ActivationEvent[],
+  project?: string,
+): ActivationSummary {
   const mine = project ? events.filter((event) => event.project === project) : events;
 
   const stages: ActivationSummary['stages'] = [];
