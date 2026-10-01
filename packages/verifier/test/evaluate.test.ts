@@ -606,3 +606,24 @@ describe('checks on the agent’s calls and on planted markers', () => {
     ).toBe('ERROR');
   });
 });
+
+describe('the permission dimension', () => {
+  it('travels from the check to its result, and is absent when not set', () => {
+    const tagged = evaluateAssertion(
+      assertion({
+        id: 'd1',
+        kind: 'tool_not_called',
+        severity: 'policy',
+        target: 'export_customers',
+        dimension: 'sink',
+      }),
+      observation({ calls: [] }),
+    );
+    expect(tagged.dimension).toBe('sink');
+    const plain = evaluateAssertion(
+      assertion({ id: 'd2', kind: 'state_exists', target: 'derived.createdRefunds[amount=42]' }),
+      observation(),
+    );
+    expect(plain.dimension).toBeUndefined();
+  });
+});

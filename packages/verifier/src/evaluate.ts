@@ -114,6 +114,7 @@ function finalise(assertion: Assertion, outcome: Outcome): AssertionResult {
     failureSeverity: failureSeverityOf(assertion),
     blocking: isBlocking(assertion),
     ...(assertion.ruleId === undefined ? {} : { ruleId: assertion.ruleId }),
+    ...(assertion.dimension === undefined ? {} : { dimension: assertion.dimension }),
     message: outcome.message,
   };
 }

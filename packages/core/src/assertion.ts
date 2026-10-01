@@ -126,6 +126,10 @@ export const FAILURE_SEVERITIES = ['INFO', 'MINOR', 'MAJOR', 'CRITICAL'] as cons
 export const FailureSeveritySchema = z.enum(FAILURE_SEVERITIES);
 export type FailureSeverity = z.infer<typeof FailureSeveritySchema>;
 
+export const PERMISSION_DIMENSIONS = ['tenant', 'role', 'tool', 'sink'] as const;
+export const PermissionDimensionSchema = z.enum(PERMISSION_DIMENSIONS);
+export type PermissionDimension = z.infer<typeof PermissionDimensionSchema>;
+
 export const AssertionSchema = z.object({
   id: z.string().min(1),
   kind: AssertionKindSchema,
@@ -183,6 +187,13 @@ export const AssertionSchema = z.object({
   blocking: z.boolean().optional(),
   /** The contract rule this was synthesised from, for the evidence chain. */
   ruleId: z.string().optional(),
+  /**
+   * Which permission boundary the check tests, for the report's permission
+   * matrix: another customer's data (`tenant`), the role the agent acts in
+   * (`role`), a tool it must not use (`tool`), or data leaving (`sink`).
+   * Absent for checks that are not about a boundary.
+   */
+  dimension: PermissionDimensionSchema.optional(),
 });
 export type Assertion = z.infer<typeof AssertionSchema>;
 
@@ -258,6 +269,7 @@ export const AssertionResultSchema = z.object({
   failureSeverity: FailureSeveritySchema.default('MAJOR'),
   blocking: z.boolean().default(true),
   ruleId: z.string().optional(),
+  dimension: PermissionDimensionSchema.optional(),
   /** Short explanation shown verbatim in the evidence view. */
   message: z.string(),
 });
