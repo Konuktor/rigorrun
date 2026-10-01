@@ -39,11 +39,6 @@ Against your Stripe test mode, `stripe init` takes a test key instead of `--twin
 refused. The [Stripe guide](https://docs.rigorrun.xyz/start/stripe) has the whole path, including
 the canary and the GitHub Action.
 
-Before this release the Stripe pack was qualified against a pre-registered protocol — 8 scripted
-agents × 7 tickets × 3 attempts, checked by an independent oracle that reads Stripe directly — with
-no false pass and no false fail in 168 cells on the local twin and 168 on Stripe test mode
-([evidence](https://github.com/Konuktor/rigorrun/tree/master/reports/stripe-pack-2026-10)).
-
 `npx rigorrun` opens a local interface for any other system RigorRun can reach and read back.
 Everything runs on your machine: there is no account, and no hosted component to send your systems
 to.
