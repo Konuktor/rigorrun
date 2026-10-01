@@ -9,9 +9,9 @@
  */
 import { parseArgs } from 'node:util';
 import { caseOutcome, type CaseResult } from '@rigorrun/core';
-import { explainCase } from '@rigorrun/report';
+import { explainCase, timeoutAdvice } from '@rigorrun/report';
 import { STRIPE_PACK_ID } from '../conventions.ts';
-import { CANARY_CASE_ID } from '../scenarios.ts';
+import { CANARY_CASE_ID, STRIPE_CASE_TIMEOUT_MS } from '../scenarios.ts';
 import { UsageError, rows, say, withService } from './common.ts';
 
 export const CANARY_USAGE = `rigorrun stripe canary --project <id> [--agent <name>] - one small refund, first
@@ -21,10 +21,12 @@ full. Prints what the agent said and, beneath it, what Stripe holds. Run the
 whole suite afterwards with \`rigorrun gate --project <id>\`.
 
 OPTIONS
-      --project <id>    Required. A project made by \`rigorrun stripe init\`.
-      --agent <name>    Which agent, by name or id. Default: the last one added.
-      --home <path>     Where projects live.
-      --json            Print the case's result as JSON.
+      --project <id>       Required. A project made by \`rigorrun stripe init\`.
+      --agent <name>       Which agent, by name or id. Default: the last one added.
+      --case-timeout <ms>  How long the agent has to answer. Default ${STRIPE_CASE_TIMEOUT_MS}
+                           (${STRIPE_CASE_TIMEOUT_MS / 60_000} minutes); slow models can need more.
+      --home <path>        Where projects live.
+      --json               Print the case's result as JSON.
 
 EXIT CODES
   0  the agent made the refund it was asked for, and nothing else
@@ -38,6 +40,7 @@ export async function cmdCanary(argv: string[]): Promise<number> {
     options: {
       project: { type: 'string' },
       agent: { type: 'string' },
+      'case-timeout': { type: 'string' },
       home: { type: 'string' },
       json: { type: 'boolean', default: false },
       help: { type: 'boolean', short: 'h' },
@@ -51,6 +54,7 @@ export async function cmdCanary(argv: string[]): Promise<number> {
   const projectId = values.project;
   if (!projectId)
     throw new UsageError('Which project? Try `rigorrun stripe canary --project <id>`.');
+  const caseTimeoutMs = budgetFlag(values['case-timeout']);
 
   return withService(values.home, async (service) => {
     const project = await service.readProject(projectId).catch(() => {
@@ -80,7 +84,18 @@ export async function cmdCanary(argv: string[]): Promise<number> {
       );
     }
 
-    const run = await service.runAgent(projectId, agent.id, { caseIds: [CANARY_CASE_ID] });
+    const run = await service
+      .runAgent(projectId, agent.id, {
+        caseIds: [CANARY_CASE_ID],
+        ...(caseTimeoutMs === undefined ? {} : { caseTimeoutMs }),
+      })
+      .catch((error: unknown) => {
+        // A budget the project cannot honour is the setup, not the agent.
+        if (caseTimeoutMs !== undefined && /cannot outlast/.test((error as Error).message)) {
+          throw new UsageError((error as Error).message);
+        }
+        throw error;
+      });
     const result = run.caseResults[0];
     if (!result) throw new Error('The canary run produced no result.');
     if (values.json) {
@@ -92,11 +107,7 @@ export async function cmdCanary(argv: string[]): Promise<number> {
         run.limits.some((limit) => limit.id === 'simulated'),
       );
       say();
-      say(
-        caseOutcome(result) === 'PASS'
-          ? `Next  rigorrun gate --project ${projectId} --report report.html`
-          : 'The lines above say what Stripe holds. Fix the agent, then run the canary again.',
-      );
+      for (const line of advice(result, projectId)) say(line);
     }
     return exitCodeOf(caseOutcome(result));
   });
@@ -123,6 +134,39 @@ function printCanary(agentName: string, result: CaseResult, simulated: boolean):
       .join(' · '),
   ]);
   for (const line of rows(lines)) say(line);
+}
+
+/** What to do next, by how the canary ended. */
+function advice(result: CaseResult, projectId: string): string[] {
+  const outcome = caseOutcome(result);
+  if (outcome === 'PASS')
+    return [`Next  rigorrun gate --project ${projectId} --report report.html`];
+  if (outcome === 'TIMED_OUT') {
+    // Not "fix the agent": it may be right and only slow. A timed-out case
+    // is never a task success, so whether the refund is there is read from
+    // the success checks themselves; and a timeout means no rule was broken.
+    const owed = result.assertions.filter((check) => check.severity === 'success');
+    const done = owed.length > 0 && owed.every((check) => check.status === 'PASS');
+    return [
+      timeoutAdvice(result.budgetMs, 'ticket'),
+      ...(done
+        ? ['Stripe already holds the refund the ticket asked for; the answer came late.']
+        : []),
+    ];
+  }
+  return ['The lines above say what Stripe holds. Fix the agent, then run the canary again.'];
+}
+
+/** `--case-timeout`: whole milliseconds, more than none. */
+function budgetFlag(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new UsageError(
+      `--case-timeout takes a whole number of milliseconds, such as 600000 for ten minutes, not "${raw}".`,
+    );
+  }
+  return value;
 }
 
 function exitCodeOf(outcome: string): number {

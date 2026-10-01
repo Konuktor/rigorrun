@@ -14,11 +14,13 @@ import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Benchmark, EnvironmentContract } from '@rigorrun/core';
-import { ProjectStore } from '@rigorrun/daemon';
+import { ProjectStore, Service } from '@rigorrun/daemon';
+import { ProxyServer } from '@rigorrun/proxy';
 import {
   CANARY_CASE_ID,
   KEY_SECRET,
   STRIPE_CASE_IDS,
+  STRIPE_CASE_TIMEOUT_MS,
   STRIPE_RULE_IDS,
   startTwin,
   stripeSuite,
@@ -60,6 +62,22 @@ const cli = async (...args: string[]) => {
   return { code: value, out, err };
 };
 
+/** The project service over one home, closed again afterwards. */
+async function withProjectService<T>(
+  home: string,
+  work: (service: Service) => Promise<T>,
+): Promise<T> {
+  const proxy = new ProxyServer();
+  await proxy.start();
+  const service = new Service({ store: new ProjectStore(home), proxy });
+  try {
+    return await work(service);
+  } finally {
+    await service.workspace.close();
+    await proxy.stop();
+  }
+}
+
 let homes = 0;
 const freshHome = () => join(dir, `home-${(homes += 1)}`);
 
@@ -84,8 +102,11 @@ async function initTwin(
   return { projectId: (JSON.parse(out) as { projectId: string }).projectId, out };
 }
 
-/** An agent that refunds what the ticket asks, on the payment it names, with its own key. */
-function refundingAgent(scale = 100): Promise<string> {
+/**
+ * An agent that refunds what the ticket asks, on the payment it names, with its
+ * own key — and, given `answerAfterMs`, answers only that long after.
+ */
+function refundingAgent(scale = 100, answerAfterMs = 0): Promise<string> {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       let text = '';
@@ -110,6 +131,7 @@ function refundingAgent(scale = 100): Promise<string> {
             amount: String(amount),
           }).toString(),
         });
+        if (answerAfterMs > 0) await new Promise((done) => setTimeout(done, answerAfterMs));
         res.end(JSON.stringify({ status: 'done', message: `Refunded ${inputs['amount']}.` }));
       });
     });
@@ -239,6 +261,10 @@ describe('stripe init --twin', () => {
       'Use a test account or Sandbox that nothing else writes to while RigorRun runs.',
     );
     expect(out).toContain('rigorrun stripe canary --project');
+    // The budget a slow model will meet, and the flag that changes it, before the first run.
+    expect(out).toContain(
+      'Each ticket gets 5 minutes; slower agents: add --case-timeout <ms> to canary, run or gate.',
+    );
     expect(out.split('\n').length).toBeLessThan(30);
   });
 
@@ -530,6 +556,152 @@ describe('stripe canary', () => {
     expect(out).toContain('Canary · units · FAIL');
     expect(out).toMatch(/Refund re_\w+ of \$0\.01 on ch_\w+ \(a \$1\.00 charge\)/);
   });
+
+  it('runs under five minutes by default, and under --case-timeout when given one', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    const url = await refundingAgent();
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'desk',
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+
+    const plain = await cli('stripe', 'canary', '--project', projectId, '--json', '--home', home);
+    expect(plain.code, plain.err).toBe(0);
+    expect((JSON.parse(plain.out) as { budgetMs: number }).budgetMs).toBe(300_000);
+
+    const given = await cli(
+      'stripe',
+      'canary',
+      '--project',
+      projectId,
+      '--case-timeout',
+      '420000',
+      '--json',
+      '--home',
+      home,
+    );
+    expect(given.code, given.err).toBe(0);
+    expect((JSON.parse(given.out) as { budgetMs: number }).budgetMs).toBe(420_000);
+
+    const bad = await cli(
+      'stripe',
+      'canary',
+      '--project',
+      projectId,
+      '--case-timeout',
+      'soon',
+      '--home',
+      home,
+    );
+    expect(bad.code).toBe(2);
+    expect(bad.err).toContain('--case-timeout');
+    expect((await cli('stripe', 'canary', '--help')).out).toContain('--case-timeout <ms>');
+    // The default the help states is the suite's own, not a number typed twice.
+    expect((await cli('gate', '--help')).out).toContain(`${STRIPE_CASE_TIMEOUT_MS} (5 min)`);
+    expect((await cli('--help')).out).toContain(`${STRIPE_CASE_TIMEOUT_MS} (5 min)`);
+  });
+
+  it('lets the project’s run and gate keep the suite’s five minutes, or take --case-timeout', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    const url = await refundingAgent();
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'desk',
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+    const budgets = async (...extra: string[]) => {
+      const { out } = await cli(
+        'run',
+        '--project',
+        projectId,
+        '--case',
+        'full_refund',
+        '--json',
+        '--home',
+        home,
+        ...extra,
+      );
+      const run = JSON.parse(out.slice(out.indexOf('{'))) as {
+        caseResults: { budgetMs: number }[];
+      };
+      return run.caseResults.map((result) => result.budgetMs);
+    };
+    // The project's generic default (60 s) does not shorten the suite's own budget.
+    expect(await budgets()).toEqual([300_000]);
+    expect(await budgets('--case-timeout', '450000')).toEqual([450_000]);
+  });
+
+  it('says a canary that ran out of time ran out of time, and how to give it more', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    // A case budget the test can outlast: the shortest the tool-call timeout allows.
+    await withProjectService(home, (service) =>
+      service.configureEnvironment(projectId, {
+        readOnlyTools: [],
+        verifierReads: [],
+        reset: { kind: 'none' },
+        budgets: { toolCallMs: 100 },
+      }),
+    );
+    // Refunds at once, as asked, and answers after the budget: a slow model.
+    const url = await refundingAgent(100, 5_600);
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'slow',
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+
+    const { code, out } = await cli(
+      'stripe',
+      'canary',
+      '--project',
+      projectId,
+      '--case-timeout',
+      '5100',
+      '--home',
+      home,
+    );
+    expect(code).toBe(1);
+    expect(out).toContain('Canary · slow · TIMED_OUT');
+    expect(out).toMatch(/agent said\s+\(no answer within the 5\.1 s case budget\)/);
+    expect(out).toContain('The agent did not answer within the case budget (5.1 s).');
+    expect(out).toContain('raise the budget: --case-timeout <ms>');
+    expect(out).toContain('Slow models can need several minutes per ticket.');
+    expect(out).toContain(
+      'Stripe already holds the refund the ticket asked for; the answer came late.',
+    );
+    expect(out).not.toContain('Fix the agent');
+  }, 30_000);
 
   it('refuses without a project, an agent, or a Stripe project', async () => {
     const home = freshHome();

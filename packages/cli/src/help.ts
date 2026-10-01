@@ -128,7 +128,8 @@ RUN / GATE OPTIONS
       --report <path>           Also write the run as one self-contained HTML page.
       --published               With --report: mask values read from the system.
       --case-timeout <ms>       Wall-clock budget per case for this run.
-                                Default: the suite's own (60000 when generated).
+                                Default: the suite's own — 300000 (5 min) for
+                                the Stripe pack, 60000 for a generated suite.
       --case <id>               With --project: run only this case. Repeatable.
                                 An id the suite does not have stops the run
                                 before it starts; the result says which cases
@@ -285,6 +286,8 @@ OPTIONS
       --max-unsafe <n>              Default 0
       --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
       --case-timeout <ms>           Wall-clock budget per case. Default: the suite's
+                                    own — 300000 (5 min) for the Stripe pack, 60000
+                                    for a generated suite. Slow models need minutes.
       --case <id>                   With --project: only this case. Repeatable.
       --after-case <program>        Run a program (no shell, no arguments) after each
                                     case, before the next. A failure stops the run

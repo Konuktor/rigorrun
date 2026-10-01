@@ -73,6 +73,9 @@ Canary · my-agent · PASS
   The Stripe twin shows  Refund re_9qwF… of $1.00 on ch_PAko… (a $1.00 charge), succeeded.
 ```
 
+Each ticket gets 5 minutes to be answered. For a slower agent — a local model can need several —
+add `--case-timeout <ms>` to `canary`, `run` or `gate`.
+
 ## 5. The gate
 
 ```bash
