@@ -152,10 +152,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     const project = await service.readProject(projectId).catch(() => {
       throw new CliError(`No project "${projectId}" on this machine.`);
     });
-    const agent = flags.agent[0]
-      ? project.agents.find((entry) => entry.id === flags.agent[0] || entry.name === flags.agent[0])
-      : project.agents[project.agents.length - 1];
-    if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
+    const agent = agentToGate(project, projectId, flags.agent[0]);
 
     const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     await writeProjectReport(projectId, result, flags);
@@ -267,6 +264,40 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     }
     return exitCode;
   });
+}
+
+/**
+ * The agent a gate is about. With one agent on the project there is nothing to
+ * choose; with several, a gate never picks one for you — a build that passes on
+ * whichever agent was added last is a build gated on the wrong thing.
+ */
+function agentToGate(
+  project: { name: string; agents: { id: string; name: string }[] },
+  projectId: string,
+  wanted: string | undefined,
+): { id: string; name: string } {
+  const names = project.agents.map((entry) => entry.name).join(', ');
+  if (wanted) {
+    const found = project.agents.find((entry) => entry.id === wanted || entry.name === wanted);
+    if (found) return found;
+    throw new CliError(
+      project.agents.length === 0
+        ? `No agent "${wanted}" on ${project.name}; it has none yet.`
+        : `No agent "${wanted}" on ${project.name}. Its agents: ${names}.`,
+    );
+  }
+  const [only, ...others] = project.agents;
+  if (!only) {
+    throw new CliError(
+      `${project.name} has no agent to gate. Add one: rigorrun agent add --project ${projectId} --black-box <url>`,
+    );
+  }
+  if (others.length > 0) {
+    throw new CliError(
+      `${project.name} has ${project.agents.length} agents; say which one to gate with --agent <name>: ${names}.`,
+    );
+  }
+  return only;
 }
 
 export async function cmdProjectCompare(

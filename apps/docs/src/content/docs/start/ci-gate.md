@@ -7,8 +7,8 @@ description: Run the same suite from CI with a threshold, so a regression stops 
 rigorrun gate --project <id>
 ```
 
-Runs the project's suite against its configured agent and exits non-zero if the result is under the
-bar.
+Runs the project's suite against its agent and exits non-zero if the result is under the bar. A
+project with more than one agent needs `--agent <name>`: the gate never picks one for you.
 
 ## Exit codes
 
@@ -52,6 +52,7 @@ the gate's exit code.
 | Input           | Required | Default                             | Meaning                                                            |
 | --------------- | -------- | ----------------------------------- | ------------------------------------------------------------------ |
 | `project`       | Yes      | —                                   | Project id passed to `gate --project`.                             |
+| `agent`         | No       | —                                   | Agent passed to `--agent`; needed when the project has several.    |
 | `version`       | No       | `0.4.0`                             | Exact npm package version; never `latest`.                         |
 | `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                          |
 | `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.             |

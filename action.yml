@@ -5,6 +5,10 @@ inputs:
   project:
     description: Project id to pass to rigorrun gate --project.
     required: true
+  agent:
+    description: The agent to gate, by name or id. Needed only when the project has more than one.
+    required: false
+    default: ''
   version:
     description: Published rigorrun package version to run.
     required: false
@@ -50,6 +54,7 @@ runs:
       id: gate
       shell: bash
       env:
+        INPUT_AGENT: ${{ inputs.agent }}
         INPUT_CLI: ${{ inputs.cli }}
         INPUT_MIN_SUCCESS: ${{ inputs.min-success }}
         INPUT_PROJECT: ${{ inputs.project }}
@@ -73,6 +78,9 @@ runs:
           echo "error The cli input did not contain a command." | tee "$log_path"
         else
           gate_arguments=(gate --project "$INPUT_PROJECT" --report "$INPUT_REPORT")
+          if [[ -n "$INPUT_AGENT" ]]; then
+            gate_arguments+=(--agent "$INPUT_AGENT")
+          fi
           if [[ -n "$INPUT_MIN_SUCCESS" ]]; then
             gate_arguments+=(--min-success "$INPUT_MIN_SUCCESS")
           fi

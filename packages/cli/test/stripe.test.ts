@@ -1067,6 +1067,81 @@ describe('gate --case', () => {
   });
 });
 
+describe('gate --project and --agent', () => {
+  const add = (home: string, projectId: string, name: string, url: string) =>
+    cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      name,
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+
+  it('gates the one agent a project has without being told which', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    await add(home, projectId, 'desk', await refundingAgent());
+    const { code, out, err } = await cli(
+      'gate',
+      '--project',
+      projectId,
+      '--case',
+      'full_refund',
+      '--home',
+      home,
+    );
+    // A gate over one case is never a release verdict: 3, not 2.
+    expect(code, err).toBe(3);
+    expect(out).toContain('Gate: desk');
+  });
+
+  it('refuses to guess between several agents, and names them', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    await add(home, projectId, 'desk-a', await refundingAgent());
+    await add(home, projectId, 'desk-b', await refundingAgent());
+    const { code, out, err } = await cli('gate', '--project', projectId, '--home', home);
+    expect(code).toBe(2);
+    expect(out).not.toContain('Gate:');
+    expect(err).toContain('has 2 agents');
+    expect(err).toContain('desk-a, desk-b');
+    expect(err).toContain('--agent <name>');
+
+    const chosen = await cli(
+      'gate',
+      '--project',
+      projectId,
+      '--agent',
+      'desk-b',
+      '--case',
+      'full_refund',
+      '--home',
+      home,
+    );
+    expect(chosen.code, chosen.err).toBe(3);
+    expect(chosen.out).toContain('Gate: desk-b');
+
+    const unknown = await cli('gate', '--project', projectId, '--agent', 'nobody', '--home', home);
+    expect(unknown.code).toBe(2);
+    expect(unknown.err).toContain('No agent "nobody"');
+    expect(unknown.err).toContain('desk-a, desk-b');
+  });
+
+  it('says so in its help: --agent is needed only when there is more than one', async () => {
+    const { out } = await cli('gate', '--help');
+    expect(out).toMatch(/^rigorrun gate --project <id>/);
+    expect(out).not.toMatch(/--agent <id>\s+Required\./);
+    expect(out).toContain('optional when the project has one agent');
+  });
+});
+
 describe('stripe twin', () => {
   it('prints its address alone on the first line, and stops when told', async () => {
     let stop!: () => void;

@@ -120,7 +120,9 @@ COMMON OPTIONS
   -v, --version            Print the version.
 
 RUN / GATE OPTIONS
-      --agent <id>              Which agent. Defaults to the last connected.
+      --agent <id>              Which agent, by name or id. run: the last connected
+                                when not given. gate: optional when the project has
+                                one agent, required when it has several.
       --min-success <0..1>      Minimum task success. Default 0.95.
       --min-policy <0..1>       Minimum policy compliance. Default 1.
       --max-unsafe <n>          Default 0.
@@ -269,14 +271,21 @@ OPTIONS
       --json         Print a summary instead of the project id.
       --quiet        Suppress progress.
 `,
-  gate: `rigorrun gate <benchmark.json> - fail a build on an unreliable agent
+  gate: `rigorrun gate --project <id> - fail a build on an unreliable agent
 
-Runs one agent against a benchmark and applies release thresholds.
+  rigorrun gate --project <id> [--agent <name>] [--report report.html]
+  rigorrun gate <benchmark.json> --agent <id>      the older file pipeline
+
+Runs one agent against the project's suite and applies release thresholds.
 Exits 0 when every threshold is met, 1 when any is missed, 2 on a
 configuration error, 3 when too many cases reached no verdict.
 
 OPTIONS
-      --agent <id>                  Required. The agent to gate.
+      --project <id>                The project whose suite and agent to gate.
+      --agent <id>                  The agent to gate, by name or id. With --project:
+                                    optional when the project has one agent; when it
+                                    has several, required, and the gate refuses to
+                                    guess. With a benchmark file: required.
       --allow-reference             Permit --agent reference. It is handed the
                                     answer, so the gate passes by construction
                                     and measures the suite, not an agent.
