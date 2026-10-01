@@ -17,10 +17,27 @@ import Button from '../components/Button.astro';
 import Command from '../components/Command.astro';
 import ClaimGap from '../components/ClaimGap.astro';
 import ClaimReality from '../components/ClaimReality.astro';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { RELEASE_LABEL, DOCS_URL, REPO_URL } from '../site';
 import { stripeReplay } from '../lib/replay';
 
 const headline = stripeReplay?.headline ?? null;
+
+/**
+ * The demo video, when it has been made. `scripts/record-demo-video.mjs` films
+ * it from the flagship recording into public/media/; until demo.mp4 is there,
+ * the hero has no player at all rather than one that fails to load. Astro
+ * reads `public/` from the project root, which is the directory the build runs
+ * in (no `root` is configured), so this looks exactly where the build copies from.
+ */
+const media = join(process.cwd(), 'public', 'media');
+const demoVideo = existsSync(join(media, 'demo.mp4'))
+  ? {
+      webm: existsSync(join(media, 'demo.webm')),
+      poster: existsSync(join(media, 'demo-poster.png')) ? '/media/demo-poster.png' : undefined,
+    }
+  : null;
 
 /** Per agent, how its cases ended, for the case where no case failed. */
 const tallies = (stripeReplay?.agents ?? []).map((agent) => ({
@@ -193,10 +210,52 @@ const limits = [
               </>
             )
           }
+          <!--
+            Under the card, in the same column: beside it on a desktop, so the
+            commands on the left stay where they were, and after it on a phone.
+            `controls` because a loop that cannot be paused is motion somebody
+            is made to watch.
+          -->
+          {
+            demoVideo && (
+              <figure class="mt-6">
+                <video
+                  class="block aspect-video w-full rounded-panel border border-line bg-inset"
+                  width="1280"
+                  height="720"
+                  autoplay
+                  muted
+                  loop
+                  playsinline
+                  controls
+                  poster={demoVideo.poster}
+                  aria-label="The demo, filmed: npx rigorrun demo in a terminal, then the recorded run on this site."
+                  data-demo-video
+                >
+                  {demoVideo.webm && <source src="/media/demo.webm" type="video/webm" />}
+                  <source src="/media/demo.mp4" type="video/mp4" />
+                </video>
+                <figcaption class="mt-2 text-meta text-muted">
+                  <a class="rr-link" href="/media/demo.mp4">Watch the 60-second run</a>
+                </figcaption>
+              </figure>
+            )
+          }
         </div>
       </div>
     </div>
   </section>
+
+  <script>
+    // Somebody who has asked for less motion gets the poster and the controls,
+    // not a loop that starts on its own.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for (const video of document.querySelectorAll<HTMLVideoElement>('[data-demo-video]')) {
+        video.removeAttribute('autoplay');
+        video.pause();
+      }
+    }
+  </script>
 
   <!-- ────────────────────────────────────────────────────────── how it works -->
   <Section ruled id="how">

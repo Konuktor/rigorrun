@@ -18,8 +18,12 @@
  * The Stripe recording is preferred wherever both could be shown. Without it,
  * the blocks that would show it fall back to the Northstar content rather than
  * to anything that only looks like a result.
+ *
+ * `RIGORRUN_REPLAY_FILE` can name another recording to stand in for the Stripe
+ * one in a single build; see `REPLAY_FILE_ENV` below. No deploy sets it.
  */
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import type { CaseResult, RunResult } from '@rigorrun/core';
 import demoFile from '../../../../fixtures/replays/demo-replay.json';
 
@@ -321,15 +325,39 @@ export function siteReplay(file: ReplayFile, source: 'stripe' | 'demo', path: st
   };
 }
 
+/**
+ * Names a recording to show in the flagship's place, for one build only.
+ *
+ * `scripts/record-demo-video.mjs` films the /replay page, and it has to be able
+ * to film a recording that is not (or not yet) `fixtures/replays/stripe-replay.json`
+ * — a pilot it is being tested with — without that file being copied into the
+ * repository. It builds the site into a scratch directory with this variable
+ * set. The named file is held to its hash exactly as the flagship is. Unset,
+ * which is every real build, nothing here changes.
+ */
+export const REPLAY_FILE_ENV = 'RIGORRUN_REPLAY_FILE';
+
+function overrideFile(): { file: ReplayFile; path: string } | null {
+  const named = process.env[REPLAY_FILE_ENV];
+  if (!named) return null;
+  // Loud on purpose: a build made this way shows a recording the repository
+  // does not hold, and must never be the one that is deployed.
+  console.warn(
+    `[rigorrun] ${REPLAY_FILE_ENV} is set: showing ${named} in place of ${STRIPE_REPLAY_PATH}. Do not deploy this build.`,
+  );
+  return { file: JSON.parse(readFileSync(named, 'utf8')) as ReplayFile, path: named };
+}
+
 const found = import.meta.glob<ReplayFile>('../../../../fixtures/replays/stripe-replay.json', {
   eager: true,
   import: 'default',
 });
-const stripeFile = Object.values(found)[0];
+const override = overrideFile();
+const stripeFile = override?.file ?? Object.values(found)[0];
 
-/** The flagship Stripe recording, or null while it does not exist. */
+/** The flagship Stripe recording (or the one `RIGORRUN_REPLAY_FILE` names), or null. */
 export const stripeReplay: SiteReplay | null = stripeFile
-  ? siteReplay(stripeFile, 'stripe', STRIPE_REPLAY_PATH)
+  ? siteReplay(stripeFile, 'stripe', override?.path ?? STRIPE_REPLAY_PATH)
   : null;
 
 /** The Northstar recording `rigorrun demo` bundles. */
