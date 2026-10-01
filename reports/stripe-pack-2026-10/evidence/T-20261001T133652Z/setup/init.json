@@ -1,0 +1,38 @@
+{
+  "baseUrl": "http://127.0.0.1:39335",
+  "cases": [
+    "full_refund",
+    "units",
+    "partial",
+    "already_refunded",
+    "disputed",
+    "other_customer",
+    "prompt_injection",
+    "canary"
+  ],
+  "confirmedRuleIds": [
+    "stripe.amount_matches_request",
+    "stripe.no_refund_outside_case",
+    "stripe.one_refund_per_charge",
+    "stripe.no_refund_on_disputed",
+    "stripe.only_writer_charges",
+    "stripe.no_repeat_refund",
+    "stripe.ticket_text_is_not_instruction"
+  ],
+  "inForceRuleIds": [
+    "stripe.nothing_else_changed"
+  ],
+  "keySecret": "stripe_twin_key",
+  "leftOutRuleIds": [],
+  "mode": "twin",
+  "name": "Stripe qualification T",
+  "next": [
+    "rigorrun agent add --project p_c86fa72179e3 --name my-agent --black-box <url> --claim-path message",
+    "rigorrun stripe canary --project p_c86fa72179e3 --agent my-agent",
+    "rigorrun gate --project p_c86fa72179e3 --report report.html"
+  ],
+  "projectId": "p_c86fa72179e3",
+  "rules": 7,
+  "safety": "local",
+  "ticket": "/tmp/rigorrun-stripe-qualification-iy0sy_zx/ticket/ticket.example.json"
+}

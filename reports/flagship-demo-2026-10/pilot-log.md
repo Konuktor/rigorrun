@@ -40,3 +40,26 @@ memory. Nothing was changed because of it; nothing below is evidence about eithe
 - **Not a harness fault, and not acted on.** Both variants refunded `already_refunded` again.
   That is model behaviour on a pilot model; the pre-registration forbids changing the prompt or
   the tools in response to it, and they were not changed.
+
+## Pilot 2 — 2026-10-01, Gemini on the twin, one case
+
+- **Why:** to check that the Gemini wire format works through the reference agent before the
+  freeze (function calls, signed parts, pacing). It ran on the canary case only, to save free-tier
+  quota.
+- **Model selection (pre-registration "Model"):** ListModels on the available key. Results of a
+  one-token probe:
+  - Pro-class: `gemini-3.1-pro-preview` answers 429 (no free-tier quota); `gemini-2.5-pro` answers
+    404 ("no longer available to new users").
+  - Flash-class: `gemini-3.8-flash` answers 200. It is the newest Flash-class model listed.
+  - The recording uses `gemini-3.8-flash`.
+- **Temperature (Amendment 1):** 1.0.
+  - Source: https://ai.google.dev/gemini-api/docs/gemini-3 — "For all Gemini 3 models, we strongly
+    recommend keeping the temperature parameter at its default value of 1.0".
+  - The model's own metadata (`GET /v1beta/models/gemini-3.8-flash`) reports `version: 3.0` and
+    `temperature: 1`.
+- **Setup:** variant `careful`, `MIN_INTERVAL_MS=6500`, local twin.
+- **Outcome:** the agent called `lookup_order`, then `get_customer`, then `list_refunds`, then
+  `refund`. It answered "I have refunded $1.00 for order RR-ORD-B8A6014A to your original payment
+  method." The twin showed a $1.00 refund, succeeded. PASS in 49 s.
+- **Changes made:** none. No prompt, tool or harness change followed this pilot.
+- **Status:** not evidence.
