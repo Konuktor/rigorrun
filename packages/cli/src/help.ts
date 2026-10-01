@@ -34,9 +34,20 @@ PROJECTS
   gate --project <id>      Same, but exit non-zero if it misses the bar.
   compare-runs --project <id> <runId>
                            Say what changed since the baseline run.
+  agent add --project <id> --black-box <url>
+                           Connect an agent that answers on an address and
+                           does each case's work itself. It is probed first.
+  agent list --project <id>
+                           The agents on a project, and whether they answer.
   secrets list|set|remove  Credentials, which never leave this machine. Kept in
                            your OS keychain where there is one; \`doctor\` says
                            which store you actually got.
+
+PACKS
+  <pack> ...               A system RigorRun ships its own client for has its
+                           own commands, named by the pack's id as the first
+                           word. \`rigorrun <pack> --help\` lists them; the
+                           packs in this build are listed at the end of this page.
 
 MOVING WORK AROUND
   backup                   Copy this whole workspace. Never your credentials.
@@ -96,6 +107,10 @@ RUN / GATE OPTIONS
       --published               With --report: mask values read from the system.
       --case-timeout <ms>       Wall-clock budget per case for this run.
                                 Default: the suite's own (60000 when generated).
+      --case <id>               With --project: run only this case. Repeatable.
+                                An id the suite does not have stops the run
+                                before it starts; the result says which cases
+                                it covered, and never becomes the baseline.
       --after-case <program>    Run a program (a path or a name; no shell, no
                                 arguments) after each case has finished and
                                 before the next starts, outside the case budget.
@@ -132,6 +147,8 @@ EXAMPLES
   rigorrun projects
   rigorrun run --project p_1a2b3c
   rigorrun gate --project p_1a2b3c --min-success 0.95
+  rigorrun gate --project p_1a2b3c --case case_one
+  rigorrun agent add --project p_1a2b3c --black-box http://127.0.0.1:8080/task
   rigorrun compare-runs --project p_1a2b3c run_9f8e7d
 
   rigorrun verify npm:@modelcontextprotocol/server-memory@2026.8.31
@@ -233,12 +250,50 @@ OPTIONS
       --max-unsafe <n>              Default 0
       --max-inconclusive <n>        Cases allowed to end without a verdict. Default 0
       --case-timeout <ms>           Wall-clock budget per case. Default: the suite's
+      --case <id>                   With --project: only this case. Repeatable.
       --after-case <program>        Run a program (no shell, no arguments) after each
                                     case, before the next. A failure stops the run
                                     with exit 2.
       --repeats <n>                 Attempts per case. Default 1.
       --report <path>               Also write an HTML report.
 `,
+  agent: `rigorrun agent add|list --project <id> - the agents on a project
+
+agent add connects a black-box agent: one that answers on an address and does
+each case's work itself, wherever it runs, while RigorRun reads the system
+afterwards through its own connection. It is sent the rigorrun/task/1 envelope
+(or your --body-template) and probed before it is called connected.
+
+  rigorrun agent add --project <id> --black-box <url> [options]
+  rigorrun agent list --project <id>
+
+ADD OPTIONS
+      --black-box <url>         Required. Where the agent answers. Loopback over
+                                http or https; anything else over https, and
+                                only a host named with --allow-host.
+      --name <name>             What to call it in results.
+      --allow-host <host>       A host outside this machine the work may be sent
+                                to. Exact names only. Repeatable.
+      --body-template <file>    A JSON body with {{caseId}}, {{task.text}},
+                                {{task.instruction}}, {{task.policyBrief}} or
+                                {{inputs.<name>}} inside strings, instead of the
+                                envelope.
+      --completion <how>        response (default), poll or settle.
+      --claim-path <path>       Where its final message is in its answer, as a
+                                dotted path. Default output.
+      --header <Name=secret>    A header whose value comes from the named secret
+                                on this machine, never typed here. Repeatable.
+      --settle <s>              With --completion settle: how long to wait after
+                                it answers, for work it finishes afterwards.
+                                Default 5.
+      --json                    Print the stored agent.
+
+EXIT CODES
+  0  added, and it answered the probe
+  1  added, but it did not answer; the reason is printed
+  2  refused, and nothing was stored: no such project, an address RigorRun
+     will not send work to, or a header secret that is not set`,
+
   record: `rigorrun record - receive a trace from the Chrome recorder
 
 Starts a loopback-only HTTP listener that accepts a single sanitised workflow

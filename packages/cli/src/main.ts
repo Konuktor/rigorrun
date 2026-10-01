@@ -28,13 +28,7 @@ import {
   type Flags,
 } from './commands.ts';
 import { cmdPrivacyInspect } from './scaffold.ts';
-import {
-  cmdBackup,
-  cmdExportProject,
-  cmdImportProject,
-  cmdRestore,
-  cmdTrust,
-} from './backup.ts';
+import { cmdBackup, cmdExportProject, cmdImportProject, cmdRestore, cmdTrust } from './backup.ts';
 import { receiveTrace } from './record.ts';
 import { cmdServe } from './serve.ts';
 import { cmdDoctor as cmdDoctorProduct } from './doctor.ts';
@@ -48,6 +42,43 @@ import {
   cmdProjects,
   cmdSecret,
 } from './project.ts';
+import { cmdAgent } from './agentAdd.ts';
+import { packCommands, registerBuiltInPacks, routeToPack } from './packs.ts';
+
+/**
+ * Every command RigorRun itself answers to. A pack is reached by its id as the
+ * first word, and only when that word is not one of these.
+ */
+export const OWN_COMMANDS: ReadonlySet<string> = new Set([
+  'serve',
+  'projects',
+  'feedback',
+  'secrets',
+  'secret',
+  'backup',
+  'restore',
+  'export-project',
+  'import-project',
+  'trust',
+  'compare-runs',
+  'demo',
+  'record',
+  'compile',
+  'generate',
+  'run',
+  'compare',
+  'gate',
+  'report',
+  'agent',
+  'agents',
+  'workflows',
+  'environments',
+  'inspect-environment',
+  'privacy',
+  'verify',
+  'setup',
+  'doctor',
+]);
 
 /**
  * Parses arguments, dispatches, and turns every expected failure into an exit
@@ -69,6 +100,12 @@ export async function main(argv: string[]): Promise<number> {
 }
 
 async function dispatch(argv: string[]): Promise<number> {
+  registerBuiltInPacks();
+  // Before RigorRun's own parser, which would refuse a flag only the pack
+  // understands. A pack's commands are the pack's.
+  const routed = await routeToPack(argv, OWN_COMMANDS);
+  if (routed !== undefined) return routed;
+
   let parsed;
   try {
     parsed = parseArgs({
@@ -112,6 +149,17 @@ async function dispatch(argv: string[]): Promise<number> {
         'max-inconclusive': { type: 'string' },
         'case-timeout': { type: 'string' },
         'after-case': { type: 'string' },
+        // run/gate --project: only these cases. Repeatable.
+        case: { type: 'string', multiple: true, default: [] },
+        // agent add.
+        name: { type: 'string' },
+        'black-box': { type: 'string' },
+        'allow-host': { type: 'string', multiple: true, default: [] },
+        'body-template': { type: 'string' },
+        completion: { type: 'string' },
+        'claim-path': { type: 'string' },
+        header: { type: 'string', multiple: true, default: [] },
+        settle: { type: 'string' },
         // verify only.
         'max-undetermined': { type: 'string' },
         'min-exercised': { type: 'string' },
@@ -137,6 +185,12 @@ async function dispatch(argv: string[]): Promise<number> {
   }
   if (values.help && !command) {
     line(HELP);
+    const packs = packCommands(OWN_COMMANDS);
+    if (packs.length > 0) {
+      line('PACKS IN THIS BUILD');
+      for (const pack of packs) line(`  ${pack.id.padEnd(24)} ${pack.description}`);
+      line();
+    }
     return 0;
   }
   if (values.help) {
@@ -166,7 +220,18 @@ async function dispatch(argv: string[]): Promise<number> {
     maxInconclusive: numberFlag(values['max-inconclusive'], 'max-inconclusive'),
     caseTimeoutMs: numberFlag(values['case-timeout'], 'case-timeout'),
     afterCase: values['after-case'],
+    caseIds: values.case ?? [],
   };
+
+  // A benchmark file has no project to narrow, and a flag that is accepted and
+  // then ignored is a run that covers more than somebody asked for.
+  if (
+    (command === 'run' || command === 'gate') &&
+    !flags.project &&
+    (flags.caseIds?.length ?? 0) > 0
+  ) {
+    throw new CliError("--case selects cases of a project's suite. Use it with --project <id>.");
+  }
 
   switch (command) {
     // The bare command starts the runner, because everything a person wants to
@@ -230,6 +295,17 @@ async function dispatch(argv: string[]): Promise<number> {
       return flags.project ? cmdProjectGate(flags.project, flags) : cmdGate(target, flags);
     case 'report':
       return cmdReport(target, flags);
+    case 'agent':
+      return cmdAgent(target, flags, {
+        name: values.name,
+        blackBox: values['black-box'],
+        allowHost: values['allow-host'] ?? [],
+        bodyTemplate: values['body-template'],
+        completion: values.completion,
+        claimPath: values['claim-path'],
+        header: values.header ?? [],
+        settleSeconds: numberFlag(values.settle, 'settle'),
+      });
     case 'agents':
       return cmdAgents(flags);
     case 'workflows':

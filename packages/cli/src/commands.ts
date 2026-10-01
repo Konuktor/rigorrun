@@ -58,6 +58,8 @@ export interface Flags {
   caseTimeoutMs?: number | undefined;
   /** A command run after each case has finished and before the next starts. */
   afterCase?: string | undefined;
+  /** `--case <id>`, repeatable: run only these cases of a project's suite. */
+  caseIds?: string[] | undefined;
   /** Which project to act on. The product path, as against a benchmark file. */
   project?: string | undefined;
   /** Where the store lives. Overridden in tests and in CI. */
@@ -147,11 +149,7 @@ export async function cmdDemo(flags: Flags): Promise<number> {
   line();
   printComparison(result);
   line();
-  line(
-    c.grey(
-      `Time from "start recording" to a reviewed benchmark: ${fmtMs(timings.total)}.`,
-    ),
-  );
+  line(c.grey(`Time from "start recording" to a reviewed benchmark: ${fmtMs(timings.total)}.`));
   line(c.grey(`Artefacts in ${outDir}/ · run .rigorrun/runs/${result.runId}.json`));
   if (flags.json) line(JSON.stringify(result, null, 2));
   return result.verdict.winnerAgentId ? 0 : 1;
@@ -198,7 +196,13 @@ export function cmdEnvironments(flags: Flags): number {
     ];
   });
   if (flags.json) {
-    line(JSON.stringify(listEnvironments().map((r) => ({ id: r.id, name: r.name })), null, 2));
+    line(
+      JSON.stringify(
+        listEnvironments().map((r) => ({ id: r.id, name: r.name })),
+        null,
+        2,
+      ),
+    );
     return 0;
   }
   heading('Environments');
@@ -239,12 +243,14 @@ export function cmdInspectEnvironment(id: string | undefined, flags: Flags): num
   line(c.bold('Actions'));
   table(
     ['action', 'kind', 'changes', 'parameters'],
-    adapter.getActions().map((action) => [
-      action.name,
-      action.readOnly ? 'read' : 'write',
-      action.mutates.join(', ') || '—',
-      action.params.map((param) => param.name).join(', '),
-    ]),
+    adapter
+      .getActions()
+      .map((action) => [
+        action.name,
+        action.readOnly ? 'read' : 'write',
+        action.mutates.join(', ') || '—',
+        action.params.map((param) => param.name).join(', '),
+      ]),
   );
   return 0;
 }
@@ -252,7 +258,13 @@ export function cmdInspectEnvironment(id: string | undefined, flags: Flags): num
 /** `rigorrun workflows` — the demo jobs this build ships with. */
 export function cmdWorkflows(flags: Flags): number {
   if (flags.json) {
-    line(JSON.stringify(WORKFLOWS.map((w) => ({ key: w.key, title: w.title })), null, 2));
+    line(
+      JSON.stringify(
+        WORKFLOWS.map((w) => ({ key: w.key, title: w.title })),
+        null,
+        2,
+      ),
+    );
     return 0;
   }
   heading('Demo workflows');
@@ -282,10 +294,14 @@ export async function cmdCompile(tracePath: string | undefined, flags: Flags): P
   heading('Contract');
   line(c.grey(draft.goal));
   line();
-  line(`${c.bold('Observed')}  ${draft.observedFacts.length} facts taken straight from what changed`);
+  line(
+    `${c.bold('Observed')}  ${draft.observedFacts.length} facts taken straight from what changed`,
+  );
   for (const fact of draft.observedFacts.slice(0, 6)) line(`  ${c.grey('·')} ${fact.statement}`);
   line();
-  line(`${c.bold('Proposed')}  ${draft.rules.length} rules, none of them enforced until you say so`);
+  line(
+    `${c.bold('Proposed')}  ${draft.rules.length} rules, none of them enforced until you say so`,
+  );
   for (const rule of draft.rules) {
     line(`  ${ruleTag(rule.status)} ${rule.statement}`);
     if (rule.question) line(`     ${c.grey(rule.question.text)}`);
@@ -612,9 +628,12 @@ function printComparison(result: RunResult): void {
       );
     }
   }
-  line(`${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`);
+  line(
+    `${c.grey('verification')}  ${result.verification}   ${c.grey('isolation')}  ${result.isolation}`,
+  );
   for (const limit of result.limits) line(`${c.grey('limit')}  ${limit.limit}`);
-  for (const warning of result.suiteQuality?.warnings ?? []) line(`${c.yellow('suite')}  ${warning}`);
+  for (const warning of result.suiteQuality?.warnings ?? [])
+    line(`${c.yellow('suite')}  ${warning}`);
   line();
   // The reference implementation is handed the answer: a control that shows
   // the suite can be passed, never the headline about the agents.
@@ -627,7 +646,9 @@ function printComparison(result: RunResult): void {
           ? `${passed.map((s) => s.agentName).join(' and ')} met the release thresholds.`
           : `No agent met the release thresholds.`),
     );
-    line(`  ${c.grey('-')} ${c.grey('The reference implementation passed: the suite can be passed. It is a control, given the answer, not a contender.')}`);
+    line(
+      `  ${c.grey('-')} ${c.grey('The reference implementation passed: the suite can be passed. It is a control, given the answer, not a contender.')}`,
+    );
     return;
   }
   line(`${c.bold('Verdict')}  ${result.verdict.outcome ?? ''} ${result.verdict.summary}`);
@@ -694,8 +715,6 @@ function resolveAgentOrFail(id: string) {
     throw new CliError((error as Error).message);
   }
 }
-
-
 
 function firstIssue(error: unknown): string {
   const issues = (error as { issues?: { path?: (string | number)[]; message: string }[] }).issues;
