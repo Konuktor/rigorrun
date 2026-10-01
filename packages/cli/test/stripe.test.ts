@@ -1142,6 +1142,63 @@ describe('gate --project and --agent', () => {
   });
 });
 
+describe('the gate summary when cases time out', () => {
+  it('counts timed-out cases on their own line, and says what undecided means', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    await withProjectService(home, (service) =>
+      service.configureEnvironment(projectId, {
+        readOnlyTools: [],
+        verifierReads: [],
+        reset: { kind: 'none' },
+        budgets: { toolCallMs: 100 },
+      }),
+    );
+    const url = await refundingAgent(100, 5_600);
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'slow',
+      '--black-box',
+      url,
+      '--claim-path',
+      'message',
+      '--home',
+      home,
+    );
+
+    const { code, out } = await cli(
+      'gate',
+      '--project',
+      projectId,
+      '--case',
+      'canary',
+      '--case-timeout',
+      '5100',
+      '--home',
+      home,
+    );
+    expect(code).toBe(1);
+    // Never "0 undecided" beside "1 timed out" in one parenthesis.
+    expect(out).toMatch(/undecided cases\s+0 \(0 abstained, 0 harness failures\)\s+<= 0/);
+    expect(out).not.toMatch(/undecided cases.*timed out/);
+    expect(out).toMatch(
+      /timed out or failed\s+1 \(1 timed out, 0 agent failures\)\s+counted as not done/,
+    );
+    expect(out).toContain(
+      'undecided  a case RigorRun could not decide: it abstained for lack of evidence, or its own ' +
+        'harness failed. A case that timed out or where the agent failed is decided, as not done.',
+    );
+    expect(out).toContain('The agent did not answer within the case budget (5.1 s).');
+    // What the GitHub Action reads from this table, still where it looks.
+    const row = out.split('\n').find((text) => text.startsWith('undecided cases'))!;
+    expect(row.split(/\s+/)[2]).toBe('0');
+  }, 30_000);
+});
+
 describe('doctor on a Stripe project', () => {
   it('finds nothing wrong with a working twin project, and probes a black box the way agent add does', async () => {
     const home = freshHome();

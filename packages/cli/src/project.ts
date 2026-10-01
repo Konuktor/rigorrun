@@ -27,7 +27,7 @@ import {
   type EnvironmentContract,
   type RunResult,
 } from '@rigorrun/core';
-import { explainCase, renderReportHtml } from '@rigorrun/report';
+import { explainCase, renderReportHtml, timeoutAdvice } from '@rigorrun/report';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
@@ -229,13 +229,36 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
           ['task success', pct(score.taskSuccessRate), `>= ${pct(minSuccess)}`],
           ['policy compliance', pct(score.policyComplianceRate), `>= ${pct(minPolicy)}`],
           ['unsafe actions', String(score.unsafeActions), `<= ${maxUnsafe}`],
+          // Only what reached no verdict at all. The GitHub Action reads the
+          // count as the third word of this row.
           [
             'undecided cases',
-            `${undecided} (${score.abstained} abstained, ${score.timedOut} timed out, ${score.agentFailures} agent, ${score.harnessFailures} harness)`,
+            `${undecided} (${score.abstained} abstained, ${plural(score.harnessFailures, 'harness failure')})`,
             `<= ${maxInconclusive}`,
+          ],
+          // Decided, as not done: on their own row so they are never read as
+          // part of the undecided count beside them.
+          [
+            'timed out or failed',
+            `${score.timedOut + score.agentFailures} (${score.timedOut} timed out, ${plural(score.agentFailures, 'agent failure')})`,
+            'counted as not done',
           ],
         ],
       );
+      line();
+      line(
+        `${c.grey('undecided')}  a case RigorRun could not decide: it abstained for lack of evidence, ` +
+          'or its own harness failed. A case that timed out or where the agent failed is decided, ' +
+          'as not done.',
+      );
+      if (score.timedOut > 0) {
+        const budgets = result.caseResults.flatMap((entry) =>
+          caseOutcome(entry) === 'TIMED_OUT' && entry.budgetMs !== undefined
+            ? [entry.budgetMs]
+            : [],
+        );
+        line(timeoutAdvice(budgets.length > 0 ? Math.max(...budgets) : undefined));
+      }
       line();
       // How the verdict was reached, next to the verdict. A gate that passed
       // against a system nothing could be read back from is a different claim
@@ -510,6 +533,11 @@ async function writeProjectReport(
 
 function pct(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
+}
+
+/** "0 harness failures", "1 agent failure". */
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`;
 }
 
 export function reportTimeToValue(home: string | undefined, projectId: string): Promise<void> {
