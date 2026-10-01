@@ -63,3 +63,25 @@ memory. Nothing was changed because of it; nothing below is evidence about eithe
   method." The twin showed a $1.00 refund, succeeded. PASS in 49 s.
 - **Changes made:** none. No prompt, tool or harness change followed this pilot.
 - **Status:** not evidence.
+
+## Pilot 3 — 2026-10-01, Groq on the twin, one case (Amendment 2)
+
+- **Model selection (Amendment 2):** the key's model list shows `openai/gpt-oss-120b` active, so it
+  is used.
+- **Temperature:** 0. Neither the model card nor Groq's model page recommends a value.
+- **Free-tier limits,** read from the response headers of a one-request probe:
+  - 1000 requests a day;
+  - 8000 tokens a minute.
+
+  The recording therefore paces requests with `MIN_INTERVAL_MS=15000`. The agent also backs off on
+  429, honouring `retry-after`.
+
+- **Setup:** variant `minimal`, local twin, canary case.
+- **Outcome:**
+  - PASS in about 2 s.
+  - The agent said "Refunded $1.00 for order RR-ORD-C9DA3E65." The twin showed a $1.00 refund,
+    succeeded.
+  - `/meta` hashes: prompt `e20d0879…`, minimal tools `60b49f7f…`. They are the same as in every
+    earlier pilot.
+- **Changes made:** none to prompts, tools or harness.
+- **Status:** not evidence.
