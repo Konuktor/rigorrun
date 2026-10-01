@@ -11,3 +11,24 @@ export * from './reality.ts';
 export * from './actions.ts';
 export * from './session.ts';
 export * from './pack.ts';
+export {
+  startTwin,
+  isLoopbackHost,
+  type RunningTwin,
+  type TwinFault,
+  type TwinOptions,
+} from './twin/server.ts';
+export {
+  DEFAULT_DISPUTE_DELAY_MS,
+  TwinModel,
+  type TwinBalance,
+  type TwinCharge,
+  type TwinCustomer,
+  type TwinDispute,
+  type TwinModelOptions,
+  type TwinObjectKind,
+  type TwinObjects,
+  type TwinPaymentIntent,
+  type TwinRefund,
+} from './twin/model.ts';
+export { TwinError, type TwinErrorBody, type TwinErrorDetail } from './twin/errors.ts';
