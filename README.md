@@ -39,6 +39,13 @@ and prints what was read. Against your Stripe test mode, `stripe init` takes a t
 and [the example agent](examples/stripe-support-agent); CI is one step
 (`uses: Konuktor/rigorrun@v0.4.0`, see [docs/CI.md](docs/CI.md)).
 
+**How we know the verdicts are right.** Before this release the Stripe pack was qualified against a
+protocol written before any code: 8 scripted agents (1 correct, 7 with one defect each) × 7 tickets ×
+3 attempts, each verdict checked against an independent oracle that reads Stripe directly. On the
+local twin and on Stripe test mode: 168 and 168 cells, no false pass and no false fail. Black-box
+mode on its own system: 36 cells, none either.
+([Stripe evidence](reports/stripe-pack-2026-10) · [black-box evidence](reports/blackbox-qualification-2026-10))
+
 Not on Stripe? This opens a local interface for any system RigorRun can reach and read back — an
 MCP server, an HTTP API, or a web application:
 

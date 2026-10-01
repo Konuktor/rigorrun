@@ -17,6 +17,7 @@ const releases = [
       ['Changed', 'rigorrun demo replays a recorded run on the Stripe cases; the synthetic support desk moved to rigorrun demo --northstar.'],
       ['Safety', 'Only Stripe test keys are accepted, Stripe must confirm test mode before anything is stored, and any object that comes back in live mode stops the run. The twin never receives a real key.'],
       ['Fixed', 'A rule the owner did not confirm can no longer fail an agent; gate --case no longer reports a release pass over a subset; a 202 answer from a black-box agent is no longer judged as finished work.'],
+      ['Evidence', 'Released after pre-registered qualifications at the release commit: the Stripe pack, 8 scripted agents × 7 tickets × 3 attempts against an independent oracle, 168 cells on the local twin and 168 on Stripe test mode with no false pass and no false fail; black-box mode, 36 cells, none either. reports/stripe-pack-2026-10 and reports/blackbox-qualification-2026-10.'],
     ],
   },
   {

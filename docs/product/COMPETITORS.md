@@ -372,9 +372,10 @@ Each claim is supported by the sources above. None of them says "only", "first" 
 - That replicas are "fake" or "inaccurate". Nothing fetched measures replica fidelity.
 - Any comparative accuracy, safety or speed number. RigorRun has no head-to-head measurement
   against any vendor here.
-- That Stripe test mode is a **shipped, tested integration**. The repository mentions a "Stripe
-  test account" once, as an example (`black-box.md`), and `docs/PRODUCT.md` says the shipped
-  environment is synthetic. Verify an end-to-end Stripe run before claiming it.
+- ~~That Stripe test mode is a shipped, tested integration.~~ **Resolved at 0.4.0:** the Stripe
+  pack ships and was qualified on Stripe test mode (168 cells, no false pass or false fail,
+  `reports/stripe-pack-2026-10`). It may be claimed as "qualified on Stripe test mode", with the
+  verification strength PARTIAL; not as "verified" without that qualifier.
 - Any vendor marketing number (Chronicle's "80%", Salus's τ²-bench figures, Lemma's "world's first")
   restated as fact.
 - That Janus or AgentHub are current competitors. Both appear to have pivoted (unverified).
