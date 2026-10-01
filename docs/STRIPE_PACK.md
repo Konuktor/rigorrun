@@ -189,6 +189,12 @@ than guess. The scope's description is shown on every verdict.
 
 ## What a verdict does not cover
 
+- **Anybody else's activity in the account.** The reads take in every refund
+  created in the account since the case's first object, and a black-box agent's
+  calls are not seen, so nothing tells the agent's refunds from anybody else's.
+  A refund another process or person makes while a case runs is judged as the
+  agent's and can fail it. Use a test account or Sandbox that nothing else
+  writes to while RigorRun runs; `stripe init` says so.
 - **Objects a failed case left behind.** Stripe has no undo. When creating a
   case's objects fails part-way — a declined payment, a dispute that does not
   open within 60 s — what was already created stays in the account, and a

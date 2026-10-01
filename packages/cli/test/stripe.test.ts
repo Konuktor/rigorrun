@@ -233,6 +233,11 @@ describe('stripe init --twin', () => {
     expect(code).toBe(0);
     expect(out).toContain(`Stripe pack · local twin at ${twin.url}`);
     expect(out).toContain('7 tickets and a $1.00 canary · 7 of 7 rules confirmed');
+    // A refund anybody else makes in the account while a case runs is read as
+    // the agent's: there is nothing to tell them apart by.
+    expect(out).toContain(
+      'Use a test account or Sandbox that nothing else writes to while RigorRun runs.',
+    );
     expect(out).toContain('rigorrun stripe canary --project');
     expect(out.split('\n').length).toBeLessThan(30);
   });

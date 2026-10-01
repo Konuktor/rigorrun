@@ -270,6 +270,9 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
         ? '  key   any test key works here; nothing reaches Stripe'
         : '  key   test mode, confirmed by Stripe',
     );
+    // The reads take in every refund made in the account while a case runs,
+    // and an agent's calls cannot be told from anybody else's.
+    say('  Use a test account or Sandbox that nothing else writes to while RigorRun runs.');
     say();
     say('Every ticket is held to');
     for (const rule of inForce) say(`  ${rule.statement}`);
