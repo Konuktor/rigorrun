@@ -22,11 +22,17 @@ import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
-import { z } from 'zod';
 import { caseOutcome, type Benchmark, type EnvironmentContract, type RunResult } from '@rigorrun/core';
 import type { DiscoveredTool } from '@rigorrun/mcp';
 import { Pairing, SESSION_COOKIE, cookieValue } from './pairing.ts';
-import { ConnectorSchema, SafetySchema, nextSteps, timeToFirstVerdictMs, type Project } from './project.ts';
+import {
+  BlackBoxRequestSchema,
+  ConnectorSchema,
+  SafetySchema,
+  nextSteps,
+  timeToFirstVerdictMs,
+  type Project,
+} from './project.ts';
 import type { Service } from './service.ts';
 
 const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
@@ -50,16 +56,6 @@ export interface RunnerOptions {
   port?: number;
 }
 
-/** A black-box agent as the interface or the API describes it. */
-const BlackBoxRequestSchema = z.object({
-  endpoint: z.string().min(1, 'an endpoint is required'),
-  allowedHosts: z.array(z.string()).default([]),
-  headers: z.record(z.string(), z.string()).default({}),
-  bodyTemplate: z.string().nullable().default(null),
-  completion: z.enum(['response', 'poll', 'settle']).default('response'),
-  claimPath: z.string().default('output'),
-  settleQuietMs: z.number().int().positive().max(600_000).default(5000),
-});
 
 export class Runner {
   readonly pairing = new Pairing();
@@ -441,6 +437,24 @@ export class Runner {
       });
     });
 
+    // A pack's own suite, built from the answers it asked for. The rules a
+    // person confirms are named here; every other rule stays a proposal.
+    app.post('/api/projects/:id/pack-suite', async (context) => {
+      const body = await context.req.json<{ params?: unknown; confirmedRuleIds?: unknown }>();
+      const confirmedRuleIds = Array.isArray(body.confirmedRuleIds)
+        ? body.confirmedRuleIds.filter((entry): entry is string => typeof entry === 'string')
+        : [];
+      const { contract, benchmark } = await service.installPackSuite(
+        context.req.param('id'),
+        body.params,
+        { confirmedRuleIds },
+      );
+      return context.json({
+        contract,
+        cases: benchmark.cases.map((entry) => ({ id: entry.id, name: entry.name, category: entry.category })),
+      });
+    });
+
     // ------------------------------------------------------------- agents
 
     app.post('/api/projects/:id/agents', async (context) => {
@@ -548,8 +562,11 @@ export class Runner {
     // --------------------------------------------------------------- runs
 
     app.post('/api/projects/:id/runs', async (context) => {
-      const body = await context.req.json<{ agentId: string }>();
-      const result = await service.runAgent(context.req.param('id'), body.agentId);
+      const body = await context.req.json<{ agentId: string; caseIds?: unknown }>();
+      const caseIds = Array.isArray(body.caseIds)
+        ? body.caseIds.filter((entry): entry is string => typeof entry === 'string')
+        : [];
+      const result = await service.runAgent(context.req.param('id'), body.agentId, { caseIds });
       return context.json({ run: publicRun(result) });
     });
 

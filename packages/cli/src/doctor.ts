@@ -11,7 +11,7 @@
  * secrets and never prints one, and it reports a project's connector without
  * its credentials.
  */
-import { ProjectStore, Service, storeRoot, nextSteps } from '@rigorrun/daemon';
+import { ProjectStore, Service, storeRoot, nextSteps, secretNamesOf } from '@rigorrun/daemon';
 import { ProxyServer } from '@rigorrun/proxy';
 import { inspectRuntime } from '@rigorrun/sandbox';
 import { describeAgent, probeAgent, probeProcessAgent } from '@rigorrun/daemon';
@@ -107,7 +107,9 @@ export async function cmdDoctor(flags: Flags): Promise<number> {
       own.push({ what: 'system', ok: false, detail: 'nothing connected yet' });
     } else {
       const missing = [];
-      for (const name of project.connector.secretNames) {
+      const names =
+        project.connector.kind === 'pack' ? secretNamesOf(project.connector) : project.connector.secretNames;
+      for (const name of names) {
         if ((await store.secret(name)) === undefined) missing.push(name);
       }
       if (missing.length > 0) {

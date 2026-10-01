@@ -292,7 +292,7 @@ export async function cmdImportProject(
     line(c.grey('  RigorRun will not open it until you have read that line and said yes,'));
     line(c.grey(`  in the interface or with \`rigorrun trust ${id}\`.`));
   }
-  const missing = (connector?.secretNames ?? []).filter(() => !bundle.secrets);
+  const missing = (connector ? secretNamesOf(connector) : []).filter(() => !bundle.secrets);
   if (missing.length > 0) {
     line();
     line(c.grey('  Credentials it needs and this machine does not have:'));

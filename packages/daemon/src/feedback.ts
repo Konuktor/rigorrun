@@ -166,10 +166,17 @@ async function shapeOf(
     connector: project.connector
       ? project.connector.kind === 'mcp'
         ? `mcp:${project.connector.transport}`
-        : 'openapi'
+        : project.connector.kind === 'pack'
+          ? `pack:${project.connector.pack}`
+          : 'openapi'
       : 'none',
     safety: project.safety,
-    usesCredentials: secretsConfigured && (project.connector?.secretNames.length ?? 0) > 0,
+    // A pack always opens with a credential, whether the project names it or
+    // the pack's own default applies.
+    usesCredentials:
+      secretsConfigured &&
+      project.connector !== null &&
+      (project.connector.kind === 'pack' || project.connector.secretNames.length > 0),
     counts: {
       toolsDiscovered: discovery?.tools.length ?? 0,
       toolsMarkedReadOnly: project.readOnlyTools.length,

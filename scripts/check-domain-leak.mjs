@@ -105,6 +105,9 @@ const DOMAIN_TERMS = [
   'booking',
   'organiser',
   'deposit',
+  // A vendor a pack is for. Its name, like its nouns, belongs in its own
+  // package; generic code reaches a pack by the id a project stores.
+  'stripe',
 ];
 
 const pattern = new RegExp(`\\b(${DOMAIN_TERMS.join('|')})s?\\b`, 'gi');

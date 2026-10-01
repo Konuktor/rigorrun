@@ -13,9 +13,12 @@
  */
 import { randomBytes } from 'node:crypto';
 import {
+  BenchmarkSchema,
+  EnvironmentContractSchema,
   applyReview,
   effectiveSteps,
   fromActionLog,
+  hashValue,
   rulesAwaitingReview,
   type Benchmark,
   type CanonicalHumanTrace,
@@ -30,9 +33,11 @@ import { assessBenchmark, type BenchmarkQuality } from '@rigorrun/quality';
 import { importOtelTrace, type ImportedTrace } from '@rigorrun/trace-import';
 import {
   clearEnvironments,
+  getPack,
   registerEnvironment,
   type EnvironmentFixture,
   type EnvironmentSchema,
+  type PackDefinition,
 } from '@rigorrun/environment';
 import { naiveAgent, type AgentAdapter } from '@rigorrun/agents';
 import { createHttpV2Agent, probeAgent } from './httpAgent.ts';
@@ -270,6 +275,16 @@ export class Service {
     const budgets = BudgetsSchema.parse({ ...project.budgets, ...(input.budgets ?? {}) });
     const problem = budgetProblem(budgets);
     if (problem) throw new Error(problem);
+    const pack = packOf(project);
+    if (pack && (input.verifierReads.length > 0 || input.readOnlyTools.length > 0 || input.reset.kind !== 'none')) {
+      // Accepting these would store settings nothing reads, and a person
+      // looking at them later would believe they were in force.
+      throw new Error(
+        `${pack.name} reads what each case creates with its own client, and makes fresh records ` +
+          'for every case rather than putting anything back, so it takes no nominated reads, ' +
+          'read-only tools or reset. Only the budgets apply.',
+      );
+    }
     const updated: Project = {
       ...project,
       readOnlyTools: input.readOnlyTools,
@@ -281,6 +296,7 @@ export class Service {
       budgets,
     };
     await this.store.write(updated);
+    if (pack) return { project: updated, readsProblem: '', readsIgnored: [] };
     // Said at setup rather than discovered in a verdict: a read the person
     // nominated that RigorRun will never call is something to hear about now.
     const readsIgnored = readsForVerdict(updated.verifierReads).ignored.map((read) => read.tool);
@@ -545,6 +561,7 @@ export class Service {
   /** Compiles the demonstration into a contract of proposals, none enforced. */
   async compile(projectId: string): Promise<EnvironmentContract> {
     const project = await this.store.read(projectId);
+    refuseForPack(project, 'compiled from a demonstration');
     const trace = await this.store.readArtefact<CanonicalHumanTrace>(projectId, 'trace');
     if (!trace) throw new Error('There is no recorded job to compile yet.');
 
@@ -589,6 +606,7 @@ export class Service {
 
   async generate(projectId: string): Promise<Benchmark> {
     const project = await this.store.read(projectId);
+    refuseForPack(project, 'generated');
     const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
     if (!contract) throw new Error('There is no contract to generate from yet.');
     if (rulesAwaitingReview(contract).length > 0) {
@@ -628,6 +646,109 @@ export class Service {
     await this.store.write(updated);
     await this.activation.stage('benchmark_built', projectId);
     return benchmark;
+  }
+
+  /**
+   * Installs the suite a pack ships with, from the answers it asked for.
+   *
+   * The pack writes the cases; RigorRun holds them to the same promises as a
+   * generated suite before storing them where a generated suite goes. Both
+   * halves are validated, every check must cite a rule the contract has, the
+   * person's confirmations are applied exactly as a review applies them. A
+   * check that cites a rule then gates exactly when its rule is in force —
+   * observed or confirmed — as a generated suite's checks do: a pack's author
+   * proposing a rule is not the person who runs the agent agreeing to it, and
+   * nothing unconfirmed fails an agent. A check citing no rule is left as the
+   * pack wrote it.
+   *
+   * The suite is re-addressed to this project — its environment is the
+   * project, as a generated suite's is — and its contract hash is the hash of
+   * the contract as stored, confirmations included, so a run says which rules
+   * were in force.
+   */
+  async installPackSuite(
+    projectId: string,
+    params: unknown,
+    decisions: { confirmedRuleIds?: string[] } = {},
+  ): Promise<{ contract: EnvironmentContract; benchmark: Benchmark }> {
+    const project = await this.store.read(projectId);
+    const pack = packOf(project);
+    if (!pack) {
+      throw new Error(
+        `${project.name} is not connected through a pack, so there is no pack suite to install. ` +
+          'Build its suite from a demonstration instead.',
+      );
+    }
+    if (!pack.suite) throw new Error(`${pack.name} does not ship a suite.`);
+
+    const made = pack.suite(params);
+    const parsedContract = EnvironmentContractSchema.safeParse(made.contract);
+    if (!parsedContract.success) {
+      throw new Error(`${pack.name} produced a contract RigorRun cannot use: ${firstIssue(parsedContract.error)}`);
+    }
+    const parsedBenchmark = BenchmarkSchema.safeParse(made.benchmark);
+    if (!parsedBenchmark.success) {
+      throw new Error(`${pack.name} produced a suite RigorRun cannot use: ${firstIssue(parsedBenchmark.error)}`);
+    }
+
+    const ruleIds = new Set(parsedContract.data.rules.map((rule) => rule.id));
+    const confirmedRuleIds = [...new Set(decisions.confirmedRuleIds ?? [])];
+    const unknownRules = confirmedRuleIds.filter((id) => !ruleIds.has(id));
+    if (unknownRules.length > 0) {
+      throw new Error(
+        `${pack.name}'s suite has no rule ${unknownRules.join(', ')}. Its rules: ${[...ruleIds].join(', ') || 'none'}.`,
+      );
+    }
+    for (const testCase of parsedBenchmark.data.cases) {
+      for (const check of testCase.checks) {
+        if (check.ruleId !== undefined && !ruleIds.has(check.ruleId)) {
+          // A check whose rule is not on the contract can be neither confirmed
+          // nor rejected, so whether it may fail an agent is undecidable.
+          throw new Error(
+            `${pack.name}'s case ${testCase.id} has a check (${check.id}) citing rule ${check.ruleId}, ` +
+              'which its contract does not have.',
+          );
+        }
+      }
+    }
+
+    const contract = applyReview(
+      { ...parsedContract.data, environmentId: project.id },
+      { confirmedRuleIds, rejectedRuleIds: [] },
+      this.now().toISOString(),
+    );
+    const inForce = new Set(
+      contract.rules.filter((rule) => rule.status === 'observed' || rule.status === 'confirmed').map((rule) => rule.id),
+    );
+    const benchmark: Benchmark = {
+      ...parsedBenchmark.data,
+      environment: project.id,
+      contractId: contract.id,
+      contractHash: await hashValue(contract),
+      cases: parsedBenchmark.data.cases.map((testCase) => ({
+        ...testCase,
+        checks: testCase.checks.map((check) =>
+          check.ruleId === undefined ? check : { ...check, blocking: inForce.has(check.ruleId) },
+        ),
+      })),
+    };
+
+    await this.store.writeArtefact(projectId, 'contract', contract);
+    await this.store.writeArtefact(projectId, 'benchmark', benchmark);
+    await this.store.writeArtefact(projectId, 'schema', pack.schema);
+    // A quality check describes the suite it checked; this is a new suite.
+    await this.store.deleteArtefact(projectId, 'quality');
+
+    const updated: Project = {
+      ...project,
+      timings: { ...project.timings, benchmarkGeneratedAt: this.now().toISOString() },
+    };
+    await this.store.write(updated);
+    if (rulesAwaitingReview(contract).length === 0) {
+      await this.activation.stage('contract_confirmed', projectId);
+    }
+    await this.activation.stage('benchmark_built', projectId);
+    return { contract, benchmark };
   }
 
   // ------------------------------------------------------ step 6: run an agent
@@ -831,6 +952,9 @@ export class Service {
     failure: { name: string; reason: string; request: Record<string, unknown> },
   ): Promise<{ caseId: string; shouldPerform: boolean; refusalReason: string; cases: number }> {
     const project = await this.store.read(projectId);
+    // A regression case is replayed against a world RigorRun installs; a pack
+    // makes its records per case from a recipe, which only the pack can write.
+    refuseForPack(project, 'extended with a replayed failure');
     const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
     const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
     if (!benchmark || !contract) {
@@ -870,6 +994,13 @@ export class Service {
        * reading of the system. If it throws, the run stops.
        */
       afterCase?: (result: RunResult['caseResults'][number], index: number) => Promise<void>;
+      /**
+       * Only these cases, in the suite's order. For a quick check of one
+       * case, or a qualification that runs a fixed few. Absent or empty runs
+       * every case; an id the suite does not have is refused before anything
+       * runs, and the run records which cases it covered.
+       */
+      caseIds?: readonly string[];
     } = {},
   ): Promise<RunResult> {
     const project = await this.store.read(projectId);
@@ -877,8 +1008,21 @@ export class Service {
       const problem = budgetProblem({ toolCallMs: project.budgets.toolCallMs, caseMs: options.caseTimeoutMs });
       if (problem) throw new Error(problem);
     }
-    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
-    if (!benchmark) throw new Error('There is no benchmark to run yet.');
+    const suite = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
+    if (!suite) throw new Error('There is no benchmark to run yet.');
+    const benchmark = selectCases(suite, options.caseIds ?? []);
+    const subset = benchmark.cases.length !== suite.cases.length;
+
+    const pack = packOf(project);
+    if (pack && project.safety === 'production') {
+      // Every case creates its own records before the agent starts, so a run
+      // writes whatever the agent does. Refused here, before anything opens,
+      // rather than as a harness failure per case.
+      throw new Error(
+        `${project.name} is marked production, and every ${pack.name} case creates records in the system ` +
+          'before the agent starts. Point the project at a test account or the local twin.',
+      );
+    }
 
     const config = project.agents.find((entry) => entry.id === agentId);
     if (!config) throw new Error(`No agent "${agentId}" on this project.`);
@@ -926,6 +1070,7 @@ export class Service {
       await this.activation.attempt('run_failed', projectId);
       throw error;
     }
+    if (subset) result = await withSubsetLimit(result, suite, benchmark);
     await this.store.writeRun(projectId, result.runId, result);
 
     const score = result.scores[0];
@@ -963,7 +1108,9 @@ export class Service {
         // system, whichever way that verdict went. A failure is a result.
         firstVerdictAt: project.timings.firstVerdictAt ?? this.now().toISOString(),
       },
-      baselineRunId: project.baselineRunId ?? result.runId,
+      // A run of a few cases is not something to measure the whole suite
+      // against later, so it never becomes the baseline by default.
+      baselineRunId: project.baselineRunId ?? (subset ? null : result.runId),
     };
     await this.store.write(updated);
 
@@ -1147,8 +1294,10 @@ export class Service {
     return out;
   }
 
-  /** The confirmed schema, re-derived from the recorded observations. */
+  /** The confirmed schema, re-derived from the recorded observations. A pack declares its own. */
   private async schemaOf(project: Project): Promise<EnvironmentSchema> {
+    const pack = packOf(project);
+    if (pack) return pack.schema;
     const induced = this.workspace.inducedFor(project.id);
     if (induced) return this.workspace.schemaFor(project, induced);
 
@@ -1175,6 +1324,29 @@ export class Service {
     // a build server, with no interface ever having existed.
     await this.workspace.connect(project);
     const build = () => this.workspace.environment(project, schema);
+    if (packOf(project)) {
+      // Nothing to reset and nothing to read: every case makes its own
+      // records, so there is no shared starting world to capture, and reading
+      // one here would read the system for no case at all.
+      const fixture: EnvironmentFixture = {
+        id: 'live',
+        title: 'Records each case creates for itself',
+        summary: 'Nothing is shared between cases; each one starts from what it created.',
+        state: { entities: {} },
+        config: {},
+        request: {},
+      };
+      clearEnvironments();
+      registerEnvironment({
+        id: project.id,
+        name: project.name,
+        description: project.goal || project.name,
+        fixtures: [fixture],
+        create: build,
+      });
+      await this.store.writeArtefact(project.id, 'schema', schema);
+      return { fixture };
+    }
     const environment = build();
     await environment.reset();
     const state = await environment.getState();
@@ -1202,6 +1374,76 @@ export class Service {
     await this.store.writeArtefact(project.id, 'schema', schema);
     return { fixture };
   }
+}
+
+/** The pack a project is connected through, if it is. */
+function packOf(project: Project): PackDefinition | undefined {
+  return project.connector?.kind === 'pack' ? getPack(project.connector.pack) : undefined;
+}
+
+/** Refuses a step that only exists for suites built from a demonstration. */
+function refuseForPack(project: Project, what: string): void {
+  const pack = packOf(project);
+  if (!pack) return;
+  throw new Error(
+    `${project.name} is connected through ${pack.name}, which ships its own suite, so its suite is not ` +
+      `${what}. Install the pack's suite instead.`,
+  );
+}
+
+function firstIssue(error: { issues: { path: PropertyKey[]; message: string }[] }): string {
+  const issue = error.issues[0];
+  if (!issue) return 'unknown shape';
+  return issue.path.length > 0 ? `${issue.path.map(String).join('.')}: ${issue.message}` : issue.message;
+}
+
+/**
+ * The suite with only the named cases, in the suite's own order.
+ *
+ * Done before anything runs, so an id that is not in the suite is a refusal
+ * rather than a run that quietly covers less than was asked for.
+ */
+export function selectCases(benchmark: Benchmark, caseIds: readonly string[]): Benchmark {
+  if (caseIds.length === 0) return benchmark;
+  const known = new Set(benchmark.cases.map((entry) => entry.id));
+  const unknown = [...new Set(caseIds)].filter((id) => !known.has(id));
+  if (unknown.length > 0) {
+    throw new Error(
+      `This suite has no case ${unknown.join(', ')}. Its cases: ${[...known].join(', ')}.`,
+    );
+  }
+  const wanted = new Set(caseIds);
+  return { ...benchmark, cases: benchmark.cases.filter((entry) => wanted.has(entry.id)) };
+}
+
+/**
+ * A run of some of a suite's cases, saying so.
+ *
+ * Recorded as a limit because that is what it is: the verdict covers the
+ * cases that ran and says nothing about the rest. The run's benchmark hash is
+ * already the hash of the cases it ran — which is what keeps a comparison
+ * against a whole-suite run from claiming to be like for like — and the
+ * result's own hash is resealed over the added limit, exactly as the runner
+ * sealed it.
+ */
+async function withSubsetLimit(result: RunResult, suite: Benchmark, ran: Benchmark): Promise<RunResult> {
+  const ids = ran.cases.map((entry) => entry.id);
+  const limited: RunResult = {
+    ...result,
+    limits: [
+      ...result.limits,
+      {
+        id: 'cases_selected',
+        limit:
+          `Ran ${ids.length} of the suite's ${suite.cases.length} cases, chosen by id (${ids.join(', ')}). ` +
+          'The verdict says nothing about the others.',
+        remedy: 'Run the whole suite before relying on this verdict for a release.',
+      },
+    ],
+    resultHash: '',
+  };
+  limited.resultHash = await hashValue(limited);
+  return limited;
 }
 
 /**

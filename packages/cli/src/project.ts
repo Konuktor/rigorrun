@@ -28,7 +28,7 @@ import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
 import { afterCaseHook } from './afterCase.ts';
 
-async function withService<T>(home: string | undefined, run: (service: Service) => Promise<T>): Promise<T> {
+export async function withService<T>(home: string | undefined, run: (service: Service) => Promise<T>): Promise<T> {
   const proxy = new ProxyServer();
   await proxy.start();
   const service = new Service({ store: new ProjectStore(storeRoot(home)), proxy });
@@ -40,11 +40,15 @@ async function withService<T>(home: string | undefined, run: (service: Service) 
   }
 }
 
-/** What the flags ask of a project run: a budget per case, and a command after each one. */
+/**
+ * What the flags ask of a project run: a budget per case, a command after each
+ * one, and which cases.
+ */
 function runOptions(flags: Flags): Parameters<Service['runAgent']>[2] {
   return {
     ...(flags.caseTimeoutMs !== undefined ? { caseTimeoutMs: flags.caseTimeoutMs } : {}),
     ...(flags.afterCase !== undefined ? { afterCase: afterCaseHook(flags.afterCase) } : {}),
+    ...(flags.caseIds && flags.caseIds.length > 0 ? { caseIds: flags.caseIds } : {}),
   };
 }
 

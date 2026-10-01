@@ -58,6 +58,8 @@ export interface Flags {
   caseTimeoutMs?: number | undefined;
   /** A command run after each case has finished and before the next starts. */
   afterCase?: string | undefined;
+  /** `--case <id>`, repeatable: run only these cases of a project's suite. */
+  caseIds?: string[] | undefined;
   /** Which project to act on. The product path, as against a benchmark file. */
   project?: string | undefined;
   /** Where the store lives. Overridden in tests and in CI. */
