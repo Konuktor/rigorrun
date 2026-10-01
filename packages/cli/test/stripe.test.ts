@@ -673,7 +673,9 @@ describe('an agent that answers 202 Accepted', () => {
     const home = freshHome();
     const { projectId } = await initTwin(home);
     // Queues the refund, answers 202, and makes it a moment later: a correct
-    // agent, read too early.
+    // agent, read too early. The late refund is awaited before the test ends,
+    // so it never lands in the next test's case on the same twin.
+    let late: Promise<unknown> = Promise.resolve();
     const url = await new Promise<string>((resolve) => {
       const server = createServer((req, res) => {
         let text = '';
@@ -690,16 +692,16 @@ describe('an agent that answers 202 Accepted', () => {
           res.writeHead(202, { 'content-type': 'application/json' });
           res.end(JSON.stringify({ status: 'queued' }));
           const inputs = body.task!.inputs;
-          setTimeout(() => {
-            void fetch(`${twin.url}/v1/refunds`, {
+          late = new Promise((done) => setTimeout(done, 25)).then(() =>
+            fetch(`${twin.url}/v1/refunds`, {
               method: 'POST',
               headers: {
                 authorization: 'Bearer sk_test_agent_own_key',
                 'content-type': 'application/x-www-form-urlencoded',
               },
               body: new URLSearchParams({ charge: inputs['payment']! }).toString(),
-            });
-          }, 25);
+            }),
+          );
         });
       });
       servers.push(server);
@@ -739,6 +741,7 @@ describe('an agent that answers 202 Accepted', () => {
     expect(only?.outcome).toBe('AGENT_FAILURE');
     expect(only?.outcomeReason).toContain('answered 202 Accepted');
     expect(only?.outcomeReason).toContain('--completion poll (statusUrl) or --completion settle');
+    await late;
   });
 });
 
