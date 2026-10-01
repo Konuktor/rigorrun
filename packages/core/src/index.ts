@@ -14,6 +14,7 @@ export * from './frame.ts';
 export * from './environmentContract.ts';
 export * from './budgets.ts';
 export * from './benchmark.ts';
+export * from './bindings.ts';
 export * from './run.ts';
 export * from './record.ts';
 

@@ -39,6 +39,14 @@ export type StateReadCapability =
 export type SeedCapability =
   /** Any state can be installed, so a case can require an exact world. */
   | 'arbitrary'
+  /**
+   * Nothing can be installed, but fresh records can be created. Each case, and
+   * each attempt at it, makes its own from the case's recipe through the
+   * system's ordinary operations, and the case is then bound to the
+   * identifiers they were given. The starting world is what was made, not
+   * something chosen in advance, so it is read rather than assumed.
+   */
+  | 'materialized'
   /** Nothing can be installed. Cases must find a world that already fits. */
   | 'none';
 
@@ -58,6 +66,13 @@ export type ResetCapability =
   | 'endpoint'
   /** A command the operator configured, run locally. */
   | 'command'
+  /**
+   * Nothing is put back. Every case reads only the records it materialized,
+   * so whatever an earlier case left behind is outside its view rather than
+   * undone. Isolation by construction, and RigorRun's own machinery: it holds
+   * only for an environment whose seed is `materialized`.
+   */
+  | 'namespace'
   | 'none';
 
 /** Where the record of what happened comes from. */
@@ -91,6 +106,14 @@ export interface EnvironmentCapabilities {
   reset: ResetCapability;
   events: EventsCapability;
   safety: SafetyMode;
+  /**
+   * True when the system answering is a local stand-in built to behave like
+   * the real one — a twin — rather than the real one. Everything above can be
+   * true of a twin, which is exactly why this has to be said separately: a
+   * verdict against it describes what the agent did to the stand-in. Absent
+   * means the real system.
+   */
+  simulated?: boolean;
 }
 
 /**
@@ -138,6 +161,12 @@ export type IsolationLevel =
   /** The world was restored between cases. Results are independent. */
   | 'RESET'
   /**
+   * Nothing was restored. Every case and attempt created its own records and
+   * was judged on those alone, so no two of them shared anything to inherit.
+   * Results are independent by construction rather than by putting back.
+   */
+  | 'FRESH_OBJECTS'
+  /**
    * Reset put the same things back, but not identically — a timestamp, a
    * generated id. Differences between two states still mean something;
    * comparing a state to a remembered absolute value does not.
@@ -182,11 +211,25 @@ export interface ObservedIsolation {
  */
 const RESET_WE_CONTROL: ReadonlySet<ResetCapability> = new Set(['snapshot', 'container']);
 
+/**
+ * Whether every case creates its own records and reads nothing else.
+ *
+ * Both halves are needed. A namespace without materialization would read an
+ * empty scope while sharing one world, which is no isolation at all.
+ */
+function freshPerCase(caps: EnvironmentCapabilities): boolean {
+  return caps.reset === 'namespace' && caps.seed === 'materialized';
+}
+
 export function isolationLevel(
   caps: EnvironmentCapabilities,
   observed?: ObservedIsolation,
 ): IsolationLevel {
   if (caps.reset === 'none') return 'NONE';
+  // Nothing is put back, so there is no reset to measure and an observation of
+  // two resets says nothing. What makes the cases independent is that each one
+  // was judged only on what it created.
+  if (caps.reset === 'namespace') return freshPerCase(caps) ? 'FRESH_OBJECTS' : 'NONE';
   if (observed) return observed.stable ? 'RESET' : observed.pathsStable ? 'PARTIAL' : 'NONE';
   // Nobody measured. Say `RESET` only where the reset is ours to perform.
   return RESET_WE_CONTROL.has(caps.reset) ? 'RESET' : 'DECLARED';
@@ -199,8 +242,12 @@ export function isolationLevel(
  * once against a scratch system is fine. It is repetition without reset, where
  * the second attempt starts from the wreckage of the first and the numbers mean
  * nothing, and it is mutation against production, which is somebody's real day.
+ *
+ * A namespace is the one way to repeat without putting anything back: every
+ * attempt materializes its own records, so no attempt starts from another's.
  */
 export function mayRepeatMutatingCases(caps: EnvironmentCapabilities): boolean {
+  if (caps.reset === 'namespace') return freshPerCase(caps);
   return caps.reset !== 'none';
 }
 
@@ -239,6 +286,16 @@ export function capabilityLimits(caps: EnvironmentCapabilities): CapabilityLimit
         'whether it worked.',
       remedy: 'Nominate one or more read operations as verifier reads.',
     });
+  } else if (caps.stateRead === 'designated-reads' && caps.seed === 'materialized') {
+    // The same partiality, with a different cause and no remedy a person could
+    // apply: the reads follow what the case created, and nothing was nominated.
+    limits.push({
+      id: 'scoped_state_read',
+      limit:
+        'RigorRun reads back the records each case created and what was attached to them while ' +
+        'it ran. Changes anywhere else in the system cannot be checked.',
+      remedy: '',
+    });
   } else if (caps.stateRead === 'designated-reads') {
     limits.push({
       id: 'partial_state_read',
@@ -246,6 +303,16 @@ export function capabilityLimits(caps: EnvironmentCapabilities): CapabilityLimit
         'RigorRun reads back only what the nominated read operations return. Anything outside ' +
         'them cannot be checked.',
       remedy: 'Nominate more read operations to widen what can be verified.',
+    });
+  }
+
+  if (caps.simulated === true) {
+    limits.push({
+      id: 'simulated',
+      limit:
+        'This ran against the local twin, not the real system, so a verdict says what the agent ' +
+        'did to a simulation of it.',
+      remedy: 'Run the same suite against the real system in its test mode.',
     });
   }
 

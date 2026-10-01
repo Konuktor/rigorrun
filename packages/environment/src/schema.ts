@@ -27,13 +27,7 @@ export type FieldType = 'string' | 'number' | 'boolean' | 'enum' | 'timestamp';
  *  - `freetext`   — prose. Never hoisted into the projection, never compared.
  */
 export type FieldRole =
-  | 'identifier'
-  | 'quantity'
-  | 'status'
-  | 'actor'
-  | 'timestamp'
-  | 'flag'
-  | 'freetext';
+  'identifier' | 'quantity' | 'status' | 'actor' | 'timestamp' | 'flag' | 'freetext';
 
 /**
  * The dimension a quantity is measured in.
@@ -43,6 +37,16 @@ export type FieldRole =
  */
 export type Unit =
   | 'currency'
+  /**
+   * Money as a whole number of the currency's smallest unit, with precision 1.
+   *
+   * Separate from `currency` because the two disagree about what 1 means: a
+   * system that stores 2500 for twenty-five of something is not comparable
+   * with one that stores 25, and treating them as one unit would let the
+   * generator propose a boundary a hundred times too small. Which currency,
+   * and how many minor units make a major one, is the environment's to say.
+   */
+  | 'currency_minor'
   | 'count'
   | 'duration_days'
   | 'duration_hours'
@@ -261,7 +265,10 @@ export function validateSchema(schema: EnvironmentSchema): SchemaProblem[] {
     }
     for (const key of entity.keyFields ?? []) {
       if (!fieldNames.has(key)) {
-        problems.push({ path: `${entity.name}.${key}`, message: 'keyFields names a field that does not exist' });
+        problems.push({
+          path: `${entity.name}.${key}`,
+          message: 'keyFields names a field that does not exist',
+        });
       }
     }
     if (entity.keyFields && entity.keyFields[0] !== entity.idField) {
@@ -271,7 +278,10 @@ export function validateSchema(schema: EnvironmentSchema): SchemaProblem[] {
       problems.push({ path: entity.name, message: 'an entity named by keyFields has an identity' });
     }
     if (entity.appendOnly && entity.mutable) {
-      problems.push({ path: entity.name, message: 'an entity cannot be both appendOnly and mutable' });
+      problems.push({
+        path: entity.name,
+        message: 'an entity cannot be both appendOnly and mutable',
+      });
     }
     for (const reference of entity.referenceFields ?? []) {
       if (!fieldNames.has(reference)) {
@@ -323,7 +333,10 @@ export function validateSchema(schema: EnvironmentSchema): SchemaProblem[] {
       } else {
         for (const field of [relationship.via.fromField, relationship.via.toField]) {
           if (!join.fields.some((f) => f.name === field)) {
-            problems.push({ path, message: `join field "${field}" is not a field of ${join.name}` });
+            problems.push({
+              path,
+              message: `join field "${field}" is not a field of ${join.name}`,
+            });
           }
         }
       }
