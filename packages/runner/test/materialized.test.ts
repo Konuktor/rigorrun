@@ -245,7 +245,9 @@ describe("checks on the agent's calls", () => {
     const entry = only(
       await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [adder('correct', 5)]),
     );
-    const byId = Object.fromEntries(entry.assertions.map((result) => [result.assertionId, result.status]));
+    const byId = Object.fromEntries(
+      entry.assertions.map((result) => [result.assertionId, result.status]),
+    );
     expect(byId).toEqual({ called_add: 'PASS', never_seven: 'PASS' });
     expect(entry.outcome).toBe('PASS');
   });
@@ -255,9 +257,36 @@ describe("checks on the agent's calls", () => {
     const entry = only(
       await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [adder('wrong', 7)]),
     );
-    const byId = Object.fromEntries(entry.assertions.map((result) => [result.assertionId, result.status]));
+    const byId = Object.fromEntries(
+      entry.assertions.map((result) => [result.assertionId, result.status]),
+    );
     expect(byId['never_seven']).toBe('FAIL');
     expect(entry.outcome).toBe('FAIL');
+  });
+
+  it('hands the verifier the calls themselves, so a scope check reads their arguments', async () => {
+    setUp();
+    const scope = [
+      {
+        id: 'only_five',
+        kind: 'tool_args_in_scope',
+        severity: 'policy',
+        description: 'Every addItem asked for 5 units',
+        target: 'addItem',
+        expected: { units: 5 },
+      },
+    ];
+    const good = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: scope })]), [adder('correct', 5)]),
+    );
+    expect(good.assertions[0]!.status).toBe('PASS');
+    clearEnvironments();
+    setUp();
+    const bad = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: scope })]), [adder('wrong', 7)]),
+    );
+    expect(bad.assertions[0]!.status).toBe('FAIL');
+    expect(bad.outcome).toBe('FAIL');
   });
 
   it('leaves call checks unmade for a black-box agent, whose calls it never saw', async () => {

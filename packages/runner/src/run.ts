@@ -34,6 +34,7 @@ import {
   type CaseResult,
   type EntityReadStability,
   type EvidenceIndependence,
+  type ObservedCall,
   type ObservedEvent,
   type RunResult,
   type SuiteQuality,
@@ -454,10 +455,37 @@ async function executeCase(
   const steps: AgentStep[] = [];
   let pendingNote: string | null = null;
   let stepBudget = bound.maxSteps;
+  // The case's allow-list is advisory here, deliberately: an agent that reads
+  // the world before retrying often uses a read the case did not list, and
+  // refusing it turns a careful agent into a duplicate-maker (runner/test/
+  // retry.test.ts). A scope test names the tools that must not be called
+  // (`tool_not_called`) instead.
+  const refuse = (tool: string, args: Record<string, unknown>, code: string, message: string) => {
+    steps.push({
+      index: steps.length,
+      at: Date.now(),
+      tool,
+      args: boundArgs(args),
+      ok: false,
+      error: code,
+      ...(pendingNote ? { note: pendingNote } : {}),
+    });
+    pendingNote = null;
+    return { ok: false as const, error: { code, message } };
+  };
 
   const env: AgentEnvironment = {
     async call(tool: string, args: Record<string, unknown> = {}): Promise<ToolResult> {
       if (stepBudget <= 0) {
+        // Recorded, so the trace shows the agent kept going after its budget.
+        steps.push({
+          index: steps.length,
+          at: Date.now(),
+          tool,
+          args: boundArgs(args),
+          ok: false,
+          error: 'BUDGET_EXHAUSTED',
+        });
         return {
           ok: false,
           error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' },
@@ -465,24 +493,12 @@ async function executeCase(
       }
       stepBudget -= 1;
       if (writeGuard?.has(tool)) {
-        const refusal = {
-          ok: false as const,
-          error: {
-            code: 'WRITE_REFUSED',
-            message: `${tool} writes, and this environment is marked production.`,
-          },
-        };
-        steps.push({
-          index: steps.length,
-          at: Date.now(),
+        return refuse(
           tool,
-          args: boundArgs(args),
-          ok: false,
-          error: refusal.error.code,
-          ...(pendingNote ? { note: pendingNote } : {}),
-        });
-        pendingNote = null;
-        return refusal;
+          args,
+          'WRITE_REFUSED',
+          `${tool} writes, and this environment is marked production.`,
+        );
       }
       let result: Awaited<ReturnType<EnvironmentAdapter['executeAction']>>;
       try {
@@ -589,6 +605,16 @@ async function executeCase(
     ok: event.ok,
     ...(event.error ? { error: event.error } : {}),
   }));
+  // The agent's calls as checks read them: every attempt, with what RigorRun
+  // refused marked as such.
+  const observedCalls = steps.map((step): ObservedCall => ({
+    tool: step.tool,
+    args: step.args,
+    ok: step.ok,
+    ...(step.result === undefined ? {} : { result: step.result }),
+    ...(step.error ? { error: step.error } : {}),
+    refused: step.error === 'TOOL_NOT_ALLOWED' || step.error === 'WRITE_REFUSED',
+  }));
   const { derived, deltas } = buildProjection(adapter.describeEntities(), {
     seed: initialState,
     final: finalState,
@@ -629,6 +655,7 @@ async function executeCase(
         ...(frame ? { frame } : {}),
       },
       events: observedEvents,
+      calls: observedCalls,
       agentReport: report,
     },
     {
