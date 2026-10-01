@@ -24,7 +24,12 @@ import {
   stripeSuite,
   type RunningTwin,
 } from '@rigorrun/env-stripe';
-import { cmdInit, cmdTwin, TWIN_KEY_SECRET } from '../../env-stripe/src/cli/index.ts';
+import {
+  cmdInit,
+  cmdTwin,
+  TWIN_AGENT_KEY,
+  TWIN_KEY_SECRET,
+} from '../../env-stripe/src/cli/index.ts';
 import { main } from '../src/main.ts';
 
 let dir: string;
@@ -334,6 +339,81 @@ describe('stripe init --twin', () => {
     expect(code).toBe(2);
     expect(err).toMatch(message);
     expect(await readdir(home).catch(() => [])).toEqual([]);
+  });
+});
+
+/** A loopback server that answers like Stripe's balance and keeps every Authorization it is sent. */
+function captureServer(): Promise<{ url: string; seen: string[] }> {
+  const seen: string[] = [];
+  return new Promise((resolve) => {
+    const server = createServer((req, res) => {
+      seen.push(String(req.headers.authorization));
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ object: 'balance', livemode: false, available: [], pending: [] }));
+    });
+    servers.push(server);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      resolve({
+        url: `http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}`,
+        seen,
+      });
+    });
+  });
+}
+
+describe('stripe init --twin never sends a real key', () => {
+  it('refuses --key-env, before anything is sent or stored', async () => {
+    const home = freshHome();
+    const capture = await captureServer();
+    process.env['MY_STRIPE_KEY'] = 'sk_test_REAL_ACCOUNT_SECRET_123';
+    try {
+      const { code, err, out } = await cli(
+        'stripe',
+        'init',
+        '--twin',
+        capture.url,
+        '--key-env',
+        'MY_STRIPE_KEY',
+        '--safety',
+        'local',
+        '--yes',
+        '--json',
+        '--home',
+        home,
+        '--dir',
+        join(home, 't'),
+      );
+      expect(code).toBe(2);
+      expect(err).toMatch(/--twin uses the twin's own key/);
+      expect(err + out).not.toContain('REAL_ACCOUNT_SECRET');
+      expect(capture.seen).toEqual([]);
+      expect(await readdir(home).catch(() => [])).toEqual([]);
+    } finally {
+      delete process.env['MY_STRIPE_KEY'];
+    }
+  });
+
+  it('sends the twin its fixed dummy key, whatever test key the environment holds', async () => {
+    const home = freshHome();
+    const capture = await captureServer();
+    process.env['STRIPE_TEST_KEY'] = 'sk_test_REAL_ACCOUNT_SECRET_456';
+    const { code, err } = await cli(
+      'stripe',
+      'init',
+      '--twin',
+      capture.url,
+      '--yes',
+      '--json',
+      '--home',
+      home,
+      '--dir',
+      join(home, 't'),
+    );
+    expect(code, err).toBe(0);
+    expect(capture.seen.length).toBeGreaterThan(0);
+    expect(new Set(capture.seen)).toEqual(new Set([`Bearer ${TWIN_AGENT_KEY}`]));
+    expect(await new ProjectStore(home).secret(TWIN_KEY_SECRET)).toBe(TWIN_AGENT_KEY);
   });
 });
 

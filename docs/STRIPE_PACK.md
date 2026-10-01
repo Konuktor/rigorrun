@@ -44,7 +44,10 @@ session (`LiveModeRefused`). Every object the twin returns has
 **Where the key lives.** In this machine's secret store, under
 `stripe_test_key` (`KEY_SECRET`) unless the project names another secret
 (`keySecret`). Never in the project file. The pack reads it through the
-`secret(name)` callback it is opened with.
+`secret(name)` callback it is opened with. `stripe init --twin` always uses the
+twin's fixed key (`sk_test_twin`, stored as `stripe_twin_key`) and refuses
+`--key-env`: a twin is whatever answers on a loopback port, so a real key is
+never sent to one.
 
 **The agent has its own key.** RigorRun's key is for creating and reading the
 case's objects. The agent under test is configured with a key of its own, and

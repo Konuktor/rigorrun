@@ -56,6 +56,7 @@ OPTIONS
       --key-env <NAME>          Test mode: the environment variable holding your
                                 test key (sk_test_… or rk_test_…). Default ${DEFAULT_KEY_ENV}.
                                 Read from the environment, never from a flag.
+                                Refused with --twin, which always uses its own key.
       --safety <kind>           staging, ephemeral or local. Required for test
                                 mode; the twin is local. Never production.
       --name <name>             The project's name.
@@ -187,7 +188,15 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
 
   // ------------------------------------------------- refused before anything
   const twin = values.twin !== undefined;
-  const keyEnv = values['key-env'] ?? (twin ? undefined : DEFAULT_KEY_ENV);
+  if (twin && values['key-env'] !== undefined) {
+    // Refused rather than ignored: a twin is whatever answers on a loopback
+    // port, and a real test key sent there would be handed to that process.
+    throw new UsageError(
+      "--twin uses the twin's own key, never yours: drop --key-env. A real key is only ever " +
+        'sent to Stripe itself (stripe init --key-env NAME --safety staging).',
+    );
+  }
+  const keyEnv = twin ? undefined : (values['key-env'] ?? DEFAULT_KEY_ENV);
   const key = keyEnv === undefined ? TWIN_AGENT_KEY : process.env[keyEnv];
   if (key === undefined || key.trim() === '') {
     throw new UsageError(
