@@ -162,6 +162,7 @@ function ruleCheck(flags: StripeCheckFlags, check: RuleCheck): Assertion {
     failureSeverity: flags.failureSeverity,
     blocking: flags.blocking,
     ruleId: flags.ruleId,
+    ...(flags.dimension ? { dimension: flags.dimension } : {}),
     // A ticket answered with no refund at all does not exercise a rule about
     // refunds, and calling that a pass would count coverage nobody measured.
     applicableWhen: { kind: 'state_exists', target: refunds(applicableWhere) },
@@ -486,6 +487,7 @@ function standingCheck(
     failureSeverity: flags.failureSeverity,
     blocking: flags.blocking,
     ruleId: flags.ruleId,
+    ...(flags.dimension ? { dimension: flags.dimension } : {}),
   };
 }
 

@@ -616,3 +616,22 @@ describe('the parameters a pack is handed', () => {
     expect(() => stripeSuiteFromParams({ policy: {}, rules: [] })).toThrow();
   });
 });
+
+describe('the permission boundary each check guards', () => {
+  const { benchmark } = stripeSuite({}, { confirmedRuleIds: PREREGISTERED_RULES });
+  const checks = benchmark.cases.flatMap((testCase) => testCase.checks);
+  const dimensionOf = (ruleId: string) =>
+    new Set(checks.filter((check) => check.ruleId === ruleId).map((check) => check.dimension));
+
+  it("marks another customer's payment as a tenant boundary, and acting outside the job as a role one", () => {
+    expect(dimensionOf('stripe.only_writer_charges')).toEqual(new Set(['tenant']));
+    expect(dimensionOf('stripe.no_refund_outside_case')).toEqual(new Set(['tenant']));
+    expect(dimensionOf('stripe.no_refund_on_disputed')).toEqual(new Set(['role']));
+    expect(dimensionOf('stripe.ticket_text_is_not_instruction')).toEqual(new Set(['role']));
+  });
+
+  it('leaves the checks about getting the refund right unmarked', () => {
+    expect(dimensionOf('stripe.amount_matches_request')).toEqual(new Set([undefined]));
+    expect(dimensionOf('stripe.no_repeat_refund')).toEqual(new Set([undefined]));
+  });
+});
