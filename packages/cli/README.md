@@ -21,14 +21,19 @@ npx rigorrun demo    # a recorded run, replayed offline; no keys, no account
 `demo` replays a real model working a support desk: what it said beside what the system held
 afterwards. The same run, case by case, is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
 
-### Your Stripe agent, unchanged
+### Your Stripe agent, no code changes
 
 ```bash
-npx rigorrun stripe twin                                         # a local Stripe twin; leave it running
-npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes      # the Stripe pack's tickets, as a project
-npx rigorrun agent add --project <id> --black-box <agent URL>    # your agent, as it already runs
-npx rigorrun gate --project <id> --report report.html            # exit 1 when a case fails
+npx rigorrun stripe twin                                   # a local Stripe twin; leave it running
+npx rigorrun stripe init --twin --yes                      # the Stripe pack's tickets, as a project
+npx rigorrun agent add --project <id> --name my-agent \
+  --black-box <agent URL> --claim-path message             # your agent's endpoint, as it runs today
+npx rigorrun gate --project <id> --report report.html      # exit 1 when a case fails
 ```
+
+No change to your agent's code: RigorRun sends each ticket to the endpoint your agent already
+serves (map your request shape with `--body-template`) and reads Stripe itself. Your agent keeps its
+own Stripe test key — or, for the local twin, its Stripe base URL points at the twin.
 
 Against your Stripe test mode, `stripe init` takes a test key instead of `--twin`; live keys are
 refused. The [Stripe guide](https://docs.rigorrun.xyz/start/stripe) has the whole path, including
@@ -63,8 +68,9 @@ most tools:   you write the tests   →  the tool runs them
    be.
 3. **Rule on what it worked out.** It shows the evidence behind each proposed rule. A rule you
    reject cannot fail your agent.
-4. **Connect your agent** — unchanged, wherever it runs: RigorRun sends each case's work to a URL it
-   already serves and reads the result from your system (a black box). Or an HTTP endpoint, a local
+4. **Connect your agent** — no change to its code, wherever it runs: RigorRun sends each case's work
+   to the endpoint it already serves (map your request shape with `--body-template`) and reads the
+   result from your system (a black box). Or an HTTP endpoint, a local
    command, or your own loop pulling work.
 5. **Run it.** A verdict, with how strongly each answer could be verified.
 6. **Gate the next change** in CI.

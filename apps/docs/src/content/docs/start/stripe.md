@@ -44,8 +44,10 @@ run is going: the reads include every refund made in the account since a case be
 
 ## 3. Your agent, as a black box
 
-Your agent needs one thing: an HTTP endpoint that takes a ticket as `rigorrun/task/1`, does the
-work with its own Stripe key, and answers with a sentence. It imports nothing from RigorRun.
+No change to your agent's code: RigorRun sends each ticket to the endpoint your agent already serves
+and reads Stripe itself. The ticket arrives as `rigorrun/task/1`, or in your own request shape with
+`--body-template` (see [a black-box agent](/agents/black-box/)); the agent does the work with its own
+Stripe test key and answers with a sentence. It imports nothing from RigorRun.
 [examples/stripe-support-agent](https://github.com/Konuktor/rigorrun/tree/master/examples/stripe-support-agent)
 is a complete one, and [a black-box agent](/agents/black-box/) describes the envelope.
 
@@ -54,8 +56,17 @@ npx rigorrun agent add --project <id> --name my-agent \
   --black-box http://127.0.0.1:8787/ --claim-path message
 ```
 
-Point the agent at the same place RigorRun uses: the twin's address (`STRIPE_BASE_URL`, any
-`sk_test_…` key), or `https://api.stripe.com` with a test key of its own.
+Point the agent at the same place RigorRun uses: `https://api.stripe.com` with a test key of its
+own, or, for the local twin, its Stripe base URL at the twin (any `sk_test_…` key works there). The
+example agent reads `STRIPE_BASE_URL`; Stripe's own SDKs take the address in code:
+
+```js
+new Stripe(key, { host: '127.0.0.1', port: 12112, protocol: 'http' }); // stripe-node, twin only
+```
+
+```python
+StripeClient(key, base_addresses={"api": "http://127.0.0.1:12112"})  # stripe-python, twin only
+```
 
 ## 4. The canary
 

@@ -19,17 +19,21 @@ npx rigorrun demo
 Replays a recorded run offline: what the agent said, beside what the system held afterwards. No
 keys, no account. The same run is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
 
-## Your Stripe agent, unchanged
+## Your Stripe agent, no code changes
 
 ```bash
-npx rigorrun stripe twin                                         # a local Stripe twin; leave it running
-npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes      # the Stripe pack's tickets, as a project
-npx rigorrun agent add --project <id> --black-box <agent URL>    # your agent, as it already runs
-npx rigorrun gate --project <id> --report report.html            # exit 1 when a case fails
+npx rigorrun stripe twin                                   # a local Stripe twin; leave it running
+npx rigorrun stripe init --twin --yes                      # the Stripe pack's tickets, as a project
+npx rigorrun agent add --project <id> --name my-agent \
+  --black-box <agent URL> --claim-path message             # your agent's endpoint, as it runs today
+npx rigorrun gate --project <id> --report report.html      # exit 1 when a case fails
 ```
 
-RigorRun posts each ticket to your agent's endpoint, then reads Stripe with its own key; the
-verdict comes from what Stripe holds, never from what the agent said. Every verdict is `PARTIAL`
+No change to your agent's code: RigorRun sends each ticket to the endpoint your agent already
+serves (map your request shape with `--body-template`; `--claim-path` names the field its answer's
+sentence is in) and reads Stripe itself. Your agent keeps its own Stripe test key — or, for the
+local twin, its Stripe base URL points at the twin. The verdict comes from what Stripe holds, never
+from what the agent said. Every verdict is `PARTIAL`
 and prints what was read. Against your Stripe test mode, `stripe init` takes a test key instead of
 `--twin` — live keys are refused. Start with [the Stripe guide](https://docs.rigorrun.xyz/start/stripe)
 and [the example agent](examples/stripe-support-agent); CI is one step
@@ -97,18 +101,18 @@ line builds before it serves.
 pnpm release:verify       # everything below, in order, on this machine
 ```
 
-| | |
-| --- | --- |
-| `pnpm lint` · `pnpm typecheck` | the usual |
-| `pnpm test` | 847 unit tests |
-| `pnpm contrast` | every token pair against its WCAG requirement |
-| `pnpm domain` | no business noun in generic code, across 26 directories |
-| `pnpm e2e` · `pnpm a11y` · `pnpm visual` · `pnpm cross` | the interface |
-| `pnpm e2e:external` | **a stranger connects their own system and their own agent** |
-| `pnpm e2e:restart` | SIGKILL survival, and a damaged file reported rather than dropped |
-| `pnpm verify:package` | clean-room install of the tarball, then the full journey against it |
-| `pnpm gate1` | clean machine → a verification record, one command, no browser |
-| `pnpm contact` | whether the addresses the site publishes can receive mail |
+|                                                         |                                                                     |
+| ------------------------------------------------------- | ------------------------------------------------------------------- |
+| `pnpm lint` · `pnpm typecheck`                          | the usual                                                           |
+| `pnpm test`                                             | 847 unit tests                                                      |
+| `pnpm contrast`                                         | every token pair against its WCAG requirement                       |
+| `pnpm domain`                                           | no business noun in generic code, across 26 directories             |
+| `pnpm e2e` · `pnpm a11y` · `pnpm visual` · `pnpm cross` | the interface                                                       |
+| `pnpm e2e:external`                                     | **a stranger connects their own system and their own agent**        |
+| `pnpm e2e:restart`                                      | SIGKILL survival, and a damaged file reported rather than dropped   |
+| `pnpm verify:package`                                   | clean-room install of the tarball, then the full journey against it |
+| `pnpm gate1`                                            | clean machine → a verification record, one command, no browser      |
+| `pnpm contact`                                          | whether the addresses the site publishes can receive mail           |
 
 Two of these matter more than the rest. `e2e:external` and `verify:package` measure whether somebody
 who has never seen this source can use RigorRun; everything else measures whether RigorRun works on

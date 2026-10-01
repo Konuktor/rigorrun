@@ -314,3 +314,37 @@ describe('the Stripe example’s commands', () => {
     expect(text).toContain('STRIPE_KEY=sk_test_twin STRIPE_BASE_URL=http://127.0.0.1:12112');
   });
 });
+
+describe('what the docs say about changing your agent', () => {
+  // "Unchanged" was not true as written: the agent needs an endpoint RigorRun
+  // can send a ticket to, and on the twin its Stripe address changes. What
+  // does not change is its code.
+  const PAGES = [
+    'README.md',
+    'packages/cli/README.md',
+    'apps/site/src/pages/index.astro',
+    'apps/site/src/pages/start.astro',
+    'apps/docs/src/content/docs/start/stripe.md',
+    'apps/docs/src/content/docs/agents/black-box.md',
+  ];
+
+  it('never call the agent "unchanged", and say what stays the same instead', async () => {
+    for (const page of PAGES) {
+      const text = await readFile(join(repoRoot, page), 'utf8');
+      expect(text, page).not.toMatch(/agent[^.\n]{0,40}\bunchanged|\bunchanged[^.\n]{0,20}agent/i);
+      expect(text, page).toMatch(/no (change to (your agent's|its) code|code changes)/i);
+    }
+  });
+
+  it('name the body template and the twin’s address wherever the Stripe path is set out', async () => {
+    for (const page of [
+      'README.md',
+      'packages/cli/README.md',
+      'apps/docs/src/content/docs/start/stripe.md',
+    ]) {
+      const text = await readFile(join(repoRoot, page), 'utf8');
+      expect(text, page).toContain('--body-template');
+      expect(text, page).toMatch(/base URL (points|at the twin)/);
+    }
+  });
+});

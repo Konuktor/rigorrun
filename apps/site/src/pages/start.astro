@@ -1,7 +1,7 @@
 ---
 /**
  * The founder's path, in the order it is walked: see a recording, try the
- * Stripe pack on the twin, move to test mode, connect the agent as it is, run
+ * Stripe pack on the twin, move to test mode, connect the agent with no code changes, run
  * the canary, gate, and put the gate in CI. The general path — your own
  * system through MCP, OpenAPI or a browser — follows it, unchanged.
  */
@@ -44,8 +44,8 @@ npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes`,
 npx rigorrun stripe init --key-env STRIPE_TEST_KEY`,
   },
   {
-    title: 'Point it at your agent, unchanged',
-    body: 'RigorRun posts each ticket to a URL your agent already serves, waits for its answer and records the sentence as the agent’s claim. Your agent talks to Stripe with its own key and never sees RigorRun’s. The example agent shows the whole contract in one file.',
+    title: 'Point it at your agent, no code changes',
+    body: 'RigorRun sends each ticket to the endpoint your agent already serves (map your request shape with --body-template), waits for its answer and records the sentence as the agent’s claim, then reads Stripe itself. Your agent keeps its own Stripe test key and never sees RigorRun’s — or, for the local twin, its Stripe base URL points at the twin. The example agent shows the whole contract in one file.',
     code: `npx rigorrun agent add --project <id> --name support \\
   --black-box http://127.0.0.1:8787/ --claim-path message`,
     link: { href: EXAMPLE_AGENT, label: 'The example Stripe support agent' },
@@ -93,7 +93,7 @@ const general = [
 
 <Base
   title="Get started"
-  description="Try RigorRun on a recorded run, then on your own Stripe support agent: a local Stripe twin with no keys, your Stripe test mode, your agent connected unchanged, a canary, a gate and a GitHub Action. Node 20.11 or newer; nothing to sign up for."
+  description="Try RigorRun on a recorded run, then on your own Stripe support agent: a local Stripe twin with no keys, your Stripe test mode, your agent connected with no code changes, a canary, a gate and a GitHub Action. Node 20.11 or newer; nothing to sign up for."
 >
   <Section>
     <div class="grid gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
