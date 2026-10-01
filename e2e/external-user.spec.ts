@@ -212,7 +212,7 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // A server's claim is shown as a claim, and a tool it said nothing about is
   // assumed to write.
-  await expect(page.getByText("server’s claim").first()).toBeVisible();
+  await expect(page.getByText('server’s claim').first()).toBeVisible();
   await evidence(page, 'tools-discovered');
   await expect(page.getByText('unknown').first()).toBeVisible();
   await expect(
@@ -437,7 +437,17 @@ test('a stranger connects their own system and their own agent, and gets a verdi
   const projectId = /#\/projects\/(p_[A-Za-z0-9_-]+)/.exec(page.url())?.[1];
   expect(projectId, 'the URL should name the project').toBeTruthy();
 
-  const gate = await runCli(['gate', '--project', projectId!, '--min-success', '0.95']);
+  // The project holds both agents by now, so the build server names the one it
+  // gates: with several agents RigorRun refuses to pick one for you.
+  const gate = await runCli([
+    'gate',
+    '--project',
+    projectId!,
+    '--agent',
+    'Booking agent (after a change)',
+    '--min-success',
+    '0.95',
+  ]);
   // 1, not 2: the agent missed the bar, and RigorRun could run the question.
   // A build server cannot tell those apart from prose, which is why the codes
   // are the contract.
