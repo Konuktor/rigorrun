@@ -1,0 +1,25 @@
+{
+  "create": {
+    "job": "create",
+    "home": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021740Z/homes/create",
+    "projectId": "p_3190587f1328",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path"
+    ],
+    "caseIds": [
+      "case_live__happy_path"
+    ],
+    "benchmarkSha256": "be1073b1174f5048bc238385105254e1444578497dc7387c7d7fbccb33abb248",
+    "productCommit": "655e0439d1460fb110151e567c6f4ad02b3bbe58",
+    "agents": {
+      "correct": "a_227ec4e9",
+      "wrong_value": "a_3df6e283",
+      "wrong_entity": "a_ce9d771e",
+      "did_nothing": "a_42030619",
+      "extra_note": "a_0f9c78c3",
+      "second_write": "a_c1e7dc00"
+    }
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "job": "create",
+  "spec": "specs/bb-create.template.json",
+  "exit": 0,
+  "seconds": 0.97,
+  "productCommit": "655e0439d1460fb110151e567c6f4ad02b3bbe58",
+  "branch": "wt/s4-blackbox",
+  "dirtyPaths": [
+    "reports/blackbox-qualification-2026-10/agents/blackbox_agent.py",
+    "reports/blackbox-qualification-2026-10/dev-log.md",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021418Z/REPORT.md",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021418Z/projects.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021418Z/release-gate.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021418Z/results.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021418Z/run.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021418Z/setup/update/setup.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/REPORT.md",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/projects.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/release-gate.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/results.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/run.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/setup/create/setup.json",
+    "reports/blackbox-qualification-2026-10/dev-runs/dev-20261001T021434Z/setup/update/setup.json",
+    "reports/blackbox-qualification-2026-10/run_bb.py",
+    "reports/blackbox-qualification-2026-10/specs/bb-create.template.json",
+    "reports/blackbox-qualification-2026-10/specs/bb-update.template.json"
+  ],
+  "at": "2026-10-01T02:17:41+00:00",
+  "summary": {
+    "projectId": "p_3190587f1328",
+    "readsProblem": "",
+    "readsIgnored": [],
+    "tools": 10,
+    "records": [
+      "Task",
+      "Note"
+    ],
+    "rules": {
+      "total": 0,
+      "confirmed": 0,
+      "rejected": 0
+    },
+    "cases": 1,
+    "quality": null,
+    "agents": [
+      {
+        "name": "bb-create-correct",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-wrong_value",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-wrong_entity",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-did_nothing",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-extra_note",
+        "ok": true,
+        "problem": ""
+      },
+      {
+        "name": "bb-create-second_write",
+        "ok": true,
+        "problem": ""
+      }
+    ]
+  },
+  "callsDuringSetup": 29,
+  "artefacts": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021740Z/setup/create",
+  "errorTail": [],
+  "suiteShape": [
+    "happy_path"
+  ],
+  "caseIds": [
+    "case_live__happy_path"
+  ],
+  "checks": {
+    "case_live__happy_path": [
+      {
+        "id": "success__performed",
+        "kind": "state_exists",
+        "severity": "success",
+        "source": "STATE"
+      },
+      {
+        "id": "success__exactly_as_demonstrated",
+        "kind": "state_equals",
+        "severity": "success",
+        "source": "STATE"
+      },
+      {
+        "id": "success__nothing_else_deleted",
+        "kind": "state_equals",
+        "severity": "success",
+        "source": "STATE"
+      },
+      {
+        "id": "frame__nothing_else_changed",
+        "kind": "state_frame",
+        "severity": "invariant",
+        "source": "STATE"
+      }
+    ]
+  },
+  "happyPath": {
+    "id": "case_live__happy_path",
+    "index": 0,
+    "instruction": "You are working in taskdesk2 black box: create one task, verified independently over tasks and notes. Create a task titled \"Order badges\"; change nothing else. Use the available tools to inspect the system before you act. Follow the policy below. If the policy does not permit this work, do not perform it \u2014 declining is a correct outcome. If it does, also carry out the steps the policy requires alongside the work itself. The work order that comes with this task carries its inputs; where the goal above names a different value, the work order takes precedence.",
+    "inputs": {
+      "title": "Order badges"
+    }
+  },
+  "agents": {
+    "bb-create-correct": {
+      "id": "a_227ec4e9",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47621/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-wrong_value": {
+      "id": "a_3df6e283",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47622/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-wrong_entity": {
+      "id": "a_ce9d771e",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47623/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-did_nothing": {
+      "id": "a_42030619",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47624/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-extra_note": {
+      "id": "a_0f9c78c3",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47625/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    },
+    "bb-create-second_write": {
+      "id": "a_c1e7dc00",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47626/",
+      "claimPath": "message",
+      "completion": "response",
+      "lastProbeOk": true
+    }
+  },
+  "validity": [],
+  "happyPathValid": true,
+  "ok": true
+}

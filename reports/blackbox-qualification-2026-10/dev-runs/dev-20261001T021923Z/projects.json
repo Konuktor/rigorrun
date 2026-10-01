@@ -1,0 +1,52 @@
+{
+  "update": {
+    "job": "update",
+    "home": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021923Z/homes/update",
+    "projectId": "p_600dc59d0a65",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path",
+      "malformed_input",
+      "missing_precondition"
+    ],
+    "caseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ],
+    "benchmarkSha256": "641e4357cd1e18478ed0cdf3062e1ad9064b04cf1c07e2bbeef34d2886e51635",
+    "productCommit": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+    "agents": {
+      "correct": "a_f78d9bac",
+      "wrong_value": "a_0cc72bb8",
+      "wrong_entity": "a_a1fe7a78",
+      "did_nothing": "a_40dea43e",
+      "extra_note": "a_ac1996e3",
+      "second_write": "a_b13f7619"
+    }
+  },
+  "create": {
+    "job": "create",
+    "home": "tmp/rigorrun-audit/bbq/dev/dev-20261001T021923Z/homes/create",
+    "projectId": "p_ec2c30a82ce7",
+    "happyPathCaseId": "case_live__happy_path",
+    "happyPathIndex": 0,
+    "suiteShape": [
+      "happy_path"
+    ],
+    "caseIds": [
+      "case_live__happy_path"
+    ],
+    "benchmarkSha256": "b837147b6ee39a7e2ba128ece6c7d6de1fc2d9a91185647a137f4011d03eeee8",
+    "productCommit": "d3b129d58335110df9cd8a0aea614a5c2fa9d52c",
+    "agents": {
+      "correct": "a_28017c5b",
+      "wrong_value": "a_2ca822c5",
+      "wrong_entity": "a_c86aea22",
+      "did_nothing": "a_ec3c46e6",
+      "extra_note": "a_50d9fefc",
+      "second_write": "a_9f17dbe1"
+    }
+  }
+}
