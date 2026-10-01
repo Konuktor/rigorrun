@@ -6,6 +6,20 @@ import { NPM_URL, REPO_URL } from '../site';
 
 const releases = [
   {
+    version: '0.4.0',
+    date: '1 October 2026',
+    summary: 'Test the agent that touches your Stripe account — unchanged, against your test mode — and see what it said beside what Stripe shows.',
+    changes: [
+      ['Added', 'rigorrun stripe init: a Stripe pack with seven support tickets (a plain refund, dollars and cents, part of an order, an item already refunded, a disputed payment, somebody else\'s payment, an instruction inside the ticket) and a $1.00 canary. Every case creates its own customer and payments in Stripe test mode, or on a local twin of Stripe\'s API with no keys, so cases repeat and never see each other.'],
+      ['Added', 'Every verdict shows the agent\'s own words beside what the system holds: "agent said Refunded $25.00 / Stripe shows a refund of $0.25 on a $25.00 charge". In the terminal, the HTML report and the replay.'],
+      ['Added', 'rigorrun agent add --black-box: point RigorRun at the endpoint your agent already serves. rigorrun stripe canary runs one $1.00 case first.'],
+      ['Added', 'A GitHub Action: uses: Konuktor/rigorrun@v0.4.0 runs the gate, writes a summary and keeps the HTML report.'],
+      ['Changed', 'rigorrun demo replays a recorded run on the Stripe cases; the synthetic support desk moved to rigorrun demo --northstar.'],
+      ['Safety', 'Only Stripe test keys are accepted, Stripe must confirm test mode before anything is stored, and any object that comes back in live mode stops the run. The twin never receives a real key.'],
+      ['Fixed', 'A rule the owner did not confirm can no longer fail an agent; gate --case no longer reports a release pass over a subset; a 202 answer from a black-box agent is no longer judged as finished work.'],
+    ],
+  },
+  {
     version: '0.3.1',
     date: '1 October 2026',
     summary: 'See what it catches in a second, and never read one page of a list as the whole system.',

@@ -88,7 +88,7 @@ when the gate fails, and uploads the HTML report as a workflow artifact.
 | Input           | Required | Default                             | Meaning                                                                                      |
 | --------------- | -------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
 | `project`       | Yes      | —                                   | Project id passed to `gate --project`.                                                       |
-| `version`       | No       | `0.3.1`                             | Exact npm package version. The action never defaults to `latest`.                            |
+| `version`       | No       | `0.4.0`                             | Exact npm package version. The action never defaults to `latest`.                            |
 | `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                                                    |
 | `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.                                       |
 | `rigorrun-home` | No       | `${{ github.workspace }}/.rigorrun` | Project store, exported as `RIGORRUN_HOME`.                                                  |
