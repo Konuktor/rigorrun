@@ -208,6 +208,7 @@ export class ExternalDriver {
                 instruction: input.task.instruction,
                 inputs: input.task.inputs,
                 policyBrief: input.task.policyBrief,
+                ...(input.task.principal ? { principal: input.task.principal } : {}),
               },
               mcpUrl,
               expiresAt: new Date(Date.now() + timeoutMs).toISOString(),

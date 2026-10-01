@@ -147,7 +147,9 @@ export class ProjectStore {
   }
 
   async has(id: string): Promise<boolean> {
-    return (await this.read(id).then(() => true).catch(() => false));
+    return await this.read(id)
+      .then(() => true)
+      .catch(() => false);
   }
 
   async write(project: Project): Promise<void> {
@@ -238,7 +240,10 @@ export class ProjectStore {
    */
   async secrets(): Promise<Record<string, string>> {
     const fromEnvironment = Object.entries(process.env)
-      .filter((entry): entry is [string, string] => entry[0].startsWith(SECRET_ENV_PREFIX) && Boolean(entry[1]))
+      .filter(
+        (entry): entry is [string, string] =>
+          entry[0].startsWith(SECRET_ENV_PREFIX) && Boolean(entry[1]),
+      )
       .map(([variable, value]) => [`env:${variable}`, value] as const);
     return { ...Object.fromEntries(fromEnvironment), ...(await this.secretStore.all()) };
   }

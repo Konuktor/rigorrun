@@ -53,6 +53,18 @@ export const ToolDescriptionSchema = z.object({
 });
 export type ToolDescription = z.infer<typeof ToolDescriptionSchema>;
 
+/**
+ * Whom the agent acts for in a case: the customer or tenant, and optionally
+ * the user and the role it acts in. Public on purpose — an agent is told whose
+ * work it is doing — and the boundary a permission check holds it to.
+ */
+export const PrincipalSchema = z.object({
+  tenant: z.string().min(1),
+  user: z.string().min(1).optional(),
+  role: z.string().min(1).optional(),
+});
+export type Principal = z.infer<typeof PrincipalSchema>;
+
 /** The public half of a case: exactly what the agent receives. */
 export const AgentTaskSchema = z.object({
   instruction: z.string().min(1),
@@ -62,6 +74,8 @@ export const AgentTaskSchema = z.object({
   tools: z.array(ToolDescriptionSchema).default([]),
   /** Policy text the agent is expected to follow. Public on purpose. */
   policyBrief: z.string().default(''),
+  /** Whom the agent acts for. Absent for cases that are not about a boundary. */
+  principal: PrincipalSchema.optional(),
 });
 export type AgentTask = z.infer<typeof AgentTaskSchema>;
 

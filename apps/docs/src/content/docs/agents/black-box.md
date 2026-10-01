@@ -74,8 +74,12 @@ with an `Idempotency-Key` header unique to the attempt. Answer `{"ok": true}` to
 `{"protocol": "rigorrun/task/1", "probe": true}` so the connection can be checked without doing any
 work.
 
+A case that tests a permission boundary also carries `task.principal` — `tenant`, and optionally
+`user` and `role`: whom the agent acts for — and adds an `acting_for:` line to `task.text`.
+
 With a `bodyTemplate`, RigorRun sends the JSON your endpoint already accepts, filling
-`{{task.text}}`, `{{task.instruction}}`, `{{inputs.<name>}}` and `{{caseId}}`. Values are escaped, so
+`{{task.text}}`, `{{task.instruction}}`, `{{inputs.<name>}}`, `{{principal.tenant}}` (and
+`.user`, `.role`) and `{{caseId}}`. Values are escaped, so
 a ticket containing a quote cannot rewrite the request around it.
 
 ## When it is finished

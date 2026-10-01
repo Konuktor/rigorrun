@@ -179,6 +179,21 @@ describe('the request', () => {
     });
   });
 
+  it('tells the agent whom it acts for, in the envelope, the text and a template', () => {
+    const acting = {
+      ...input,
+      task: { ...input.task, principal: { tenant: 'org_alder', role: 'support' } },
+    };
+    const envelope = taskEnvelope(acting);
+    expect(envelope.task.principal).toEqual({ tenant: 'org_alder', role: 'support' });
+    expect(envelope.task.text).toContain('acting_for: org_alder (role: support)');
+    expect(JSON.parse(renderBody('{"org": "{{principal.tenant}}"}', envelope))).toEqual({
+      org: 'org_alder',
+    });
+    // A case that names no principal sends none.
+    expect(taskEnvelope(input).task).not.toHaveProperty('principal');
+  });
+
   it('refuses a template naming something the case does not have', () => {
     expect(() => renderBody('{"x": "{{inputs.nothing}}"}', taskEnvelope(input))).toThrow(
       /does not have/,

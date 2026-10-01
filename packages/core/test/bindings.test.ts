@@ -59,6 +59,20 @@ function makeCase(overrides: Record<string, unknown> = {}): BenchmarkCase {
 }
 
 describe('bindCase', () => {
+  it('binds whom the agent acts for, and leaves a case without a principal without one', () => {
+    const withPrincipal = bindCase(
+      makeCase({
+        task: {
+          instruction: 'Handle {{bind:item}}.',
+          principal: { tenant: '{{bind:holder}}', role: 'support' },
+        },
+      }),
+      BINDINGS,
+    );
+    expect(withPrincipal.task.principal).toEqual({ tenant: BINDINGS.holder, role: 'support' });
+    expect(bindCase(makeCase(), BINDINGS).task.principal).toBeUndefined();
+  });
+
   it('binds the task the agent reads, whatever the values contain', () => {
     const bound = bindCase(makeCase(), BINDINGS);
     expect(bound.task.instruction).toBe(

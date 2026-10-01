@@ -150,6 +150,7 @@ export function createHttpV2Agent(config: HttpV2AgentConfig): AgentAdapter {
               instruction: input.task.instruction,
               inputs: input.task.inputs,
               policyBrief: input.task.policyBrief,
+              ...(input.task.principal ? { principal: input.task.principal } : {}),
             },
             environment: { mcpUrl, expiresAt },
             maxSteps: input.maxSteps,
@@ -178,7 +179,8 @@ export function createHttpV2Agent(config: HttpV2AgentConfig): AgentAdapter {
           report: parsed.data.output || `The agent reported ${parsed.data.status}.`,
           usage: parsed.data.usage ?? null,
           costUsd: parsed.data.costUsd ?? null,
-          costNote: parsed.data.costUsd === undefined ? 'cost unavailable' : 'reported by the agent',
+          costNote:
+            parsed.data.costUsd === undefined ? 'cost unavailable' : 'reported by the agent',
         };
       } catch (error) {
         // A timeout is a result, not a crash: an agent that never finishes has

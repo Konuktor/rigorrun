@@ -54,7 +54,10 @@ function outcome(result: CaseResult) {
 }
 
 /** Worse in any dimension is a regression, even if another improved. */
-function movementOf(before: CaseResult, after: CaseResult): { movement: CaseMovement; detail: string } {
+function movementOf(
+  before: CaseResult,
+  after: CaseResult,
+): { movement: CaseMovement; detail: string } {
   const worse: string[] = [];
   const better: string[] = [];
 
