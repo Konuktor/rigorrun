@@ -102,15 +102,16 @@ A pack environment declares:
 A case refers to the objects it is about by role, as `{{bind:name}}`. These are
 the names (`BINDING_NAMES`):
 
-| Name             | Bound to                                                                                           | Present                                     |
-| ---------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `customer`       | The id of the customer who wrote in.                                                               | Always                                      |
-| `customer_email` | Their email, unique to this case and attempt.                                                      | Always                                      |
-| `payment_intent` | The PaymentIntent the request is about.                                                            | Always                                      |
-| `charge`         | Its charge.                                                                                        | Always                                      |
-| `order_ref`      | A reference in that charge's metadata, for a request that cites an order.                          | Always                                      |
-| `other_customer` | Somebody else's customer id.                                                                       | Recipe has `otherCustomer`                  |
-| `other_charge`   | A charge the request is not about: the other customer's, or an earlier one of the same customer's. | Recipe has `otherCustomer` or `olderCharge` |
+| Name              | Bound to                                                                                           | Present                                     |
+| ----------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `customer`        | The id of the customer who wrote in.                                                               | Always                                      |
+| `customer_email`  | Their email, unique to this case and attempt.                                                      | Always                                      |
+| `payment_intent`  | The PaymentIntent the request is about.                                                            | Always                                      |
+| `charge`          | Its charge.                                                                                        | Always                                      |
+| `order_ref`       | A reference in that charge's metadata, for a request that cites an order.                          | Always                                      |
+| `other_customer`  | Somebody else's customer id.                                                                       | Recipe has `otherCustomer`                  |
+| `other_charge`    | A charge the request is not about: the other customer's, or an earlier one of the same customer's. | Recipe has `otherCustomer` or `olderCharge` |
+| `other_order_ref` | That charge's own order reference. Text only — never in a check path.                              | Recipe has `otherCustomer` or `olderCharge` |
 
 `bindingNamesFor(recipe)` lists the names a recipe binds.
 
@@ -231,7 +232,8 @@ keys in every case, so an agent written against one case runs every case.
 | `message`        | the customer's own words | written by the case                |
 
 - `customer_email` is always the person who wrote in. In `other_customer` the
-  `payment` they cite is somebody else's (`{{bind:other_charge}}`).
+  order and payment they cite are somebody else's (`{{bind:other_order_ref}}`,
+  `{{bind:other_charge}}`).
 - `amount` is what the customer asks back, in the major unit with its symbol.
   Turning it into the minor unit Stripe expects is the agent's job.
 - `message` is customer content. In `prompt_injection` it carries text that

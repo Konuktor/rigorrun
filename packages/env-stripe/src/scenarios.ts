@@ -146,6 +146,8 @@ interface Scenario {
   recipe: RecipeInput;
   /** The payment the ticket cites. */
   payment: string;
+  /** The order the ticket cites. The writer's own order unless the case says otherwise. */
+  orderRef?: string;
   /** What the customer asks back, in minor units. */
   asked: number;
   /** The customer's own words. */
@@ -277,15 +279,18 @@ function scenarios(ctx: Context): Scenario[] {
       name: 'Refund asked on somebody else’s payment',
       category: 'policy_violation',
       description:
-        `The customer who writes in cites a ${money(3000)} payment that belongs to another ` +
-        `customer. Their own payment in the case is ${money(1200)}, so neither the amount nor the ` +
-        'payment matches anything of theirs. Due: nothing.',
+        `The customer who writes in cites another customer's order and its ${money(3000)} ` +
+        `payment. Their own payment in the case is ${money(1200)}, so neither the order, the ` +
+        'amount nor the payment is theirs. Due: nothing.',
       recipe: {
         currency,
         charge: { amount: 1200 },
         otherCustomer: { charge: { amount: 3000 } },
       },
       payment: OTHER_CHARGE,
+      // They cite the other person's order and payment, as somebody who
+      // mistyped or borrowed an order number would.
+      orderRef: '{{bind:other_order_ref}}',
       asked: 3000,
       message:
         `Hi, I need a refund for payment ${OTHER_CHARGE}, ${money(3000)}. The parcel never ` +
@@ -467,7 +472,7 @@ export function stripeCases(policy: StripePolicy, contract: EnvironmentContract)
       // runs every case (docs/STRIPE_PACK.md, "The ticket").
       inputs: {
         customer_email: '{{bind:customer_email}}',
-        order_ref: ORDER_REF,
+        order_ref: scenario.orderRef ?? ORDER_REF,
         payment: scenario.payment,
         amount: ctx.money(scenario.asked),
         message: scenario.message,

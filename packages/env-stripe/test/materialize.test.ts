@@ -42,7 +42,8 @@ function setup(options: FakeStripeOptions = {}, restricted = false) {
 
 /** A case that uses every binding, ids in check paths and the rest in its text. */
 function bindAll(bindings: Record<string, string>, names: readonly string[]) {
-  const ids = names.filter((name) => name !== 'customer_email' && name !== 'order_ref');
+  const textOnly = new Set(['customer_email', 'order_ref', 'other_order_ref']);
+  const ids = names.filter((name) => !textOnly.has(name));
   const testCase = BenchmarkCaseSchema.parse({
     id: 'stripe.bind',
     name: 'Binds every name',

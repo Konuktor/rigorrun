@@ -38,6 +38,7 @@ export const BINDING_NAMES = [
   'order_ref',
   'other_customer',
   'other_charge',
+  'other_order_ref',
 ] as const;
 export type BindingName = (typeof BINDING_NAMES)[number];
 
@@ -124,6 +125,10 @@ export function bindingNamesFor(recipe: Recipe): BindingName[] {
   return BINDING_NAMES.filter((name) => {
     if (name === 'other_customer') return recipe.otherCustomer !== undefined;
     if (name === 'other_charge')
+      return recipe.otherCustomer !== undefined || recipe.olderCharge !== undefined;
+    // The other payment's own order reference, so a ticket can cite it the way
+    // a person would: by the order, not by a payment id.
+    if (name === 'other_order_ref')
       return recipe.otherCustomer !== undefined || recipe.olderCharge !== undefined;
     return true;
   });

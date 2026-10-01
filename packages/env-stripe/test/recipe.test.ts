@@ -72,12 +72,12 @@ describe('a recipe', () => {
     expect(bindingNamesFor(parseRecipe({ charge: { amount: 1 } }))).toEqual(base);
     expect(
       bindingNamesFor(parseRecipe({ charge: { amount: 1 }, olderCharge: { amount: 1 } })),
-    ).toEqual([...base, 'other_charge']);
+    ).toEqual([...base, 'other_charge', 'other_order_ref']);
     expect(
       bindingNamesFor(
         parseRecipe({ charge: { amount: 1 }, otherCustomer: { charge: { amount: 1 } } }),
       ),
-    ).toEqual([...base, 'other_customer', 'other_charge']);
+    ).toEqual([...base, 'other_customer', 'other_charge', 'other_order_ref']);
     // Every name is one a check path can carry, by the binding rules in core.
     for (const name of BINDING_NAMES) expect(name).toMatch(/^[A-Za-z0-9_]+$/);
   });

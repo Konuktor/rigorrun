@@ -167,8 +167,10 @@ export async function materializeCase(
   if (other) {
     bindings['other_customer'] = other.customer.id;
     bindings['other_charge'] = other.payment.charge.id;
+    bindings['other_order_ref'] = other.payment.orderRef;
   } else if (older) {
     bindings['other_charge'] = older.charge.id;
+    bindings['other_order_ref'] = older.orderRef;
   }
   assertBindings(recipe, bindings, ctx);
 
@@ -402,7 +404,7 @@ function assertBindings(
   bindings: Record<string, string>,
   ctx: PackCaseContext,
 ): void {
-  const textOnly = new Set(['customer_email', 'order_ref']);
+  const textOnly = new Set(['customer_email', 'order_ref', 'other_order_ref']);
   for (const name of bindingNamesFor(recipe)) {
     const value = bindings[name];
     if (value === undefined || value === '') {

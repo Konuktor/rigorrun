@@ -63,6 +63,7 @@ const REALISTIC: Record<string, string> = {
   order_ref: 'RR-ORD-3F9C2A',
   other_customer: 'cus_Rb8Mn3OqB5cD0e',
   other_charge: 'ch_3QzYxWvUtSrQpOnMlKjIhGf',
+  other_order_ref: 'RR-ORD-7B1E04',
 };
 
 /** Binds a case with exactly the names the pack would bind for its recipe. */
@@ -226,7 +227,9 @@ describe('the suite', () => {
         ['amount', 'customer_email', 'message', 'order_ref', 'payment'].sort(),
       );
       expect(task.inputs['customer_email']).toBe('{{bind:customer_email}}');
-      expect(task.inputs['order_ref']).toBe('{{bind:order_ref}}');
+      expect(task.inputs['order_ref']).toBe(
+        testCase.id === 'other_customer' ? '{{bind:other_order_ref}}' : '{{bind:order_ref}}',
+      );
       expect(task.inputs['payment']).toBe(
         testCase.id === 'other_customer' ? '{{bind:other_charge}}' : '{{bind:charge}}',
       );

@@ -208,6 +208,7 @@ function materialize(caseId: string, recipe: Recipe, attempt = 0): Built {
       status: 'succeeded',
     });
     bindings.other_charge = other;
+    bindings.other_order_ref = `${orderRef}-OTHER`;
   };
   if (recipe.olderCharge) otherPayment(customer, recipe.olderCharge.amount);
   if (recipe.otherCustomer) {
