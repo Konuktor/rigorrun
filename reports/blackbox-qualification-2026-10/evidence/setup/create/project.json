@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "id": "p_9dbf7981abaf",
+  "name": "taskdesk2 black box: create one task, verified independently over tasks and notes",
+  "goal": "Create a task titled \"Order badges\"; change nothing else.",
+  "connector": {
+    "kind": "mcp",
+    "transport": "stdio",
+    "command": "/usr/bin/python3",
+    "args": [
+      "/home/erbol/RigorRun-dev/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_server.py",
+      "--db",
+      "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/rq-io2-state/desk.db",
+      "--faults",
+      "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/rq-io2-state/faults.json",
+      "--shadow",
+      "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/rq-io2-state/shadow.json",
+      "--calls-log",
+      "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/bbq/counted/rigorrun-calls.log"
+    ],
+    "url": "",
+    "auth": "header",
+    "secretNames": [],
+    "verifier": {
+      "kind": "mcp",
+      "transport": "stdio",
+      "command": "/usr/bin/python3",
+      "args": [
+        "/home/erbol/RigorRun-dev/reports/public-mcp-audit-2026-09/requalification-v3/io-v2/taskdesk2_oracle_server.py",
+        "--db",
+        "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/rq-io2-state/desk.db",
+        "--down-flag",
+        "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/rq-io2-state/oracle-down.flag",
+        "--empty-flag",
+        "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/rq-io2-state/oracle-empty.flag",
+        "--calls-log",
+        "/home/erbol/RigorRun-dev/tmp/rigorrun-audit/bbq/counted/rigorrun-calls.log"
+      ],
+      "url": "",
+      "auth": "header",
+      "secretNames": []
+    }
+  },
+  "safety": "local",
+  "readOnlyTools": [
+    "list_tasks",
+    "list_notes",
+    "verifier:query_tasks",
+    "verifier:query_notes"
+  ],
+  "verifierReads": [
+    {
+      "tool": "verifier:query_tasks",
+      "args": {}
+    },
+    {
+      "tool": "verifier:query_notes",
+      "args": {}
+    }
+  ],
+  "budgets": {
+    "toolCallMs": 20000,
+    "caseMs": 60000
+  },
+  "reset": {
+    "kind": "none",
+    "tool": ""
+  },
+  "schemaAnswers": [
+    {
+      "questionId": "q_name_Task",
+      "value": "Task"
+    },
+    {
+      "questionId": "q_id_Task",
+      "value": "id"
+    },
+    {
+      "questionId": "q_role_Task_title",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Task_title",
+      "value": "no"
+    },
+    {
+      "questionId": "q_role_Task_status",
+      "value": "status"
+    },
+    {
+      "questionId": "q_name_Note",
+      "value": "Note"
+    },
+    {
+      "questionId": "q_id_Note",
+      "value": "id"
+    },
+    {
+      "questionId": "q_unit_Note_task_id",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_task_id",
+      "value": "identifier"
+    },
+    {
+      "questionId": "q_role_Note_body",
+      "value": "freetext"
+    },
+    {
+      "questionId": "q_untrusted_Note_body",
+      "value": "no"
+    },
+    {
+      "questionId": "q_unit_Note_seen",
+      "value": "count"
+    },
+    {
+      "questionId": "q_role_Note_seen",
+      "value": "quantity"
+    },
+    {
+      "questionId": "q_rel_Note_task_id",
+      "value": "optional"
+    }
+  ],
+  "agents": [
+    {
+      "id": "a_75e914e3",
+      "name": "bb-create-correct",
+      "lastProbeAt": "2026-10-01T09:52:59.643Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47621/",
+      "headers": {},
+      "bodyTemplate": null,
+      "completion": "response",
+      "claimPath": "message",
+      "allowedHosts": [],
+      "remoteConfirmedAt": "2026-10-01T09:52:59.643Z",
+      "settleQuietMs": 5000
+    },
+    {
+      "id": "a_ec96064f",
+      "name": "bb-create-wrong_value",
+      "lastProbeAt": "2026-10-01T09:52:59.659Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47622/",
+      "headers": {},
+      "bodyTemplate": null,
+      "completion": "response",
+      "claimPath": "message",
+      "allowedHosts": [],
+      "remoteConfirmedAt": "2026-10-01T09:52:59.659Z",
+      "settleQuietMs": 5000
+    },
+    {
+      "id": "a_163b31eb",
+      "name": "bb-create-wrong_entity",
+      "lastProbeAt": "2026-10-01T09:52:59.665Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47623/",
+      "headers": {},
+      "bodyTemplate": null,
+      "completion": "response",
+      "claimPath": "message",
+      "allowedHosts": [],
+      "remoteConfirmedAt": "2026-10-01T09:52:59.665Z",
+      "settleQuietMs": 5000
+    },
+    {
+      "id": "a_497fa570",
+      "name": "bb-create-did_nothing",
+      "lastProbeAt": "2026-10-01T09:52:59.669Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47624/",
+      "headers": {},
+      "bodyTemplate": null,
+      "completion": "response",
+      "claimPath": "message",
+      "allowedHosts": [],
+      "remoteConfirmedAt": "2026-10-01T09:52:59.669Z",
+      "settleQuietMs": 5000
+    },
+    {
+      "id": "a_3f443ee2",
+      "name": "bb-create-extra_note",
+      "lastProbeAt": "2026-10-01T09:52:59.674Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": "",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47625/",
+      "headers": {},
+      "bodyTemplate": null,
+      "completion": "response",
+      "claimPath": "message",
+      "allowedHosts": [],
+      "remoteConfirmedAt": "2026-10-01T09:52:59.674Z",
+      "settleQuietMs": 5000
+    },
+    {
+      "id": "a_66a6b6ca",
+      "name": "bb-create-second_write",
+      "kind": "blackbox",
+      "endpoint": "http://127.0.0.1:47626/",
+      "headers": {},
+      "bodyTemplate": null,
+      "completion": "response",
+      "claimPath": "message",
+      "allowedHosts": [],
+      "remoteConfirmedAt": "2026-10-01T09:52:59.679Z",
+      "settleQuietMs": 5000,
+      "lastProbeAt": "2026-10-01T09:52:59.679Z",
+      "lastProbeOk": true,
+      "lastProbeProblem": ""
+    }
+  ],
+  "runs": [],
+  "timings": {
+    "createdAt": "2026-10-01T09:52:59.458Z",
+    "environmentConnectedAt": "2026-10-01T09:52:59.574Z",
+    "workflowRecordedAt": "2026-10-01T09:52:59.611Z",
+    "benchmarkGeneratedAt": "2026-10-01T09:52:59.641Z",
+    "agentConnectedAt": "2026-10-01T09:52:59.655Z",
+    "firstVerdictAt": null
+  },
+  "baselineRunId": null,
+  "connectorTrust": {
+    "origin": "typed",
+    "confirmedAt": null
+  }
+}

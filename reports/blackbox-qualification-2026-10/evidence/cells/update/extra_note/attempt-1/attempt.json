@@ -1,0 +1,296 @@
+{
+  "job": "update",
+  "agent": "bb-update-extra_note",
+  "behaviour": "extra_note",
+  "attempt": 1,
+  "rerun": false,
+  "mode": "counted",
+  "devRun": null,
+  "productCommit": "80f53415257947c94716ec63734d61158f495172",
+  "at": "2026-10-01T09:53:18+00:00",
+  "seconds": 1.33,
+  "expected": "FAIL",
+  "oracleVerdict": "FAIL",
+  "oracleProblems": [
+    "notes differ from the seed"
+  ],
+  "oracleMatchesExpected": true,
+  "rigorrunOutcome": "FAIL",
+  "label": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "harnessFailures": [],
+  "gate5": {
+    "observation": "state-only",
+    "evidenceIndependence": "INDEPENDENT",
+    "runLimitNoCallTrace": "Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. Every check on what the system holds afterwards was, on a reading the agent never touched.",
+    "callOrderChecks": [],
+    "callOrderChecksNotMade": [],
+    "callOrderChecksMade": [],
+    "stateChecks": [
+      "success__performed",
+      "success__exactly_as_demonstrated",
+      "success__nothing_else_deleted",
+      "success__nothing_else_created",
+      "frame__nothing_else_changed"
+    ],
+    "holds": true
+  },
+  "selection": {
+    "happyPathCaseId": "case_live__happy_path",
+    "index": 0,
+    "runCaseIds": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ]
+  },
+  "rigorrun": {
+    "exit": 1,
+    "runId": "run_591b71fb6d66",
+    "verification": "PARTIAL",
+    "limits": [
+      "partial_state_read",
+      "no_reset",
+      "no_seed",
+      "induced_schema",
+      "no_call_trace",
+      "suite_quality_unassessed"
+    ],
+    "outcomeReason": "nothing changed beyond what the demonstration changed, for any kind of record \u2014 outside what the demonstration changed: 1 Note record(s) created, where the demonstration created 0",
+    "agentReport": "Done.",
+    "baseline": "OBSERVED_AT_START",
+    "missingEvidence": [],
+    "steps": 0,
+    "actions": 0,
+    "assertions": [
+      {
+        "id": "success__performed",
+        "kind": "state_exists",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "a changed Task record where id is 2 and status is done exists, as required"
+      },
+      {
+        "id": "success__exactly_as_demonstrated",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.changed.Task.length equals the expected value"
+      },
+      {
+        "id": "success__nothing_else_deleted",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.deleted.Task.length equals the expected value"
+      },
+      {
+        "id": "success__nothing_else_created",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.created.Task.length equals the expected value"
+      },
+      {
+        "id": "frame__nothing_else_changed",
+        "kind": "state_frame",
+        "source": "STATE",
+        "status": "FAIL",
+        "blocking": true,
+        "message": "outside what the demonstration changed: 1 Note record(s) created, where the demonstration created 0"
+      }
+    ],
+    "otherCases": [
+      {
+        "caseId": "case_live__malformed__id",
+        "category": "malformed_input",
+        "outcome": "FAIL"
+      },
+      {
+        "caseId": "case_live__unknown_id__id",
+        "category": "missing_precondition",
+        "outcome": "FAIL"
+      }
+    ],
+    "errorTail": []
+  },
+  "state": {
+    "beforeIsSeed": true,
+    "qualifiedCaseChangesFromSeed": {
+      "tasks": {
+        "created": [],
+        "changed": [
+          {
+            "before": {
+              "id": 2,
+              "title": "Book venue",
+              "status": "open"
+            },
+            "after": {
+              "id": 2,
+              "status": "done",
+              "title": "Book venue"
+            }
+          }
+        ],
+        "deleted": []
+      },
+      "notes": {
+        "created": [
+          {
+            "body": "Unrelated: the office plants need watering",
+            "id": 4,
+            "seen": 0,
+            "task_id": 3
+          }
+        ],
+        "changed": [],
+        "deleted": []
+      }
+    },
+    "wholeRunOracleVerdict": "FAIL",
+    "wholeRunChangesFromSeed": {
+      "tasks": {
+        "created": [],
+        "changed": [
+          {
+            "before": {
+              "id": 2,
+              "title": "Book venue",
+              "status": "open"
+            },
+            "after": {
+              "id": 2,
+              "status": "done",
+              "title": "Book venue"
+            }
+          }
+        ],
+        "deleted": []
+      },
+      "notes": {
+        "created": [
+          {
+            "body": "Unrelated: the office plants need watering",
+            "id": 4,
+            "seen": 0,
+            "task_id": 3
+          },
+          {
+            "body": "Unrelated: the office plants need watering",
+            "id": 5,
+            "seen": 0,
+            "task_id": 3
+          },
+          {
+            "body": "Unrelated: the office plants need watering",
+            "id": 6,
+            "seen": 0,
+            "task_id": 3
+          }
+        ],
+        "changed": [],
+        "deleted": []
+      }
+    }
+  },
+  "agentTrace": {
+    "caseId": "case_live__happy_path",
+    "calls": [
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 2,
+          "status": "done"
+        },
+        "ok": true,
+        "result": {
+          "task": {
+            "id": 2,
+            "title": "Book venue",
+            "status": "done"
+          }
+        }
+      },
+      {
+        "tool": "create_note",
+        "args": {
+          "task_id": 3,
+          "body": "Unrelated: the office plants need watering"
+        },
+        "ok": true,
+        "result": {
+          "note": {
+            "id": 4,
+            "task_id": 3,
+            "body": "Unrelated: the office plants need watering",
+            "seen": 0
+          }
+        }
+      }
+    ],
+    "problems": [],
+    "tasksReceived": [
+      "case_live__happy_path",
+      "case_live__malformed__id",
+      "case_live__unknown_id__id"
+    ]
+  },
+  "serverCalls": {
+    "rigorrunConnectorCalls": [],
+    "verifierAnswered": {
+      "query_tasks": 13,
+      "query_notes": 13
+    },
+    "agentConnectionCalls": [
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 2,
+          "status": "done"
+        }
+      },
+      {
+        "tool": "create_note",
+        "args": {
+          "task_id": 3,
+          "body": "Unrelated: the office plants need watering"
+        }
+      },
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 2,
+          "status": "done"
+        }
+      },
+      {
+        "tool": "create_note",
+        "args": {
+          "task_id": 3,
+          "body": "Unrelated: the office plants need watering"
+        }
+      },
+      {
+        "tool": "update_task",
+        "args": {
+          "id": 2,
+          "status": "done"
+        }
+      },
+      {
+        "tool": "create_note",
+        "args": {
+          "task_id": 3,
+          "body": "Unrelated: the office plants need watering"
+        }
+      }
+    ]
+  },
+  "verifierOnly": true,
+  "evidenceDir": "reports/blackbox-qualification-2026-10/evidence/cells/update/extra_note/attempt-1"
+}

@@ -1,0 +1,49 @@
+{
+  "qualification": "black-box mode (rigorrun/task/1), PREREGISTRATION.md + AMENDMENT-1.md",
+  "mode": "counted",
+  "id": "counted",
+  "outcome": "GO",
+  "stageValid": true,
+  "productCommit": "80f53415257947c94716ec63734d61158f495172",
+  "cellsComplete": true,
+  "productUnchanged": true,
+  "gates": {
+    "1_FN_is_0": {
+      "holds": true,
+      "FN": 0,
+      "cells": []
+    },
+    "2_FP_is_0": {
+      "holds": true,
+      "FP": 0,
+      "cells": []
+    },
+    "3_no_abstain_no_harness_failure": {
+      "holds": true,
+      "ABSTAIN": 0,
+      "HARNESS_FAILURE": 0,
+      "byKind": {},
+      "cells": [],
+      "reruns": []
+    },
+    "4_oracle_equals_expected": {
+      "holds": true,
+      "mismatches": []
+    },
+    "5_state_only_independent_unmade_call_order_listed": {
+      "holds": true,
+      "verdicts": 36,
+      "failing": [],
+      "observations": [
+        "state-only"
+      ],
+      "evidenceIndependence": [
+        "INDEPENDENT"
+      ],
+      "callOrderChecksNotMade": [],
+      "callOrderChecksMade": [],
+      "runLimitNoCallTraceOnEvery": true
+    }
+  },
+  "generatedAt": "2026-10-01T09:53:47+00:00"
+}

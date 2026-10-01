@@ -1,0 +1,179 @@
+{
+  "job": "create",
+  "agent": "bb-create-wrong_value",
+  "behaviour": "wrong_value",
+  "attempt": 1,
+  "rerun": false,
+  "mode": "counted",
+  "devRun": null,
+  "productCommit": "80f53415257947c94716ec63734d61158f495172",
+  "at": "2026-10-01T09:53:30+00:00",
+  "seconds": 1.04,
+  "expected": "FAIL",
+  "oracleVerdict": "FAIL",
+  "oracleProblems": [
+    "the new task is {'id': 4, 'status': 'open', 'title': 'Order lanyards'}, not 'Order badges' open"
+  ],
+  "oracleMatchesExpected": true,
+  "rigorrunOutcome": "FAIL",
+  "label": "FAIL",
+  "classification": "TRUE_POSITIVE",
+  "harnessFailures": [],
+  "gate5": {
+    "observation": "state-only",
+    "evidenceIndependence": "INDEPENDENT",
+    "runLimitNoCallTrace": "Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. Every check on what the system holds afterwards was, on a reading the agent never touched.",
+    "callOrderChecks": [],
+    "callOrderChecksNotMade": [],
+    "callOrderChecksMade": [],
+    "stateChecks": [
+      "success__performed",
+      "success__exactly_as_demonstrated",
+      "success__nothing_else_deleted",
+      "frame__nothing_else_changed"
+    ],
+    "holds": true
+  },
+  "selection": {
+    "happyPathCaseId": "case_live__happy_path",
+    "index": 0,
+    "runCaseIds": [
+      "case_live__happy_path"
+    ]
+  },
+  "rigorrun": {
+    "exit": 1,
+    "runId": "run_8b16585b1c43",
+    "verification": "PARTIAL",
+    "limits": [
+      "partial_state_read",
+      "no_reset",
+      "no_seed",
+      "induced_schema",
+      "no_call_trace",
+      "suite_quality_unassessed"
+    ],
+    "outcomeReason": "the requested work was actually performed \u2014 no new Task record where title is Order badges; one was required",
+    "agentReport": "Done.",
+    "baseline": "OBSERVED_AT_START",
+    "missingEvidence": [],
+    "steps": 0,
+    "actions": 0,
+    "assertions": [
+      {
+        "id": "success__performed",
+        "kind": "state_exists",
+        "source": "STATE",
+        "status": "FAIL",
+        "blocking": true,
+        "message": "no new Task record where title is Order badges; one was required"
+      },
+      {
+        "id": "success__exactly_as_demonstrated",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.created.Task.length equals the expected value"
+      },
+      {
+        "id": "success__nothing_else_deleted",
+        "kind": "state_equals",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "derived.deleted.Task.length equals the expected value"
+      },
+      {
+        "id": "frame__nothing_else_changed",
+        "kind": "state_frame",
+        "source": "STATE",
+        "status": "PASS",
+        "blocking": true,
+        "message": "nothing changed beyond what the demonstration changed"
+      }
+    ],
+    "otherCases": [],
+    "errorTail": []
+  },
+  "state": {
+    "beforeIsSeed": true,
+    "qualifiedCaseChangesFromSeed": {
+      "tasks": {
+        "created": [
+          {
+            "id": 4,
+            "status": "open",
+            "title": "Order lanyards"
+          }
+        ],
+        "changed": [],
+        "deleted": []
+      },
+      "notes": {
+        "created": [],
+        "changed": [],
+        "deleted": []
+      }
+    },
+    "wholeRunOracleVerdict": "FAIL",
+    "wholeRunChangesFromSeed": {
+      "tasks": {
+        "created": [
+          {
+            "id": 4,
+            "status": "open",
+            "title": "Order lanyards"
+          }
+        ],
+        "changed": [],
+        "deleted": []
+      },
+      "notes": {
+        "created": [],
+        "changed": [],
+        "deleted": []
+      }
+    }
+  },
+  "agentTrace": {
+    "caseId": "case_live__happy_path",
+    "calls": [
+      {
+        "tool": "create_task",
+        "args": {
+          "title": "Order lanyards"
+        },
+        "ok": true,
+        "result": {
+          "task": {
+            "id": 4,
+            "title": "Order lanyards",
+            "status": "open"
+          }
+        }
+      }
+    ],
+    "problems": [],
+    "tasksReceived": [
+      "case_live__happy_path"
+    ]
+  },
+  "serverCalls": {
+    "rigorrunConnectorCalls": [],
+    "verifierAnswered": {
+      "query_tasks": 5,
+      "query_notes": 5
+    },
+    "agentConnectionCalls": [
+      {
+        "tool": "create_task",
+        "args": {
+          "title": "Order lanyards"
+        }
+      }
+    ]
+  },
+  "verifierOnly": true,
+  "evidenceDir": "reports/blackbox-qualification-2026-10/evidence/cells/create/wrong_value/attempt-1"
+}
