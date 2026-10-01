@@ -336,8 +336,10 @@ describe('--case on a project run', () => {
       '--after-case',
       hook,
     );
-    expect(gate.code, gate.out + gate.err).toBe(0);
+    // Two of the suite's cases, both passed: shown, but never a release PASS.
+    expect(gate.code, gate.out + gate.err).toBe(3);
     expect(gate.out).toContain('Ran 2 of the suite');
+    expect(gate.out).toMatch(/gate over 2 of 3 cases is not a release verdict; run without --case/);
 
     const lines = (await readFile(seen, 'utf8'))
       .trim()

@@ -118,6 +118,7 @@ RUN / GATE OPTIONS
                                 An id the suite does not have stops the run
                                 before it starts; the result says which cases
                                 it covered, and never becomes the baseline.
+                                gate over some cases is never a PASS: exit 3.
       --after-case <program>    Run a program (a path or a name; no shell, no
                                 arguments) after each case has finished and
                                 before the next starts, outside the case budget.
@@ -154,7 +155,7 @@ EXAMPLES
   rigorrun projects
   rigorrun run --project p_1a2b3c
   rigorrun gate --project p_1a2b3c --min-success 0.95
-  rigorrun gate --project p_1a2b3c --case case_one
+  rigorrun run --project p_1a2b3c --case case_one
   rigorrun stripe twin                         then, in another terminal:
   rigorrun stripe init --twin --yes
   rigorrun agent add --project p_1a2b3c --black-box http://127.0.0.1:8080/task

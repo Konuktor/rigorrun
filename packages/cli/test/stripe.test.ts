@@ -742,6 +742,146 @@ describe('an agent that answers 202 Accepted', () => {
   });
 });
 
+/** Refunds whatever is left on the payment the ticket names, whatever it asks for. */
+function alwaysFullAgent(): Promise<string> {
+  return new Promise((resolve) => {
+    const server = createServer((req, res) => {
+      let text = '';
+      req.on('data', (chunk) => (text += chunk));
+      req.on('end', async () => {
+        const body = JSON.parse(text) as {
+          probe?: boolean;
+          task?: { inputs: Record<string, string> };
+        };
+        res.writeHead(200, { 'content-type': 'application/json' });
+        if (body.probe) return res.end(JSON.stringify({ ok: true }));
+        await fetch(`${twin.url}/v1/refunds`, {
+          method: 'POST',
+          headers: {
+            authorization: 'Bearer sk_test_agent_own_key',
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({ charge: body.task!.inputs['payment']! }).toString(),
+        });
+        res.end(JSON.stringify({ message: 'Refunded in full.' }));
+      });
+    });
+    servers.push(server);
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      resolve(`http://127.0.0.1:${typeof address === 'object' && address ? address.port : 0}/`);
+    });
+  });
+}
+
+describe('gate --case', () => {
+  it('is never a release PASS for an agent the omitted cases would fail', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    const url = await alwaysFullAgent();
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'full',
+      '--black-box',
+      url,
+      '--home',
+      home,
+    );
+    const gate = (...extra: string[]) =>
+      cli('gate', '--project', projectId, '--agent', 'full', '--home', home, ...extra);
+
+    // full_refund alone: the agent passes it, and fails partial, which did not run.
+    const subset = await gate('--case', 'full_refund');
+    expect(subset.code, subset.out).toBe(3);
+    expect(subset.out).toContain(
+      'gate over 1 of 8 cases is not a release verdict; run without --case',
+    );
+    expect(subset.out).not.toMatch(/^PASS$/m);
+
+    const json = await gate('--case', 'full_refund', '--json');
+    expect(json.code).toBe(3);
+    const answer = JSON.parse(json.out.slice(json.out.indexOf('{'))) as {
+      passed: boolean;
+      inconclusive: boolean;
+      failures: string[];
+      selectedCases: string[];
+      suiteCaseCount: number;
+      limits: { id: string }[];
+    };
+    expect(answer).toMatchObject({
+      passed: false,
+      inconclusive: true,
+      selectedCases: ['full_refund'],
+      suiteCaseCount: 8,
+    });
+    expect(answer.limits.map((limit) => limit.id)).toContain('cases_selected');
+    expect(answer.failures).toContain(
+      'gate over 1 of 8 cases is not a release verdict; run without --case',
+    );
+
+    // A subset that fails is still a failure.
+    expect((await gate('--case', 'full_refund', '--case', 'partial')).code).toBe(1);
+    // run --case, which qualification harnesses and stripe canary use, is unchanged.
+    expect(
+      (
+        await cli(
+          'run',
+          '--project',
+          projectId,
+          '--agent',
+          'full',
+          '--case',
+          'full_refund',
+          '--home',
+          home,
+        )
+      ).code,
+    ).toBe(0);
+  });
+
+  it('says how much of the suite a whole-suite gate covered, in its JSON', async () => {
+    const home = freshHome();
+    const { projectId } = await initTwin(home);
+    await cli(
+      'agent',
+      'add',
+      '--project',
+      projectId,
+      '--name',
+      'desk',
+      '--black-box',
+      await refundingAgent(),
+      '--home',
+      home,
+    );
+    const { code, out } = await cli(
+      'gate',
+      '--project',
+      projectId,
+      '--agent',
+      'desk',
+      '--json',
+      '--home',
+      home,
+    );
+    // This agent refunds whatever payment a ticket cites, so it fails the gate;
+    // what matters here is what the JSON says the gate covered.
+    expect(code, out).toBe(1);
+    const answer = JSON.parse(out.slice(out.indexOf('{'))) as {
+      selectedCases: string[];
+      suiteCaseCount: number;
+      limits: { id: string }[];
+    };
+    expect(answer.suiteCaseCount).toBe(8);
+    expect(answer.selectedCases).toHaveLength(8);
+    expect(answer.limits.map((limit) => limit.id)).not.toContain('cases_selected');
+  });
+});
+
 describe('stripe twin', () => {
   it('prints its address alone on the first line, and stops when told', async () => {
     let stop!: () => void;

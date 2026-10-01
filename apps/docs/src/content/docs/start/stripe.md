@@ -83,7 +83,9 @@ Runs every case and exits `0` when the agent clears the bar, `1` when it does no
 for each case, what the agent said beside what Stripe holds: an agent that sent `$25.00` as `25`
 fails with _Refund re_… of $0.25 on ch_… (a $25.00 charge)_.
 
-`--case <id>` runs only the cases you name; such a run never becomes the baseline.
+`--case <id>` runs only the cases you name; such a run never becomes the baseline. `gate --case` is
+never a release verdict: it exits `3` (inconclusive) unless a named case fails, and its `--json`
+says which cases ran (`selectedCases`) out of how many (`suiteCaseCount`).
 
 ## 6. In CI
 
