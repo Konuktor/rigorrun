@@ -33,6 +33,7 @@
     "deploy:crm": "pnpm build:crm && wrangler pages deploy apps/demo-crm/dist --project-name rigorrun-crm --branch main --commit-dirty=true",
     "deploy:all": "pnpm deploy:crm && pnpm deploy:ops && pnpm deploy:site && pnpm deploy:docs",
     "assets": "node scripts/capture-assets.mjs",
+    "video": "node scripts/record-demo-video.mjs",
     "a11y": "playwright test --config e2e/playwright.a11y.config.ts",
     "smoke:prod": "playwright test --config e2e/playwright.smoke.config.ts",
     "e2e:prod": "playwright test --config e2e/playwright.public.config.ts",
