@@ -578,6 +578,17 @@ async function executeCase(
     missingEvidence.push(`final_state_unavailable:${error.read}`);
   }
   const events = await adapter.getEvents();
+  // What the agent's calls did, as the verifier and the result both see it.
+  // Checks of kind event_occurred / event_not_occurred read this; until 0.5.0
+  // the verifier was handed an empty list, so every such check answered as if
+  // nothing had happened.
+  const observedEvents = events.map((event): ObservedEvent => ({
+    type: event.type,
+    at: event.at,
+    payload: event.payload,
+    ok: event.ok,
+    ...(event.error ? { error: event.error } : {}),
+  }));
   const { derived, deltas } = buildProjection(adapter.describeEntities(), {
     seed: initialState,
     final: finalState,
@@ -617,7 +628,7 @@ async function executeCase(
         ...(Object.keys(windowed).length > 0 ? { windowed } : {}),
         ...(frame ? { frame } : {}),
       },
-      events: [],
+      events: observedEvents,
       agentReport: report,
     },
     {
@@ -665,13 +676,7 @@ async function executeCase(
     finishedAt,
     durationMs: round3(durationMs),
     steps,
-    actions: events.map((event): ObservedEvent => ({
-      type: event.type,
-      at: event.at,
-      payload: event.payload,
-      ok: event.ok,
-      ...(event.error ? { error: event.error } : {}),
-    })),
+    actions: observedEvents,
     assertions: summary.results,
     taskSuccess: !errored && summary.taskSuccess,
     policyCompliant: summary.policyCompliant,

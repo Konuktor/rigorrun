@@ -218,6 +218,59 @@ describe('what the agent can see', () => {
   });
 });
 
+describe("checks on the agent's calls", () => {
+  // Until 0.5.0 the verifier was handed no events, so a check on a call the
+  // agent made answered as if it had made none: event_occurred always failed
+  // and event_not_occurred always passed.
+  const callChecks = [
+    {
+      id: 'called_add',
+      kind: 'event_occurred',
+      severity: 'success',
+      description: 'The agent called addItem',
+      target: 'addItem',
+    },
+    {
+      id: 'never_seven',
+      kind: 'event_not_occurred',
+      severity: 'policy',
+      description: 'The agent never asked for 7 units',
+      target: 'addItem',
+      expected: { units: 7 },
+    },
+  ];
+
+  it('sees a call the agent made', async () => {
+    setUp();
+    const entry = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [adder('correct', 5)]),
+    );
+    const byId = Object.fromEntries(entry.assertions.map((result) => [result.assertionId, result.status]));
+    expect(byId).toEqual({ called_add: 'PASS', never_seven: 'PASS' });
+    expect(entry.outcome).toBe('PASS');
+  });
+
+  it('fails a call the agent must not have made', async () => {
+    setUp();
+    const entry = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [adder('wrong', 7)]),
+    );
+    const byId = Object.fromEntries(entry.assertions.map((result) => [result.assertionId, result.status]));
+    expect(byId['never_seven']).toBe('FAIL');
+    expect(entry.outcome).toBe('FAIL');
+  });
+
+  it('leaves call checks unmade for a black-box agent, whose calls it never saw', async () => {
+    const session = setUp();
+    const entry = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [
+        blackBoxAdder(session.world, 7),
+      ]),
+    );
+    expect(entry.assertions.every((result) => result.status === 'UNVERIFIABLE')).toBe(true);
+  });
+});
+
 describe('production', () => {
   it('still refuses a black-box agent outright', async () => {
     const session = setUp({ safety: 'production' });
