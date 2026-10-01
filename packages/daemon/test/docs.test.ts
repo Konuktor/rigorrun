@@ -348,3 +348,23 @@ describe('what the docs say about changing your agent', () => {
     }
   });
 });
+
+describe('the first-run page', () => {
+  const page = () =>
+    readFile(
+      join(repoRoot, 'apps', 'docs', 'src', 'content', 'docs', 'start', 'first-run.md'),
+      'utf8',
+    );
+
+  it('offers the black-box way in that the Stripe guide recommends', async () => {
+    const text = await page();
+    expect(text).toContain('[a black-box agent](/agents/black-box/)');
+  });
+
+  it('places the "Safe to ship?" headline where it is printed, and says what the gate prints', async () => {
+    const text = await page();
+    expect(text).toMatch(/In the interface, the headline/);
+    // The gate's last line, as the command line prints it.
+    expect(text.replace(/\s+/g, ' ')).toMatch(/`PASS`, `FAIL` or `INCONCLUSIVE`/);
+  });
+});
