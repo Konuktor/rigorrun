@@ -6,7 +6,12 @@
  */
 import { describe, expect, it } from 'vitest';
 import { stateFromRows, type EntityRow } from '@rigorrun/environment';
-import { describeStripeReality, formatMinorUnits, stripeSchema } from '../src/index.ts';
+import {
+  describeLateWrites,
+  describeStripeReality,
+  formatMinorUnits,
+  stripeSchema,
+} from '../src/index.ts';
 
 function charge(id: string, customer: string, amount: number, extra: EntityRow = {}): EntityRow {
   return {
@@ -195,6 +200,45 @@ describe('reality lines, beyond the cases', () => {
     expect(describeStripeReality(state, final, one, () => 'jpy')).toEqual([
       'Refund re_1 of 1000 JPY on ch_A (a 2500 JPY charge), succeeded.',
     ]);
+  });
+});
+
+describe('a late write from another case', () => {
+  const late = {
+    refund: 're_late',
+    amount: 2500,
+    currency: 'usd',
+    status: 'succeeded',
+    charge: 'ch_EARLIER',
+    madeFor: { run: 'run_1', agent: 'agent_1', case: 'full_refund', attempt: '0' },
+  };
+
+  it('is said, with the case it belongs to, and that it is not counted here', () => {
+    expect(describeLateWrites([late])).toEqual([
+      '1 refund landed on another case’s records while this case ran (a late write from an ' +
+        'earlier case: re_late of $25.00 on ch_EARLIER, made for full_refund); it is not ' +
+        'counted here.',
+    ]);
+  });
+
+  it('counts several in one line', () => {
+    const [line] = describeLateWrites([
+      late,
+      {
+        ...late,
+        refund: 're_late2',
+        amount: 600,
+        charge: 'ch_OTHER',
+        madeFor: { ...late.madeFor, case: 'partial' },
+      },
+    ]);
+    expect(line).toMatch(/^2 refunds landed on other cases’ records while this case ran/);
+    expect(line).toContain('re_late2 of $6.00 on ch_OTHER, made for partial');
+    expect(line).toMatch(/they are not counted here\.$/);
+  });
+
+  it('says nothing when there was none', () => {
+    expect(describeLateWrites([])).toEqual([]);
   });
 });
 

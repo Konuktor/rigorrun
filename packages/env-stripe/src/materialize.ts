@@ -21,7 +21,7 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import type { PackCaseContext, PackMaterialization } from '@rigorrun/environment';
-import { caseMetadata, idempotencyKey } from './conventions.ts';
+import { caseMarkOf, caseMetadata, idempotencyKey } from './conventions.ts';
 import {
   StripeApiError,
   StripeConnectionError,
@@ -56,6 +56,15 @@ export const StripeScopeDataSchema = z
     charges: z.array(z.string().regex(PLAIN)).min(1),
     /** Stripe's own `created` for the case's first object, in Unix seconds. */
     createdGte: z.number().int().nonnegative(),
+    /**
+     * The case these reads are for, as its objects' metadata names it. A
+     * refund the account-wide window finds on a payment marked for any other
+     * case belongs to that case, not to this one (see `readCase`).
+     */
+    owner: z
+      .object({ run: z.string(), agent: z.string(), case: z.string(), attempt: z.string() })
+      .strict()
+      .optional(),
   })
   .strict();
 export type StripeScopeData = z.infer<typeof StripeScopeDataSchema>;
@@ -222,7 +231,12 @@ async function createAll(
     main.charge.id,
     ...(other ? [other.payment.charge.id] : []),
   ];
-  const data: StripeScopeData = { customers, charges, createdGte: customer.created };
+  const data: StripeScopeData = {
+    customers,
+    charges,
+    createdGte: customer.created,
+    owner: caseMarkOf(ctx),
+  };
   return {
     bindings,
     scope: { description: describeScope(customers.length, charges.length), data },

@@ -8,10 +8,12 @@
  * every case creates objects, and there is no such thing as a read-only Stripe
  * pack.
  *
- * The session holds the client and nothing about any one case. The one thing
- * it remembers between calls is the currency of each charge and refund it has
- * read, which is a fact about that object and not about a case: Stripe never
- * reuses an id, so no case can see another's through it.
+ * The session holds the client and nothing a case is judged by. It remembers
+ * two things between calls: the currency of each charge and refund it has
+ * read, which is a fact about that object and not about a case — Stripe never
+ * reuses an id, so no case can see another's through it — and, for showing
+ * beside a case's verdict, the refunds its last read set aside as another
+ * case's, keyed by the customer only that case has.
  */
 import { z } from 'zod';
 import type {
@@ -35,9 +37,9 @@ import {
   type StripeClient,
 } from './client.ts';
 import { confirmTestMode, guardKey, isRestrictedKey } from './keyGuard.ts';
-import { materializeCase } from './materialize.ts';
-import { readCase } from './read.ts';
-import { describeStripeReality } from './reality.ts';
+import { materializeCase, StripeScopeDataSchema } from './materialize.ts';
+import { readCase, type LateWrite } from './read.ts';
+import { describeLateWrites, describeStripeReality } from './reality.ts';
 import { executeStripeAction, STRIPE_ACTIONS } from './actions.ts';
 
 /**
@@ -158,6 +160,13 @@ class StripeSession implements PackSession {
   readonly simulated: boolean;
 
   private readonly currencies = new Map<string, string>();
+  /**
+   * What each case's reads set aside as another case's, by the id of the
+   * customer who wrote in — which no other case shares: the refunds already
+   * there at its first read, the starting world, and those at its latest.
+   * Only ever shown, and only what appeared in between.
+   */
+  private readonly lateWrites = new Map<string, { atStart: Set<string>; latest: LateWrite[] }>();
 
   constructor(
     private readonly client: StripeClient,
@@ -182,17 +191,30 @@ class StripeSession implements PackSession {
 
   async read(scope: PackScope | null): Promise<CanonicalState> {
     const { maxPages } = this.settings.deps;
-    const { state, currencies } = await readCase(
+    const { state, currencies, elsewhere } = await readCase(
       this.client,
       scope,
       maxPages === undefined ? {} : { maxPages },
     );
     for (const [id, currency] of currencies) this.currencies.set(id, currency);
+    const writer = StripeScopeDataSchema.safeParse(scope?.data).data?.customers[0];
+    if (writer !== undefined) {
+      const seen = this.lateWrites.get(writer);
+      this.lateWrites.set(writer, {
+        atStart: seen?.atStart ?? new Set(elsewhere.map((write) => write.refund)),
+        latest: elsewhere,
+      });
+    }
     return state;
   }
 
   reality(seed: CanonicalState, final: CanonicalState, bindings: PackBindings): string[] {
-    return describeStripeReality(seed, final, bindings, (id) => this.currencies.get(id));
+    const seen = this.lateWrites.get(bindings['customer'] ?? '');
+    const landed = seen?.latest.filter((write) => !seen.atStart.has(write.refund)) ?? [];
+    return [
+      ...describeStripeReality(seed, final, bindings, (id) => this.currencies.get(id)),
+      ...describeLateWrites(landed),
+    ];
   }
 
   actions(): ActionDefinition[] {

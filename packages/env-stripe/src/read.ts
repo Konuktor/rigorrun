@@ -12,6 +12,16 @@
  *    whose payment it was (`charge__customer`) and that it exists
  *    (`charge__exists`) instead of reporting a refund against nothing.
  *
+ * A refund in that window on a payment RigorRun made for a different case —
+ * another case, attempt, agent or run, as the payment's metadata says — is
+ * that case's, not this one's: most often a slow agent's work for a case that
+ * had already timed out, landing while the next one ran. It is left out of
+ * the state, so no check here counts it, and handed back in `elsewhere` so it
+ * is said rather than hidden. A refund on a payment that carries no RigorRun
+ * metadata at all is outside every case, and counts here as before. (The
+ * pre-registered oracle draws the same line: reports/stripe-pack-2026-10/
+ * AMENDMENT-2.md, section 1.)
+ *
  * A charge read only because a refund named it is read on its own: its
  * customer is somebody outside the case, and is not read.
  *
@@ -40,6 +50,7 @@ import {
   type StripeClient,
   type StripeParams,
 } from './client.ts';
+import { caseMarkIn, sameCase, type CaseMark } from './conventions.ts';
 import { StripeScopeDataSchema } from './materialize.ts';
 import { stripeSchema } from './schema.ts';
 import type { StripeCharge, StripeCustomer, StripeDispute, StripeRefund } from './wire.ts';
@@ -54,6 +65,22 @@ export interface StripeReadResult {
    * whether 2500 is $25.00 or ¥2500.
    */
   currencies: Map<string, string>;
+  /**
+   * Refunds the account-wide window found on payments RigorRun made for some
+   * other case, left out of `state`. Empty when there were none.
+   */
+  elsewhere: LateWrite[];
+}
+
+/** A refund that landed on another case's payment while this case's reads looked. */
+export interface LateWrite {
+  refund: string;
+  amount: number;
+  currency: string;
+  status: string;
+  charge: string;
+  /** The case the payment was made for, as its metadata names it. */
+  madeFor: CaseMark;
 }
 
 export interface ReadOptions {
@@ -75,7 +102,7 @@ export async function readCase(
   options: ReadOptions = {},
 ): Promise<StripeReadResult> {
   const currencies = new Map<string, string>();
-  if (scope === null) return { state: emptyState(stripeSchema), currencies };
+  if (scope === null) return { state: emptyState(stripeSchema), currencies, elsewhere: [] };
 
   const parsed = StripeScopeDataSchema.safeParse(scope.data);
   if (!parsed.success) {
@@ -139,12 +166,31 @@ export async function readCase(
 
   // A refund on a charge outside the case: read the charge it names, so the
   // refund is seen against a real charge and its owner rather than nothing.
-  const elsewhere = [...refunds.values()]
+  const outside = [...refunds.values()]
     .map((refund) => idOf(refund.charge))
     .filter((id): id is string => id !== null && !charges.has(id));
-  for (const id of [...new Set(elsewhere)].sort()) {
+  const elsewhere: LateWrite[] = [];
+  for (const id of [...new Set(outside)].sort()) {
     const charge = await reader.retrieve<StripeCharge>(`/v1/charges/${id}`);
-    if (charge !== undefined) charges.set(charge.id, charge);
+    if (charge === undefined) continue;
+    const madeFor = caseMarkIn(charge.metadata);
+    if (madeFor !== null && (data.owner === undefined || !sameCase(madeFor, data.owner))) {
+      // Another case's payment: its refunds are that case's, said, not counted.
+      for (const refund of [...refunds.values()]) {
+        if (idOf(refund.charge) !== id) continue;
+        refunds.delete(refund.id);
+        elsewhere.push({
+          refund: refund.id,
+          amount: refund.amount,
+          currency: refund.currency,
+          status: refund.status,
+          charge: id,
+          madeFor,
+        });
+      }
+      continue;
+    }
+    charges.set(charge.id, charge);
   }
 
   const state = emptyState(stripeSchema);
@@ -167,6 +213,7 @@ export async function readCase(
   return {
     state: Object.keys(windowed).length > 0 ? { ...state, windowed } : state,
     currencies,
+    elsewhere: elsewhere.sort((a, b) => a.refund.localeCompare(b.refund)),
   };
 }
 

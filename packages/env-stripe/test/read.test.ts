@@ -155,6 +155,77 @@ describe('reading a case', () => {
     expect(final.entities['Customer']?.[stranger.customer]).toBeUndefined();
   });
 
+  it('sets aside a refund on a payment RigorRun made for another case, and names it', async () => {
+    // An earlier case on the same account, whose agent was still working when
+    // it timed out: its refund lands while this case runs.
+    const fake = new FakeStripe();
+    const client = createStripeClient({
+      baseUrl: 'http://127.0.0.1:12112',
+      key: 'sk_test_abc',
+      fetch: fake.fetch,
+      sleep: async () => {},
+    });
+    const deps = { client, restricted: false, sleep: async () => {} };
+    const earlier = await materializeCase(
+      { charge: { amount: 2500 } },
+      { ...ctx, caseId: 'case0' },
+      deps,
+    );
+    const made = await materializeCase({ charge: { amount: 4999 } }, ctx, deps);
+    const seed = (await readCase(client, made.scope)).state;
+
+    const late = fake.refund(earlier.bindings['charge']!, 2500);
+    const { state, elsewhere } = await readCase(client, made.scope);
+
+    expect(createdRefunds(seed, state)).toEqual([]);
+    expect(state.entities['Refund']?.[late]).toBeUndefined();
+    // Nor is the earlier case's payment read into this case's world.
+    expect(state.entities['Charge']?.[earlier.bindings['charge']!]).toBeUndefined();
+    expect(elsewhere).toEqual([
+      {
+        refund: late,
+        amount: 2500,
+        currency: 'usd',
+        status: 'succeeded',
+        charge: earlier.bindings['charge'],
+        madeFor: { run: 'run1', agent: 'agent1', case: 'case0', attempt: '0' },
+      },
+    ]);
+  });
+
+  it('sets aside a refund on an earlier attempt’s payment of the same case', async () => {
+    const fake = new FakeStripe();
+    const client = createStripeClient({
+      baseUrl: 'http://127.0.0.1:12112',
+      key: 'sk_test_abc',
+      fetch: fake.fetch,
+      sleep: async () => {},
+    });
+    const deps = { client, restricted: false, sleep: async () => {} };
+    const first = await materializeCase({ charge: { amount: 2500 } }, ctx, deps);
+    const second = await materializeCase(
+      { charge: { amount: 2500 } },
+      { ...ctx, attempt: 1 },
+      deps,
+    );
+    fake.refund(first.bindings['charge']!, 2500);
+    const { elsewhere } = await readCase(client, second.scope);
+    expect(elsewhere.map((write) => write.madeFor)).toEqual([
+      { run: 'run1', agent: 'agent1', case: 'case1', attempt: '0' },
+    ]);
+  });
+
+  it('still counts a refund on a payment that carries no RigorRun metadata at all', async () => {
+    const { fake, client, made } = await caseOn({ charge: { amount: 2500 } });
+    const stranger = fake.outsider(9900);
+    fake.refund(stranger.charge, 100);
+    const { state, elsewhere } = await readCase(client, made.scope);
+    expect(elsewhere).toEqual([]);
+    expect(
+      Object.values(state.entities['Refund'] ?? {}).map((refund) => refund['charge']),
+    ).toContain(stranger.charge);
+  });
+
   it('says a list too long to read is windowed, so checks on it abstain', async () => {
     const { fake, read } = await caseOn({ charge: { amount: 2500 } }, { pageSize: 1 });
     for (let index = 0; index < 11; index += 1) fake.refund(fake.outsider(100).charge);
