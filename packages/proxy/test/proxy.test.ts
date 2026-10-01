@@ -47,22 +47,33 @@ const TOOLS: ToolDescription[] = [
     description: 'Changes one thing.',
     params: [
       { name: 'thingId', type: 'string', required: true, description: '' },
-      { name: 'state', type: 'enum', required: true, enumValues: ['open', 'shut'], description: '' },
+      {
+        name: 'state',
+        type: 'enum',
+        required: true,
+        enumValues: ['open', 'shut'],
+        description: '',
+      },
     ],
     readOnly: false,
   },
 ];
 
 /** Stands in for the runner's bounded channel. */
-function channel(budget = 5): { env: ProxyChannel; seen: string[] } {
+function channel(budget = 5): { env: ProxyChannel; seen: string[]; refused: string[] } {
   const seen: string[] = [];
+  const refused: string[] = [];
   let remaining = budget;
   return {
     seen,
+    refused,
     env: {
       async call(tool: string, args: Record<string, unknown> = {}): Promise<ToolResult> {
         if (remaining <= 0) {
-          return { ok: false, error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' } };
+          return {
+            ok: false,
+            error: { code: 'TOOL_UNAVAILABLE', message: 'Step budget exhausted.' },
+          };
         }
         remaining -= 1;
         seen.push(`${tool}(${JSON.stringify(args)})`);
@@ -72,6 +83,9 @@ function channel(budget = 5): { env: ProxyChannel; seen: string[] } {
         return { ok: true, data: { thingId: args['thingId'], state: 'open' } };
       },
       stepsRemaining: () => remaining,
+      refused(tool: string, args: Record<string, unknown>, code: string) {
+        refused.push(`${code}:${tool}(${JSON.stringify(args)})`);
+      },
     },
   };
 }
@@ -83,7 +97,7 @@ async function open(options: { budget?: number } = {}) {
   started.push(proxy);
   await proxy.start();
 
-  const { env, seen } = channel(options.budget);
+  const { env, seen, refused } = channel(options.budget);
   const calls: ProxyCall[] = [];
   const { server } = createProxySession({
     tools: TOOLS,
@@ -92,11 +106,14 @@ async function open(options: { budget?: number } = {}) {
   });
   const { sessionId, url } = await proxy.publish(server);
 
-  const client = new Client({ name: 'someone-elses-agent', version: '1.0.0' }, { capabilities: {} });
+  const client = new Client(
+    { name: 'someone-elses-agent', version: '1.0.0' },
+    { capabilities: {} },
+  );
   await client.connect(
     new StreamableHTTPClientTransport(new URL(url)) as unknown as Parameters<Client['connect']>[0],
   );
-  return { proxy, client, url, sessionId, calls, seen };
+  return { proxy, client, url, sessionId, calls, seen, refused };
 }
 
 afterEach(async () => {
@@ -110,7 +127,10 @@ describe('an agent that already speaks MCP', () => {
     expect(listed.tools.map((tool) => tool.name).sort()).toEqual(['change_thing', 'read_thing']);
 
     const change = listed.tools.find((tool) => tool.name === 'change_thing')!;
-    const schema = change.inputSchema as { properties: Record<string, { enum?: string[] }>; required: string[] };
+    const schema = change.inputSchema as {
+      properties: Record<string, { enum?: string[] }>;
+      required: string[];
+    };
     expect(schema.properties['state']?.enum).toEqual(['open', 'shut']);
     expect(schema.required.sort()).toEqual(['state', 'thingId']);
     await client.close();
@@ -140,12 +160,14 @@ describe('an agent that already speaks MCP', () => {
   }, 30_000);
 
   it('cannot reach a tool the case did not offer', async () => {
-    const { client, calls, seen } = await open();
+    const { client, calls, seen, refused } = await open();
     const result = await client.callTool({ name: 'delete_everything', arguments: {} });
     expect(result.isError).toBe(true);
-    // Refused at the proxy: it never reached the channel, and it is recorded.
+    // Refused at the proxy: it never reached the channel, and it is recorded —
+    // in the session's own list and, through the channel, in the evidence.
     expect(seen).toEqual([]);
     expect(calls[0]).toMatchObject({ tool: 'delete_everything', error: 'TOOL_NOT_ALLOWED' });
+    expect(refused).toEqual(['TOOL_NOT_ALLOWED:delete_everything({})']);
     await client.close();
   }, 30_000);
 
@@ -166,7 +188,10 @@ describe('the proxy as an exposed surface', () => {
     await proxy.revoke(sessionId);
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+      },
       body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
     });
     expect(response.status).toBe(404);

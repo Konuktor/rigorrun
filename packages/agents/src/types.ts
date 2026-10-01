@@ -15,8 +15,7 @@ import type { AgentTask, TokenUsage } from '@rigorrun/core';
  * must not know which business system it is pointed at.
  */
 export type ToolResult<T = unknown> =
-  | { ok: true; data: T }
-  | { ok: false; error: { code: string; message: string } };
+  { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
 
 export interface AgentRunInput {
   caseId: string;
@@ -31,6 +30,11 @@ export interface AgentEnvironment {
   stepsRemaining(): number;
   /** Optional free-text reasoning attached to the next step, for evidence. */
   note(text: string): void;
+  /**
+   * Records an attempt refused before it reached the channel — a tool the
+   * proxy did not offer. It costs no step; it is evidence that the agent tried.
+   */
+  refused?(tool: string, args: Record<string, unknown>, code: string): void;
 }
 
 export interface AgentRunOutput {

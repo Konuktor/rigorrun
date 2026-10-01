@@ -532,6 +532,9 @@ async function executeCase(
           };
     },
     stepsRemaining: () => stepBudget,
+    refused(tool: string, args: Record<string, unknown>, code: string) {
+      refuse(tool, args, code, `${tool} was refused before it reached the system.`);
+    },
     note(text: string) {
       pendingNote = text.slice(0, 1000);
     },

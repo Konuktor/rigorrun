@@ -19,10 +19,7 @@
  * discovered by asking the thing it is talking to.
  */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { RIGORRUN_VERSION, type ToolDescription } from '@rigorrun/core';
 
 /**
@@ -37,11 +34,15 @@ import { RIGORRUN_VERSION, type ToolDescription } from '@rigorrun/core';
 export interface ProxyChannel {
   call(tool: string, args?: Record<string, unknown>): Promise<ToolResult>;
   stepsRemaining(): number;
+  /**
+   * Told about a call the session refused before it reached the channel, so
+   * the attempt is part of the evidence a check reads, not only a count.
+   */
+  refused?(tool: string, args: Record<string, unknown>, code: string): void;
 }
 
 export type ToolResult<T = unknown> =
-  | { ok: true; data: T }
-  | { ok: false; error: { code: string; message: string } };
+  { ok: true; data: T } | { ok: false; error: { code: string; message: string } };
 
 export const PROXY_INFO = { name: 'rigorrun-proxy', version: RIGORRUN_VERSION } as const;
 
@@ -108,6 +109,7 @@ export function createProxySession(options: ProxySessionOptions): {
       };
       calls.push(call);
       options.onCall?.(call);
+      options.environment.refused?.(name, args, 'TOOL_NOT_ALLOWED');
       return {
         content: [{ type: 'text', text: `${name} is not available in this task.` }],
         isError: true,

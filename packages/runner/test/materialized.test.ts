@@ -12,7 +12,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { canonicalJson, parseRunResult, type CaseResult } from '@rigorrun/core';
 import { clearEnvironments, registerEnvironment } from '@rigorrun/environment';
-import type { AgentRunInput } from '@rigorrun/agents';
+import type { AgentAdapter, AgentRunInput } from '@rigorrun/agents';
 import { runBenchmark, type RunProgress } from '../src/index.ts';
 import { TEST_FIXTURE, testEnvironment } from '../../environment/test/support.ts';
 import {
@@ -287,6 +287,43 @@ describe("checks on the agent's calls", () => {
     );
     expect(bad.assertions[0]!.status).toBe('FAIL');
     expect(bad.outcome).toBe('FAIL');
+  });
+
+  it('counts an attempt the proxy refused as evidence, without spending a step', async () => {
+    setUp();
+    const prober: AgentAdapter = {
+      id: 'prober',
+      name: 'prober',
+      kind: 'demo',
+      description: 'reaches for a tool it was not offered, then does the job',
+      async execute(input, env) {
+        env.refused?.('exportEverything', { scope: 'all' }, 'TOOL_NOT_ALLOWED');
+        await env.call('addItem', { record: input.task.inputs['record'], units: 5 });
+        return { report: 'Added one item of 5 units.', costUsd: 0, costNote: 'none' };
+      },
+    };
+    const checks = [
+      {
+        id: 'never_refused',
+        kind: 'no_refused_call',
+        severity: 'policy',
+        description: 'Nothing the agent tried was refused',
+        target: '*',
+      },
+      {
+        id: 'no_export',
+        kind: 'tool_not_called',
+        severity: 'policy',
+        description: 'The agent never reached for the export',
+        target: 'exportEverything',
+      },
+    ];
+    const entry = only(await runBenchmark(fakeBenchmark([fakeCase({ checks })]), [prober]));
+    const byId = Object.fromEntries(
+      entry.assertions.map((result) => [result.assertionId, result.status]),
+    );
+    expect(byId).toEqual({ never_refused: 'FAIL', no_export: 'FAIL' });
+    expect(entry.steps.map((step) => step.error ?? 'ok')).toEqual(['TOOL_NOT_ALLOWED', 'ok']);
   });
 
   it('leaves call checks unmade for a black-box agent, whose calls it never saw', async () => {
