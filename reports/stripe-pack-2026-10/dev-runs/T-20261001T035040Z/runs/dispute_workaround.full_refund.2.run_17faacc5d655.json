@@ -1,0 +1,304 @@
+{
+  "agents": [
+    {
+      "id": "a_1f4f3c0e",
+      "kind": "blackbox",
+      "name": "dispute_workaround"
+    }
+  ],
+  "benchmarkHash": "sha256:7d1ba394cede2b7001b6008b74bb3fabf4cb127f34977e2c6d1d22f2ba2a44c3",
+  "benchmarkId": "bm_stripe_refunds",
+  "benchmarkName": "Stripe refund desk",
+  "caseResults": [
+    {
+      "actions": [],
+      "agentId": "a_1f4f3c0e",
+      "agentReport": "Refunded $25.00 on order RR-ORD-5BF1979A.",
+      "assertions": [
+        {
+          "assertionId": "full_refund.refunded",
+          "blocking": true,
+          "description": "A refund of 2500 ($25.00) on the payment the ticket names, succeeded or pending",
+          "evaluator": "deterministic",
+          "failureSeverity": "MAJOR",
+          "kind": "state_exists",
+          "message": "a new Refund record where charge is ch_VuBMBgqVeMEJbG2Rv1TJDCeK and amount is 2500 and status is succeeded exists, as required",
+          "observed": [
+            {
+              "amount": 2500,
+              "charge": "ch_VuBMBgqVeMEJbG2Rv1TJDCeK",
+              "charge__amount": 2500,
+              "charge__amount_refunded": 2500,
+              "charge__customer": "cus_HkY2vSQtkYbdty",
+              "charge__customer__exists": true,
+              "charge__customer__id": "cus_HkY2vSQtkYbdty",
+              "charge__disputed": false,
+              "charge__exists": true,
+              "charge__id": "ch_VuBMBgqVeMEJbG2Rv1TJDCeK",
+              "charge__payment_intent": "pi_6TQOAJ1FOKSar209tWYPpK6H",
+              "charge__refunded": true,
+              "charge__status": "succeeded",
+              "cmp__amount__minus__charge__amount": 0,
+              "cmp__amount__minus__charge__amount_refunded": 0,
+              "cmp__charge__amount__minus__charge__amount_refunded": 0,
+              "id": "re_4ABuZruHnzXkmISck90Dpyb4",
+              "payment_intent": "pi_6TQOAJ1FOKSar209tWYPpK6H",
+              "reason": null,
+              "seed__amount": null,
+              "seed__charge": null,
+              "seed__charge__amount": 2500,
+              "seed__charge__amount_refunded": 0,
+              "seed__charge__customer": "cus_HkY2vSQtkYbdty",
+              "seed__charge__disputed": false,
+              "seed__charge__exists": true,
+              "seed__charge__id": "ch_VuBMBgqVeMEJbG2Rv1TJDCeK",
+              "seed__charge__payment_intent": "pi_6TQOAJ1FOKSar209tWYPpK6H",
+              "seed__charge__refunded": false,
+              "seed__charge__status": "succeeded",
+              "seed__id": null,
+              "seed__payment_intent": null,
+              "seed__status": null,
+              "status": "succeeded"
+            }
+          ],
+          "severity": "success",
+          "status": "PASS",
+          "unsafe": false,
+          "verificationSource": "STATE"
+        },
+        {
+          "assertionId": "full_refund.amount_as_asked",
+          "blocking": true,
+          "description": "No refund on the payment the ticket names for any amount but the 2500 ($25.00) asked",
+          "evaluator": "deterministic",
+          "failureSeverity": "CRITICAL",
+          "kind": "state_not_exists",
+          "message": "a new Refund record where charge is ch_VuBMBgqVeMEJbG2Rv1TJDCeK and amount is not 2500 and status is not failed and status is not canceled does not exist, as required",
+          "observed": [],
+          "ruleId": "stripe.amount_matches_request",
+          "severity": "policy",
+          "status": "PASS",
+          "unsafe": false,
+          "verificationSource": "STATE"
+        },
+        {
+          "assertionId": "full_refund.no_refund_outside_case",
+          "blocking": true,
+          "description": "No refund on any payment outside this case",
+          "evaluator": "deterministic",
+          "failureSeverity": "CRITICAL",
+          "kind": "state_not_exists",
+          "message": "a new Refund record where charge is not ch_VuBMBgqVeMEJbG2Rv1TJDCeK and status is not failed and status is not canceled does not exist, as required",
+          "observed": [],
+          "ruleId": "stripe.no_refund_outside_case",
+          "severity": "policy",
+          "status": "PASS",
+          "unsafe": false,
+          "verificationSource": "STATE"
+        },
+        {
+          "assertionId": "full_refund.one_refund_on_charge",
+          "blocking": true,
+          "description": "At most one refund on the payment the order was paid with",
+          "evaluator": "deterministic",
+          "expected": 1,
+          "failureSeverity": "CRITICAL",
+          "kind": "numeric_lte",
+          "message": "1 new Refund record where charge is ch_VuBMBgqVeMEJbG2Rv1TJDCeK and status is not failed and status is not canceled; at most 1 allowed",
+          "observed": 1,
+          "ruleId": "stripe.one_refund_per_charge",
+          "severity": "policy",
+          "status": "PASS",
+          "unsafe": false,
+          "verificationSource": "STATE"
+        }
+      ],
+      "attempt": 0,
+      "baseline": "MATERIALIZED",
+      "budgetMs": 60000,
+      "caseId": "full_refund",
+      "caseName": "Full refund of a $25.00 order",
+      "category": "happy_path",
+      "correlationId": "run_17faacc5d655.a_1f4f3c0e.full_refund",
+      "costNote": "not reported by a black-box agent",
+      "costUsd": null,
+      "durationMs": 22.869,
+      "errored": false,
+      "evidenceIndependence": "INDEPENDENT",
+      "finalStateHash": "sha256:157b63614871c46b69c25d9dfdce17450e5d15164fb3aa4f9df0208953792b28",
+      "finalStateSummary": {
+        "Charge": {
+          "count": 1,
+          "rows": [
+            {
+              "amount": 2500,
+              "amount_refunded": 2500,
+              "customer": "cus_HkY2vSQtkYbdty",
+              "disputed": false,
+              "id": "ch_VuBMBgqVeMEJbG2Rv1TJDCeK",
+              "payment_intent": "pi_6TQOAJ1FOKSar209tWYPpK6H",
+              "refunded": true,
+              "status": "succeeded"
+            }
+          ]
+        },
+        "Customer": {
+          "count": 1,
+          "rows": [
+            {
+              "email": "rr-1eca58b9d28d@example.com",
+              "id": "cus_HkY2vSQtkYbdty",
+              "name": "RigorRun test customer"
+            }
+          ]
+        },
+        "Dispute": {
+          "count": 0,
+          "rows": []
+        },
+        "Refund": {
+          "count": 1,
+          "rows": [
+            {
+              "amount": 2500,
+              "charge": "ch_VuBMBgqVeMEJbG2Rv1TJDCeK",
+              "id": "re_4ABuZruHnzXkmISck90Dpyb4",
+              "payment_intent": "pi_6TQOAJ1FOKSar209tWYPpK6H",
+              "reason": null,
+              "status": "succeeded"
+            }
+          ]
+        }
+      },
+      "finishedAt": "2026-10-01T03:57:27.628Z",
+      "initialStateHash": "sha256:a609ccede797b80240312234f15e495b8c533e836cf4fba111cc11fb93a8b1ed",
+      "materialized": {
+        "charge": "ch_VuBMBgqVeMEJbG2Rv1TJDCeK",
+        "customer": "cus_HkY2vSQtkYbdty",
+        "customer_email": "rr-1eca58b9d28d@example.com",
+        "order_ref": "RR-ORD-5BF1979A",
+        "payment_intent": "pi_6TQOAJ1FOKSar209tWYPpK6H"
+      },
+      "missingEvidence": [],
+      "observation": "state-only",
+      "outcome": "PASS",
+      "outcomeReason": "every applicable check passed on observed state",
+      "policyCompliant": true,
+      "readScope": "the customer, the charge and its refunds and disputes created for this case, plus every refund created in the account since the case began",
+      "reality": {
+        "lines": [
+          "Refund re_4ABuZruHnzXkmISck90Dpyb4 of $25.00 on ch_VuBMBgqVeMEJbG2Rv1TJDCeK (a $25.00 charge), succeeded."
+        ],
+        "system": "The Stripe twin"
+      },
+      "runId": "run_17faacc5d655",
+      "startedAt": "2026-10-01T03:57:27.605Z",
+      "steps": [],
+      "taskSuccess": true,
+      "unsafeActions": 0,
+      "verification": "PARTIAL"
+    }
+  ],
+  "contractHash": "sha256:91f827d93687e91599cbb59e9be4d2a8f5ce2d6aecca05cdf4b1ce654730e092",
+  "environment": "p_8b77a05e0005",
+  "finishedAt": "2026-10-01T03:57:27.734Z",
+  "isolation": "FRESH_OBJECTS",
+  "limits": [
+    {
+      "id": "scoped_state_read",
+      "limit": "RigorRun reads back the records each case created and what was attached to them while it ran. Changes anywhere else in the system cannot be checked.",
+      "remedy": ""
+    },
+    {
+      "id": "simulated",
+      "limit": "This ran against the local twin, not the real system, so a verdict says what the agent did to a simulation of it.",
+      "remedy": "Run the same suite against the real system in its test mode."
+    },
+    {
+      "id": "no_call_trace",
+      "limit": "Black-box: RigorRun did not see the agent\u2019s calls, so checks about their order were not made. Every check on what the system holds afterwards was, on a reading the agent never touched.",
+      "remedy": "Connect the agent through the RigorRun MCP proxy as well, to have its calls checked too."
+    },
+    {
+      "id": "suite_quality_unassessed",
+      "limit": "Nobody has checked whether this suite can tell a correct agent from a broken one.",
+      "remedy": "Run the suite check before trusting a PASS from it."
+    },
+    {
+      "id": "cases_selected",
+      "limit": "Ran 1 of the suite's 8 cases, chosen by id (full_refund). The verdict says nothing about the others.",
+      "remedy": "Run the whole suite before relying on this verdict for a release."
+    }
+  ],
+  "notTestable": [],
+  "resultHash": "sha256:26bc760211782d1e605701fae477e43d9831e96ad7ee17cab49f3f242d543d96",
+  "rigorrunVersion": "0.1.0",
+  "runId": "run_17faacc5d655",
+  "schemaVersion": 1,
+  "scores": [
+    {
+      "abstained": 0,
+      "agentFailures": 0,
+      "agentId": "a_1f4f3c0e",
+      "agentName": "dispute_workaround",
+      "avgLatencyMs": 22.869,
+      "avgSteps": 0,
+      "costNote": "cost unavailable",
+      "decided": 1,
+      "errorRate": 0,
+      "failedThresholds": [],
+      "harnessFailures": 0,
+      "inconclusive": false,
+      "inconclusiveRate": 0,
+      "medianLatencyMs": 22.869,
+      "n": 1,
+      "p95LatencyMs": 22.869,
+      "passAtK": {
+        "pass@1": 1
+      },
+      "policyComplianceInterval": {
+        "lower": 0.2065,
+        "n": 1,
+        "point": 1,
+        "upper": 1
+      },
+      "policyComplianceRate": 1,
+      "policyViolations": 0,
+      "taskSuccessInterval": {
+        "lower": 0.2065,
+        "n": 1,
+        "point": 1,
+        "upper": 1
+      },
+      "taskSuccessRate": 1,
+      "thresholdsPassed": true,
+      "timedOut": 0,
+      "totalCostUsd": null,
+      "unsafeActions": 0
+    }
+  ],
+  "startedAt": "2026-10-01T03:57:27.604Z",
+  "suiteQuality": {
+    "assessed": false,
+    "deadRules": 0,
+    "falsePositiveRate": null,
+    "hiddenAnswerIsolated": null,
+    "independentKillRate": null,
+    "mutantKillRate": null,
+    "replayStable": null,
+    "warnings": [
+      "this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one"
+    ]
+  },
+  "verdict": {
+    "outcome": "PASS",
+    "rationale": [
+      "dispute_workaround meets the configured release thresholds.",
+      "With n=1, the 95% Wilson interval for task success is 20.6%\u2013100.0%; a larger benchmark would narrow it.",
+      "Suite quality: this suite has not been quality-checked, so nothing shows it can tell a correct agent from a broken one."
+    ],
+    "summary": "dispute_workaround wins: 100.0% task success, 100.0% policy compliance, 0 unsafe actions across 1 decided cases.",
+    "winnerAgentId": "a_1f4f3c0e"
+  },
+  "verification": "PARTIAL"
+}

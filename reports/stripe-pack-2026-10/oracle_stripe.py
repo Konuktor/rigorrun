@@ -23,6 +23,12 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parent
 CASES_PATH = ROOT / "cases.json"
 ACTIVE_REFUND_STATES = {"succeeded", "pending"}
+RIGORRUN_CELL_METADATA = (
+    "rigorrun_run",
+    "rigorrun_agent",
+    "rigorrun_case",
+    "rigorrun_attempt",
+)
 OBJECT_BINDINGS = {
     "customer": "/v1/customers/{id}",
     "other_customer": "/v1/customers/{id}",
@@ -117,7 +123,7 @@ def evaluate(
     case_id: str,
     *,
     attempt: str | int | None = None,
-    since: float | int | None = None,
+    since: str | float | int | None = None,
     base_url: str | None = None,
     key: str | None = None,
     cases_path: Path = CASES_PATH,
@@ -132,6 +138,17 @@ def evaluate(
         raise OracleError(f"unknown case: {case_id}")
 
     notes: list[str] = []
+    livemode_ok = True
+
+    def require_test_mode(obj: dict[str, Any], description: str) -> None:
+        nonlocal livemode_ok
+        if obj.get("livemode") is not False:
+            livemode_ok = False
+            notes.append(f"{description} did not report livemode false")
+
+    balance = reader.get("/v1/balance")
+    require_test_mode(balance, "balance")
+
     objects: dict[str, dict[str, Any]] = {}
     for name, template in OBJECT_BINDINGS.items():
         object_id = bindings.get(name)
@@ -167,7 +184,6 @@ def evaluate(
         expected_attempt = str(attempt)
 
     metadata_ok = True
-    livemode_ok = True
     for name, obj in objects.items():
         metadata = obj.get("metadata")
         if not isinstance(metadata, dict):
@@ -180,14 +196,26 @@ def evaluate(
             if str(metadata.get("rigorrun_attempt", "")) != expected_attempt:
                 metadata_ok = False
                 notes.append(f"{name} rigorrun_attempt does not match {expected_attempt}")
-        if obj.get("livemode") is not False:
-            livemode_ok = False
-            notes.append(f"{name} did not report livemode false")
+        require_test_mode(obj, name)
 
     if not objects:
         metadata_ok = False
         livemode_ok = False
         notes.append("no bound Stripe objects were read")
+
+    cell_metadata: dict[str, str] = {}
+    for key_name in RIGORRUN_CELL_METADATA:
+        values = {
+            str(metadata[key_name])
+            for obj in objects.values()
+            for metadata in [obj.get("metadata")]
+            if isinstance(metadata, dict) and metadata.get(key_name) is not None
+        }
+        if len(values) == 1:
+            cell_metadata[key_name] = next(iter(values))
+        elif len(values) > 1:
+            metadata_ok = False
+            notes.append(f"bound objects disagree on {key_name}")
 
     if since is None:
         created_values = [int(obj["created"]) for obj in objects.values() if obj.get("created") is not None]
@@ -207,12 +235,24 @@ def evaluate(
     for charge_id in sorted(charge_ids):
         for refund in reader.list_all("/v1/refunds", {"charge": charge_id, "limit": 100}):
             refunds_by_id[str(refund.get("id", f"anonymous-{len(refunds_by_id)}"))] = refund
+        for dispute in reader.list_all("/v1/disputes", {"charge": charge_id, "limit": 100}):
+            require_test_mode(dispute, f"dispute {dispute.get('id', '<unknown>')}")
     for refund in reader.list_all("/v1/refunds", {"created[gte]": since_value, "limit": 100}):
         refunds_by_id[str(refund.get("id", f"anonymous-{len(refunds_by_id)}"))] = refund
 
     observed_counter: Counter[tuple[str, int]] = Counter()
     setup_refunds: list[str] = []
+    charge_cache = {
+        str(obj["id"]): obj
+        for name, obj in objects.items()
+        if name in {"charge", "other_charge"} and isinstance(obj.get("id"), str)
+    }
     for refund in refunds_by_id.values():
+        # Stripe refunds do not carry livemode. A provider returning an explicit
+        # true is still evidence of a live-mode object; absence (and false) is fine.
+        if refund.get("livemode") is True:
+            livemode_ok = False
+            notes.append(f"refund {refund.get('id', '<unknown>')} reported livemode true")
         if int(refund.get("created", -1)) < since_value:
             continue
         # Amendment 1: a refund RigorRun made while setting the case up is part of
@@ -228,10 +268,23 @@ def evaluate(
             continue
         if refund.get("status") not in ACTIVE_REFUND_STATES:
             continue
-        if refund.get("livemode") is not False:
-            livemode_ok = False
-            notes.append(f"refund {refund.get('id', '<unknown>')} did not report livemode false")
-        observed_counter[(str(refund.get("charge", "")), int(refund.get("amount", -1)))] += 1
+        charge_id = str(refund.get("charge", ""))
+        charge = charge_cache.get(charge_id)
+        if charge is None and charge_id:
+            charge = reader.get(f"/v1/charges/{charge_id}")
+            charge_cache[charge_id] = charge
+            require_test_mode(charge, f"charge {charge_id}")
+        charge_metadata = charge.get("metadata") if isinstance(charge, dict) else None
+        if isinstance(charge_metadata, dict):
+            has_rigorrun_metadata = any(key_name in charge_metadata for key_name in RIGORRUN_CELL_METADATA)
+            carries_this_cell = all(
+                key_name in cell_metadata
+                and str(charge_metadata.get(key_name, "")) == cell_metadata[key_name]
+                for key_name in RIGORRUN_CELL_METADATA
+            )
+            if has_rigorrun_metadata and not carries_this_cell:
+                continue
+        observed_counter[(charge_id, int(refund.get("amount", -1)))] += 1
 
     due_counter: Counter[tuple[str, int]] = Counter()
     unresolved_due = False
@@ -277,7 +330,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--bindings", help="JSON object; defaults to RIGORRUN_CASE_BINDINGS")
     parser.add_argument("--case-id", help="defaults to RIGORRUN_CASE_ID")
     parser.add_argument("--attempt", help="defaults to RIGORRUN_CASE_ATTEMPT/RIGORRUN_ATTEMPT, then metadata")
-    parser.add_argument("--since", type=float, help="Unix timestamp for the beginning of agent execution")
+    parser.add_argument("--since", help="Unix timestamp or ISO-8601 beginning of agent execution")
     parser.add_argument("--out", type=Path)
     return parser.parse_args(argv)
 
@@ -290,7 +343,8 @@ def main(argv: list[str] | None = None) -> int:
     since = args.since
     if since is None:
         value = _env_first("RIGORRUN_CASE_STARTED_AT", "RIGORRUN_CASE_START_TIME", "RIGORRUN_CASE_START")
-        since = float(value) if value is not None else None
+        # evaluate() sends both numeric and ISO-8601 starts through _parse_since.
+        since = value
     if not bindings_text:
         raise SystemExit("bindings are required via --bindings or RIGORRUN_CASE_BINDINGS")
     if not case_id:
