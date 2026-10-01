@@ -189,6 +189,11 @@ than guess. The scope's description is shown on every verdict.
 
 ## What a verdict does not cover
 
+- **A pending refund counts as made.** A refund Stripe reports `pending` (or
+  `requires_action`) counts as made, as the pre-registered oracle counts it,
+  and the verdict is sealed when the case ends. Nothing follows the refund to a
+  final state: if Stripe later fails or cancels it, the verdict stays PASS. A
+  PASS says the agent issued the refund owed, not that the money arrived.
 - **Anybody else's activity in the account.** The reads take in every refund
   created in the account since the case's first object, and a black-box agent's
   calls are not seen, so nothing tells the agent's refunds from anybody else's.

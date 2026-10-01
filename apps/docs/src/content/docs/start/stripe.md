@@ -103,6 +103,8 @@ store committed or restored. The key arrives as `RIGORRUN_SECRET__STRIPE_TEST_KE
   This is always checked; it is what the policy's "and nothing else" means.
 - **State only.** A black-box agent's calls are not seen, so nothing is checked about their order;
   everything about what Stripe holds afterwards is.
+- **A pending refund counts as made.** As the pre-registered oracle counts it. The verdict is sealed
+  when the case ends; if Stripe later fails or cancels the refund, it stays PASS.
 - **Nobody else may write to the account during a run.** A refund made by anyone while a case runs is
   read as the agent's, because a black-box agent's calls cannot be told apart from anybody else's.
 - **A failed case can leave objects behind.** Stripe has no undo. If creating a case's records fails
