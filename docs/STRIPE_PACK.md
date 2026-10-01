@@ -166,6 +166,14 @@ written in minor units and nothing converts them; a ticket is written the way a
 person writes ("$49.99"), and the check that goes with it says `4999`. That
 conversion is the mistake the `units` case exists to catch.
 
+A suite's currency is one of `STRIPE_POLICY_CURRENCIES` — `usd`, `eur`, `gbp`,
+`cad`, `aud`, `nzd`, `chf`, `sek`, `nok`, `dkk`, `sgd`, `hkd`: Stripe currencies
+with two decimal places. Zero-decimal currencies are not supported yet (the
+`units` case would have no conversion to catch), and a code Stripe does not
+support is refused when the policy is read, not at the first payment. The twin
+refuses a payment in a currency Stripe does not list as supported with the
+error it gives a malformed one (`Invalid currency: zzz.`, param `currency`).
+
 A boundary is one minor unit. Two quantities are compared only when both are
 `currency_minor`, so the projection publishes, for example,
 `cmp__amount__minus__charge__amount` on every refund.

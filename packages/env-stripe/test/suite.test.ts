@@ -29,6 +29,7 @@ import {
   STRIPE_CASE_IDS,
   STRIPE_PACK_ID,
   STRIPE_POLICY_BRIEF,
+  STRIPE_POLICY_CURRENCIES,
   STRIPE_POLICY_LINES,
   STRIPE_REFUND_ACTION,
   STRIPE_RULE_IDS,
@@ -143,6 +144,32 @@ describe('the policy', () => {
 
   it('refuses a currency without cents, where the units case would catch nothing', () => {
     expect(() => parseStripePolicy({ currency: 'jpy' })).toThrow(/two decimal places/);
+  });
+
+  it('takes only the two-decimal currencies Stripe supports that it lists, and nothing made up', () => {
+    expect([...STRIPE_POLICY_CURRENCIES]).toEqual([
+      'usd',
+      'eur',
+      'gbp',
+      'cad',
+      'aud',
+      'nzd',
+      'chf',
+      'sek',
+      'nok',
+      'dkk',
+      'sgd',
+      'hkd',
+    ]);
+    for (const currency of STRIPE_POLICY_CURRENCIES) {
+      expect(parseStripePolicy({ currency }).currency).toBe(currency);
+      // Written with two decimals in every ticket and every line about Stripe.
+      expect(formatMinorUnits(4999, currency)).toMatch(/49\.99/);
+    }
+    // ICU would format any three letters with two decimals; Stripe refuses them.
+    for (const currency of ['zzz', 'xxx', 'abc', 'krw', 'kwd', 'mxn']) {
+      expect(() => parseStripePolicy({ currency }), currency).toThrow(/not supported/);
+    }
   });
 
   it('refuses a threshold that would forbid a refund a fixed case is owed', () => {

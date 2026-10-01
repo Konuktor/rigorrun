@@ -174,6 +174,52 @@ const ZERO_DECIMAL = new Set([
   'xpf',
 ]);
 
+/**
+ * The currencies the twin takes a payment in: those Stripe lists with a
+ * minimum charge (docs.stripe.com/currencies, read 2026-10-01), and the
+ * zero-decimal ones above. Stripe supports more than 135; one it supports that
+ * is missing here is refused by the twin, which errs towards refusing rather
+ * than towards accepting a currency nobody checked. Every currency a Stripe
+ * pack policy allows is here.
+ */
+const SUPPORTED_CURRENCIES = new Set([
+  'usd',
+  'aed',
+  'ars',
+  'aud',
+  'brl',
+  'cad',
+  'chf',
+  'cop',
+  'czk',
+  'dkk',
+  'eur',
+  'gbp',
+  'hkd',
+  'huf',
+  'idr',
+  'ils',
+  'inr',
+  'mxn',
+  'myr',
+  'nok',
+  'nzd',
+  'php',
+  'pln',
+  'ron',
+  'rub',
+  'sek',
+  'sgd',
+  'thb',
+  'zar',
+  ...ZERO_DECIMAL,
+]);
+
+/** Whether the twin takes a payment in this lower-case currency code. */
+export function isSupportedCurrency(currency: string): boolean {
+  return SUPPORTED_CURRENCIES.has(currency);
+}
+
 const SYMBOLS: Partial<Record<string, string>> = { usd: '$', eur: '€', gbp: '£', jpy: '¥' };
 
 /**

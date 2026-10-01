@@ -318,6 +318,11 @@ describe('stripe init --twin', () => {
       /an amount such as \$100/,
     ],
     [
+      'a currency Stripe does not support',
+      ['--twin', 'TWIN', '--yes', '--currency', 'zzz'],
+      /cannot be tested: .*not supported/,
+    ],
+    [
       'a twin that is not on this machine',
       ['--twin', 'http://twin.example.com', '--yes'],
       /loopback/,

@@ -15,6 +15,7 @@ import {
   checkExpand,
   MAXIMUM_AMOUNT,
   formatAmount,
+  isSupportedCurrency,
   type PaymentIntentInput,
   type RefundInput,
   type TwinModel,
@@ -213,7 +214,9 @@ const createPaymentIntent: Route = {
     const currencyRaw = nonEmptyString(params, 'currency');
     if (currencyRaw === undefined) missing('currency');
     const currency = currencyRaw.toLowerCase();
-    if (!/^[a-z]{3}$/.test(currency)) {
+    // A code Stripe does not support is refused as a malformed one is: the
+    // same error, before anything is made.
+    if (!/^[a-z]{3}$/.test(currency) || !isSupportedCurrency(currency)) {
       throw invalidRequest(`Invalid currency: ${currencyRaw}.`, { param: 'currency' });
     }
     if (amount > MAXIMUM_AMOUNT) {

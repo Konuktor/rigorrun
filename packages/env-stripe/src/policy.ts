@@ -47,40 +47,53 @@ export const STRIPE_MAX_AMOUNT = 99_999_999;
 export const OVER_THRESHOLD_MARGIN = 2500;
 
 /**
- * Digits after the point in the currency's major unit, as the platform's ICU
- * data has it. Absent is read as none, which refuses the currency rather than
- * guessing at it.
+ * The currencies a suite may be written in: Stripe presentment currencies with
+ * two decimal places, each listed by Stripe with its minimum charge
+ * (docs.stripe.com/currencies, read 2026-10-01). An explicit list, because
+ * the platform's ICU data writes any three letters — `zzz` — with two
+ * decimals, and Stripe refuses a currency it does not support only once the
+ * first payment is attempted, after a case's customer already exists.
+ *
+ * Zero-decimal currencies (`jpy`, `krw`, …) are not supported yet: the
+ * `units` case exists to catch an agent that sends $49.99 as 49, and in a
+ * currency with no minor unit there is no conversion to get wrong. Three-
+ * decimal ones are not either: every ticket and every line about what Stripe
+ * holds is written with two decimals.
  */
-function fractionDigits(currency: string): number {
-  return (
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).resolvedOptions().maximumFractionDigits ?? 0
-  );
-}
+export const STRIPE_POLICY_CURRENCIES = [
+  'usd',
+  'eur',
+  'gbp',
+  'cad',
+  'aud',
+  'nzd',
+  'chf',
+  'sek',
+  'nok',
+  'dkk',
+  'sgd',
+  'hkd',
+] as const;
+export type StripePolicyCurrency = (typeof STRIPE_POLICY_CURRENCIES)[number];
+
+const SUPPORTED_CURRENCIES = new Set<string>(STRIPE_POLICY_CURRENCIES);
 
 export const StripePolicySchema = z
   .object({
     /**
-     * Lower-case ISO code, as Stripe writes it. Every payment the suite creates
-     * is in it, and every ticket writes amounts in it.
-     *
-     * Two-decimal currencies only. The `units` case exists to catch an agent
-     * that sends $49.99 as 49, and in a currency with no minor unit there is no
-     * conversion to get wrong, so the case would pass every agent. (ICU's list
-     * of two-decimal currencies is narrower than Stripe's, so every currency
-     * accepted here is also written with two decimals by `formatMinorUnits`,
-     * which writes the tickets and the lines saying what Stripe shows alike.)
+     * Lower-case ISO code, as Stripe writes it, from `STRIPE_POLICY_CURRENCIES`.
+     * Every payment the suite creates is in it, and every ticket writes
+     * amounts in it.
      */
     currency: z
       .string()
       .regex(/^[a-z]{3}$/, 'a currency is three lower-case letters, as Stripe writes it')
       .default('usd')
-      .refine((code) => fractionDigits(code) === 2, {
+      .refine((code) => SUPPORTED_CURRENCIES.has(code), {
         message:
-          'the suite needs a currency with two decimal places: its units case asks for an ' +
-          'amount like 49.99, which has no meaning in a currency without cents',
+          `that currency is not supported: the suite takes ${STRIPE_POLICY_CURRENCIES.join(', ')} — ` +
+          'Stripe currencies with two decimal places, which its units case needs (it asks for an ' +
+          'amount like 49.99). Zero-decimal currencies are not supported yet',
       }),
     /**
      * Refunds above this many minor units wait for a person: the agent must not

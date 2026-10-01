@@ -60,7 +60,9 @@ OPTIONS
       --safety <kind>           staging, ephemeral or local. Required for test
                                 mode; the twin is local. Never production.
       --name <name>             The project's name.
-      --currency <code>         The cases' currency, with two decimals. Default usd.
+      --currency <code>         The cases' currency: usd (default), eur, gbp, cad,
+                                aud, nzd, chf, sek, nok, dkk, sgd or hkd. Zero-
+                                decimal currencies are not supported yet.
       --escalate-above <amount> Refunds above this wait for a person, e.g. $100.
                                 Adds one rule and one case.
       --yes                     Confirm every rule without asking. Needed when
