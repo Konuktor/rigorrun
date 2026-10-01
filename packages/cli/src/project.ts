@@ -27,7 +27,7 @@ import {
   type EnvironmentContract,
   type RunResult,
 } from '@rigorrun/core';
-import { explainCase, renderReportHtml } from '@rigorrun/report';
+import { explainCase, renderReportHtml, timeoutAdvice } from '@rigorrun/report';
 import { CliError } from './io.ts';
 import { c, heading, line, table } from './ui.ts';
 import type { Flags } from './commands.ts';
@@ -152,10 +152,7 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     const project = await service.readProject(projectId).catch(() => {
       throw new CliError(`No project "${projectId}" on this machine.`);
     });
-    const agent = flags.agent[0]
-      ? project.agents.find((entry) => entry.id === flags.agent[0] || entry.name === flags.agent[0])
-      : project.agents[project.agents.length - 1];
-    if (!agent) throw new CliError(`${project.name} has no agent to gate.`);
+    const agent = agentToGate(project, projectId, flags.agent[0]);
 
     const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     await writeProjectReport(projectId, result, flags);
@@ -232,13 +229,36 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
           ['task success', pct(score.taskSuccessRate), `>= ${pct(minSuccess)}`],
           ['policy compliance', pct(score.policyComplianceRate), `>= ${pct(minPolicy)}`],
           ['unsafe actions', String(score.unsafeActions), `<= ${maxUnsafe}`],
+          // Only what reached no verdict at all. The GitHub Action reads the
+          // count as the third word of this row.
           [
             'undecided cases',
-            `${undecided} (${score.abstained} abstained, ${score.timedOut} timed out, ${score.agentFailures} agent, ${score.harnessFailures} harness)`,
+            `${undecided} (${score.abstained} abstained, ${plural(score.harnessFailures, 'harness failure')})`,
             `<= ${maxInconclusive}`,
+          ],
+          // Decided, as not done: on their own row so they are never read as
+          // part of the undecided count beside them.
+          [
+            'timed out or failed',
+            `${score.timedOut + score.agentFailures} (${score.timedOut} timed out, ${plural(score.agentFailures, 'agent failure')})`,
+            'counted as not done',
           ],
         ],
       );
+      line();
+      line(
+        `${c.grey('undecided')}  a case RigorRun could not decide: it abstained for lack of evidence, ` +
+          'or its own harness failed. A case that timed out or where the agent failed is decided, ' +
+          'as not done.',
+      );
+      if (score.timedOut > 0) {
+        const budgets = result.caseResults.flatMap((entry) =>
+          caseOutcome(entry) === 'TIMED_OUT' && entry.budgetMs !== undefined
+            ? [entry.budgetMs]
+            : [],
+        );
+        line(timeoutAdvice(budgets.length > 0 ? Math.max(...budgets) : undefined));
+      }
       line();
       // How the verdict was reached, next to the verdict. A gate that passed
       // against a system nothing could be read back from is a different claim
@@ -267,6 +287,40 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     }
     return exitCode;
   });
+}
+
+/**
+ * The agent a gate is about. With one agent on the project there is nothing to
+ * choose; with several, a gate never picks one for you — a build that passes on
+ * whichever agent was added last is a build gated on the wrong thing.
+ */
+function agentToGate(
+  project: { name: string; agents: { id: string; name: string }[] },
+  projectId: string,
+  wanted: string | undefined,
+): { id: string; name: string } {
+  const names = project.agents.map((entry) => entry.name).join(', ');
+  if (wanted) {
+    const found = project.agents.find((entry) => entry.id === wanted || entry.name === wanted);
+    if (found) return found;
+    throw new CliError(
+      project.agents.length === 0
+        ? `No agent "${wanted}" on ${project.name}; it has none yet.`
+        : `No agent "${wanted}" on ${project.name}. Its agents: ${names}.`,
+    );
+  }
+  const [only, ...others] = project.agents;
+  if (!only) {
+    throw new CliError(
+      `${project.name} has no agent to gate. Add one: rigorrun agent add --project ${projectId} --black-box <url>`,
+    );
+  }
+  if (others.length > 0) {
+    throw new CliError(
+      `${project.name} has ${project.agents.length} agents; say which one to gate with --agent <name>: ${names}.`,
+    );
+  }
+  return only;
 }
 
 export async function cmdProjectCompare(
@@ -479,6 +533,11 @@ async function writeProjectReport(
 
 function pct(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
+}
+
+/** "0 harness failures", "1 agent failure". */
+function plural(count: number, noun: string): string {
+  return `${count} ${noun}${count === 1 ? '' : 's'}`;
 }
 
 export function reportTimeToValue(home: string | undefined, projectId: string): Promise<void> {

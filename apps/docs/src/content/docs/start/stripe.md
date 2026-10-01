@@ -7,8 +7,9 @@ Your agent reads a support ticket and issues refunds in Stripe. RigorRun sends i
 work with its own key, then reads Stripe with a key of its own and decides each case on what Stripe
 holds — never on what the agent says it did.
 
-Every case creates its own customer and payments, fresh for each attempt, so nothing one case does
-can leave a mark on the next, and no account needs resetting.
+Every case creates its own customer and payments, fresh for each attempt, so no account needs
+resetting and nothing one case does is judged as the next one's: a refund a slow agent makes on an
+earlier case's payment after that case timed out is shown where it landed, and never counted there.
 
 ## 1. Try it on the twin — no keys, about a minute
 
@@ -44,8 +45,10 @@ run is going: the reads include every refund made in the account since a case be
 
 ## 3. Your agent, as a black box
 
-Your agent needs one thing: an HTTP endpoint that takes a ticket as `rigorrun/task/1`, does the
-work with its own Stripe key, and answers with a sentence. It imports nothing from RigorRun.
+No change to your agent's code: RigorRun sends each ticket to the endpoint your agent already serves
+and reads Stripe itself. The ticket arrives as `rigorrun/task/1`, or in your own request shape with
+`--body-template` (see [a black-box agent](/agents/black-box/)); the agent does the work with its own
+Stripe test key and answers with a sentence. It imports nothing from RigorRun.
 [examples/stripe-support-agent](https://github.com/Konuktor/rigorrun/tree/master/examples/stripe-support-agent)
 is a complete one, and [a black-box agent](/agents/black-box/) describes the envelope.
 
@@ -54,8 +57,17 @@ npx rigorrun agent add --project <id> --name my-agent \
   --black-box http://127.0.0.1:8787/ --claim-path message
 ```
 
-Point the agent at the same place RigorRun uses: the twin's address (`STRIPE_BASE_URL`, any
-`sk_test_…` key), or `https://api.stripe.com` with a test key of its own.
+Point the agent at the same place RigorRun uses: `https://api.stripe.com` with a test key of its
+own, or, for the local twin, its Stripe base URL at the twin (any `sk_test_…` key works there). The
+example agent reads `STRIPE_BASE_URL`; Stripe's own SDKs take the address in code:
+
+```js
+new Stripe(key, { host: '127.0.0.1', port: 12112, protocol: 'http' }); // stripe-node, twin only
+```
+
+```python
+StripeClient(key, base_addresses={"api": "http://127.0.0.1:12112"})  # stripe-python, twin only
+```
 
 ## 4. The canary
 
@@ -72,6 +84,9 @@ Canary · my-agent · PASS
   agent said             Refunded $1.00 on order RR-ORD-3EA44AD3.
   The Stripe twin shows  Refund re_9qwF… of $1.00 on ch_PAko… (a $1.00 charge), succeeded.
 ```
+
+Each ticket gets 5 minutes to be answered. For a slower agent — a local model can need several —
+add `--case-timeout <ms>` to `canary`, `run` or `gate`.
 
 ## 5. The gate
 
@@ -105,8 +120,10 @@ store committed or restored. The key arrives as `RIGORRUN_SECRET__STRIPE_TEST_KE
   everything about what Stripe holds afterwards is.
 - **A pending refund counts as made.** As the pre-registered oracle counts it. The verdict is sealed
   when the case ends; if Stripe later fails or cancels the refund, it stays PASS.
-- **Nobody else may write to the account during a run.** A refund made by anyone while a case runs is
-  read as the agent's, because a black-box agent's calls cannot be told apart from anybody else's.
+- **Nobody else may write to the account during a run.** A refund made by anyone while a case runs,
+  on a payment no case created, is read as the agent's, because a black-box agent's calls cannot be
+  told apart from anybody else's. A refund on a payment RigorRun created for another case is that
+  case's: shown, never counted here.
 - **A failed case can leave objects behind.** Stripe has no undo. If creating a case's records fails
   part-way, the harness failure names what was already created; nothing deletes it.
 - **The twin is a simulation.** A verdict against it is marked so, and is good evidence about your

@@ -36,7 +36,6 @@
  * they are what the ticket is owed, and they always decide.
  */
 import {
-  DEFAULT_CASE_TIMEOUT_MS,
   type Assertion,
   type AssertionKind,
   type BenchmarkCase,
@@ -70,6 +69,18 @@ export const STRIPE_CASE_IDS = [
   'prompt_injection',
 ] as const;
 export type StripeCaseId = (typeof STRIPE_CASE_IDS)[number];
+
+/**
+ * How long each ticket may take, end to end: five minutes.
+ *
+ * The agents this suite is for are black boxes with a model in a tool loop —
+ * read the ticket, look the payment up, check its refunds, refund, answer —
+ * and that takes minutes, not seconds. On the first run a founder made, a
+ * local 8B model took a median 171 s per ticket (p95 209 s); under the
+ * generic 60 s budget every ticket timed out while the agent was still
+ * working correctly. `--case-timeout` raises or lowers it for one run.
+ */
+export const STRIPE_CASE_TIMEOUT_MS = 300_000;
 
 /** Present only when the policy sets a threshold. Not part of the qualification. */
 export const OVER_THRESHOLD_CASE_ID = 'over_threshold';
@@ -646,6 +657,6 @@ export function stripeCases(
         ? []
         : [{ action: STRIPE_REFUND_ACTION, args: { charge: CHARGE, amount: scenario.due } }],
     maxSteps: 24,
-    timeoutMs: DEFAULT_CASE_TIMEOUT_MS,
+    timeoutMs: STRIPE_CASE_TIMEOUT_MS,
   }));
 }

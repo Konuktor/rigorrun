@@ -88,7 +88,7 @@ describe('the rendered report', () => {
     expect(html).toContain('synthetic demo environment');
   });
 
-  it('does not call somebody else\'s system synthetic', () => {
+  it("does not call somebody else's system synthetic", () => {
     // A run against a real system used to carry a footer telling its owner
     // that every record in it was fabricated.
     const real = renderReportHtml(run, {
@@ -180,5 +180,47 @@ describe('publishing a sanitised report', () => {
   it('does not leak the private workflow into the published HTML', () => {
     expect(publishedHtml).not.toContain('CUST-2016');
     expect(publishedHtml).not.toContain('IMPORTANT SYSTEM MESSAGE');
+  });
+});
+
+describe('a run of one black-box agent that timed out', () => {
+  // The counts a founder read on a first run: every case timed out, none
+  // abstained, nothing broke. Each number must say what it counts.
+  const [first] = run.scores;
+  const slow = {
+    ...first!,
+    agentId: 'agent_slow',
+    agentName: 'slow',
+    errorRate: 0.75,
+    timedOut: 6,
+    agentFailures: 0,
+    harnessFailures: 0,
+    abstained: 0,
+    avgSteps: 0,
+  };
+  const page = renderReportHtml(
+    {
+      ...run,
+      agents: [{ id: 'agent_slow', name: 'slow', kind: 'blackbox' }],
+      scores: [slow],
+      caseResults: run.caseResults.filter((entry) => entry.agentId === first!.agentId),
+    },
+    { generatedAt: '2026-01-20T10:00:00.000Z' },
+  );
+
+  it('says what the error rate is made of, and keeps timeouts out of "no verdict"', () => {
+    expect(page).toContain('6 timed out · 0 agent failure(s) · 0 harness');
+    expect(page).not.toContain('agent or adapter failures');
+    expect(page).toMatch(/No verdict[\s\S]{0,200}0 abstained · 0 harness/);
+    expect(page).not.toMatch(/0 abstained · 6 timed out/);
+  });
+
+  it('shows no step count for an agent whose steps RigorRun never sees', () => {
+    expect(page).toMatch(/<td class="num">—<\/td>/);
+    expect(page).not.toMatch(/<td class="num">0\.0<\/td>/);
+  });
+
+  it('is not called a benchmark', () => {
+    expect(page).not.toContain('Private agent benchmark');
   });
 });

@@ -652,11 +652,13 @@ function printComparison(result: RunResult): void {
     `${c.grey(`n=${result.scores[0]?.n ?? 0} cases per agent. Ranges are 95% Wilson intervals.`)}`,
   );
   for (const s of result.scores) {
-    const undecided = s.abstained + s.timedOut + s.agentFailures + s.harnessFailures;
-    if (undecided > 0) {
+    if (s.abstained + s.timedOut + s.agentFailures + s.harnessFailures > 0) {
+      // Timed out and agent failures are decided, as not done; only an
+      // abstention or a harness failure leaves a case undecided.
       line(
-        `${c.grey('outcomes')}  ${s.agentName}: ${s.decided ?? s.n}/${s.n} decided · ` +
-          `${s.abstained} abstained · ${s.timedOut} timed out · ${s.agentFailures} agent failure(s) · ${s.harnessFailures} harness failure(s)`,
+        `${c.grey('outcomes')}  ${s.agentName}: ${s.decided ?? s.n}/${s.n} decided, ` +
+          `${s.timedOut} of them timed out and ${s.agentFailures} agent failure(s), counted as not done · ` +
+          `undecided: ${s.abstained} abstained, ${s.harnessFailures} harness failure(s)`,
       );
     }
   }

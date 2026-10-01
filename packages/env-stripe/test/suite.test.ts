@@ -27,6 +27,7 @@ import {
   REFUND_STATUSES,
   STRIPE_ACTIONS,
   STRIPE_CASE_IDS,
+  STRIPE_CASE_TIMEOUT_MS,
   STRIPE_PACK_ID,
   STRIPE_POLICY_BRIEF,
   STRIPE_POLICY_CURRENCIES,
@@ -447,6 +448,12 @@ describe('the suite', () => {
     for (const testCase of benchmark.cases) {
       expect(BenchmarkCaseSchema.parse(testCase)).toEqual(testCase);
     }
+  });
+
+  it('gives every ticket five minutes, because a model in a tool loop needs minutes, not seconds', () => {
+    expect(STRIPE_CASE_TIMEOUT_MS).toBe(300_000);
+    const all = stripeSuite({ escalateAbove: 10_000 }, { canary: true }).benchmark.cases;
+    expect(new Set(all.map((testCase) => testCase.timeoutMs))).toEqual(new Set([300_000]));
   });
 });
 

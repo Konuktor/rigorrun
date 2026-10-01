@@ -46,6 +46,45 @@ export function caseMetadata(ctx: PackCaseContext): Record<string, string> {
   };
 }
 
+/** Which case, attempt, agent and run an object was made for, as its metadata says. */
+export interface CaseMark {
+  run: string;
+  agent: string;
+  case: string;
+  attempt: string;
+}
+
+/** A case's own mark, as `caseMetadata` writes it. */
+export function caseMarkOf(ctx: PackCaseContext): CaseMark {
+  return { run: ctx.runId, agent: ctx.agentId, case: ctx.caseId, attempt: String(ctx.attempt) };
+}
+
+/**
+ * The case an object's metadata names, or null when it carries none of
+ * RigorRun's keys — an object outside every case. A key that is present names
+ * a case even with the others missing (they read as empty), so a partly
+ * written mark is never mistaken for no mark.
+ */
+export function caseMarkIn(
+  metadata: Readonly<Record<string, string>> | null | undefined,
+): CaseMark | null {
+  if (metadata === null || metadata === undefined) return null;
+  const keys = Object.values(METADATA_KEYS);
+  if (!keys.some((key) => Object.prototype.hasOwnProperty.call(metadata, key))) return null;
+  const value = (key: string) => String(metadata[key] ?? '');
+  return {
+    run: value(METADATA_KEYS.run),
+    agent: value(METADATA_KEYS.agent),
+    case: value(METADATA_KEYS.case),
+    attempt: value(METADATA_KEYS.attempt),
+  };
+}
+
+/** Whether two marks name the same run, agent, case and attempt. */
+export function sameCase(a: CaseMark, b: CaseMark): boolean {
+  return a.run === b.run && a.agent === b.agent && a.case === b.case && a.attempt === b.attempt;
+}
+
 /**
  * The Idempotency-Key for one of RigorRun's own writes.
  *

@@ -19,6 +19,7 @@ import {
   type EntityRow,
   type PackBindings,
 } from '@rigorrun/environment';
+import type { LateWrite } from './read.ts';
 
 /**
  * Currencies whose minor unit is not a hundredth, per Stripe's list. Every
@@ -127,6 +128,30 @@ export function describeStripeReality(
   if (windowed !== undefined)
     lines.push(`Some refunds may be missing from this account: ${windowed}.`);
   return lines;
+}
+
+/**
+ * Refunds that landed on another case's payments while this case ran, which
+ * its reads saw and set aside (see `readCase`). One line, so the count is
+ * read before the detail, and so it never pushes the case's own lines out of
+ * a short listing.
+ */
+export function describeLateWrites(writes: readonly LateWrite[]): string[] {
+  if (writes.length === 0) return [];
+  const each = writes
+    .map(
+      (write) =>
+        `${write.refund} of ${formatMinorUnits(write.amount, write.currency)} on ${write.charge}, ` +
+        `made for ${write.madeFor.case}`,
+    )
+    .join('; ');
+  return [
+    writes.length === 1
+      ? `1 refund landed on another case’s records while this case ran (a late write from an ` +
+        `earlier case: ${each}); it is not counted here.`
+      : `${writes.length} refunds landed on other cases’ records while this case ran (late ` +
+        `writes from earlier cases: ${each}); they are not counted here.`,
+  ];
 }
 
 /** Which charge this is to the case, in words, with its amount. */

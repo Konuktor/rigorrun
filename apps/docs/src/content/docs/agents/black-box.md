@@ -1,12 +1,15 @@
 ---
 title: A black-box agent
-description: Your agent as it is, wherever it runs. RigorRun sends it the work, then reads the system itself and judges what changed.
+description: Your agent with no change to its code, wherever it runs. RigorRun sends it the work, then reads the system itself and judges what changed.
 ---
 
-The fastest way to test an agent you already have. Nothing about it changes: it keeps its own
-tools, its own SDKs and its own deployment — your laptop, staging, the cloud. RigorRun posts each
-case's work to an address the agent already takes work on, waits for the answer, and then reads the
-system through **its own connection** to decide what actually happened.
+The fastest way to test an agent you already have, with no change to its code: it keeps its own
+tools, its own SDKs, its own credentials and its own deployment — your laptop, staging, the cloud.
+RigorRun posts each case's work to the endpoint the agent already serves (in your request shape,
+with a [body template](#what-rigorrun-sends)), waits for the answer, and then reads the system
+through **its own connection** to decide what actually happened. What the agent must share with
+RigorRun is the system: the same staging database, or the same Stripe test account — or, for
+Stripe's local twin, a Stripe base URL pointed at the twin.
 
 That makes every verdict `INDEPENDENT`: the agent never touched the connection the result was read
 through, and its own account of what it did is shown next to the evidence and never scored.

@@ -44,9 +44,14 @@ export function explainCase(result: CaseResult): CaseExplanation {
   ]
     .filter(Boolean)
     .join(' · ');
+  const outcome = caseOutcome(result);
   return {
-    outcome: caseOutcome(result),
-    claim: result.agentReport.trim() || '(the agent said nothing)',
+    outcome,
+    claim:
+      // A timeout is RigorRun's own message, not something the agent said.
+      outcome === 'TIMED_OUT'
+        ? `(no answer within the ${result.budgetMs === undefined ? '' : `${seconds(result.budgetMs)} `}case budget)`
+        : result.agentReport.trim() || '(the agent said nothing)',
     ...(result.reality
       ? { reality: { system: result.reality.system, lines: [...result.reality.lines] } }
       : {}),
@@ -60,6 +65,27 @@ export function explainCase(result: CaseResult): CaseExplanation {
     ).slice(0, MAX_LINES),
     evidence,
   };
+}
+
+/**
+ * What to do about a case that ran out of time. Not "fix the agent": a
+ * timeout says only that the answer did not come inside the budget, and a
+ * slow model working correctly ends exactly this way. `unit` is what one case
+ * is to the person reading — a pack may say what its cases are.
+ */
+export function timeoutAdvice(budgetMs: number | undefined, unit = 'case'): string {
+  const suggested = Math.max(600_000, (budgetMs ?? 0) * 2);
+  return (
+    `The agent did not answer within the case budget${budgetMs === undefined ? '' : ` (${seconds(budgetMs)})`}. If it is still ` +
+    `working, raise the budget: --case-timeout <ms>, e.g. --case-timeout ${suggested}. Slow ` +
+    `models can need several minutes per ${unit}.`
+  );
+}
+
+/** A budget in seconds, as a person reads it: 60 s, 5.1 s, 91 s. */
+function seconds(ms: number): string {
+  const value = ms / 1000;
+  return `${value >= 10 ? Math.round(value) : Number(value.toFixed(1))} s`;
 }
 
 function sentence(assertion: AssertionResult): string {

@@ -66,21 +66,50 @@ parameters for 24 hours.
 
 ## Run it
 
-Against the local twin (`rigorrun stripe twin`, on `127.0.0.1:12112`), or Stripe test mode with
-the agent's own test key:
+From a clone of this repository. The agent is plain Node with no dependencies, so there is
+nothing to install:
 
 ```bash
-export STRIPE_KEY=sk_test_…                    # the agent's own key; RigorRun never sees it
-export STRIPE_BASE_URL=http://127.0.0.1:12112  # the twin; leave unset for api.stripe.com
-export GEMINI_API_KEY=… GEMINI_MODEL=…         # no default model: a recording pins one
-VARIANT=careful node examples/stripe-support-agent/server.mjs
+git clone https://github.com/Konuktor/rigorrun && cd rigorrun
 ```
 
-Or on a local model, through any OpenAI-compatible endpoint:
+### Point it at the twin
+
+No Stripe account and no keys: the twin is Stripe's API on your machine, and any `sk_test_…` key
+works against it. Start it in one terminal and leave it running:
 
 ```bash
-LLM_PROVIDER=openai OPENAI_BASE_URL=http://127.0.0.1:11434/v1 OPENAI_MODEL=llama3.1:8b \
+npx rigorrun stripe twin                      # serves http://127.0.0.1:12112
+```
+
+In a second terminal, start the agent pointed at the twin, on a local model through any
+OpenAI-compatible endpoint (Ollama here) — still no keys:
+
+```bash
+STRIPE_KEY=sk_test_twin STRIPE_BASE_URL=http://127.0.0.1:12112 \
+  LLM_PROVIDER=openai OPENAI_BASE_URL=http://127.0.0.1:11434/v1 OPENAI_MODEL=llama3.1:8b \
   VARIANT=careful node examples/stripe-support-agent/server.mjs
+```
+
+A local model can take minutes per ticket. RigorRun gives each ticket 5; if yours needs more, add
+`--case-timeout 600000` (ten minutes) to `rigorrun stripe canary` and `rigorrun gate`.
+
+Or on Gemini, with your own API key and model (there is no default model: a recording pins one):
+
+```bash
+export GEMINI_API_KEY=… GEMINI_MODEL=…
+STRIPE_KEY=sk_test_twin STRIPE_BASE_URL=http://127.0.0.1:12112 \
+  VARIANT=careful node examples/stripe-support-agent/server.mjs
+```
+
+### Or Stripe test mode
+
+Give the agent a test key of its own — RigorRun never sees it — and leave `STRIPE_BASE_URL` unset,
+so the agent calls `https://api.stripe.com`:
+
+```bash
+export GEMINI_API_KEY=… GEMINI_MODEL=…
+STRIPE_KEY=sk_test_… VARIANT=careful node examples/stripe-support-agent/server.mjs
 ```
 
 Check it answers, without doing any work:

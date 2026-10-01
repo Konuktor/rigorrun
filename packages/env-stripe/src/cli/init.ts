@@ -28,7 +28,7 @@ import { parseStripePolicy, type StripePolicy, type StripePolicyInput } from '..
 import { formatMinorUnits } from '../reality.ts';
 import { BINDING_NAMES } from '../recipe.ts';
 import { stripeRules } from '../rules.ts';
-import { CANARY_AMOUNT, CANARY_CASE_ID } from '../scenarios.ts';
+import { CANARY_AMOUNT, CANARY_CASE_ID, STRIPE_CASE_TIMEOUT_MS } from '../scenarios.ts';
 import { UsageError, messageOf, rows, say, withService } from './common.ts';
 import { TWIN_AGENT_KEY } from './twin.ts';
 
@@ -385,5 +385,9 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
   say();
   say('Next');
   for (const command of next) say(`  ${command}`);
+  say(
+    `Each ticket gets ${STRIPE_CASE_TIMEOUT_MS / 60_000} minutes; slower agents: add ` +
+      '--case-timeout <ms> to canary, run or gate.',
+  );
   return 0;
 }

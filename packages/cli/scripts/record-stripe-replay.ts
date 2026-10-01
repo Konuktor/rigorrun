@@ -70,7 +70,12 @@ import {
   type RunResult,
 } from '@rigorrun/core';
 import { ProjectStore, selectCases, storeRoot } from '@rigorrun/daemon';
-import { STRIPE_CASE_IDS, startTwin, type RunningTwin } from '@rigorrun/env-stripe';
+import {
+  STRIPE_CASE_IDS,
+  STRIPE_CASE_TIMEOUT_MS,
+  startTwin,
+  type RunningTwin,
+} from '@rigorrun/env-stripe';
 import { TWIN_AGENT_KEY } from '@rigorrun/env-stripe/cli/twin.ts';
 import { runCommand, startCommand } from '@rigorrun/exec';
 import { decideVerdict } from '@rigorrun/scoring';
@@ -674,7 +679,7 @@ async function record(
 
     // One recording per variant: seven cases, one attempt each.
     const caseArgs = STRIPE_CASE_IDS.flatMap((caseId) => ['--case', caseId]);
-    const perCase = (settings.caseTimeoutMs ?? 60_000) + 120_000;
+    const perCase = (settings.caseTimeoutMs ?? STRIPE_CASE_TIMEOUT_MS) + 120_000;
     const runIds: Partial<Record<Variant, string>> = {};
     const store = new ProjectStore(storeRoot(home));
     for (const variant of VARIANTS) {
@@ -912,7 +917,7 @@ async function logPilot(
     '',
     `- **System:** ${SYSTEM_NAMES[settings.system]}. **Model:** \`${settings.model}\` through ${providerName(settings, credentials)} (\`${settings.provider}\` wire format), temperature ${settings.temperature} (${settings.temperatureSource}).`,
     `- **Commit:** \`${at.commit}\`${at.dirty.length > 0 ? `, with uncommitted changes to ${at.dirty.map((path) => `\`${path}\``).join(', ')}` : ', clean'}.`,
-    `- **Harness:** case timeout ${settings.caseTimeoutMs ?? 'the suite’s own (60000)'} ms; MIN_INTERVAL_MS ${settings.minIntervalMs ?? 'unset'}; one attempt per case.`,
+    `- **Harness:** case timeout ${settings.caseTimeoutMs ?? `the suite’s own (${STRIPE_CASE_TIMEOUT_MS})`} ms; MIN_INTERVAL_MS ${settings.minIntervalMs ?? 'unset'}; one attempt per case.`,
     `- **Agents (GET /meta):** ${hashes.length > 0 ? hashes.join('; ') : 'none started'}.`,
     `- **Changed since the previous pilot, and why:** ${settings.note}`,
     `- **Outcome:** ${outcome.join('; ')}`,

@@ -118,6 +118,8 @@ describe('materializing a plain case', () => {
       customers: [made.bindings['customer']],
       charges: [made.bindings['charge']],
       createdGte: fake.customers.get(made.bindings['customer']!)?.created,
+      // The case the reads are for, so a refund on another case's payment is that case's.
+      owner: { run: ctx.runId, agent: ctx.agentId, case: ctx.caseId, attempt: String(ctx.attempt) },
     });
     expect(made.scope.description).toBe(
       'the customer, the charge and its refunds and disputes created for this case, plus every ' +

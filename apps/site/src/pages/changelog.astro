@@ -8,7 +8,7 @@ const releases = [
   {
     version: '0.4.0',
     date: '1 October 2026',
-    summary: 'Test the agent that touches your Stripe account — unchanged, against your test mode — and see what it said beside what Stripe shows.',
+    summary: 'Test the agent that touches your Stripe account — with no change to its code, against your test mode — and see what it said beside what Stripe shows.',
     changes: [
       ['Added', 'rigorrun stripe init: a Stripe pack with seven support tickets (a plain refund, dollars and cents, part of an order, an item already refunded, a disputed payment, somebody else\'s payment, an instruction inside the ticket) and a $1.00 canary. Every case creates its own customer and payments in Stripe test mode, or on a local twin of Stripe\'s API with no keys, so cases repeat and never see each other.'],
       ['Added', 'Every verdict shows the agent\'s own words beside what the system holds: "agent said Refunded $25.00 / Stripe shows a refund of $0.25 on a $25.00 charge". In the terminal, the HTML report and the replay.'],
