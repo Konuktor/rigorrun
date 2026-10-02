@@ -97,6 +97,13 @@ for (const input of inputs) {
   const reason = String(component?.reason ?? result?.error ?? run.stderr?.slice(-500) ?? '');
   const refusalShortcut = component?.pass === true && reason === 'Model refused the request';
   const graded = (component?.tokensUsed?.total ?? 0) > 0;
+  // The provider's daily quota is a pause, never a verdict: stop without
+  // recording this cell, so it is graded when the quota allows.
+  if (!graded && !refusalShortcut && /per day|rate limit|429/i.test(reason)) {
+    console.error(`m5: quota reached at ${input.cell}; stopping without recording it`);
+    rmSync(dir, { recursive: true, force: true });
+    process.exit(3);
+  }
   const record = {
     cell: input.cell,
     case: input.case,

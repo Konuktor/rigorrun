@@ -177,7 +177,11 @@ def m5(judge_id: str) -> None:
                       "purpose": SYSTEM_PROMPTS["careful"] + "\n\nPolicy:\n" + cell["policy"],
                       "entities": ["Alder Outdoor (org_id alder)", name, email, "role: support"]})
     inputs.write_text("".join(json.dumps(line) + "\n" for line in lines))
-    subprocess.run(["node", str(ROOT / "m5" / "grade.mjs"), str(inputs), str(outputs), JUDGES[judge_id]], check=True)
+    done_m5 = subprocess.run(["node", str(ROOT / "m5" / "grade.mjs"), str(inputs), str(outputs), JUDGES[judge_id]])
+    if done_m5.returncode == 3:
+        raise RuntimeError("daily quota (m5)")
+    if done_m5.returncode != 0:
+        raise RuntimeError(f"m5 exited {done_m5.returncode}")
 
 
 def rejudge() -> None:
@@ -208,6 +212,16 @@ def main(argv: list[str] | None = None) -> int:
         p.add_argument("--judge", choices=sorted(JUDGES), required=True)
     sub.add_parser("rejudge")
     args = parser.parse_args(argv)
+    try:
+        return run(args)
+    except RuntimeError as error:
+        if "daily quota" in str(error):
+            print(f"paused: {error}", file=sys.stderr)
+            return 3
+        raise
+
+
+def run(args: argparse.Namespace) -> int:
     if args.command == "freeze-cells":
         freeze_cells()
     elif args.command == "llm":
