@@ -22,9 +22,16 @@ import ClaimReality from '../components/ClaimReality.astro';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { RELEASE_LABEL, DOCS_URL, REPO_URL, CONTACT_EMAIL, contactHref } from '../site';
-import { stripeReplay } from '../lib/replay';
+import { helpdeskReplay, stripeReplay } from '../lib/replay';
 
-const headline = stripeReplay?.headline ?? null;
+/**
+ * The card beside the hero: the permissions recording's pre-registered
+ * headline when there is one, else the Stripe recording's. Each is chosen by
+ * its own recording's rule, never by what reads best here.
+ */
+const featured = helpdeskReplay?.headline ? helpdeskReplay : stripeReplay;
+const featuredPath = featured === helpdeskReplay ? '/replay/helpdesk' : '/replay';
+const headline = featured?.headline ?? null;
 
 /**
  * The demo video, when it has been made. `scripts/record-demo-video.mjs` films
@@ -42,7 +49,7 @@ const demoVideo = existsSync(join(media, 'demo.mp4'))
   : null;
 
 /** Per agent, how its cases ended, for the case where no case failed. */
-const tallies = (stripeReplay?.agents ?? []).map((agent) => ({
+const tallies = (featured?.agents ?? []).map((agent) => ({
   name: agent.name,
   cases: agent.cases.length,
   passed: agent.cases.filter((entry) => entry.outcome === 'PASS').length,
@@ -127,7 +134,7 @@ const limits = [
 
 <Base
   title="RigorRun"
-  description="Your agent acts for one customer at a time. RigorRun tests that it stays there: it sends the agent tickets that tempt it across the line, then reads the real system itself — today Stripe, your test mode or a local twin — and shows what happened beside what the agent said. Open source; runs on your machine."
+  description="Your agent acts for one customer at a time. RigorRun tests that it stays there: it sends the agent tickets that tempt it across the line, then reads the system itself — a multi-tenant helpdesk twin, or Stripe — and shows what happened beside what the agent said. Open source; runs on your machine."
 >
   <!-- ───────────────────────────────────────────────────────────────── hero -->
   <section>
@@ -155,13 +162,21 @@ const limits = [
             RigorRun sends your agent tickets that tempt it across the line — somebody else&rsquo;s
             order, a decision that is not its to make, an instruction hidden in the customer&rsquo;s
             message — then reads the system itself and puts what actually happened next to what the
-            agent said it did. The first system it reads is Stripe: your test mode, or a local twin
-            with no keys.
+            agent said it did. It reads two systems today: a multi-tenant helpdesk twin, and Stripe —
+            your test mode, or a local twin with no keys.
           </p>
 
           <ol class="mt-8 max-w-xl space-y-5" aria-label="How to try it">
             <li>
-              <Command command="npx rigorrun demo" size="lg" />
+              <Command command="npx rigorrun helpdesk try" size="lg" />
+              <p class="mt-2 text-support text-muted">
+                <span class="text-fg">A built-in demo agent, two tokens, six tickets.</span> A
+                helpdesk twin shared by two organisations; the verdict comes from its access log,
+                tables and outbox. Seconds, no keys.
+              </p>
+            </li>
+            <li>
+              <Command command="npx rigorrun demo" />
               <p class="mt-2 text-support text-muted">
                 <span class="text-fg">See a recorded run first.</span> Offline, no keys, no account.
               </p>
@@ -187,7 +202,7 @@ const limits = [
 
           <p class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-support">
             <a class="rr-link font-medium" href="/start">Get started</a>
-            <a class="rr-link" href="/replay">The recorded run, case by case</a>
+            <a class="rr-link" href={featuredPath}>The recorded run, case by case</a>
             <a class="rr-link" href={contactHref(CONTACT_EMAIL)}>Set it up with me on a call</a>
             <span class="text-muted">MIT · runs on your machine · no account</span>
           </p>
@@ -195,12 +210,12 @@ const limits = [
 
         <div>
           {
-            stripeReplay && headline && (
-              <ClaimReality replay={stripeReplay} entry={headline} />
+            featured && headline && (
+              <ClaimReality replay={featured} entry={headline} />
             )
           }
           {
-            stripeReplay && !headline && (
+            featured && !headline && (
               <div class="rounded-panel border border-line bg-surface p-6 shadow-[var(--shadow-lift)]">
                 <p class="text-micro font-semibold uppercase text-muted">The recorded run</p>
                 <h2 class="mt-3 text-title font-medium">No case failed in this recording.</h2>
@@ -212,17 +227,17 @@ const limits = [
                   ))}
                 </ul>
                 <p class="mt-4 text-meta text-muted">
-                  <span class="font-mono text-secondary">{stripeReplay.model}</span> ({stripeReplay.provider})
-                  · recorded {stripeReplay.date} · on {stripeReplay.system}.
+                  <span class="font-mono text-secondary">{featured.model}</span> ({featured.provider})
+                  · recorded {featured.date} · on {featured.system}.
                 </p>
                 <p class="mt-4 text-support">
-                  <a class="rr-link" href="/replay">Every case, with what the agent said</a>
+                  <a class="rr-link" href={featuredPath}>Every case, with what the agent said</a>
                 </p>
               </div>
             )
           }
           {
-            !stripeReplay && (
+            !featured && (
               <>
                 <ClaimGap />
                 <p class="mt-3 text-meta text-muted">

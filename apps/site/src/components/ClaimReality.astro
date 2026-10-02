@@ -33,6 +33,8 @@ const lines =
     : entry.findings.map((finding) => `${finding.description}: ${finding.message}`);
 const shows = `${entry.realitySystem ?? 'The system'} shows`;
 const temperature = replay.temperature === null ? null : `temperature ${replay.temperature}`;
+/** The page that shows every case of this recording. */
+const page = replay.source === 'helpdesk' ? '/replay/helpdesk' : '/replay';
 ---
 
 <article
@@ -98,7 +100,7 @@ const temperature = replay.temperature === null ? null : `temperature ${replay.t
       <Strength verification={entry.verification} independence={entry.independence} />
       {
         link && (
-          <a class="rr-link ml-auto text-support" href="/replay">
+          <a class="rr-link ml-auto text-support" href={page}>
             Every case of this run
           </a>
         )
@@ -114,6 +116,17 @@ const temperature = replay.temperature === null ? null : `temperature ${replay.t
         <p class="mt-1 text-meta text-muted">
           <span class="font-mono text-secondary">{entry.agentName}</span> —{' '}
           {replay.variantDescriptions[entry.variant]}
+        </p>
+      )
+    }
+    {
+      replay.errata.length > 0 && (
+        <p class="mt-1 text-meta text-muted">
+          Found after recording:{' '}
+          <a class="rr-link" href={`${page}#found-after-recording`}>
+            {replay.errata.length === 1 ? 'one note' : `${replay.errata.length} notes`} on this
+            recording</a
+          >.
         </p>
       )
     }
