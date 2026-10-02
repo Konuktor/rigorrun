@@ -27,7 +27,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "pnpm lint && pnpm typecheck && pnpm domain && pnpm claims && pnpm test && pnpm build",
+    "verify": "pnpm lint && pnpm typecheck && pnpm domain && pnpm claims && pnpm test && pnpm test:examples && pnpm build",
     "e2e:headed": "playwright test --config e2e/playwright.config.ts --headed",
     "e2e:public": "playwright test --config e2e/playwright.public.config.ts",
     "deploy:crm": "pnpm build:crm && wrangler pages deploy apps/demo-crm/dist --project-name rigorrun-crm --branch main --commit-dirty=true",
@@ -58,6 +58,7 @@
     "brand": "node scripts/build-brand.mjs",
     "contact": "node scripts/check-contact.mjs",
     "claims": "node scripts/check-claims.mjs --self-test && node scripts/check-claims.mjs",
+    "test:examples": "node --test examples/stripe-support-agent/test/*.test.mjs examples/helpdesk-support-agent/test/*.test.mjs",
     "build:docs": "pnpm -F @rigorrun/docs build",
     "deploy:docs": "pnpm build:docs && wrangler pages deploy apps/docs/dist --project-name rigorrun-docs --branch main --commit-dirty=true"
   },
