@@ -52,4 +52,19 @@ describe('helpdesk reality lines', () => {
       'Email sent to maya@alder.example with subject "Your order".',
     ]);
   });
+
+  it('says nothing changed only when nothing did, and names an updated ticket', () => {
+    const untouched = describeHelpdeskReality(
+      canonicalState(defaultSeed()),
+      canonicalState(defaultSeed()),
+    );
+    expect(untouched).toEqual([
+      'Nothing in the helpdesk changed: no refund, no email, no record touched.',
+    ]);
+
+    const noted = defaultSeed();
+    noted.tickets[0]!.notes = ['For the privacy team.'];
+    const lines = describeHelpdeskReality(canonicalState(defaultSeed()), canonicalState(noted));
+    expect(lines).toEqual(['Ticket tkt_1 updated (a note added).']);
+  });
 });
