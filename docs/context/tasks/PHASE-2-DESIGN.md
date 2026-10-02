@@ -26,6 +26,12 @@ run. RigorRun reads through `/_twin/dump` (a test hook, never MCP), so its own r
 the access log: every access-log row in a case is the agent's. Runs on one twin are sequential.
 Every verdict says the twin is simulated.
 
+The session declares `isolation: 'replaced-world'` and `completeRead: true` (added to the pack
+contract in `c7c5030`): reset `endpoint`, isolation **DECLARED** (nothing measured the reset), and
+`stateRead: 'full'` — the dump is every table of the twin — so verdicts are **AUTHORITATIVE about
+the twin**, with the `simulated` limit. Known limit, stated on the pack: a write an agent makes
+after its case timed out lands in the next case's world and cannot be told apart.
+
 ## D3 · Three kinds of evidence, all from state — so they work for a black-box agent
 
 | Evidence                               | Where the twin records it                                             | Check                                                                                                                                   |
