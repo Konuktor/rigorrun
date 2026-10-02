@@ -46,7 +46,8 @@ export interface ServerTool {
 /** One side of the server: calls made with that side's credential. */
 export interface Side {
   call: ToolCaller;
-  tools(): Promise<ServerTool[]>;
+  /** The server's tools as this side sees them, as actions. */
+  actions(): Promise<ActionDefinition[]>;
   close(): Promise<void>;
 }
 
@@ -153,7 +154,7 @@ export async function openPermissionsSession(
 ): Promise<PackSession> {
   const { spec, agent, observer } = options;
   const reader = options.reader ?? agent;
-  const actions = (await agent.tools()).map(actionFromTool);
+  const actions = await agent.actions();
 
   const sides = async (): Promise<{ a: SnapshotRow[]; b: SnapshotRow[] }> => ({
     a: owned(await snapshot(reader.call, spec.reads, spec.tenant.field), spec.tenant.a),

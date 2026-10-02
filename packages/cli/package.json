@@ -1,7 +1,7 @@
 {
   "name": "rigorrun",
   "version": "0.6.0",
-  "description": "Permission and scope tests for AI agents: send your agent tickets that tempt it to act for the wrong customer or organisation, then read the system itself — a multi-tenant helpdesk twin, or Stripe — instead of the transcript.",
+  "description": "Permission and scope tests for AI agents: send your agent tickets that tempt it to act for the wrong customer or organisation, then read the system itself \u2014 a multi-tenant helpdesk twin, or Stripe \u2014 instead of the transcript.",
   "keywords": [
     "mcp",
     "model-context-protocol",
@@ -55,8 +55,9 @@
     "@rigorrun/conformance": "workspace:*",
     "@rigorrun/core": "workspace:*",
     "@rigorrun/daemon": "workspace:*",
-    "@rigorrun/env-mcp": "workspace:*",
     "@rigorrun/env-helpdesk": "workspace:*",
+    "@rigorrun/env-mcp": "workspace:*",
+    "@rigorrun/env-permissions": "workspace:*",
     "@rigorrun/env-stripe": "workspace:*",
     "@rigorrun/environment": "workspace:*",
     "@rigorrun/environments": "workspace:*",

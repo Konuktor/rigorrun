@@ -327,6 +327,9 @@ importers:
       '@rigorrun/env-mcp':
         specifier: workspace:*
         version: link:../env-mcp
+      '@rigorrun/env-permissions':
+        specifier: workspace:*
+        version: link:../env-permissions
       '@rigorrun/env-stripe':
         specifier: workspace:*
         version: link:../env-stripe

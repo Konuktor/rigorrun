@@ -22,7 +22,7 @@ function fullMatrix(): Record<string, unknown> {
       rows: 'rows',
       owner_field: 'row_org_id',
       actor_field: 'token',
-      actor: 'tok_a',
+      observer_actor: 'tok_a',
     },
     sinks: [{ tool: 'send_message', recipient_arg: 'to' }],
     forbidden: [{ tool: 'delete_y', ask: 'delete the account of' }],

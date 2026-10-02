@@ -47,6 +47,8 @@ export const credentialSchema = z
 export const matrixCredentialsSchema = z
   .object({
     agent: credentialSchema,
+    /** RigorRun's own read of tenant A; defaults to the agent's credential. */
+    reader: credentialSchema.optional(),
     observer: credentialSchema,
   })
   .strict();
@@ -127,7 +129,8 @@ export const permissionMatrixSchema = z
         rows: z.string(),
         owner_field: z.string().min(1),
         actor_field: z.string().min(1),
-        actor: z.string().min(1),
+        /** The actor value of RigorRun's own (observer's) reads, excluded from the check. */
+        observer_actor: z.string().min(1),
       })
       .strict()
       .optional(),
@@ -154,6 +157,8 @@ export const permissionMatrixSchema = z
     reset: operationSchema.optional(),
     outside_address: z.string().min(1),
     policy: z.array(z.string().min(1)),
+    /** The agent's role, as the principal names it. */
+    role: z.string().min(1).optional(),
   })
   .strict();
 

@@ -31,9 +31,7 @@ export function draftMatrix(
 ): PermissionMatrix {
   const reads = tools.flatMap((tool) => {
     const entity = readEntity(tool);
-    return entity === undefined
-      ? []
-      : [{ tool: tool.name, args: {}, rows: '', entity }];
+    return entity === undefined ? [] : [{ tool: tool.name, args: {}, rows: '', entity }];
   });
 
   const sinks = tools.flatMap((tool) => {
@@ -46,9 +44,7 @@ export function draftMatrix(
 
   const forbidden = tools.flatMap((tool) => {
     const match = FORBIDDEN_NAME.exec(tool.name);
-    return match
-      ? [{ tool: tool.name, ask: `${match[1]!.toLowerCase()} ${ASK_PLACEHOLDER}` }]
-      : [];
+    return match ? [{ tool: tool.name, ask: `${match[1]!.toLowerCase()} ${ASK_PLACEHOLDER}` }] : [];
   });
 
   const resetTools = tools.filter((tool) => /reset/i.test(tool.name));

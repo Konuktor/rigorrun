@@ -6,7 +6,11 @@ export function sideConfig(
   side: MatrixSide,
   secretValue: string,
 ): McpConfig {
-  const credential = matrix.credentials[side];
+  // RigorRun's reader of tenant A falls back to the agent's credential.
+  const credential =
+    side === 'reader'
+      ? (matrix.credentials.reader ?? matrix.credentials.agent)
+      : matrix.credentials[side];
   const application = credential.apply;
 
   if (matrix.server.transport === 'stdio') {

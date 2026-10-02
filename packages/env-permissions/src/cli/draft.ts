@@ -60,9 +60,7 @@ function inputs(values: {
   }
   const secretValue = process.env[values.agentSecret];
   if (secretValue === undefined) {
-    throw new PermissionsDraftUsageError(
-      `Environment variable ${values.agentSecret} is not set.`,
-    );
+    throw new PermissionsDraftUsageError(`Environment variable ${values.agentSecret} is not set.`);
   }
 
   if (values.mcpCommand !== undefined) {

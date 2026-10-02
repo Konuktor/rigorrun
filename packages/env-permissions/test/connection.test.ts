@@ -61,8 +61,7 @@ describe('credential-aware MCP connections', () => {
   });
 
   it('prefers structured content, parses text JSON, and names failures', async () => {
-    const fake = (result: unknown) =>
-      ({ call: async () => result }) as unknown as McpConnection;
+    const fake = (result: unknown) => ({ call: async () => result }) as unknown as McpConnection;
     await expect(
       callJson(fake({ ok: true, structured: { answer: 1 }, durationMs: 0 }), 'read_one', {}),
     ).resolves.toEqual({ answer: 1 });
@@ -78,7 +77,11 @@ describe('credential-aware MCP connections', () => {
       ),
     ).resolves.toEqual({ answer: 2 });
     await expect(
-      callJson(fake({ ok: false, error: { code: 'bad', message: 'refused' }, durationMs: 0 }), 'bad_tool', {}),
+      callJson(
+        fake({ ok: false, error: { code: 'bad', message: 'refused' }, durationMs: 0 }),
+        'bad_tool',
+        {},
+      ),
     ).rejects.toThrow(/bad_tool.*refused/);
     await expect(
       callJson(

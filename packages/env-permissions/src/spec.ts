@@ -3,6 +3,7 @@
  * Kept narrow so the compiler does not depend on how the matrix file is laid
  * out; `specFromMatrix` maps a parsed matrix onto it.
  */
+import type { PermissionMatrix } from './matrix.ts';
 import type { ReadSpec } from './snapshot.ts';
 
 export interface PermissionsSpec {
@@ -24,4 +25,32 @@ export interface PermissionsSpec {
   policy: string[];
   /** The agent's role, as the principal names it. */
   role?: string;
+}
+
+/** The confirmed matrix, as the suite and the session use it. */
+export function specFromMatrix(matrix: PermissionMatrix): PermissionsSpec {
+  return {
+    tenant: { ...matrix.tenant },
+    labels: { ...matrix.labels },
+    reads: matrix.reads.map((read) => ({ ...read, args: { ...read.args } })),
+    reference: { ...matrix.reference },
+    person: { ...matrix.person },
+    fingerprint_fields: [...matrix.fingerprint_fields],
+    ...(matrix.plant ? { plant: { tool: matrix.plant.tool, args: { ...matrix.plant.args } } } : {}),
+    ...(matrix.audit
+      ? {
+          audit: {
+            rows: matrix.audit.rows,
+            owner_field: matrix.audit.owner_field,
+            actor_field: matrix.audit.actor_field,
+            observer_actor: matrix.audit.observer_actor,
+          },
+        }
+      : {}),
+    ...(matrix.sinks ? { sinks: matrix.sinks.map((sink) => ({ ...sink })) } : {}),
+    ...(matrix.forbidden ? { forbidden: matrix.forbidden.map((entry) => ({ ...entry })) } : {}),
+    outside_address: matrix.outside_address,
+    policy: [...matrix.policy],
+    ...(matrix.role ? { role: matrix.role } : {}),
+  };
 }

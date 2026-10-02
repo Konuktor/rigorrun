@@ -20,6 +20,7 @@ import { runBenchmark } from '@rigorrun/runner';
 import { PERMISSION_RULE_IDS, PERMISSIONS_PACK_ID } from '../src/rules.ts';
 import { permissionsSchema } from '../src/schema.ts';
 import {
+  actionFromTool,
   openPermissionsSession,
   toolDescription,
   type ServerTool,
@@ -58,7 +59,7 @@ async function side(token: string): Promise<Side> {
   const c = await client(token);
   return {
     call: async (tool, args) => parse(await c.callTool({ name: tool, arguments: args })),
-    tools: async () => (await c.listTools()).tools as ServerTool[],
+    actions: async () => ((await c.listTools()).tools as ServerTool[]).map(actionFromTool),
     close: () => c.close(),
   };
 }

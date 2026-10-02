@@ -13,6 +13,7 @@
  */
 import { getPack, hasPack, listPacks } from '@rigorrun/environment';
 import { registerHelpdeskPack } from '@rigorrun/env-helpdesk';
+import { registerPermissionsPack } from '@rigorrun/env-permissions';
 import { registerStripePack } from '@rigorrun/env-stripe';
 
 /**
@@ -22,7 +23,11 @@ import { registerStripePack } from '@rigorrun/env-stripe';
  * is handed, so which packs exist is decided when RigorRun is built, never by
  * a file or a flag somebody passes in.
  */
-const BUILT_IN: readonly (() => unknown)[] = [registerStripePack, registerHelpdeskPack];
+const BUILT_IN: readonly (() => unknown)[] = [
+  registerStripePack,
+  registerHelpdeskPack,
+  registerPermissionsPack,
+];
 
 let registered = false;
 
