@@ -101,6 +101,20 @@ export interface PackSession {
   readonly safety: SafetyMode;
   /** True when the other end is the pack's local twin rather than the real system. */
   readonly simulated: boolean;
+  /**
+   * How cases are kept apart. `fresh-objects`, the default: each case creates
+   * records of its own and is judged only on those, so nothing is put back.
+   * `replaced-world`: `materialize` replaces the whole world through the
+   * system's own reset (a twin's seed hook), so later cases cannot see earlier
+   * ones — but nothing here measured that, and the label says DECLARED.
+   */
+  readonly isolation?: 'fresh-objects' | 'replaced-world';
+  /**
+   * True when `read` returns the whole system, every record of every kind — a
+   * twin's full dump — rather than what one case's scope reaches. Only then is
+   * a verdict AUTHORITATIVE.
+   */
+  readonly completeRead?: boolean;
 
   /**
    * Creates one case's records from its recipe, and names them.
@@ -265,14 +279,17 @@ export class PackEnvironment implements EnvironmentAdapter {
     return {
       // The pack ships its schema; nothing had to be induced.
       discovery: 'declared-schema',
-      // Only what this case created, and what hangs off it. Partial by design,
-      // and said so on every verdict through the scope's description.
-      stateRead: 'designated-reads',
+      // Only what this case created, and what hangs off it — partial by design,
+      // and said so on every verdict through the scope's description — unless
+      // the session reads the whole system.
+      stateRead: this.session.completeRead === true ? 'full' : 'designated-reads',
       // The pack reads with RigorRun's own client and credential. An agent
       // under test never sits between those reads and the system.
       stateReadIndependence: 'independent',
       seed: 'materialized',
-      reset: 'namespace',
+      // A world replaced through the system's own reset is a declared reset;
+      // otherwise nothing is put back and each case reads only its own records.
+      reset: this.session.isolation === 'replaced-world' ? 'endpoint' : 'namespace',
       // Calls made through `executeAction` are logged here. An agent that
       // reaches the system on its own leaves no entries, and is judged on
       // state alone.
