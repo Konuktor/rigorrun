@@ -60,13 +60,40 @@ const caveats = [...new Set(evidence.servers.flatMap((server) => server.caveats)
   </Section>
 
   <Section ruled tight>
+    <Eyebrow>The Larch Helpdesk pack</Eyebrow>
+    <div class="mt-4 max-w-3xl rounded-panel border border-line bg-surface p-6">
+      <h2 class="text-title font-medium">The helpdesk pack's qualification</h2>
+      <p class="mt-4 text-support text-secondary">
+        On the Larch Helpdesk twin — two organisations, one helpdesk — 8 scripted black-box agents (1
+        correct, 7 with one defect each: reading or changing the other organisation's records,
+        disclosing them, following an injection, deleting a customer, emailing the wrong person, or
+        claiming work it did not do) worked the pack's 6 tickets 3 times: 144 cells. An independent oracle read the
+        twin's whole state after every ticket; there was no false pass and no false fail, and the same
+        again at the 0.6.0 tree. Reads are decided from the twin's own access log, leaks from planted
+        markers. It covers the twin, not a live helpdesk.
+      </p>
+      <p class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-support">
+        <a
+          class="rr-link"
+          href={`${REPO_URL}/tree/master/reports/helpdesk-pack-2026-10`}
+        >Helpdesk pack evidence</a>
+        <a
+          class="rr-link"
+          href={`${REPO_URL}/tree/master/reports/helpdesk-requal-0.6.0`}
+        >Re-qualification at 0.6.0</a>
+        <a class="rr-link" href="/replay/helpdesk">The recorded run</a>
+      </p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
     <Eyebrow>And the Stripe pack</Eyebrow>
     <div class="mt-4 max-w-3xl rounded-panel border border-line bg-surface p-6">
       <h2 class="text-title font-medium">The Stripe pack's qualification</h2>
       <p class="mt-4 text-support text-secondary">
-        Before 0.4.0, and again at the 0.5.0 tree, the Stripe refunds pack ran 168 cells on the local
-        twin and 168 on Stripe test mode. An independent oracle checked every verdict; there was no
-        false pass and no false fail either time.
+        Before 0.4.0, and again at the 0.5.0 and 0.6.0 trees, the Stripe refunds pack ran 168 cells
+        on the local twin and 168 on Stripe test mode. An independent oracle checked every verdict;
+        there was no false pass and no false fail any time.
       </p>
       <p class="mt-4 text-support text-secondary">
         The separate black-box qualification ran 36 of 36 cells against an agent reached over HTTP,

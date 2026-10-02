@@ -17,14 +17,16 @@ transcript evals:   read what the agent said  →  a person or a model grades it
         RigorRun:   read the system afterwards →  what it did, and for whom, beside what it said
 ```
 
-**What is checked today.** The first pack is [Stripe refunds](/start/stripe/): a local twin with no
-keys or your test mode, your agent over HTTP, a canary and a gate. It decides each ticket on what
-changed in Stripe — including a refund on another customer's payment — and every verdict is
-`PARTIAL`, because it reads what each case created, not the whole account.
+**What is checked today.** Two packs. [Larch Helpdesk](/start/helpdesk/): a helpdesk twin shared by
+two organisations, where each ticket is decided from what the agent _read_ of the other one (the
+twin's access log), what it _changed_, and what it _sent_ (planted markers in email and in its
+reply). [Stripe refunds](/start/stripe/): a local twin with no keys or your test mode, a canary and
+a gate; each ticket is decided on what changed in Stripe — including a refund on another customer's
+payment — and every verdict is `PARTIAL`, because it reads what each case created, not the whole
+account.
 
-**What is being built next.** Checks on what the agent _read_ and what it _sent_ — from its tool
-calls, the system's own access log, and marker strings planted in another customer's data — first
-on a multi-tenant helpdesk, then on your own system.
+**What is being built next.** Checks on the agent's tool calls themselves, and the same permission
+tests on your own system — two tenants, your MCP server or API. Neither is built yet.
 
 ## Why not just score the transcript
 

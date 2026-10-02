@@ -6,12 +6,15 @@
  * page is read here, at build time, from a recording file whose run still
  * matches the hash it was recorded with. A page never types one in.
  *
- * Two recordings can exist:
+ * Three recordings can exist:
  *
  *  - `fixtures/replays/stripe-replay.json`, the flagship Stripe recording made
  *    under reports/flagship-demo-2026-10/PREREGISTRATION.md. It may not exist
  *    yet, so it is looked for with `import.meta.glob`, which resolves to an
  *    empty object rather than failing the build when the file is absent.
+ *  - `fixtures/replays/helpdesk-replay.json`, the Larch Helpdesk recording.
+ *    Like the Stripe recording, it is optional and loaded with
+ *    `import.meta.glob`.
  *  - `fixtures/replays/demo-replay.json`, the Northstar run `rigorrun demo`
  *    bundles. Always present.
  *
@@ -19,19 +22,42 @@
  * the blocks that would show it fall back to the Northstar content rather than
  * to anything that only looks like a result.
  *
- * `RIGORRUN_REPLAY_FILE` can name another recording to stand in for the Stripe
- * one in a single build; see `REPLAY_FILE_ENV` below. No deploy sets it.
+ * Each flagship slot also has an environment override for preview builds. No
+ * deploy sets either one.
  */
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import type { CaseResult, RunResult } from '@rigorrun/core';
+import type { Benchmark, CaseResult, RunResult } from '@rigorrun/core';
 import demoFile from '../../../../fixtures/replays/demo-replay.json';
 
 export const REPLAY_FORMAT = 'rigorrun/replay/1';
 
 /** Repository paths, for the pages that say where a recording lives. */
 export const STRIPE_REPLAY_PATH = 'fixtures/replays/stripe-replay.json';
+export const HELPDESK_REPLAY_PATH = 'fixtures/replays/helpdesk-replay.json';
 export const DEMO_REPLAY_PATH = 'fixtures/replays/demo-replay.json';
+
+export interface ReplayVariant {
+  agentId: string;
+  description: string;
+  promptSha256: string;
+  toolsSha256: string;
+  runId: string;
+  runResultHash: string;
+}
+
+export interface ReplayPresentation {
+  headline: { variants: string[]; cases: string[]; source: string };
+  task: { label: string; inputs: string[] };
+  next: string[];
+}
+
+/** A fault found after a recording was made, disclosed beside it. */
+export interface Erratum {
+  added: string;
+  about: string;
+  text: string;
+}
 
 /** What a recording file holds. `temperature` and `discarded` are optional additions. */
 export interface ReplayFile {
@@ -45,20 +71,28 @@ export interface ReplayFile {
   resultHash: string;
   /** The sampling temperature, when the recording states one (flagship amendment 1). */
   temperature?: number;
+  /** True when the recording ran against a twin rather than a live system. */
+  simulated?: boolean;
+  /** Named agent variants, present on flagship recordings. */
+  variants?: Record<string, ReplayVariant>;
   /** Recordings discarded whole for a harness failure, with their cause. */
   discarded?: unknown[];
+  /**
+   * Faults found in a recording after it was made, outside the hashed run and
+   * dated. The recording itself is never re-made or edited to hide them.
+   */
+  errata?: Erratum[];
+  /** The suite exactly as it ran, including its case order. */
+  benchmark?: Benchmark;
+  /** Recording-owned rules for presenting a flagship run. */
+  presentation?: ReplayPresentation;
   run: RunResult;
 }
 
-/** The two variants of the reference agent the flagship recording runs. */
-export type Variant = 'careful' | 'minimal';
+/** A flagship recording chooses and names its own variants. */
+export type Variant = string;
 
-/**
- * How each variant is described. `minimal`'s sentence is the pre-registration's
- * own, which requires it to be described in these words wherever the demo
- * names it; `careful`'s is the tool list the same table gives it.
- */
-export const VARIANT_DESCRIPTIONS: Readonly<Record<Variant, string>> = {
+const LEGACY_VARIANT_DESCRIPTIONS: Readonly<Record<string, string>> = {
   minimal:
     'a first version written the way first versions often are: the same model and policy, a thinner tool layer.',
   careful:
@@ -139,11 +173,11 @@ export interface AgentView {
 }
 
 export interface SiteReplay {
-  source: 'stripe' | 'demo';
+  source: 'stripe' | 'helpdesk' | 'demo';
   path: string;
   model: string;
   provider: string;
-  /** The system as the site may name it. Says "a local Stripe twin" when the run was simulated. */
+  /** The system as the recording names it, without a trailing simulated label. */
   system: string;
   recordedAt: string;
   /** `YYYY-MM-DD`. */
@@ -158,9 +192,13 @@ export interface SiteReplay {
   limits: RunResult['limits'];
   agents: AgentView[];
   cases: CaseView[];
+  variantDescriptions: Readonly<Record<string, string>>;
+  presentation: ReplayPresentation | null;
+  matrix: PermissionMatrix | null;
   /** The pre-registered headline failure, or null when the rule finds none. */
   headline: CaseView | null;
   discarded: unknown[];
+  errata: Erratum[];
 }
 
 /** The hash a recording carries, computed exactly as the recorder and the CLI compute it. */
@@ -198,7 +236,15 @@ export function outcomeOf(
 }
 
 /** Which reference variant an agent is, by its id or name; null when it is neither. */
-export function variantOf(agent: { id: string; name: string }): Variant | null {
+export function variantOf(
+  agent: { id: string; name: string },
+  variants?: Readonly<Record<string, ReplayVariant>>,
+): Variant | null {
+  if (variants !== undefined) {
+    return (
+      Object.entries(variants).find(([, variant]) => variant.agentId === agent.id)?.[0] ?? null
+    );
+  }
   for (const variant of ['minimal', 'careful'] as const) {
     const word = new RegExp(`(^|[^a-z])${variant}([^a-z]|$)`);
     if (word.test(agent.id.toLowerCase()) || word.test(agent.name.toLowerCase())) return variant;
@@ -237,7 +283,13 @@ function findingsOf(entry: CaseResult): Finding[] {
   }));
 }
 
-function caseView(entry: CaseResult, run: RunResult, simulated: boolean): CaseView {
+function caseView(
+  entry: CaseResult,
+  run: RunResult,
+  simulated: boolean,
+  system: string,
+  variants?: Readonly<Record<string, ReplayVariant>>,
+): CaseView {
   const agent = run.agents.find((candidate) => candidate.id === entry.agentId);
   const agentName = agent?.name ?? entry.agentId;
   const reality = entry.reality;
@@ -247,14 +299,18 @@ function caseView(entry: CaseResult, run: RunResult, simulated: boolean): CaseVi
     category: entry.category,
     agentId: entry.agentId,
     agentName,
-    variant: variantOf({ id: entry.agentId, name: agentName }),
+    variant: variantOf({ id: entry.agentId, name: agentName }, variants),
     attempt: entry.attempt ?? 0,
     outcome: outcomeOf(entry),
     said: ownWords(entry.agentReport ?? ''),
     outOfSteps: (entry.agentReport ?? '').trim() === STEP_BUDGET_REPORT,
-    // The system's name comes from the recording, except that a simulated run
-    // is always named as the local twin it was, whatever the line calls it.
-    realitySystem: reality ? (simulated ? 'The local Stripe twin' : reality.system) : null,
+    // A twin is always named from the recording rather than from a reality line
+    // that might use the live system's shorter name.
+    realitySystem: reality
+      ? simulated
+        ? system.replace(/^./, (first) => first.toUpperCase())
+        : reality.system
+      : null,
     reality: reality?.lines ?? [],
     readScope: entry.readScope ?? null,
     verification: entry.verification ?? run.verification,
@@ -271,9 +327,16 @@ function caseView(entry: CaseResult, run: RunResult, simulated: boolean): CaseVi
  * `careful` in the same order; otherwise none. Within a case, the earliest
  * attempt counts.
  */
-export function pickHeadline(cases: readonly CaseView[]): CaseView | null {
-  for (const variant of ['minimal', 'careful'] as const) {
-    for (const caseId of HEADLINE_ORDER) {
+export function pickHeadline(
+  cases: readonly CaseView[],
+  rule: ReplayPresentation['headline'] = {
+    variants: ['minimal', 'careful'],
+    cases: [...HEADLINE_ORDER],
+    source: '',
+  },
+): CaseView | null {
+  for (const variant of rule.variants) {
+    for (const caseId of rule.cases) {
       const found = cases
         .filter(
           (entry) =>
@@ -286,21 +349,115 @@ export function pickHeadline(cases: readonly CaseView[]): CaseView | null {
   return null;
 }
 
+export const PERMISSION_BOUNDARIES = [
+  ['tenant', "Another tenant's data"],
+  ['role', 'Outside its role'],
+  ['tool', 'A tool it must not use'],
+  ['sink', 'Data leaving'],
+] as const;
+
+export type PermissionDimension = (typeof PERMISSION_BOUNDARIES)[number][0];
+
+export interface PermissionMatrixCell {
+  variant: string;
+  agentId: string;
+  failed: number;
+  held: number;
+  notChecked: number;
+}
+
+export interface PermissionMatrixRow {
+  dimension: PermissionDimension;
+  label: string;
+  cells: PermissionMatrixCell[];
+}
+
+export interface PermissionMatrix {
+  variants: { name: string; agentId: string }[];
+  rows: PermissionMatrixRow[];
+}
+
+function isReplayFile(fileOrRun: ReplayFile | RunResult): fileOrRun is ReplayFile {
+  return 'run' in fileOrRun;
+}
+
+/** Count every permission check by boundary and recorded variant. */
+export function permissionMatrix(fileOrRun: ReplayFile | RunResult): PermissionMatrix | null {
+  const file = isReplayFile(fileOrRun) ? fileOrRun : null;
+  const run: RunResult = file?.run ?? (fileOrRun as RunResult);
+  const variants = file?.variants
+    ? Object.entries(file.variants).map(([name, variant]) => ({ name, agentId: variant.agentId }))
+    : run.agents.map((agent) => ({ name: agent.name, agentId: agent.id }));
+  const dimensions = new Set(
+    run.caseResults.flatMap((result) =>
+      result.assertions.flatMap((assertion) =>
+        assertion.dimension === undefined ? [] : [assertion.dimension],
+      ),
+    ),
+  );
+  const rows = PERMISSION_BOUNDARIES.filter(([dimension]) => dimensions.has(dimension)).map(
+    ([dimension, label]) => ({
+      dimension,
+      label,
+      cells: variants.map((variant) => {
+        const assertions = run.caseResults
+          .filter((result) => result.agentId === variant.agentId)
+          .flatMap((result) =>
+            result.assertions.filter((assertion) => assertion.dimension === dimension),
+          );
+        return {
+          variant: variant.name,
+          agentId: variant.agentId,
+          failed: assertions.filter(
+            (assertion) => assertion.status === 'FAIL' || assertion.status === 'ERROR',
+          ).length,
+          held: assertions.filter((assertion) => assertion.status === 'PASS').length,
+          notChecked: assertions.filter(
+            (assertion) =>
+              assertion.status === 'UNVERIFIABLE' || assertion.status === 'INAPPLICABLE',
+          ).length,
+        };
+      }),
+    }),
+  );
+  return rows.length > 0 ? { variants, rows } : null;
+}
+
+function orderedCases(cases: readonly CaseView[], file: ReplayFile): CaseView[] {
+  const order = file.benchmark?.cases.map((entry) => entry.id) ?? [...STRIPE_CASE_ORDER];
+  const ranks = new Map(order.map((caseId, index) => [caseId, index]));
+  return [...cases].sort(
+    (left, right) =>
+      (ranks.get(left.caseId) ?? order.length) - (ranks.get(right.caseId) ?? order.length) ||
+      left.attempt - right.attempt,
+  );
+}
+
 /** A recording, verified, in the terms a page shows it. */
-export function siteReplay(file: ReplayFile, source: 'stripe' | 'demo', path: string): SiteReplay {
+export function siteReplay(
+  file: ReplayFile,
+  source: 'stripe' | 'helpdesk' | 'demo',
+  path: string,
+): SiteReplay {
   verifyReplay(file, path);
   const run = file.run;
-  const simulated = isSimulated(run);
-  const cases = run.caseResults.map((entry) => caseView(entry, run, simulated));
+  const simulated = file.simulated === true || isSimulated(run);
+  const system = simulated ? file.system.replace(/\s+\(simulated\)$/i, '') : file.system;
+  const cases = orderedCases(
+    run.caseResults.map((entry) => caseView(entry, run, simulated, system, file.variants)),
+    file,
+  );
   const agents: AgentView[] = run.agents.map((agent) => ({
     id: agent.id,
     name: agent.name,
-    variant: variantOf(agent),
+    variant: variantOf(agent, file.variants),
     cases: cases.filter((entry) => entry.agentId === agent.id),
   }));
-  let system = file.system;
-  if (simulated)
-    system = source === 'stripe' ? 'a local Stripe twin' : `${file.system} (simulated)`;
+  const variantDescriptions = file.variants
+    ? Object.fromEntries(
+        Object.entries(file.variants).map(([name, variant]) => [name, variant.description]),
+      )
+    : LEGACY_VARIANT_DESCRIPTIONS;
   return {
     source,
     path,
@@ -318,10 +475,12 @@ export function siteReplay(file: ReplayFile, source: 'stripe' | 'demo', path: st
     limits: run.limits,
     agents,
     cases,
-    // The rule is the Stripe pre-registration's. The Northstar run has no
-    // variants, so it never has a headline.
-    headline: source === 'stripe' ? pickHeadline(cases) : null,
+    variantDescriptions,
+    presentation: file.presentation ?? null,
+    matrix: permissionMatrix(file),
+    headline: file.presentation ? pickHeadline(cases, file.presentation.headline) : null,
     discarded: Array.isArray(file.discarded) ? file.discarded : [],
+    errata: Array.isArray(file.errata) ? file.errata : [],
   };
 }
 
@@ -336,29 +495,63 @@ export function siteReplay(file: ReplayFile, source: 'stripe' | 'demo', path: st
  * which is every real build, nothing here changes.
  */
 export const REPLAY_FILE_ENV = 'RIGORRUN_REPLAY_FILE';
+export const HELPDESK_REPLAY_FILE_ENV = 'RIGORRUN_HELPDESK_REPLAY_FILE';
 
-function overrideFile(): { file: ReplayFile; path: string } | null {
-  const named = process.env[REPLAY_FILE_ENV];
+function overrideFile(
+  environmentName: typeof REPLAY_FILE_ENV | typeof HELPDESK_REPLAY_FILE_ENV,
+  repositoryPath: string,
+): { file: ReplayFile; path: string } | null {
+  const named = process.env[environmentName];
   if (!named) return null;
   // Loud on purpose: a build made this way shows a recording the repository
   // does not hold, and must never be the one that is deployed.
   console.warn(
-    `[rigorrun] ${REPLAY_FILE_ENV} is set: showing ${named} in place of ${STRIPE_REPLAY_PATH}. Do not deploy this build.`,
+    `[rigorrun] ${environmentName} is set: showing ${named} in place of ${repositoryPath}. Do not deploy this build.`,
   );
   return { file: JSON.parse(readFileSync(named, 'utf8')) as ReplayFile, path: named };
 }
 
-const found = import.meta.glob<ReplayFile>('../../../../fixtures/replays/stripe-replay.json', {
-  eager: true,
-  import: 'default',
-});
-const override = overrideFile();
-const stripeFile = override?.file ?? Object.values(found)[0];
+const foundStripe = import.meta.glob<ReplayFile>(
+  '../../../../fixtures/replays/stripe-replay.json',
+  {
+    eager: true,
+    import: 'default',
+  },
+);
+const foundHelpdesk = import.meta.glob<ReplayFile>(
+  '../../../../fixtures/replays/helpdesk-replay.json',
+  { eager: true, import: 'default' },
+);
+const stripeOverride = overrideFile(REPLAY_FILE_ENV, STRIPE_REPLAY_PATH);
+const helpdeskOverride = overrideFile(HELPDESK_REPLAY_FILE_ENV, HELPDESK_REPLAY_PATH);
+const stripeFile = stripeOverride?.file ?? Object.values(foundStripe)[0];
+const helpdeskFile = helpdeskOverride?.file ?? Object.values(foundHelpdesk)[0];
+
+export type FlagshipReplaySlug = 'stripe' | 'helpdesk';
+
+/** Every flagship recording present in this build, keyed by its URL slug. */
+export const flagshipReplays: Readonly<Partial<Record<FlagshipReplaySlug, SiteReplay>>> = {
+  ...(stripeFile
+    ? {
+        stripe: siteReplay(stripeFile, 'stripe', stripeOverride?.path ?? STRIPE_REPLAY_PATH),
+      }
+    : {}),
+  ...(helpdeskFile
+    ? {
+        helpdesk: siteReplay(
+          helpdeskFile,
+          'helpdesk',
+          helpdeskOverride?.path ?? HELPDESK_REPLAY_PATH,
+        ),
+      }
+    : {}),
+};
 
 /** The flagship Stripe recording (or the one `RIGORRUN_REPLAY_FILE` names), or null. */
-export const stripeReplay: SiteReplay | null = stripeFile
-  ? siteReplay(stripeFile, 'stripe', override?.path ?? STRIPE_REPLAY_PATH)
-  : null;
+export const stripeReplay: SiteReplay | null = flagshipReplays.stripe ?? null;
+
+/** The flagship Helpdesk recording, or the preview override for its slot, or null. */
+export const helpdeskReplay: SiteReplay | null = flagshipReplays.helpdesk ?? null;
 
 /** The Northstar recording `rigorrun demo` bundles. */
 export const demoReplay: SiteReplay = siteReplay(

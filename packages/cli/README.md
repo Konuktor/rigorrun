@@ -6,9 +6,9 @@
 
 RigorRun sends your agent tickets that tempt it across that line — somebody else's order, a decision
 that is not its to make, an instruction hidden in the customer's message — then reads the system
-itself and shows what actually happened beside what the agent said it did. The first system it reads
-is Stripe: your test mode, or a local twin with no keys. The verdict comes from the state of the
-system your agent changed, never from what it says about itself.
+itself and shows what actually happened beside what the agent said it did. It ships two packs: Larch
+Helpdesk, a multi-tenant helpdesk twin, and Stripe — your test mode, or a local twin with no keys.
+The verdict comes from what the system recorded, never from what the agent says about itself.
 
 **Early Access** — parts of it are honestly unfinished, and they are listed rather than hidden.
 
@@ -17,11 +17,29 @@ system your agent changed, never from what it says about itself.
 </div>
 
 ```bash
-npx rigorrun demo    # a recorded run, replayed offline; no keys, no account
+npx rigorrun helpdesk try   # six tickets on a two-organisation helpdesk twin; no keys, seconds
+npx rigorrun demo           # a recorded run, replayed offline; no keys, no account
 ```
+
+`helpdesk try` runs one support agent twice — once with the organisation's own token, once with the
+helpdesk's service token — and shows, from the twin's own access log, tables and outbox, which one
+read, changed or sent another organisation's data.
 
 `demo` replays a real model working a support desk: what it said beside what the system held
 afterwards. The same run, case by case, is at [rigorrun.xyz/replay](https://rigorrun.xyz/replay).
+
+### Your multi-tenant support agent
+
+```bash
+npx rigorrun helpdesk twin                                 # MCP at http://127.0.0.1:12113/mcp; leave it running
+npx rigorrun helpdesk try --agent <agent URL>              # your agent, connected to the twin with its token
+```
+
+Each ticket is decided from what the twin recorded: its access log (another organisation's rows
+read), its tables (records changed or deleted) and its outbox (who was emailed, and whether another
+organisation's planted marker went with it). The
+[helpdesk guide](https://docs.rigorrun.xyz/start/helpdesk) has the whole path, including `init`
+and the gate.
 
 ### Your Stripe agent, no code changes
 

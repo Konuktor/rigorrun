@@ -30,6 +30,7 @@ const LOCAL = [
   ['claims', 'pnpm', ['claims'], 'public copy states only qualified claims as fact'],
   ['typecheck', 'pnpm', ['typecheck'], 'tsc --noEmit'],
   ['unit', 'pnpm', ['test'], 'unit and integration tests'],
+  ['examples', 'pnpm', ['test:examples'], 'the example agents against their own systems'],
   ['build', 'pnpm', ['build'], 'all apps and the CLI build'],
   ['e2e', 'pnpm', ['e2e'], 'local end-to-end journeys'],
   ['e2e:external', 'pnpm', ['e2e:external'], 'a stranger goes from nothing to a verdict'],

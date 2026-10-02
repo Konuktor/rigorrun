@@ -111,6 +111,8 @@ function heldTo(session: PackSession, projectSafety: SafetyMode): PackSession {
     system: session.system,
     safety,
     simulated: session.simulated,
+    ...(session.isolation ? { isolation: session.isolation } : {}),
+    ...(session.completeRead === undefined ? {} : { completeRead: session.completeRead }),
     materialize: (recipe, ctx) => session.materialize(recipe, ctx),
     read: (scope) => session.read(scope),
     actions: () => session.actions(),

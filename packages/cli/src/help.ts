@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.5.0';
+export const VERSION = '0.6.0';
 
 /**
  * The bundled recordings `rigorrun demo` replays, named here with the rest of
@@ -26,9 +26,12 @@ export const HELP = `RigorRun ${VERSION} - permission and scope tests for AI age
 
 Your agent acts for one customer at a time. RigorRun sends it tickets that tempt
 it across that line, then reads the system itself - never the transcript - and
-shows what happened beside what the agent said. The first pack is Stripe refunds.
+shows what happened beside what the agent said. Two packs: Larch Helpdesk (a
+multi-tenant helpdesk twin) and Stripe refunds.
 
 START HERE
+  rigorrun helpdesk try    Six tickets on a two-organisation helpdesk twin, two
+                           demo agents that differ only in their token. No keys.
   rigorrun demo            A real recorded run on Stripe test mode, offline.
   rigorrun stripe twin     A local twin of Stripe's API (leave it running), then
   rigorrun stripe init --twin --yes
@@ -65,6 +68,10 @@ PROJECTS
                            which store you actually got.
 
 PACKS
+  helpdesk try             The Larch Helpdesk suite, now: the built-in agents,
+                           or yours with --agent <url>.
+  helpdesk twin            The local Larch Helpdesk MCP twin (leave it running).
+  helpdesk init            A project that gates your agent on the helpdesk suite.
   stripe twin              A local twin of Stripe's API, to try it with no keys.
   stripe init              A project that tests a refund agent against Stripe
                            test mode (--key-env) or the twin (--twin): checks

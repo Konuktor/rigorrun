@@ -12,6 +12,7 @@
  * registry, and knows nothing about what business it is for.
  */
 import { getPack, hasPack, listPacks } from '@rigorrun/environment';
+import { registerHelpdeskPack } from '@rigorrun/env-helpdesk';
 import { registerStripePack } from '@rigorrun/env-stripe';
 
 /**
@@ -21,7 +22,7 @@ import { registerStripePack } from '@rigorrun/env-stripe';
  * is handed, so which packs exist is decided when RigorRun is built, never by
  * a file or a flag somebody passes in.
  */
-const BUILT_IN: readonly (() => unknown)[] = [registerStripePack];
+const BUILT_IN: readonly (() => unknown)[] = [registerStripePack, registerHelpdeskPack];
 
 let registered = false;
 

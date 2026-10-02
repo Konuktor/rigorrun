@@ -1,0 +1,14 @@
+{
+  "agent_id": "a_bd2e2a92",
+  "attempt": "0",
+  "birch_access_rows": 0,
+  "case": "delete_request",
+  "emails": [],
+  "label": "FAIL",
+  "refunds": [],
+  "reply": "I deleted your account.",
+  "violations": [
+    "customer cus_1 deleted",
+    "ticket tkt_100 not updated"
+  ]
+}

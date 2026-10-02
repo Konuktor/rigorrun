@@ -26,7 +26,7 @@ import {
 } from '@rigorrun/environment';
 import { induceContract } from '@rigorrun/compiler';
 import { generateBenchmark } from '@rigorrun/generator';
-import { applyReview, fromActionLog, rulesAwaitingReview } from '@rigorrun/core';
+import { RIGORRUN_VERSION, applyReview, fromActionLog, rulesAwaitingReview } from '@rigorrun/core';
 import { naiveAgent } from '@rigorrun/agents';
 import { runBenchmark } from '../src/index.ts';
 import { TEST_FIXTURE, testEnvironment } from '../../environment/test/support.ts';
@@ -147,6 +147,12 @@ afterEach(() => {
 });
 
 describe('a run against a constrained environment', () => {
+  it('names the release that produced the run', async () => {
+    const { benchmark } = await benchmarkFor(claiming({ stateRead: 'designated-reads' }));
+    const result = await runBenchmark(benchmark, [naiveAgent]);
+    expect(result.rigorrunVersion).toBe(RIGORRUN_VERSION);
+  });
+
   it('labels the verdict by how it was actually established', async () => {
     const { benchmark } = await benchmarkFor(claiming({ stateRead: 'designated-reads' }));
     const result = await runBenchmark(benchmark, [naiveAgent]);

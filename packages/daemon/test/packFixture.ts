@@ -113,7 +113,7 @@ export function packSuite(): { contract: EnvironmentContract; benchmark: unknown
 }
 
 export function fakeItemsPack(
-  options: { sessionSafety?: SafetyMode; cliExit?: number } = {},
+  options: { sessionSafety?: SafetyMode; cliExit?: number; replacedWorld?: boolean } = {},
 ): FakeItemsPack {
   const handle: FakeItemsPack = {
     pack: undefined as unknown as PackDefinition,
@@ -135,10 +135,13 @@ export function fakeItemsPack(
       const key = secret(opened.keySecret ?? DEFAULT_KEY_SECRET);
       handle.keys.push(key);
       if (key === undefined) throw new Error('No key for the fake system.');
-      const session = fakeSession({
+      const made = fakeSession({
         safety: options.sessionSafety ?? 'ephemeral',
         simulated: true,
       });
+      const session = options.replacedWorld
+        ? Object.assign(made, { isolation: 'replaced-world' as const, completeRead: true })
+        : made;
       const close = session.close.bind(session);
       session.close = async () => {
         handle.closed += 1;

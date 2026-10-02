@@ -41,6 +41,7 @@ export default defineConfig({
           label: 'Getting started',
           items: [
             { label: 'What RigorRun is', slug: 'start/what-it-is' },
+            { label: 'Test a multi-tenant support agent', slug: 'start/helpdesk' },
             { label: 'Test a Stripe refund agent', slug: 'start/stripe' },
             { label: 'Install and run', slug: 'start/install' },
             { label: 'Your first project (any system)', slug: 'start/first-project' },

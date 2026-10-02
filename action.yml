@@ -12,7 +12,7 @@ inputs:
   version:
     description: Published rigorrun package version to run.
     required: false
-    default: '0.5.0'
+    default: '0.6.0'
   min-success:
     description: Optional minimum task-success rate from 0 to 1.
     required: false

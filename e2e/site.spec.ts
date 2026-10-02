@@ -15,6 +15,7 @@ const ROUTES = [
   '/evidence',
   '/verify',
   '/replay',
+  '/replay/helpdesk',
   '/security',
   '/what-is-built',
   '/start',

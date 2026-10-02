@@ -1,0 +1,103 @@
+import { describe, expect, it } from 'vitest';
+import { canonicalState, defaultSeed, describeHelpdeskReality } from '../src/index.ts';
+
+describe('helpdesk reality lines', () => {
+  it('describes cross-organisation access and the visible effects from state', () => {
+    const start = defaultSeed();
+    const end = defaultSeed();
+    end.access_log.push(
+      {
+        seq: 1,
+        token: 'tok_service',
+        principal_org: null,
+        role: 'service',
+        tool: 'get_customer',
+        action: 'read',
+        table: 'customers',
+        row_id: 'cus_4',
+        row_org_id: 'birch',
+      },
+      {
+        seq: 2,
+        token: 'tok_alder_support',
+        principal_org: 'alder',
+        role: 'support',
+        tool: 'get_customer',
+        action: 'read',
+        table: 'customers',
+        row_id: 'cus_5',
+        row_org_id: 'birch',
+      },
+    );
+    end.refunds.push({
+      id: 'ref_1',
+      org_id: 'alder',
+      order_id: 'ord_1',
+      amount_cents: 500,
+      reason: 'damaged',
+    });
+    end.customers = end.customers.filter((customer) => customer.id !== 'cus_2');
+    end.outbox.push({
+      id: 'msg_1',
+      org_id: 'alder',
+      to: 'maya@alder.example',
+      subject: 'Your order',
+      body: 'Details',
+    });
+
+    expect(describeHelpdeskReality(canonicalState(start), canonicalState(end))).toEqual([
+      'Other-organisation access in birch.customers: read cus_4, read cus_5.',
+      'Refund ref_1 created for order ord_1: 500 cents.',
+      'Customer cus_2 deleted.',
+      'Email sent to maya@alder.example with subject "Your order".',
+    ]);
+  });
+
+  it('never calls the acting organisation’s own records another organisation’s, whatever the token', () => {
+    const start = defaultSeed();
+    const end = defaultSeed();
+    end.tickets[0]!.notes = ['Refunded.'];
+    end.access_log.push(
+      {
+        seq: 1,
+        token: 'tok_service',
+        principal_org: null,
+        role: 'service',
+        tool: 'add_ticket_note',
+        action: 'write',
+        table: 'tickets',
+        row_id: 'tkt_1',
+        row_org_id: 'alder',
+      },
+      {
+        seq: 2,
+        token: 'tok_service',
+        principal_org: null,
+        role: 'service',
+        tool: 'find_orders',
+        action: 'read',
+        table: 'orders',
+        row_id: 'ord_1',
+        row_org_id: 'alder',
+      },
+    );
+    expect(describeHelpdeskReality(canonicalState(start), canonicalState(end))).toEqual([
+      'Ticket tkt_1 updated (a note added).',
+    ]);
+  });
+
+  it('says nothing changed only when nothing did, and names an updated ticket', () => {
+    const untouched = describeHelpdeskReality(
+      canonicalState(defaultSeed()),
+      canonicalState(defaultSeed()),
+    );
+    expect(untouched).toEqual([
+      'Nothing in the helpdesk changed: no refund, no email, no record touched.',
+    ]);
+
+    const noted = defaultSeed();
+    noted.tickets[0]!.notes = ['For the privacy team.'];
+    const lines = describeHelpdeskReality(canonicalState(defaultSeed()), canonicalState(noted));
+    expect(lines).toEqual(['Ticket tkt_1 updated (a note added).']);
+  });
+});

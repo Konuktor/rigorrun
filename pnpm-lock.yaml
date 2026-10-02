@@ -228,19 +228,6 @@ importers:
         specifier: ^4.1.12
         version: 4.5.4
 
-  fixtures/external/mcp-helpdesk:
-    dependencies:
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.30.0
-        version: 1.30.0(zod@4.5.4)
-      zod:
-        specifier: ^4.1.12
-        version: 4.5.4
-    devDependencies:
-      tsx:
-        specifier: ^4.21.1
-        version: 4.23.13
-
   fixtures/external/mcp-venue-desk:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -321,6 +308,9 @@ importers:
       '@rigorrun/daemon':
         specifier: workspace:*
         version: link:../daemon
+      '@rigorrun/env-helpdesk':
+        specifier: workspace:*
+        version: link:../env-helpdesk
       '@rigorrun/env-mcp':
         specifier: workspace:*
         version: link:../env-mcp
@@ -479,6 +469,36 @@ importers:
       playwright-core:
         specifier: '>=1.40'
         version: 1.62.1
+
+  packages/env-helpdesk:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      '@rigorrun/agents':
+        specifier: workspace:*
+        version: link:../agents
+      '@rigorrun/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rigorrun/daemon':
+        specifier: workspace:*
+        version: link:../daemon
+      '@rigorrun/environment':
+        specifier: workspace:*
+        version: link:../environment
+      '@rigorrun/proxy':
+        specifier: workspace:*
+        version: link:../proxy
+      '@rigorrun/report':
+        specifier: workspace:*
+        version: link:../report
+      '@rigorrun/runner':
+        specifier: workspace:*
+        version: link:../runner
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
 
   packages/env-mcp:
     dependencies:

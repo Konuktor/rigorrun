@@ -1,0 +1,276 @@
+---
+import Base from '../../layouts/Base.astro';
+import Section from '../../components/Section.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
+import Command from '../../components/Command.astro';
+import CaseRow from '../../components/CaseRow.astro';
+import ClaimReality from '../../components/ClaimReality.astro';
+import PermissionMatrix from '../../components/PermissionMatrix.astro';
+import {
+  helpdeskReplay,
+  type CaseView,
+  type SiteReplay,
+} from '../../lib/replay';
+import { REPO_URL } from '../../site';
+
+export function getStaticPaths() {
+  return helpdeskReplay
+    ? [{ params: { slug: 'helpdesk' }, props: { replay: helpdeskReplay } }]
+    : [];
+}
+
+interface Props {
+  replay: SiteReplay;
+}
+
+const { replay } = Astro.props;
+const cases = replay.cases;
+const count = (list: readonly CaseView[], outcome: string) =>
+  list.filter((entry) => entry.outcome === outcome).length;
+const undecided = (list: readonly CaseView[]) =>
+  list.filter((entry) => entry.outcome !== 'PASS' && entry.outcome !== 'FAIL').length;
+const unsafe = (list: readonly CaseView[]) =>
+  list.reduce((sum, entry) => sum + entry.unsafeActions, 0);
+const commit = replay.commit.slice(0, 7);
+const presentation = replay.presentation;
+const headlineRule = presentation?.headline.cases
+  .map((caseId) => caseId.replaceAll('_', ' '))
+  .join(', ');
+const headlineVariants = presentation?.headline.variants ?? [];
+const preregistration = presentation
+  ? `${REPO_URL}/blob/master/${presentation.headline.source}`
+  : null;
+const times = replay.agents.length === 2 ? 'twice' : `${replay.agents.length} times`;
+---
+
+<Base
+  title="A Larch Helpdesk recorded run"
+  description={`${replay.model} worked the Larch Helpdesk pack’s tickets on ${replay.system}, recorded ${replay.date}. Every verdict comes from what the twin recorded.`}
+>
+  <Section>
+    <div class="max-w-3xl">
+      <Eyebrow>A recorded run · Larch Helpdesk</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">
+        What the support agent said, and what the twin recorded.
+      </h1>
+      <p class="mt-6 text-lead text-secondary">
+        A support agent worked the Larch Helpdesk pack’s tickets for Alder Outdoor {times} — once
+        per token. After each ticket RigorRun read the twin: its access log, its tables and its
+        outbox. The verdict comes from that read, not from what the agent said. Passes are shown as
+        well as failures.
+      </p>
+    </div>
+
+    <div
+      class="mt-10 max-w-3xl overflow-x-auto rounded-panel border border-line bg-surface"
+      tabindex="0"
+      role="region"
+      aria-label="Outcomes per variant"
+    >
+      <table class="w-full min-w-[34rem] text-left">
+        <caption class="sr-only">Outcomes per variant, read from the recording</caption>
+        <thead>
+          <tr class="border-b border-line">
+            <th scope="col" class="px-4 py-2.5 text-micro font-semibold uppercase text-muted">
+              Variant
+            </th>
+            <th scope="col" class="px-4 py-2.5 text-micro font-semibold uppercase text-muted">Cases</th>
+            <th scope="col" class="px-4 py-2.5 text-micro font-semibold uppercase text-muted">Passed</th>
+            <th scope="col" class="px-4 py-2.5 text-micro font-semibold uppercase text-muted">Failed</th>
+            {
+              undecided(cases) > 0 && (
+                <th scope="col" class="px-4 py-2.5 text-micro font-semibold uppercase text-muted">
+                  No verdict
+                </th>
+              )
+            }
+            <th scope="col" class="px-4 py-2.5 text-micro font-semibold uppercase text-muted">
+              Unsafe actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="ruled">
+          {
+            replay.agents.map((agent) => (
+              <tr>
+                <th scope="row" class="px-4 py-3 font-mono text-support font-medium text-fg">
+                  {agent.variant ?? agent.name}
+                </th>
+                <td class="px-4 py-3 text-title font-semibold">{agent.cases.length}</td>
+                <td class="px-4 py-3 text-title font-semibold text-pass">
+                  {count(agent.cases, 'PASS')}
+                </td>
+                <td class="px-4 py-3 text-title font-semibold text-fail">
+                  {count(agent.cases, 'FAIL')}
+                </td>
+                {undecided(cases) > 0 && (
+                  <td class="px-4 py-3 text-title font-semibold text-warn">
+                    {undecided(agent.cases)}
+                  </td>
+                )}
+                <td class="px-4 py-3 text-title font-semibold">{unsafe(agent.cases)}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="mt-6 max-w-3xl text-support text-muted">
+      <span class="font-mono text-secondary">{replay.model}</span> ({replay.provider}), temperature{' '}
+      {replay.temperature ?? 'not recorded'}, recorded {replay.date} at commit{' '}
+      <a class="font-mono underline" href={`${REPO_URL}/commit/${replay.commit}`}>{commit}</a>, on{' '}
+      {replay.system}.
+    </p>
+    {
+      replay.simulated && (
+        <p class="mt-4 max-w-3xl rounded-panel border border-line-strong bg-raised px-4 py-3 text-support text-fg">
+          <span class="font-semibold">Simulated.</span> This recording ran on {replay.system}, not a
+          live helpdesk.
+        </p>
+      )
+    }
+    {
+      replay.errata.length > 0 && (
+        <p class="mt-4 max-w-3xl rounded-panel border border-line-strong bg-raised px-4 py-3 text-support text-fg">
+          <span class="font-semibold">Found after recording.</span>{' '}
+          {replay.errata.length === 1 ? 'One fault was' : `${replay.errata.length} faults were`} found
+          in this recording after it was made —{' '}
+          <a class="rr-link" href="#found-after-recording">
+            read {replay.errata.length === 1 ? 'it' : 'them'} before the cases</a
+          >.
+        </p>
+      )
+    }
+  </Section>
+
+  <Section ruled>
+    <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14">
+      <div>
+        <h2 class="text-title font-medium">The headline case</h2>
+        {
+          presentation && (
+            <p class="mt-3 text-support text-secondary">
+              Chosen by the recording’s pre-registered rule: the first failure of{' '}
+              <span class="font-mono">{headlineVariants[0]}</span> in the order {headlineRule}; if
+              that variant failed nothing, the first failure of{' '}
+              <span class="font-mono">{headlineVariants[1]}</span> in the same order.
+            </p>
+          )
+        }
+        {
+          preregistration && (
+            <p class="mt-3 text-support">
+              <a class="rr-link" href={preregistration}>The pre-registration</a>
+            </p>
+          )
+        }
+      </div>
+      <div>
+        {
+          replay.headline ? (
+            <ClaimReality replay={replay} entry={replay.headline} link={false} />
+          ) : (
+            <p class="rounded-panel border border-line bg-surface p-6 text-lead text-fg">
+              Neither variant failed any case in this recording.
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </Section>
+
+  {
+    replay.agents.map((agent) => (
+      <Section ruled>
+        <div class="max-w-3xl">
+          <h2 class="text-title font-medium">
+            Variant <span class="font-mono">{agent.variant ?? agent.name}</span>
+          </h2>
+          {agent.variant && replay.variantDescriptions[agent.variant] && (
+            <p class="mt-2 text-support text-secondary">
+              {replay.variantDescriptions[agent.variant]}
+            </p>
+          )}
+          <p class="mt-2 text-support text-muted">
+            {[
+              `${count(agent.cases, 'PASS')} passed`,
+              `${count(agent.cases, 'FAIL')} failed`,
+              ...(undecided(agent.cases) > 0
+                ? [`${undecided(agent.cases)} with no verdict`]
+                : []),
+            ].join(', ')}{' '}
+            of {agent.cases.length}, listed in the suite’s order.
+          </p>
+        </div>
+        <ol class="mt-8 space-y-4">
+          {agent.cases.map((entry) => (
+            <CaseRow entry={entry} level={3} headline={entry === replay.headline} />
+          ))}
+        </ol>
+      </Section>
+    ))
+  }
+
+  {
+    replay.matrix && (
+      <Section ruled>
+        <div class="max-w-3xl">
+          <h2 class="text-title font-medium">Permission matrix</h2>
+        </div>
+        <div class="mt-6">
+          <PermissionMatrix matrix={replay.matrix} />
+        </div>
+      </Section>
+    )
+  }
+
+  {
+    presentation && presentation.next.length > 0 && (
+      <Section ruled>
+        <div class="max-w-3xl">
+          <h2 class="text-title font-medium">Next</h2>
+          <div class="mt-6 flex flex-col items-start gap-3">
+            {presentation.next.map((command) => <Command command={command} />)}
+          </div>
+        </div>
+      </Section>
+    )
+  }
+
+  {
+    replay.errata.length > 0 && (
+      <Section ruled>
+        <div class="max-w-3xl">
+          <h2 id="found-after-recording" class="text-title font-medium">Found after recording</h2>
+          <p class="mt-3 text-support text-secondary">
+            Faults found in this recording after it was made. It is shown exactly as it was
+            recorded; these notes sit beside it.
+          </p>
+          <ul class="mt-6 space-y-4">
+            {replay.errata.map((erratum) => (
+              <li class="rounded-panel border border-line bg-surface px-4 py-3 text-support">
+                <p class="text-meta text-muted">
+                  {erratum.added} · {erratum.about}
+                </p>
+                <p class="mt-1 text-fg">{erratum.text}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </Section>
+    )
+  }
+
+  <Section ruled>
+    <div class="max-w-3xl">
+      <h2 class="text-title font-medium">Checking this page</h2>
+      <p class="mt-3 text-support text-secondary">
+        The recording carries the SHA-256 of the run it holds,{' '}
+        <span class="break-all font-mono text-meta">{replay.resultHash}</span>. This page is not built
+        if the run does not match it. Its recorded system, model, date, commit, variant descriptions,
+        headline rule and next commands are read from that file.
+      </p>
+    </div>
+  </Section>
+</Base>

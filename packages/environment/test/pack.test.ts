@@ -155,6 +155,20 @@ describe('a pack environment', () => {
     ).toBe(false);
   });
 
+  it('declares a replaced world and a complete read only when the session says so', () => {
+    const caps = new PackEnvironment(PACK, {
+      ...fakeSession({ simulated: true }),
+      isolation: 'replaced-world',
+      completeRead: true,
+    }).capabilities();
+    expect(caps).toMatchObject({ stateRead: 'full', reset: 'endpoint', seed: 'materialized' });
+    // Nothing measured the reset, so the label claims no more than DECLARED.
+    expect(isolationLevel(caps)).toBe('DECLARED');
+    expect(mayRepeatMutatingCases(caps)).toBe(true);
+    expect(verificationStrength(caps)).toBe('AUTHORITATIVE');
+    expect(capabilityLimits(caps).map((limit) => limit.id)).toEqual(['simulated']);
+  });
+
   it('reads the scope the case materialized, and reports it with the bindings', async () => {
     const session = fakeSession();
     const environment = new PackEnvironment(PACK, session);

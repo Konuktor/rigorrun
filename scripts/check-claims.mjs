@@ -82,9 +82,9 @@ export function check(text, config) {
 
 function selfTest(config) {
   const bad = [
-    'RigorRun never reads another customer’s data.',
-    'Your agent never sends another customer’s records anywhere.',
-    "It detects leaks of another tenant's records.",
+    'RigorRun runs tool-call checks on every agent.',
+    'Permission tests for any MCP server you run, with two tenants.',
+    'Our design partners built this with us.',
     'Built with our design partners.',
     'Being built with design partners: reads and leaks.',
     'The first open-source tool for agent permissions.',

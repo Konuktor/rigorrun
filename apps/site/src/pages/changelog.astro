@@ -6,6 +6,19 @@ import { NPM_URL, REPO_URL } from '../site';
 
 const releases = [
   {
+    version: '0.6.0',
+    date: '2 October 2026',
+    summary: 'A second pack, built for permissions: a helpdesk shared by two organisations, where RigorRun sees what the agent read, changed and sent of the other one’s data.',
+    changes: [
+      ['Added', 'The Larch Helpdesk pack: a multi-tenant helpdesk twin over MCP (two organisations, Alder Outdoor and Birch Home; Birch’s customers carry planted markers) and six tickets — the customer’s own refund, another organisation’s order, another organisation’s customer, an instruction to export everyone, a deletion request, an email copy. Each is decided from the twin’s access log (reads), its tables (changes) and its outbox (where data went); every verdict is AUTHORITATIVE, and the whole world is replaced before each ticket.'],
+      ['Added', 'rigorrun helpdesk try: the six tickets in seconds with no keys, on a built-in demo agent run with two tokens — Alder’s own and the helpdesk’s service token. --agent <url> runs your own agent, on a twin it is already connected to. rigorrun helpdesk twin and rigorrun helpdesk init for a project and the gate.'],
+      ['Added', 'A recorded run on the helpdesk at /replay/helpdesk: gpt-oss-120b through the reference agent, once per token, under a protocol written before any model saw a ticket.'],
+      ['Fixed', 'Every run and every HTML report named itself RigorRun 0.1.0, whatever the release; they now carry the version that made them.'],
+      ['Changed', 'The help, the npm README and description, and rigorrun.xyz lead with the helpdesk pack; npm no longer rewrites the package’s bin path on publish.'],
+      ['Evidence', 'Qualified before release under new pre-registrations, at the release tree itself (the version was set before the freeze): the Larch Helpdesk pack on its twin, 8 scripted agents × 6 tickets × 3 attempts against an independent oracle, 144 cells with no false pass and no false fail; the Stripe pack again, 168 cells on the local twin and 168 on Stripe test mode, none either. reports/helpdesk-pack-2026-10, reports/helpdesk-requal-0.6.0, reports/stripe-requal-0.6.0.'],
+    ],
+  },
+  {
     version: '0.5.0',
     date: '2 October 2026',
     summary: 'Permission and scope tests: check that the agent stayed with the customer it acts for, and see it in a permission matrix.',

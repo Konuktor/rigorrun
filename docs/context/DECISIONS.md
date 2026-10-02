@@ -4,6 +4,28 @@
 > [POSITIONING.md](POSITIONING.md) in the same commit. Entries are never edited after the fact;
 > a reversal is a new entry.
 
+## D-008 · 2026-10-02 · Release 0.6.0; the helpdesk pack leads; positioning statuses follow the evidence
+
+The founder said "yes" to releasing 0.6.0, to updating POSITIONING.md and to rewriting email v2
+around the helpdesk recording. POSITIONING.md now lists the Larch Helpdesk pack as qualified (on
+its twin) and the access log and planted markers as qualified evidence there; tool-call checks
+stay "being built", your own system "not built". The one sentence, the headline and the ICP are
+unchanged. The site, README and CLI lead with `rigorrun helpdesk try` and the helpdesk recording;
+Stripe stays as the second pack. **Why:** the helpdesk pack is qualified (144 cells, twice, no
+false pass or fail) and its recording shows the positioning's exact failure — an agent acting on
+another organisation's record and saying it did the job — which Stripe shows only as a refund on
+another customer's payment. 0.6.0 was qualified at the tree it releases (D-007's lesson applied).
+
+## D-007 · 2026-10-02 · 0.5.0 released on the re-qualified tree, with the version bump disclosed
+
+The founder said "deploy the site and release 0.5.0". The Stripe pack was re-qualified at tree
+`27d40a8`; the version bump to 0.5.0 came after, so the released tree `c247c72` differs from the
+qualified one by three version lines. Rather than run both stages again for a version string, the
+difference is published in full (`reports/stripe-requal-0.5.0/RELEASE-TREE.md`) and named in the
+changelog. **Why:** the rule is "re-qualify, or say that the release tree differs"; a
+version-only diff is checkable by anyone in one command. Next time, bump the version before the
+freeze.
+
 ## D-006 · 2026-10-02 · Codex and Cursor work on the project under Claude's supervision
 
 Claude writes briefs, delegates, reviews diffs and runs the tests itself; it never accepts an

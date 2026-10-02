@@ -248,6 +248,16 @@ describe('a pack connection', () => {
     expect(fake.closed).toBe(1);
   });
 
+  it('keeps a replaced world and a complete read when it holds the session to a stricter safety', async () => {
+    clearPacks();
+    fake = fakeItemsPack({ replacedWorld: true });
+    registerPack(fake.pack);
+    await store.setSecret(DEFAULT_KEY_SECRET, 'k');
+    const project = await packProject('production');
+    const caps = service.workspace.environment(project, EMPTY_SCHEMA).capabilities();
+    expect(caps).toMatchObject({ safety: 'production', stateRead: 'full', reset: 'endpoint' });
+  });
+
   it('holds the session to the project’s safety when that is stricter, and refuses every write on production', async () => {
     await store.setSecret(DEFAULT_KEY_SECRET, 'k');
     const project = await packProject('production');
