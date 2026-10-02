@@ -19,7 +19,11 @@ export PATH="/usr/bin:/bin:$HOME/.local/bin:$PATH"
 
 mkdir -p logs
 LOG=driver.log
-PAUSE=1200
+# The quota refills continuously (~8.3k tokens/hour per model, 200k/day) and
+# an agent cell needs ~5.4k tokens; an agent cannot wait out a long 429, so a
+# cell cut off by the quota is lost and re-run. Waking every 3 hours lets ~4–5
+# cells finish per wake instead of starving on partial ones.
+PAUSE=10800
 log() { echo "$(date -u +%FT%TZ) $*" >> "$LOG"; }
 
 # Run a resumable command until it finishes: exit 0 done, exit 3 quota pause,
