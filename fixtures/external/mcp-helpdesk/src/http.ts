@@ -19,9 +19,12 @@ async function readBody(request: IncomingMessage): Promise<unknown> {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-function bearerToken(request: IncomingMessage): string | undefined {
-  const match = /^Bearer\s+(.+)$/i.exec(request.headers.authorization ?? '');
-  return match?.[1];
+/** The token from `Authorization: Bearer <token>`, parsed without a regular expression. */
+export function bearerToken(request: Pick<IncomingMessage, 'headers'>): string | undefined {
+  const header = request.headers.authorization ?? '';
+  if (header.slice(0, 7).toLowerCase() !== 'bearer ') return undefined;
+  const token = header.slice(7).trim();
+  return token === '' ? undefined : token;
 }
 
 function isLoopback(request: IncomingMessage): boolean {

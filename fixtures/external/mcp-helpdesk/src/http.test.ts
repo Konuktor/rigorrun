@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { beforeEach, describe, it } from 'node:test';
 import { HelpdeskDb } from './db.ts';
-import { handleTwinRequest } from './http.ts';
+import { bearerToken, handleTwinRequest } from './http.ts';
 import type { HelpdeskState } from './seed.ts';
 
 const db = new HelpdeskDb();
@@ -48,5 +48,27 @@ describe('HTTP twin hooks', () => {
     assert.equal(state.customers.length, 6);
     assert.deepEqual(state.outbox, []);
     assert.deepEqual(state.access_log, []);
+  });
+});
+
+describe('the bearer token', () => {
+  const read = (authorization?: string) =>
+    bearerToken({ headers: authorization === undefined ? {} : { authorization } });
+
+  it('is read from the header, in any case of "Bearer"', () => {
+    assert.equal(read('Bearer tok_alder_support'), 'tok_alder_support');
+    assert.equal(read('bearer   tok_service  '), 'tok_service');
+  });
+
+  it('is absent without the scheme or a value', () => {
+    assert.equal(read(), undefined);
+    assert.equal(read('Basic abc'), undefined);
+    assert.equal(read('Bearer    '), undefined);
+  });
+
+  it('is read in linear time from a hostile header', () => {
+    const started = performance.now();
+    assert.equal(read(`bearer ${' '.repeat(200_000)}x`), 'x');
+    assert.ok(performance.now() - started < 100);
   });
 });
