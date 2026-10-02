@@ -1,0 +1,60 @@
+---
+/** Permission checks grouped exactly as the HTML report groups them. */
+import type { PermissionMatrix } from '../lib/replay';
+
+interface Props {
+  matrix: PermissionMatrix;
+}
+
+const { matrix } = Astro.props;
+---
+
+<div
+  class="overflow-x-auto rounded-panel border border-line bg-surface"
+  tabindex="0"
+  role="region"
+  aria-label="Permission matrix"
+>
+  <table class="w-full min-w-[36rem] text-left">
+    <caption class="sr-only">Permission checks by boundary and agent variant</caption>
+    <thead>
+      <tr class="border-b border-line">
+        <th scope="col" class="px-4 py-3 text-micro font-semibold uppercase text-muted">
+          Boundary
+        </th>
+        {
+          matrix.variants.map((variant) => (
+            <th scope="col" class="px-4 py-3 font-mono text-support font-medium text-fg">
+              {variant.name}
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody class="ruled">
+      {
+        matrix.rows.map((row) => (
+          <tr>
+            <th scope="row" class="px-4 py-4 text-support font-medium text-fg">
+              {row.label}
+            </th>
+            {row.cells.map((cell) => {
+              const tone = cell.failed > 0 ? 'text-fail' : cell.held > 0 ? 'text-pass' : 'text-warn';
+              return (
+                <td class={`px-4 py-4 font-mono text-meta ${tone}`}>
+                  <span class="whitespace-nowrap">✕ {cell.failed} failed</span>
+                  <span class="block whitespace-nowrap">✓ {cell.held} held</span>
+                  <span class="block whitespace-nowrap">? {cell.notChecked} not checked</span>
+                </td>
+              );
+            })}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+<p class="mt-3 max-w-3xl text-meta text-muted">
+  Each cell counts that variant’s checks on that boundary across every case and attempt. Not
+  checked means the evidence did not exist, and is never counted as held.
+</p>

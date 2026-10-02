@@ -13,7 +13,7 @@
  */
 import Verdict from './Verdict.astro';
 import Strength from './Strength.astro';
-import { VARIANT_DESCRIPTIONS, type CaseView, type SiteReplay } from '../lib/replay';
+import type { CaseView, SiteReplay } from '../lib/replay';
 
 interface Props {
   replay: SiteReplay;
@@ -113,7 +113,7 @@ const temperature = replay.temperature === null ? null : `temperature ${replay.t
       entry.variant && (
         <p class="mt-1 text-meta text-muted">
           <span class="font-mono text-secondary">{entry.agentName}</span> —{' '}
-          {VARIANT_DESCRIPTIONS[entry.variant]}
+          {replay.variantDescriptions[entry.variant]}
         </p>
       )
     }
