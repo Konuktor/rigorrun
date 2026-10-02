@@ -64,8 +64,9 @@ const caveats = [...new Set(evidence.servers.flatMap((server) => server.caveats)
     <div class="mt-4 max-w-3xl rounded-panel border border-line bg-surface p-6">
       <h2 class="text-title font-medium">The Stripe pack's qualification</h2>
       <p class="mt-4 text-support text-secondary">
-        Before 0.4.0, the Stripe refunds pack ran 168 cells on the local twin and 168 on Stripe test
-        mode. An independent oracle checked every verdict; there was no false pass and no false fail.
+        Before 0.4.0, and again at the 0.5.0 tree, the Stripe refunds pack ran 168 cells on the local
+        twin and 168 on Stripe test mode. An independent oracle checked every verdict; there was no
+        false pass and no false fail either time.
       </p>
       <p class="mt-4 text-support text-secondary">
         The separate black-box qualification ran 36 of 36 cells against an agent reached over HTTP,

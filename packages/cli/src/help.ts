@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.4.0';
+export const VERSION = '0.5.0';
 
 /**
  * The bundled recordings `rigorrun demo` replays, named here with the rest of

@@ -35,10 +35,10 @@ actions. Set them to what you would actually block a release on.
 
 ```yaml
 - name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.4.0
+  uses: Konuktor/rigorrun@v0.5.0
   with:
     project: ${{ vars.RIGORRUN_PROJECT }}
-    version: 0.4.0
+    version: 0.5.0
     min-success: '0.95'
     report: rigorrun-report.html
     node-version: 22
@@ -53,7 +53,7 @@ the gate's exit code.
 | --------------- | -------- | ----------------------------------- | ------------------------------------------------------------------ |
 | `project`       | Yes      | —                                   | Project id passed to `gate --project`.                             |
 | `agent`         | No       | —                                   | Agent passed to `--agent`; needed when the project has several.    |
-| `version`       | No       | `0.4.0`                             | Exact npm package version; never `latest`.                         |
+| `version`       | No       | `0.5.0`                             | Exact npm package version; never `latest`.                         |
 | `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                          |
 | `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.             |
 | `rigorrun-home` | No       | `${{ github.workspace }}/.rigorrun` | Project store, exported as `RIGORRUN_HOME`.                        |

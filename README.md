@@ -43,7 +43,7 @@ from what the agent said. Every verdict is `PARTIAL`
 and prints what was read. Against your Stripe test mode, `stripe init` takes a test key instead of
 `--twin` — live keys are refused. Start with [the Stripe guide](https://docs.rigorrun.xyz/start/stripe)
 and [the example agent](examples/stripe-support-agent); CI is one step
-(`uses: Konuktor/rigorrun@v0.4.0`, see [docs/CI.md](docs/CI.md)).
+(`uses: Konuktor/rigorrun@v0.5.0`, see [docs/CI.md](docs/CI.md)).
 
 **How we know the verdicts are right.** Before this release the Stripe pack was qualified against a
 protocol written before any code: 8 scripted agents (1 correct, 7 with one defect each) × 7 tickets ×

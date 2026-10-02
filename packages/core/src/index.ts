@@ -28,4 +28,4 @@ export * from './record.ts';
  * record recorded a harness that was never released. Kept in step with
  * package.json by `packages/cli/test/package.test.ts`.
  */
-export const RIGORRUN_VERSION = '0.4.0';
+export const RIGORRUN_VERSION = '0.5.0';
