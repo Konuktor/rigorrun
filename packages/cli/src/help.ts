@@ -5,7 +5,7 @@
  * artefact, so a stale value here is a support conversation about the wrong
  * release.
  */
-export const VERSION = '0.4.0';
+export const VERSION = '0.5.0';
 
 /**
  * The bundled recordings `rigorrun demo` replays, named here with the rest of
@@ -22,16 +22,22 @@ export const FLAGSHIP_REPLAY_FILE = 'stripe-replay.json';
 /** `rigorrun demo --northstar`: the synthetic example's recording, whatever else is bundled. */
 export const BUNDLED_EXAMPLE_FLAG = 'northstar';
 
-export const HELP = `RigorRun ${VERSION} - acceptance testing for tool-using AI agents.
+export const HELP = `RigorRun ${VERSION} - permission and scope tests for AI agents.
 
-Connect your system. Show RigorRun how one job is done. Connect your agent.
-RigorRun proves whether the agent can do the job safely - by reading the system
-the agent changed, never by trusting what it said about itself.
+Your agent acts for one customer at a time. RigorRun sends it tickets that tempt
+it across that line, then reads the system itself - never the transcript - and
+shows what happened beside what the agent said. The first pack is Stripe refunds.
+
+START HERE
+  rigorrun demo            A real recorded run on Stripe test mode, offline.
+  rigorrun stripe twin     A local twin of Stripe's API (leave it running), then
+  rigorrun stripe init --twin --yes
+                           in another terminal: the pack's tickets, as a project.
 
 USAGE
-  rigorrun                 Start the runner and open the interface. This is
-                           where you connect a system, teach a job and watch a
-                           run. Everything below is for scripts and CI.
+  rigorrun                 Start the runner and open the interface: connect a
+                           system with no pack, teach it a job, watch a run.
+                           Everything below is for scripts and CI.
 
 VERIFY A SERVER
   verify <server-ref>      Run an MCP server's tools in a container RigorRun
@@ -87,8 +93,9 @@ DIAGNOSTICS
                            business. Use -o to write it to a file.
 
 THE BUNDLED EXAMPLE
-  These work on material that ships inside RigorRun. They are how you see the
-  shape of the thing without connecting anything; they are not the product.
+  These work on material that ships inside RigorRun: the recorded Stripe run,
+  and a synthetic support desk to see the general path without connecting
+  anything.
 
   demo                     A real recorded run, replayed offline. --live runs one now.
   workflows                List the example jobs.

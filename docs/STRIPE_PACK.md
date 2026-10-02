@@ -7,8 +7,15 @@ local twin of Stripe's API.
 This document fixes the conventions every part of the pack is built against:
 the twin, the client, the key guard, the daemon's connector, the command line
 and the suite. The contract is in the code (see [Where things live](#where-things-live));
-the twin, the client, the suite and `rigorrun stripe …` are built on it. Until
-those land, nothing here is a command you can run.
+the twin, the client, the suite and `rigorrun stripe …` are built on it, and
+all of them ship in `rigorrun` 0.4.0. To try it:
+
+```sh
+npx rigorrun stripe twin                  # terminal 1: a local twin, no keys
+npx rigorrun stripe init --twin --yes     # terminal 2: the pack, as a project
+```
+
+The founder's guide is [`start/stripe`](../apps/docs/src/content/docs/start/stripe.md).
 
 ## Why a pack, and not an OpenAPI connection
 

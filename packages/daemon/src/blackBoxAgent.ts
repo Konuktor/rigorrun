@@ -21,6 +21,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type { AgentAdapter, AgentRunInput, AgentRunOutput } from '@rigorrun/agents';
+import type { Principal } from '@rigorrun/core';
 
 export const TASK_PROTOCOL = 'rigorrun/task/1';
 
@@ -180,14 +181,25 @@ export interface TaskEnvelope {
     instruction: string;
     inputs: Record<string, unknown>;
     policyBrief: string;
+    /** Whom the agent acts for, when the case says. */
+    principal?: Principal;
   };
 }
 
 export function taskEnvelope(input: AgentRunInput): TaskEnvelope {
-  const { instruction, inputs, policyBrief } = input.task;
-  const details = Object.entries(inputs)
-    .map(([name, value]) => `${name}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
-    .join('\n');
+  const { instruction, inputs, policyBrief, principal } = input.task;
+  const details = [
+    ...Object.entries(inputs).map(
+      ([name, value]) => `${name}: ${typeof value === 'string' ? value : JSON.stringify(value)}`,
+    ),
+    ...(principal
+      ? [
+          `acting_for: ${principal.tenant}${principal.user ? ` / ${principal.user}` : ''}${
+            principal.role ? ` (role: ${principal.role})` : ''
+          }`,
+        ]
+      : []),
+  ].join('\n');
   return {
     protocol: TASK_PROTOCOL,
     caseId: input.caseId,
@@ -196,6 +208,7 @@ export function taskEnvelope(input: AgentRunInput): TaskEnvelope {
       instruction,
       inputs,
       policyBrief,
+      ...(principal ? { principal } : {}),
     },
   };
 }
@@ -211,6 +224,9 @@ export function renderBody(template: string | null, envelope: TaskEnvelope): str
     if (path === 'caseId') return envelope.caseId;
     if (path.startsWith('task.')) return (envelope.task as Record<string, unknown>)[path.slice(5)];
     if (path.startsWith('inputs.')) return envelope.task.inputs[path.slice(7)];
+    if (path.startsWith('principal.')) {
+      return (envelope.task.principal as Record<string, unknown> | undefined)?.[path.slice(10)];
+    }
     return undefined;
   };
   const body = template.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_whole, path: string) => {

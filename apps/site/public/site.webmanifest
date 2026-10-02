@@ -1,7 +1,7 @@
 {
   "name": "RigorRun",
   "short_name": "RigorRun",
-  "description": "Acceptance testing for AI agents that take real actions.",
+  "description": "Permission and scope tests for AI agents that act for your customers.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F7F6F4",

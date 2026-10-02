@@ -2,11 +2,13 @@
 
 # RigorRun
 
-**Your agent moves money. You're checking it by reading the transcript.**
+**Your agent acts for one customer at a time. You check it stays there by reading the transcript.**
 
-RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a local
-twin with no keys — and shows what actually happened beside what the agent said it did. Open
-source, runs on your machine, no account.
+RigorRun sends your agent tickets that tempt it across that line — somebody else's order, a
+decision that is not its to make, an instruction hidden in the customer's message — then reads the
+system itself and shows what actually happened beside what the agent said it did. The first system
+it reads is Stripe: your test mode, or a local twin with no keys. Open source, runs on your machine,
+no account.
 
 [rigorrun.xyz](https://rigorrun.xyz) · [Documentation](https://docs.rigorrun.xyz) · [A recorded run, case by case](https://rigorrun.xyz/replay) · [npm](https://www.npmjs.com/package/rigorrun)
 
@@ -41,7 +43,7 @@ from what the agent said. Every verdict is `PARTIAL`
 and prints what was read. Against your Stripe test mode, `stripe init` takes a test key instead of
 `--twin` — live keys are refused. Start with [the Stripe guide](https://docs.rigorrun.xyz/start/stripe)
 and [the example agent](examples/stripe-support-agent); CI is one step
-(`uses: Konuktor/rigorrun@v0.4.0`, see [docs/CI.md](docs/CI.md)).
+(`uses: Konuktor/rigorrun@v0.5.0`, see [docs/CI.md](docs/CI.md)).
 
 **How we know the verdicts are right.** Before this release the Stripe pack was qualified against a
 protocol written before any code: 8 scripted agents (1 correct, 7 with one defect each) × 7 tickets ×

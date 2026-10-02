@@ -34,14 +34,17 @@ const steps: Step[] = [
   {
     title: 'Try the Stripe pack on the twin',
     body: 'The twin is a local copy of the part of Stripe’s API the cases use. It runs on this machine, accepts any test key and reaches nothing. Start it, leave it running, and set up the pack against it. Every verdict on the twin says so.',
-    code: `npx rigorrun stripe twin
-npx rigorrun stripe init --twin http://127.0.0.1:12112 --yes`,
+    code: `# terminal 1: the twin, left running
+npx rigorrun stripe twin
+
+# terminal 2
+npx rigorrun stripe init --twin --yes`,
   },
   {
     title: 'Move to your Stripe test mode',
     body: 'Give RigorRun a test key of its own; it lives in this machine’s secret store, never in the project. Only test keys are accepted: the key is checked before any request is sent, and Stripe must then confirm it is not in live mode. A dedicated Sandbox, used by nothing else during a run, is recommended.',
     code: `export STRIPE_TEST_KEY=sk_test_…
-npx rigorrun stripe init --key-env STRIPE_TEST_KEY`,
+npx rigorrun stripe init --key-env STRIPE_TEST_KEY --safety staging`,
   },
   {
     title: 'Point it at your agent, no code changes',
@@ -64,7 +67,7 @@ npx rigorrun stripe init --key-env STRIPE_TEST_KEY`,
     title: 'Put the gate in CI',
     body: 'The GitHub Action runs the same gate as a step in your workflow, publishes its summary and uploads the HTML report.',
     code: `- name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.4.0
+  uses: Konuktor/rigorrun@v0.5.0
   with:
     project: \${{ vars.RIGORRUN_PROJECT }}`,
     link: { href: CI_GUIDE, label: 'The CI guide' },

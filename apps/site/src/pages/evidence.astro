@@ -44,6 +44,7 @@ const caveats = [...new Set(evidence.servers.flatMap((server) => server.caveats)
     <h1 class="mt-4 max-w-3xl text-hero font-medium text-balance">
       {spelled} servers we did not write.
     </h1>
+
     <p class="mt-7 max-w-2xl text-lead text-secondary">
       Each one was fetched from the public registry, pinned to the exact bytes the registry
       published, and run in a container with no network, no mounts and no access to this machine.
@@ -55,6 +56,32 @@ const caveats = [...new Set(evidence.servers.flatMap((server) => server.caveats)
     <div class="mt-8">
       <Command command={`rigorrun verify ${evidence.servers[0]?.ref}`} />
       <p class="mt-3 text-support text-muted">Reproduce any row below with one command.</p>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <Eyebrow>And the Stripe pack</Eyebrow>
+    <div class="mt-4 max-w-3xl rounded-panel border border-line bg-surface p-6">
+      <h2 class="text-title font-medium">The Stripe pack's qualification</h2>
+      <p class="mt-4 text-support text-secondary">
+        Before 0.4.0, and again at the 0.5.0 tree, the Stripe refunds pack ran 168 cells on the local
+        twin and 168 on Stripe test mode. An independent oracle checked every verdict; there was no
+        false pass and no false fail either time.
+      </p>
+      <p class="mt-4 text-support text-secondary">
+        The separate black-box qualification ran 36 of 36 cells against an agent reached over HTTP,
+        with no change to its code and state-only verdicts.
+      </p>
+      <p class="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-support">
+        <a
+          class="rr-link"
+          href={`${REPO_URL}/tree/master/reports/stripe-pack-2026-10`}
+        >Stripe pack evidence</a>
+        <a
+          class="rr-link"
+          href={`${REPO_URL}/tree/master/reports/blackbox-qualification-2026-10`}
+        >Black-box evidence</a>
+      </p>
     </div>
   </Section>
 

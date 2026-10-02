@@ -1,3 +1,7 @@
+> **Describes the v0.2 path (any system, built from one demonstration).** Current positioning:
+> [`docs/context/POSITIONING.md`](context/POSITIONING.md); what is qualified today:
+> [`docs/context/CLAIMS.md`](context/CLAIMS.md).
+
 # Point RigorRun at your agent
 
 Your agent keeps its own loop. RigorRun hands each case an MCP address scoped to
@@ -10,10 +14,10 @@ through it; `rigorrun setup <spec.json>` does it without the interface.
 
 ## Three ways in
 
-| Your agent | Choose, at the agent step | Doc |
-| --- | --- | --- |
-| Answers HTTP on this machine | **It listens on an address** | [HTTP_AGENT.md](HTTP_AGENT.md) |
-| Is a command you can run | **It is a command on this machine** | [CLI_AGENT.md](CLI_AGENT.md) |
+| Your agent                               | Choose, at the agent step                      | Doc                                |
+| ---------------------------------------- | ---------------------------------------------- | ---------------------------------- |
+| Answers HTTP on this machine             | **It listens on an address**                   | [HTTP_AGENT.md](HTTP_AGENT.md)     |
+| Is a command you can run                 | **It is a command on this machine**            | [CLI_AGENT.md](CLI_AGENT.md)       |
 | Cannot be started or reached by RigorRun | **RigorRun cannot start it — I will drive it** | [DRIVEN_AGENT.md](DRIVEN_AGENT.md) |
 
 All three speak `rigorrun/agent/2`: one task in (`instruction`, `inputs`,

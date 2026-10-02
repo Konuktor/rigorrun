@@ -229,6 +229,7 @@ export function createProcessAgent(config: ProcessAgentConfig): AgentAdapter {
               instruction: input.task.instruction,
               inputs: input.task.inputs,
               policyBrief: input.task.policyBrief,
+              ...(input.task.principal ? { principal: input.task.principal } : {}),
             },
             environment: {
               mcpUrl,

@@ -53,12 +53,13 @@ ${masthead(data, generatedAt, mode)}
 ${comparison(data)}
 ${verdictBlock(data)}
 ${caseMatrix(data)}
+${permissionMatrix(data)}
 ${reliability(data)}
 ${failures(data, mode)}
 ${contractSection(options.contract)}
 ${metadata(data, options, generatedAt, mode)}
 <footer>
-  RigorRun ${esc(data.rigorrunVersion)} · Acceptance testing for tool-using AI agents.${
+  RigorRun ${esc(data.rigorrunVersion)} · Permission and scope tests for AI agents.${
     options.syntheticEnvironment
       ? `<br>
   ${esc(data.environment)} is a synthetic demo environment. Every record in it is fabricated.`
@@ -181,6 +182,62 @@ function caseMatrix(run: RunResult): string {
   </table>
   <p class="dim mono" style="margin-top:10px">
     ✓ passed · ✕ failed · ⏱ timed out · ? no verdict (abstained or harness failure) · <span class="cell unsafe" style="width:16px;height:16px;font-size:10px">!</span> unsafe action taken
+  </p>
+</div>`;
+}
+
+const PERMISSION_BOUNDARIES = [
+  ['tenant', "Another tenant's data"],
+  ['role', 'Outside its role'],
+  ['tool', 'A tool it must not use'],
+  ['sink', 'Data leaving'],
+] as const;
+
+function permissionMatrix(run: RunResult): string {
+  const dimensions = new Set(
+    run.caseResults.flatMap((result) =>
+      result.assertions.flatMap((assertion) =>
+        assertion.dimension === undefined ? [] : [assertion.dimension],
+      ),
+    ),
+  );
+  if (dimensions.size === 0) return '';
+
+  const header = run.agents.map((agent) => `<th>${esc(shortName(agent.name))}</th>`).join('');
+  const rows = PERMISSION_BOUNDARIES.filter(([dimension]) => dimensions.has(dimension))
+    .map(([dimension, label]) => {
+      const cells = run.agents
+        .map((agent) => {
+          const assertions = run.caseResults
+            .filter((result) => result.agentId === agent.id)
+            .flatMap((result) =>
+              result.assertions.filter((assertion) => assertion.dimension === dimension),
+            );
+          const failed = assertions.filter(
+            (assertion) => assertion.status === 'FAIL' || assertion.status === 'ERROR',
+          ).length;
+          const held = assertions.filter((assertion) => assertion.status === 'PASS').length;
+          const notChecked = assertions.filter(
+            (assertion) =>
+              assertion.status === 'UNVERIFIABLE' || assertion.status === 'INAPPLICABLE',
+          ).length;
+          const cls = failed > 0 ? 'fail' : held > 0 ? 'pass' : 'undecided';
+          const summary = `✕ ${failed} failed · ✓ ${held} held · ? ${notChecked} not checked`;
+          return `<td class="cell ${cls}">${esc(summary)}</td>`;
+        })
+        .join('');
+      return `<tr><td>${esc(label)}</td>${cells}</tr>`;
+    })
+    .join('');
+
+  return `<h2>Permission matrix</h2>
+<div class="panel">
+  <table class="permission-matrix">
+    <thead><tr><th>Boundary</th>${header}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <p class="dim mono" style="margin-top:10px">
+    Each cell counts that agent's checks on that boundary across every case and attempt. Not checked means the evidence did not exist — for example, a black-box agent's calls are never seen — and is never counted as held.
   </p>
 </div>`;
 }

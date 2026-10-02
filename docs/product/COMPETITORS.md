@@ -1,3 +1,6 @@
+> Competitor facts below were gathered for the v0.2 positioning. Current positioning and the
+> state-based testers and runtime-authorisation vendors added since: [`docs/context/POSITIONING.md`](../context/POSITIONING.md).
+
 # Competitors
 
 **Accessed:** 2026-10-01 (every URL below was fetched or seen in search results on this date).
@@ -31,7 +34,7 @@ RigorRun's own row is sourced from this repository, not from the web.
 | **HUD** (YC Winter 2025)            | Platform for building RL environments and evals                                          | Verifiers that inspect final environment state; LLM grading recommended only where programmatic checks fail                      | Docker environments (shell, MCP, browser, VNC)                                 | SDK is MIT; local `hud eval`; cloud billed per environment-hour           | [yc](https://www.ycombinator.com/companies/hud), [site](https://www.hud.ai/), [sdk](https://github.com/hud-evals/hud-python), [verifiers](https://www.hud.ai/resources/verifier-reward-design-rl-environments)                  |
 | **Cekura** (YC F24)                 | Testing and monitoring for voice and chat agents                                         | LLM-based judges over the whole session                                                                                          | Synthetic users plus a mock tool platform; production monitoring               | VPC/on-prem on Enterprise                                                 | [launch hn](https://news.ycombinator.com/item?id=47232903), [pricing](https://www.cekura.ai/pricing)                                                                                                                            |
 | **Halluminate** (YC Summer 2025)    | Data and RL environments for computer-use agents                                         | Error analysis by expert human annotators; proprietary benchmarks                                                                | Managed sandboxes modeled on Salesforce, Slack, ticketing tools                | **unverified**                                                            | [yc](https://www.ycombinator.com/companies/halluminate)                                                                                                                                                                         |
-| **RigorRun**                        | Acceptance testing from one human demonstration                                          | State of the system the agent changed; a model is "a second opinion, never the arbiter"                                          | The user's own system: staging, a Stripe test account, an MCP server's backend | MIT; `npx rigorrun`; runs locally; no account                             | `README.md`, `docs/PRODUCT.md`, `docs/GETTING_STARTED.md`, `apps/docs/src/content/docs/agents/black-box.md`                                                                                                                     |
+| **RigorRun**                        | Acceptance testing from one human demonstration                                          | State of the system the agent changed; a model is "a second opinion, never the arbiter"                                          | The user's own system: staging, a Stripe test account, an MCP server's backend | MIT; `npx rigorrun`; runs locally; no account                             | `README.md`, `docs/archive/v0.2/PRODUCT.md`, `docs/GETTING_STARTED.md`, `apps/docs/src/content/docs/agents/black-box.md`                                                                                                        |
 
 ---
 
@@ -297,7 +300,7 @@ Each bullet compares approaches. None of them ranks RigorRun above anyone.
    [concepts](https://docs.langchain.com/langsmith/evaluation-concepts),
    [products](https://www.patronus.ai/products)). Cekura's verdicts come from LLM-based judges
    ([launch hn](https://news.ycombinator.com/item?id=47232903)). RigorRun decides from system
-   state; a model is "a second opinion, never the arbiter" (`docs/PRODUCT.md`). **Overlap:**
+   state; a model is "a second opinion, never the arbiter" (`docs/archive/v0.2/PRODUCT.md`). **Overlap:**
    Archal (state diffs), Arga's benchmark (before-and-after state), HUD (state verifiers) and Coval
    (API State) also judge from state. In Archal, Arga and HUD that is the state of a simulated or
    containerized environment, not the user's live test-mode system.
@@ -306,7 +309,7 @@ Each bullet compares approaches. None of them ranks RigorRun above anyone.
    [chronicle launch](https://www.ycombinator.com/launches/QFn-chronicle-labs-staging-environments-for-ai-agents)).
    Cekura extracts them from production conversations or from a description of the agent
    ([launch hn](https://news.ycombinator.com/item?id=47232903)). RigorRun derives a suite from one
-   human demonstration of the job (`docs/POSITIONING.md`). That works before any production traffic
+   human demonstration of the job (`docs/archive/v0.2/POSITIONING.md`). That works before any production traffic
    exists, but it depends on a person doing the job once.
 4. **Where it runs.** Arga needs `arga login`
    ([cli](https://github.com/ArgaLabs/arga-cli/blob/main/README.md)). Hue's simulation and
@@ -320,7 +323,7 @@ Each bullet compares approaches. None of them ranks RigorRun above anyone.
 5. **When it acts.** Salus blocks actions at runtime in production
    ([yc](https://www.ycombinator.com/companies/salus)). Lemma monitors live traffic
    ([site](https://www.uselemma.ai/)). RigorRun gates changes before production and does not watch
-   production (`docs/POSITIONING.md`). These tools complement RigorRun rather than replace it.
+   production (`docs/archive/v0.2/POSITIONING.md`). These tools complement RigorRun rather than replace it.
 
 ### What competitors have that RigorRun does not
 
@@ -339,7 +342,7 @@ Each bullet compares approaches. None of them ranks RigorRun above anyone.
   ([hud.ai](https://www.hud.ai/)).
 - **RL training data and environments**: HUD and Halluminate.
 - **Human expert review as a service**: Halluminate.
-- **Maturity.** `docs/PRODUCT.md` calls RigorRun "An early MVP" whose shipped environment is
+- **Maturity.** `docs/archive/v0.2/PRODUCT.md` calls RigorRun "An early MVP" whose shipped environment is
   synthetic. Several competitors publish named enterprise customers and paid tiers.
 
 ---
@@ -349,16 +352,16 @@ Each bullet compares approaches. None of them ranks RigorRun above anyone.
 Each claim is supported by the sources above. None of them says "only", "first" or "better".
 
 1. "RigorRun runs on your machine — `npx rigorrun`, MIT-licensed, no account." (`README.md`,
-   `docs/PRODUCT.md`)
+   `docs/archive/v0.2/PRODUCT.md`)
 2. "RigorRun tests your agent against your own system — staging, a test-mode account, your MCP
    server — not a replica of it." (`black-box.md`; replicas are described at argalabs.com and
    archal.ai)
 3. "The verdict comes from the state of the system your agent changed, not from a model grading
-   the transcript." (`docs/PRODUCT.md`, `docs/POSITIONING.md`)
+   the transcript." (`docs/archive/v0.2/PRODUCT.md`, `docs/archive/v0.2/POSITIONING.md`)
 4. "Show RigorRun the job once; it builds the acceptance suite from that demonstration."
-   (`docs/POSITIONING.md`)
+   (`docs/archive/v0.2/POSITIONING.md`)
 5. "RigorRun gates a change before production. Pair it with a monitor or a runtime guard if you
-   need those." (`docs/POSITIONING.md`; see the Salus and Lemma rows)
+   need those." (`docs/archive/v0.2/POSITIONING.md`; see the Salus and Lemma rows)
 
 ## 5. Do not claim
 

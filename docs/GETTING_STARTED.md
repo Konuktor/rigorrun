@@ -1,3 +1,7 @@
+> **Describes the v0.2 path (any system, built from one demonstration).** Current positioning:
+> [`docs/context/POSITIONING.md`](context/POSITIONING.md); what is qualified today:
+> [`docs/context/CLAIMS.md`](context/CLAIMS.md).
+
 # Getting started
 
 Connect your system. Show RigorRun how one job is done. Connect your agent.
@@ -85,12 +89,12 @@ judgement, because neither can be discovered:
 
 **Which tools only read.** A server can annotate a tool `readOnlyHint: true`,
 and RigorRun shows you that it did — labelled as the server's claim. It will
-not act on it. The specification is blunt about why: *"Clients should never make
-tool use decisions based on ToolAnnotations received from untrusted servers."*
+not act on it. The specification is blunt about why: _"Clients should never make
+tool use decisions based on ToolAnnotations received from untrusted servers."_
 A tool nobody has vouched for counts as writing.
 
 **Which tools read the records you care about.** These are the calls RigorRun
-makes *after* your agent finishes, to find out what actually happened. They are
+makes _after_ your agent finishes, to find out what actually happened. They are
 the entire reason a verdict can rest on your system rather than on your agent's
 account of itself. Pick at least one.
 
@@ -120,7 +124,7 @@ start.
 ## 5. Review what it learned
 
 RigorRun worked the records out from what your system handed back. It read the
-*shape* of the data and never the names, which is what stops a business
+_shape_ of the data and never the names, which is what stops a business
 vocabulary getting into the parts that are supposed to be general — and it
 means some things it genuinely cannot know:
 
@@ -213,6 +217,6 @@ npx rigorrun feedback export -o rigorrun-feedback.json
 
 That file contains your operating system, Node and RigorRun versions, how far
 you got, how long it took, what kind of connector you used, counts of tools and
-cases, and the *classes* of anything that failed. It contains no credentials, no
+cases, and the _classes_ of anything that failed. It contains no credentials, no
 tool arguments, no results, and no names from your business. Open it before you
 send it — it is small and readable on purpose.

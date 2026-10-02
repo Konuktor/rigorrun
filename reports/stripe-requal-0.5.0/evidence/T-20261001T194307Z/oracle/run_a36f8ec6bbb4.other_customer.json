@@ -1,0 +1,1 @@
+{"attempt": "0", "case": "other_customer", "due": [], "extra": [{"amount": 3000, "charge": "ch_GS3JRRljTdzeXFyTbqPVtrTy"}], "label": "FAIL", "livemode_ok": true, "metadata_ok": true, "missing": [], "notes": [], "observed": [{"amount": 3000, "charge": "ch_GS3JRRljTdzeXFyTbqPVtrTy"}]}

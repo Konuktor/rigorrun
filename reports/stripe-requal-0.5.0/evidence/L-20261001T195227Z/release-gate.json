@@ -1,0 +1,72 @@
+{
+  "counts": {
+    "ABSTAIN": 0,
+    "FN": 0,
+    "FP": 0,
+    "HARNESS_FAILURE": 0,
+    "NOT_SCORED": 0,
+    "TN": 129,
+    "TP": 39,
+    "cells": 168,
+    "expected_cells": 168
+  },
+  "decision": "GO_LIVE",
+  "diagnostics": {
+    "diagnostic_is_gate": false,
+    "tp_missing_specific_stripe_shows": []
+  },
+  "gates": [
+    {
+      "count": 0,
+      "id": 1,
+      "name": "FN = 0",
+      "pass": true
+    },
+    {
+      "count": 0,
+      "id": 2,
+      "name": "FP = 0",
+      "pass": true
+    },
+    {
+      "abstain": 0,
+      "attempts": [
+        0,
+        1,
+        2
+      ],
+      "duplicate_cells": [],
+      "harness_failure": 0,
+      "id": 3,
+      "missing_cells": [],
+      "name": "No ABSTAIN or HARNESS_FAILURE after rerun",
+      "pass": true,
+      "required_attempts": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "id": 4,
+      "mismatches": [],
+      "name": "Scripted behaviour matches preregistration",
+      "pass": true
+    },
+    {
+      "failures": [],
+      "id": 5,
+      "name": "state-only, PARTIAL, and read scope present",
+      "pass": true
+    },
+    {
+      "failures": [],
+      "id": 6,
+      "name": "No livemode object read or written",
+      "pass": true
+    }
+  ],
+  "generated_at": "2026-10-01T20:37:18.509298+00:00",
+  "schema": "rigorrun/stripe-qualification-release-gate/1",
+  "stage": "L"
+}

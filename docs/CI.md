@@ -71,10 +71,10 @@ travel together.
 
 ```yaml
 - name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.4.0
+  uses: Konuktor/rigorrun@v0.5.0
   with:
     project: ${{ vars.RIGORRUN_PROJECT }}
-    version: 0.4.0
+    version: 0.5.0
     min-success: '0.95'
     report: rigorrun-report.html
     node-version: 22
@@ -88,7 +88,7 @@ when the gate fails, and uploads the HTML report as a workflow artifact.
 | Input           | Required | Default                             | Meaning                                                                                      |
 | --------------- | -------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
 | `project`       | Yes      | —                                   | Project id passed to `gate --project`.                                                       |
-| `version`       | No       | `0.4.0`                             | Exact npm package version. The action never defaults to `latest`.                            |
+| `version`       | No       | `0.5.0`                             | Exact npm package version. The action never defaults to `latest`.                            |
 | `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                                                    |
 | `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.                                       |
 | `rigorrun-home` | No       | `${{ github.workspace }}/.rigorrun` | Project store, exported as `RIGORRUN_HOME`.                                                  |

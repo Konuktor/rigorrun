@@ -6,6 +6,19 @@ import { NPM_URL, REPO_URL } from '../site';
 
 const releases = [
   {
+    version: '0.5.0',
+    date: '2 October 2026',
+    summary: 'Permission and scope tests: check that the agent stayed with the customer it acts for, and see it in a permission matrix.',
+    changes: [
+      ['Added', 'The HTML report has a permission matrix: for each boundary (another tenant\'s data, outside its role, a tool it must not use, data leaving) and each agent, how many checks failed, held, or could not be checked. The Stripe pack\'s checks name the boundary they guard, so a Stripe run fills it.'],
+      ['Added', 'Four check kinds for agents reached through RigorRun\'s MCP proxy — tool_not_called, tool_args_in_scope, no_refused_call and marker_absent (a string planted in another customer\'s data must not appear in a reply, a call or a record). They are not qualified yet: the qualification on a multi-tenant system is next. For a black-box agent they are listed as not made.'],
+      ['Added', 'task.principal: a case can say whom the agent acts for (tenant, user, role); it is sent in every agent envelope and in body templates as {{principal.tenant}}.'],
+      ['Fixed', 'event_occurred and event_not_occurred were evaluated against an empty list of events, so the first always failed and the second always passed. contains and not_contains now look inside records, and a path that does not resolve is not checked rather than silently passed. A call the proxy refuses is now evidence, not only a count.'],
+      ['Changed', 'The help, the npm description, the README and rigorrun.xyz describe RigorRun as permission and scope tests for AI agents; the commands they show work as typed (stripe twin, then stripe init --twin --yes).'],
+      ['Evidence', 'Re-qualified before release under a new pre-registration: the Stripe pack at the 0.5.0 tree, 168 cells on the local twin and 168 on Stripe test mode, no false pass and no false fail, the same as 0.4.0. The released tree differs from the one qualified only by its version strings. reports/stripe-requal-0.5.0.'],
+    ],
+  },
+  {
     version: '0.4.0',
     date: '1 October 2026',
     summary: 'Test the agent that touches your Stripe account — with no change to its code, against your test mode — and see what it said beside what Stripe shows.',

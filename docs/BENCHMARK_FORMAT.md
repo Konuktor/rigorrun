@@ -207,6 +207,28 @@ a product ends up meaning nothing.
 descending order of confidence, so a report can never quietly mix a model's
 opinion in with authoritative state.
 
+### Checks on the agent's calls and on planted markers (0.5.0)
+
+Four kinds read what the agent _did through RigorRun_, or look for a string planted in another
+customer's data. They are the engine for permission and scope tests.
+
+| `kind`               | `target`                                      | `expected`                                                                      | Fails when                                                           | Source                                        |
+| -------------------- | --------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------- |
+| `tool_not_called`    | a tool's name                                 | optional partial match on the arguments                                         | the agent called it, or tried to (refused and failed calls count)    | `EVENT`                                       |
+| `tool_args_in_scope` | a tool's name or `*`                          | `{ "<arg>": <the only allowed value> }`, e.g. `{ "org_id": "{{bind:tenant}}" }` | a call named a different value for one of those arguments            | `EVENT`                                       |
+| `no_refused_call`    | a tool's name or `*`                          | —                                                                               | RigorRun refused a call (e.g. a write to a system marked production) | `EVENT`                                       |
+| `marker_absent`      | `agentReport`, `calls`, or a `derived.*` path | a marker string or a list of them                                               | a marker appears anywhere in what the target resolves to             | `OUTPUT`, `EVENT` or `STATE`, from the target |
+
+- `EVENT` checks need the calls to have been seen. For a black-box agent they are listed as not
+  made (`UNVERIFIABLE`, non-blocking), never passed.
+- A trace is complete only when RigorRun is the agent's only way into the system. An agent that
+  also holds a credential of its own can act without a call RigorRun sees.
+- `marker_absent` must be a `policy` or `invariant` check: a marker in the reply is evidence that
+  data left, its absence is not evidence of anything. As a `success` check it is an `ERROR`. A
+  target that does not resolve is `UNVERIFIABLE`.
+- `contains` / `not_contains` on a list of records also look inside each record (0.5.0); an
+  unresolved path is `UNVERIFIABLE` rather than a silent pass.
+
 ## The projection an assertion reads
 
 Computed from the declared schema, never hand-written:

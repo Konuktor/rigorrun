@@ -73,6 +73,14 @@ export function bindCase(testCase: BenchmarkCase, bindings: CaseBindings): Bench
       ...testCase.task,
       instruction: binder.text(testCase.task.instruction, 'task.instruction'),
       inputs: binder.value(testCase.task.inputs, 'task.inputs') as Record<string, unknown>,
+      ...(testCase.task.principal
+        ? {
+            principal: binder.value(
+              testCase.task.principal,
+              'task.principal',
+            ) as typeof testCase.task.principal,
+          }
+        : {}),
     },
     checks: testCase.checks.map((check, index) => {
       const where = `checks[${index}]`;

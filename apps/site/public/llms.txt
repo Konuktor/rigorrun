@@ -1,32 +1,48 @@
 # RigorRun
 
-> Acceptance testing for AI agents that take real actions. A person demonstrates
-> a real job once; RigorRun derives the rules from what changed in the system,
-> generates an executable acceptance suite, runs an agent against it, and decides
-> pass or fail by reading the system state afterwards rather than the agent's own
-> account of what it did.
+> Permission and scope tests for AI agents, run before the agent ships. RigorRun
+> sends an agent tickets that tempt it to act for the wrong customer or outside
+> its job, then decides pass or fail by reading the real system afterwards — not
+> the agent's transcript, and never with a model as the judge.
 
-RigorRun is a local-first CLI and web interface, published on npm as `rigorrun`,
-MIT licensed, with SLSA build provenance. It runs entirely on the user's machine:
-there is no account and no hosted component.
+RigorRun is a local-first CLI, published on npm as `rigorrun`, MIT licensed, with
+SLSA build provenance. It runs entirely on the user's machine: there is no account
+and no hosted component.
+
+## What is checked today
+
+- The first pack is Stripe refunds (`npx rigorrun stripe twin`, then
+  `npx rigorrun stripe init --twin --yes`): seven tickets, including a refund on
+  another customer's payment, a disputed payment and an instruction inside the
+  ticket. Each is decided from what Stripe holds afterwards.
+- It was qualified before release against an independent oracle: 168 cells on a
+  local Stripe twin and 168 on Stripe test mode, no false pass and no false fail;
+  black-box mode 36 cells, none either.
+- Every Stripe verdict is PARTIAL: it reads what each case created, not the
+  whole account.
+
+## Being built (not available yet)
+
+- Being built: checks on what the agent read and what it sent, from its tool
+  calls, the system's access log and marker strings planted in another
+  customer's data (being built, not available yet).
+- Being built next: a multi-tenant helpdesk pack, then the same checks on the
+  user's own system.
 
 ## Key distinctions
 
-- It is not an LLM evaluation harness. Evals score a model's output text.
-  RigorRun compares system state before and after, through read operations the
-  operator nominates.
+- It is not an LLM evaluation harness. Evals grade what the agent said;
+  RigorRun reads what happened in the system.
+- It is not a runtime guard or policy engine. It checks, before release, that
+  the permissions the agent should respect actually held.
 - Every verdict carries a verification strength: AUTHORITATIVE, PARTIAL or
-  OBSERVATIONAL. A verdict against a real external system is PARTIAL by design.
-- A browser-only connection is OBSERVATIONAL: the DOM is not authoritative state.
-- Isolation is reported as RESET, PARTIAL, DECLARED or NONE. DECLARED means a
-  reset was nominated but never observed to work.
+  OBSERVATIONAL.
 
 ## Docs
 
 - Getting started: https://rigorrun.xyz/start
-- How it works: https://rigorrun.xyz/how-it-works
-- Evidence, against MCP servers written by others: https://rigorrun.xyz/evidence
-- Verify a published MCP server: https://rigorrun.xyz/verify
+- The recorded run on Stripe test mode: https://rigorrun.xyz/replay
+- Evidence: https://rigorrun.xyz/evidence
 - Security and local-first architecture: https://rigorrun.xyz/security
 - What is and is not built: https://rigorrun.xyz/what-is-built
 - Full documentation: https://docs.rigorrun.xyz
@@ -34,5 +50,4 @@ there is no account and no hosted component.
 ## Honest limits
 
 No external team has used RigorRun yet. There are no customers, no funding and no
-revenue. Published evidence covers four MCP servers from a single publisher, in
-which 19 of 37 tools were exercised; the remainder are itemised with reasons.
+revenue. The founder is looking for 3–5 design partners.

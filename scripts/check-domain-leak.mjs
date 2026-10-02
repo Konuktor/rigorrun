@@ -158,7 +158,7 @@ const ALLOWED_SHAPES = new Map([
     'masks amounts before a report leaves the machine. Only recognises the ' +
       'dollar form, which is a real limit of the mask rather than an assumption ' +
       'about the business: an unmasked euro figure is a redaction gap, logged in ' +
-      'ROADMAP.md.',
+      'docs/archive/v0.2/ROADMAP.md.',
   ],
   [
     'apps/demo-ops/src/render/values.tsx',

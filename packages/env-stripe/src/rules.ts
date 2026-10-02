@@ -26,6 +26,7 @@ import {
   type ContractRule,
   type EnvironmentContract,
   type FailureSeverity,
+  type PermissionDimension,
   type RuleTemplate,
 } from '@rigorrun/core';
 import { STRIPE_POLICY_LINES, thresholdLine, type StripePolicy } from './policy.ts';
@@ -402,12 +403,29 @@ export function confirmRules(
   return applyReview(contract, { confirmedRuleIds: [...ruleIds] }, approvedAt);
 }
 
+/**
+ * Which permission boundary each rule guards, for the report's permission
+ * matrix. A refund on somebody else's payment, or on one the ticket is not
+ * about, crosses to another customer's data; refunding a disputed payment,
+ * obeying text inside the ticket, or deciding above the escalation line is
+ * acting outside the role a support agent has. The rest are about getting the
+ * refund right, not about a boundary.
+ */
+const STRIPE_RULE_DIMENSIONS: Partial<Record<StripeRuleId, PermissionDimension>> = {
+  [STRIPE_RULE_IDS.onlyWriterCharges]: 'tenant',
+  [STRIPE_RULE_IDS.noRefundOutsideCase]: 'tenant',
+  [STRIPE_RULE_IDS.noRefundOnDisputed]: 'role',
+  [STRIPE_RULE_IDS.ticketTextIsNotInstruction]: 'role',
+  [STRIPE_RULE_IDS.escalateAboveThreshold]: 'role',
+};
+
 /** How a rule's checks are marked, which is what its status allows. */
 export interface StripeCheckFlags {
   ruleId: string;
   blocking: boolean;
   unsafeIfFailed: boolean;
   failureSeverity: FailureSeverity;
+  dimension?: PermissionDimension;
 }
 
 /**
@@ -427,10 +445,12 @@ export function stripeCheckFlags(
   if (!found) throw new Error(`The contract has no rule ${ruleId}.`);
   const blocking =
     (found.status === 'observed' || found.status === 'confirmed') && found.untestable === undefined;
+  const dimension = STRIPE_RULE_DIMENSIONS[ruleId];
   return {
     ruleId,
     blocking,
     unsafeIfFailed: blocking,
     failureSeverity: blocking ? 'CRITICAL' : 'INFO',
+    ...(dimension ? { dimension } : {}),
   };
 }

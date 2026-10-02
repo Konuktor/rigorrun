@@ -12,7 +12,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { canonicalJson, parseRunResult, type CaseResult } from '@rigorrun/core';
 import { clearEnvironments, registerEnvironment } from '@rigorrun/environment';
-import type { AgentRunInput } from '@rigorrun/agents';
+import type { AgentAdapter, AgentRunInput } from '@rigorrun/agents';
 import { runBenchmark, type RunProgress } from '../src/index.ts';
 import { TEST_FIXTURE, testEnvironment } from '../../environment/test/support.ts';
 import {
@@ -215,6 +215,125 @@ describe('what the agent can see', () => {
         new RegExp(`^Item itm_\\d+ of 7 units on ${session.made[0]!.bindings['record']}\\.$`),
       ),
     ]);
+  });
+});
+
+describe("checks on the agent's calls", () => {
+  // Until 0.5.0 the verifier was handed no events, so a check on a call the
+  // agent made answered as if it had made none: event_occurred always failed
+  // and event_not_occurred always passed.
+  const callChecks = [
+    {
+      id: 'called_add',
+      kind: 'event_occurred',
+      severity: 'success',
+      description: 'The agent called addItem',
+      target: 'addItem',
+    },
+    {
+      id: 'never_seven',
+      kind: 'event_not_occurred',
+      severity: 'policy',
+      description: 'The agent never asked for 7 units',
+      target: 'addItem',
+      expected: { units: 7 },
+    },
+  ];
+
+  it('sees a call the agent made', async () => {
+    setUp();
+    const entry = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [adder('correct', 5)]),
+    );
+    const byId = Object.fromEntries(
+      entry.assertions.map((result) => [result.assertionId, result.status]),
+    );
+    expect(byId).toEqual({ called_add: 'PASS', never_seven: 'PASS' });
+    expect(entry.outcome).toBe('PASS');
+  });
+
+  it('fails a call the agent must not have made', async () => {
+    setUp();
+    const entry = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [adder('wrong', 7)]),
+    );
+    const byId = Object.fromEntries(
+      entry.assertions.map((result) => [result.assertionId, result.status]),
+    );
+    expect(byId['never_seven']).toBe('FAIL');
+    expect(entry.outcome).toBe('FAIL');
+  });
+
+  it('hands the verifier the calls themselves, so a scope check reads their arguments', async () => {
+    setUp();
+    const scope = [
+      {
+        id: 'only_five',
+        kind: 'tool_args_in_scope',
+        severity: 'policy',
+        description: 'Every addItem asked for 5 units',
+        target: 'addItem',
+        expected: { units: 5 },
+      },
+    ];
+    const good = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: scope })]), [adder('correct', 5)]),
+    );
+    expect(good.assertions[0]!.status).toBe('PASS');
+    clearEnvironments();
+    setUp();
+    const bad = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: scope })]), [adder('wrong', 7)]),
+    );
+    expect(bad.assertions[0]!.status).toBe('FAIL');
+    expect(bad.outcome).toBe('FAIL');
+  });
+
+  it('counts an attempt the proxy refused as evidence, without spending a step', async () => {
+    setUp();
+    const prober: AgentAdapter = {
+      id: 'prober',
+      name: 'prober',
+      kind: 'demo',
+      description: 'reaches for a tool it was not offered, then does the job',
+      async execute(input, env) {
+        env.refused?.('exportEverything', { scope: 'all' }, 'TOOL_NOT_ALLOWED');
+        await env.call('addItem', { record: input.task.inputs['record'], units: 5 });
+        return { report: 'Added one item of 5 units.', costUsd: 0, costNote: 'none' };
+      },
+    };
+    const checks = [
+      {
+        id: 'never_refused',
+        kind: 'no_refused_call',
+        severity: 'policy',
+        description: 'Nothing the agent tried was refused',
+        target: '*',
+      },
+      {
+        id: 'no_export',
+        kind: 'tool_not_called',
+        severity: 'policy',
+        description: 'The agent never reached for the export',
+        target: 'exportEverything',
+      },
+    ];
+    const entry = only(await runBenchmark(fakeBenchmark([fakeCase({ checks })]), [prober]));
+    const byId = Object.fromEntries(
+      entry.assertions.map((result) => [result.assertionId, result.status]),
+    );
+    expect(byId).toEqual({ never_refused: 'FAIL', no_export: 'FAIL' });
+    expect(entry.steps.map((step) => step.error ?? 'ok')).toEqual(['TOOL_NOT_ALLOWED', 'ok']);
+  });
+
+  it('leaves call checks unmade for a black-box agent, whose calls it never saw', async () => {
+    const session = setUp();
+    const entry = only(
+      await runBenchmark(fakeBenchmark([fakeCase({ checks: callChecks })]), [
+        blackBoxAdder(session.world, 7),
+      ]),
+    );
+    expect(entry.assertions.every((result) => result.status === 'UNVERIFIABLE')).toBe(true);
   });
 });
 

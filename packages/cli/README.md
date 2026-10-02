@@ -2,11 +2,13 @@
 
 # RigorRun
 
-**Your agent moves money. You're checking it by reading the transcript.**
+**Your agent acts for one customer at a time. You check it stays there by reading the transcript.**
 
-RigorRun gives your agent support tickets, then reads Stripe itself — your test mode, or a local
-twin with no keys — and shows what actually happened beside what the agent said it did. The verdict
-comes from the state of the system your agent changed, never from what it says about itself.
+RigorRun sends your agent tickets that tempt it across that line — somebody else's order, a decision
+that is not its to make, an instruction hidden in the customer's message — then reads the system
+itself and shows what actually happened beside what the agent said it did. The first system it reads
+is Stripe: your test mode, or a local twin with no keys. The verdict comes from the state of the
+system your agent changed, never from what it says about itself.
 
 **Early Access** — parts of it are honestly unfinished, and they are listed rather than hidden.
 

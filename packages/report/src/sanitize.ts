@@ -86,6 +86,8 @@ function sanitizeCaseResult(result: CaseResult, index: number): CaseResult {
       verificationSource: assertion.verificationSource,
       failureSeverity: assertion.failureSeverity,
       blocking: assertion.blocking,
+      // Which boundary the check guards names a kind of rule, not a record.
+      ...(assertion.dimension ? { dimension: assertion.dimension } : {}),
       message: WITHHELD,
     })),
     agentReport: WITHHELD,

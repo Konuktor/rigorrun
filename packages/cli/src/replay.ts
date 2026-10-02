@@ -304,7 +304,7 @@ export function printReplay(replay: Replay, options: { show?: number; list?: num
   );
   line();
   line(
-    `${c.bold('Your own agent')}  npx rigorrun   — connect a system, show it the job once, send your agent the work.`,
+    `${c.bold('Your own agent')}  npx rigorrun --help lists the packs; npx rigorrun opens the interface for any other system.`,
   );
 }
 

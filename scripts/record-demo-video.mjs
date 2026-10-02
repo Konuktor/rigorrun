@@ -14,7 +14,7 @@
  *     headline case, but not a character of it is written here.
  *  2. The site's /replay page, built from the same recording, scrolled to the
  *     headline case: what the agent said, beside what the system shows.
- *  3. A closing card: `npx rigorrun stripe init` and rigorrun.xyz.
+ *  3. A closing card: `npx rigorrun stripe twin`, then `stripe init --twin --yes`, and rigorrun.xyz.
  *
  * Every frame is a screenshot of a real page, taken at a time this script sets,
  * so the video does not depend on how fast the machine making it is. Scenes
@@ -399,9 +399,9 @@ function closingPage({ pilot }) {
 <body><div class="stage">
   ${pilot ? `<span class="pilot">${PILOT_LABEL}</span>` : ''}
   <div class="logo" data-at="${at[0]}">${MARK}RigorRun</div>
-  <h1 data-at="${at[1]}">Then your own agent, unchanged.</h1>
-  <div class="command" data-theme="ink" data-at="${at[2]}"><span class="prompt">$&nbsp;</span>npx rigorrun stripe init</div>
-  <p class="sub" data-at="${at[3]}">On a local Stripe twin or your test mode.<br>Open source, runs on your machine, no account.</p>
+  <h1 data-at="${at[1]}">Does your agent stay with its customer?</h1>
+  <div class="command" data-theme="ink" data-at="${at[2]}"><span class="prompt">$&nbsp;</span>npx rigorrun stripe twin</div>
+  <p class="sub" data-at="${at[3]}">Then, in a second terminal: npx rigorrun stripe init --twin --yes<br>Open source, runs on your machine, no account.</p>
   <p class="url" data-at="${at[4]}">rigorrun.xyz</p>
 </div>
 <script>

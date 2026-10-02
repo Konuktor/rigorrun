@@ -96,14 +96,14 @@ function card() {
     </div>
     <div>
       <p style="font-size:66px;line-height:1.06;letter-spacing:-0.035em;font-weight:500;max-width:20ch">
-        Your agent said it worked.
-        <span style="color:${MUTED}">RigorRun checks what it did.</span>
+        Your agent acts for one customer.
+        <span style="color:${MUTED}">RigorRun checks it stays there.</span>
       </p>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;font-size:22px;color:${MUTED}">
       <span style="font-family:'Geist Mono',monospace;color:${FG};background:${INK};color:#E9ECF1;
-        padding:12px 20px;border-radius:10px">$ npx rigorrun</span>
-      <span>Acceptance testing for AI agents</span>
+        padding:12px 20px;border-radius:10px">$ npx rigorrun demo</span>
+      <span>Permission and scope tests for AI agents</span>
     </div>
   </div>`;
 }

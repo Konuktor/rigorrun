@@ -12,6 +12,9 @@ const groups = [
   {
     title: 'Getting to a verdict',
     rows: [
+      ['Stripe refunds pack', 'WORKING', 'Qualified before 0.4.0 and again for 0.5.0: 168 + 168 cells each time, no false pass or false fail. Evidence: reports/stripe-pack-2026-10, reports/stripe-requal-0.5.0.'],
+      ['Checks on reads and outbound data (tool calls, access log, marker strings)', 'BEING BUILT', 'Being built next.'],
+      ['Permission tests on your own system', 'NOT BUILT YET', 'Not built yet.'],
       ['One command starts a runner and opens an interface', 'WORKING', 'From the public registry, in a clean HOME and cache. A headless box gets the URL printed.'],
       ['Connect an MCP server on this machine, or over HTTP', 'WORKING', 'Against servers nobody here wrote, unmodified, including one behind OAuth with PKCE.'],
       ['Connect an HTTP API from an OpenAPI 3 document', 'WORKING', 'JSON natively, YAML when the optional dependency is present. No discovered write endpoint is called during setup.'],
@@ -45,9 +48,11 @@ const groups = [
 
 const TONE: Record<string, string> = {
   WORKING: 'border-pass-line bg-pass-bg text-pass',
+  'BEING BUILT': 'border-warn-line bg-warn-bg text-warn',
   PARTIAL: 'border-warn-line bg-warn-bg text-warn',
   'PARTIAL BY DESIGN': 'border-warn-line bg-warn-bg text-warn',
   'NOT BUILT': 'border-line-strong text-muted',
+  'NOT BUILT YET': 'border-line-strong text-muted',
 };
 ---
 <Base

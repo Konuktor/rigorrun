@@ -35,18 +35,22 @@ benchmark half an hour later with the blame in the wrong place.
   "task": {
     "instruction": "Confirm a held booking.",
     "inputs": { "bookingId": "BKG-4002" },
-    "policyBrief": "…the rules a person confirmed…"
+    "policyBrief": "…the rules a person confirmed…",
   },
   "environment": {
     "mcpUrl": "http://127.0.0.1:41925/mcp/9f2c…",
-    "expiresAt": "2026-02-01T09:12:00.000Z"
+    "expiresAt": "2026-02-01T09:12:00.000Z",
   },
-  "maxSteps": 20
+  "maxSteps": 20,
 }
 ```
 
 `policyBrief` is public on purpose: an agent that is not told the rules is being
-tested on guessing them. The *assertions* remain private.
+tested on guessing them. The _assertions_ remain private.
+
+A case that tests a permission boundary also carries `task.principal`:
+`{ "tenant": "…", "user": "…", "role": "…" }` (`user` and `role` optional) — whom the agent acts
+for. It is optional and additive: an agent that ignores it still speaks the protocol (0.5.0).
 
 ## The answer
 

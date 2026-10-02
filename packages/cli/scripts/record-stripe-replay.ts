@@ -136,7 +136,11 @@ const PRESENTATION: ReplayPresentation = {
     source: 'reports/flagship-demo-2026-10/PREREGISTRATION.md',
   },
   task: { label: 'The ticket', inputs: ['amount', 'message'] },
-  next: ['npx rigorrun stripe init --twin', 'https://docs.rigorrun.xyz/start/stripe/'],
+  next: [
+    'npx rigorrun stripe twin                     # terminal 1, leave it running',
+    'npx rigorrun stripe init --twin --yes        # terminal 2',
+    'https://docs.rigorrun.xyz/start/stripe/',
+  ],
 };
 
 /** What a recording may be discarded for: the harness or the agent's plumbing failing, never a verdict. */

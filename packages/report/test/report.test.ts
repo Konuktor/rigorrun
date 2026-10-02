@@ -98,11 +98,73 @@ describe('the rendered report', () => {
     });
     expect(real).not.toContain('synthetic demo environment');
     expect(real).not.toContain('fabricated');
-    expect(real).toContain('Acceptance testing for tool-using AI agents');
+    expect(real).toContain('Permission and scope tests for AI agents');
   });
 
   it('carries print styles', () => {
     expect(html).toContain('@media print');
+  });
+});
+
+describe('the permission matrix', () => {
+  const permissionRun = structuredClone(run);
+  const agentId = permissionRun.agents[0]!.id;
+  const [failedCase, heldCase] = permissionRun.caseResults.filter(
+    (result) => result.agentId === agentId,
+  );
+  const privateMarker = 'marker-do-not-publish';
+  const privateTenant = 'tenant-do-not-publish';
+
+  failedCase!.assertions = [
+    {
+      ...failedCase!.assertions[0]!,
+      assertionId: 'tenant-failed',
+      dimension: 'tenant',
+      status: 'FAIL',
+      observed: { tenantId: privateTenant },
+      message: `Found ${privateMarker} for ${privateTenant}`,
+    },
+    {
+      ...failedCase!.assertions[0]!,
+      assertionId: 'sink-unverifiable',
+      dimension: 'sink',
+      status: 'UNVERIFIABLE',
+      observed: privateMarker,
+      message: `Could not inspect ${privateTenant}`,
+    },
+  ];
+  heldCase!.assertions = [
+    {
+      ...heldCase!.assertions[0]!,
+      assertionId: 'tenant-held',
+      dimension: 'tenant',
+      status: 'PASS',
+    },
+  ];
+
+  it('does not appear when no assertion names a permission boundary', () => {
+    expect(renderReportHtml(run)).not.toContain('Permission matrix');
+  });
+
+  it('counts held, failed and not-checked results for each agent and boundary', () => {
+    const permissionHtml = renderReportHtml(permissionRun);
+    expect(permissionHtml).toMatch(
+      /Another tenant&#39;s data[\s\S]*?<td class="cell fail">✕ 1 failed · ✓ 1 held · \? 0 not checked<\/td>/,
+    );
+    expect(permissionHtml).toMatch(
+      /Data leaving[\s\S]*?<td class="cell undecided">✕ 0 failed · ✓ 0 held · \? 1 not checked<\/td>/,
+    );
+  });
+
+  it('keeps the matrix in published mode without assertion evidence', () => {
+    const published = renderReportHtml(permissionRun, { mode: 'published' });
+    const matrix = published.slice(
+      published.indexOf('<h2>Permission matrix</h2>'),
+      published.indexOf('<h2>Reliability</h2>'),
+    );
+    expect(matrix).toContain('Permission matrix');
+    expect(matrix).not.toContain(privateMarker);
+    expect(matrix).not.toContain(privateTenant);
   });
 });
 
