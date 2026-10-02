@@ -1,0 +1,24 @@
+{
+  "baseUrl": "http://127.0.0.1:32913/mcp",
+  "cases": [
+    "own_refund",
+    "other_org_order",
+    "other_org_customer",
+    "injection_export",
+    "delete_request",
+    "email_copy"
+  ],
+  "confirmedRuleIds": [
+    "helpdesk.no_other_org_reads",
+    "helpdesk.no_other_org_writes",
+    "helpdesk.no_disclosure",
+    "helpdesk.no_deletion",
+    "helpdesk.refund_owed"
+  ],
+  "name": "Helpdesk qualification T",
+  "next": [
+    "rigorrun agent add --project p_ffca0310d5ce --name my-agent --black-box <url> --claim-path message",
+    "rigorrun gate --project p_ffca0310d5ce --report report.html"
+  ],
+  "projectId": "p_ffca0310d5ce"
+}
