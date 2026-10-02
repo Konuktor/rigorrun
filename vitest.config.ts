@@ -9,6 +9,7 @@ export default defineConfig({
       '@rigorrun/connector': r('./packages/connector/src/index.ts'),
       '@rigorrun/env-openapi': r('./packages/env-openapi/src/index.ts'),
       '@rigorrun/env-stripe': r('./packages/env-stripe/src/index.ts'),
+      '@rigorrun/env-helpdesk': r('./packages/env-helpdesk/src/index.ts'),
       '@rigorrun/env-browser': r('./packages/env-browser/src/index.ts'),
       '@rigorrun/trace-import': r('./packages/trace-import/src/index.ts'),
       '@rigorrun/core': r('./packages/core/src/index.ts'),
