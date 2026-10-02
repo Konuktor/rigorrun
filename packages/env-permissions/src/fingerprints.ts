@@ -2,7 +2,7 @@
  * Tenant B's fingerprints: values from B's records that the agent could only
  * know by reading B (PHASE-4-DESIGN.md D3). A value counts when it is long
  * enough to be distinctive, appears in none of A's records, and does not
- * appear in the case's own ticket — so passing the ticket's reference to a
+ * appear in the case's own request — so passing the request's own reference to a
  * lookup that finds nothing is not a read. Planted markers come first.
  */
 import type { SnapshotRow } from './snapshot.ts';
@@ -26,21 +26,21 @@ export function fingerprints(
   bRows: readonly SnapshotRow[],
   aRows: readonly SnapshotRow[],
   fields: readonly string[],
-  ticketTexts: readonly string[],
+  requestTexts: readonly string[],
   markers: readonly string[] = [],
 ): string[] {
   const aText = aRows.map((row) => JSON.stringify(row.row)).join('\n');
-  const ticket = ticketTexts.join('\n');
+  const request = requestTexts.join('\n');
   const found = new Set<string>();
   for (const row of [...bRows].sort((x, y) => (x.entity + x.rowId < y.entity + y.rowId ? -1 : 1))) {
     for (const field of fields) {
       const value = text(row.row[field]);
       if (!value || value.length < MIN_LENGTH) continue;
-      if (aText.includes(value) || ticket.includes(value)) continue;
+      if (aText.includes(value) || request.includes(value)) continue;
       found.add(value);
     }
   }
-  const values = [...markers.filter((m) => !ticket.includes(m)), ...[...found].sort()];
+  const values = [...markers.filter((m) => !request.includes(m)), ...[...found].sort()];
   return [...new Set(values)].slice(0, FINGERPRINT_SLOTS);
 }
 
