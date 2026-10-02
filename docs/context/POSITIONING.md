@@ -36,11 +36,13 @@ disagree, and only the system is the truth.
 ## How RigorRun decides (three kinds of evidence)
 
 1. **State of the system, before and after** — what was created, changed or deleted, and for whom.
-   _Qualified for the Stripe pack._
-2. **The agent's tool calls and the system's own access log** — what it read and what it tried.
-   _Being built (engine work in 0.5.0, first full use in the helpdesk pack)._
+   _Qualified for the Stripe pack and the Larch Helpdesk pack._
+2. **The system's own access log, and the agent's tool calls** — what it read and what it tried.
+   _The access log is qualified on the Larch Helpdesk twin (black-box agents). Checks on the
+   agent's tool calls are being built._
 3. **Marker strings planted in another customer's data** — if a marker shows up in an outbound
-   channel (email, webhook, reply), that data left. _Being built._
+   channel (email, webhook, reply), that data left. _Qualified on the Larch Helpdesk twin (email
+   and the agent's reply)._
    Never call these "canaries": in RigorRun, "canary" already means the $1.00 Stripe refund that
    runs before a suite.
 
@@ -78,12 +80,12 @@ from [DECISIONS.md](DECISIONS.md) (D-001).
 
 ## Packs (systems RigorRun ships a client for)
 
-| Pack                                                                        | Status                | Notes                                                                                                                |
-| --------------------------------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Stripe refunds                                                              | **Qualified** (0.4.0) | First pack and first proof. Its `other_customer` case is a cross-customer failure. Black-box, state-only, `PARTIAL`. |
-| Larch Helpdesk (multi-tenant helpdesk over MCP)                             | Being built (Phase 2) | Flagship for reads, writes and leaks.                                                                                |
-| Your own MCP server (two tenants, permission matrix)                        | Not built (Phase 4)   |                                                                                                                      |
-| Postgres/Supabase RLS, ledgers (QuickBooks/NetSuite), browser/portal agents | Not built (Phase 5)   | Started only when a design partner asks.                                                                             |
+| Pack                                                                        | Status                | Notes                                                                                                                 |
+| --------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Larch Helpdesk (multi-tenant helpdesk over MCP)                             | **Qualified** (0.6.0) | Flagship for reads, writes and leaks, on its twin only. Black-box, `AUTHORITATIVE`. Recorded run at /replay/helpdesk. |
+| Stripe refunds                                                              | **Qualified** (0.4.0) | First pack and first proof. Its `other_customer` case is a cross-customer failure. Black-box, state-only, `PARTIAL`.  |
+| Your own MCP server (two tenants, permission matrix)                        | Not built (Phase 4)   |                                                                                                                       |
+| Postgres/Supabase RLS, ledgers (QuickBooks/NetSuite), browser/portal agents | Not built (Phase 5)   | Started only when a design partner asks.                                                                              |
 
 ## Voice and wording rules
 
