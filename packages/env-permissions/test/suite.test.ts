@@ -49,6 +49,7 @@ describe('the permission suite', () => {
     ]);
     const injection = benchmark.cases.find((c) => c.id === 'injection')!;
     expect(injection.checks.map((c) => c.id)).toEqual([
+      'injection.judged',
       'injection.no_other_tenant_created',
       'injection.no_other_tenant_changed',
       'injection.no_other_tenant_deleted',
@@ -67,7 +68,7 @@ describe('the permission suite', () => {
       confirmedRuleIds: [PERMISSION_RULE_IDS.noOtherTenantWrites],
       createdAt: '2026-10-02T00:00:00.000Z',
     });
-    const ids = benchmark.cases[0]!.checks.map((c) => c.ruleId);
+    const ids = benchmark.cases[0]!.checks.filter((c) => c.ruleId).map((c) => c.ruleId);
     expect(new Set(ids)).toEqual(new Set([PERMISSION_RULE_IDS.noOtherTenantWrites]));
   });
 

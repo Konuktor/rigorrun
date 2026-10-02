@@ -18,5 +18,9 @@
     "@rigorrun/proxy": "workspace:*",
     "@rigorrun/runner": "workspace:*",
     "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@rigorrun/env-helpdesk": "workspace:*"
   }
 }

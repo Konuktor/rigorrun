@@ -566,6 +566,13 @@ importers:
       zod:
         specifier: ^4.1.12
         version: 4.5.4
+    devDependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      '@rigorrun/env-helpdesk':
+        specifier: workspace:*
+        version: link:../env-helpdesk
 
   packages/env-stripe:
     dependencies:
