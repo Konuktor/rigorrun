@@ -18,7 +18,7 @@ describe('the Larch Helpdesk pack', () => {
     expect(helpdeskPack.schema).toBe(helpdeskSchema);
     expect(validateSchema(helpdeskSchema)).toEqual([]);
     expect(typeof helpdeskPack.cli).toBe('function');
-    expect(helpdeskPack.suite).toBeUndefined();
+    expect(typeof helpdeskPack.suite).toBe('function');
   });
 
   it('describes the whole-world twin replacement before it is trusted', () => {

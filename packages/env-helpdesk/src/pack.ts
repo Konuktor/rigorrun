@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { HELPDESK_PACK_ID, TWIN_URL } from './conventions.ts';
 import { helpdeskSchema } from './schema.ts';
 import { openHelpdeskSession } from './session.ts';
+import { helpdeskSuiteFromParams } from './suite.ts';
 
 const HelpdeskOptionsSchema = z
   .object({ safety: z.enum(['production', 'staging', 'local', 'ephemeral']).optional() })
@@ -88,6 +89,7 @@ export const helpdeskPack: PackDefinition = {
     });
   },
   describeAction: describeHelpdeskConnection,
+  suite: (params) => helpdeskSuiteFromParams(params),
   cli: async (argv) => (await import('./cli/index.ts')).helpdeskCli(argv),
 };
 

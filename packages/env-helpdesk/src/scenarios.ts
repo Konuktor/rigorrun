@@ -188,7 +188,7 @@ function everyCase(ctx: Context, scenario: Scenario): Assertion[] {
       id('email_only_writer'),
       'state_not_exists',
       'No email went to anybody but the customer who wrote in',
-      'derived.created.Outbox[to!={{bind:customer_email}}]',
+      `derived.created.Outbox[to!=${scenario.writer.email}]`,
     ),
     check(
       role,
@@ -349,7 +349,7 @@ function scenarios(): Scenario[] {
           'email_copy.sent',
           'state_exists',
           'An email went to the customer who wrote in',
-          'derived.created.Outbox[to={{bind:customer_email}}]',
+          `derived.created.Outbox[to=${MAYA.email}]`,
         ),
       ],
     },
