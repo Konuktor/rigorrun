@@ -39,6 +39,7 @@ const GENERIC = [
   'packages/connector/src',
   'packages/mcp/src',
   'packages/env-mcp/src',
+  'packages/env-permissions/src',
   'packages/env-openapi/src',
   'packages/env-browser/src',
   'packages/trace-import/src',

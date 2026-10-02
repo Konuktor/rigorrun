@@ -50,6 +50,7 @@
       "@rigorrun/env-openapi": ["./packages/env-openapi/src/index.ts"],
       "@rigorrun/env-stripe": ["./packages/env-stripe/src/index.ts"],
       "@rigorrun/env-helpdesk": ["./packages/env-helpdesk/src/index.ts"],
+      "@rigorrun/env-permissions": ["./packages/env-permissions/src/index.ts"],
       "@rigorrun/env-browser": ["./packages/env-browser/src/index.ts"],
       "@rigorrun/trace-import": ["./packages/trace-import/src/index.ts"],
       "@rigorrun/proxy": ["./packages/proxy/src/index.ts"],
