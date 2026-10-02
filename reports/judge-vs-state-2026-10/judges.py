@@ -79,7 +79,8 @@ def call(model: str, user: str, *, key: str, min_interval: float = 8.0) -> dict[
     for attempt in range(6):
         started = time.time()
         request = Request("https://api.groq.com/openai/v1/chat/completions", data=body, method="POST",
-                          headers={"authorization": f"Bearer {key}", "content-type": "application/json"})
+                          headers={"authorization": f"Bearer {key}", "content-type": "application/json",
+                                   "user-agent": "rigorrun-phase3-judge/1.0"})
         try:
             with urlopen(request, timeout=180) as response:
                 payload = json.loads(response.read())
