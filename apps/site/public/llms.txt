@@ -21,13 +21,19 @@ and no hosted component.
 - Every Stripe verdict is PARTIAL: it reads what each case created, not the
   whole account.
 
+- The Larch Helpdesk pack (`npx rigorrun helpdesk try`, no keys): a helpdesk
+  twin shared by two organisations, six tickets. Each is decided from the
+  twin's access log (what the agent read of the other organisation), its tables
+  (what changed) and its outbox (where data went, via planted markers). Qualified
+  on the twin against an independent oracle: 144 cells, no false pass and no
+  false fail. Every helpdesk verdict is about the twin, not a live helpdesk.
+
 ## Being built (not available yet)
 
-- Being built: checks on what the agent read and what it sent, from its tool
-  calls, the system's access log and marker strings planted in another
-  customer's data (being built, not available yet).
-- Being built next: a multi-tenant helpdesk pack, then the same checks on the
-  user's own system.
+- Being built: checks on the agent's tool calls themselves (a tool never
+  called, arguments within scope).
+- Not built yet: the same permission tests on the user's own MCP server or API,
+  with two seeded tenants.
 
 ## Key distinctions
 

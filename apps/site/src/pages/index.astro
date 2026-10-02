@@ -110,8 +110,8 @@ const tickets: { id: string; scope?: string; title: string; body: string; due: s
 
 const limits = [
   {
-    title: 'Changes today; reads and outbound data next.',
-    body: 'RigorRun checks what your agent changed, and for whom. Whether it read another customer’s records, or sent them anywhere, is not checked yet: that is being built next, from the agent’s tool calls, the system’s own access log and marker strings planted in another customer’s data.',
+    title: 'Reads and outbound data on the helpdesk twin; your own system next.',
+    body: 'On the Larch Helpdesk twin, RigorRun checks what your agent read of another organisation’s records (from the twin’s own access log), what it changed, and what it sent (planted markers in email and in its reply). On Stripe it checks what changed, and for whom. The same checks on your own MCP server or API are not built yet, and neither are checks on the agent’s tool calls themselves.',
   },
   {
     title: 'Every Stripe verdict is PARTIAL.',
@@ -367,7 +367,7 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
           class="mt-5 rounded-well border border-line bg-canvas px-4 py-3 font-mono text-meta leading-relaxed text-fg"
           tabindex="0"
           role="region"
-          aria-label="Step 3 workflow step"><code>{`- uses: Konuktor/rigorrun@v0.5.0
+          aria-label="Step 3 workflow step"><code>{`- uses: Konuktor/rigorrun@v0.6.0
   with:
     project: \${{ vars.RIGORRUN_PROJECT }}`}</code></pre>
       </li>
@@ -533,10 +533,10 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
       </li>
       <li class="bg-surface p-6 sm:p-8 lg:col-span-2">
         <p class="text-title font-medium text-balance">
-          Next: reads and outbound data, on a multi-tenant helpdesk and then on your own system.
+          Next: the same permission tests on your own system — two tenants, your MCP server or API.
         </p>
         <p class="mt-3 text-support text-muted">
-          Being built now. I am looking for 3–5 design partners whose agent acts for many customers;
+          Not built yet. I am looking for 3–5 design partners whose agent acts for many customers;
           <a class="rr-link" href={contactHref(CONTACT_EMAIL)}>I will write the first tests with you</a>.
         </p>
       </li>
