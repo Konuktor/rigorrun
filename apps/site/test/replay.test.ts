@@ -5,11 +5,15 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { RunResult } from '@rigorrun/core';
+import stripeFile from '../../../fixtures/replays/stripe-replay.json';
 import {
   HEADLINE_ORDER,
   demoReplay,
+  flagshipReplays,
   hashRun,
+  helpdeskReplay,
   isSimulated,
+  permissionMatrix,
   pickHeadline,
   replay,
   siteReplay,
@@ -124,6 +128,21 @@ describe('variants', () => {
     expect(variantOf({ id: 'support-minimal', name: 'support' })).toBe('minimal');
     expect(variantOf({ id: 'minimalist', name: 'agent' })).toBeNull();
   });
+
+  it("uses a flagship recording's agent ids instead of matching names", () => {
+    const variants = {
+      scoped: {
+        agentId: 'agent-a',
+        description: 'scoped description',
+        promptSha256: 'prompt',
+        toolsSha256: 'tools',
+        runId: 'run-a',
+        runResultHash: 'hash-a',
+      },
+    };
+    expect(variantOf({ id: 'agent-a', name: 'unlabelled agent' }, variants)).toBe('scoped');
+    expect(variantOf({ id: 'careful', name: 'careful' }, variants)).toBeNull();
+  });
 });
 
 describe('a recording on the twin', () => {
@@ -133,7 +152,7 @@ describe('a recording on the twin', () => {
     expect(isSimulated(runOf({}))).toBe(false);
   });
 
-  it('is named as the local Stripe twin, in its system and in every reality line', () => {
+  it('is named from the recording as a twin, in its system and in every reality line', () => {
     const run = runOf({
       limits: [{ id: 'simulated', limit: 'twin', remedy: '' }],
       agents: [{ id: 'minimal', name: 'minimal', kind: 'http' }],
@@ -154,11 +173,197 @@ describe('a recording on the twin', () => {
         },
       ],
     });
-    const shown = siteReplay(fileOf(run), 'stripe', 'stripe-replay.json');
+    const shown = siteReplay(
+      { ...fileOf(run), system: 'the Stripe staging twin (simulated)', simulated: true },
+      'stripe',
+      'stripe-replay.json',
+    );
     expect(shown.simulated).toBe(true);
-    expect(shown.system).toBe('a local Stripe twin');
-    expect(shown.headline?.realitySystem).toBe('The local Stripe twin');
-    expect(shown.headline?.said).toBe('I refunded the order.');
+    expect(shown.system).toBe('the Stripe staging twin');
+    expect(shown.cases[0]?.realitySystem).toBe('The Stripe staging twin');
+    expect(shown.cases[0]?.said).toBe('I refunded the order.');
+  });
+});
+
+function assertion(
+  status: 'PASS' | 'FAIL' | 'ERROR' | 'UNVERIFIABLE' | 'INAPPLICABLE',
+  dimension: 'tenant' | 'role' | 'tool' | 'sink',
+) {
+  return {
+    assertionId: `${dimension}-${status}`,
+    kind: 'equals',
+    description: `${dimension} check`,
+    status,
+    severity: 'MUST',
+    evaluator: 'deterministic',
+    unsafe: status === 'FAIL' || status === 'ERROR',
+    message: `${status} ${dimension}`,
+    dimension,
+  };
+}
+
+function caseResult(
+  agentId: string,
+  caseId: string,
+  outcome: 'PASS' | 'FAIL',
+  assertions: ReturnType<typeof assertion>[] = [],
+) {
+  return {
+    caseId,
+    caseName: caseId.replaceAll('_', ' '),
+    category: 'boundary',
+    agentId,
+    attempt: 0,
+    outcome,
+    taskSuccess: outcome === 'PASS',
+    policyCompliant: outcome === 'PASS',
+    unsafeActions: outcome === 'FAIL' ? 1 : 0,
+    errored: false,
+    assertions,
+    agentReport: `${agentId} reported ${caseId}`,
+    reality: { system: 'Larch Helpdesk', lines: [`the twin recorded ${caseId}`] },
+  };
+}
+
+function helpdeskFile(): ReplayFile {
+  const run = runOf({
+    limits: [{ id: 'simulated', limit: 'The helpdesk is a twin.', remedy: '' }],
+    agents: [
+      { id: 'agent-scoped-id', name: 'Alder support', kind: 'blackbox' },
+      { id: 'agent-service-id', name: 'Helpdesk support', kind: 'blackbox' },
+    ],
+    caseResults: [
+      caseResult('agent-scoped-id', 'email_copy', 'PASS'),
+      caseResult('agent-scoped-id', 'other_org_order', 'FAIL', [
+        assertion('FAIL', 'tenant'),
+        assertion('ERROR', 'role'),
+      ]),
+      caseResult('agent-scoped-id', 'own_refund', 'PASS', [assertion('PASS', 'tenant')]),
+      caseResult('agent-service-id', 'own_refund', 'FAIL'),
+      caseResult('agent-service-id', 'email_copy', 'FAIL', [
+        assertion('FAIL', 'sink'),
+        assertion('INAPPLICABLE', 'sink'),
+      ]),
+      caseResult('agent-service-id', 'other_org_order', 'PASS', [
+        assertion('PASS', 'tenant'),
+        assertion('UNVERIFIABLE', 'tool'),
+      ]),
+    ],
+  });
+  return {
+    ...fileOf(run),
+    recordedAt: '2026-10-02T06:00:00.000Z',
+    system: 'the Larch Helpdesk twin (simulated)',
+    simulated: true,
+    variants: {
+      scoped: {
+        agentId: 'agent-scoped-id',
+        description: "the support agent, connected with Alder Outdoor's own support token.",
+        promptSha256: 'prompt',
+        toolsSha256: 'tools',
+        runId: 'run-scoped',
+        runResultHash: 'hash-scoped',
+      },
+      service: {
+        agentId: 'agent-service-id',
+        description: "the same agent, connected with the helpdesk's service token.",
+        promptSha256: 'prompt',
+        toolsSha256: 'tools',
+        runId: 'run-service',
+        runResultHash: 'hash-service',
+      },
+    },
+    benchmark: {
+      cases: [{ id: 'own_refund' }, { id: 'other_org_order' }, { id: 'email_copy' }],
+    } as NonNullable<ReplayFile['benchmark']>,
+    presentation: {
+      headline: {
+        variants: ['service', 'scoped'],
+        cases: ['other_org_order', 'email_copy', 'own_refund'],
+        source: 'reports/permissions-demo-2026-10/PREREGISTRATION.md',
+      },
+      task: { label: 'The ticket', inputs: ['message'] },
+      next: ['npx rigorrun helpdesk try'],
+    },
+  };
+}
+
+function withOutcomes(
+  file: ReplayFile,
+  outcome: (agentId: string, caseId: string) => 'PASS' | 'FAIL',
+): ReplayFile {
+  const run = {
+    ...file.run,
+    caseResults: file.run.caseResults.map((entry) => ({
+      ...entry,
+      outcome: outcome(entry.agentId, entry.caseId),
+    })),
+  };
+  return { ...file, run, resultHash: hashRun(run) };
+}
+
+describe('a helpdesk-shaped flagship recording', () => {
+  it('uses recording variants, headline rule, suite order and system name', () => {
+    const shown = siteReplay(helpdeskFile(), 'helpdesk', 'helpdesk-replay.json');
+
+    expect(shown.agents.map((agent) => agent.variant)).toEqual(['scoped', 'service']);
+    expect(shown.agents[0]?.cases.map((entry) => entry.caseId)).toEqual([
+      'own_refund',
+      'other_org_order',
+      'email_copy',
+    ]);
+    expect(shown.headline?.variant).toBe('service');
+    expect(shown.headline?.caseId).toBe('email_copy');
+    expect(shown.system).toBe('the Larch Helpdesk twin');
+    expect(shown.headline?.realitySystem).toBe('The Larch Helpdesk twin');
+    expect(shown.variantDescriptions.scoped).toContain("Alder Outdoor's own support token");
+  });
+
+  it('falls back to the next variant and has no headline when neither failed', () => {
+    const file = helpdeskFile();
+    const scopedOnly = withOutcomes(file, (agentId, caseId) =>
+      agentId === 'agent-scoped-id' && caseId === 'other_org_order' ? 'FAIL' : 'PASS',
+    );
+    expect(siteReplay(scopedOnly, 'helpdesk', 'scoped.json').headline?.variant).toBe('scoped');
+
+    const allPass = withOutcomes(file, () => 'PASS');
+    expect(siteReplay(allPass, 'helpdesk', 'passing.json').headline).toBeNull();
+  });
+
+  it('counts each variant and boundary in the permission matrix', () => {
+    const matrix = permissionMatrix(helpdeskFile());
+    expect(matrix?.variants.map((variant) => variant.name)).toEqual(['scoped', 'service']);
+    expect(matrix?.rows.map((row) => row.label)).toEqual([
+      "Another tenant's data",
+      'Outside its role',
+      'A tool it must not use',
+      'Data leaving',
+    ]);
+    expect(matrix?.rows[0]?.cells).toMatchObject([
+      { variant: 'scoped', failed: 1, held: 1, notChecked: 0 },
+      { variant: 'service', failed: 0, held: 1, notChecked: 0 },
+    ]);
+    expect(matrix?.rows[3]?.cells[1]).toMatchObject({
+      variant: 'service',
+      failed: 1,
+      held: 0,
+      notChecked: 1,
+    });
+  });
+});
+
+describe('the real Stripe flagship recording', () => {
+  it("keeps today's headline and agent order from the recording", () => {
+    const shown = siteReplay(
+      stripeFile as unknown as ReplayFile,
+      'stripe',
+      'fixtures/replays/stripe-replay.json',
+    );
+    expect(shown.headline).toMatchObject({ variant: 'minimal', caseId: 'other_customer' });
+    expect(shown.agents.map((agent) => agent.variant)).toEqual(['careful', 'minimal']);
+    expect(shown.agents[0]?.cases.map((entry) => entry.caseId)).toEqual(
+      stripeFile.benchmark.cases.map((entry) => entry.id),
+    );
   });
 });
 
@@ -182,5 +387,7 @@ describe('verification', () => {
 
   it('prefers the Stripe recording whenever it exists', () => {
     expect(replay).toBe(stripeReplay ?? demoReplay);
+    expect(flagshipReplays.stripe).toBe(stripeReplay ?? undefined);
+    expect(flagshipReplays.helpdesk ?? null).toBe(helpdeskReplay);
   });
 });

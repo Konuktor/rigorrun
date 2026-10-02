@@ -17,13 +17,8 @@ import Command from '../components/Command.astro';
 import Button from '../components/Button.astro';
 import CaseRow from '../components/CaseRow.astro';
 import ClaimReality from '../components/ClaimReality.astro';
-import {
-  replay,
-  HEADLINE_ORDER,
-  STRIPE_CASE_ORDER,
-  VARIANT_DESCRIPTIONS,
-  type CaseView,
-} from '../lib/replay';
+import PermissionMatrix from '../components/PermissionMatrix.astro';
+import { replay, type CaseView } from '../lib/replay';
 import { REPO_URL } from '../site';
 
 const stripe = replay.source === 'stripe';
@@ -39,14 +34,9 @@ const commit = replay.commit.slice(0, 7);
 const blackBox = cases.length > 0 && cases.every((entry) => entry.observation === 'state-only');
 const temperature = replay.temperature === null ? '' : `, temperature ${replay.temperature}`;
 
-/** The Stripe recording lists every agent's cases in the pre-registration's own order. */
-const rank = (caseId: string) => {
-  const index = (STRIPE_CASE_ORDER as readonly string[]).indexOf(caseId);
-  return index === -1 ? STRIPE_CASE_ORDER.length : index;
-};
 const agents = replay.agents.map((agent) => ({
   ...agent,
-  ordered: [...agent.cases].sort((a, b) => rank(a.caseId) - rank(b.caseId) || a.attempt - b.attempt),
+  ordered: agent.cases,
 }));
 
 // The Northstar run, as this page always showed it: failures first, worst first.
@@ -61,8 +51,12 @@ const realityName = stripe
     ? 'the local Stripe twin showed'
     : 'Stripe showed'
   : 'the system held afterwards';
-const headlineRule = HEADLINE_ORDER.map((id) => id.replaceAll('_', ' ')).join(', ');
-const preregistration = `${REPO_URL}/blob/master/reports/flagship-demo-2026-10/PREREGISTRATION.md`;
+const headline = replay.presentation?.headline;
+const headlineRule = headline?.cases.map((id) => id.replaceAll('_', ' ')).join(', ') ?? '';
+const headlineVariants = headline?.variants ?? [];
+const preregistration = headline
+  ? `${REPO_URL}/blob/master/${headline.source}`
+  : `${REPO_URL}/blob/master/reports/flagship-demo-2026-10/PREREGISTRATION.md`;
 const simulatedLimit = replay.limits.find((limit) => limit.id === 'simulated');
 ---
 
@@ -163,10 +157,11 @@ const simulatedLimit = replay.limits.find((limit) => limit.id === 'simulated');
     </p>
 
     {
-      simulatedLimit && (
+      replay.simulated && (
         <p class="mt-4 max-w-3xl rounded-panel border border-line-strong bg-raised px-4 py-3 text-support text-fg">
-          <span class="font-semibold">Simulated.</span> {simulatedLimit.limit}
-          {simulatedLimit.remedy && <span class="text-secondary"> {simulatedLimit.remedy}</span>}
+          <span class="font-semibold">Simulated.</span>{' '}
+          {simulatedLimit?.limit ?? `This recording ran on ${replay.system}, not a live system.`}
+          {simulatedLimit?.remedy && <span class="text-secondary"> {simulatedLimit.remedy}</span>}
         </p>
       )
     }
@@ -185,9 +180,9 @@ const simulatedLimit = replay.limits.find((limit) => limit.id === 'simulated');
             <h2 class="text-title font-medium">The headline case</h2>
             <p class="mt-3 text-support text-secondary">
               Chosen by a rule written before anything was recorded: the first failure of{' '}
-              <span class="font-mono">minimal</span> in the order {headlineRule}; if{' '}
-              <span class="font-mono">minimal</span> failed nothing, the first failure of{' '}
-              <span class="font-mono">careful</span> in the same order.
+              <span class="font-mono">{headlineVariants[0]}</span> in the order {headlineRule}; if{' '}
+              <span class="font-mono">{headlineVariants[0]}</span> failed nothing, the first failure of{' '}
+              <span class="font-mono">{headlineVariants[1]}</span> in the same order.
             </p>
             <p class="mt-3 text-support">
               <a class="rr-link" href={preregistration}>
@@ -219,7 +214,7 @@ const simulatedLimit = replay.limits.find((limit) => limit.id === 'simulated');
             </h2>
             {agent.variant && (
               <p class="mt-2 text-support text-secondary">
-                {VARIANT_DESCRIPTIONS[agent.variant].replace(/^./, (first) => first.toUpperCase())}
+                {replay.variantDescriptions[agent.variant]?.replace(/^./, (first) => first.toUpperCase())}
               </p>
             )}
             <p class="mt-2 text-support text-muted">
@@ -238,6 +233,19 @@ const simulatedLimit = replay.limits.find((limit) => limit.id === 'simulated');
           </ol>
         </Section>
       ))
+  }
+
+  {
+    stripe && replay.matrix && (
+      <Section ruled>
+        <div class="max-w-3xl">
+          <h2 class="text-title font-medium">Permission matrix</h2>
+        </div>
+        <div class="mt-6">
+          <PermissionMatrix matrix={replay.matrix} />
+        </div>
+      </Section>
+    )
   }
 
   {
