@@ -17,6 +17,13 @@ export interface ReadSpec {
   rows: string;
   /** What the rows are, in the matrix's words (e.g. the entity's plural). */
   entity: string;
+  /**
+   * Call once per row of an entity read earlier, passing that row's `field` as
+   * the argument `arg` — for records reached through another (a booking
+   * through its client). A row without the tenant field takes its parent's
+   * owner: whose it is runs through the relation.
+   */
+  for_each?: { entity: string; arg: string; field: string };
 }
 
 export interface SnapshotRow {
@@ -65,8 +72,7 @@ export async function snapshot(
   tenantField: string,
 ): Promise<SnapshotRow[]> {
   const out: SnapshotRow[] = [];
-  for (const read of reads) {
-    const result = await call(read.tool, read.args);
+  const take = (read: ReadSpec, result: unknown, parentOwner: string | null) => {
     const rows = at(result, read.rows);
     if (!Array.isArray(rows)) {
       throw new Error(`${read.tool} did not return a list at "${read.rows || '(the result)'}"`);
@@ -79,9 +85,22 @@ export async function snapshot(
       out.push({
         entity: read.entity,
         rowId: typeof id === 'string' || typeof id === 'number' ? String(id) : digest(record),
-        owner: typeof owner === 'string' || typeof owner === 'number' ? String(owner) : null,
+        owner: typeof owner === 'string' || typeof owner === 'number' ? String(owner) : parentOwner,
         row: record,
       });
+    }
+  };
+  for (const read of reads) {
+    if (!read.for_each) {
+      take(read, await call(read.tool, read.args), null);
+      continue;
+    }
+    const { entity, arg, field } = read.for_each;
+    const parents = out.filter((row) => row.entity === entity);
+    for (const parent of parents) {
+      const key = at(parent.row, field);
+      if (typeof key !== 'string' && typeof key !== 'number') continue;
+      take(read, await call(read.tool, { ...read.args, [arg]: key }), parent.owner);
     }
   }
   return out;

@@ -32,7 +32,13 @@ export function specFromMatrix(matrix: PermissionMatrix): PermissionsSpec {
   return {
     tenant: { ...matrix.tenant },
     labels: { ...matrix.labels },
-    reads: matrix.reads.map((read) => ({ ...read, args: { ...read.args } })),
+    reads: matrix.reads.map((read) => ({
+      tool: read.tool,
+      args: { ...read.args },
+      rows: read.rows,
+      entity: read.entity,
+      ...(read.for_each ? { for_each: { ...read.for_each } } : {}),
+    })),
     reference: { ...matrix.reference },
     person: { ...matrix.person },
     fingerprint_fields: [...matrix.fingerprint_fields],

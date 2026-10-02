@@ -59,6 +59,11 @@ const readSchema = z
     args: jsonObject,
     rows: z.string(),
     entity: z.string().min(1),
+    /** Call once per row of an earlier read's entity; rows inherit that row's owner. */
+    for_each: z
+      .object({ entity: z.string().min(1), arg: z.string().min(1), field: z.string().min(1) })
+      .strict()
+      .optional(),
   })
   .strict();
 
