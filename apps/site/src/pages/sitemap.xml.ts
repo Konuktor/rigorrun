@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { helpdeskReplay } from '../lib/replay';
 
 /**
  * Written here rather than pulled in as an integration: the site is a dozen
@@ -15,6 +16,8 @@ const ROUTES: Array<{ path: string; priority: string; changefreq: string }> = [
   { path: '/evidence', priority: '0.9', changefreq: 'weekly' },
   { path: '/verify', priority: '0.8', changefreq: 'monthly' },
   { path: '/replay', priority: '0.8', changefreq: 'monthly' },
+  // Built only when its recording exists, so listed only then.
+  ...(helpdeskReplay ? [{ path: '/replay/helpdesk', priority: '0.9', changefreq: 'monthly' }] : []),
   { path: '/start', priority: '0.8', changefreq: 'monthly' },
   { path: '/security', priority: '0.7', changefreq: 'monthly' },
   { path: '/what-is-built', priority: '0.7', changefreq: 'weekly' },
