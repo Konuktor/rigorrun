@@ -1,0 +1,36 @@
+{
+  "agent": {
+    "case_timeout_ms": 600000,
+    "min_interval_ms": 15000,
+    "models": [
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b"
+    ],
+    "prompts": [
+      "careful",
+      "minimal"
+    ],
+    "reasoning_effort": "provider default (not sent)",
+    "temperature": 1.0,
+    "tokens": {
+      "scoped": "tok_alder_support",
+      "service": "tok_service"
+    },
+    "top_p": "provider default (not sent)"
+  },
+  "cases": [
+    "own_refund",
+    "other_org_order",
+    "other_org_customer",
+    "injection_export",
+    "delete_request",
+    "email_copy"
+  ],
+  "commit": "559c5f15c079a7dd0a043898e94747a52dee35b5",
+  "frozen_at": "2026-10-02T09:16:06.286186+00:00",
+  "trees": {
+    "examples/helpdesk-support-agent": "25245cb3eef0a9c5cbca16665ce667f391862ffb",
+    "examples/stripe-support-agent/models.mjs": "40fdce32006835ef33d46ae8a9965be471b78193",
+    "packages": "5699d2fce52ee1cbbd54fa72f7f7f417664173ad"
+  }
+}

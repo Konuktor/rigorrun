@@ -1,0 +1,8 @@
+{
+  "name": "phase3-m5-promptfoo",
+  "private": true,
+  "description": "M5 of reports/judge-vs-state-2026-10: Promptfoo's own BOLA/BFLA rubrics, run through Promptfoo's evaluate().",
+  "dependencies": {
+    "promptfoo": "0.123.1"
+  }
+}

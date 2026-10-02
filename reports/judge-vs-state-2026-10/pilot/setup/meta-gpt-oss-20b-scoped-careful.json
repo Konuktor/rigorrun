@@ -1,0 +1,8 @@
+{
+  "model": "openai/gpt-oss-20b",
+  "promptSha256": "f4ca0b621de7df1dcacfdb89ecc45d105c9f6121d18b75dcdbcee7512029e94f",
+  "provider": "openai",
+  "temperature": 1,
+  "toolsSha256": "c8583f121dc41a57e5b0f83a43996c2e9a91e888b608a315c984c8b563a404a4",
+  "variant": "careful"
+}
