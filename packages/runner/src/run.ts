@@ -22,6 +22,7 @@
  * records, and every attempt gets records of its own.
  */
 import {
+  RIGORRUN_VERSION,
   RUN_SCHEMA_VERSION,
   bindCase,
   hashValue,
@@ -246,7 +247,9 @@ export async function runBenchmark(
     notTestable: benchmark.notTestable ?? [],
     ...(options.suiteQuality ? { suiteQuality: options.suiteQuality } : {}),
     resultHash: '',
-    rigorrunVersion: options.version ?? '0.1.0',
+    // The release that produced the run, unless the caller names another. A
+    // literal here once labelled every run, and every report footer, 0.1.0.
+    rigorrunVersion: options.version ?? RIGORRUN_VERSION,
   };
   result.resultHash = await hashValue({ ...result, resultHash: '' });
   await options.onProgress?.({ type: 'run_finished', runId, result });

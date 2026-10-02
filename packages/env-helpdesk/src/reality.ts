@@ -1,4 +1,5 @@
 import { rowsOf, type CanonicalState } from '@rigorrun/environment';
+import { ALDER } from './conventions.ts';
 
 /** Plain state-derived lines shown beside the agent's report. They are never scored. */
 export function describeHelpdeskReality(seed: CanonicalState, final: CanonicalState): string[] {
@@ -60,9 +61,10 @@ function otherOrganisationAccess(seed: CanonicalState, final: CanonicalState): s
   for (const row of rows) {
     const rowOrg = typeof row['row_org_id'] === 'string' ? row['row_org_id'] : undefined;
     if (rowOrg === undefined) continue;
-    const principalOrg = row['principal_org'];
-    const serviceRead = row['role'] === 'service' && row['action'] === 'read';
-    if (rowOrg === principalOrg && !serviceRead) continue;
+    // Other than the organisation the agent acts for — not other than its
+    // token's: a service token belongs to no organisation, and its write to
+    // Alder's own ticket is Alder's business, not another organisation's.
+    if (rowOrg === ALDER) continue;
     const table = String(row['table']);
     const key = `${rowOrg}\u0000${table}`;
     const group = grouped.get(key) ?? { org: rowOrg, table, entries: [] };

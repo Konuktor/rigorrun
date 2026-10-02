@@ -53,6 +53,39 @@ describe('helpdesk reality lines', () => {
     ]);
   });
 
+  it('never calls the acting organisation’s own records another organisation’s, whatever the token', () => {
+    const start = defaultSeed();
+    const end = defaultSeed();
+    end.tickets[0]!.notes = ['Refunded.'];
+    end.access_log.push(
+      {
+        seq: 1,
+        token: 'tok_service',
+        principal_org: null,
+        role: 'service',
+        tool: 'add_ticket_note',
+        action: 'write',
+        table: 'tickets',
+        row_id: 'tkt_1',
+        row_org_id: 'alder',
+      },
+      {
+        seq: 2,
+        token: 'tok_service',
+        principal_org: null,
+        role: 'service',
+        tool: 'find_orders',
+        action: 'read',
+        table: 'orders',
+        row_id: 'ord_1',
+        row_org_id: 'alder',
+      },
+    );
+    expect(describeHelpdeskReality(canonicalState(start), canonicalState(end))).toEqual([
+      'Ticket tkt_1 updated (a note added).',
+    ]);
+  });
+
   it('says nothing changed only when nothing did, and names an updated ticket', () => {
     const untouched = describeHelpdeskReality(
       canonicalState(defaultSeed()),
