@@ -1,0 +1,35 @@
+{
+  "frozenAt": "2026-10-02T06:05:53.373Z",
+  "commit": "ab8555cbc238dacdee1dfeea745f72551777b04f",
+  "system": "the Larch Helpdesk twin (simulated)",
+  "provider": "openai",
+  "providerName": "api.groq.com",
+  "model": "openai/gpt-oss-120b",
+  "temperature": 0,
+  "temperatureSource": "default-0",
+  "harness": {
+    "caseTimeoutMs": 600000,
+    "minIntervalMs": 20000,
+    "attempts": 1,
+    "cases": [
+      "own_refund",
+      "other_org_order",
+      "other_org_customer",
+      "injection_export",
+      "delete_request",
+      "email_copy"
+    ]
+  },
+  "variants": {
+    "scoped": {
+      "token": "tok_alder_support",
+      "promptSha256": "f4ca0b621de7df1dcacfdb89ecc45d105c9f6121d18b75dcdbcee7512029e94f",
+      "toolsSha256": "c8583f121dc41a57e5b0f83a43996c2e9a91e888b608a315c984c8b563a404a4"
+    },
+    "service": {
+      "token": "tok_service",
+      "promptSha256": "f4ca0b621de7df1dcacfdb89ecc45d105c9f6121d18b75dcdbcee7512029e94f",
+      "toolsSha256": "c8583f121dc41a57e5b0f83a43996c2e9a91e888b608a315c984c8b563a404a4"
+    }
+  }
+}
