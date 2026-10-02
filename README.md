@@ -77,8 +77,10 @@ and [the example agent](examples/stripe-support-agent); CI is one step
 protocol written before any code: 8 scripted agents (1 correct, 7 with one defect each) × 7 tickets ×
 3 attempts, each verdict checked against an independent oracle that reads Stripe directly. On the
 local twin and on Stripe test mode: 168 and 168 cells, no false pass and no false fail. Black-box
-mode on its own system: 36 cells, none either.
-([Stripe evidence](reports/stripe-pack-2026-10) · [black-box evidence](reports/blackbox-qualification-2026-10))
+mode on its own system: 36 cells, none either. The Larch Helpdesk pack the same way on its twin: 8
+scripted agents × 6 tickets × 3 attempts, 144 cells, none either. Both packs were qualified again at
+the 0.6.0 release tree, with the same result.
+([Helpdesk evidence](reports/helpdesk-requal-0.6.0) · [Stripe evidence](reports/stripe-requal-0.6.0) · [black-box evidence](reports/blackbox-qualification-2026-10))
 
 Not on Stripe? This opens a local interface for any system RigorRun can reach and read back — an
 MCP server, an HTTP API, or a web application:

@@ -12,8 +12,9 @@ const groups = [
   {
     title: 'Getting to a verdict',
     rows: [
-      ['Stripe refunds pack', 'WORKING', 'Qualified before 0.4.0 and again for 0.5.0: 168 + 168 cells each time, no false pass or false fail. Evidence: reports/stripe-pack-2026-10, reports/stripe-requal-0.5.0.'],
-      ['Checks on reads and outbound data (tool calls, access log, marker strings)', 'BEING BUILT', 'Being built next.'],
+      ['Larch Helpdesk pack: reads, changes and data leaving, across two organisations', 'WORKING', 'On its twin only, for black-box agents: what the agent read (the twin\'s access log), changed (its tables) and sent (planted markers in email and the reply). Qualified, and again at the 0.6.0 tree: 144 cells each time, no false pass or false fail. Evidence: reports/helpdesk-pack-2026-10, reports/helpdesk-requal-0.6.0.'],
+      ['Stripe refunds pack', 'WORKING', 'Qualified before 0.4.0 and again for 0.5.0 and 0.6.0: 168 + 168 cells each time, no false pass or false fail. Evidence: reports/stripe-pack-2026-10, reports/stripe-requal-0.5.0, reports/stripe-requal-0.6.0.'],
+      ['Checks on the agent\'s tool calls (a tool never called, arguments within scope)', 'BEING BUILT', 'Being built next.'],
       ['Permission tests on your own system', 'NOT BUILT YET', 'Not built yet.'],
       ['One command starts a runner and opens an interface', 'WORKING', 'From the public registry, in a clean HOME and cache. A headless box gets the URL printed.'],
       ['Connect an MCP server on this machine, or over HTTP', 'WORKING', 'Against servers nobody here wrote, unmodified, including one behind OAuth with PKCE.'],
