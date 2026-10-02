@@ -6,26 +6,26 @@
 
 ## Now
 
-- **Phase:** Step A (context, guardrails, agents) → Phase 0 (repositioned site and email).
-- **Outreach:** paused since 2026-10-02 (D-004). 5 sent on 2026-10-01 (Calltree, Minimal AI, Open,
-  Parahelp, Quivr). Resumes after the Phase 0 deploy.
-- **Released:** `rigorrun` 0.4.0 (2026-10-01), qualified tree `aee8fe5`. **0.5.0 candidate:**
-  `engine/0.5.0`, tree `27d40a8`, re-qualified T and L on 2026-10-02 — waiting for the founder's
-  "yes" to release. Any further change under `packages/` needs another re-qualification.
-- **Working branches:** `positioning/permissions` (Phase 0, no `packages/` changes) and
-  `engine/0.5.0` (Phase 1; has T-001). Agents work in `~/RigorRun-agents/<agent>-<task>`.
+- **Phase:** 0 and 1 done and released. Next: Phase 2 (Larch Helpdesk pack, flagship permissions demo).
+- **Outreach:** the site is live, so the pause (D-004) can end: email v2 is in
+  `~/Documents/rigorrun-outreach/*_v2.*`, waiting for the founder to read it and send the bot "GO v2".
+- **Released:** `rigorrun` **0.5.0** on 2026-10-02 (npm `latest`, provenance; tag `v0.5.0`, master
+  `7562967`, PR #6). Qualified tree `27d40a8`; released tree `c247c72` differs only by version
+  strings (`reports/stripe-requal-0.5.0/RELEASE-TREE.md`). rigorrun.xyz and the docs deployed the
+  same day; `release:verify --prod` all 17 gates pass.
+- **Working branch:** `phase2/helpdesk` (from master). Agents work in `~/RigorRun-agents/<agent>-<task>`.
 
 ## Phases
 
-| Phase | Goal                                                                                                                                   | Release        | Status      |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ----------- |
-| A     | Context files, claims ledger + check, agent instructions, Codex/Cursor wired                                                           | —              | doing       |
-| 0     | Site, docs, README and email lead with permissions; only qualified claims as fact; working commands                                    | no npm release | todo        |
-| 1     | Engine primitives: events/calls to the verifier, call checks, markers, principal, permission matrix in the report; Stripe re-qualified | 0.5.0          | todo        |
-| 2     | Larch Helpdesk flagship: MCP fixture, pack, example agent, qualification, recording, `try`                                             | 0.6.0          | todo        |
-| 3     | Pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader                                                       | —              | todo        |
-| 4     | Your own MCP server: permission matrix, seeding tenant B, qualification on an unseen fixture                                           | 0.7.0          | todo        |
-| 5     | Further packs (RLS, ledgers, portals) — only on a design partner's request                                                             | —              | not started |
+| Phase | Goal                                                                                                                                   | Release        | Status                     |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------- |
+| A     | Context files, claims ledger + check, agent instructions, Codex/Cursor wired                                                           | —              | done                       |
+| 0     | Site, docs, README and email lead with permissions; only qualified claims as fact; working commands                                    | no npm release | done (deployed 2026-10-02) |
+| 1     | Engine primitives: events/calls to the verifier, call checks, markers, principal, permission matrix in the report; Stripe re-qualified | 0.5.0          | released                   |
+| 2     | Larch Helpdesk flagship: MCP fixture, pack, example agent, qualification, recording, `try`                                             | 0.6.0          | todo                       |
+| 3     | Pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader                                                       | —              | todo                       |
+| 4     | Your own MCP server: permission matrix, seeding tenant B, qualification on an unseen fixture                                           | 0.7.0          | todo                       |
+| 5     | Further packs (RLS, ledgers, portals) — only on a design partner's request                                                             | —              | not started                |
 
 ## Tasks
 
@@ -42,7 +42,7 @@
 | 0-3  | Copy-pinning tests (`e2e/smoke.spec.ts:16`, `e2e/site.spec.ts:75,177-178`)                                          | 0     | cursor         | done                                                                                                                                                  | 42d07ad                               | claude: smoke + site e2e on local preview                                                                                  |
 | 0-4  | OG image text (`scripts/build-brand.mjs`), demo video command or hide the video                                     | 0     | claude         | done: OG, video re-recorded, replay Next lines                                                                                                        | 87fa9d6, e1d1a07                      | claude: viewed og.png and the video closing frame                                                                          |
 | 0-5  | Email v2, follow-up, bot prompt, CSV marked sent                                                                    | 0     | claude         | drafted, waiting for founder review                                                                                                                   | ~/Documents/rigorrun-outreach/_\_v2._ | claude: pnpm claims on both files                                                                                          |
-| 0-6  | Deploy site and docs; `release:verify:prod`; resume outreach                                                        | 0     | claude         | waiting for the founder's "yes" to deploy                                                                                                             | —                                     | —                                                                                                                          |
+| 0-6  | Deploy site and docs; `release:verify:prod`; resume outreach                                                        | 0     | claude         | done                                                                                                                                                  | master 7562967                        | claude: release:verify --prod, 17/17                                                                                       |
 | 1-1  | Runner hands the verifier the events (`events: []` bug)                                                             | 1     | claude         | done                                                                                                                                                  | dfbb436 on engine/0.5.0               | claude: regression test fails without the fix; 1797 passed                                                                 |
 | 1-2  | `contains`/`not_contains` find markers inside records; missing path UNVERIFIABLE (T-001)                            | 1     | codex          | done                                                                                                                                                  | 968a504                               | claude: 600 tests, lint, typecheck                                                                                         |
 | 1-3  | Check kinds `tool_not_called`, `tool_args_in_scope`, `no_refused_call`, `marker_absent`; `Observation.calls`        | 1     | claude         | done                                                                                                                                                  | 9e93f0e                               | claude: 13 new tests; 1804 passed                                                                                          |
@@ -63,6 +63,13 @@
 | 2026-09-28 | 5    | 0       | 0     | 0      | 0               |
 
 ## Log
+
+- **2026-10-02 (morning)** — **0.5.0 released** (founder's "yes"): PR #6 merged after CI (one new
+  CodeQL alert — a polynomial regex in the helpdesk fixture's bearer parsing — fixed first), tag
+  `v0.5.0`, published by `release.yml` with provenance; a clean `npx rigorrun@latest` runs help,
+  demo, `stripe twin` and `stripe init --twin --yes`. rigorrun.xyz and docs deployed;
+  `release:verify --prod` 17/17. Follow-up: npm warns it normalises `bin` (`./bin/…`) on publish,
+  as it did for 0.4.0 — harmless, to be cleaned in the next release.
 
 - **2026-10-02 (early morning)** — 0.5.0 candidate re-qualified (`reports/stripe-requal-0.5.0`):
   Stage T GO_TWIN and Stage L GO_LIVE, 168 cells each, TP 39 / TN 129, no false pass or fail, no

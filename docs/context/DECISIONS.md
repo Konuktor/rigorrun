@@ -4,6 +4,16 @@
 > [POSITIONING.md](POSITIONING.md) in the same commit. Entries are never edited after the fact;
 > a reversal is a new entry.
 
+## D-007 · 2026-10-02 · 0.5.0 released on the re-qualified tree, with the version bump disclosed
+
+The founder said "deploy the site and release 0.5.0". The Stripe pack was re-qualified at tree
+`27d40a8`; the version bump to 0.5.0 came after, so the released tree `c247c72` differs from the
+qualified one by three version lines. Rather than run both stages again for a version string, the
+difference is published in full (`reports/stripe-requal-0.5.0/RELEASE-TREE.md`) and named in the
+changelog. **Why:** the rule is "re-qualify, or say that the release tree differs"; a
+version-only diff is checkable by anyone in one command. Next time, bump the version before the
+freeze.
+
 ## D-006 · 2026-10-02 · Codex and Cursor work on the project under Claude's supervision
 
 Claude writes briefs, delegates, reviews diffs and runs the tests itself; it never accepts an
