@@ -84,3 +84,13 @@ variant failed a case, it says exactly that.
   at its documented 1.0, so before that freeze the agent has to take the temperature (the script
   passes it as `TEMPERATURE`) and report it in `/meta` as `temperature`. Until then the script
   refuses any non-zero temperature rather than record one the agent did not use.
+
+## Found after recording (2026-10-02)
+
+**Temperature.** Amendment 2 recorded gpt-oss-120b at 0 because "neither the model card nor Groq's
+page for the model recommends a value". OpenAI's own gpt-oss README (github.com/openai/gpt-oss,
+"Recommended Sampling Parameters") recommends `temperature=1.0` and `top_p=1.0`, so Amendment 1's
+rule, as written, gives 1.0. The check missed the README. The recording ran at 0; what it would
+show at 1.0 has not been measured. It is not re-recorded — the first complete recording is final —
+and the fault is listed beside it (`errata` in `fixtures/replays/stripe-replay.json`, shown on
+rigorrun.xyz/replay).

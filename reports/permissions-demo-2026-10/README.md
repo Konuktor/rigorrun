@@ -38,6 +38,13 @@ are ord_5 (read, written) and ref_1 (written), both in `service · other_org_ord
   `7d60df6`, after the recording; the recording is left as made.
 - The run's `rigorrunVersion` reads `0.1.0`, a literal the runner used whenever the CLI named no
   version (every run before `7d60df6`, including the Stripe flagship's).
+- **Temperature.** The pre-registration says gpt-oss has "no recommended value in its documentation,
+  so 0". That is wrong: OpenAI's gpt-oss README (github.com/openai/gpt-oss, "Recommended Sampling
+  Parameters") recommends `temperature=1.0` and `top_p=1.0`, so the Stripe flagship's Amendment 1
+  rule gives 1.0. The check repeated the Stripe recording's Amendment 2, which read the Hugging Face
+  model card and Groq's page (neither names a value) and missed the README. This recording ran at 0;
+  what it would show at 1.0 has not been measured. Found 2026-10-02 while designing Phase 3; not
+  re-recorded (the first complete recording is final).
 
 ## Files
 

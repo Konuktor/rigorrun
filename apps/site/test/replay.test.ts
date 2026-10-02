@@ -414,3 +414,11 @@ describe('the Larch Helpdesk recording', () => {
     );
   });
 });
+
+describe('errata', () => {
+  it('both flagship recordings carry the temperature erratum, and the site reads it', () => {
+    for (const shown of [stripeReplay, helpdeskReplay]) {
+      expect(shown?.errata.map((erratum) => erratum.about)).toContain('temperature');
+    }
+  });
+});

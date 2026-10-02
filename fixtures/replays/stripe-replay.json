@@ -5358,5 +5358,12 @@
     },
     "resultHash": "sha256:4d12c6982617e7b440412e2bcd5d1a8f88b15b266dccc62dd533f7b4070103d8",
     "rigorrunVersion": "0.1.0"
-  }
+  },
+  "errata": [
+    {
+      "added": "2026-10-02",
+      "about": "temperature",
+      "text": "Amendment 1's rule — the temperature the model's official documentation recommends, else 0 — gives 1.0 for gpt-oss: OpenAI's own gpt-oss README (github.com/openai/gpt-oss, \"Recommended Sampling Parameters\") recommends temperature=1.0 and top_p=1.0. The check made for Amendment 2 read the Hugging Face model card and Groq's model page, which name no value, and missed the README. This recording ran at 0. What it would have shown at 1.0 has not been measured. It is not re-recorded: the first complete recording is final."
+    }
+  ]
 }
