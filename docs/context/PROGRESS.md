@@ -6,7 +6,7 @@
 
 ## Now
 
-- **Phase:** 2 done and **released as 0.6.0** (2026-10-02). Next: Phase 3 (pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader) and outreach v3.
+- **Phase:** 3 running unattended (graders vs the system's record, pre-registered in `reports/judge-vs-state-2026-10/`): systemd `rigorrun-phase3` in worktree `~/RigorRun-phase3`, branch `phase3/judge-vs-state`. Groq free tier (founder's choice) — about two weeks; progress in `driver.log` there.
 - **Outreach:** email v3 (`~/Documents/rigorrun-outreach/email_templates_v3.md`, bot prompt `grok_outreach_prompt_v3.md`) cites the helpdesk recording; v2 marked superseded. Nothing sent: waits for the founder to read v3 and send the bot "GO v3".
 - **Released:** `rigorrun` **0.6.0** on 2026-10-02 (npm `latest`, provenance; tag `v0.6.0` on master `fe1614f`, PR #7; sitemap fix PR #8, master `11ec9e9`). Released packages tree `5699d2f` **is** the qualified tree. rigorrun.xyz and docs deployed; `release:verify --prod` all gates pass after the sitemap fix.
 - **Working branch:** `phase2/helpdesk` (from master). Agents work in `~/RigorRun-agents/<agent>-<task>`.
@@ -19,7 +19,7 @@
 | 0     | Site, docs, README and email lead with permissions; only qualified claims as fact; working commands                                    | no npm release | done (deployed 2026-10-02) |
 | 1     | Engine primitives: events/calls to the verifier, call checks, markers, principal, permission matrix in the report; Stripe re-qualified | 0.5.0          | released                   |
 | 2     | Larch Helpdesk flagship: MCP fixture, pack, example agent, qualification, recording, `try`                                             | 0.6.0          | released                   |
-| 3     | Pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader                                                       | —              | todo                       |
+| 3     | Pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader                                                       | —              | doing (running)            |
 | 4     | Your own MCP server: permission matrix, seeding tenant B, qualification on an unseen fixture                                           | 0.7.0          | todo                       |
 | 5     | Further packs (RLS, ledgers, portals) — only on a design partner's request                                                             | —              | not started                |
 
@@ -70,6 +70,14 @@
 | 2026-09-28 | 5    | 0       | 0     | 0      | 0               |
 
 ## Log
+
+- **2026-10-02 (night)** — Phase 3 pre-registered after a methodology and a statistics review of
+  the design (cluster-level primary, confirmatory only with >= 12 boundary clusters, M1b and M2b
+  with Holm; Promptfoo 0.123.1's BOLA/BFLA rubric run through its own CLI on the same judges).
+  Pilot 4 cells, frozen, collection started; Groq's free tier allows 200k tokens/day per model
+  (not in headers), so the founder chose to let it run ~2 weeks unattended. Also found while
+  designing: both flagship recordings ran gpt-oss at temperature 0 where OpenAI's README recommends
+  1.0 — disclosed as errata beside each recording (PR #10).
 
 - **2026-10-02 (evening)** — **0.6.0 released** (founder's "yes"): PR #7 green (CodeQL clean),
   merged, tag `v0.6.0`, published by `release.yml` with provenance; a clean `npx rigorrun@0.6.0`
