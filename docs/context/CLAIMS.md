@@ -20,16 +20,17 @@
 | Q-MCP-REQUAL            | On third-party MCP servers (requalification v3) RigorRun's verdicts matched an independent oracle: TP 59, TN 13, FP 0, FN 0.                                                                                                                          | QUALIFIED | `reports/public-mcp-audit-2026-09/requalification-v3/README.md`                                                                                                                                                                                                                                                        |
 | R-FLAGSHIP              | Recorded 2026-10-01: Groq `openai/gpt-oss-120b`, the `minimal` reference agent, said "Refunded $30.00 … as requested" while Stripe shows $0.30 refunded on another customer's $30.00 charge.                                                          | RECORDED  | `fixtures/replays/stripe-replay.json` (hash-verified), `reports/flagship-demo-2026-10`                                                                                                                                                                                                                                 |
 | Q-MATRIX                | The HTML report shows a permission matrix (boundary × agent: failed, held, not checked). For the Stripe pack it is filled from qualified verdicts, and every Stripe check's boundary tag was verified on every verdict of the 0.5.0 re-qualification. | QUALIFIED | `reports/stripe-requal-0.5.0` (`DIAGNOSTIC-T.md`, `DIAGNOSTIC-L.md`: 0 mismatches); shipped in 0.5.0                                                                                                                                                                                                                   |
+| Q-HELPDESK-READS        | On the Larch Helpdesk twin, RigorRun detects that a black-box support agent read another organisation's records (from the twin's own access log).                                                                                                     | QUALIFIED | `reports/helpdesk-pack-2026-10` — 144 cells, TP 42 / TN 102, no false pass, no false fail                                                                                                                                                                                                                              |
+| Q-HELPDESK-LEAKS        | On the Larch Helpdesk twin, RigorRun detects another organisation's data leaving — a planted marker in an email or in the agent's reply — and email to anyone but the customer who wrote in.                                                          | QUALIFIED | same                                                                                                                                                                                                                                                                                                                   |
+| Q-HELPDESK-WRITES       | On the Larch Helpdesk twin, RigorRun detects a refund or change on another organisation's records.                                                                                                                                                    | QUALIFIED | same                                                                                                                                                                                                                                                                                                                   |
+| Q-HELPDESK-ROLE         | On the Larch Helpdesk twin, RigorRun detects one action outside a support agent's role: deleting a customer.                                                                                                                                          | QUALIFIED | same                                                                                                                                                                                                                                                                                                                   |
+| Q-HELPDESK              | Larch Helpdesk: a multi-tenant helpdesk twin with six permission cases, `rigorrun helpdesk try` (no keys) and `init`.                                                                                                                                 | QUALIFIED | same; shipped from 0.6.0                                                                                                                                                                                                                                                                                               |
 
 ## Being built (direction only — "being built", "next")
 
-| id         | Claim                                                                                                          | Status   | Planned in                            |
-| ---------- | -------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------- |
-| B-READS    | Detects that the agent read another customer's / tenant's data (proxy call log, system access log).            | BUILDING | Phase 1 engine, Phase 2 helpdesk pack |
-| B-LEAKS    | Detects another customer's data leaving through an outbound channel (marker strings in email, webhook, reply). | BUILDING | Phase 1–2                             |
-| B-ROLE     | Tests actions outside the role the agent acts for.                                                             | BUILDING | Phase 1–2                             |
-| B-CALLS    | Tool-call checks: a tool never called, arguments within the principal's scope, refused calls recorded.         | BUILDING | Phase 1                               |
-| B-HELPDESK | Larch Helpdesk: a multi-tenant helpdesk pack over MCP, with a recorded run.                                    | BUILDING | Phase 2                               |
+| id      | Claim                                                                                                  | Status   | Planned in |
+| ------- | ------------------------------------------------------------------------------------------------------ | -------- | ---------- |
+| B-CALLS | Tool-call checks: a tool never called, arguments within the principal's scope, refused calls recorded. | BUILDING | Phase 1    |
 
 ## Not built (do not imply it exists)
 
@@ -60,12 +61,12 @@ hedges: "being built with design partners" is still a claim that partners exist.
 {
   "allowed": ["QUALIFIED", "RECORDED"],
   "status": {
-    "B-READS": "BUILDING",
-    "B-LEAKS": "BUILDING",
-    "B-ROLE": "BUILDING",
+    "B-READS": "QUALIFIED",
+    "B-LEAKS": "QUALIFIED",
+    "B-ROLE": "QUALIFIED",
     "B-CALLS": "BUILDING",
     "Q-MATRIX": "QUALIFIED",
-    "B-HELPDESK": "BUILDING",
+    "B-HELPDESK": "QUALIFIED",
     "N-BYO": "NOT_BUILT",
     "N-LEDGER": "NOT_BUILT",
     "N-RLS": "NOT_BUILT",
