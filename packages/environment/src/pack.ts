@@ -107,8 +107,11 @@ export interface PackSession {
    * `replaced-world`: `materialize` replaces the whole world through the
    * system's own reset (a twin's seed hook), so later cases cannot see earlier
    * ones — but nothing here measured that, and the label says DECLARED.
+   * `shared-world`: nothing is put back and cases are not given records of
+   * their own — each is judged on what changed while it ran — so the label
+   * says NONE.
    */
-  readonly isolation?: 'fresh-objects' | 'replaced-world';
+  readonly isolation?: 'fresh-objects' | 'replaced-world' | 'shared-world';
   /**
    * True when `read` returns the whole system, every record of every kind — a
    * twin's full dump — rather than what one case's scope reaches. Only then is
@@ -289,7 +292,12 @@ export class PackEnvironment implements EnvironmentAdapter {
       seed: 'materialized',
       // A world replaced through the system's own reset is a declared reset;
       // otherwise nothing is put back and each case reads only its own records.
-      reset: this.session.isolation === 'replaced-world' ? 'endpoint' : 'namespace',
+      reset:
+        this.session.isolation === 'replaced-world'
+          ? 'endpoint'
+          : this.session.isolation === 'shared-world'
+            ? 'none'
+            : 'namespace',
       // Calls made through `executeAction` are logged here. An agent that
       // reaches the system on its own leaves no entries, and is judged on
       // state alone.

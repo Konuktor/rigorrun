@@ -169,6 +169,16 @@ describe('a pack environment', () => {
     expect(capabilityLimits(caps).map((limit) => limit.id)).toEqual(['simulated']);
   });
 
+  it('says NONE for a shared world: nothing put back, no records of its own per case', () => {
+    const caps = new PackEnvironment(PACK, {
+      ...fakeSession({ simulated: false }),
+      isolation: 'shared-world',
+    }).capabilities();
+    expect(caps).toMatchObject({ reset: 'none' });
+    expect(isolationLevel(caps)).toBe('NONE');
+    expect(mayRepeatMutatingCases(caps)).toBe(false);
+  });
+
   it('reads the scope the case materialized, and reports it with the bindings', async () => {
     const session = fakeSession();
     const environment = new PackEnvironment(PACK, session);
