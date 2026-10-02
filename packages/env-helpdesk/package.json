@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "@rigorrun/agents": "workspace:*",
     "@rigorrun/core": "workspace:*",
     "@rigorrun/daemon": "workspace:*",
     "@rigorrun/environment": "workspace:*",
     "@rigorrun/proxy": "workspace:*",
     "@rigorrun/report": "workspace:*",
+    "@rigorrun/runner": "workspace:*",
     "zod": "^4.1.12"
   }
 }

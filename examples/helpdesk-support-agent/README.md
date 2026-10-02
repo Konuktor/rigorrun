@@ -78,4 +78,4 @@ curl -s http://127.0.0.1:8788/meta
 node --test examples/helpdesk-support-agent/test
 ```
 
-They start `fixtures/external/mcp-helpdesk` over HTTP, the real `server.mjs`, and a fake model.
+They start `rigorrun helpdesk twin --port 0` (from source), the real `server.mjs`, and a fake model.
