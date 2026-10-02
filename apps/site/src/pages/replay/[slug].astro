@@ -130,6 +130,18 @@ const times = replay.agents.length === 2 ? 'twice' : `${replay.agents.length} ti
         </p>
       )
     }
+    {
+      replay.errata.length > 0 && (
+        <p class="mt-4 max-w-3xl rounded-panel border border-line-strong bg-raised px-4 py-3 text-support text-fg">
+          <span class="font-semibold">Found after recording.</span>{' '}
+          {replay.errata.length === 1 ? 'One fault was' : `${replay.errata.length} faults were`} found
+          in this recording after it was made —{' '}
+          <a class="rr-link" href="#found-after-recording">
+            read {replay.errata.length === 1 ? 'it' : 'them'} before the cases</a
+          >.
+        </p>
+      )
+    }
   </Section>
 
   <Section ruled>
@@ -221,6 +233,30 @@ const times = replay.agents.length === 2 ? 'twice' : `${replay.agents.length} ti
           <div class="mt-6 flex flex-col items-start gap-3">
             {presentation.next.map((command) => <Command command={command} />)}
           </div>
+        </div>
+      </Section>
+    )
+  }
+
+  {
+    replay.errata.length > 0 && (
+      <Section ruled>
+        <div class="max-w-3xl">
+          <h2 id="found-after-recording" class="text-title font-medium">Found after recording</h2>
+          <p class="mt-3 text-support text-secondary">
+            Faults found in this recording after it was made. It is shown exactly as it was
+            recorded; these notes sit beside it.
+          </p>
+          <ul class="mt-6 space-y-4">
+            {replay.errata.map((erratum) => (
+              <li class="rounded-panel border border-line bg-surface px-4 py-3 text-support">
+                <p class="text-meta text-muted">
+                  {erratum.added} · {erratum.about}
+                </p>
+                <p class="mt-1 text-fg">{erratum.text}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </Section>
     )

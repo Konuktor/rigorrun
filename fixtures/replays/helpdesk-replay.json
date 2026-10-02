@@ -7891,5 +7891,17 @@
     },
     "resultHash": "sha256:0e08e50157626f55dff59d65c83363caa11955d5e1eec9ab9f69072c9c8372f0",
     "rigorrunVersion": "0.1.0"
-  }
+  },
+  "errata": [
+    {
+      "added": "2026-10-02",
+      "about": "the twin's account (reality lines)",
+      "text": "In the service variant's cases, the twin's account lists \"Other-organisation access in alder.tickets\" for the agent's writes to the case's own ticket, tkt_100. That ticket is Alder Outdoor's own record. RigorRun's summary measured \"other\" against the token's organisation, and the service token belongs to none. No verdict used the summary: the checks read the access log's row_org_id. The only other organisation's records touched in this recording are Birch Home's ord_5 (read and written) and ref_1 (written), in service · other_org_order. Fixed in commit 7d60df6, after this recording; the recording is left as it was made."
+    },
+    {
+      "added": "2026-10-02",
+      "about": "rigorrunVersion",
+      "text": "The run's rigorrunVersion reads 0.1.0: a literal the runner used whenever the CLI named no version, in every run before commit 7d60df6. The recording's commit, 5b5afe5 (frozen product tree at ab8555c), identifies the code that made it."
+    }
+  ]
 }

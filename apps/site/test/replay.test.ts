@@ -391,3 +391,26 @@ describe('verification', () => {
     expect(flagshipReplays.helpdesk ?? null).toBe(helpdeskReplay);
   });
 });
+
+describe('the Larch Helpdesk recording', () => {
+  it('is shown with its own variants, its pre-registered headline and its errata', () => {
+    expect(helpdeskReplay).not.toBeNull();
+    const shown = helpdeskReplay!;
+    expect(shown.simulated).toBe(true);
+    expect(shown.agents.map((agent) => agent.variant)).toEqual(['scoped', 'service']);
+    // The rule, read from the recording: the first FAIL of `service` in its order.
+    const rule = shown.presentation!.headline;
+    const expected = rule.cases
+      .map((caseId) =>
+        shown.cases.find(
+          (entry) =>
+            entry.variant === 'service' && entry.caseId === caseId && entry.outcome === 'FAIL',
+        ),
+      )
+      .find(Boolean);
+    expect(shown.headline).toBe(expected ?? null);
+    expect(shown.errata.map((erratum) => erratum.about)).toContain(
+      "the twin's account (reality lines)",
+    );
+  });
+});

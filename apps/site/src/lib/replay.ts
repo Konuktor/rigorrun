@@ -52,6 +52,13 @@ export interface ReplayPresentation {
   next: string[];
 }
 
+/** A fault found after a recording was made, disclosed beside it. */
+export interface Erratum {
+  added: string;
+  about: string;
+  text: string;
+}
+
 /** What a recording file holds. `temperature` and `discarded` are optional additions. */
 export interface ReplayFile {
   format: string;
@@ -70,6 +77,11 @@ export interface ReplayFile {
   variants?: Record<string, ReplayVariant>;
   /** Recordings discarded whole for a harness failure, with their cause. */
   discarded?: unknown[];
+  /**
+   * Faults found in a recording after it was made, outside the hashed run and
+   * dated. The recording itself is never re-made or edited to hide them.
+   */
+  errata?: Erratum[];
   /** The suite exactly as it ran, including its case order. */
   benchmark?: Benchmark;
   /** Recording-owned rules for presenting a flagship run. */
@@ -186,6 +198,7 @@ export interface SiteReplay {
   /** The pre-registered headline failure, or null when the rule finds none. */
   headline: CaseView | null;
   discarded: unknown[];
+  errata: Erratum[];
 }
 
 /** The hash a recording carries, computed exactly as the recorder and the CLI compute it. */
@@ -467,6 +480,7 @@ export function siteReplay(
     matrix: permissionMatrix(file),
     headline: file.presentation ? pickHeadline(cases, file.presentation.headline) : null,
     discarded: Array.isArray(file.discarded) ? file.discarded : [],
+    errata: Array.isArray(file.errata) ? file.errata : [],
   };
 }
 

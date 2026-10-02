@@ -77,7 +77,7 @@ const temperature = replay.temperature === null ? null : `temperature ${replay.t
     <p
       class="mb-4 inline-block rounded-pill border border-line-strong bg-canvas px-3 py-1 font-mono text-micro text-secondary sm:absolute sm:left-6 sm:top-0 sm:mb-0 sm:-translate-y-1/2 sm:whitespace-nowrap"
     >
-      then read by RigorRun, with its own key
+      {replay.source === 'helpdesk' ? 'then read by RigorRun, from the twin itself' : 'then read by RigorRun, with its own key'}
     </p>
     <Sub class="text-micro font-semibold uppercase text-muted">{shows}</Sub>
     <ul class="mt-2.5 space-y-1.5 font-mono text-support leading-relaxed text-fg">
