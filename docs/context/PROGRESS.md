@@ -6,26 +6,22 @@
 
 ## Now
 
-- **Phase:** 2 done on `phase2/helpdesk` except publishing: recording made, site and docs updated, 0.6.0 re-qualified at the release tree, `release:verify` 15/15, `dist/rigorrun-0.6.0.tgz` built. Waiting for the founder's "yes" to merge, tag, publish and deploy.
-- **Outreach:** the site is live, so the pause (D-004) can end: email v2 is in
-  `~/Documents/rigorrun-outreach/*_v2.*`, waiting for the founder to read it and send the bot "GO v2".
-- **Released:** `rigorrun` **0.5.0** on 2026-10-02 (npm `latest`, provenance; tag `v0.5.0`, master
-  `7562967`, PR #6). Qualified tree `27d40a8`; released tree `c247c72` differs only by version
-  strings (`reports/stripe-requal-0.5.0/RELEASE-TREE.md`). rigorrun.xyz and the docs deployed the
-  same day; `release:verify --prod` all 17 gates pass.
+- **Phase:** 2 done and **released as 0.6.0** (2026-10-02). Next: Phase 3 (pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader) and outreach v3.
+- **Outreach:** email v3 (`~/Documents/rigorrun-outreach/email_templates_v3.md`, bot prompt `grok_outreach_prompt_v3.md`) cites the helpdesk recording; v2 marked superseded. Nothing sent: waits for the founder to read v3 and send the bot "GO v3".
+- **Released:** `rigorrun` **0.6.0** on 2026-10-02 (npm `latest`, provenance; tag `v0.6.0` on master `fe1614f`, PR #7; sitemap fix PR #8, master `11ec9e9`). Released packages tree `5699d2f` **is** the qualified tree. rigorrun.xyz and docs deployed; `release:verify --prod` all gates pass after the sitemap fix.
 - **Working branch:** `phase2/helpdesk` (from master). Agents work in `~/RigorRun-agents/<agent>-<task>`.
 
 ## Phases
 
-| Phase | Goal                                                                                                                                   | Release        | Status                        |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ----------------------------- |
-| A     | Context files, claims ledger + check, agent instructions, Codex/Cursor wired                                                           | —              | done                          |
-| 0     | Site, docs, README and email lead with permissions; only qualified claims as fact; working commands                                    | no npm release | done (deployed 2026-10-02)    |
-| 1     | Engine primitives: events/calls to the verifier, call checks, markers, principal, permission matrix in the report; Stripe re-qualified | 0.5.0          | released                      |
-| 2     | Larch Helpdesk flagship: MCP fixture, pack, example agent, qualification, recording, `try`                                             | 0.6.0          | done; release waits for "yes" |
-| 3     | Pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader                                                       | —              | todo                          |
-| 4     | Your own MCP server: permission matrix, seeding tenant B, qualification on an unseen fixture                                           | 0.7.0          | todo                          |
-| 5     | Further packs (RLS, ledgers, portals) — only on a design partner's request                                                             | —              | not started                   |
+| Phase | Goal                                                                                                                                   | Release        | Status                     |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------- |
+| A     | Context files, claims ledger + check, agent instructions, Codex/Cursor wired                                                           | —              | done                       |
+| 0     | Site, docs, README and email lead with permissions; only qualified claims as fact; working commands                                    | no npm release | done (deployed 2026-10-02) |
+| 1     | Engine primitives: events/calls to the verifier, call checks, markers, principal, permission matrix in the report; Stripe re-qualified | 0.5.0          | released                   |
+| 2     | Larch Helpdesk flagship: MCP fixture, pack, example agent, qualification, recording, `try`                                             | 0.6.0          | released                   |
+| 3     | Pre-registered head-to-head vs answer/trace judges and the Promptfoo BOLA grader                                                       | —              | todo                       |
+| 4     | Your own MCP server: permission matrix, seeding tenant B, qualification on an unseen fixture                                           | 0.7.0          | todo                       |
+| 5     | Further packs (RLS, ledgers, portals) — only on a design partner's request                                                             | —              | not started                |
 
 ## Tasks
 
@@ -64,7 +60,7 @@
 | 2-9  | Recording pre-registration, recorder, pilot, freeze, recording                                                                       | 2     | claude          | done: scoped 6/6 PASS; service FAIL on other_org_order (refunded $300 on Birch's order), 5 PASS; 12 verdicts checked by hand against the transcripts; two faults found after recording disclosed as errata | 38918d8 … cdae933, df16983, 0eda55b   | claude: transcripts vs verdicts, secret scan                                                                               |
 | 2-10 | Site: replay pages for any flagship recording, `/replay/helpdesk`, permission matrix (T-008); home leads with the helpdesk recording | 2     | codex + claude  | done (codex T-008; claude: errata, home page, copy)                                                                                                                                                        | 99a153d, ad2d68f                      | claude: site tests 18/18, build, screenshots desktop + phone                                                               |
 | 2-11 | `helpdesk try --agent` uses a running twin; CLI help leads with `helpdesk try`; docs page `start/helpdesk`; npm `bin` path           | 2     | claude          | done                                                                                                                                                                                                       | ab8555c                               | claude: 1857 tests, lint, typecheck, claims, domain, build:docs                                                            |
-| 2-12 | 0.6.0: re-qualifications at the release tree; release:verify; verify:package; publish; deploy                                        | 2     | claude          | re-qualified (helpdesk GO_TWIN 144; Stripe GO_TWIN + GO_LIVE 168 + 168; tree 5699d2f = release tree); release:verify 15/15; package ready — **publish and deploy wait for the founder's "yes"**            | c2fd2cb                               | claude                                                                                                                     |
+| 2-12 | 0.6.0: re-qualifications at the release tree; release:verify; verify:package; publish; deploy                                        | 2     | claude          | done: published (provenance), deployed; clean `npx rigorrun@0.6.0` runs --version, help and `helpdesk try`; report footer says 0.6.0                                                                       | fe1614f, 11ec9e9                      | claude: release:verify --prod all gates                                                                                    |
 | —    | Allow-list enforcement in the runner                                                                                                 | 1     | claude          | dropped                                                                                                                                                                                                    | —                                     | it broke a careful agent that reads before retrying (runner/test/retry.test.ts); scope tests use `tool_not_called` instead |
 
 ## Outreach and pilots (weekly)
@@ -74,6 +70,13 @@
 | 2026-09-28 | 5    | 0       | 0     | 0      | 0               |
 
 ## Log
+
+- **2026-10-02 (evening)** — **0.6.0 released** (founder's "yes"): PR #7 green (CodeQL clean),
+  merged, tag `v0.6.0`, published by `release.yml` with provenance; a clean `npx rigorrun@0.6.0`
+  prints 0.6.0, leads its help with `helpdesk try`, and `helpdesk try` gives 6/6 and 4/6 as
+  designed. Site and docs deployed; `release:verify --prod` caught `/replay/helpdesk` missing from
+  the sitemap — fixed in PR #8, redeployed, all gates pass. POSITIONING.md statuses updated (D-008).
+  Email v3 and bot prompt v3 drafted around the helpdesk recording; not sent.
 
 - **2026-10-02 (afternoon)** — Recording done (`reports/permissions-demo-2026-10`): gpt-oss-120b,
   scoped token 6/6 PASS; service token refunded $300 on Birch's order BIR-2001 after seeing
