@@ -1,0 +1,20 @@
+{
+  "name": "clinic-desk-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A multi-tenant clinic front-desk MCP server, unlike the Larch Helpdesk on purpose: the unseen system Phase 4 is qualified on. Imports nothing from RigorRun.",
+  "bin": { "clinic-desk-mcp": "./src/stdio.ts" },
+  "scripts": {
+    "start": "tsx src/stdio.ts",
+    "start:http": "tsx src/http.ts",
+    "test": "node --import tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.1"
+  }
+}

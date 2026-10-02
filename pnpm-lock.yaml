@@ -228,6 +228,19 @@ importers:
         specifier: ^4.1.12
         version: 4.5.4
 
+  fixtures/external/mcp-clinic-desk:
+    dependencies:
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.30.0
+        version: 1.30.0(zod@4.5.4)
+      zod:
+        specifier: ^4.1.12
+        version: 4.5.4
+    devDependencies:
+      tsx:
+        specifier: ^4.21.1
+        version: 4.23.13
+
   fixtures/external/mcp-venue-desk:
     dependencies:
       '@modelcontextprotocol/sdk':
