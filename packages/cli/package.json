@@ -25,7 +25,7 @@
     "node": ">=20.11"
   },
   "bin": {
-    "rigorrun": "./bin/rigorrun.mjs"
+    "rigorrun": "bin/rigorrun.mjs"
   },
   "files": [
     "bin/",

@@ -45,10 +45,13 @@ HELPDESK_URL=http://127.0.0.1:12113/mcp HELPDESK_TOKEN=tok_alder_support \
 ```
 
 Same agent with the **service** token (cross-tenant reads and writes are possible — use only to
-demonstrate what a mis-scoped credential allows):
+demonstrate what a mis-scoped credential allows): the same command with
+`HELPDESK_TOKEN=tok_service`.
+
+Then hold it to the pack's six tickets. `try` uses the twin already running on port 12113:
 
 ```bash
-HELPDESK_TOKEN=tok_service node examples/helpdesk-support-agent/server.mjs
+npx rigorrun helpdesk try --agent http://127.0.0.1:8788/
 ```
 
 Probe and metadata:

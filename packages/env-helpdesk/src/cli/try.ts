@@ -15,13 +15,14 @@ import { PackEnvironment, clearEnvironments, registerEnvironment } from '@rigorr
 import type { AgentAdapter } from '@rigorrun/agents';
 import { renderReportHtml } from '@rigorrun/report';
 import { runBenchmark } from '@rigorrun/runner';
-import { HELPDESK_PACK_ID, TWIN_PORT } from '../conventions.ts';
+import { HELPDESK_PACK_ID, TWIN_PORT, TWIN_URL } from '../conventions.ts';
 import { DEMO_SCOPED_TOKEN, DEMO_SERVICE_TOKEN, demoAgent } from '../demo/agents.ts';
 import { helpdeskPack } from '../pack.ts';
 import { HELPDESK_RULE_IDS } from '../rules.ts';
 import { HELPDESK_CASE_TIMEOUT_MS } from '../scenarios.ts';
 import { helpdeskSuite } from '../suite.ts';
-import { startTwin } from '../twin/http.ts';
+import { HelpdeskClient } from '../client.ts';
+import { startTwin, type RunningTwin } from '../twin/http.ts';
 import { HelpdeskUsageError } from './twin.ts';
 
 export const TRY_USAGE = `rigorrun helpdesk try - the Larch Helpdesk suite, now, with no keys
@@ -29,8 +30,9 @@ export const TRY_USAGE = `rigorrun helpdesk try - the Larch Helpdesk suite, now,
   rigorrun helpdesk try                     two built-in agents, one difference: the token
   rigorrun helpdesk try --agent <url>       your own agent (rigorrun/task/1 over HTTP)
 
-Starts the twin on this machine, gives every case a fresh world, and decides each ticket from what
-the twin recorded — its tables, its access log, its outbox — never from what the agent said.
+Starts the twin on this machine (with --agent, uses the one already running on its port), gives
+every case a fresh world, and decides each ticket from what the twin recorded — its tables, its
+access log, its outbox — never from what the agent said.
 
 OPTIONS
       --agent <url>        Your agent's endpoint. Point its helpdesk MCP URL at the twin this
@@ -41,6 +43,35 @@ OPTIONS
       --json               Print the outcomes as JSON.`;
 
 const say = (text = '') => process.stdout.write(`${text}\n`);
+
+/**
+ * The twin to run on. With `--agent`, the agent is usually already connected
+ * to a twin on the default port — an MCP client connects when it starts — so a
+ * twin already answering there is used rather than refused; its world is
+ * replaced before every case all the same. Anything else on the port is an
+ * error, never a twin.
+ */
+async function twinFor(
+  port: number,
+  reuse: boolean,
+): Promise<{ twin: RunningTwin; reused: boolean }> {
+  try {
+    return { twin: await startTwin({ port }), reused: false };
+  } catch (error) {
+    if (!reuse || (error as NodeJS.ErrnoException).code !== 'EADDRINUSE') throw error;
+    const url = `http://127.0.0.1:${port}/mcp`;
+    const answers = await new HelpdeskClient(url).dump().then(
+      () => true,
+      () => false,
+    );
+    if (!answers) {
+      throw new HelpdeskUsageError(
+        `Port ${port} is taken by something that is not a Larch Helpdesk twin. Stop it, or pass --port.`,
+      );
+    }
+    return { twin: { url, port, close: async () => {} }, reused: true };
+  }
+}
 
 export async function cmdTry(argv: string[]): Promise<number> {
   const { values } = parseArgs({
@@ -64,7 +95,7 @@ export async function cmdTry(argv: string[]): Promise<number> {
     throw new HelpdeskUsageError(`--port is a port number, not "${values.port}".`);
   }
 
-  const twin = await startTwin({ port });
+  const { twin, reused } = await twinFor(port, Boolean(values.agent));
   const session = await helpdeskPack.open({
     mode: 'twin',
     baseUrl: twin.url,
@@ -80,7 +111,7 @@ export async function cmdTry(argv: string[]): Promise<number> {
   try {
     const human = !values.json;
     if (human) {
-      say(`Larch Helpdesk twin · ${twin.url}`);
+      say(`Larch Helpdesk twin · ${twin.url}${reused ? ' (already running)' : ''}`);
       say('  Alder Outdoor and Birch Home share it; the agent supports Alder only.');
       say();
     }
@@ -157,8 +188,9 @@ export async function cmdTry(argv: string[]): Promise<number> {
       if (!values.agent) {
         say();
         say('Same code, one difference — the token. Now yours:');
+        say('  rigorrun helpdesk twin                       # leave it running');
         say(
-          `  point its helpdesk MCP URL at http://127.0.0.1:${TWIN_PORT}/mcp with ${DEMO_SCOPED_TOKEN}, then`,
+          `  point your agent's helpdesk MCP URL at ${TWIN_URL} with ${DEMO_SCOPED_TOKEN}, start it, then`,
         );
         say('  rigorrun helpdesk try --agent <your agent URL>');
       }

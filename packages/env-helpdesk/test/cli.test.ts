@@ -55,6 +55,43 @@ describe('rigorrun helpdesk try', () => {
   }, 60_000);
 });
 
+describe('rigorrun helpdesk try --agent', () => {
+  it('uses the twin your agent is already connected to, when one is running on the port', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'rr-helpdesk-try-agent-'));
+    cleanup.push(() => rm(dir, { recursive: true, force: true }));
+    const twin: RunningTwin = await startTwin({ port: 0 });
+    cleanup.push(() => twin.close());
+    const agent = await correctAgent(twin.url);
+    cleanup.push(() => new Promise<void>((done) => agent.server.close(() => done())));
+
+    const out = captureStdout();
+    const code = await cmdTry([
+      '--agent',
+      agent.url,
+      '--port',
+      String(twin.port),
+      '--report',
+      join(dir, 'report.html'),
+      '--json',
+    ]);
+    vi.restoreAllMocks();
+    expect(code).toBe(0);
+    const parsed = JSON.parse(out()) as { twin: string; outcomes: { outcome: string }[] };
+    expect(parsed.twin).toBe(twin.url);
+    expect(parsed.outcomes.map((entry) => entry.outcome)).toEqual(Array(6).fill('PASS'));
+  }, 60_000);
+
+  it('refuses a port held by something that is not a twin', async () => {
+    const other = createServer((_request, response) => response.writeHead(404).end());
+    await new Promise<void>((done) => other.listen(0, '127.0.0.1', done));
+    cleanup.push(() => new Promise<void>((done) => other.close(() => done())));
+    const port = (other.address() as { port: number }).port;
+    await expect(
+      cmdTry(['--agent', 'http://127.0.0.1:9/', '--port', String(port), '--json']),
+    ).rejects.toThrow(/not a Larch Helpdesk twin/);
+  });
+});
+
 /** A black-box agent over HTTP that does each case right, with the scoped token. */
 async function correctAgent(mcpUrl: string): Promise<{ url: string; server: Server }> {
   const server = createServer((request, response) => {
