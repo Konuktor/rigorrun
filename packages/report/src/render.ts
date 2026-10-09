@@ -8,6 +8,7 @@
  */
 import {
   caseOutcome,
+  redactDeep,
   type AgentScore,
   type AssertionResult,
   type Benchmark,
@@ -491,7 +492,7 @@ function timeline(result: CaseResult): string {
 function describeAction(type: string, payload: Record<string, unknown>): string {
   if (type.startsWith('tool.')) {
     const name = type.slice(5);
-    const keys = Object.entries(payload)
+    const keys = Object.entries(redactDeep(payload))
       .filter(([, v]) => typeof v === 'string' || typeof v === 'number')
       .map(([k, v]) => `${k}=${String(v)}`)
       .slice(0, 3)

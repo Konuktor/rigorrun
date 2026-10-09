@@ -314,6 +314,27 @@ describe('passing case evidence', () => {
     expect(page.includes(token)).toBe(false);
     expect(page).toContain('[REDACTED]');
   });
+
+  it.each(['api_key', 'authorization', 'password', 'access_token'])(
+    'redacts an opaque %s payload value before formatting the full PASS action timeline',
+    (credentialKey) => {
+      const { data, result } = passingRun();
+      const credential = 'synthetic-review-credential';
+      result.actions = [
+        {
+          type: 'tool.send_mail',
+          at: 10,
+          ok: true,
+          payload: { [credentialKey]: credential, to: 'visible-recipient' },
+        },
+      ];
+      const page = renderReportHtml(data);
+      expect(page).toContain('<details');
+      expect(page.includes(credential)).toBe(false);
+      expect(page).toContain(`${credentialKey}=[REDACTED]`);
+      expect(page).toContain('to=visible-recipient');
+    },
+  );
 });
 
 describe('the permission matrix', () => {
