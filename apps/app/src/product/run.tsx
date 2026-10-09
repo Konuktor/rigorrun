@@ -21,15 +21,18 @@ import {
   type RunView,
   type WaitingView,
 } from './api.ts';
+import type { ProjectWriteLock } from './projectWriteLock.ts';
 
 export function ConnectAgent({
   project,
   onConnected,
   onDraftChanged,
+  writeLock,
 }: {
   project: ProjectView;
   onConnected: (project: ProjectView) => void;
   onDraftChanged?: () => void;
+  writeLock?: ProjectWriteLock;
 }) {
   const active = useRef(true);
   const requestVersion = useRef(0);
@@ -69,6 +72,8 @@ export function ConnectAgent({
   }
 
   async function add(): Promise<void> {
+    const finish = writeLock?.begin('agent');
+    if (writeLock && !finish) return;
     const version = ++requestVersion.current;
     setBusy(true);
     setProblem('');
@@ -117,6 +122,7 @@ export function ConnectAgent({
         setProblem((error as Error).message);
     } finally {
       if (active.current && version === requestVersion.current) setBusy(false);
+      finish?.();
     }
   }
 
@@ -359,6 +365,7 @@ export function ConnectAgent({
               onClick={add}
               disabled={
                 busy ||
+                !!writeLock?.operation ||
                 (kind === 'blackbox' && (!bbEndpoint.trim() || (remoteHost !== null && !bbAgreed)))
               }
               testId="add-agent"
@@ -504,12 +511,14 @@ export function RunAndVerdict({
   activation,
   onRan,
   beforeRun,
+  writeLock,
 }: {
   project: ProjectView;
   activation: ActivationView | null;
   onRan: () => void;
   /** Release-check flows recheck suite readiness before any candidate call. */
   beforeRun?: () => Promise<boolean>;
+  writeLock?: ProjectWriteLock;
 }) {
   const active = useRef(true);
   useEffect(() => {
@@ -529,6 +538,8 @@ export function RunAndVerdict({
   const driven = ready.find((agent) => agent.id === running && agent.kind === 'external');
 
   async function go(agentId: string): Promise<void> {
+    const finish = writeLock?.begin('run');
+    if (writeLock && !finish) return;
     setRunning(agentId);
     setBusy(true);
     setProblem('');
@@ -554,6 +565,7 @@ export function RunAndVerdict({
         setBusy(false);
         setRunning('');
       }
+      finish?.();
     }
   }
 
@@ -574,10 +586,10 @@ export function RunAndVerdict({
               <Button
                 key={agent.id}
                 onClick={() => go(agent.id)}
-                disabled={busy}
+                disabled={busy || !!writeLock?.operation}
                 testId={`run-${agent.id}`}
               >
-                {busy ? 'Running…' : `Run ${agent.name}`}
+                {busy || writeLock?.operation === 'run' ? 'Running…' : `Run ${agent.name}`}
               </Button>
             ))}
           </div>

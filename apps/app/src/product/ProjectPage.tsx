@@ -99,7 +99,7 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
       setRecording(result.recording.steps);
       setRecordingOpen(result.recording.inProgress);
       setQuality(result.quality);
-      return result.project;
+      return result;
     } catch (error) {
       if (active.current && request === loading.current) setProblem((error as Error).message);
       return null;

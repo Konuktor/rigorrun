@@ -11,6 +11,7 @@ import {
   type RuleView,
 } from '../product/api.ts';
 import { ConnectAgent, RunAndVerdict } from '../product/run.tsx';
+import { useProjectWriteLock } from '../product/projectWriteLock.ts';
 
 export function isHelpdesk(project: ProjectView): boolean {
   return project.connector?.kind === 'pack' && project.connector.pack === 'helpdesk';
@@ -59,7 +60,7 @@ export function HelpdeskFlow({
   initialRules: RuleView[];
   initialCases: CaseView[];
   activation: ActivationView | null;
-  onUpdated: () => Promise<ProjectView | null>;
+  onUpdated: () => Promise<Awaited<ReturnType<typeof api.project>> | null>;
   onConnected: (project: ProjectView) => void;
 }) {
   const saved =
@@ -74,7 +75,10 @@ export function HelpdeskFlow({
   const [readiness, setReadiness] = useState<GateReadinessView | null>(null);
   const [busy, setBusy] = useState('');
   const [problem, setProblem] = useState('');
+  const [writeNotice, setWriteNotice] = useState('');
   const [evidenceRevision, setEvidenceRevision] = useState(0);
+  const writeLock = useProjectWriteLock(project.id);
+  const completed = useRef(0);
   const active = useRef(true);
   const epoch = useRef(0);
   const pending = rules.filter((rule) => decisions[rule.id] === 'pending');
@@ -101,6 +105,44 @@ export function HelpdeskFlow({
     // The initial snapshot is read once; later checks are explicit actions.
   }, [project.id]);
 
+  useEffect(() => {
+    if (writeLock.operation || completed.current === writeLock.completed) return;
+    completed.current = writeLock.completed;
+    // Even an obsolete request may have persisted. Refresh the saved snapshot,
+    // but do not replace the local edited URL/rules or mark that draft saved.
+    const suiteChanged = ['connect', 'review'].includes(writeLock.settledOperation);
+    const version = suiteChanged ? ++epoch.current : epoch.current;
+    if (suiteChanged) setReadiness(null);
+    void onUpdated()
+      .then(async (snapshot) => {
+        if (!active.current || version !== epoch.current || !snapshot) return;
+        if (!suiteChanged || settingsDirty || reviewDirty) return;
+        const connector = snapshot.project.connector;
+        if (connector?.kind !== 'pack' || connector.pack !== 'helpdesk') return;
+        // A view reopened during a write may have loaded its pre-write snapshot.
+        // With no edited draft in this view, adopt what was actually persisted.
+        setUrl(connector.baseUrl ?? 'http://127.0.0.1:12113/mcp');
+        setSafety(snapshot.project.safety);
+        const storedRules = snapshot.contract?.rules ?? [];
+        setRules(storedRules);
+        setCases(snapshot.benchmark?.cases ?? []);
+        setDecisions(decisionsOf(storedRules));
+        const status = await api.gateReadiness(project.id);
+        if (active.current && version === epoch.current) setReadiness(status);
+      })
+      .catch((error: Error) => {
+        if (active.current && version === epoch.current) setProblem(error.message);
+      });
+  }, [
+    writeLock.completed,
+    writeLock.operation,
+    writeLock.settledOperation,
+    onUpdated,
+    project.id,
+    settingsDirty,
+    reviewDirty,
+  ]);
+
   function invalidateSettings(): void {
     epoch.current++;
     setSettingsDirty(true);
@@ -110,6 +152,7 @@ export function HelpdeskFlow({
     setDecisions({});
     setBusy('');
     setProblem('');
+    setWriteNotice('');
     setEvidenceRevision((value) => value + 1);
   }
 
@@ -135,9 +178,11 @@ export function HelpdeskFlow({
 
   async function connect(): Promise<void> {
     if (!safety || !localTwinUrl(url)) return;
+    const finish = writeLock.begin('connect');
+    if (!finish) return;
     const version = ++epoch.current;
-    setBusy('connect');
     setProblem('');
+    setWriteNotice('');
     setReadiness(null);
     try {
       const connected = await api.connect(
@@ -158,16 +203,22 @@ export function HelpdeskFlow({
       onConnected(connected.project);
       const status = await api.gateReadiness(project.id);
       if (active.current && version === epoch.current) setReadiness(status);
-      if (active.current && version === epoch.current) await onUpdated();
     } catch (error) {
       if (active.current && version === epoch.current) setProblem((error as Error).message);
     } finally {
-      if (active.current && version === epoch.current) setBusy('');
+      if (active.current && version !== epoch.current) {
+        setWriteNotice(
+          'The previous connection write settled. Your edited settings are not saved; connect again to save them.',
+        );
+      }
+      finish();
     }
   }
 
   async function saveRules(): Promise<void> {
     if (pending.length > 0 || settingsDirty) return;
+    const finish = writeLock.begin('review');
+    if (!finish) return;
     const version = ++epoch.current;
     const confirmed = rules
       .filter((rule) => decisions[rule.id] === 'confirmed')
@@ -175,8 +226,8 @@ export function HelpdeskFlow({
     const rejected = rules
       .filter((rule) => decisions[rule.id] === 'rejected')
       .map((rule) => rule.id);
-    setBusy('review');
     setProblem('');
+    setWriteNotice('');
     setReadiness(null);
     try {
       // Suite construction and transport must use exactly the same confirmations.
@@ -194,11 +245,15 @@ export function HelpdeskFlow({
       setEvidenceRevision((value) => value + 1);
       const status = await api.gateReadiness(project.id);
       if (active.current && version === epoch.current) setReadiness(status);
-      if (active.current && version === epoch.current) await onUpdated();
     } catch (error) {
       if (active.current && version === epoch.current) setProblem((error as Error).message);
     } finally {
-      if (active.current && version === epoch.current) setBusy('');
+      if (active.current && version !== epoch.current) {
+        setWriteNotice(
+          'The previous suite write settled. Your edited decisions are not saved; save them again.',
+        );
+      }
+      finish();
     }
   }
 
@@ -211,6 +266,17 @@ export function HelpdeskFlow({
           checked scenarios and observable state, not everything an agent could do.
         </p>
       </header>
+      {writeLock.operation ? (
+        <p className="text-meta text-muted" role="status" data-testid="pack-operation">
+          A project operation is in progress. You can edit drafts, but wait before saving or running
+          again.
+        </p>
+      ) : null}
+      {writeNotice ? (
+        <p className="text-meta text-muted" role="status">
+          {writeNotice}
+        </p>
+      ) : null}
       <Panel padded>
         <div className="flex max-w-2xl flex-col gap-4">
           <SectionLabel>1. Connect the twin</SectionLabel>
@@ -269,10 +335,10 @@ export function HelpdeskFlow({
           <div>
             <Button
               onClick={connect}
-              disabled={busy !== '' || !safety || !localTwinUrl(url)}
+              disabled={!!writeLock.operation || busy !== '' || !safety || !localTwinUrl(url)}
               testId="pack-connect"
             >
-              {busy === 'connect' ? 'Connecting…' : 'Connect twin and draft rules'}
+              {writeLock.operation === 'connect' ? 'Connecting…' : 'Connect twin and draft rules'}
             </Button>
           </div>
         </div>
@@ -301,6 +367,7 @@ export function HelpdeskFlow({
                       setReviewDirty(true);
                       setReadiness(null);
                       setBusy('');
+                      setWriteNotice('');
                       setEvidenceRevision((current) => current + 1);
                     }}
                     testId={`pack-decision-${rule.id}`}
@@ -319,10 +386,12 @@ export function HelpdeskFlow({
             <div>
               <Button
                 onClick={saveRules}
-                disabled={busy !== '' || pending.length > 0}
+                disabled={!!writeLock.operation || busy !== '' || pending.length > 0}
                 testId="pack-save-rules"
               >
-                {busy === 'review' ? 'Saving decisions…' : 'Save decisions and install suite'}
+                {writeLock.operation === 'review'
+                  ? 'Saving decisions…'
+                  : 'Save decisions and install suite'}
               </Button>
             </div>
           </div>
@@ -354,7 +423,7 @@ export function HelpdeskFlow({
               <Button
                 variant="secondary"
                 onClick={() => void checkReadiness()}
-                disabled={busy !== ''}
+                disabled={!!writeLock.operation || busy !== ''}
                 testId="pack-check-readiness"
               >
                 {busy === 'readiness' ? 'Checking…' : 'Check readiness'}
@@ -370,6 +439,7 @@ export function HelpdeskFlow({
             project={project}
             onConnected={onConnected}
             onDraftChanged={() => setEvidenceRevision((value) => value + 1)}
+            writeLock={writeLock}
           />
           <SectionLabel>4. Run and inspect the evidence</SectionLabel>
           <RunAndVerdict
@@ -378,6 +448,7 @@ export function HelpdeskFlow({
             activation={activation}
             beforeRun={checkReadiness}
             onRan={() => void onUpdated()}
+            writeLock={writeLock}
           />
         </>
       ) : null}

@@ -73,7 +73,11 @@ async function launch(args: string[], ready: RegExp): Promise<string> {
   });
 }
 
-async function control(mcpUrl: string, failProbe = false): Promise<string> {
+async function control(
+  mcpUrl: string,
+  failProbe = false,
+  beforeWork?: () => Promise<void>,
+): Promise<string> {
   const server = createServer((request, response) => {
     void (async () => {
       let body = '';
@@ -86,6 +90,7 @@ async function control(mcpUrl: string, failProbe = false): Promise<string> {
           .end(JSON.stringify({ ok: !failProbe }));
         return;
       }
+      await beforeWork?.();
       const task = envelope['task'] as { inputs: Record<string, string> };
       const input = task.inputs;
       const message = input['message'] ?? '';
@@ -340,6 +345,278 @@ test('failed probe and pending or changed twin block run without reusing evidenc
   await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
   await expect(page.getByTestId('add-agent')).toHaveCount(0);
   await expect(page.getByTestId('verdict')).toHaveCount(0);
+});
+
+test('a held connect keeps the project write locked across URL and safety edits', async ({
+  page,
+}) => {
+  const id = await create(page);
+  const firstUrl = 'http://127.0.0.1:12001/mcp';
+  const secondUrl = 'http://127.0.0.1:12002/mcp';
+  let release!: () => void;
+  let captured!: () => void;
+  let completed!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const firstCaptured = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  const firstCompleted = new Promise<void>((resolve) => {
+    completed = resolve;
+  });
+  const requests: string[] = [];
+  await page.route(`**/api/projects/${id}/environment`, async (route) => {
+    requests.push(route.request().postDataJSON().connector.baseUrl);
+    if (requests.length === 1) {
+      captured();
+      await held; // Hold before the real daemon dispatch, not after its write.
+    }
+    const response = await route.fetch();
+    await route.fulfill({ response });
+    if (route.request().postDataJSON().connector.baseUrl === firstUrl) completed();
+  });
+  await page.getByTestId('pack-url').fill(firstUrl);
+  await page.getByTestId('pack-safety').selectOption('ephemeral');
+  await page.getByTestId('pack-connect').click();
+  await firstCaptured;
+  try {
+    await page.getByTestId('pack-url').fill(secondUrl);
+    await page.getByTestId('pack-safety').selectOption('local');
+    const locked = await page.getByTestId('pack-connect').isDisabled();
+    await expect.soft(page.getByTestId('pack-connect')).toBeDisabled();
+    await page.getByTestId('pack-connect').evaluate((button: HTMLButtonElement) => button.click());
+    if (!locked) {
+      // On RED, capture the actual newer daemon write before releasing the old one.
+      await expect
+        .poll(
+          async () =>
+            JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+              ?.baseUrl,
+        )
+        .toBe(secondUrl);
+    }
+    await page.screenshot({ path: join(scratch, 'connect-edited-in-flight.png') });
+  } finally {
+    release();
+  }
+  await firstCompleted;
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+          ?.baseUrl,
+    )
+    .toBe(firstUrl);
+  expect.soft(requests).toEqual([firstUrl]);
+  await expect(page.getByTestId('pack-connect')).toBeEnabled();
+  await expect(page.getByTestId('pack-url')).toHaveValue(secondUrl);
+  await expect(page.getByTestId('pack-safety')).toHaveValue('local');
+  await expect(page.getByTestId('pack-rules')).toHaveCount(0);
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'not saved' })).toBeVisible();
+  await page.screenshot({ path: join(scratch, 'connect-unsaved-after-settle.png') });
+  // The edited draft is still unsaved. Its explicit retry is now the only writer.
+  await page.getByTestId('pack-connect').click();
+  await expect(page.getByTestId('pack-rules')).toBeVisible();
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+          ?.baseUrl,
+    )
+    .toBe(secondUrl);
+  await page.reload();
+  await expect(page.getByTestId('pack-url')).toHaveValue(secondUrl);
+  await expect(page.getByTestId('pack-safety')).toHaveValue('local');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+});
+
+test('a held suite save keeps the project write locked across rule edits', async ({ page }) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  let release!: () => void;
+  let captured!: () => void;
+  let completed!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const firstCaptured = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  const firstCompleted = new Promise<void>((resolve) => {
+    completed = resolve;
+  });
+  const requests: string[][] = [];
+  let secondCompleted!: () => void;
+  const secondWriteCompleted = new Promise<void>((resolve) => {
+    secondCompleted = resolve;
+  });
+  await page.route(`**/api/projects/${id}/pack-suite`, async (route) => {
+    requests.push(route.request().postDataJSON().rejectedRuleIds);
+    const first = requests.length === 1;
+    if (first) {
+      captured();
+      await held; // Both installations remain real service operations.
+    }
+    const response = await route.fetch();
+    await route.fulfill({ response });
+    if (first) completed();
+    else secondCompleted();
+  });
+  const decision = page.getByTestId('pack-decision-helpdesk.no_deletion');
+  await decision.selectOption('rejected');
+  await page.getByTestId('pack-save-rules').click();
+  await firstCaptured;
+  try {
+    await decision.selectOption('confirmed');
+    const locked = await page.getByTestId('pack-save-rules').isDisabled();
+    await expect.soft(page.getByTestId('pack-save-rules')).toBeDisabled();
+    await page
+      .getByTestId('pack-save-rules')
+      .evaluate((button: HTMLButtonElement) => button.click());
+    if (!locked) await secondWriteCompleted;
+    await page.screenshot({ path: join(scratch, 'suite-edited-in-flight.png') });
+  } finally {
+    release();
+  }
+  await firstCompleted;
+  expect.soft(requests).toEqual([['helpdesk.no_deletion']]);
+  await expect(page.getByTestId('pack-save-rules')).toBeEnabled();
+  await expect(decision).toHaveValue('confirmed');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  await expect(page.getByTestId('add-agent')).toHaveCount(0);
+  const persistedDecision = await page.evaluate(async (projectId) => {
+    const response = await fetch(`/api/projects/${projectId}`);
+    const snapshot = await response.json();
+    return snapshot.contract.rules.find(
+      (rule: { id: string }) => rule.id === 'helpdesk.no_deletion',
+    ).status;
+  }, id);
+  expect(persistedDecision).toBe('rejected');
+  await expect(page.getByRole('status').filter({ hasText: 'not saved' })).toBeVisible();
+  await page.screenshot({ path: join(scratch, 'suite-unsaved-after-settle.png') });
+  await page.getByTestId('pack-save-rules').click();
+  await expect(page.getByTestId('pack-readiness')).toContainText('Ready for the checked suite');
+  await page.reload();
+  await expect(decision).toHaveValue('confirmed');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Ready for the checked suite');
+});
+
+test('a held connect reconciles the saved snapshot after navigating back', async ({ page }) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  const nextUrl = 'http://127.0.0.1:12003/mcp';
+  let release!: () => void;
+  let captured!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const firstCaptured = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  let writes = 0;
+  await page.route(`**/api/projects/${id}/environment`, async (route) => {
+    writes++;
+    captured();
+    await held;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+  await page.getByTestId('pack-url').fill(nextUrl);
+  await page.getByTestId('pack-connect').click();
+  await firstCaptured;
+  try {
+    await page.getByRole('button', { name: 'All projects', exact: false }).click();
+    await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+    await page.getByTestId(`open-${id}`).click();
+    await expect(page.getByTestId('pack-url')).toHaveValue(twinUrl);
+    await expect(page.getByTestId('pack-connect')).toBeDisabled();
+  } finally {
+    release();
+  }
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+          ?.baseUrl,
+    )
+    .toBe(nextUrl);
+  await expect(page.getByTestId('pack-connect')).toBeEnabled();
+  await expect(page.getByTestId('pack-url')).toHaveValue(nextUrl);
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  expect(writes).toBe(1);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: join(scratch, 'connect-return-after-settle.png') });
+  await page.reload();
+  await expect(page.getByTestId('pack-url')).toHaveValue(nextUrl);
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+});
+
+test('a held candidate run keeps the project locked across evidence remount and navigation', async ({
+  page,
+}) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  let release!: () => void;
+  let candidateCalled!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const candidateStarted = new Promise<void>((resolve) => {
+    candidateCalled = resolve;
+  });
+  let blockedCalls = 0;
+  const heldAgentUrl = await control(twinUrl, false, async () => {
+    blockedCalls++;
+    candidateCalled();
+    await held;
+  });
+  await addAgent(page, heldAgentUrl, 'Held HTTP control');
+  await expect(page.getByText('answering', { exact: true })).toBeVisible();
+  const runButton = page.locator('[data-testid^="run-"]');
+  await runButton.click();
+  await candidateStarted;
+  try {
+    await page.getByTestId('blackbox-endpoint').fill(badUrl);
+    const locked = await runButton.isDisabled();
+    await expect.soft(runButton).toBeDisabled();
+    await expect.soft(page.getByTestId('pack-connect')).toBeDisabled();
+    await expect.soft(page.getByTestId('pack-save-rules')).toBeDisabled();
+    await expect.soft(page.getByTestId('add-agent')).toBeDisabled();
+    await runButton.evaluate((button: HTMLButtonElement) => button.click());
+    if (!locked) await expect.poll(() => blockedCalls).toBe(2);
+    await runButton.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: join(scratch, 'run-edited-in-flight.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await runButton.scrollIntoViewIfNeeded();
+    await expectNoOverflow(page);
+    await page.screenshot({ path: join(scratch, 'run-edited-in-flight-mobile.png') });
+    await page.getByRole('button', { name: 'All projects', exact: false }).click();
+    await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+    await page.getByTestId(`open-${id}`).click();
+    await expect(runButton).toHaveCount(1);
+    await expect.soft(runButton).toBeDisabled();
+    expect.soft(blockedCalls).toBe(1);
+    await expect(page.getByTestId('verdict')).toHaveCount(0);
+    await runButton.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: join(scratch, 'run-return-in-flight.png') });
+  } finally {
+    release();
+  }
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).runs.length,
+    )
+    .toBe(1);
+  await expect(runButton).toBeEnabled();
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await expect(page.getByTestId('pack-history').locator('li')).toHaveCount(1);
+  await page.screenshot({ path: join(scratch, 'run-after-settle.png') });
 });
 
 test('late readiness or probe cannot publish after URL or project switching', async ({ page }) => {
