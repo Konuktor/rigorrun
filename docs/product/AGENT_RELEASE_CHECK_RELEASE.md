@@ -22,6 +22,7 @@ Logs are retained under `/tmp/rigorrun-release-audit-i3emcZ` on this machine.
 | Installed Helpdesk browser onboarding | PASS | 12 tests, `installed-browser-0.6.1.log`. |
 | Real demo source capture | PASS | `/tmp/rigorrun-media-9w96XW/videos/rigorrun-release-check/capture/receipt.json`: real installed UI, six explicitly reviewed rules, scoped PASS, overbroad FAIL, reload and repeat; zero captured browser errors. Real CLI gate exits 0 and 1 verified separately after stopping the daemon. |
 | Full release run on `b03a3cb3` | FAIL | All gates except E2E passed. E2E: 82 passed, one failed before reaching its rule assertions because Vite could not fetch the lazy DemoPage module. Retained `release-verify-b03a3cb3.log`; no automatic retry or test weakening. Investigate repeatability, then require a new full green run. |
+| Focused failed-E2E diagnostic | PASS, not a substitute for full E2E | Ten repetitions, zero retries, all passed; traces retained under `rejected-rule-diagnostic/`. The observed dev-module fetch failure did not recur. No test assertion or runtime code changed to hide it. |
 | Frozen full release rerun after review fixes | Pending | Must pass before publication. |
 | Fresh `pnpm verify:package` | Pending | Includes package budget, clean install, SBOM and dependency advisories. |
 | Independent release review | Fixes requested | No critical issue; first-run documentation omitted two required persistence buttons. Corrected guide/quickstart, synchronized the home-page action pin and repository CI exit-3 wording. Follow-up review pending. |
