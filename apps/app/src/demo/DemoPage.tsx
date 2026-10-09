@@ -15,7 +15,8 @@ import { VerdictStep } from './verdict.tsx';
 import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 
 export function DemoPage() {
-  const { state, setStep, compile, toggleRule, approveAndGenerate, run, reset } = useDemo();
+  const { state, setStep, compile, toggleRule, confirmAll, approveAndGenerate, run, reset } =
+    useDemo();
   const reached = reachedSteps(state);
   const currentIndex = STEPS.indexOf(state.step);
 
@@ -25,7 +26,7 @@ export function DemoPage() {
         current={state.step}
         reached={reached}
         onSelect={setStep}
-        disabled={state.running}
+        disabled={state.running || state.hydrating}
       />
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_13rem]">
@@ -77,9 +78,9 @@ export function DemoPage() {
       <footer className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-meta text-muted">
         <Tag>Offline</Tag>
         <span className="min-w-[16rem] flex-1">
-          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend and
-          no API key — the same packages power the CLI and CI. The application, its customers and
-          its orders are invented.
+          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend and no
+          API key — the same packages power the CLI and CI. The application, its customers and its
+          orders are invented.
         </span>
       </footer>
     </div>
@@ -98,12 +99,7 @@ export function DemoPage() {
 
     if (state.step === 'learned') {
       if (!state.draftContract) return <Hydrating step="learned" />;
-      return (
-        <LearnedStep
-          contract={state.draftContract}
-          onContinue={() => setStep('confirm')}
-        />
-      );
+      return <LearnedStep contract={state.draftContract} onContinue={() => setStep('confirm')} />;
     }
 
     if (state.step === 'confirm') {
@@ -114,6 +110,7 @@ export function DemoPage() {
           rejected={state.rejected}
           confirmed={state.confirmed}
           onDecide={toggleRule}
+          onConfirmAll={confirmAll}
           onApprove={() => void approveAndGenerate()}
         />
       );

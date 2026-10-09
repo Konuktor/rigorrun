@@ -309,19 +309,25 @@ export function ContractStep({
   rejected,
   confirmed,
   onDecide,
+  onConfirmAll,
   onApprove,
 }: {
   contract: EnvironmentContract;
   rejected: Set<string>;
   confirmed: Set<string>;
   onDecide: (ruleId: string, decision: 'confirm' | 'reject') => void;
+  onConfirmAll: () => void;
   onApprove: () => void;
 }) {
   const rules = contract.rules;
-  const enforced = rules.filter((rule) => !rejected.has(rule.id)).length;
-  const answered = rules.filter(
+  const proposed = rules.filter((rule) => rule.status === 'inferred');
+  const enforced = rules.filter(
+    (rule) => rule.status === 'observed' || rule.status === 'confirmed' || confirmed.has(rule.id),
+  ).length;
+  const answered = proposed.filter(
     (rule) => rejected.has(rule.id) || confirmed.has(rule.id),
   ).length;
+  const pending = proposed.length - answered;
 
   return (
     <div className="space-y-4">
@@ -334,29 +340,49 @@ export function ContractStep({
         <SummaryStat label="Answered" value={answered} tone="pass" />
         <SummaryStat label="Said no to" value={rejected.size} />
         <SummaryStat label="Will be enforced" value={enforced} tone="warn" />
+        <SummaryStat label="Pending" value={pending} tone="warn" />
         <div className="min-w-[14rem] flex-1 self-center text-meta text-muted">
-          You can continue at any point. Anything you have not answered is treated as a yes.
+          Decide each proposed rule before continuing. Observed facts do not need a new decision.
         </div>
       </div>
 
-      <Panel title="Your rules" subtitle="Plain questions. No eval vocabulary, and no wrong answer.">
+      <Panel
+        title="Your rules"
+        subtitle="Plain questions. No eval vocabulary, and no wrong answer."
+      >
         <ul>
-          {rules.map((rule) => (
-            <InferredRule
-              key={rule.id}
-              rule={rule}
-              rejected={rejected.has(rule.id)}
-              confirmed={confirmed.has(rule.id)}
-              onDecide={onDecide}
-            />
-          ))}
+          {rules.map((rule) =>
+            rule.status === 'inferred' ? (
+              <InferredRule
+                key={rule.id}
+                rule={rule}
+                rejected={rejected.has(rule.id)}
+                confirmed={confirmed.has(rule.id)}
+                onDecide={onDecide}
+              />
+            ) : (
+              <li key={rule.id} className="border-b border-line-soft px-4 py-3.5 last:border-0">
+                <Tag tone="pass">{rule.status}</Tag>
+                <p className="mt-1 text-body">{rule.statement}</p>
+              </li>
+            ),
+          )}
         </ul>
       </Panel>
+
+      <Button
+        variant="secondary"
+        onClick={onConfirmAll}
+        disabled={pending === 0}
+        testId="confirm-all-rules"
+      >
+        Confirm all proposed rules
+      </Button>
 
       <NextBar
         note={`${enforced} rules will be enforced. ${rejected.size > 0 ? `${rejected.size} rule${rejected.size === 1 ? '' : 's'} you said no to will generate no checks.` : 'Say no to anything you disagree with before continuing.'}`}
         button={
-          <Button onClick={onApprove} testId="step-generate" size="lg">
+          <Button onClick={onApprove} disabled={pending > 0} testId="step-generate" size="lg">
             Stress-test the job →
           </Button>
         }
@@ -486,7 +512,9 @@ function InferredRule({
         <span className="text-meta text-muted">
           {rejected
             ? 'Not your policy — no agent will be failed for it.'
-            : 'Part of your policy — an agent that breaks it will fail.'}
+            : confirmed
+              ? 'Part of your policy — an agent that breaks it will fail.'
+              : 'Undecided — no policy check is approved yet.'}
         </span>
       </div>
     </li>

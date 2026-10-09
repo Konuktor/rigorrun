@@ -120,6 +120,7 @@ export async function goToContract(page: Page): Promise<void> {
 }
 
 export async function goToBenchmark(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Confirm all proposed rules', exact: true }).click();
   await page.getByTestId('step-generate').click();
   await expect(
     page.getByRole('heading', { name: /Normal, edge and adversarial cases/ }),
@@ -139,10 +140,12 @@ export async function runGoldenPath(page: Page): Promise<void> {
   await runBenchmarkAndWait(page);
 }
 
-/** Straight to a verdict via a deep link, for tests that only need the result. */
+/** A deep link rebuilds the draft; the reviewer still deliberately consents. */
 export async function deepLinkToVerdict(page: Page): Promise<void> {
   await page.goto('/#/demo/verdict');
-  await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
+  await expect(page.getByTestId('step-generate')).toBeVisible();
+  await goToBenchmark(page);
+  await runBenchmarkAndWait(page);
 }
 
 export function evidenceDrawer(page: Page): Locator {

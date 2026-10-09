@@ -67,9 +67,7 @@ test.describe('golden path', () => {
     await goToLearned(page);
 
     await expect(page.getByRole('heading', { name: /What RigorRun saw/ })).toBeVisible();
-    await expect(
-      page.getByRole('heading', { name: /What RigorRun is guessing/ }),
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: /What RigorRun is guessing/ })).toBeVisible();
     // Reading is not deciding: no answer can be given on this screen.
     await expect(page.locator('[data-testid^="rule-confirm-"]')).toHaveCount(0);
     await expect(page.getByText(/above \$50/).first()).toBeVisible();
@@ -303,12 +301,16 @@ test.describe('reports', () => {
 
 test.describe('routing', () => {
   for (const step of ['record', 'learned', 'confirm', 'benchmark', 'verdict']) {
-    test(`deep link to #/demo/${step} rebuilds that step`, async ({ page }) => {
+    test(`deep link to #/demo/${step} rebuilds only without implicit approval`, async ({
+      page,
+    }) => {
       const watchers = watchPage(page);
       await page.goto(`/#/demo/${step}`);
-      await expect(page.getByTestId(`nav-${step}`)).toHaveAttribute('aria-current', 'step', {
-        timeout: 90_000,
+      const safeStep = ['benchmark', 'verdict'].includes(step) ? 'confirm' : step;
+      await expect(page.getByTestId(`nav-${safeStep}`)).toHaveAttribute('aria-current', 'step', {
+        timeout: 10_000,
       });
+      if (safeStep === 'confirm') await expect(page.getByTestId('step-generate')).toBeDisabled();
       expectClean(watchers);
     });
   }
@@ -329,11 +331,14 @@ test.describe('routing', () => {
     ).toBeVisible();
   });
 
-  test('refreshing the verdict re-runs it rather than stranding the user', async ({ page }) => {
+  test('refreshing the verdict returns to review without inventing stored consent', async ({
+    page,
+  }) => {
     await runGoldenPath(page);
     await page.reload();
-    await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByTestId('verdict')).toContainText(/wins|No agent met the release thresholds/);
+    await expect(page.getByTestId('nav-confirm')).toHaveAttribute('aria-current', 'step');
+    await expect(page.getByTestId('step-generate')).toBeDisabled();
+    await expect(page.getByTestId('verdict')).toHaveCount(0);
   });
 
   test('an unknown hash falls back to the projects list without erroring', async ({ page }) => {

@@ -279,6 +279,7 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // ------------------------------------------------------ 6. rule, then build
   await page.getByTestId('compile').click();
+  await page.getByRole('button', { name: 'Confirm all proposed rules', exact: true }).click();
   await expect(page.getByText('Guesses, every one.')).toBeVisible();
   await page.getByTestId('generate').click();
 
