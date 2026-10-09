@@ -309,6 +309,7 @@ try {
       const result = JSON.parse(gate.stdout);
       assert.equal(result.passed, mode === 'scoped');
       const run = await latestRun(mode);
+      assert.equal(run.scores[0].thresholdsPassed, result.passed, 'Stored and CLI verdicts agree.');
       await writeFile(join(artifact, `${mode}.json`), JSON.stringify(run, null, 2));
       assert.ok(run.caseResults.every((entry) => entry.observation === 'state-only'));
       if (mode === 'scoped') {
@@ -385,6 +386,18 @@ try {
           /Passing cases|Passed cases|PASS details|Passing checks/i.test(html),
           'The allowed control HTML must expose passing case evidence.',
         );
+      else {
+        assert.ok(
+          html.includes('Failures &amp; evidence'),
+          'Defect HTML contains failure evidence.',
+        );
+        const failed = run.caseResults.flatMap((entry) =>
+          entry.assertions.filter((assertion) => assertion.status === 'FAIL'),
+        );
+        assert.ok(failed.length > 0, 'Every defect control fails an observed assertion.');
+        for (const assertion of failed)
+          assert.ok(html.includes(assertion.assertionId), 'HTML retains the failed assertion ID.');
+      }
     });
   }
   await check('invalid agent configuration exits 2 before candidate tasks', async () => {
