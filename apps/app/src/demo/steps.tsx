@@ -22,13 +22,6 @@ import {
 } from '../components/primitives.tsx';
 import type { DemoState, RunPhase } from './useDemo.ts';
 
-/**
- * Where the recorded application lives. Local by default; the deployed build
- * points at the hosted copy of Northstar Support so a reviewer with no local
- * setup can still open it.
- */
-const CRM_URL = import.meta.env['VITE_CRM_URL'] ?? 'http://127.0.0.1:5174';
-
 /* ------------------------------------------------------------------ shared */
 
 export function StepHeader({
@@ -95,10 +88,12 @@ function NextBar({ note, button }: { note: string; button: ReactNode }) {
 export function RecordStep({
   trace,
   environmentName,
+  demoAppUrl,
   onCompile,
 }: {
   trace: CanonicalHumanTrace | null;
   environmentName: string;
+  demoAppUrl: string;
   onCompile: () => void;
 }) {
   if (!trace) {
@@ -122,10 +117,10 @@ export function RecordStep({
     <div className="space-y-4">
       <StepHeader
         title="A person did the job once"
-        lede={`This is what RigorRun captured while somebody worked in ${environmentName}, a synthetic application built for this example: what they did, and what the system looked like before and after. It records the meaning of each step, not the page.`}
+        lede={`A bundled demonstration is replayed against ${environmentName}, a synthetic application built for this example. RigorRun reads the system before and after the replay. This is not a recording of edits you make in the separate demo app.`}
         action={
           <a
-            href={CRM_URL}
+            href={demoAppUrl}
             target="_blank"
             rel="noreferrer"
             className="inline-flex h-9 items-center rounded-control border border-line px-3 text-secondary hover:border-line-strong hover:text-fg"

@@ -2,7 +2,10 @@
  * The demo shell: step progress, the current step's screen, and the CLI
  * equivalent of whatever the user is looking at.
  */
-import { STEPS, STEP_META, reachedSteps, useDemo, type Step } from './useDemo.ts';
+import { useEffect, useState } from 'react';
+import { STEPS, STEP_META, WORKFLOWS, reachedSteps, useDemo, type Step } from './useDemo.ts';
+import { DEMO_WORKFLOW_KEYS, demoHash, demoRoute } from './route.ts';
+import { Field, Select } from '../product/inputs.tsx';
 import {
   BenchmarkStep,
   ContractStep,
@@ -15,13 +18,53 @@ import { VerdictStep } from './verdict.tsx';
 import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 
 export function DemoPage() {
+  const [route, setRoute] = useState(() => demoRoute(window.location.hash));
+  useEffect(() => {
+    const onHashChange = () => {
+      const next = demoRoute(window.location.hash);
+      setRoute(next);
+      const canonical = demoHash(next.workflowKey, next.step);
+      if (window.location.hash !== canonical) window.history.replaceState(null, '', canonical);
+    };
+    onHashChange();
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  return <WorkflowDemo key={route.workflowKey} workflowKey={route.workflowKey} />;
+}
+
+/** A changed URL key discards the previous example's hook state and artifacts. */
+function WorkflowDemo({ workflowKey }: { workflowKey: string }) {
   const { state, setStep, compile, toggleRule, confirmAll, approveAndGenerate, run, reset } =
-    useDemo();
+    useDemo(workflowKey);
   const reached = reachedSteps(state);
   const currentIndex = STEPS.indexOf(state.step);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-6">
+      <div className="mb-5 grid gap-3 sm:grid-cols-[minmax(12rem,18rem)_1fr] sm:items-end">
+        <fieldset disabled={state.running || state.hydrating}>
+          <Field label="Example workflow">
+            {({ id }) => (
+              <Select
+                id={id}
+                value={workflowKey}
+                onChange={(key) => {
+                  window.location.hash = demoHash(key, 'record');
+                }}
+                options={WORKFLOWS.filter((workflow) =>
+                  (DEMO_WORKFLOW_KEYS as readonly string[]).includes(workflow.key),
+                ).map((workflow) => ({ value: workflow.key, label: workflow.title }))}
+                testId="workflow-selector"
+              />
+            )}
+          </Field>
+        </fieldset>
+        <p className="text-meta text-muted">
+          Synthetic data · scripted agents · executed locally · not a qualified release suite
+        </p>
+      </div>
       <StepProgress
         current={state.step}
         reached={reached}
@@ -92,6 +135,11 @@ export function DemoPage() {
         <RecordStep
           trace={state.trace}
           environmentName={state.workflow.registration.name}
+          demoAppUrl={
+            state.workflow.key === 'refund'
+              ? (import.meta.env['VITE_CRM_URL'] ?? 'http://127.0.0.1:5174')
+              : `${import.meta.env['VITE_OPS_URL'] ?? 'http://127.0.0.1:5175'}/#/${state.workflow.registration.id}`
+          }
           onCompile={() => void compile()}
         />
       );

@@ -29,6 +29,7 @@ import {
   type WorkflowDefinition,
 } from '@rigorrun/environments';
 import { induceContract } from '@rigorrun/compiler';
+import { demoHash, demoRoute } from './route.ts';
 
 export const STEPS = ['record', 'learned', 'confirm', 'benchmark', 'run', 'verdict'] as const;
 export type Step = (typeof STEPS)[number];
@@ -123,9 +124,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export function stepFromHash(hash: string): Step | null {
-  const match = /^#\/demo\/([a-z]+)/.exec(hash);
-  const candidate = match?.[1];
-  return candidate && (STEPS as readonly string[]).includes(candidate) ? (candidate as Step) : null;
+  return hash.startsWith('#/demo') ? demoRoute(hash).step : null;
 }
 
 export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
@@ -154,14 +153,25 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  const setStep = useCallback((step: Step, replace = false) => {
-    const target = `#/demo/${step}${window.location.hash.includes('?') ? `?${window.location.hash.split('?')[1]}` : ''}`;
-    if (window.location.hash !== target) {
-      if (replace) window.history.replaceState(null, '', target);
-      else window.location.hash = target;
-    }
-    setState((prev) => ({ ...prev, step }));
-  }, []);
+  const setStep = useCallback(
+    (step: Step, replace = false) => {
+      const target = demoHash(workflowKey, step);
+      if (window.location.hash !== target) {
+        if (replace) window.history.replaceState(null, '', target);
+        else window.location.hash = target;
+      }
+      setState((prev) => ({ ...prev, step }));
+    },
+    [workflowKey],
+  );
+
+  // Invalidate async work from an example as soon as its keyed child unmounts.
+  useEffect(
+    () => () => {
+      runToken.current += 1;
+    },
+    [],
+  );
 
   /** Replays the recording to capture authoritative state either side of it. */
   const buildTrace = useCallback(
@@ -188,7 +198,10 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         workflow.registration.create(),
         contract,
         [fixtureFor(workflow, workflow.fixtureId)],
-        { benchmarkId: `bm_${workflow.key}` },
+        {
+          benchmarkId: `bm_${workflow.key}`,
+          name: `${workflow.title} — synthetic data · scripted agents · executed locally · not a qualified release suite`,
+        },
       );
       return { contract, benchmark: generation.benchmark };
     },
@@ -264,6 +277,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   /* ------------------------------------------------------------- actions */
 
   const compile = useCallback(async () => {
+    const token = runToken.current;
     const current = stateRef.current;
     if (current.draftContract) {
       setStep('learned');
@@ -272,6 +286,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     setState((prev) => ({ ...prev, hydrating: true }));
     try {
       const recorded = current.trace ?? (await buildTrace());
+      if (runToken.current !== token) return;
       setState((prev) => ({
         ...prev,
         trace: recorded,
@@ -280,6 +295,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
       }));
       setStep('learned');
     } catch (error) {
+      if (runToken.current !== token) return;
       setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
     }
   }, [buildContract, buildTrace, setStep]);
@@ -327,6 +343,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   }, []);
 
   const approveAndGenerate = useCallback(async () => {
+    const token = runToken.current;
     const current = stateRef.current;
     if (current.hydrating || !current.draftContract) return;
     if (
@@ -347,6 +364,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         current.confirmed,
         current.rejected,
       );
+      if (runToken.current !== token) return;
       setState((prev) => ({
         ...prev,
         trace: recorded,
@@ -360,6 +378,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
       }));
       setStep('benchmark');
     } catch (error) {
+      if (runToken.current !== token) return;
       setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
     }
   }, [buildBenchmark, buildContract, buildTrace, setStep]);
@@ -434,9 +453,8 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     return () => {
       cancelled = true;
     };
-    // Intentionally mount-only: later navigation is driven by the actions
-    // above, and the callbacks it closes over are stable.
-  }, [buildContract, buildTrace, setStep]);
+    // A manually changed URL can request a step whose draft does not yet exist.
+  }, [buildContract, buildTrace, setStep, state.step]);
 
   /**
    * The recording is replayed as soon as the page opens.
@@ -459,13 +477,14 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     return () => {
       cancelled = true;
     };
-  }, [buildTrace]);
+  }, [buildTrace, state.trace]);
 
   /** Back and forward move between steps without discarding anything. */
   useEffect(() => {
     const onHashChange = () => {
       const target = stepFromHash(window.location.hash);
       if (!target) return;
+      if (demoRoute(window.location.hash).workflowKey !== workflowKey) return;
       if (STEPS.indexOf(target) > STEPS.indexOf('confirm') && !stateRef.current.benchmark) {
         setStep('confirm', true);
         return;
@@ -474,7 +493,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, [setStep]);
+  }, [setStep, workflowKey]);
 
   return { state, setStep, compile, toggleRule, confirmAll, approveAndGenerate, run, reset };
 }
