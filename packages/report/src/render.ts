@@ -9,6 +9,7 @@
 import {
   caseOutcome,
   type AgentScore,
+  type AssertionResult,
   type Benchmark,
   type CaseResult,
   type RunResult,
@@ -56,7 +57,8 @@ ${caseMatrix(data)}
 ${permissionMatrix(data)}
 ${reliability(data)}
 ${failures(data, mode)}
-${contractSection(options.contract)}
+${passingCases(data, mode, options.benchmark)}
+${mode === 'full' ? contractSection(options.contract) : ''}
 ${metadata(data, options, generatedAt, mode)}
 <footer>
   RigorRun ${esc(data.rigorrunVersion)} · Permission and scope tests for AI agents.${
@@ -294,6 +296,99 @@ function failures(run: RunResult, mode: string): string {
 ${failed.map((result) => failureCard(result, run, mode)).join('')}`;
 }
 
+function passingCases(run: RunResult, mode: string, benchmark?: Benchmark): string {
+  const passed = run.caseResults.filter(
+    (result) => caseOutcome(result) === 'PASS' && result.taskSuccess && result.policyCompliant,
+  );
+  if (passed.length === 0) return '';
+  return `<h2>Passing cases &amp; evidence</h2>
+${passed
+  .map((result) => {
+    const agentName =
+      run.agents.find((agent) => agent.id === result.agentId)?.name ?? result.agentId;
+    const instruction =
+      mode === 'full'
+        ? benchmark?.cases.find((entry) => entry.id === result.caseId)?.task.instruction
+        : undefined;
+    return `<details class="passing">
+  <summary><span class="tag pass">PASS</span> <strong>${esc(result.caseName)}</strong>
+    <span class="dim mono">${esc(agentName)} · ${esc(result.caseId)} · attempt ${esc(String((result.attempt ?? 0) + 1))}</span>
+  </summary>
+  <div class="body">
+    <h3>Task</h3>
+    <p>${mode === 'published' ? '(withheld from the published report)' : esc(instruction ?? result.caseName)}</p>
+    ${checkSummary(result)}
+    ${claimVersusReality(result)}
+    ${result.outcomeReason ? `<p class="mono dim">${esc(result.outcomeReason)}</p>` : ''}
+    ${result.readScope ? `<p class="mono dim">Read: ${esc(result.readScope)}</p>` : ''}
+    ${result.missingEvidence.length > 0 ? `<p class="mono dim">Missing evidence: ${result.missingEvidence.map(esc).join(', ')}</p>` : ''}
+    <p class="mono dim">Evidence: ${esc(explainCase(result).evidence || 'source not recorded')}</p>
+    <h3>Recorded environment actions</h3>
+    ${result.observation === 'state-only' ? '<p class="dim">Internal calls and reasoning were not observed.</p>' : ''}
+    ${result.actions.length > 0 ? `<ol class="timeline">${timeline(result)}</ol>` : '<p class="dim">No environment actions were recorded.</p>'}
+    ${mode === 'full' ? observedState(result) : ''}
+    <h3 style="margin-top:16px">Checked assertions</h3>
+    ${assertionTable(result.assertions, mode)}
+    <p class="dim">PASS covers the checked assertions and observed scope of this case.</p>
+  </div>
+</details>`;
+  })
+  .join('')}`;
+}
+
+function observedState(result: CaseResult): string {
+  const entries = Object.entries(result.finalStateSummary);
+  return `<h3 style="margin-top:12px">Observed final state</h3>
+    <p class="dim">The run supplies a bounded state summary; read scope is shown above.</p>
+    ${
+      entries.length > 0
+        ? entries
+            .map(([entity, summary]) => `<h3>${esc(entity)}</h3><pre>${escJson(summary)}</pre>`)
+            .join('')
+        : '<p class="dim">No final state summary was recorded.</p>'
+    }`;
+}
+
+/** Count only checks that were made; a stored compliance flag cannot fill a missing read. */
+function checkSummary(result: CaseResult): string {
+  return `<p class="mono">${(['success', 'policy'] as const)
+    .map((group) => {
+      const checks = result.assertions.filter((assertion) =>
+        group === 'success' ? assertion.severity === 'success' : assertion.severity !== 'success',
+      );
+      const passed = checks.filter((assertion) => assertion.status === 'PASS').length;
+      const failed = checks.filter(
+        (assertion) => assertion.status === 'FAIL' || assertion.status === 'ERROR',
+      ).length;
+      const unknown = checks.filter((assertion) => assertion.status === 'UNVERIFIABLE').length;
+      const inapplicable = checks.filter((assertion) => assertion.status === 'INAPPLICABLE').length;
+      const label = group === 'success' ? 'Task success' : 'Policy compliance';
+      const counts = `${passed} passed · ${failed} failed · ${unknown} not checked`;
+      return `${label}: ${passed + failed === 0 && unknown > 0 ? `unknown · ${counts}` : counts}${inapplicable > 0 ? ` · ${inapplicable} inapplicable` : ''}`;
+    })
+    .join('<br>')}</p>`;
+}
+
+function assertionTable(assertions: AssertionResult[], mode: string): string {
+  return `<div class="checks"><table>
+    <thead><tr><th>Check</th><th>Purpose</th><th>Kind</th><th>Evaluator</th><th>Source</th><th>Observed</th><th>Expected</th><th>Status</th></tr></thead>
+    <tbody>${assertions
+      .map(
+        (assertion) => `<tr>
+      <td>${esc(assertion.description)}<div class="dim mono">${esc(assertion.assertionId)}</div>${assertion.message ? `<div class="dim">${esc(assertion.message)}</div>` : ''}</td>
+      <td>${assertion.severity === 'success' ? 'Task success' : 'Policy compliance'}</td>
+      <td class="mono dim">${esc(assertion.kind)}</td>
+      <td>${evaluatorTag(assertion.evaluator)}</td>
+      <td class="mono">${esc(assertion.verificationSource ?? 'not recorded')}</td>
+      <td class="mono">${mode === 'published' ? '<span class="dim">withheld</span>' : assertion.observed === undefined ? '<span class="dim">not recorded</span>' : escJson(assertion.observed)}</td>
+      <td class="mono">${mode === 'published' ? '<span class="dim">withheld</span>' : assertion.expected === undefined ? '<span class="dim">—</span>' : escJson(assertion.expected)}</td>
+      <td><span class="tag ${assertion.status === 'PASS' ? 'pass' : assertion.status === 'FAIL' ? 'fail' : 'error'}">${esc(assertion.status)}</span>${assertion.unsafe ? ' <span class="tag fail">unsafe</span>' : ''}</td>
+    </tr>`,
+      )
+      .join('')}</tbody>
+  </table></div>`;
+}
+
 function failureCard(result: CaseResult, run: RunResult, mode: string): string {
   const agentName = run.agents.find((a) => a.id === result.agentId)?.name ?? result.agentId;
   const failedChecks = result.assertions.filter((a) => a.status !== 'PASS');
@@ -308,6 +403,7 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
     <div>${result.unsafeActions > 0 ? `<span class="tag fail">${result.unsafeActions} unsafe</span>` : `<span class="tag ${caseOutcome(result) === 'FAIL' ? 'fail' : 'error'}">${esc(caseOutcome(result))}</span>`}</div>
   </div>
   <div class="body">
+    ${checkSummary(result)}
     ${claimVersusReality(result)}
     ${result.outcomeReason ? `<p class="mono dim">${esc(result.outcomeReason)}</p>` : ''}
     ${result.readScope ? `<p class="mono dim">Read: ${esc(result.readScope)}</p>` : ''}
@@ -338,23 +434,7 @@ function failureCard(result: CaseResult, run: RunResult, mode: string): string {
       </div>
     </div>
     <h3 style="margin-top:16px">Which checks failed</h3>
-    <table>
-      <thead><tr><th>Check</th><th>Kind</th><th>Evaluator</th><th>Observed</th><th>Expected</th><th>Status</th></tr></thead>
-      <tbody>
-      ${failedChecks
-        .map(
-          (a) => `<tr>
-          <td>${esc(a.description)}<div class="dim mono">${esc(a.assertionId)}</div></td>
-          <td class="mono dim">${esc(a.kind)}</td>
-          <td>${evaluatorTag(a.evaluator)}</td>
-          <td class="mono">${escJson(a.observed)}</td>
-          <td class="mono">${a.expected === undefined ? '<span class="dim">—</span>' : escJson(a.expected)}</td>
-          <td><span class="tag ${a.status === 'FAIL' ? 'fail' : 'error'}">${esc(a.status)}</span>${a.unsafe ? ' <span class="tag fail">unsafe</span>' : ''}</td>
-        </tr>`,
-        )
-        .join('')}
-      </tbody>
-    </table>
+    ${assertionTable(failedChecks, mode)}
   </div>
 </div>`;
 }
@@ -368,7 +448,13 @@ function claimVersusReality(result: CaseResult): string {
   const explanation = explainCase(result);
   const reality =
     explanation.reality && explanation.reality.lines.length > 0 ? explanation.reality : undefined;
-  if (explanation.saw.length === 0 && explanation.notChecked.length === 0 && !reality) return '';
+  if (
+    explanation.saw.length === 0 &&
+    explanation.notChecked.length === 0 &&
+    !reality &&
+    !result.agentReport
+  )
+    return '';
   return `<div class="grid ${reality ? 'cols-3' : 'cols-2'}" style="margin-bottom:12px">
       <div><h3>The agent said</h3><blockquote>${esc(explanation.claim)}</blockquote></div>
       ${
@@ -377,9 +463,10 @@ function claimVersusReality(result: CaseResult): string {
           : ''
       }
       <div><h3>RigorRun saw</h3>
-        ${explanation.saw.length > 0 ? `<ul>${explanation.saw.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>` : '<p class="dim">No check failed.</p>'}
+        ${explanation.saw.length > 0 ? `<ul>${explanation.saw.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>` : explanation.notChecked.length > 0 ? '<p class="dim">Some checks could not be made.</p>' : '<p class="dim">See the checked assertions below.</p>'}
         ${explanation.notChecked.length > 0 ? `<p class="dim">Not checked: ${explanation.notChecked.map(esc).join('; ')}</p>` : ''}
         ${explanation.evidence ? `<p class="dim mono">${esc(explanation.evidence)}</p>` : ''}
+        <p class="dim">The agent&#39;s claim is never used to decide a verdict.</p>
       </div>
     </div>`;
 }

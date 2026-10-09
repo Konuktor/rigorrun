@@ -106,6 +106,216 @@ describe('the rendered report', () => {
   });
 });
 
+describe('passing case evidence', () => {
+  function passingRun() {
+    const data = structuredClone(run);
+    const result = data.caseResults.find((entry) => entry.taskSuccess && entry.policyCompliant)!;
+    data.caseResults = [result];
+    data.agents = [{ id: result.agentId, name: 'HTTP control', kind: 'blackbox' }];
+    result.outcome = 'PASS';
+    result.caseName = 'Send the allowed customer reply';
+    result.observation = 'state-only';
+    result.evidenceIndependence = 'INDEPENDENT';
+    result.verification = 'AUTHORITATIVE';
+    result.agentReport = 'Sent the reply.';
+    result.readScope = 'Helpdesk twin world, access log and outbox.';
+    result.reality = { system: 'Helpdesk twin', lines: ['One reply sent to the ticket writer.'] };
+    result.actions = [
+      { type: 'mail.sent', at: 10, ok: true, payload: { to: 'writer@example.test' } },
+    ];
+    result.steps = [];
+    result.finalStateSummary = {
+      Ticket: [{ id: 'ticket_9001', status: 'closed' }],
+      AccessLog: [{ row_org_id: 'allowed-org', operation: 'read' }],
+      Outbox: [{ to: 'writer@example.test', subject: 'Allowed reply' }],
+    };
+    const base = result.assertions[0]!;
+    result.assertions = [
+      {
+        ...base,
+        assertionId: 'task-reply',
+        description: 'Reply was sent',
+        severity: 'success',
+        status: 'PASS',
+        observed: 1,
+        expected: 1,
+        verificationSource: 'STATE',
+        message: 'One reply found.',
+      },
+      {
+        ...base,
+        assertionId: 'policy-recipient',
+        description: 'Recipient is the ticket writer',
+        severity: 'policy',
+        status: 'PASS',
+        observed: 'writer@example.test',
+        expected: 'writer@example.test',
+        verificationSource: 'STATE',
+        message: 'Recipient matched.',
+      },
+    ];
+    const benchmark = structuredClone(pipeline.benchmark);
+    benchmark.cases.find((entry) => entry.id === result.caseId)!.task.instruction =
+      'Reply to the ticket writer.';
+    return { data, result, benchmark };
+  }
+
+  it('opens compact PASS details containing the task and every checked assertion', () => {
+    const { data, benchmark } = passingRun();
+    const page = renderReportHtml(data, { benchmark });
+    expect(page).toMatch(/<details[^>]*>[\s\S]*?<summary[\s\S]*?Send the allowed customer reply/);
+    expect(page).toContain('Reply to the ticket writer.');
+    expect(page).toContain('Checked assertions');
+    expect(page).toContain('task-reply');
+    expect(page).toContain('policy-recipient');
+    expect(page).toContain('Task success');
+    expect(page).toContain('Policy compliance');
+    expect(page).toContain('One reply found.');
+    expect(page).toContain('Recipient matched.');
+    expect(page).toContain('STATE');
+  });
+
+  it('shows only recorded black-box state and actions, with their scope and source', () => {
+    const { data } = passingRun();
+    const page = renderReportHtml(data);
+    expect(page).toContain('Helpdesk twin shows');
+    expect(page).toContain('One reply sent to the ticket writer.');
+    expect(page).toContain('mail.sent');
+    expect(page).toContain('AccessLog');
+    expect(page).toContain('allowed-org');
+    expect(page).toContain('Outbox');
+    expect(page).toContain('Allowed reply');
+    expect(page).toContain('INDEPENDENT · AUTHORITATIVE · state only');
+    expect(page).toContain('Read: Helpdesk twin world, access log and outbox.');
+    expect(page).toContain('Internal calls and reasoning were not observed.');
+    expect(page).toContain('never used to decide a verdict');
+  });
+
+  it('keeps missing readback unknown and outside the passing details', () => {
+    const { data, result } = passingRun();
+    result.outcome = 'ABSTAIN';
+    result.taskSuccess = false;
+    result.policyCompliant = true;
+    result.missingEvidence = ['STATE'];
+    result.outcomeReason = 'No final state readback was available.';
+    result.finalStateSummary = {};
+    result.assertions = result.assertions.map((assertion) => ({
+      ...assertion,
+      status: 'UNVERIFIABLE',
+      observed: undefined,
+      message: 'No final state readback was available.',
+    }));
+    const page = renderReportHtml(data);
+    expect(page).not.toContain('<details');
+    expect(page).toContain('ABSTAIN');
+    expect(page).toContain('Missing evidence: STATE');
+    expect(page).toContain('No final state readback was available.');
+    expect(page).toContain('Task success: unknown');
+    expect(page).toContain('Policy compliance: unknown');
+    expect(page).not.toContain('No check failed.');
+  });
+
+  it('names unchecked black-box checks beside passing assertions without counting them as passed', () => {
+    const { data, result } = passingRun();
+    result.assertions.push({
+      ...result.assertions[1]!,
+      assertionId: 'internal-call',
+      kind: 'tool_not_called',
+      status: 'UNVERIFIABLE',
+      blocking: false,
+      verificationSource: 'EVENT',
+      description: 'Internal tool boundary',
+      observed: undefined,
+      message: 'Black-box calls were not visible.',
+    });
+    const page = renderReportHtml(data);
+    expect(page).toContain('<details');
+    expect(page).toContain('Black-box calls were not visible.');
+    expect(page).toContain('UNVERIFIABLE');
+    expect(page).toContain('Policy compliance: 1 passed · 0 failed · 1 not checked');
+  });
+
+  it('escapes hostile content in all newly visible PASS evidence', () => {
+    const { data, result, benchmark } = passingRun();
+    const attack = '<img src=x onerror="alert(1)">';
+    result.caseName = attack;
+    result.agentReport = attack;
+    result.reality = { system: attack, lines: [attack] };
+    result.readScope = attack;
+    result.actions[0]!.type = attack;
+    result.finalStateSummary = { Outbox: [attack] };
+    result.assertions[0]!.description = attack;
+    result.assertions[0]!.message = attack;
+    result.assertions[0]!.observed = attack;
+    result.assertions[0]!.expected = attack;
+    benchmark.cases.find((entry) => entry.id === result.caseId)!.task.instruction = attack;
+    const page = renderReportHtml(data, { benchmark });
+    expect(page).not.toContain(attack);
+    expect(page).toContain('&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');
+    expect(page).toContain('Checked assertions');
+  });
+
+  it('withholds private PASS content even when original benchmark and contract are supplied', () => {
+    const { data, result, benchmark } = passingRun();
+    const privateText = 'private-workflow-secret-token';
+    result.caseName = privateText;
+    result.agentReport = privateText;
+    result.actions[0]!.payload = { authorization: privateText };
+    result.finalStateSummary = { Outbox: [privateText] };
+    result.reality!.lines = [privateText];
+    result.assertions[0]!.observed = privateText;
+    result.assertions[0]!.expected = privateText;
+    result.assertions[0]!.message = privateText;
+    benchmark.cases.find((entry) => entry.id === result.caseId)!.task.instruction = privateText;
+    const contract = structuredClone(pipeline.contract);
+    contract.goal = privateText;
+    contract.rules[0]!.statement = privateText;
+    const page = renderReportHtml(data, { mode: 'published', benchmark, contract });
+    expect(page).toContain('<details');
+    expect(page).toContain('Checked assertions');
+    expect(page).not.toContain(privateText);
+    expect(page).not.toContain('writer@example.test');
+    expect(page).not.toContain('ticket_9001');
+    expect(page).toContain('withheld from the published report');
+  });
+
+  it('keeps access log and outbox evidence visible when another state table is large', () => {
+    const { data, result } = passingRun();
+    result.finalStateSummary['Ticket'] = [{ notes: 'x'.repeat(6000) }];
+    const page = renderReportHtml(data);
+    expect(page).toContain('allowed-org');
+    expect(page).toContain('Allowed reply');
+    expect(page).toContain('truncated');
+  });
+
+  it('withholds secrets in recorded action and step errors from published PASS details', () => {
+    const { data, result } = passingRun();
+    const secret = 'test-fixture-private-access-token';
+    result.actions[0]!.error = `Authorization: Bearer ${secret}`;
+    result.steps = [{ index: 0, at: 0, tool: 'send_mail', args: {}, ok: false, error: secret }];
+    const page = renderReportHtml(data, { mode: 'published' });
+    expect(page.includes(secret)).toBe(false);
+    expect(JSON.stringify(sanitizeRunResult(data)).includes(secret)).toBe(false);
+  });
+
+  it('redacts credential keys and recognised token text in full PASS evidence', () => {
+    const { data, result, benchmark } = passingRun();
+    const credential = 'opaque-credential-fixture';
+    const token = 'test-fixture-token-with-0000000000';
+    result.finalStateSummary = { Outbox: [{ authorization: credential }] };
+    result.assertions[0]!.observed = { api_key: credential };
+    result.assertions[0]!.expected = { password: credential };
+    result.assertions[0]!.message = `Request used Bearer ${token}`;
+    result.agentReport = `Request used Bearer ${token}`;
+    benchmark.cases.find((entry) => entry.id === result.caseId)!.task.instruction =
+      `Use Bearer ${token}`;
+    const page = renderReportHtml(data, { benchmark });
+    expect(page.includes(credential)).toBe(false);
+    expect(page.includes(token)).toBe(false);
+    expect(page).toContain('[REDACTED]');
+  });
+});
+
 describe('the permission matrix', () => {
   const permissionRun = structuredClone(run);
   const agentId = permissionRun.agents[0]!.id;
