@@ -1,9 +1,10 @@
 # Local MVP runbook
 
-This is a local development checkpoint for the general-agent MVP, checked on
-2026-10-09 against base `e10ce750a6d14f89363226bc5fd5445f98b66f91` plus the
-Task 6 QA files. It is not a published release or an integrated Core/UI acceptance
-record. The Helpdesk and Stripe paths below use bundled suites and local twins.
+This is an integrated local checkpoint for the general-agent MVP on 2026-10-09,
+runtime head `437a2a2f`. The coordinator observed functional acceptance across the
+integrated Core, UI, QA and site changes; independent whole-branch review is still
+pending. This is not a published release or qualification of the new tree.
+The Helpdesk and Stripe paths below use bundled suites and local twins.
 Changes under `packages/`, including this regression test, change the tree to which
 the historical qualification applies; those reports do not qualify this new build.
 
@@ -76,9 +77,11 @@ Without `RIGORRUN_HELPDESK_E2E_KEEP=1`, the test cleans up its temporary directo
 With it, the fake-data artifacts remain for inspection; subprocesses and servers
 still stop. Each subsequent run creates another fresh directory.
 
-An inspected repeat at this checkpoint retained its evidence at
-`/tmp/rigorrun-helpdesk-e2e-4RQr12`; this machine-local path is an example, not a
+The coordinator's integrated targeted run retained its evidence at
+`/tmp/rigorrun-helpdesk-e2e-wmbXMO`; this machine-local path is an example, not a
 portable fixture. Run the command again to get your own fresh output path.
+The final integrated repeat used another fresh twin/store and retained its checked
+evidence at `/tmp/rigorrun-helpdesk-e2e-7Jp8ih`.
 
 For a quick paired demonstration, also use a fresh report path:
 
@@ -110,27 +113,49 @@ pnpm cli gate --project '<projectId>' --agent my-agent --report "$rr_project_dir
 that flag; interactive initialization lets you decide individually. A pass applies
 to this suite and observed twin state, not arbitrary systems or production actions.
 
-## Verification at this QA checkpoint
+## Verification at the integrated local checkpoint
 
 Runtime observed: Node `v22.22.2`, pnpm `11.7.0`, Python `3.14.7`.
 
 ```sh
 pnpm exec vitest run packages/cli/test/helpdesk.e2e.test.ts packages/cli/test/stripe.e2e.test.ts packages/env-helpdesk/test/cli.test.ts
 pnpm exec vitest run packages/cli/test/helpdesk.e2e.test.ts
-pnpm test
-pnpm lint
-pnpm typecheck
-pnpm claims
+env -u NO_COLOR pnpm verify
+pnpm e2e:external
 ```
 
-The targeted three-file run passed all 10 tests without skips; the Helpdesk repeat
-checks fresh state again. The full baseline-plus-QA run passed 162 files, 1869 tests,
-with one skipped alternate Stripe golden-file diagnostic (the golden comparison
-itself runs). Python-backed Stripe and daemon tests ran, with no Python skips.
-Lint, typecheck and claims passed after adding the final scoped test and runbook.
-The full run preceded the final extra persisted-record assertions; those assertions
-passed in the Helpdesk repeat and final targeted run. Integrated acceptance remains
-the coordinator's next check.
+The coordinator observed `env -u NO_COLOR pnpm verify` exit 0: lint, typecheck,
+domain, claims (68 files), full Vitest, example tests and all builds passed. Vitest
+passed 166 files and 1929 tests, with one existing skipped alternate Stripe
+golden-file diagnostic (the golden comparison itself runs). Example tests passed
+13/13. The targeted Helpdesk/Stripe/Helpdesk-CLI run passed 10/10 without skips,
+including the Python-backed Stripe tests.
+
+All builds completed: CRM, operations, app, site (15 routes), docs (31 routes),
+extension and CLI with a staged local package. The existing Starlight missing
+404-entry notice remains a build notice; it did not fail the build. A staged CLI
+package is not a package-install verification or published release.
+
+The final external-browser adaptation landed after the verification command's lint
+stage had started. The coordinator separately reran ESLint for that changed file
+and the external test: both passed, with external 1/1 in 9.8 seconds. Child-process
+environment warnings were resolved. Browser diagnostics still detect unsafe
+actions; the generated venue release gate exits 3 before candidate contact without
+changing assessment or run artifacts. Its 95% task-success threshold was preserved.
+
+Focused browser checks passed: demo 58/58, site 96/96 across desktop/tablet/mobile,
+dedicated restart 2/2 and operations renderer 7/7, with no skips in those checks.
+An initial whole-browser configuration attempt had 57 passes, 9 environment setup
+failures and 4 intended skips: the operations test expected port 5175 but the driver
+used 5375, and daemon restart was attempted before the app build. The dedicated
+operations and restart drivers subsequently passed. That initial attempt was not
+an all-green run.
+
+The QA worker's earlier baseline-plus-QA full run passed 162 files and 1869 tests,
+with the same alternate golden diagnostic skip. Fresh Helpdesk repeats passed
+before integration. The coordinator's final integrated repeat passed 3/3 with no
+skips in 7.14 seconds, using a new twin/store and checking default scoped exit 0,
+service-token exit 1, setup exit 2 and actual saved evidence again.
 
 Initial test development exposed fixture parsing and a mistaken expectation of
 PASS evidence cards, both corrected. The new path is a regression proof of existing
@@ -140,16 +165,20 @@ bundled functionality, not a manufactured RED/GREEN engine fix.
 
 Quality assessment is an explicit operation that executes repeated writes against
 the configured environment. Use a disposable test/staging environment with reset
-and readback; do not run it on production. Gate must not silently invoke assessment.
-Generated-suite review, freshness checkpoints and strict quality refusals are
-upcoming Core safeguards at this QA checkpoint; their integrated verification is
-pending. Missing/stale/inadequate evidence is intended to exit 3 before candidate
-contact and is covered by the Core task's acceptance, not this bundled-path test.
-Treat generic project and raw-file runs as diagnostics until that acceptance passes.
+and readback; do not run it on production. Gate does not silently invoke assessment.
+Integrated tests now cover explicit review decisions (omissions do not confirm
+rules), current-source checkpoints and full generated-suite quality protection.
+The exit contract is 0 for a candidate passing a usable scoped suite, 1 for a
+candidate failing it, 2 for invalid setup and 3 for missing, stale or inadequate
+suite/evidence before candidate contact. Bundled Helpdesk/Stripe default 0/1 gates
+were verified separately from generated-suite quality checks. These safeguards do
+not qualify arbitrary workflows or establish a universal release gate. The generated
+venue example remains inadequate for release; raw benchmark-file gates remain
+diagnostic and do not have the project path's equivalent quality protection.
 
-This QA checkpoint did not run the integrated UI/browser acceptance, app/site builds,
-`pnpm verify`, package-install/release qualification or deployment. Runtime blocking,
-hosted organisations, shared team histories, approvals and subscription billing are
+Package-install verification, new qualification, release verification, push and
+deployment were not performed. Independent whole-branch review remains pending.
+Runtime blocking, hosted organisations, shared team histories, approvals and subscription billing are
 not built in this slice. Custom workflows need an adapter with observable state,
 safe reset and agreed rules; the synthetic examples do not establish that coverage.
 
