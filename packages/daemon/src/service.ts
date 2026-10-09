@@ -75,7 +75,7 @@ import {
   type ConnectorInput,
   type Project,
 } from './project.ts';
-import type { Listing, ProjectStore } from './store.ts';
+import { ArtefactCorruptError, type Listing, type ProjectStore } from './store.ts';
 import { Workspace } from './workspace.ts';
 import { compareRuns, type RunComparison } from './compare.ts';
 import { ActivationLog } from './activation.ts';
@@ -84,6 +84,7 @@ import {
   configurationDigest,
   isSuiteSource,
   SuiteIntegrityError,
+  type QualitySource,
   type SuiteSource,
 } from './suiteIntegrity.ts';
 
@@ -325,7 +326,8 @@ export class Service {
     };
     await this.store.write(updated);
     await this.invalidateConfigurationChange(project, updated);
-    if (pack) return { project: await this.store.read(projectId), readsProblem: '', readsIgnored: [] };
+    if (pack)
+      return { project: await this.store.read(projectId), readsProblem: '', readsIgnored: [] };
     // Said at setup rather than discovered in a verdict: a read the person
     // nominated that RigorRun will never call is something to hear about now.
     const readsIgnored = readsForVerdict(updated.verifierReads).ignored.map((read) => read.tool);
@@ -680,7 +682,13 @@ export class Service {
     }
     const schema = await this.schemaOf(project);
     await this.store.writeArtefact(projectId, 'schema', schema);
-    const inputs = await this.suiteInputs(projectId);
+    // Bind the exact stored inputs we read, not a later reread that could
+    // accidentally label an older in-memory contract with a newer digest.
+    const inputs = {
+      contractDigest: await hashValue(contract),
+      configurationDigest: await configurationDigest(project, schema),
+    };
+    await this.assertInputsCurrent(projectId, inputs);
     const { fixture } = await this.registerFor(project, schema);
     const { benchmark } = await generateBenchmark(
       this.workspace.environment(project, schema),
@@ -735,6 +743,11 @@ export class Service {
       );
     }
     if (!pack.suite) throw new Error(`${pack.name} does not ship a suite.`);
+    const previousSchema = await this.store.readArtefact<EnvironmentSchema>(projectId, 'schema');
+    const previousConfiguration = await configurationDigest(project, previousSchema);
+    const previousContract = await hashValue({
+      contract: (await this.store.readArtefact(projectId, 'contract')) ?? null,
+    });
 
     const made = pack.suite(params);
     const parsedContract = EnvironmentContractSchema.safeParse(made.contract);
@@ -810,11 +823,28 @@ export class Service {
       })),
     };
 
+    const latest = await this.store.read(projectId);
+    const latestSchema = await this.store.readArtefact<EnvironmentSchema>(projectId, 'schema');
+    if (
+      (await configurationDigest(latest, latestSchema)) !== previousConfiguration ||
+      (await hashValue({
+        contract: (await this.store.readArtefact(projectId, 'contract')) ?? null,
+      })) !== previousContract
+    ) {
+      throw new SuiteIntegrityError(
+        'stale',
+        'The contract or configuration changed while installing the pack suite. Reinstall it.',
+      );
+    }
+    const inputs = {
+      contractDigest: await hashValue(contract),
+      configurationDigest: await configurationDigest(project, pack.schema),
+      origin: 'pack' as const,
+      packId: pack.id,
+    };
     await this.store.writeArtefact(projectId, 'contract', contract);
     await this.store.writeArtefact(projectId, 'schema', pack.schema);
-    await this.publishSuite(projectId, benchmark, {
-      ...await this.suiteInputs(projectId), origin: 'pack', packId: pack.id,
-    });
+    await this.publishSuite(projectId, benchmark, inputs);
 
     const current = await this.store.read(projectId);
     const updated: Project = {
@@ -987,20 +1017,20 @@ export class Service {
       // can supply. Run here, every one of them would fail for that reason
       // alone, and the score would describe the check rather than the suite.
       throw new Error(
-        `${pack.name}'s suite is written by hand and qualified with the pack, not checked with ` +
+        `${pack.name}'s suite is bundled with the pack, not checked with ` +
           'synthetic agents: their plans refer to records each case creates for itself, which a ' +
           'replayed plan never has. Run a known-correct agent against it instead.',
       );
     }
-    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
-    const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
-    if (!benchmark || !contract) throw new Error('There is no suite to check yet.');
     if (project.safety === 'production') {
       throw new Error(
         'Checking the suite runs it several times, and most of those runs write. RigorRun will ' +
           'not do that against something marked production.',
       );
     }
+    const { benchmark, source } = await this.readCurrentSuite(projectId);
+    const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
+    if (!contract) throw new SuiteIntegrityError('missing', 'There is no contract to assess.');
 
     const schema = await this.schemaOf(project);
     await this.registerFor(project, schema);
@@ -1012,13 +1042,91 @@ export class Service {
       reference: createReferenceAgent(benchmark),
       naive: naiveAgent,
     });
+    await this.assertSuiteCurrent(projectId, source);
+    await this.store.deleteArtefact(projectId, 'quality-source');
     await this.store.writeArtefact(projectId, 'quality', quality);
+    const qualitySource: QualitySource = { suite: source, qualityDigest: await hashValue(quality) };
+    await this.store.writeArtefact(projectId, 'quality-source', qualitySource);
     return quality;
   }
 
   /** The last assessment, if the suite has been checked. */
   async quality(projectId: string): Promise<BenchmarkQuality | undefined> {
-    return this.store.readArtefact<BenchmarkQuality>(projectId, 'quality');
+    try {
+      const { benchmark, source } = await this.readCurrentSuite(projectId);
+      return await this.currentQuality(projectId, source, benchmark);
+    } catch (error) {
+      if (error instanceof SuiteIntegrityError || error instanceof ArtefactCorruptError)
+        return undefined;
+      throw error;
+    }
+  }
+
+  /** No test writes here. Assessing a generated suite is a separate, explicit action. */
+  async gateReadiness(
+    projectId: string,
+  ): Promise<{ ready: boolean; reasons: string[]; source: SuiteSource | null }> {
+    let current: { benchmark: Benchmark; source: SuiteSource };
+    try {
+      current = await this.readCurrentSuite(projectId);
+    } catch (error) {
+      if (!(error instanceof SuiteIntegrityError)) throw error;
+      return { ready: false, reasons: [error.message], source: null };
+    }
+    const { benchmark, source } = current;
+    const project = await this.store.read(projectId);
+    const reasons: string[] = [];
+    if (benchmark.cases.length === 0) reasons.push('The suite has no cases.');
+    const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
+    if (!contract || rulesAwaitingReview(contract).length > 0)
+      reasons.push('The contract still needs explicit review.');
+    if (source.origin === 'pack') {
+      if (
+        !['helpdesk', 'stripe'].includes(source.packId ?? '') ||
+        project.connector?.kind !== 'pack' ||
+        project.connector.pack !== source.packId ||
+        !getPack(source.packId!)
+      ) {
+        reasons.push(
+          'Only currently installed bundled Helpdesk and Stripe suites use the pack release-gate path.',
+        );
+      }
+    } else {
+      const quality = await this.currentQuality(projectId, source, benchmark);
+      if (!quality) {
+        reasons.push(
+          'A current complete quality assessment is required. Run the suite assessment explicitly with consent: it performs writes in the test environment.',
+        );
+      } else {
+        reasons.push(...qualityProblems(quality, benchmark));
+      }
+    }
+    return { ready: reasons.length === 0, reasons, source };
+  }
+
+  private async currentQuality(
+    projectId: string,
+    source: SuiteSource,
+    benchmark: Benchmark,
+  ): Promise<BenchmarkQuality | undefined> {
+    try {
+      const quality = await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality');
+      const provenance = await this.store.readArtefact<QualitySource>(projectId, 'quality-source');
+      if (
+        !isQuality(quality) ||
+        quality.benchmarkId !== benchmark.id ||
+        quality.cases !== benchmark.cases.length ||
+        !provenance ||
+        !isSuiteSource(provenance.suite) ||
+        (await hashValue(provenance.suite)) !== (await hashValue(source)) ||
+        (await hashValue(quality)) !== provenance.qualityDigest
+      )
+        return undefined;
+      return quality;
+    } catch (error) {
+      if (error instanceof ArtefactCorruptError) return undefined;
+      throw error;
+    }
   }
 
   /**
@@ -1068,10 +1176,14 @@ export class Service {
     const replayed = await replayFailure(adapter, contract, { ...failure }, caseId);
 
     await this.assertSuiteCurrent(projectId, source);
-    await this.publishSuite(projectId, {
-      ...benchmark,
-      cases: [...benchmark.cases, replayed.testCase],
-    }, source);
+    await this.publishSuite(
+      projectId,
+      {
+        ...benchmark,
+        cases: [...benchmark.cases, replayed.testCase],
+      },
+      source,
+    );
     return {
       caseId,
       shouldPerform: replayed.shouldPerform,
@@ -1135,6 +1247,7 @@ export class Service {
     await this.registerFor(project, schema);
     // The agent is being graded on what it changes, so whatever the connector
     // was refusing while this project was being set up, it stops refusing now.
+    await this.assertSuiteCurrent(projectId, source);
     this.workspace.allowWrites(projectId);
 
     let result;
@@ -1162,14 +1275,11 @@ export class Service {
                 },
               }
             : {}),
-          // A pack's suite is refused the suite check, so it is never "unassessed"
-          // in the sense that has a remedy: it was qualified with the pack.
+          // Pack materialization needs its own controls, not the generated-suite check.
           ...(pack
             ? { suiteQuality: packSuiteQuality(pack.name), suiteFromPack: pack.name }
             : {
-                suiteQuality: suiteQualityOf(
-                  await this.store.readArtefact<BenchmarkQuality>(projectId, 'quality'),
-                ),
+                suiteQuality: suiteQualityOf(await this.currentQuality(projectId, source, suite)),
               }),
         },
       );
@@ -1183,7 +1293,11 @@ export class Service {
       await this.assertSuiteCurrent(projectId, source);
     } catch (error) {
       if (!(error instanceof SuiteIntegrityError)) throw error;
-      throw new SuiteIntegrityError('stale', `${error.message} Historical evidence was saved as ${result.runId}.`, result.runId);
+      throw new SuiteIntegrityError(
+        'stale',
+        `${error.message} Historical evidence was saved as ${result.runId}.`,
+        result.runId,
+      );
     }
 
     const score = result.scores[0];
@@ -1406,10 +1520,16 @@ export class Service {
   // ------------------------------------------------------------------ helpers
 
   /** Single-writer checkpoints, not a transaction or a cross-process lock. */
-  private async suiteInputs(projectId: string): Promise<Pick<SuiteSource, 'contractDigest' | 'configurationDigest'>> {
+  private async suiteInputs(
+    projectId: string,
+  ): Promise<Pick<SuiteSource, 'contractDigest' | 'configurationDigest'>> {
     const project = await this.store.read(projectId);
     const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
-    if (!contract) throw new SuiteIntegrityError('missing', 'The suite has no stored contract. Regenerate or reinstall it.');
+    if (!contract)
+      throw new SuiteIntegrityError(
+        'missing',
+        'The suite has no stored contract. Regenerate or reinstall it.',
+      );
     const schema = await this.store.readArtefact<EnvironmentSchema>(projectId, 'schema');
     return {
       contractDigest: await hashValue(contract),
@@ -1417,20 +1537,39 @@ export class Service {
     };
   }
 
-  private async assertInputsCurrent(projectId: string, inputs: Pick<SuiteSource, 'contractDigest' | 'configurationDigest'>): Promise<void> {
+  private async assertInputsCurrent(
+    projectId: string,
+    inputs: Pick<SuiteSource, 'contractDigest' | 'configurationDigest'>,
+  ): Promise<void> {
     const current = await this.suiteInputs(projectId);
-    if (current.contractDigest !== inputs.contractDigest || current.configurationDigest !== inputs.configurationDigest) {
-      throw new SuiteIntegrityError('stale', 'The contract or environment configuration changed. Regenerate or reinstall the suite.');
+    if (
+      current.contractDigest !== inputs.contractDigest ||
+      current.configurationDigest !== inputs.configurationDigest
+    ) {
+      throw new SuiteIntegrityError(
+        'stale',
+        'The contract or environment configuration changed. Regenerate or reinstall the suite.',
+      );
     }
   }
 
-  private async publishSuite(projectId: string, benchmark: Benchmark, inputs: Omit<SuiteSource, 'version' | 'benchmarkDigest'>): Promise<void> {
+  private async publishSuite(
+    projectId: string,
+    benchmark: Benchmark,
+    inputs: Omit<SuiteSource, 'version' | 'benchmarkDigest'>,
+  ): Promise<void> {
+    await this.assertInputsCurrent(projectId, inputs);
     await this.store.deleteArtefact(projectId, 'suite-source');
     await this.store.deleteArtefact(projectId, 'quality');
     await this.store.deleteArtefact(projectId, 'quality-source');
     await this.store.writeArtefact(projectId, 'benchmark', benchmark);
-    const source: SuiteSource = { ...inputs, version: 1, benchmarkDigest: await hashValue(benchmark) };
+    const source: SuiteSource = {
+      ...inputs,
+      version: 1,
+      benchmarkDigest: await hashValue(benchmark),
+    };
     await this.store.writeArtefact(projectId, 'suite-source', source);
+    await this.assertSuiteCurrent(projectId, source);
   }
 
   private async invalidateSuite(projectId: string): Promise<void> {
@@ -1438,39 +1577,66 @@ export class Service {
       await this.store.deleteArtefact(projectId, name);
     }
     const project = await this.store.read(projectId);
-    await this.store.write({ ...project, timings: { ...project.timings, benchmarkGeneratedAt: null } });
+    await this.store.write({
+      ...project,
+      timings: { ...project.timings, benchmarkGeneratedAt: null },
+    });
   }
 
   private async invalidateConfigurationChange(before: Project, after: Project): Promise<void> {
-    if (await configurationDigest(before, null) !== await configurationDigest(after, null)) {
+    if ((await configurationDigest(before, null)) !== (await configurationDigest(after, null))) {
       await this.invalidateSuite(after.id);
     }
   }
 
-  async readCurrentSuite(projectId: string): Promise<{ benchmark: Benchmark; source: SuiteSource }> {
-    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
-    const source = await this.store.readArtefact<unknown>(projectId, 'suite-source');
-    if (!benchmark || !source) {
-      throw new SuiteIntegrityError('missing', 'The suite or its source record is missing. Explicitly regenerate or reinstall the suite.');
+  async readCurrentSuite(
+    projectId: string,
+  ): Promise<{ benchmark: Benchmark; source: SuiteSource }> {
+    try {
+      const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
+      const source = await this.store.readArtefact<unknown>(projectId, 'suite-source');
+      if (!benchmark || !source) {
+        throw new SuiteIntegrityError(
+          'missing',
+          'Build a suite first: the suite or its source record is missing. Explicitly regenerate or reinstall the suite.',
+        );
+      }
+      if (!isSuiteSource(source) || !BenchmarkSchema.safeParse(benchmark).success) {
+        throw new SuiteIntegrityError(
+          'stale',
+          'The suite or its source record is invalid. Regenerate or reinstall the suite.',
+        );
+      }
+      await this.assertInputsCurrent(projectId, source);
+      if ((await hashValue(benchmark)) !== source.benchmarkDigest) {
+        throw new SuiteIntegrityError(
+          'stale',
+          'The benchmark changed since publication. Regenerate or reinstall the suite.',
+        );
+      }
+      return { benchmark, source };
+    } catch (error) {
+      if (error instanceof ArtefactCorruptError) {
+        throw new SuiteIntegrityError(
+          'stale',
+          'The suite source artifacts are damaged. Regenerate or reinstall the suite.',
+        );
+      }
+      throw error;
     }
-    if (!isSuiteSource(source) || !BenchmarkSchema.safeParse(benchmark).success) {
-      throw new SuiteIntegrityError('stale', 'The suite or its source record is invalid. Regenerate or reinstall the suite.');
-    }
-    await this.assertInputsCurrent(projectId, source);
-    if (await hashValue(benchmark) !== source.benchmarkDigest) {
-      throw new SuiteIntegrityError('stale', 'The benchmark changed since publication. Regenerate or reinstall the suite.');
-    }
-    return { benchmark, source };
   }
 
   async assertSuiteCurrent(projectId: string, source: SuiteSource): Promise<void> {
     try {
       const current = await this.readCurrentSuite(projectId);
-      if (await hashValue(current.source) === await hashValue(source)) return;
+      if ((await hashValue(current.source)) === (await hashValue(source))) return;
     } catch (error) {
       if (!(error instanceof SuiteIntegrityError)) throw error;
     }
-    throw new SuiteIntegrityError('stale', 'The suite source changed during this operation. Regenerate or reinstall it and run again.');
+    throw new SuiteIntegrityError(
+      'stale',
+      'The suite source changed during this operation. Regenerate or reinstall it and run again.',
+    );
   }
 
   /** Header values, from the credential store, at the moment they are sent. */
@@ -1704,8 +1870,8 @@ function payloadsAreEmpty(payloads: readonly unknown[]): boolean {
  * What a verdict carries about a suite that came with a pack.
  *
  * The suite check is refused for a pack's suite (`refuseForPack`): it measures
- * suites induced from a demonstration, and a pack's is written by hand and
- * qualified with the pack. So it is not assessed here, and the one warning
+ * suites induced from a demonstration, and a pack's is bundled by its author.
+ * It is not assessed here, and the warning
  * says why, rather than repeating the unassessed suite's advice to run a check
  * that will not run.
  */
@@ -1719,9 +1885,118 @@ export function packSuiteQuality(packName: string): SuiteQuality {
     hiddenAnswerIsolated: null,
     deadRules: 0,
     warnings: [
-      `this suite came with the ${packName} pack and was qualified with it, not by RigorRun's suite check, which measures suites induced from a demonstration`,
+      `this suite is bundled with the ${packName} pack; the generated-suite quality check does not assess it. Historical qualification applies only to its recorded code and scope, not automatically to this build`,
     ],
   };
+}
+
+/** Reject incomplete persisted assessments before treating them as measured evidence. */
+function isQuality(value: unknown): value is BenchmarkQuality {
+  if (!value || typeof value !== 'object') return false;
+  const q = value as BenchmarkQuality;
+  return (
+    typeof q.benchmarkId === 'string' &&
+    Number.isInteger(q.cases) &&
+    q.cases >= 0 &&
+    Number.isFinite(q.mutantKillRate) &&
+    q.mutantKillRate >= 0 &&
+    q.mutantKillRate <= 1 &&
+    Number.isFinite(q.independentKillRate) &&
+    q.independentKillRate >= 0 &&
+    q.independentKillRate <= 1 &&
+    typeof q.replayStable === 'boolean' &&
+    typeof q.hiddenAnswerIsolated === 'boolean' &&
+    Number.isFinite(q.wallClockMs) &&
+    q.wallClockMs >= 0 &&
+    Array.isArray(q.deadRules) &&
+    q.deadRules.every((r) => typeof r === 'string') &&
+    Array.isArray(q.nonDiscriminatingRules) &&
+    q.nonDiscriminatingRules.every((r) => typeof r === 'string') &&
+    Array.isArray(q.measures) &&
+    q.measures.every(
+      (m) =>
+        m &&
+        typeof m.id === 'string' &&
+        ['string', 'number', 'boolean'].includes(typeof m.value) &&
+        (typeof m.value !== 'number' || Number.isFinite(m.value)),
+    ) &&
+    [
+      'false_positive_rate',
+      'false_accusation',
+      'mutant_kill_rate',
+      'replay_stability',
+      'hidden_answer_isolation',
+    ].every((id) => {
+      const found = q.measures.filter((m) => m.id === id);
+      if (found.length !== 1) return false;
+      const value = found[0]!.value;
+      return id === 'replay_stability' || id === 'hidden_answer_isolation'
+        ? typeof value === 'boolean'
+        : typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
+    }) &&
+    Array.isArray(q.mutants) &&
+    q.mutants.every(
+      (m) =>
+        m &&
+        typeof m.id === 'string' &&
+        ['must_be_caught', 'must_survive'].includes(m.expectation) &&
+        ['rule_derived', 'environment_derived'].includes(m.independence) &&
+        typeof m.caught === 'boolean' &&
+        typeof m.asExpected === 'boolean' &&
+        Number.isInteger(m.caughtOn) &&
+        m.caughtOn >= 0 &&
+        m.caughtOn <= q.cases,
+    )
+  );
+}
+
+/** Conservative MVP prerequisite, independent of user-adjustable candidate thresholds. */
+function qualityProblems(quality: BenchmarkQuality, benchmark: Benchmark): string[] {
+  const reasons: string[] = [];
+  const suppliedWarnings = (quality as BenchmarkQuality & { warnings?: unknown }).warnings;
+  if (
+    suppliedWarnings !== undefined &&
+    (!Array.isArray(suppliedWarnings) || suppliedWarnings.length > 0)
+  ) {
+    reasons.push('The assessment carries unresolved warnings.');
+  }
+  if (
+    quality.benchmarkId !== benchmark.id ||
+    quality.cases !== benchmark.cases.length ||
+    quality.cases === 0
+  ) {
+    reasons.push('The assessment does not cover this complete, nonempty suite.');
+  }
+  const required = [
+    ['false_positive_rate', 0],
+    ['false_accusation', 0],
+    ['mutant_kill_rate', 1],
+    ['replay_stability', true],
+    ['hidden_answer_isolation', true],
+  ] as const;
+  for (const [id, expected] of required) {
+    const found = quality.measures.filter((m) => m.id === id);
+    if (found.length !== 1 || found[0]!.value !== expected) {
+      reasons.push(`Quality metric ${id} must be present and equal ${String(expected)}.`);
+    }
+  }
+  if (quality.mutantKillRate !== 1) reasons.push('The mutant kill rate must equal 1.');
+  if (quality.independentKillRate !== 1) reasons.push('The independent kill rate must equal 1.');
+  if (!quality.replayStable) reasons.push('Replay is unstable.');
+  if (!quality.hiddenAnswerIsolated) reasons.push('Hidden answers are not isolated.');
+  if (quality.deadRules.length > 0) reasons.push('The suite has dead rules.');
+  const defects = quality.mutants.filter((m) => m.expectation === 'must_be_caught');
+  const controls = quality.mutants.filter((m) => m.expectation === 'must_survive');
+  if (defects.length === 0 || !defects.some((m) => m.independence === 'environment_derived')) {
+    reasons.push('The assessment needs nonempty defect controls, including independent defects.');
+  }
+  if (controls.length === 0) reasons.push('The assessment needs a harmless must_survive control.');
+  if (defects.some((m) => !m.caught || !m.asExpected || m.caughtOn === 0))
+    reasons.push('A required defect escaped the suite.');
+  if (controls.some((m) => m.caught || !m.asExpected || m.caughtOn !== 0))
+    reasons.push('A harmless must_survive control failed.');
+  reasons.push(...suiteQualityOf(quality).warnings);
+  return [...new Set(reasons)];
 }
 
 /**
@@ -1768,6 +2043,13 @@ export function suiteQualityOf(quality: BenchmarkQuality | undefined): SuiteQual
   if (!quality.hiddenAnswerIsolated) warnings.push('an expected answer is visible to the agent');
   if (quality.deadRules.length > 0) {
     warnings.push(`${quality.deadRules.length} confirmed rule(s) are never exercised by any case`);
+  }
+  if (
+    quality.mutants.some((m) => m.expectation === 'must_survive' && (m.caught || !m.asExpected))
+  ) {
+    warnings.push(
+      'a harmless must_survive control failed, so this suite can fail correct behaviour',
+    );
   }
   return {
     assessed: true,

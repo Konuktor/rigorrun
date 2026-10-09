@@ -412,7 +412,7 @@ describe('installing a pack’s suite', () => {
       {},
       { confirmedRuleIds: ['items.exact', 'items.no_other'] },
     );
-    await expect(service.assessSuite(project.id)).rejects.toThrow(/written by hand/);
+    await expect(service.assessSuite(project.id)).rejects.toThrow(/bundled with the pack/);
   });
 });
 

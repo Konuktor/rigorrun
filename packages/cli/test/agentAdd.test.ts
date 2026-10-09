@@ -336,10 +336,17 @@ describe('--case on a project run', () => {
       '--after-case',
       hook,
     );
-    // Two of the suite's cases, both passed: shown, but never a release PASS.
+    // An arbitrary pack cannot use the bundled-pack release exemption.
     expect(gate.code, gate.out + gate.err).toBe(3);
-    expect(gate.out).toContain('Ran 2 of the suite');
-    expect(gate.out).toMatch(/gate over 2 of 3 cases is not a release verdict; run without --case/);
+    expect(gate.out).toContain('Only currently installed bundled Helpdesk and Stripe');
+    await expect(readFile(seen, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
+    // The same subset and observation hook remain available diagnostically.
+    const diagnostic = await cli(
+      'run', '--project', project.id, '--home', home,
+      '--case', 'case_b', '--case', 'case_c', '--after-case', hook,
+    );
+    expect(diagnostic.code, diagnostic.out + diagnostic.err).toBe(0);
+    expect(diagnostic.out).toContain('Ran 2 of the suite');
 
     const lines = (await readFile(seen, 'utf8'))
       .trim()

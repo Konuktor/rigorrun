@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import type { Server } from 'node:http';
 import { clearPacks, registerPack } from '@rigorrun/environment';
 import * as generator from '@rigorrun/generator';
+import * as core from '@rigorrun/core';
 import { ProxyServer } from '@rigorrun/proxy';
 import { ProjectStore, Service, SuiteIntegrityError, type Project } from '../src/index.ts';
 import { blackBoxAgent, fakeItemsPack, PACK_ID } from './packFixture.ts';
@@ -40,26 +41,52 @@ async function packReady() {
   process.env['RIGORRUN_SECRET__FAKE_ITEMS_KEY'] = 'test-only';
   const fake = fakeItemsPack();
   registerPack(fake.pack);
-  await service.connectEnvironment(project.id, { kind: 'pack', pack: PACK_ID, mode: 'twin' }, 'ephemeral');
-  await service.installPackSuite(project.id, {}, { confirmedRuleIds: ['items.exact', 'items.no_other'] });
+  await service.connectEnvironment(
+    project.id,
+    { kind: 'pack', pack: PACK_ID, mode: 'twin' },
+    'ephemeral',
+  );
+  await service.installPackSuite(
+    project.id,
+    {},
+    { confirmedRuleIds: ['items.exact', 'items.no_other'] },
+  );
   const endpoint = await blackBoxAgent(() => fake.sessions.at(-1)!, 5, servers);
-  const { agent } = await service.addAgent(project.id, { name: 'Adds five', blackBox: { endpoint } });
+  const { agent } = await service.addAgent(project.id, {
+    name: 'Adds five',
+    blackBox: { endpoint },
+  });
   return agent.id;
 }
 
 async function generatedReady() {
   const root = fileURLToPath(new URL('../../../', import.meta.url));
-  await service.connectEnvironment(project.id, {
-    kind: 'mcp', transport: 'stdio', command: join(root, 'node_modules/.bin/tsx'),
-    args: [join(root, 'fixtures/external/mcp-venue-desk/src/stdio.ts')], url: '', secretNames: [],
-  }, 'ephemeral');
+  await service.connectEnvironment(
+    project.id,
+    {
+      kind: 'mcp',
+      transport: 'stdio',
+      command: join(root, 'node_modules/.bin/tsx'),
+      args: [join(root, 'fixtures/external/mcp-venue-desk/src/stdio.ts')],
+      url: '',
+      secretNames: [],
+    },
+    'ephemeral',
+  );
   await service.configureEnvironment(project.id, {
     readOnlyTools: ['list_venues', 'list_organisers', 'find_bookings', 'get_booking'],
-    verifierReads: [{ tool: 'find_bookings' }, { tool: 'list_venues' }, { tool: 'list_organisers' }],
+    verifierReads: [
+      { tool: 'find_bookings' },
+      { tool: 'list_venues' },
+      { tool: 'list_organisers' },
+    ],
     reset: { kind: 'tool', tool: 'reset_desk' },
   });
   await service.startTeaching(project.id);
-  await service.teachStep(project.id, 'record_signoff', { bookingId: 'BKG-4001', approver: 'Dana Whitlock' });
+  await service.teachStep(project.id, 'record_signoff', {
+    bookingId: 'BKG-4001',
+    approver: 'Dana Whitlock',
+  });
   await service.teachStep(project.id, 'confirm_booking', { bookingId: 'BKG-4001' });
   await service.finishTeaching(project.id);
   const contract = await service.compile(project.id);
@@ -92,27 +119,46 @@ it('configuration change invalidates suite', async () => {
   await packReady();
   const { source } = await service.readCurrentSuite(project.id);
   await service.configureEnvironment(project.id, {
-    readOnlyTools: [], verifierReads: [], reset: { kind: 'none' }, budgets: { caseMs: 90_000 },
+    readOnlyTools: [],
+    verifierReads: [],
+    reset: { kind: 'none' },
+    budgets: { caseMs: 90_000 },
   });
-  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({ kind: 'stale' });
+  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({
+    kind: 'stale',
+  });
   expect(await store.readArtefact(project.id, 'benchmark')).toBeUndefined();
 });
 
-it.each(['goal', 'safety', 'schema'] as const)('detects direct stored %s changes', async (field) => {
-  await packReady();
-  const { source } = await service.readCurrentSuite(project.id);
-  if (field === 'schema') await store.writeArtefact(project.id, 'schema', { entities: [], relationships: [] });
-  else await store.write({ ...await store.read(project.id), [field]: field === 'goal' ? 'Changed goal' : 'staging' });
-  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({ kind: 'stale' });
-});
+it.each(['goal', 'safety', 'schema'] as const)(
+  'detects direct stored %s changes',
+  async (field) => {
+    await packReady();
+    const { source } = await service.readCurrentSuite(project.id);
+    if (field === 'schema')
+      await store.writeArtefact(project.id, 'schema', { entities: [], relationships: [] });
+    else
+      await store.write({
+        ...(await store.read(project.id)),
+        [field]: field === 'goal' ? 'Changed goal' : 'staging',
+      });
+    await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({
+      kind: 'stale',
+    });
+  },
+);
 
 it('paused generation cannot publish after review', async () => {
   const contract = await generatedReady();
   const original = generator.generateBenchmark;
   let reached!: () => void;
   let resume!: () => void;
-  const paused = new Promise<void>((resolve) => { reached = resolve; });
-  const continued = new Promise<void>((resolve) => { resume = resolve; });
+  const paused = new Promise<void>((resolve) => {
+    reached = resolve;
+  });
+  const continued = new Promise<void>((resolve) => {
+    resume = resolve;
+  });
   vi.spyOn(generator, 'generateBenchmark').mockImplementation(async (...args) => {
     const result = await original(...args);
     reached();
@@ -135,10 +181,14 @@ it('two Services detect a stale completed run', async () => {
   services.push(second);
   let staleError: unknown;
   try {
-    await service.runAgent(project.id, agent, { afterCase: async (_result, index) => {
-      if (index === 0) await second.review(project.id, { rejectedRuleIds: ['items.exact'] });
-    } });
-  } catch (error) { staleError = error; }
+    await service.runAgent(project.id, agent, {
+      afterCase: async (_result, index) => {
+        if (index === 0) await second.review(project.id, { rejectedRuleIds: ['items.exact'] });
+      },
+    });
+  } catch (error) {
+    staleError = error;
+  }
   expect(staleError).toBeInstanceOf(SuiteIntegrityError);
   const stale = staleError as SuiteIntegrityError;
   expect(stale.kind).toBe('stale');
@@ -156,14 +206,19 @@ it('same contract with regenerated suite detects benchmark change', async () => 
   const next = await service.readCurrentSuite(project.id);
   expect(next.source.contractDigest).toBe(source.contractDigest);
   expect(next.source.benchmarkDigest).not.toBe(source.benchmarkDigest);
-  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({ kind: 'stale' });
+  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({
+    kind: 'stale',
+  });
 }, 60_000);
 
 it('appending a valid run preserves metadata changed during execution', async () => {
   const agent = await packReady();
-  await service.runAgent(project.id, agent, { afterCase: async (_result, index) => {
-    if (index === 0) await store.write({ ...await store.read(project.id), name: 'Renamed while running' });
-  } });
+  await service.runAgent(project.id, agent, {
+    afterCase: async (_result, index) => {
+      if (index === 0)
+        await store.write({ ...(await store.read(project.id)), name: 'Renamed while running' });
+    },
+  });
   expect((await store.read(project.id)).name).toBe('Renamed while running');
 });
 
@@ -185,10 +240,16 @@ it('incident additions replace provenance and clear the previous assessment', as
   await store.writeArtefact(project.id, 'quality', { old: true });
   await store.writeArtefact(project.id, 'quality-source', { old: true });
   const incident = await service.addFailureToSuite(project.id, {
-    name: 'Regression', reason: 'Missed approval', request: { bookingId: 'BKG-4001' },
+    name: 'Regression',
+    reason: 'Missed approval',
+    request: { bookingId: 'BKG-4001' },
   });
-  expect((await service.readCurrentSuite(project.id)).benchmark.cases.at(-1)?.id).toBe(incident.caseId);
-  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({ kind: 'stale' });
+  expect((await service.readCurrentSuite(project.id)).benchmark.cases.at(-1)?.id).toBe(
+    incident.caseId,
+  );
+  await expect(service.assertSuiteCurrent(project.id, source)).rejects.toMatchObject({
+    kind: 'stale',
+  });
   expect(await store.readArtefact(project.id, 'quality')).toBeUndefined();
   expect(await store.readArtefact(project.id, 'quality-source')).toBeUndefined();
 }, 60_000);
@@ -200,5 +261,44 @@ it('run startup does not overwrite a changed schema to make an obsolete source l
     await store.writeArtefact(project.id, 'schema', { entities: [], relationships: [] });
     return register(...args);
   });
-  await expect(service.runAgent(project.id, agent)).rejects.toMatchObject({ kind: 'stale' });
+  let completedCases = 0;
+  await expect(
+    service.runAgent(project.id, agent, {
+      afterCase: async () => {
+        completedCases += 1;
+      },
+    }),
+  ).rejects.toMatchObject({ kind: 'stale' });
+  expect(completedCases).toBe(0);
+});
+
+it('generation never publishes old contract content under a newer contract digest', async () => {
+  const contract = await generatedReady();
+  const write = store.writeArtefact.bind(store);
+  let changed = false;
+  vi.spyOn(store, 'writeArtefact').mockImplementation(async (id, name, value) => {
+    if (name === 'schema' && !changed) {
+      changed = true;
+      await service.review(project.id, { rejectedRuleIds: [contract.rules[0]!.id] });
+    }
+    return write(id, name, value);
+  });
+  await expect(service.generate(project.id)).rejects.toMatchObject({ kind: 'stale' });
+  expect(await store.readArtefact(project.id, 'benchmark')).toBeUndefined();
+}, 60_000);
+
+it('pack installation cannot bind a suite built with old configuration to new configuration', async () => {
+  await packReady();
+  const oldBenchmark = await store.readArtefact(project.id, 'benchmark');
+  const original = core.hashValue;
+  let changed = false;
+  vi.spyOn(core, 'hashValue').mockImplementation(async (value) => {
+    if (!changed && value && typeof value === 'object' && 'rules' in value) {
+      changed = true;
+      await store.write({ ...(await store.read(project.id)), goal: 'A different job now' });
+    }
+    return original(value);
+  });
+  await expect(service.installPackSuite(project.id, {})).rejects.toMatchObject({ kind: 'stale' });
+  expect(await store.readArtefact(project.id, 'benchmark')).toEqual(oldBenchmark);
 });

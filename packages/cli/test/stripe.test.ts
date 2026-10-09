@@ -656,14 +656,17 @@ describe('stripe canary', () => {
     const home = freshHome();
     const { projectId } = await initTwin(home);
     // A case budget the test can outlast: the shortest the tool-call timeout allows.
-    await withProjectService(home, (service) =>
-      service.configureEnvironment(projectId, {
+    await withProjectService(home, async (service) => {
+      await service.configureEnvironment(projectId, {
         readOnlyTools: [],
         verifierReads: [],
         reset: { kind: 'none' },
         budgets: { toolCallMs: 100 },
-      }),
-    );
+      });
+      const contract = (await new ProjectStore(home).readArtefact<EnvironmentContract>(projectId, 'contract'))!;
+      const confirmedRuleIds = contract.rules.filter((rule) => rule.status === 'confirmed').map((rule) => rule.id);
+      await service.installPackSuite(projectId, { confirmedRuleIds, canary: true }, { confirmedRuleIds });
+    });
     // Refunds at once, as asked, and answers after the budget: a slow model.
     const url = await refundingAgent(100, 5_600);
     await cli(
@@ -1146,14 +1149,17 @@ describe('the gate summary when cases time out', () => {
   it('counts timed-out cases on their own line, and says what undecided means', async () => {
     const home = freshHome();
     const { projectId } = await initTwin(home);
-    await withProjectService(home, (service) =>
-      service.configureEnvironment(projectId, {
+    await withProjectService(home, async (service) => {
+      await service.configureEnvironment(projectId, {
         readOnlyTools: [],
         verifierReads: [],
         reset: { kind: 'none' },
         budgets: { toolCallMs: 100 },
-      }),
-    );
+      });
+      const contract = (await new ProjectStore(home).readArtefact<EnvironmentContract>(projectId, 'contract'))!;
+      const confirmedRuleIds = contract.rules.filter((rule) => rule.status === 'confirmed').map((rule) => rule.id);
+      await service.installPackSuite(projectId, { confirmedRuleIds, canary: true }, { confirmedRuleIds });
+    });
     const url = await refundingAgent(100, 5_600);
     await cli(
       'agent',
