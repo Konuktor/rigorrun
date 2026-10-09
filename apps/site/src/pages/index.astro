@@ -34,17 +34,19 @@ const featuredPath = featured === helpdeskReplay ? '/replay/helpdesk' : '/replay
 const headline = featured?.headline ?? null;
 
 /**
- * The demo video, when it has been made. `scripts/record-demo-video.mjs` films
- * it from the flagship recording into public/media/; until demo.mp4 is there,
+ * The approved Agent Release Check walkthrough uses real UI captures with
+ * scripted controls in the simulated Helpdesk twin. Until its media is there,
  * the hero has no player at all rather than one that fails to load. Astro
  * reads `public/` from the project root, which is the directory the build runs
  * in (no `root` is configured), so this looks exactly where the build copies from.
  */
 const media = join(process.cwd(), 'public', 'media');
-const demoVideo = existsSync(join(media, 'demo.mp4'))
+const demoVideo = existsSync(join(media, 'agent-release-check.mp4'))
   ? {
-      webm: existsSync(join(media, 'demo.webm')),
-      poster: existsSync(join(media, 'demo-poster.png')) ? '/media/demo-poster.png' : undefined,
+      webm: existsSync(join(media, 'agent-release-check.webm')),
+      poster: existsSync(join(media, 'agent-release-check-poster.webp'))
+        ? '/media/agent-release-check-poster.webp'
+        : undefined,
     }
   : null;
 
@@ -268,14 +270,18 @@ const limits = [
                   controls
                   preload="none"
                   poster={demoVideo.poster}
-                  aria-label="The demo, filmed: npx rigorrun demo in a terminal, then the recorded run on this site."
+                  aria-label="Agent Release Check: real Helpdesk interface, reviewed rules, your HTTP agent, PASS and FAIL evidence, and a repeat run. Scripted controls in a simulated twin."
                   data-demo-video
                 >
-                  {demoVideo.webm && <source data-src="/media/demo.webm" type="video/webm" />}
-                  <source data-src="/media/demo.mp4" type="video/mp4" />
+                  {demoVideo.webm && <source data-src="/media/agent-release-check.webm" type="video/webm" />}
+                  <source data-src="/media/agent-release-check.mp4" type="video/mp4" />
                 </video>
+                <button type="button" class="rr-link mt-2 text-meta" data-demo-play hidden>
+                  Play demo
+                </button>
                 <figcaption class="mt-2 text-meta text-muted">
-                  <a class="rr-link" href="/media/demo.mp4">Watch the 60-second run</a>
+                  <a class="rr-link" href="/media/agent-release-check.mp4">Watch the 60-second Agent Release Check</a>
+                  <span class="block">Scripted controls · simulated Helpdesk twin · checked scenarios only</span>
                 </figcaption>
               </figure>
             )
@@ -301,9 +307,18 @@ const limits = [
     };
     for (const video of document.querySelectorAll<HTMLVideoElement>('[data-demo-video]')) {
       if (reduce) {
-        video.addEventListener('play', () => video.querySelector('source[data-src]') && load(video), {
-          once: true,
-        });
+        const button = video.parentElement?.querySelector<HTMLButtonElement>('[data-demo-play]');
+        if (button) {
+          // Empty-source native controls cannot initiate resource loading.
+          // Show the explicit Play action until a source is loaded instead.
+          video.controls = false;
+          button.hidden = false;
+          button.addEventListener('click', () => {
+            if (video.querySelector('source[data-src]')) load(video);
+            video.controls = true;
+            void video.play().then(() => { button.hidden = true; }).catch(() => {});
+          });
+        }
         continue;
       }
       const seen = new IntersectionObserver((entries) => {
