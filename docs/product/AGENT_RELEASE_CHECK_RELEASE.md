@@ -1,6 +1,6 @@
 # Agent Release Check · 0.6.1 release verification
 
-Status: **publication pending**. No npm tag, GitHub integration or site/docs deployment has been performed in this release cycle. This ledger does not supersede historical qualification or claim a new qualification.
+Status: **publication pending corrected CI and review**. The founder explicitly authorized the narrow Action self-test correction. GitHub PR [#12](https://github.com/Konuktor/rigorrun/pull/12) is open; no merge, npm tag/publish or site/docs deployment has been performed in this release cycle. This ledger does not supersede historical qualification or claim a new qualification.
 
 ## Scope and source
 
@@ -56,3 +56,27 @@ New assets under `apps/site/public/media/`; the original `demo.*` files remain u
 | `agent-release-check-poster.webp` | 56,586 | `13d3781260c601f10fe5ea0f69a0c286b3a88da671ccfec4f00830c88b6d0738` |
 
 MP4 is stream-copied from the approved master with fast-start metadata, not a new composition. WebM and poster are derived from that same approved render. Preview/frame work used the workflow's inline fallback; no native frame agents were spawned. Only synthetic encoded assets are staged for the website, not the full local reports or capture receipts.
+
+## GitHub integration attempt and remaining blocker
+
+Final source/media commit: `12cba49ea85745f2aaaa6ea5c5c565c187b1641b`, pushed through normal PR #12, not merged. Package/app/engine/acceptance code remains unchanged from the fully verified frozen `fcf407e0` tree; later changes are the reviewed site assets/player, generated proof and ledger.
+
+- Main [CI run 37993273997](https://github.com/Konuktor/rigorrun/actions/runs/37993273997): package, product-acceptance, supply-chain, benchmark-gate and CodeQL passed. Verify failed in the sandbox adversarial beforeAll because Docker Hub returned HTTP 504 while resolving `node:20-alpine`, not because its ten assertions ran and failed. 166 test files and 1,970 tests passed; ten dependent adversarial tests were not executed, plus the existing conditional skip. Logs retained in `github-ci-failed.log`. A diagnosed external outage may be retried without changing or skipping the sandbox checks; a retry is not a pass until completed.
+- [Action self-test run 37993273864](https://github.com/Konuktor/rigorrun/actions/runs/37993273864): FAIL. The legacy venue fixture's `review.confirm: []` now correctly stops setup with exit 2 and five unmatched inferred rules. `action-selftest-failed.log` retained.
+- Local diagnostic using the exact installed final tarball reproduced that refusal. Explicit confirmation plus a normal current suite assessment made setup succeed, but **both** candidate gates correctly returned 3: the generated venue suite's reference false-positive rate was 0.6, false accusation was 1 and a harmless control failed. This is not a validated correction and not evidence of candidate PASS/FAIL. Retained `action-local-diagnostic.log` and `/tmp/rigorrun-action-diagnostic-yXK73u/receipt.json`.
+- No product guard, threshold or test assertion was weakened. In particular, do not drop rules just to produce a green workflow or manufacture a quality artifact. A corrected Action self-test must use a genuinely admissible fixture and preserve expected 0/1 checks; a separate refusal case can cover 3.
+- At that checkpoint, `.github/workflows/action-selftest.yml` was outside the task brief's enumerated allowed paths and had not been edited. Independent review required explicit narrow scope authorization before a tracked correction. The subsequent authorization and reviewed correction are recorded below; green hosted CI remains required before merge/publication.
+
+The public Docker token endpoint subsequently returned HTTP 200 (response body discarded). A single diagnosed retry of only the failed main-CI job was requested with `gh run rerun 37993273997 --failed`; attempt 2 completed with the same Docker Hub token POST HTTP 504, as recorded below, and is not counted as passing. The known failing Action fixture was not blindly rerun. Registry `latest` still reports `0.6.0` at this checkpoint.
+
+## Authorized Action self-test correction
+
+The founder replied “да делай чтобы все точно у всех работало правильно” to the explicit request for `.github/workflows/action-selftest.yml`. Its offline fixture/setup and assertions are now in the brief's allowed scope. No package, app, action implementation, independent control or product guard changed in this correction.
+
+The self-test now creates three isolated synthetic Helpdesk projects through the real Service: scoped control with six literal reviewed rules, overbroad control with the same six reviewed rules, and a pending-review project. It closes the setup writer before separate action CLI processes write; only its own loopback twin/HTTP controls remain alive. The real composite action, HTML report handling and PASS 0 / FAIL 1 assertions remain. Standard gate thresholds replace the old `min-success: 0` override. INCONCLUSIVE 3 and zero pending-candidate tasks are additionally asserted.
+
+- Fresh red: actual old workflow setup fails with explicit-review exit 2, `action-workflow-red.log`.
+- Fresh green: `check-action-workflow.mjs` executes the actual updated YAML setup and unchanged composite action gate/preserve scripts, checks reports and all expected outcomes, then stops its exact owned fixture PID. `action-workflow-green.log`, exit 0; `/tmp/rigorrun-action-workflow-xVrtZc/receipt.json`. Real PASS 0, FAIL 1, INCONCLUSIVE 3, six scoped tasks, six overbroad tasks and zero pending tasks.
+- YAML Prettier check, `pnpm lint`, `pnpm typecheck`, `pnpm claims`: exit 0. Actual GitHub artifact upload and job lifecycle still require the new GitHub run; local harness success does not replace that gate.
+- Main CI attempt 2 again failed on the same external Docker Hub token POST HTTP 504 before the adversarial tests; `github-ci-retry-failed.log`. It is not counted as green. No sandbox code or dependent assertion was changed/skipped to hide it.
+- Independent correction review: approved; no critical or important workflow finding. Historical-status wording in this ledger was corrected before commit. Hosted execution/upload, main CI, registry installation and deployment remain separate unperformed gates.

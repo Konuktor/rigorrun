@@ -13,6 +13,7 @@ Prepare a patch release of the existing workflow, without redesign or engine cha
 ## Allowed files
 
 - This brief and a new `docs/product/AGENT_RELEASE_CHECK_RELEASE.md` verification ledger.
+- `.github/workflows/action-selftest.yml`: founder explicitly authorized this narrow expansion on 2026-10-10 (“да делай чтобы все точно у всех работало правильно”), answering the request to fix the stale self-test. Only its offline fixture/setup and outcome assertions may change. Use a genuinely admissible scoped fixture; retain the real composite action and PASS 0 / FAIL 1 / reports, add explicit INCONCLUSIVE 3. No product gate bypass, manufactured quality or rule removal merely to turn CI green.
 - `e2e/a11y.spec.ts`, `e2e/critical.spec.ts`: align consent-dependent navigation with the existing `deepLinkToVerdict` helper; retain accessibility/evidence assertions.
 - `e2e/__screenshots__/visual.spec.ts-snapshots/**`: only individually inspected intentional changes from the existing bundled examples; no enlarged tolerances or hidden regions.
 - `packages/cli/package.json`, `packages/cli/src/help.ts`, `packages/core/src/index.ts`, `action.yml`: release version only. Inspection found two constants asserted against the manifest by `packages/cli/test/package.test.ts`; update all three together, without engine logic changes.
