@@ -282,18 +282,25 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
 
   // ----------------------------------------------------------- the rules
   const confirmedRuleIds: string[] = [];
+  const rejectedRuleIds: string[] = [];
   const leftOut: { id: string; statement: string }[] = [];
   for (const rule of toAsk) {
     let yes = values.yes;
     if (!yes) {
       say(`  ${rule.statement}`);
       const answer = (await io.ask('    Confirm? [Y/n] ')).trim().toLowerCase();
+      if (!['', 'y', 'yes', 'n', 'no'].includes(answer)) {
+        throw new UsageError('Answer yes or no to each rule. No project was created.');
+      }
       yes = answer === '' || answer === 'y' || answer === 'yes';
     } else if (human) {
       say(`  ✓ ${rule.statement}`);
     }
     if (yes) confirmedRuleIds.push(rule.id);
-    else leftOut.push({ id: rule.id, statement: rule.statement });
+    else {
+      rejectedRuleIds.push(rule.id);
+      leftOut.push({ id: rule.id, statement: rule.statement });
+    }
   }
   const ruleCount = toAsk.length;
 
@@ -313,7 +320,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
     const installed = await service.installPackSuite(
       project.id,
       { policy: policyInput, confirmedRuleIds, createdAt: new Date().toISOString(), canary: true },
-      { confirmedRuleIds },
+      { confirmedRuleIds, rejectedRuleIds },
     );
     return { project, benchmark: installed.benchmark };
   });
@@ -346,6 +353,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo()): Promis
           keySecret,
           safety,
           confirmedRuleIds,
+          rejectedRuleIds,
           leftOutRuleIds: leftOut.map((rule) => rule.id),
           inForceRuleIds: inForce.map((rule) => rule.id),
           rules: ruleCount,

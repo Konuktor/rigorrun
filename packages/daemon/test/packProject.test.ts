@@ -347,6 +347,42 @@ describe('installing a pack’s suite', () => {
     expect(await store.readArtefact(project.id, 'benchmark')).toBeUndefined();
   });
 
+  it('preserves explicit rejection during installation without rejecting unanswered rules', async () => {
+    await store.setSecret(DEFAULT_KEY_SECRET, 'k');
+    const project = await packProject();
+    const installed = await service.installPackSuite(
+      project.id,
+      {},
+      {
+        rejectedRuleIds: ['items.no_other'],
+      },
+    );
+    expect(installed.contract.rules.map((rule) => [rule.id, rule.status])).toEqual([
+      ['items.exact', 'inferred'],
+      ['items.no_other', 'rejected'],
+    ]);
+    expect(
+      installed.benchmark.cases
+        .flatMap((entry) => entry.checks)
+        .filter((check) => check.ruleId === 'items.no_other')
+        .every((check) => check.blocking === false),
+    ).toBe(true);
+    expect(await store.readArtefact(project.id, 'contract')).toEqual(installed.contract);
+  });
+
+  it.each([
+    { rejectedRuleIds: ['items.invented'] },
+    { rejectedRuleIds: ['items.no_other', 'items.no_other'] },
+    { confirmedRuleIds: ['items.exact', 'items.exact'] },
+    { confirmedRuleIds: ['items.exact'], rejectedRuleIds: ['items.exact'] },
+  ])('refuses invalid pack review decisions before publication: %j', async (decisions) => {
+    await store.setSecret(DEFAULT_KEY_SECRET, 'k');
+    const project = await packProject();
+    await expect(service.installPackSuite(project.id, {}, decisions)).rejects.toThrow();
+    expect(await store.readArtefact(project.id, 'benchmark')).toBeUndefined();
+    expect(await store.readArtefact(project.id, 'suite-source')).toBeUndefined();
+  });
+
   it('refuses to confirm a rule the suite has no check for, which would gate nothing', async () => {
     await store.setSecret(DEFAULT_KEY_SECRET, 'k');
     const project = await packProject();

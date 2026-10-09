@@ -733,7 +733,7 @@ export class Service {
   async installPackSuite(
     projectId: string,
     params: unknown,
-    decisions: { confirmedRuleIds?: string[] } = {},
+    decisions: { confirmedRuleIds?: string[]; rejectedRuleIds?: string[] } = {},
   ): Promise<{ contract: EnvironmentContract; benchmark: Benchmark }> {
     const project = await this.store.read(projectId);
     const pack = packOf(project);
@@ -765,8 +765,18 @@ export class Service {
     }
 
     const ruleIds = new Set(parsedContract.data.rules.map((rule) => rule.id));
-    const confirmedRuleIds = [...new Set(decisions.confirmedRuleIds ?? [])];
-    const unknownRules = confirmedRuleIds.filter((id) => !ruleIds.has(id));
+    const confirmedRuleIds = decisions.confirmedRuleIds ?? [];
+    const rejectedRuleIds = decisions.rejectedRuleIds ?? [];
+    for (const ids of [confirmedRuleIds, rejectedRuleIds]) {
+      if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string')) {
+        throw new Error('Review decisions must name rules in this contract.');
+      }
+      if (new Set(ids).size !== ids.length) throw new Error('Duplicate rule in review decisions.');
+    }
+    if (confirmedRuleIds.some((id) => rejectedRuleIds.includes(id))) {
+      throw new Error('A rule cannot be both confirmed and rejected.');
+    }
+    const unknownRules = [...confirmedRuleIds, ...rejectedRuleIds].filter((id) => !ruleIds.has(id));
     if (unknownRules.length > 0) {
       throw new Error(
         `${pack.name}'s suite has no rule ${unknownRules.join(', ')}. Its rules: ${[...ruleIds].join(', ') || 'none'}.`,
@@ -803,7 +813,7 @@ export class Service {
 
     const contract = applyReview(
       { ...parsedContract.data, environmentId: project.id },
-      { confirmedRuleIds, rejectedRuleIds: [] },
+      { confirmedRuleIds, rejectedRuleIds },
       this.now().toISOString(),
     );
     const inForce = new Set(
