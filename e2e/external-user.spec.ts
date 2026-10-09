@@ -30,7 +30,7 @@ const tsx = join(root, 'node_modules', '.bin', 'tsx');
  * Somebody reading a claim that this works should be able to look at what the
  * person actually saw, at each point where the product asserts something.
  */
-const SHOTS = join(root, 'docs', 'external-user-run');
+const SHOTS = process.env['RIGORRUN_E2E_SHOTS'] ?? join(root, 'docs', 'external-user-run');
 let shot = 0;
 async function evidence(page: Page, name: string): Promise<void> {
   shot += 1;
@@ -279,8 +279,10 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // ------------------------------------------------------ 6. rule, then build
   await page.getByTestId('compile').click();
+  await expect(page.getByText(/Decide each proposed rule/)).toBeVisible();
+  await expect(page.getByTestId('generate')).toBeDisabled();
   await page.getByRole('button', { name: 'Confirm all proposed rules', exact: true }).click();
-  await expect(page.getByText('Guesses, every one.')).toBeVisible();
+  await expect(page.getByTestId('generate')).toBeEnabled();
   await page.getByTestId('generate').click();
 
   await expect(page.getByTestId('suite-size')).toContainText('cases built');
