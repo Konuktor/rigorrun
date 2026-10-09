@@ -15,6 +15,8 @@ import { expectNoOverflow, expectNoOffOriginRequests, watchPage } from './suppor
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const bin = join(root, 'packages/cli/src/bin.ts');
+// Exercise the same journey against either source or the installed artifact.
+const packagedBin = process.env['RIGORRUN_BIN'];
 let scratch: string;
 let home: string;
 let pairedUrl: string;
@@ -26,16 +28,20 @@ const servers: Server[] = [];
 const envelopes: Record<string, unknown>[] = [];
 
 async function launch(args: string[], ready: RegExp): Promise<string> {
-  const child = spawn(process.execPath, ['--import', 'tsx', bin, ...args], {
-    cwd: root,
-    env: {
-      PATH: process.env['PATH'] ?? '',
-      RIGORRUN_HOME: home,
-      RIGORRUN_SECRET_BACKEND: 'file',
-      NO_COLOR: '1',
+  const child = spawn(
+    packagedBin ?? process.execPath,
+    [...(packagedBin ? [] : ['--import', 'tsx', bin]), ...args],
+    {
+      cwd: root,
+      env: {
+        PATH: process.env['PATH'] ?? '',
+        RIGORRUN_HOME: home,
+        RIGORRUN_SECRET_BACKEND: 'file',
+        NO_COLOR: '1',
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
     },
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  );
   children.add(child);
   child.once('close', () => children.delete(child));
   return new Promise((resolve, reject) => {
