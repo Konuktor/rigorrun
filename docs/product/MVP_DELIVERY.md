@@ -1,5 +1,8 @@
 # General-agent MVP local handoff
 
+The local handoff record below is historical. A separately authorised production
+site/docs deployment followed it; see the final section for the actual live scope.
+
 Functional acceptance and independent whole-branch review completed on 2026-10-09
 UTC (2026-10-10 in Bishkek). Ready for local handoff, not production qualification.
 Verified runtime/test integration head: `b2b59924e9629e327d000126ebe5703853433a5c`;
@@ -157,3 +160,42 @@ Next: one real design-partner workflow with observable reads, safe reset, agreed
 failure cases and a paid-pilot acceptance contract. Fix generic compiler/generator
 quality limitations before treating their generated suites as release evidence.
 Build managed history/approvals and billing only after recurring use is established.
+
+## Production follow-up — 2026-10-09 UTC / 2026-10-10 Bishkek
+
+After local handoff, the founder explicitly requested deployment to production.
+Cloudflare and Wrangler skills guided existing-project direct uploads; the
+verification skill required fresh live checks before declaring deployment complete.
+Source: `697ad63d2a68db7a19bdce724ecca26cb1fffabb`. The original dirty checkout
+remains preserved. No source changes were needed for this follow-up.
+
+| Target                                  | New production deployment              | Previous production deployment         |
+| --------------------------------------- | -------------------------------------- | -------------------------------------- |
+| `rigorrun` → `https://rigorrun.xyz`     | `f8e9e0d3-463d-4feb-8e15-005b27b1364c` | `698eae9a-eef8-414b-a833-0b1999c9a9ac` |
+| `rigorrun-docs` → docs Pages deployment | `4408fcd2-b1a4-4a4d-9738-34702f7674e6` | `15004cf0-5e46-431d-9233-dfc2af92fcaf` |
+
+Both existing projects list the new deployment as **Production**, branch `main`,
+source `697ad63`. Immutable URLs: `https://f8e9e0d3.rigorrun.pages.dev` and
+`https://4408fcd2.rigorrun-docs.pages.dev`. Previous deployments remain available
+for rollback in Cloudflare; none were deleted or rolled back. Existing
+`https://docs.rigorrun.xyz/trust/security/` also serves the updated founder contact.
+
+Fresh acceptance:
+
+- `pnpm claims`, `pnpm build:site` and `pnpm build:docs`: exit 0. The previously
+  disclosed Starlight 404-entry build notice remains.
+- `env -u NO_COLOR PUBLIC_URL=https://rigorrun.xyz pnpm exec playwright test --config=e2e/playwright.public.config.ts --workers=1 --retries=0 --reporter=dot --output=/tmp/rigorrun-production-public-2026-10-09`: **99/99**, 54.5s, three viewports.
+- `env -u NO_COLOR PUBLIC_URL=https://rigorrun.xyz pnpm exec playwright test --config=e2e/playwright.smoke.config.ts --workers=2 --retries=0 --reporter=dot --output=/tmp/rigorrun-production-smoke-2026-10-09`: **6/6**, 17.3s.
+- Live homepage has the new headline. Homepage, access, company and the docs
+  security page return 200; all inspected contact links resolve to
+  `erbol@rigorrun.xyz`. An initial raw-HTML probe assumed plaintext mail links and
+  exited 1 because Cloudflare's existing email protection encodes them. A corrected
+  probe decoded the actual protected destinations and checked exact equality;
+  the unchanged browser contact assertions independently passed. No protection
+  settings or assertions were weakened.
+
+Only static site/docs were deployed. CLI/daemon changes remain a local MVP, not
+a published npm release or hosted runtime. No new qualification, subscription
+billing, production data writes, DNS changes, Git push or shared-branch merge.
+These deployment checks establish website availability/content, not agent safety
+or a fresh qualification of the modified package tree.

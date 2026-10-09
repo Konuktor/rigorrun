@@ -32,3 +32,14 @@ At minute 90 stop expanding scope. At minute 120 remove optional workflow-select
 - UI: in the already allowlisted `e2e/external-user.spec.ts`, allow `RIGORRUN_E2E_SHOTS` to redirect artifacts away from tracked historical screenshots, with the existing default unchanged. Adapt stale review explanation assertions to deliberate consent; retain all policy/evidence assertions.
 - Coordinator: `docs/product/MVP_DELIVERY.md` records the integrated acceptance, review fixes, supported scope and handoff. This is an implementation record, not a protected qualification report.
 - Core final-review correction: `packages/env-helpdesk/src/cli/init.ts`, `packages/env-stripe/src/cli/init.ts`, `packages/env-helpdesk/test/cli.test.ts` may preserve deliberate `n/no` as explicit rejected IDs through installation. Omitted API IDs remain inferred; invalid answers/decisions fail without publication, default `--yes` behavior remains. No factory auto-confirm or auto-reject is permitted.
+
+## Separately authorised production follow-up
+
+After local handoff, the founder explicitly requested deployment to production
+on 2026-10-09 UTC (2026-10-10 Bishkek). That request supersedes the original
+no-deployment constraint for the prepared static site and documentation only.
+Publish the existing `rigorrun` and `rigorrun-docs` Pages projects on their verified
+production branch `main`; record source/deployment IDs and live read-only checks
+in the already allowlisted `docs/product/MVP_DELIVERY.md`. Do not publish npm,
+push/merge Git branches, create new infrastructure, change DNS/security settings
+or run write-producing agent assessments against production.
