@@ -1,6 +1,6 @@
 {
   "name": "rigorrun",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Permission and scope tests for AI agents: send your agent tickets that tempt it to act for the wrong customer or organisation, then read the system itself — a multi-tenant helpdesk twin, or Stripe — instead of the transcript.",
   "keywords": [
     "mcp",

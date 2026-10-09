@@ -2,7 +2,7 @@
 
 # RigorRun
 
-**Your agent acts for one customer at a time. You check it stays there by reading the transcript.**
+**Verify what your AI agents actually do.**
 
 RigorRun sends your agent tickets that tempt it across that line — somebody else's order, a
 decision that is not its to make, an instruction hidden in the customer's message — then reads the
@@ -44,6 +44,14 @@ keys, no account. The same run is at [rigorrun.xyz/replay](https://rigorrun.xyz/
 
 ## Your multi-tenant support agent
 
+For the guided **Agent Release Check**, start `npx rigorrun@0.6.1`, create a
+project, select **Helpdesk twin**, review every rule, and connect your own HTTP
+agent. Read task and policy results alongside the twin's state, access log and
+outbox, then repeat the saved project. Follow the
+[guided quickstart](https://docs.rigorrun.xyz/start/agent-release-check/).
+A PASS is limited to the checked scenarios; the twin is simulated, not your live
+helpdesk. Use one writer per project and stop the local daemon before CLI writes.
+
 ```bash
 npx rigorrun helpdesk twin                                 # MCP at http://127.0.0.1:12113/mcp; leave it running
 npx rigorrun helpdesk try --agent <agent URL>              # your agent, connected to the twin with its token
@@ -71,9 +79,9 @@ from what the agent said. Every verdict is `PARTIAL`
 and prints what was read. Against your Stripe test mode, `stripe init` takes a test key instead of
 `--twin` — live keys are refused. Start with [the Stripe guide](https://docs.rigorrun.xyz/start/stripe)
 and [the example agent](examples/stripe-support-agent); CI is one step
-(`uses: Konuktor/rigorrun@v0.6.0`, see [docs/CI.md](docs/CI.md)).
+(`uses: Konuktor/rigorrun@v0.6.1`, see [docs/CI.md](docs/CI.md)).
 
-**How we know the verdicts are right.** Before this release the Stripe pack was qualified against a
+**Historical qualification evidence.** For the recorded qualification trees, the Stripe pack was qualified against a
 protocol written before any code: 8 scripted agents (1 correct, 7 with one defect each) × 7 tickets ×
 3 attempts, each verdict checked against an independent oracle that reads Stripe directly. On the
 local twin and on Stripe test mode: 168 and 168 cells, no false pass and no false fail. Black-box
@@ -81,6 +89,10 @@ mode on its own system: 36 cells, none either. The Larch Helpdesk pack the same 
 scripted agents × 6 tickets × 3 attempts, 144 cells, none either. Both packs were qualified again at
 the 0.6.0 release tree, with the same result.
 ([Helpdesk evidence](reports/helpdesk-requal-0.6.0) · [Stripe evidence](reports/stripe-requal-0.6.0) · [black-box evidence](reports/blackbox-qualification-2026-10))
+
+The 0.6.1 tree changes review handling, readiness, guided onboarding and report
+rendering. Those historical qualifications do **not** cover this changed tree.
+Current regression and installed-package checks are not a new qualification.
 
 Not on Stripe? This opens a local interface for any system RigorRun can reach and read back — an
 MCP server, an HTTP API, or a web application:
@@ -147,7 +159,7 @@ pnpm release:verify       # everything below, in order, on this machine
 |                                                         |                                                                     |
 | ------------------------------------------------------- | ------------------------------------------------------------------- |
 | `pnpm lint` · `pnpm typecheck`                          | the usual                                                           |
-| `pnpm test`                                             | 847 unit tests                                                      |
+| `pnpm test`                                             | unit and integration tests                                          |
 | `pnpm contrast`                                         | every token pair against its WCAG requirement                       |
 | `pnpm domain`                                           | no business noun in generic code, across 26 directories             |
 | `pnpm e2e` · `pnpm a11y` · `pnpm visual` · `pnpm cross` | the interface                                                       |

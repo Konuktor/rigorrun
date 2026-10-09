@@ -65,7 +65,7 @@ npx rigorrun stripe init --key-env STRIPE_TEST_KEY --safety staging`,
     title: 'Put the gate in CI',
     body: 'The GitHub Action runs the same gate as a step in your workflow, publishes its summary and uploads the HTML report.',
     code: `- name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.6.0
+  uses: Konuktor/rigorrun@v0.6.1
   with:
     project: \${{ vars.RIGORRUN_PROJECT }}`,
     link: { href: CI_GUIDE, label: 'The CI guide' },
@@ -158,10 +158,14 @@ const general = [
       <div class="flex flex-col items-start justify-center gap-5">
         <Command command="npx rigorrun helpdesk try" size="lg" />
         <p class="max-w-md text-support text-secondary">
-          For your own HTTP agent, initialise the bundled Helpdesk pack against a local twin,
-          connect the candidate and run the project gate. Use the documentation for that separate
-          setup; a verdict applies only to the suite and observable environment.
+          For your own HTTP agent, open the local runner, select Helpdesk twin,
+          explicitly review the rules, connect the candidate and inspect the run's system evidence.
+          Repeat the saved project, then use the same suite in a CLI release gate.
+          A verdict applies only to the checked suite and observable environment.
         </p>
+        <Button href={`${DOCS_URL}/start/agent-release-check/`} variant="secondary">
+          Guided Agent Release Check
+        </Button>
       </div>
     </div>
   </Section>

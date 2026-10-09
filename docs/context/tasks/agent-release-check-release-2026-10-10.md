@@ -15,7 +15,7 @@ Prepare a patch release of the existing workflow, without redesign or engine cha
 - This brief and a new `docs/product/AGENT_RELEASE_CHECK_RELEASE.md` verification ledger.
 - `e2e/a11y.spec.ts`, `e2e/critical.spec.ts`: align consent-dependent navigation with the existing `deepLinkToVerdict` helper; retain accessibility/evidence assertions.
 - `e2e/__screenshots__/visual.spec.ts-snapshots/**`: only individually inspected intentional changes from the existing bundled examples; no enlarged tolerances or hidden regions.
-- `packages/cli/package.json`, `action.yml`: release version only; any additional required version locations must be explained before editing.
+- `packages/cli/package.json`, `packages/cli/src/help.ts`, `packages/core/src/index.ts`, `action.yml`: release version only. Inspection found two constants asserted against the manifest by `packages/cli/test/package.test.ts`; update all three together, without engine logic changes.
 - `README.md`, `docs/CI.md`, `docs/product/AGENT_RELEASE_CHECK_QUICKSTART.md`.
 - `apps/docs/src/content/docs/start/helpdesk.md`, `apps/docs/src/content/docs/start/ci-gate.md`, a new `apps/docs/src/content/docs/start/agent-release-check.md`, and narrow docs navigation registration in `apps/docs/astro.config.mjs`.
 - `apps/site/src/pages/index.astro`, `apps/site/src/pages/start.astro`, `apps/site/src/pages/what-is-built.astro`, `apps/site/public/llms.txt`: existing-layout copy, links, version/availability disclosures and real demo embed only.

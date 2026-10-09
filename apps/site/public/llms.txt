@@ -54,8 +54,9 @@ test environment. No customer, revenue, funding or market-size claim is made her
   or API: not built yet.
 - Direct tool-call permission checks: being built, not a current blanket guarantee.
 - A connection, demo or passing suite does not prove arbitrary workflow safety.
-- Current development safeguards for explicit review and current suite-quality
-  evidence are local MVP changes, not a new published npm release.
+- Regression checks for the 0.6.1 review, readiness, guided Helpdesk path and
+  report changes are not a new qualification. Historical qualification does
+  not cover this changed tree.
 
 ## Start
 
@@ -63,6 +64,7 @@ test environment. No customer, revenue, funding or market-size claim is made her
   The command exits 0 when its paired demo completes even if one control fails;
   that process exit is not a candidate's release PASS.
 - Setup and concrete pack paths: https://rigorrun.xyz/start
+- Guided own-HTTP-agent path: https://docs.rigorrun.xyz/start/agent-release-check/
 - Architecture and limitations: https://rigorrun.xyz/how-it-works
 - Full docs: https://docs.rigorrun.xyz
 - Built vs planned: https://rigorrun.xyz/what-is-built

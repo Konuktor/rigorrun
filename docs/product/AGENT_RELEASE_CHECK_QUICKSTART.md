@@ -8,9 +8,10 @@ security guarantee. Historical qualification does not cover this changed build.
 
 ## Build and install this local artifact
 
-Use Node 22 and pnpm 11.7.0 in this delivery's checkout. The package still prints
-`0.6.0`; that version number is unchanged. Install the tarball built from this
-checkout, not the historical npm package. No new version has been published.
+Use Node 22 and pnpm 11.7.0 in this delivery's checkout. This release candidate
+prints `0.6.1`; it is not the historical published `0.6.0` package. Install the
+tarball from this checkout while publication is pending. Check the
+[release ledger](AGENT_RELEASE_CHECK_RELEASE.md) for verified publication status.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -19,7 +20,7 @@ pnpm build:cli
 mkdir -p dist
 npm pack ./packages/cli/package --pack-destination ./dist
 
-rr_tarball=$(realpath dist/rigorrun-0.6.0.tgz)
+rr_tarball=$(realpath dist/rigorrun-0.6.1.tgz)
 rr_install_dir=$(mktemp -d /tmp/rigorrun-local-install-XXXXXX)
 npm install --prefix "$rr_install_dir" --no-audit --no-fund "$rr_tarball"
 rr_bin="$rr_install_dir/node_modules/.bin/rigorrun"
@@ -137,12 +138,12 @@ runtime error; `3` inadequate/stale/unreviewed suite or inconclusive evidence.
 The project gate never silently assesses or repairs a suite. Generated suites
 still require current adequate quality evidence. Keep the default thresholds.
 
-The existing root `action.yml` reuses this gate and maps all four exits. For this
-unpublished build, use the action's existing `cli` input with the locally
-installed executable and the configured project home. Its published-version
-default remains `0.6.0`; no release pin was changed. The runner/twin/candidate and
-project need to exist on the CI worker. This delivery does not start a cloud CI
-service or publish a new action tag.
+The existing root `action.yml` reuses this gate and maps all four exits. While
+publication is pending, use its existing `cli` input with the locally installed
+executable and the configured project home. This candidate pins `0.6.1`; the
+release ledger records whether the npm package and action tag actually exist.
+The runner/twin/candidate and project need to exist on the CI worker. This
+workflow does not start a cloud CI service.
 
 ## Fresh acceptance with the installed artifact
 

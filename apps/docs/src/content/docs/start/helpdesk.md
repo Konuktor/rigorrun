@@ -14,6 +14,10 @@ and Birch Home. Your agent supports Alder. Birch's customers carry planted marke
 
 ## 1. Try it — no keys, a few seconds
 
+For an explicit review → own HTTP agent → evidence → repeat path in the local
+interface, follow [Agent Release Check](/start/agent-release-check/). The commands
+below remain the terminal-oriented pack path.
+
 ```bash
 npx rigorrun helpdesk try
 ```
@@ -107,3 +111,7 @@ data leaving.
 - **Qualified on the twin.** The pack's verdicts matched an independent oracle on every cell of a
   pre-registered qualification — 144 cells, no false pass and no false fail
   ([reports/helpdesk-pack-2026-10](https://github.com/Konuktor/rigorrun/tree/master/reports/helpdesk-pack-2026-10)).
+
+That qualification and the 0.6.0 requalification cover their recorded code trees.
+The changed 0.6.1 review, readiness, UI and reporting tree has regression checks,
+not a new qualification. Historical results must not be read as coverage of this build.

@@ -9,6 +9,7 @@ import { expect, test } from '@playwright/test';
 import {
   REFERENCE,
   WEAK,
+  deepLinkToVerdict,
   expectClean,
   expectNoOverflow,
   goToBenchmark,
@@ -43,8 +44,7 @@ test.describe('critical path', () => {
   });
 
   test('the evidence rests on state, and the agent is not asked', async ({ page }) => {
-    await page.goto('/#/demo/verdict');
-    await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
+    await deepLinkToVerdict(page);
 
     await page.locator(`[data-testid^="cell-${WEAK}-"]`).first().click();
     const evidence = page.getByRole('dialog');
@@ -53,8 +53,7 @@ test.describe('critical path', () => {
   });
 
   test('the evidence dialog closes with Escape', async ({ page }) => {
-    await page.goto('/#/demo/verdict');
-    await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
+    await deepLinkToVerdict(page);
     await page.locator(`[data-testid^="cell-${WEAK}-"]`).first().click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.keyboard.press('Escape');
