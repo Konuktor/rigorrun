@@ -42,44 +42,44 @@
 **Files:** Backend allowlist in task brief. New `packages/daemon/test/packSuiteRoutes.test.ts` and/or `gateReadinessRoutes.test.ts`.
 **Interfaces:** consumes existing `Service.installPackSuite(id, params, decisions)` and `Service.gateReadiness(id)`; produces shared routes above. No service gate changes.
 
-- [ ] Write setup regressions for unmatched rule retention and nonzero stop, explicit reject/confirm (including pattern `.`), overlap and invalid regex. Assert no generated suite, assessment or registered agent on refusal. Validate regex patterns before proxy/connect where possible; actual overlap only after compiling rules.
-- [ ] Run `pnpm exec vitest run packages/cli/test/setup.test.ts` and record expected RED assertions.
-- [ ] Compile regex once, resolve only explicit matches, reject conflicting matches, persist explicit decisions, report project/pending rule IDs and return the existing appropriate nonzero contract before downstream operations. Update misleading setup help/comment if required.
-- [ ] Write real Runner HTTP tests for both decisions, malformed root/arrays/elements, unknown IDs/duplicates/overlap, missing/stale/pending/refused-generated/valid bundled readiness, pairing/CSRF, unchanged disk bytes and no candidate calls.
-- [ ] Run focused server tests for RED; implement strict route parsing and read-only forwarding.
-- [ ] Run focused CLI/server tests plus pairing/CSRF, lint, typecheck and claims; commit only allowlisted files; report RED/GREEN and files.
+- [x] Write setup regressions for unmatched rule retention and nonzero stop, explicit reject/confirm (including pattern `.`), overlap and invalid regex. Assert no generated suite, assessment or registered agent on refusal. Validate regex patterns before proxy/connect where possible; actual overlap only after compiling rules.
+- [x] Run `pnpm exec vitest run packages/cli/test/setup.test.ts` and record expected RED assertions.
+- [x] Compile regex once, resolve only explicit matches, reject conflicting matches, persist explicit decisions, report project/pending rule IDs and return the existing appropriate nonzero contract before downstream operations. Update misleading setup help/comment if required.
+- [x] Write real Runner HTTP tests for both decisions, malformed root/arrays/elements, unknown IDs/duplicates/overlap, missing/stale/pending/refused-generated/valid bundled readiness, pairing/CSRF, unchanged disk bytes and no candidate calls.
+- [x] Run focused server tests for RED; implement strict route parsing and read-only forwarding.
+- [x] Run focused CLI/server tests plus pairing/CSRF, lint, typecheck and claims; commit only allowlisted files; report RED/GREEN and files.
 
 ### Task 2: Guided Helpdesk browser path
 
 **Files:** UI allowlist in task brief, with narrow pack-specific `apps/app/src/packs/HelpdeskFlow.tsx`; new onboarding spec/config. Keep pack identity/defaults/copy in this component; generic product pages consume its component and support predicate without pack literals. Leave the domain checker unchanged.
 **Interfaces:** consumes shared API, existing connect/addAgent/run/project/report. Produces wrapper signatures above and user route within Projects/Project.
 
-- [ ] Write a user-visible Playwright regression using the real CLI daemon/twin and external deterministic HTTP control with fresh state. Path: create project → Helpdesk twin URL and safety → draft rules → explicit confirm/reject → own endpoint/probe → readiness → run → evidence/report → reload/repeat.
-- [ ] Run to observe RED for missing Helpdesk path (record reason; backend may not yet be integrated).
-- [ ] Implement wrappers and a focused existing-style flow. Ensure selected pack params reflect explicit decisions; pending review cannot proceed. Confirm real daemon bootstrap registers pack, rather than unit-only registration.
-- [ ] Add the existing server's pack connector shape to `ProjectView.connector` and verify persisted Helpdesk selection/URL/safety after reload; do not cast packs as MCP connectors.
-- [ ] Add bounded coverage for failed probe, readiness refusal, project/URL switching, late response cancellation, reload and evidence isolation. Use existing UI patterns rather than full redesign.
-- [ ] Run browser flow against a local combined checkout with accepted backend commit once available. Inspect desktop/mobile screenshot and console. Run lint/typecheck/claims; report complete file list and commit.
+- [x] Write a user-visible Playwright regression using the real CLI daemon/twin and external deterministic HTTP control with fresh state. Path: create project → Helpdesk twin URL and safety → draft rules → explicit confirm/reject → own endpoint/probe → readiness → run → evidence/report → reload/repeat.
+- [x] Run to observe RED for missing Helpdesk path (record reason; backend may not yet be integrated).
+- [x] Implement wrappers and a focused existing-style flow. Ensure selected pack params reflect explicit decisions; pending review cannot proceed. Confirm real daemon bootstrap registers pack, rather than unit-only registration.
+- [x] Add the existing server's pack connector shape to `ProjectView.connector` and verify persisted Helpdesk selection/URL/safety after reload; do not cast packs as MCP connectors.
+- [x] Add bounded coverage for failed probe, readiness refusal, project/URL switching, late response cancellation, reload and evidence isolation. Use existing UI patterns rather than full redesign.
+- [x] Run browser flow against a local combined checkout with accepted backend commit once available. Inspect desktop/mobile screenshot and console. Run lint/typecheck/claims; report complete file list and commit.
 
 ### Task 3: Safe PASS evidence
 
 **Files:** Evidence allowlist in task brief.
 **Interfaces:** consumes existing `RunResult`, optional benchmark/contract, explainCase/sanitize/escape; produces self-contained HTML with compact expandable passing cases.
 
-- [ ] Write report tests for PASS task/assertion details, actual black-box world/access/outbox, task versus policy labels, missing readback unknown, adversarial HTML escaping and secret/private-data redaction in published mode.
-- [ ] Run `pnpm exec vitest run packages/report/test/report.test.ts packages/report/test/explain.test.ts packages/report/test/materialized.test.ts` to observe relevant RED.
-- [ ] Add compact details using existing render/explain functions. Do not infer internal calls/reasoning; keep unknown cases visibly undecided. Do not expose more private data than current mode permits.
-- [ ] Rerun all report tests plus lint/typecheck/claims; commit allowlisted changes and report RED/GREEN.
+- [x] Write report tests for PASS task/assertion details, actual black-box world/access/outbox, task versus policy labels, missing readback unknown, adversarial HTML escaping and secret/private-data redaction in published mode.
+- [x] Run `pnpm exec vitest run packages/report/test/report.test.ts packages/report/test/explain.test.ts packages/report/test/materialized.test.ts` to observe relevant RED.
+- [x] Add compact details using existing render/explain functions. Do not infer internal calls/reasoning; keep unknown cases visibly undecided. Do not expose more private data than current mode permits.
+- [x] Rerun all report tests plus lint/typecheck/claims; commit allowlisted changes and report RED/GREEN.
 
 ### Task 4: Root integration, artifact quickstart and acceptance
 
 **Files:** Root allowlist in task brief.
 **Interfaces:** consumes reviewed worker commits and built CLI artifact; produces English quickstart and honest acceptance ledger.
 
-- [ ] Establish baseline using public CLI Helpdesk/Stripe acceptance with independent scripted HTTP controls and a fresh store; do not count this as new-code acceptance.
-- [ ] Arrange read-only plan review; resolve findings before writing workers start. Extract task briefs with the skill script and create three native worktrees from the committed plan baseline.
-- [ ] Review each worker name-status/stat/check/full diff and test report before cherry-picking only accepted commits. Dispatch independent task review as slots become available, then read-only whole-branch review.
-- [ ] Obtain commands from actual local packaged CLI help. Build app/CLI, pack and install into a new temporary directory. Execute twin/daemon, own endpoint, explicit review, readiness, gate, HTML and repeat against installed artifact. Save artifact paths and exit codes outside protected reports.
-- [ ] Cover every acceptance item 1–11 in the spec with literal expected outcomes using independent controls (scoped, overbroad, refusal, wrong recipient/read/write/leak). Add only missing root-owned tests/fixtures with RED/GREEN.
-- [ ] Run integrated targeted tests, real daemon/browser onboarding, fresh restart/reset repeat, `pnpm verify`, `pnpm verify:package` and history/compare checks. Correct regressions through owner or explicit ownership transfer and rereview.
-- [ ] Write `docs/product/AGENT_RELEASE_CHECK_QUICKSTART.md` and `AGENT_RELEASE_CHECK_DELIVERY.md` with exact checkout, branch, SHA, commands, reports, PASS/FAIL/NOT RUN per acceptance, unsupported scope and local/npm/production status. Preserve worktrees; report deletions truthfully.
+- [x] Establish baseline using public CLI Helpdesk/Stripe acceptance with independent scripted HTTP controls and a fresh store; do not count this as new-code acceptance.
+- [x] Arrange read-only plan review; resolve findings before writing workers start. Extract task briefs with the skill script and create three native worktrees from the committed plan baseline.
+- [x] Review each worker name-status/stat/check/full diff and test report before cherry-picking only accepted commits. Dispatch independent task review as slots become available, then read-only whole-branch review.
+- [x] Obtain commands from actual local packaged CLI help. Build app/CLI, pack and install into a new temporary directory. Execute twin/daemon, own endpoint, explicit review, readiness, gate, HTML and repeat against installed artifact. Save artifact paths and exit codes outside protected reports.
+- [x] Cover every acceptance item 1–11 in the spec with literal expected outcomes using independent controls (scoped, overbroad, refusal, wrong recipient/read/write/leak). Add only missing root-owned tests/fixtures with RED/GREEN.
+- [x] Run integrated targeted tests, real daemon/browser onboarding, fresh restart/reset repeat, `pnpm verify`, `pnpm verify:package` and history/compare checks. Correct regressions through owner or explicit ownership transfer and rereview.
+- [x] Write `docs/product/AGENT_RELEASE_CHECK_QUICKSTART.md` and `AGENT_RELEASE_CHECK_DELIVERY.md` with exact checkout, branch, SHA, commands, reports, PASS/FAIL/NOT RUN per acceptance, unsupported scope and local/npm/production status. Preserve worktrees; report deletions truthfully.
