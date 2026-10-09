@@ -30,6 +30,10 @@ rr_home=$(mktemp -d /tmp/rigorrun-release-home-XXXXXX)
 Retain the absolute `rr_bin` and `rr_home` paths for the other terminals. Use the
 same home for this project. Run one writer at a time; stop the daemon before CLI
 mutations/runs against that home.
+Use one browser tab for writes. The interface retains an in-flight project lock
+across its own navigation, not across a page reload, another tab or another
+process. Wait for any pending write/run to settle before reloading or changing
+clients.
 
 ## Start the twin and your own agent
 
