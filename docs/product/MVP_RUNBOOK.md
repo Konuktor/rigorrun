@@ -1,9 +1,12 @@
 # Local MVP runbook
 
-This is an integrated local checkpoint for the general-agent MVP on 2026-10-09,
-runtime head `437a2a2f`. The coordinator observed functional acceptance across the
-integrated Core, UI, QA and site changes; independent whole-branch review is still
-pending. This is not a published release or qualification of the new tree.
+This is an integrated local checkpoint for the general-agent MVP on 2026-10-09 UTC
+(2026-10-10 in Bishkek), runtime head `b2b59924e9629e327d000126ebe5703853433a5c`.
+The coordinator observed functional acceptance across the integrated Core, UI, QA
+and site changes. Independent whole-branch review and final re-review resolved the
+findings, found no remaining Critical/Important/Minor issues, and marked the work
+ready for local handoff.
+This is not a published release or qualification of the new tree.
 The Helpdesk and Stripe paths below use bundled suites and local twins.
 Changes under `packages/`, including this regression test, change the tree to which
 the historical qualification applies; those reports do not qualify this new build.
@@ -78,10 +81,10 @@ With it, the fake-data artifacts remain for inspection; subprocesses and servers
 still stop. Each subsequent run creates another fresh directory.
 
 The coordinator's integrated targeted run retained its evidence at
-`/tmp/rigorrun-helpdesk-e2e-wmbXMO`; this machine-local path is an example, not a
+`/tmp/rigorrun-helpdesk-e2e-UDZ35V`; this machine-local path is an example, not a
 portable fixture. Run the command again to get your own fresh output path.
-The final integrated repeat used another fresh twin/store and retained its checked
-evidence at `/tmp/rigorrun-helpdesk-e2e-7Jp8ih`.
+The final repeat after the review fixes used another fresh twin/store and retained
+its checked evidence at `/tmp/rigorrun-helpdesk-e2e-ioxtPC`.
 
 For a quick paired demonstration, also use a fresh report path:
 
@@ -110,8 +113,14 @@ pnpm cli gate --project '<projectId>' --agent my-agent --report "$rr_project_dir
 ```
 
 `--yes` intentionally confirms all bundled Helpdesk rules. Read them before using
-that flag; interactive initialization lets you decide individually. A pass applies
-to this suite and observed twin state, not arbitrary systems or production actions.
+that flag; interactive initialization lets you decide individually. Helpdesk and
+Stripe bundled initialization preserve an explicit `n` or `no` as a rejected rule,
+exclude its rule checks from the installed suite, and keep a fully decided reviewed
+suite eligible for gate readiness. These prompts use `[Y/n]`: an empty response
+confirms the displayed rule. Invalid responses such as `maybe` stop initialization
+before a project is created. Always-in-force rules remain confirmed. A pass applies
+to the resulting reviewed suite and observed twin state, not arbitrary systems or
+production actions; it does not attest to a boundary you rejected.
 
 ## Verification at the integrated local checkpoint
 
@@ -124,26 +133,25 @@ env -u NO_COLOR pnpm verify
 pnpm e2e:external
 ```
 
-The coordinator observed `env -u NO_COLOR pnpm verify` exit 0: lint, typecheck,
+The coordinator observed `env -u NO_COLOR pnpm verify` exit 0 at `b2b59924`: lint, typecheck,
 domain, claims (68 files), full Vitest, example tests and all builds passed. Vitest
-passed 166 files and 1929 tests, with one existing skipped alternate Stripe
+passed 166 files and 1937 tests, with one existing skipped alternate Stripe
 golden-file diagnostic (the golden comparison itself runs). Example tests passed
-13/13. The targeted Helpdesk/Stripe/Helpdesk-CLI run passed 10/10 without skips,
-including the Python-backed Stripe tests.
+13/13. The final targeted Helpdesk/Stripe/Helpdesk-CLI run passed 12/12 without skips
+in 14.24 seconds, including the Python-backed Stripe tests; none were omitted.
 
 All builds completed: CRM, operations, app, site (15 routes), docs (31 routes),
 extension and CLI with a staged local package. The existing Starlight missing
 404-entry notice remains a build notice; it did not fail the build. A staged CLI
 package is not a package-install verification or published release.
 
-The final external-browser adaptation landed after the verification command's lint
-stage had started. The coordinator separately reran ESLint for that changed file
-and the external test: both passed, with external 1/1 in 9.8 seconds. Child-process
-environment warnings were resolved. Browser diagnostics still detect unsafe
+The final external-browser repeat passed 1/1 in 9.7 seconds after the review fixes.
+Child-process environment warnings were resolved.
+Browser diagnostics still detect unsafe
 actions; the generated venue release gate exits 3 before candidate contact without
 changing assessment or run artifacts. Its 95% task-success threshold was preserved.
 
-Focused browser checks passed: demo 58/58, site 96/96 across desktop/tablet/mobile,
+Focused browser checks passed: demo 58/58, site 99/99 across desktop/tablet/mobile,
 dedicated restart 2/2 and operations renderer 7/7, with no skips in those checks.
 An initial whole-browser configuration attempt had 57 passes, 9 environment setup
 failures and 4 intended skips: the operations test expected port 5175 but the driver
@@ -153,9 +161,10 @@ an all-green run.
 
 The QA worker's earlier baseline-plus-QA full run passed 162 files and 1869 tests,
 with the same alternate golden diagnostic skip. Fresh Helpdesk repeats passed
-before integration. The coordinator's final integrated repeat passed 3/3 with no
-skips in 7.14 seconds, using a new twin/store and checking default scoped exit 0,
-service-token exit 1, setup exit 2 and actual saved evidence again.
+before integration. Integrated repeats check default scoped exit 0, service-token
+exit 1, setup exit 2 and actual saved evidence with a new twin/store each time.
+The final fresh integrated Helpdesk repeat passed 3/3 in 7.16 seconds with no
+retries or skips.
 
 Initial test development exposed fixture parsing and a mistaken expectation of
 PASS evidence cards, both corrected. The new path is a regression proof of existing
@@ -168,6 +177,8 @@ the configured environment. Use a disposable test/staging environment with reset
 and readback; do not run it on production. Gate does not silently invoke assessment.
 Integrated tests now cover explicit review decisions (omissions do not confirm
 rules), current-source checkpoints and full generated-suite quality protection.
+Omitted API review decisions remain inferred; pressing Enter at the bundled
+`[Y/n]` CLI prompt selects its displayed yes default.
 The exit contract is 0 for a candidate passing a usable scoped suite, 1 for a
 candidate failing it, 2 for invalid setup and 3 for missing, stale or inadequate
 suite/evidence before candidate contact. Bundled Helpdesk/Stripe default 0/1 gates
@@ -177,7 +188,8 @@ venue example remains inadequate for release; raw benchmark-file gates remain
 diagnostic and do not have the project path's equivalent quality protection.
 
 Package-install verification, new qualification, release verification, push and
-deployment were not performed. Independent whole-branch review remains pending.
+deployment were not performed. Independent review is complete for this local
+handoff; it does not qualify the new package tree or constitute a release.
 Runtime blocking, hosted organisations, shared team histories, approvals and subscription billing are
 not built in this slice. Custom workflows need an adapter with observable state,
 safe reset and agreed rules; the synthetic examples do not establish that coverage.
