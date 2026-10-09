@@ -360,7 +360,10 @@ try {
       const html = await readFile(report, 'utf8');
       assert.ok(html.includes('RigorRun'));
       if (mode === 'scoped')
-        assert.match(html, /Passing cases|Passed cases|PASS details|Passing checks/i);
+        assert.ok(
+          /Passing cases|Passed cases|PASS details|Passing checks/i.test(html),
+          'The allowed control HTML must expose passing case evidence.',
+        );
     });
   }
   await check('invalid agent configuration exits 2 before candidate tasks', async () => {
@@ -372,6 +375,26 @@ try {
       before,
     );
   });
+  await check(
+    'invalid non-loopback twin configuration exits 2 before candidate tasks',
+    async () => {
+      const before = [...controls.values()].reduce((sum, control) => sum + control.calls.tasks, 0);
+      const invalid = await cli([
+        'helpdesk',
+        'init',
+        '--yes',
+        '--twin',
+        'http://example.invalid/mcp',
+        '--json',
+      ]);
+      assert.equal(invalid.code, 2, invalid.stderr);
+      assert.match(invalid.stderr, /loopback|localhost|127\.0\.0\.1/i);
+      assert.equal(
+        [...controls.values()].reduce((sum, control) => sum + control.calls.tasks, 0),
+        before,
+      );
+    },
+  );
   await check('restart/reset repeats the scoped result and history comparison', async () => {
     await startDaemon();
     const restored = await api(`/projects/${projectId}`);
