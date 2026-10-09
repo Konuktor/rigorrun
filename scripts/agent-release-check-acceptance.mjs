@@ -165,17 +165,17 @@ async function snapshot(directory) {
   return files;
 }
 
-async function latestRun(name) {
-  const folder = join(home, 'projects', projectId);
+async function latestRun(name, id = projectId) {
+  const folder = join(home, 'projects', id);
   const metadata = JSON.parse(await readFile(join(folder, 'project.json'), 'utf8'));
-  const id = metadata.agents.find((agent) => agent.name === name).id;
+  const agentId = metadata.agents.find((agent) => agent.name === name).id;
   const runs = await Promise.all(
     (await readdir(join(folder, 'runs'))).map(async (file) =>
       JSON.parse(await readFile(join(folder, 'runs', file), 'utf8')),
     ),
   );
   return runs
-    .filter((run) => run.caseResults.some((result) => result.agentId === id))
+    .filter((run) => run.caseResults.some((result) => result.agentId === agentId))
     .sort((a, b) => b.finishedAt.localeCompare(a.finishedAt))[0];
 }
 
@@ -428,6 +428,66 @@ try {
         [...controls.values()].reduce((sum, control) => sum + control.calls.tasks, 0),
         before,
       );
+    },
+  );
+  await check(
+    'CLI quickstart initializes, adds own endpoint, gates, reports and compares fresh runs',
+    async () => {
+      const version = await cli(['--version']);
+      assert.equal(version.code, 0);
+      const initialized = await cli([
+        'helpdesk',
+        'init',
+        '--yes',
+        '--twin',
+        started.url,
+        '--name',
+        'CLI quickstart control',
+        '--json',
+      ]);
+      assert.equal(initialized.code, 0, initialized.stdout + initialized.stderr);
+      const cliProjectId = JSON.parse(initialized.stdout).projectId;
+      const added = await cli([
+        'agent',
+        'add',
+        '--project',
+        cliProjectId,
+        '--name',
+        'my-agent',
+        '--black-box',
+        controls.get('scoped').endpoint,
+        '--claim-path',
+        'message',
+      ]);
+      assert.equal(added.code, 0, added.stdout + added.stderr);
+      for (const label of ['cli-first', 'cli-repeat']) {
+        const gate = await cli([
+          'gate',
+          '--project',
+          cliProjectId,
+          '--agent',
+          'my-agent',
+          '--report',
+          join(artifact, `${label}.html`),
+          '--json',
+        ]);
+        assert.equal(gate.code, 0, gate.stdout + gate.stderr);
+        const run = await latestRun('my-agent', cliProjectId);
+        await writeFile(join(artifact, `${label}.json`), JSON.stringify(run, null, 2));
+      }
+      const repeated = await latestRun('my-agent', cliProjectId);
+      const comparison = await cli([
+        'compare-runs',
+        '--project',
+        cliProjectId,
+        repeated.runId,
+        '--json',
+      ]);
+      assert.equal(comparison.code, 0, comparison.stdout + comparison.stderr);
+      await writeFile(join(artifact, 'cli-comparison.json'), comparison.stdout);
+      const projects = await cli(['projects', '--json']);
+      assert.equal(projects.code, 0, projects.stdout + projects.stderr);
+      await writeFile(join(artifact, 'projects.json'), projects.stdout);
     },
   );
   await check('restart/reset repeats the scoped result and history comparison', async () => {
