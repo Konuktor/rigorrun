@@ -515,7 +515,7 @@ export function RunAndVerdict({
 }: {
   project: ProjectView;
   activation: ActivationView | null;
-  onRan: () => void;
+  onRan?: () => void;
   /** Release-check flows recheck suite readiness before any candidate call. */
   beforeRun?: () => Promise<boolean>;
   writeLock?: ProjectWriteLock;
@@ -557,7 +557,7 @@ export function RunAndVerdict({
       const compared = await api.compare(project.id, result.run.runId).catch(() => null);
       if (!active.current) return;
       if (compared) setComparison(compared.comparison);
-      onRan();
+      onRan?.();
     } catch (error) {
       if (active.current) setProblem((error as Error).message);
     } finally {

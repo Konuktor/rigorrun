@@ -555,6 +555,103 @@ test('a held connect reconciles the saved snapshot after navigating back', async
   await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
 });
 
+for (const reopened of ['generic', 'clean', 'edited'] as const) {
+  test(`first connection reconciles a reopened ${reopened} view without inventing safety`, async ({
+    page,
+  }) => {
+    const id = await create(page);
+    expect(
+      JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector,
+    ).toBeNull();
+    const savedUrl = 'http://127.0.0.1:12004/mcp';
+    const editedUrl = 'http://127.0.0.1:12005/mcp';
+    let release!: () => void;
+    let captured!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const firstCaptured = new Promise<void>((resolve) => {
+      captured = resolve;
+    });
+    let writes = 0;
+    await page.route(`**/api/projects/${id}/environment`, async (route) => {
+      writes++;
+      captured();
+      await held; // The first connection is still absent from the actual store.
+      const response = await route.fetch();
+      await route.fulfill({ response });
+    });
+    await page.getByTestId('pack-url').fill(savedUrl);
+    await expect(page.getByTestId('pack-safety')).toHaveValue('');
+    await expect(page.getByTestId('pack-connect')).toBeDisabled();
+    await page.getByTestId('pack-safety').selectOption('ephemeral');
+    await page.getByTestId('pack-connect').click();
+    await firstCaptured;
+    let completionReads = 0;
+    try {
+      await page.getByRole('button', { name: 'All projects', exact: false }).click();
+      await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+      await page.getByTestId(`open-${id}`).click();
+      await expect(page.getByTestId('workflow-helpdesk')).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Helpdesk release check', exact: true }),
+      ).toHaveCount(0);
+      if (reopened !== 'generic') {
+        await page.getByTestId('workflow-helpdesk').click();
+        await expect(page.getByTestId('pack-operation')).toBeVisible();
+        await expect(page.getByTestId('pack-safety')).toHaveValue('');
+        if (reopened === 'edited') {
+          await page.getByTestId('pack-url').fill(editedUrl);
+          await page.getByTestId('pack-safety').selectOption('local');
+        }
+        await expect(page.getByTestId('pack-connect')).toBeDisabled();
+      }
+      await page.route(`**/api/projects/${id}`, async (route) => {
+        completionReads++;
+        await route.continue();
+      });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({
+        path: join(scratch, `first-connect-${reopened}-before-release.png`),
+      });
+    } finally {
+      release();
+    }
+    await expect
+      .poll(
+        async () =>
+          JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+            ?.baseUrl,
+      )
+      .toBe(savedUrl);
+    await expect(
+      page.getByRole('heading', { name: 'Helpdesk release check', exact: true }),
+    ).toBeVisible();
+    await expect(page.getByTestId('pack-connect')).toBeEnabled();
+    await expect(page.getByTestId('pack-url')).toHaveValue(
+      reopened === 'edited' ? editedUrl : savedUrl,
+    );
+    await expect(page.getByTestId('pack-safety')).toHaveValue(
+      reopened === 'edited' ? 'local' : 'ephemeral',
+    );
+    await expect(page.getByTestId('pack-rules')).toHaveCount(0);
+    await expect(page.getByTestId('add-agent')).toHaveCount(0);
+    await expect(page.getByTestId('verdict')).toHaveCount(0);
+    expect(writes).toBe(1);
+    expect(completionReads).toBe(1);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: join(scratch, `first-connect-${reopened}-after-settle.png`) });
+    if (reopened === 'clean') {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expectNoOverflow(page);
+      await page.screenshot({ path: join(scratch, 'first-connect-clean-after-settle-mobile.png') });
+    }
+    await page.reload();
+    await expect(page.getByTestId('pack-url')).toHaveValue(savedUrl);
+    await expect(page.getByTestId('pack-safety')).toHaveValue('ephemeral');
+  });
+}
+
 test('a held candidate run keeps the project locked across evidence remount and navigation', async ({
   page,
 }) => {

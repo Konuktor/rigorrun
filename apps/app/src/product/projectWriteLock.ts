@@ -7,7 +7,7 @@ type Entry = {
   begin: (operation: string) => (() => void) | null;
 };
 
-export type ProjectWriteLock = Snapshot & Pick<Entry, 'begin'>;
+export type ProjectWriteLock = Snapshot & Pick<Entry, 'begin' | 'getSnapshot'>;
 
 // A request outlives its view. Keep its lock for this app session, including
 // navigation away/back; unmounting or editing a draft never cancels a write.
@@ -48,5 +48,5 @@ function entryFor(projectId: string): Entry {
 export function useProjectWriteLock(projectId: string): ProjectWriteLock {
   const entry = entryFor(projectId);
   const snapshot = useSyncExternalStore(entry.subscribe, entry.getSnapshot, entry.getSnapshot);
-  return { ...snapshot, begin: entry.begin };
+  return { ...snapshot, begin: entry.begin, getSnapshot: entry.getSnapshot };
 }

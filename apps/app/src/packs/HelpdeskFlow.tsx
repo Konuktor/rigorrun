@@ -11,7 +11,7 @@ import {
   type RuleView,
 } from '../product/api.ts';
 import { ConnectAgent, RunAndVerdict } from '../product/run.tsx';
-import { useProjectWriteLock } from '../product/projectWriteLock.ts';
+import type { ProjectWriteLock } from '../product/projectWriteLock.ts';
 
 export function isHelpdesk(project: ProjectView): boolean {
   return project.connector?.kind === 'pack' && project.connector.pack === 'helpdesk';
@@ -53,14 +53,16 @@ export function HelpdeskFlow({
   initialRules,
   initialCases,
   activation,
-  onUpdated,
+  loadedSnapshot,
+  writeLock,
   onConnected,
 }: {
   project: ProjectView;
   initialRules: RuleView[];
   initialCases: CaseView[];
   activation: ActivationView | null;
-  onUpdated: () => Promise<Awaited<ReturnType<typeof api.project>> | null>;
+  loadedSnapshot: { completed: number; value: Awaited<ReturnType<typeof api.project>> } | null;
+  writeLock: ProjectWriteLock;
   onConnected: (project: ProjectView) => void;
 }) {
   const saved =
@@ -68,6 +70,7 @@ export function HelpdeskFlow({
   const [url, setUrl] = useState(saved?.baseUrl ?? 'http://127.0.0.1:12113/mcp');
   const [safety, setSafety] = useState<ProjectView['safety'] | ''>(saved ? project.safety : '');
   const [settingsDirty, setSettingsDirty] = useState(!saved || saved.mode !== 'twin');
+  const [settingsEdited, setSettingsEdited] = useState(false);
   const [rules, setRules] = useState(initialRules);
   const [cases, setCases] = useState(initialCases);
   const [decisions, setDecisions] = useState(() => decisionsOf(initialRules));
@@ -77,7 +80,6 @@ export function HelpdeskFlow({
   const [problem, setProblem] = useState('');
   const [writeNotice, setWriteNotice] = useState('');
   const [evidenceRevision, setEvidenceRevision] = useState(0);
-  const writeLock = useProjectWriteLock(project.id);
   const completed = useRef(0);
   const active = useRef(true);
   const epoch = useRef(0);
@@ -106,28 +108,41 @@ export function HelpdeskFlow({
   }, [project.id]);
 
   useEffect(() => {
-    if (writeLock.operation || completed.current === writeLock.completed) return;
+    if (
+      writeLock.operation ||
+      completed.current === writeLock.completed ||
+      loadedSnapshot?.completed !== writeLock.completed
+    )
+      return;
     completed.current = writeLock.completed;
-    // Even an obsolete request may have persisted. Refresh the saved snapshot,
-    // but do not replace the local edited URL/rules or mark that draft saved.
+    // The project owner publishes one guarded post-write load. Wait for that
+    // revision rather than fetching here and superseding the owner's request.
     const suiteChanged = ['connect', 'review'].includes(writeLock.settledOperation);
-    const version = suiteChanged ? ++epoch.current : epoch.current;
-    if (suiteChanged) setReadiness(null);
-    void onUpdated()
-      .then(async (snapshot) => {
-        if (!active.current || version !== epoch.current || !snapshot) return;
-        if (!suiteChanged || settingsDirty || reviewDirty) return;
-        const connector = snapshot.project.connector;
-        if (connector?.kind !== 'pack' || connector.pack !== 'helpdesk') return;
-        // A view reopened during a write may have loaded its pre-write snapshot.
-        // With no edited draft in this view, adopt what was actually persisted.
-        setUrl(connector.baseUrl ?? 'http://127.0.0.1:12113/mcp');
-        setSafety(snapshot.project.safety);
-        const storedRules = snapshot.contract?.rules ?? [];
-        setRules(storedRules);
-        setCases(snapshot.benchmark?.cases ?? []);
-        setDecisions(decisionsOf(storedRules));
-        const status = await api.gateReadiness(project.id);
+    if (!suiteChanged) return;
+    const version = ++epoch.current;
+    setReadiness(null);
+    if (settingsEdited || reviewDirty) {
+      setWriteNotice(
+        'The previous write settled. Your edited draft is not saved; save it with a fresh explicit action.',
+      );
+      return;
+    }
+    const snapshot = loadedSnapshot.value;
+    const connector = snapshot.project.connector;
+    if (connector?.kind !== 'pack' || connector.pack !== 'helpdesk' || connector.mode !== 'twin')
+      return;
+    // Missing initial configuration is not a user edit. Adopt only the actual
+    // persisted connection and its previously explicit safety choice.
+    setUrl(connector.baseUrl ?? 'http://127.0.0.1:12113/mcp');
+    setSafety(snapshot.project.safety);
+    setSettingsDirty(false);
+    const storedRules = snapshot.contract?.rules ?? [];
+    setRules(storedRules);
+    setCases(snapshot.benchmark?.cases ?? []);
+    setDecisions(decisionsOf(storedRules));
+    void api
+      .gateReadiness(project.id)
+      .then((status) => {
         if (active.current && version === epoch.current) setReadiness(status);
       })
       .catch((error: Error) => {
@@ -137,15 +152,16 @@ export function HelpdeskFlow({
     writeLock.completed,
     writeLock.operation,
     writeLock.settledOperation,
-    onUpdated,
+    loadedSnapshot,
     project.id,
-    settingsDirty,
+    settingsEdited,
     reviewDirty,
   ]);
 
   function invalidateSettings(): void {
     epoch.current++;
     setSettingsDirty(true);
+    setSettingsEdited(true);
     setReadiness(null);
     setRules([]);
     setCases([]);
@@ -198,6 +214,7 @@ export function HelpdeskFlow({
       setCases(draft.cases);
       setDecisions(decisionsOf(draft.contract.rules));
       setSettingsDirty(false);
+      setSettingsEdited(false);
       setReviewDirty(false);
       setEvidenceRevision((value) => value + 1);
       onConnected(connected.project);
@@ -447,7 +464,6 @@ export function HelpdeskFlow({
             project={project}
             activation={activation}
             beforeRun={checkReadiness}
-            onRan={() => void onUpdated()}
             writeLock={writeLock}
           />
         </>

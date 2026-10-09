@@ -32,6 +32,7 @@ import {
 import { ConnectEnvironment, ReviewLearned, RuleOnRules, TeachJob, ToolCatalogue } from './stages.tsx';
 import { AddAFailure, ConnectAgent, RunAndVerdict } from './run.tsx';
 import { HelpdeskChoice, HelpdeskFlow, isHelpdesk } from '../packs/HelpdeskFlow.tsx';
+import { useProjectWriteLock } from './projectWriteLock.ts';
 
 const STEPS = [
   { id: 'connect', label: 'Connect your system' },
@@ -56,6 +57,13 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
   const [rules, setRules] = useState<RuleView[]>([]);
   const active = useRef(true);
   const loading = useRef(0);
+  const writeLock = useProjectWriteLock(projectId);
+  const observedCompletion = useRef(writeLock.completed);
+  const getWriteSnapshot = writeLock.getSnapshot;
+  const [loadedSnapshot, setLoadedSnapshot] = useState<{
+    completed: number;
+    value: Awaited<ReturnType<typeof api.project>>;
+  } | null>(null);
 
   const [tools, setTools] = useState<ToolView[]>([]);
   const [serverName, setServerName] = useState('');
@@ -81,9 +89,11 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
 
   const load = useCallback(async () => {
     const request = ++loading.current;
+    const completed = getWriteSnapshot().completed;
     try {
       const result = await api.project(projectId);
       if (!active.current || request !== loading.current) return null;
+      setLoadedSnapshot({ completed, value: result });
       setProject(result.project);
       setProblem('');
       setRules(result.contract?.rules ?? []);
@@ -104,7 +114,7 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
       if (active.current && request === loading.current) setProblem((error as Error).message);
       return null;
     }
-  }, [projectId]);
+  }, [projectId, getWriteSnapshot]);
 
   useEffect(() => {
     active.current = true;
@@ -114,6 +124,14 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
       loading.current++;
     };
   }, [load]);
+
+  useEffect(() => {
+    if (writeLock.operation || observedCompletion.current === writeLock.completed) return;
+    observedCompletion.current = writeLock.completed;
+    // This owner survives conditional flow selection, including a first write
+    // whose connector was still absent when the project was reopened.
+    void load();
+  }, [writeLock.operation, writeLock.completed, load]);
 
   async function reconnect(): Promise<void> {
     setReconnecting(true);
@@ -188,12 +206,18 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
           initialRules={rules}
           initialCases={cases}
           activation={activation}
-          onUpdated={load}
+          loadedSnapshot={loadedSnapshot}
+          writeLock={writeLock}
           onConnected={setProject}
         />
       ) : (
         <>
           {!project.connector ? <HelpdeskChoice onChoose={() => setPackFlow(true)} /> : null}
+          {writeLock.operation ? (
+            <p className="text-meta text-muted" role="status">
+              A project operation is in progress. Wait before saving or running again.
+            </p>
+          ) : null}
           <nav aria-label="Steps" className="flex flex-wrap gap-x-3 gap-y-4">
             {/*
           A progress track, not a row of filter pills.
@@ -269,7 +293,7 @@ function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () 
 
           {problem ? <Problem>{problem}</Problem> : null}
 
-          {needsConnection && project.connector && !connected ? null : (
+          {writeLock.operation || (needsConnection && project.connector && !connected) ? null : (
             <>
               {current === 'connect' ? (
                 tools.length === 0 ? (
