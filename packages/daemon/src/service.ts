@@ -619,9 +619,21 @@ export class Service {
   ): Promise<EnvironmentContract> {
     const draft = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
     if (!draft) throw new Error('There is no contract to review yet.');
+    const ruleIds = new Set(draft.rules.map((rule) => rule.id));
+    const confirmed = decisions.confirmedRuleIds ?? [];
+    const rejected = decisions.rejectedRuleIds ?? [];
+    for (const ids of [confirmed, rejected]) {
+      if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string' || !ruleIds.has(id))) {
+        throw new Error('Review decisions must name rules in this contract.');
+      }
+      if (new Set(ids).size !== ids.length) throw new Error('Duplicate rule in review decisions.');
+    }
+    if (confirmed.some((id) => rejected.includes(id))) {
+      throw new Error('A rule cannot be both confirmed and rejected.');
+    }
     const reviewed = applyReview(draft, {
-      confirmedRuleIds: decisions.confirmedRuleIds ?? [],
-      rejectedRuleIds: decisions.rejectedRuleIds ?? [],
+      confirmedRuleIds: confirmed,
+      rejectedRuleIds: rejected,
     });
     await this.store.writeArtefact(projectId, 'contract', reviewed);
     if (rulesAwaitingReview(reviewed).length === 0) {

@@ -127,8 +127,8 @@ describe('the full pipeline through the CLI', () => {
     expect(out).toMatch(/\?/);
   });
 
-  it('generates a benchmark from that contract', async () => {
-    const { code, out } = await cli('generate', 'contract.json', '-o', 'benchmark.json');
+  it('generates a benchmark from the explicitly reviewed demo contract', async () => {
+    const { code, out } = await cli('generate', '.rigorrun/contract.json', '-o', 'benchmark.json');
     expect(code).toBe(0);
     expect(out).toContain('prompt_injection');
     const benchmark = JSON.parse(await readFile(join(workDir, 'benchmark.json'), 'utf8'));
