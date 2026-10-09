@@ -23,7 +23,7 @@
 ## Review Focus
 
 - Setup regex invalid/overlapping decisions must fail before downstream generation, assessment and agent registration; unmatched rules remain inferred and accessible for later review.
-- Pack-suite malformed decision arrays must fail rather than silently filter, and explicit rejection must survive reload with checks excluded.
+- Pack-suite malformed decision arrays must fail rather than silently filter, and explicit rejection must survive reload without enforcement: existing diagnostic assertions may remain nonblocking.
 - Readiness GET must use pairing/security middleware and must not mutate files or contact the candidate.
 - Project/URL changes or reload must not display prior async response/evidence; failed probe remains disconnected.
 - PASS details must retain task/policy separation, escaping, redaction, evidence source and unavailable-readback limits.
@@ -35,6 +35,7 @@
 - GET `/api/projects/:id/gate-readiness`: `{ ready: boolean, reasons: string[], source: SuiteSource | null }` directly from `service.gateReadiness(id)`. Existing paired session required.
 - App `api.packSuite(id, params, confirmedRuleIds, rejectedRuleIds)` and `api.gateReadiness(id)` wrap these routes. Existing connect accepts pack connector `{ kind: 'pack', pack: 'helpdesk', mode: 'twin', baseUrl: localMcpUrl }` with explicit local/ephemeral safety. Preserve the actual pack ID from source if it differs.
 - Agent registration uses existing `blackBox` input and probe result. Run/report/history APIs stay unchanged.
+- Extend `ProjectView.connector` with the actual daemon pack summary shape (`kind: 'pack'`, pack/mode/baseUrl/options), and restore the selected Helpdesk connection from it after reload.
 
 ### Task 1: Backend explicit review and readiness
 
@@ -56,6 +57,7 @@
 - [ ] Write a user-visible Playwright regression using the real CLI daemon/twin and external deterministic HTTP control with fresh state. Path: create project → Helpdesk twin URL and safety → draft rules → explicit confirm/reject → own endpoint/probe → readiness → run → evidence/report → reload/repeat.
 - [ ] Run to observe RED for missing Helpdesk path (record reason; backend may not yet be integrated).
 - [ ] Implement wrappers and a focused existing-style flow. Ensure selected pack params reflect explicit decisions; pending review cannot proceed. Confirm real daemon bootstrap registers pack, rather than unit-only registration.
+- [ ] Add the existing server's pack connector shape to `ProjectView.connector` and verify persisted Helpdesk selection/URL/safety after reload; do not cast packs as MCP connectors.
 - [ ] Add bounded coverage for failed probe, readiness refusal, project/URL switching, late response cancellation, reload and evidence isolation. Use existing UI patterns rather than full redesign.
 - [ ] Run browser flow against a local combined checkout with accepted backend commit once available. Inspect desktop/mobile screenshot and console. Run lint/typecheck/claims; report complete file list and commit.
 
