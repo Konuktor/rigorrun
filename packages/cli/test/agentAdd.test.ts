@@ -338,12 +338,21 @@ describe('--case on a project run', () => {
     );
     // An arbitrary pack cannot use the bundled-pack release exemption.
     expect(gate.code, gate.out + gate.err).toBe(3);
-    expect(gate.out).toContain('Only currently installed bundled Helpdesk and Stripe');
+    expect(gate.out).toContain('Only currently installed bundled suites approved by this build');
     await expect(readFile(seen, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
     // The same subset and observation hook remain available diagnostically.
     const diagnostic = await cli(
-      'run', '--project', project.id, '--home', home,
-      '--case', 'case_b', '--case', 'case_c', '--after-case', hook,
+      'run',
+      '--project',
+      project.id,
+      '--home',
+      home,
+      '--case',
+      'case_b',
+      '--case',
+      'case_c',
+      '--after-case',
+      hook,
     );
     expect(diagnostic.code, diagnostic.out + diagnostic.err).toBe(0);
     expect(diagnostic.out).toContain('Ran 2 of the suite');

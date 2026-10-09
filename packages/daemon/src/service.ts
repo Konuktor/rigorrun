@@ -35,6 +35,7 @@ import {
   clearEnvironments,
   getPack,
   registerEnvironment,
+  supportsProjectReleaseGate,
   type EnvironmentFixture,
   type EnvironmentSchema,
   type PackDefinition,
@@ -1032,7 +1033,7 @@ export class Service {
     const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
     if (!contract) throw new SuiteIntegrityError('missing', 'There is no contract to assess.');
 
-    const schema = await this.schemaOf(project);
+    const schema = await this.publishedSchema(project, source);
     await this.registerFor(project, schema);
     this.workspace.allowWrites(projectId);
 
@@ -1082,13 +1083,13 @@ export class Service {
       reasons.push('The contract still needs explicit review.');
     if (source.origin === 'pack') {
       if (
-        !['helpdesk', 'stripe'].includes(source.packId ?? '') ||
+        !supportsProjectReleaseGate(source.packId ?? '') ||
         project.connector?.kind !== 'pack' ||
         project.connector.pack !== source.packId ||
         !getPack(source.packId!)
       ) {
         reasons.push(
-          'Only currently installed bundled Helpdesk and Stripe suites use the pack release-gate path.',
+          'Only currently installed bundled suites approved by this build use the pack release-gate path.',
         );
       }
     } else {
@@ -1165,7 +1166,7 @@ export class Service {
       throw new Error('Build a suite first. A failure is added to a suite, not instead of one.');
     }
 
-    const schema = await this.schemaOf(project);
+    const schema = await this.publishedSchema(project, source);
     await this.registerFor(project, schema);
     // The same live adapter the generator was given. A regression case has to
     // be built against the system as it is now, not against a snapshot of what
@@ -1243,7 +1244,7 @@ export class Service {
       );
     }
 
-    const schema = await this.schemaOf(project);
+    const schema = await this.publishedSchema(project, source);
     await this.registerFor(project, schema);
     // The agent is being graded on what it changes, so whatever the connector
     // was refusing while this project was being set up, it stops refusing now.
@@ -1655,7 +1656,28 @@ export class Service {
     return out;
   }
 
-  /** The confirmed schema, re-derived from the recorded observations. A pack declares its own. */
+  /** Execute the captured published schema, never a process-local induction cache. */
+  private async publishedSchema(project: Project, source: SuiteSource): Promise<EnvironmentSchema> {
+    const schema = await this.store.readArtefact<EnvironmentSchema>(project.id, 'schema');
+    if (!schema)
+      throw new SuiteIntegrityError(
+        'missing',
+        'The published suite schema is missing. Regenerate or reinstall the suite.',
+      );
+    const pack = packOf(project);
+    if (
+      (await configurationDigest(project, schema)) !== source.configurationDigest ||
+      (pack && (await hashValue(pack.schema)) !== (await hashValue(schema)))
+    ) {
+      throw new SuiteIntegrityError(
+        'stale',
+        'The execution schema or configuration differs from the published suite. Regenerate or reinstall it.',
+      );
+    }
+    return schema;
+  }
+
+  /** Schema induction is used only while compiling or generating a new suite. */
   private async schemaOf(project: Project): Promise<EnvironmentSchema> {
     const pack = packOf(project);
     if (pack) return pack.schema;

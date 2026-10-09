@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Server } from 'node:http';
-import { clearPacks, registerPack } from '@rigorrun/environment';
+import { clearPacks, registerPack, type EnvironmentSchema } from '@rigorrun/environment';
+import { defineAgent, serve } from '@rigorrun/agent-sdk';
 import * as generator from '@rigorrun/generator';
 import * as core from '@rigorrun/core';
 import { ProxyServer } from '@rigorrun/proxy';
@@ -18,6 +19,7 @@ let service: Service;
 let project: Project;
 const servers: Server[] = [];
 const services: Service[] = [];
+const candidates: { close(): Promise<void> }[] = [];
 beforeEach(async () => {
   home = await mkdtemp(join(tmpdir(), 'rigorrun-integrity-'));
   store = new ProjectStore(home);
@@ -31,6 +33,7 @@ afterEach(async () => {
   vi.restoreAllMocks();
   for (const server of servers.splice(0)) await new Promise((resolve) => server.close(resolve));
   for (const item of services.splice(0)) await item.workspace.close();
+  for (const candidate of candidates.splice(0)) await candidate.close();
   await proxy.stop();
   clearPacks();
   delete process.env['RIGORRUN_SECRET__FAKE_ITEMS_KEY'];
@@ -302,3 +305,94 @@ it('pack installation cannot bind a suite built with old configuration to new co
   await expect(service.installPackSuite(project.id, {})).rejects.toMatchObject({ kind: 'stale' });
   expect(await store.readArtefact(project.id, 'benchmark')).toEqual(oldBenchmark);
 });
+
+it.each(['run', 'assessment'] as const)(
+  '%s uses the published schema after another Service regenerates it',
+  async (operation) => {
+    await generatedReady();
+    await service.generate(project.id);
+    const oldSchema = (await store.readArtefact<EnvironmentSchema>(project.id, 'schema'))!;
+    const publishedSchema = structuredClone(oldSchema);
+    publishedSchema.entities[0]!.label = 'The revised record schema';
+    await store.writeArtefact(project.id, 'schema', publishedSchema);
+    const second = new Service({ store: new ProjectStore(home), proxy });
+    services.push(second);
+    await second.generate(project.id);
+    const published = await second.readCurrentSuite(project.id);
+    expect(await core.hashValue(oldSchema)).not.toBe(await core.hashValue(publishedSchema));
+    expect(service.workspace.inducedFor(project.id)).toBeDefined();
+
+    const executedSchemas: EnvironmentSchema[] = [];
+    const environment = service.workspace.environment.bind(service.workspace);
+    vi.spyOn(service.workspace, 'environment').mockImplementation((input, schema) => {
+      executedSchemas.push(schema);
+      return environment(input, schema);
+    });
+    if (operation === 'run') {
+      const candidate = await serve(
+        defineAgent(async () => ({ status: 'completed', output: 'No changes' })),
+      );
+      candidates.push(candidate);
+      const { agent } = await service.addAgent(project.id, {
+        name: 'No changes',
+        endpoint: candidate.url,
+      });
+      await service.runAgent(project.id, agent.id);
+    } else {
+      await service.assessSuite(project.id);
+    }
+    expect(executedSchemas.length).toBeGreaterThan(0);
+    for (const schema of executedSchemas) expect(schema).toEqual(publishedSchema);
+    await service.assertSuiteCurrent(project.id, published.source);
+  },
+  60_000,
+);
+
+it.each(['connector', 'safety'] as const)(
+  'reconnects before executing a suite republished with changed %s',
+  async (field) => {
+    process.env['RIGORRUN_SECRET__FAKE_ITEMS_KEY'] = 'test-only';
+    const fake = fakeItemsPack();
+    registerPack(fake.pack);
+    await service.connectEnvironment(
+      project.id,
+      { kind: 'pack', pack: PACK_ID, mode: 'twin' },
+      'ephemeral',
+    );
+    await service.installPackSuite(
+      project.id,
+      {},
+      { confirmedRuleIds: ['items.exact', 'items.no_other'] },
+    );
+    const endpoint = await blackBoxAgent(() => fake.sessions.at(-1)!, 5, servers);
+    const { agent } = await service.addAgent(project.id, {
+      name: 'Adds five',
+      blackBox: { endpoint },
+    });
+    const oldConnection = service.workspace.connectionFor(project.id);
+
+    const second = new Service({ store: new ProjectStore(home), proxy });
+    services.push(second);
+    await second.connectEnvironment(
+      project.id,
+      {
+        kind: 'pack',
+        pack: PACK_ID,
+        mode: 'twin',
+        ...(field === 'connector' ? { baseUrl: 'http://127.0.0.1:9876' } : {}),
+      },
+      field === 'safety' ? 'staging' : 'ephemeral',
+    );
+    await second.installPackSuite(
+      project.id,
+      {},
+      { confirmedRuleIds: ['items.exact', 'items.no_other'] },
+    );
+    expect(service.workspace.connectionFor(project.id)).toBe(oldConnection);
+    const run = await service.runAgent(project.id, agent.id);
+    expect(service.workspace.connectionFor(project.id)).not.toBe(oldConnection);
+    expect(fake.closed).toBe(1);
+    expect(fake.sessions).toHaveLength(3);
+    expect(run.caseResults.map((entry) => entry.outcome)).toEqual(['PASS', 'PASS', 'PASS']);
+  },
+);
