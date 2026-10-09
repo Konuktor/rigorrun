@@ -178,3 +178,15 @@ test('the selector and synthetic explanation fit a mobile viewport', async ({ pa
   await expect(page.getByText(LABEL, { exact: true })).toBeVisible();
   await expectNoOverflow(page);
 });
+
+test('leaving a demo for Projects preserves its URL and reload destination', async ({ page }) => {
+  await page.goto('/#/demo/record?workflow=invoice');
+  await expect(page.getByRole('heading', { name: 'A person did the job once' })).toBeVisible();
+  await page.getByTestId('brand').click();
+  await expect(page).toHaveURL(/#\/projects$/);
+  await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page).toHaveURL(/#\/projects$/);
+  await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+  await expect(page.getByTestId('workflow-selector')).toHaveCount(0);
+});

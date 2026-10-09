@@ -21,6 +21,7 @@ export function DemoPage() {
   const [route, setRoute] = useState(() => demoRoute(window.location.hash));
   useEffect(() => {
     const onHashChange = () => {
+      if (!window.location.hash.startsWith('#/demo')) return;
       const next = demoRoute(window.location.hash);
       setRoute(next);
       const canonical = demoHash(next.workflowKey, next.step);
