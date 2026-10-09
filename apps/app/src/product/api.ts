@@ -63,6 +63,14 @@ export interface ProjectView {
         secretNames: string[];
       }
     | {
+        kind: 'pack';
+        pack: string;
+        mode: 'twin' | 'live';
+        baseUrl?: string;
+        keySecret?: string;
+        options?: unknown;
+      }
+    | {
         kind: 'browser';
         startUrl: string;
         browser: 'chromium' | 'firefox' | 'webkit';
@@ -185,6 +193,12 @@ export interface CaseView {
   id: string;
   name: string;
   category: string;
+}
+
+export interface GateReadinessView {
+  ready: boolean;
+  reasons: string[];
+  source: unknown;
 }
 
 export interface RunView {
@@ -429,6 +443,13 @@ export const api = {
     post<{ cases: CaseView[]; notTestable: { rule: string; reason: string }[] }>(
       `/api/projects/${id}/benchmark`,
     ),
+  packSuite: (id: string, params: unknown, confirmedRuleIds: string[], rejectedRuleIds: string[]) =>
+    post<{ contract: { rules: RuleView[] }; cases: CaseView[] }>(`/api/projects/${id}/pack-suite`, {
+      params,
+      confirmedRuleIds,
+      rejectedRuleIds,
+    }),
+  gateReadiness: (id: string) => request<GateReadinessView>(`/api/projects/${id}/gate-readiness`),
 
   addAgent: (
     id: string,

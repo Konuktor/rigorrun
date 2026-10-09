@@ -201,7 +201,11 @@ function ProjectCard({ project, onOpen }: { project: ProjectView; onOpen: () => 
                 ? 'not connected'
                 : project.connector.kind === 'mcp'
                   ? `MCP · ${project.connector.transport}`
-                  : 'OpenAPI'
+                  : project.connector.kind === 'pack'
+                    ? `${project.connector.pack} · ${project.connector.mode}`
+                    : project.connector.kind === 'browser'
+                      ? 'Browser'
+                      : 'OpenAPI'
             }
           />
           <Fact

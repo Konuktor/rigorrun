@@ -171,7 +171,9 @@ export function ConnectEnvironment({
   const openapi = saved?.kind === 'openapi' ? saved : undefined;
 
   const browser = saved?.kind === 'browser' ? saved : undefined;
-  const [kind, setKind] = useState<'mcp' | 'openapi' | 'browser'>(saved?.kind ?? 'mcp');
+  const [kind, setKind] = useState<'mcp' | 'openapi' | 'browser'>(
+    saved?.kind === 'pack' ? 'mcp' : (saved?.kind ?? 'mcp'),
+  );
   const [transport, setTransport] = useState<'stdio' | 'http'>(mcp?.transport ?? 'stdio');
   const [command, setCommand] = useState(mcp?.command ?? '');
   const [args, setArgs] = useState((mcp?.args ?? []).join('\n'));
@@ -201,7 +203,9 @@ export function ConnectEnvironment({
     if (declared && !tokenUrlTouched) setTokenUrl(declared);
   }, [declared, tokenUrlTouched]);
   const [startUrl, setStartUrl] = useState(browser?.startUrl ?? '');
-  const [secretNames, setSecretNames] = useState((saved?.secretNames ?? []).join('\n'));
+  const [secretNames, setSecretNames] = useState(
+    (saved?.kind === 'pack' ? [] : (saved?.secretNames ?? [])).join('\n'),
+  );
   // Nothing is pre-selected for a new connection. Whether RigorRun may write to
   // a system is the one decision it must never make on somebody's behalf.
   const [safety, setSafety] = useState<ProjectView['safety'] | ''>(

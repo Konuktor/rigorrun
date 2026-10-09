@@ -14,7 +14,7 @@
  * project is. You may go back to any step you have passed; a step with nothing
  * to work with says which thing is missing rather than merely being grey.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 import { Problem } from './inputs.tsx';
 import {
@@ -25,11 +25,13 @@ import {
   type DriftView,
   type ProjectView,
   type QualityView,
+  type RuleView,
   type SchemaQuestionView,
   type ToolView,
 } from './api.ts';
 import { ConnectEnvironment, ReviewLearned, RuleOnRules, TeachJob, ToolCatalogue } from './stages.tsx';
 import { AddAFailure, ConnectAgent, RunAndVerdict } from './run.tsx';
+import { HelpdeskChoice, HelpdeskFlow, isHelpdesk } from '../packs/HelpdeskFlow.tsx';
 
 const STEPS = [
   { id: 'connect', label: 'Connect your system' },
@@ -42,9 +44,18 @@ const STEPS = [
 type StepId = (typeof STEPS)[number]['id'];
 
 export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: () => void }) {
+  // A different project owns a different component lifetime, including async work.
+  return <ProjectContents key={projectId} projectId={projectId} onBack={onBack} />;
+}
+
+function ProjectContents({ projectId, onBack }: { projectId: string; onBack: () => void }) {
   const [project, setProject] = useState<ProjectView | null>(null);
   const [problem, setProblem] = useState('');
   const [step, setStep] = useState<StepId | null>(null);
+  const [packFlow, setPackFlow] = useState(false);
+  const [rules, setRules] = useState<RuleView[]>([]);
+  const active = useRef(true);
+  const loading = useRef(0);
 
   const [tools, setTools] = useState<ToolView[]>([]);
   const [serverName, setServerName] = useState('');
@@ -69,32 +80,39 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
   const [reconnecting, setReconnecting] = useState(false);
 
   const load = useCallback(async () => {
+    const request = ++loading.current;
     try {
       const result = await api.project(projectId);
+      if (!active.current || request !== loading.current) return null;
       setProject(result.project);
+      setProblem('');
+      setRules(result.contract?.rules ?? []);
       setConnected(result.environment.connected);
       setActivation(result.activation);
       // From the last successful connection, so the catalogue is there even
       // when the session is not.
-      if (result.environment.discovery) {
-        setTools(result.environment.discovery.tools);
-        setServerName(result.environment.discovery.serverName);
-        setLatencyMs(result.environment.discovery.latencyMs);
-      }
-      if (result.questions.length > 0) setQuestions(result.questions);
-      if (result.benchmark) setCases(result.benchmark.cases);
+      setTools(result.environment.discovery?.tools ?? []);
+      setServerName(result.environment.discovery?.serverName ?? '');
+      setLatencyMs(result.environment.discovery?.latencyMs ?? 0);
+      setQuestions(result.questions);
+      setCases(result.benchmark?.cases ?? []);
       setRecording(result.recording.steps);
       setRecordingOpen(result.recording.inProgress);
       setQuality(result.quality);
       return result.project;
     } catch (error) {
-      setProblem((error as Error).message);
+      if (active.current && request === loading.current) setProblem((error as Error).message);
       return null;
     }
   }, [projectId]);
 
   useEffect(() => {
+    active.current = true;
     void load();
+    return () => {
+      active.current = false;
+      loading.current++;
+    };
   }, [load]);
 
   async function reconnect(): Promise<void> {
@@ -126,6 +144,7 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
   }
 
   const reached = reachedStep(project, questions.length > 0);
+  const bundled = packFlow || isHelpdesk(project);
   const current = step ?? reached;
   const needsConnection = current !== 'connect' && current !== 'run';
 
@@ -143,7 +162,9 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
           <h1 className="text-title font-semibold">{project.name}</h1>
           {project.connector ? (
             connected ? (
-              <Tag tone="pass">connected</Tag>
+              <Tag tone="pass">
+                {project.connector.kind === 'pack' ? 'configured' : 'connected'}
+              </Tag>
             ) : (
               <Tag tone="warn">not connected</Tag>
             )
@@ -155,192 +176,218 @@ export function ProjectPage({ projectId, onBack }: { projectId: string; onBack: 
         {project.goal ? <p className="text-body text-secondary">{project.goal}</p> : null}
       </header>
 
-      {project.connector && !connected ? (
+      {project.connector && !connected && !bundled ? (
         <Disconnected onReconnect={reconnect} busy={reconnecting} />
       ) : null}
       {drift ? <Drift drift={drift} onDismiss={() => setDrift(null)} /> : null}
 
-      <nav aria-label="Steps" className="flex flex-wrap gap-x-3 gap-y-4">
-        {/*
+      {bundled ? (
+        <HelpdeskFlow
+          key={project.id}
+          project={project}
+          initialRules={rules}
+          initialCases={cases}
+          activation={activation}
+          onUpdated={load}
+          onConnected={setProject}
+        />
+      ) : (
+        <>
+          {!project.connector ? <HelpdeskChoice onChoose={() => setPackFlow(true)} /> : null}
+          <nav aria-label="Steps" className="flex flex-wrap gap-x-3 gap-y-4">
+            {/*
           A progress track, not a row of filter pills.
           The six steps used to render as identical rounded pills, so the one
           you were on looked like a selected tab and there was nothing to say
           how far through you were or what was already done. Each step now
           carries its own state: done, current, or not yet reachable.
         */}
-        {STEPS.map((entry, index) => {
-          const position = indexOf(reached);
-          const available = index <= position;
-          const done = index < position;
-          const isCurrent = current === entry.id;
-          return (
-            <button
-              key={entry.id}
-              type="button"
-              disabled={!available}
-              onClick={() => setStep(entry.id)}
-              data-testid={`step-${entry.id}`}
-              aria-current={isCurrent ? 'step' : undefined}
-              className={`group flex min-h-[var(--control-height-lg)] flex-1 basis-40 flex-col items-start gap-1 border-t-2 pt-2.5 text-left transition-colors ${
-                isCurrent
-                  ? 'border-accent'
-                  : done
-                    ? 'border-line-strong hover:border-fg'
-                    : 'border-line-soft'
-              }`}
-            >
-              <span
-                className={`flex items-center gap-1.5 font-mono text-micro font-semibold ${
-                  isCurrent ? 'text-accent' : done ? 'text-muted' : 'text-disabled'
-                }`}
-              >
-                {String(index + 1).padStart(2, '0')}
-                {done && (
-                  <svg viewBox="0 0 12 12" className="h-3 w-3" fill="none" aria-hidden="true">
-                    <path
-                      d="M2.5 6.5L5 9l4.5-5"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-                <span className="sr-only">{done ? 'done' : isCurrent ? 'current step' : 'not reached yet'}</span>
-              </span>
-              <span
-                className={`text-meta ${
-                  isCurrent ? 'text-fg' : available ? 'text-secondary group-hover:text-fg' : 'text-disabled'
-                }`}
-              >
-                {entry.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+            {STEPS.map((entry, index) => {
+              const position = indexOf(reached);
+              const available = index <= position;
+              const done = index < position;
+              const isCurrent = current === entry.id;
+              return (
+                <button
+                  key={entry.id}
+                  type="button"
+                  disabled={!available}
+                  onClick={() => setStep(entry.id)}
+                  data-testid={`step-${entry.id}`}
+                  aria-current={isCurrent ? 'step' : undefined}
+                  className={`group flex min-h-[var(--control-height-lg)] flex-1 basis-40 flex-col items-start gap-1 border-t-2 pt-2.5 text-left transition-colors ${
+                    isCurrent
+                      ? 'border-accent'
+                      : done
+                        ? 'border-line-strong hover:border-fg'
+                        : 'border-line-soft'
+                  }`}
+                >
+                  <span
+                    className={`flex items-center gap-1.5 font-mono text-micro font-semibold ${
+                      isCurrent ? 'text-accent' : done ? 'text-muted' : 'text-disabled'
+                    }`}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                    {done && (
+                      <svg viewBox="0 0 12 12" className="h-3 w-3" fill="none" aria-hidden="true">
+                        <path
+                          d="M2.5 6.5L5 9l4.5-5"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                    <span className="sr-only">
+                      {done ? 'done' : isCurrent ? 'current step' : 'not reached yet'}
+                    </span>
+                  </span>
+                  <span
+                    className={`text-meta ${
+                      isCurrent
+                        ? 'text-fg'
+                        : available
+                          ? 'text-secondary group-hover:text-fg'
+                          : 'text-disabled'
+                    }`}
+                  >
+                    {entry.label}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
 
-      {project.nextSteps.length > 0 ? (
-        <Panel padded>
-          <p className="text-body text-fg">{project.nextSteps[0]!.what}</p>
-          <p className="mt-1 text-meta text-muted">{project.nextSteps[0]!.why}</p>
-        </Panel>
-      ) : null}
-
-      {problem ? <Problem>{problem}</Problem> : null}
-
-      {needsConnection && project.connector && !connected ? null : (
-        <>
-          {current === 'connect' ? (
-            tools.length === 0 ? (
-              <ConnectEnvironment
-                project={project}
-                onConnected={(next, discovered, name, latency) => {
-                  setProject(next);
-                  setTools(discovered);
-                  setServerName(name);
-                  setLatencyMs(latency);
-                  setConnected(true);
-                }}
-              />
-            ) : (
-              <ToolCatalogue
-                project={project}
-                tools={tools}
-                serverName={serverName}
-                latencyMs={latencyMs}
-                onConfigured={(next) => {
-                  setProject(next);
-                  setStep('teach');
-                }}
-                onStartOver={() => setTools([])}
-              />
-            )
+          {project.nextSteps.length > 0 ? (
+            <Panel padded>
+              <p className="text-body text-fg">{project.nextSteps[0]!.what}</p>
+              <p className="mt-1 text-meta text-muted">{project.nextSteps[0]!.why}</p>
+            </Panel>
           ) : null}
 
-          {current === 'teach' ? (
-            <TeachJob
-              project={project}
-              tools={tools}
-              alreadyRecorded={recording}
-              recordingOpen={recordingOpen}
-              onFinished={(next, asked, contradicted) => {
-                setProject(next);
-                setQuestions(asked);
-                setMismatches(contradicted);
-                setRecording([]);
-                setRecordingOpen(false);
-                setStep('learned');
-              }}
-            />
-          ) : null}
+          {problem ? <Problem>{problem}</Problem> : null}
 
-          {current === 'learned' ? (
-            questions.length === 0 ? (
-              <NothingYet
-                what="RigorRun has not worked out any records yet."
-                why="That happens after you have shown it the job once."
-                onBack={() => setStep('teach')}
-              />
-            ) : (
-              <ReviewLearned
-                project={project}
-                questions={questions}
-                mismatches={mismatches}
-                onAnswered={(next) => {
-                  setProject(next);
-                  setStep('rules');
-                }}
-              />
-            )
-          ) : null}
-
-          {current === 'rules' ? (
-            <RuleOnRules
-              project={project}
-              onGenerated={(built) => {
-                setCases(built);
-                setStep('agent');
-                void load();
-              }}
-            />
-          ) : null}
-
-          {current === 'agent' ? (
+          {needsConnection && project.connector && !connected ? null : (
             <>
-              {cases.length > 0 ? (
-                <SuiteQuality
+              {current === 'connect' ? (
+                tools.length === 0 ? (
+                  <ConnectEnvironment
+                    project={project}
+                    onConnected={(next, discovered, name, latency) => {
+                      setProject(next);
+                      setTools(discovered);
+                      setServerName(name);
+                      setLatencyMs(latency);
+                      setConnected(true);
+                    }}
+                  />
+                ) : (
+                  <ToolCatalogue
+                    project={project}
+                    tools={tools}
+                    serverName={serverName}
+                    latencyMs={latencyMs}
+                    onConfigured={(next) => {
+                      setProject(next);
+                      setStep('teach');
+                    }}
+                    onStartOver={() => setTools([])}
+                  />
+                )
+              ) : null}
+
+              {current === 'teach' ? (
+                <TeachJob
                   project={project}
-                  cases={cases.length}
-                  quality={quality}
-                  onChecked={setQuality}
+                  tools={tools}
+                  alreadyRecorded={recording}
+                  recordingOpen={recordingOpen}
+                  onFinished={(next, asked, contradicted) => {
+                    setProject(next);
+                    setQuestions(asked);
+                    setMismatches(contradicted);
+                    setRecording([]);
+                    setRecordingOpen(false);
+                    setStep('learned');
+                  }}
                 />
               ) : null}
-              <ConnectAgent project={project} onConnected={setProject} />
+
+              {current === 'learned' ? (
+                questions.length === 0 ? (
+                  <NothingYet
+                    what="RigorRun has not worked out any records yet."
+                    why="That happens after you have shown it the job once."
+                    onBack={() => setStep('teach')}
+                  />
+                ) : (
+                  <ReviewLearned
+                    project={project}
+                    questions={questions}
+                    mismatches={mismatches}
+                    onAnswered={(next) => {
+                      setProject(next);
+                      setStep('rules');
+                    }}
+                  />
+                )
+              ) : null}
+
+              {current === 'rules' ? (
+                <RuleOnRules
+                  project={project}
+                  onGenerated={(built) => {
+                    setCases(built);
+                    setStep('agent');
+                    void load();
+                  }}
+                />
+              ) : null}
+
+              {current === 'agent' ? (
+                <>
+                  {cases.length > 0 ? (
+                    <SuiteQuality
+                      project={project}
+                      cases={cases.length}
+                      quality={quality}
+                      onChecked={setQuality}
+                    />
+                  ) : null}
+                  <ConnectAgent project={project} onConnected={setProject} />
+                </>
+              ) : null}
             </>
+          )}
+
+          {current === 'run' ? (
+            <>
+              <RunAndVerdict
+                key={`${project.id}:${JSON.stringify(project.connector)}:${project.safety}:${project.timings['benchmarkGeneratedAt']}`}
+                project={project}
+                activation={activation}
+                onRan={() => void load()}
+              />
+              {/* Here rather than in a menu: the moment somebody wants this is the
+              moment they are looking at results and thinking about what their
+              agent does in the wild. */}
+              {project.runs.length > 0 ? (
+                <AddAFailure project={project} onAdded={() => void load()} />
+              ) : null}
+            </>
+          ) : null}
+
+          {current === 'agent' && project.agents.some((agent) => agent.lastProbeOk) ? (
+            <div>
+              <Button onClick={() => setStep('run')} testId="to-run">
+                Run the suite
+              </Button>
+            </div>
           ) : null}
         </>
       )}
-
-      {current === 'run' ? (
-        <>
-          <RunAndVerdict project={project} activation={activation} onRan={() => void load()} />
-          {/* Here rather than in a menu: the moment somebody wants this is the
-              moment they are looking at results and thinking about what their
-              agent does in the wild. */}
-          {project.runs.length > 0 ? (
-            <AddAFailure project={project} onAdded={() => void load()} />
-          ) : null}
-        </>
-      ) : null}
-
-      {current === 'agent' && project.agents.some((agent) => agent.lastProbeOk) ? (
-        <div>
-          <Button onClick={() => setStep('run')} testId="to-run">
-            Run the suite
-          </Button>
-        </div>
-      ) : null}
     </div>
   );
 }
