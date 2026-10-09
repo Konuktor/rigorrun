@@ -124,6 +124,9 @@ PASS and FAIL details explain checked assertions and available system evidence.
 Task completion and policy compliance remain separate. Missing required readback
 produces unknown/inconclusive evidence. Historical reports remain historical
 after changing a connection, contract or suite.
+Full reports contain local workflow data; do not upload them blindly. The
+existing published report mode removes private evidence, but review any artifact
+before sharing it. Redaction is not a guarantee that arbitrary prose is safe.
 
 Gate exits: `0` passed; `1` candidate/task/policy failure; `2` configuration or
 runtime error; `3` inadequate/stale/unreviewed suite or inconclusive evidence.
