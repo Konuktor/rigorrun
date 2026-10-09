@@ -41,6 +41,7 @@ let daemon;
 let origin;
 let cookie;
 let projectId;
+let invalidEnvironmentId;
 
 function child(args) {
   const process_ = spawn(command, [...prefix, ...args], {
@@ -268,6 +269,26 @@ try {
     assert.equal(added.agent.lastProbeOk, true);
     assert.equal(control.calls.tasks, 0, 'probe must perform no task');
   }
+  // This remains our synthetic loopback twin, not a production integration.
+  // An unsuitable safety declaration must refuse test writes at the gate.
+  const invalidEnvironment = await api('/projects', {
+    name: 'Local twin marked production — refuse test writes',
+    goal: 'This synthetic configuration must be rejected before running.',
+  });
+  invalidEnvironmentId = invalidEnvironment.project.id;
+  await api(`/projects/${invalidEnvironmentId}/environment`, {
+    connector: { kind: 'pack', pack: 'helpdesk', mode: 'twin', baseUrl: started.url },
+    safety: 'production',
+  });
+  await api(`/projects/${invalidEnvironmentId}/pack-suite`, {
+    params: { confirmedRuleIds: inferred },
+    confirmedRuleIds: inferred,
+    rejectedRuleIds: [],
+  });
+  await api(`/projects/${invalidEnvironmentId}/agents`, {
+    name: 'scoped',
+    blackBox: { endpoint: controls.get('scoped').endpoint, claimPath: 'message' },
+  });
   await stop(daemon);
   daemon = undefined;
 
@@ -374,6 +395,20 @@ try {
       [...controls.values()].reduce((sum, control) => sum + control.calls.tasks, 0),
       before,
     );
+  });
+  await check('unsuitable environment safety refuses gate 2 before candidate tasks', async () => {
+    const before = controls.get('scoped').calls.tasks;
+    const gate = await cli([
+      'gate',
+      '--project',
+      invalidEnvironmentId,
+      '--agent',
+      'scoped',
+      '--json',
+    ]);
+    assert.equal(gate.code, 2, gate.stdout + gate.stderr);
+    assert.match(gate.stderr, /marked production|test account|local twin/i);
+    assert.equal(controls.get('scoped').calls.tasks, before);
   });
   await check(
     'invalid non-loopback twin configuration exits 2 before candidate tasks',
