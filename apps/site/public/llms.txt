@@ -1,59 +1,69 @@
 # RigorRun
 
-> Permission and scope tests for AI agents, run before the agent ships. RigorRun
-> sends an agent tickets that tempt it to act for the wrong customer or outside
-> its job, then decides pass or fail by reading the real system afterwards — not
-> the agent's transcript, and never with a model as the judge.
+> Verify what your AI agents actually do. Pre-deployment permission and workflow
+> checks read observable system state, access records and outbox evidence — not
+> just the agent's reply. Stripe is one pack, not the product's boundary.
 
-RigorRun is a local-first CLI, published on npm as `rigorrun`, MIT licensed, with
-SLSA build provenance. It runs entirely on the user's machine: there is no account
-and no hosted component.
+RigorRun is an MIT-licensed, local-first CLI published on npm as `rigorrun`.
+The free runner needs no account and has no hosted workspace. Its current published
+version and source are linked from https://rigorrun.xyz/company.
 
-## What is checked today
+## What exists
 
-- The first pack is Stripe refunds (`npx rigorrun stripe twin`, then
-  `npx rigorrun stripe init --twin --yes`): seven tickets, including a refund on
-  another customer's payment, a disputed payment and an instruction inside the
-  ticket. Each is decided from what Stripe holds afterwards.
-- It was qualified before release against an independent oracle: 168 cells on a
-  local Stripe twin and 168 on Stripe test mode, no false pass and no false fail;
-  black-box mode 36 cells, none either.
-- Every Stripe verdict is PARTIAL: it reads what each case created, not the
-  whole account.
+- Helpdesk: a simulated, two-organisation local twin. Its permission suite reads
+  the twin's access log, changed records and outbox; planted markers expose data
+  sent from the other organisation. AUTHORITATIVE describes evidence within
+  that twin, not a live helpdesk or universal agent safety.
+- Stripe: a refund suite for a local twin or Stripe test mode. Stripe verdicts
+  are PARTIAL, state-only and limited to what each case exposes.
+- Recorded public runs: https://rigorrun.xyz/replay/helpdesk and
+  https://rigorrun.xyz/replay. The built-in model-free pair demo is separately
+  labelled scripted; it is not the same evidence as a recorded model run.
+- General demonstration tooling: connect, demonstrate, review proposed rules,
+  generate diagnostic suites and assess quality. Connection alone does not
+  establish a supported or qualified custom permission pack.
+- Browser refund, invoice and access examples are synthetic illustrations.
+  Invoice and access examples have known suite-quality limitations.
 
-- The Larch Helpdesk pack (`npx rigorrun helpdesk try`, no keys): a helpdesk
-  twin shared by two organisations, six tickets. Each is decided from the
-  twin's access log (what the agent read of the other organisation), its tables
-  (what changed) and its outbox (where data went, via planted markers). Qualified
-  on the twin against an independent oracle: 144 cells, no false pass and no
-  false fail. Every helpdesk verdict is about the twin, not a live helpdesk.
+Historical qualification is scoped to the recorded build and environment.
+See https://rigorrun.xyz/evidence and https://rigorrun.xyz/verify for the evidence,
+limitations and errata. New development changes are not qualified by old reports.
 
-## Being built (not available yet)
+## Offers and proposed business model
 
-- Being built: checks on the agent's tool calls themselves (a tool never
-  called, arguments within scope).
-- Not built yet: the same permission tests on the user's own MCP server or API,
-  with two seeded tenants.
+- Open-source runner: free to self-host.
+- Scoped verification pilot: proposed paid service for one agreed workflow,
+  adapter feasibility, explicit rules, system readbacks and repeatable acceptance.
+  Quote only after scoping; custom permission packs are not ready-made integrations.
+- Team workspace — planned: a possible subscription for shared history,
+  approvals and operated checks. No hosted workspace, subscription billing,
+  checkout or validated pricing is available in this MVP.
 
-## Key distinctions
+Discuss a pilot: https://rigorrun.xyz/access
+Product and investment thesis: https://rigorrun.xyz/company
+Founder contact: erbol@rigorrun.xyz
 
-- It is not an LLM evaluation harness. Evals grade what the agent said;
-  RigorRun reads what happened in the system.
-- It is not a runtime guard or policy engine. It checks, before release, that
-  the permissions the agent should respect actually held.
-- Every verdict carries a verification strength: AUTHORITATIVE, PARTIAL or
-  OBSERVATIONAL.
+The first customer hypothesis is a B2B engineering team deploying a tool-using
+agent, with a CTO or AI/platform lead accountable for release risk and a resettable
+test environment. No customer, revenue, funding or market-size claim is made here.
 
-## Docs
+## Not built or not established
 
-- Getting started: https://rigorrun.xyz/start
-- The recorded run on Stripe test mode: https://rigorrun.xyz/replay
-- Evidence: https://rigorrun.xyz/evidence
-- Security and local-first architecture: https://rigorrun.xyz/security
-- What is and is not built: https://rigorrun.xyz/what-is-built
-- Full documentation: https://docs.rigorrun.xyz
+- Runtime enforcement: RigorRun does not block production actions.
+- Generally supported two-tenant permission tests for a user's own MCP server
+  or API: not built yet.
+- Direct tool-call permission checks: being built, not a current blanket guarantee.
+- A connection, demo or passing suite does not prove arbitrary workflow safety.
+- Current development safeguards for explicit review and current suite-quality
+  evidence are local MVP changes, not a new published npm release.
 
-## Honest limits
+## Start
 
-No external team has used RigorRun yet. There are no customers, no funding and no
-revenue. The founder is looking for 3–5 design partners.
+- No-key, model-free Helpdesk twin pair: `npx rigorrun helpdesk try`.
+  The command exits 0 when its paired demo completes even if one control fails;
+  that process exit is not a candidate's release PASS.
+- Setup and concrete pack paths: https://rigorrun.xyz/start
+- Architecture and limitations: https://rigorrun.xyz/how-it-works
+- Full docs: https://docs.rigorrun.xyz
+- Built vs planned: https://rigorrun.xyz/what-is-built
+- Security and local-first boundaries: https://rigorrun.xyz/security

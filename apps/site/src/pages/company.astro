@@ -3,90 +3,53 @@ import Base from '../layouts/Base.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Button from '../components/Button.astro';
-import { FOUNDER, CONTACT_EMAIL, REPO_URL, VERSION, contactHref, contactLabel } from '../site';
+import { FOUNDER, CONTACT_EMAIL, PILOT_HREF, INVESTOR_HREF, REPO_URL, VERSION, contactHref, contactLabel } from '../site';
 ---
-<Base
-  title="Company"
-  description="RigorRun is built by Erbol Tahirov: permission and scope tests for agents that act for many customers, decided from the real system — where it is, and what has not happened yet."
->
+
+<Base title="Company and product thesis" description="RigorRun is a founder-led, open-source agent verification project. The thesis: test permissions and scope from system evidence before deployment. Paid workflow pilots first; a team subscription is planned.">
   <Section>
     <div class="rr-prose-width">
       <Eyebrow>Company</Eyebrow>
-      <h1 class="mt-4 text-display font-medium text-balance">
-        An agent acts for many customers. Its permissions have to keep each one separate.
-      </h1>
-      <p class="mt-7 text-lead text-secondary">
-        RigorRun tests whether an agent that acts for many customers through the same tools stays with
-        the one it is acting for. The verdict is decided from the real system: what changed, and for
-        whom, after the agent finished. What the agent said is shown beside that evidence and never
-        scored.
-      </p>
-      <p class="mt-5 text-lead text-secondary">
-        Two qualified packs are available now: a multi-tenant helpdesk twin and Stripe refunds. The
-        founder is looking for 3–5 design partners whose agents act across customer boundaries, so
-        that tests on their own systems — not built yet — start with the permissions those systems
-        actually have to enforce.
-      </p>
+      <h1 class="mt-4 text-display font-medium text-balance">Agents need a release check for what they do, not just what they say.</h1>
+      <p class="mt-7 text-lead text-secondary">RigorRun is building pre-deployment verification for tool-using AI agents. Start with permission and customer-scope failures, read the system afterwards, and keep the agent&rsquo;s claims separate from the evidence.</p>
+      <p class="mt-5 text-support text-secondary">Founder-led by {FOUNDER}. The published MIT runner is <span class="font-mono">rigorrun@{VERSION}</span>. Current concrete examples are the multi-tenant Helpdesk twin and Stripe refunds; custom-system permission packs are not built yet.</p>
     </div>
   </Section>
-
   <Section ruled tight>
-    <div class="grid gap-10 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+      <div><h2 class="text-display font-medium text-balance">The investment thesis</h2></div>
       <div>
-        <h2 class="text-title font-medium">Who</h2>
-        <p class="mt-4 text-support text-secondary">
-          RigorRun is built by <span class="text-fg">{FOUNDER}</span>, working on it alone.
-        </p>
-        <p class="mt-4 text-support text-muted">
-          There is no company registered behind it yet, no funding, and no employees. Saying so is
-          cheaper than being found out, and a product that argues you should check claims rather
-          than believe them does not get to make unverifiable ones about itself.
-        </p>
-        <div class="mt-7 flex flex-wrap gap-3">
-          <Button href={contactHref(CONTACT_EMAIL)} variant="secondary">{contactLabel(CONTACT_EMAIL)}</Button>
-          <Button href={REPO_URL} variant="secondary" external>GitHub</Button>
-        </div>
+        <p class="text-lead text-secondary">When an agent gets tools and credentials, a plausible reply is no longer enough to check the work. Prompt, model and integration changes need regression tests for customer boundaries, allowed actions and actual side effects.</p>
+        <p class="mt-5 text-support text-secondary">The initial customer hypothesis is a CTO or AI/platform lead at a B2B SaaS team moving tool-using agents into customer workflows. The buying moment is a release, a security review or an incident that must not recur.</p>
+        <p class="mt-5 text-support text-muted">This is a product thesis, not a measured market-size or competitive-superiority claim. RigorRun complements runtime authorisation and monitoring; it does not replace them.</p>
       </div>
-
+    </div>
+  </Section>
+  <Section ruled tight>
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+      <div><h2 class="text-display font-medium text-balance">Open source for adoption. Workflow verification for revenue.</h2></div>
       <div>
-        <h2 class="text-title font-medium">Where it actually is</h2>
-        <dl class="mt-5 ruled rounded-panel border border-line bg-surface">
-          <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:gap-6">
-            <dt class="w-40 shrink-0 text-micro font-semibold uppercase text-muted">Verified against</dt>
-            <dd class="text-support text-secondary">
-              <a
-                class="rr-link"
-                href="https://github.com/Konuktor/rigorrun/tree/master/reports/stripe-pack-2026-10"
-              >Stripe refunds</a>: 168 cells on the local twin and 168 on Stripe test mode, with no
-              false pass or false fail; <a
-                class="rr-link"
-                href="https://github.com/Konuktor/rigorrun/tree/master/reports/blackbox-qualification-2026-10"
-              >black-box mode</a>, 36 of 36 cells.
-            </dd>
-          </div>
-          {
-            [
-              ['Published', `rigorrun@${VERSION} on npm, MIT, with SLSA build provenance`],
-              ['Users', 'No external user has run this yet. That is the next thing that matters.'],
-              ['Revenue', 'None. There is no price and no billing.'],
-              ['Funding', 'None raised.'],
-              [
-                'Verified against',
-                'Four public MCP servers written by somebody else, and a fixture system written for the dogfood test. Not a customer.',
-              ],
-            ].map(([term, detail]) => (
-              <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:gap-6">
-                <dt class="w-40 shrink-0 text-micro font-semibold uppercase text-muted">{term}</dt>
-                <dd class="text-support text-secondary">{detail}</dd>
-              </div>
-            ))
-          }
-        </dl>
-        <p class="mt-5 text-support text-muted">
-          If you have an agent doing a job you cannot afford to have silently break, that is the
-          conversation worth having. <a class="rr-link" href={contactHref(CONTACT_EMAIL)}>Get in touch.</a>
-        </p>
+        <p class="text-lead text-secondary">The runner stays MIT-licensed. The initial commercial offer is a paid, scoped pilot: make one real workflow testable, agree which defects it must catch, and hand off reproducible evidence and a release check.</p>
+        <p class="mt-5 text-support text-secondary">A shared team workspace is planned as the recurring product: workflow management, run history and approvals. It is not built yet. Willingness to pay, repeat usage and pricing remain validation questions.</p>
+        <p class="mt-5 text-support"><a class="rr-link" href="/access">Free runner, paid pilot and planned subscription</a></p>
       </div>
+    </div>
+  </Section>
+  <Section ruled tight>
+    <h2 class="text-display font-medium text-balance">Next milestones, not traction claims</h2>
+    <ol class="mt-8 grid gap-6 lg:grid-cols-3">
+      <li class="rounded-panel border border-line bg-surface p-6"><h3 class="text-title font-medium">Validate one real workflow</h3><p class="mt-3 text-support text-secondary">Find a design partner with a known failure, readable system state and a safe test environment. Custom integrations are scoped work, not assumed compatibility.</p></li>
+      <li class="rounded-panel border border-line bg-surface p-6"><h3 class="text-title font-medium">Show repeated release use</h3><p class="mt-3 text-support text-secondary">Check whether the team reruns the suite after model, prompt and credential changes, and whether the evidence helps a real shipping decision.</p></li>
+      <li class="rounded-panel border border-line bg-surface p-6"><h3 class="text-title font-medium">Validate the recurring product</h3><p class="mt-3 text-support text-secondary">Only then test demand for managed workflows, shared history and approvals. These are planned milestones, not current revenue or customer results.</p></li>
+    </ol>
+    <p class="mt-6 max-w-3xl text-support text-muted">The technical starting point is public: <a class="rr-link" href="/replay/helpdesk">the recorded Helpdesk run</a>, <a class="rr-link" href="/replay">the Stripe recording</a> and <a class="rr-link" href="/evidence">the evidence with its limits</a>. Historical release evidence does not qualify an altered engine build.</p>
+  </Section>
+  <Section ruled tight>
+    <div class="rr-prose-width">
+      <h2 class="text-display font-medium text-balance">See the demo. Challenge the thesis.</h2>
+      <p class="mt-5 text-lead text-secondary">For a hackathon, start with the recorded failure and its system evidence. For an engineering team or investor conversation, bring a workflow, a failure mode or a hard question.</p>
+      <div class="mt-7 flex flex-wrap gap-3"><Button href={INVESTOR_HREF}>Discuss the thesis</Button><Button href={PILOT_HREF} variant="secondary">Discuss a paid pilot</Button><Button href={REPO_URL} variant="secondary" external>Source code</Button></div>
+      <p class="mt-5 text-support"><a class="rr-link" href={contactHref(CONTACT_EMAIL)}>{contactLabel(CONTACT_EMAIL)}</a></p>
     </div>
   </Section>
 </Base>

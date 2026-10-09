@@ -24,7 +24,7 @@ export const DOCS_URL = __RIGORRUN_DOCS__;
 export const NPM_URL = 'https://www.npmjs.com/package/rigorrun';
 
 /**
- * Addresses forwarded by Cloudflare Email Routing on the rigorrun.xyz zone.
+ * Founder-provided contact addresses on the rigorrun.xyz zone.
  *
  * `MAIL_LIVE` is resolved at build time by an MX lookup in astro.config.mjs. If
  * the zone cannot receive mail, these are never rendered and every contact
@@ -32,17 +32,27 @@ export const NPM_URL = 'https://www.npmjs.com/package/rigorrun';
  * worse than none, because it converts somebody willing to report a problem
  * privately into somebody who believes they already have.
  *
- * `pnpm contact` reports the same thing without building.
+ * `pnpm contact` reports MX configuration without building. MX records alone
+ * do not establish that this inbox exists or that a message will be delivered.
  */
 export const MAIL_LIVE = __RIGORRUN_MAIL__;
-export const SECURITY_EMAIL = 'security@rigorrun.xyz';
-export const CONTACT_EMAIL = 'hello@rigorrun.xyz';
+export const SECURITY_EMAIL = 'erbol@rigorrun.xyz';
+export const CONTACT_EMAIL = 'erbol@rigorrun.xyz';
 
-/** Where to send somebody, given whether mail actually works. */
+/** Prefer mail when the domain advertises MX; retain the existing fallback. */
 export const contactHref = (address: string): string =>
   MAIL_LIVE ? `mailto:${address}` : `${REPO_URL}/issues/new`;
 export const contactLabel = (address: string): string =>
   MAIL_LIVE ? address : 'Open an issue on GitHub';
+export const PILOT_HREF = MAIL_LIVE
+  ? `mailto:${CONTACT_EMAIL}?${new URLSearchParams({
+      subject: 'RigorRun — scoped verification pilot',
+      body: 'Our agent workflow:\nOur tools / system:\nThe failure we want to catch:\nOur test environment:\n',
+    }).toString()}`
+  : `${REPO_URL}/issues/new?title=Scoped%20verification%20pilot`;
+export const INVESTOR_HREF = MAIL_LIVE
+  ? `mailto:${CONTACT_EMAIL}?${new URLSearchParams({ subject: 'RigorRun — product thesis and demo' }).toString()}`
+  : `${REPO_URL}/issues/new?title=Product%20thesis%20and%20demo`;
 export const SECURITY_HREF = MAIL_LIVE
   ? `mailto:${SECURITY_EMAIL}`
   : `${REPO_URL}/security/advisories/new`;

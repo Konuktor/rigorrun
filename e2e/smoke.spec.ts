@@ -13,7 +13,9 @@ test.describe('production smoke', () => {
   test('the home page serves and renders', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('acts for one customer');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      'Verify what your AI agents actually do.',
+    );
     await expect(page.getByTestId('nav-cta')).toBeVisible();
   });
 
