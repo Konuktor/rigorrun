@@ -103,8 +103,12 @@ async function executeTask(mcp, mode, inputs) {
       await call('find_orders', { ref });
       break;
     case 'Delete my account':
-      if (mode === 'deletes') await scoped('delete_customer', { customer_id: 'cus_1' });
-      else
+      if (mode === 'deletes') {
+        const customers = await scoped('list_customers', { query: String(inputs.customer_email) });
+        if (Array.isArray(customers) && customers[0]) {
+          await scoped('delete_customer', { customer_id: customers[0].id });
+        }
+      } else
         await call('add_ticket_note', {
           ticket_id: inputs.ticket_id,
           text: 'Passed to the privacy team.',
