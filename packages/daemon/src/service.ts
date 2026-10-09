@@ -80,6 +80,12 @@ import { Workspace } from './workspace.ts';
 import { compareRuns, type RunComparison } from './compare.ts';
 import { ActivationLog } from './activation.ts';
 import { detectDrift, type Discovery, type DriftReport } from './drift.ts';
+import {
+  configurationDigest,
+  isSuiteSource,
+  SuiteIntegrityError,
+  type SuiteSource,
+} from './suiteIntegrity.ts';
 
 export interface ServiceOptions {
   store: ProjectStore;
@@ -187,6 +193,7 @@ export class Service {
       environmentConnectedAt: attempted.timings.environmentConnectedAt ?? this.now().toISOString(),
     };
     await this.store.write(attempted);
+    await this.invalidateConfigurationChange(project, attempted);
     await this.saveDiscovery(projectId, connection.discovery);
     await this.activation.stage('environment_connected', projectId);
 
@@ -317,7 +324,8 @@ export class Service {
       budgets,
     };
     await this.store.write(updated);
-    if (pack) return { project: updated, readsProblem: '', readsIgnored: [] };
+    await this.invalidateConfigurationChange(project, updated);
+    if (pack) return { project: await this.store.read(projectId), readsProblem: '', readsIgnored: [] };
     // Said at setup rather than discovered in a verdict: a read the person
     // nominated that RigorRun will never call is something to hear about now.
     const readsIgnored = readsForVerdict(updated.verifierReads).ignored.map((read) => read.tool);
@@ -553,12 +561,14 @@ export class Service {
     // whose content cannot be recomputed without redoing the job.
     await this.store.writeArtefact(projectId, 'induced', finished.induced);
     await this.store.writeArtefact(projectId, 'schema', finished.schema);
+    await this.invalidateSuite(projectId);
 
     const updated: Project = {
       ...project,
       timings: {
         ...project.timings,
         workflowRecordedAt: this.now().toISOString(),
+        benchmarkGeneratedAt: null,
       },
     };
     await this.store.write(updated);
@@ -581,6 +591,7 @@ export class Service {
       schemaAnswers: [...merged].map(([questionId, value]) => ({ questionId, value })),
     };
     await this.store.write(updated);
+    await this.invalidateConfigurationChange(project, updated);
     return updated;
   }
 
@@ -604,6 +615,7 @@ export class Service {
       ...(project.goal.trim() ? { goal: project.goal } : {}),
     }).contract;
     await this.store.writeArtefact(projectId, 'contract', draft);
+    await this.invalidateSuite(projectId);
     return draft;
   }
 
@@ -636,6 +648,7 @@ export class Service {
       rejectedRuleIds: rejected,
     });
     await this.store.writeArtefact(projectId, 'contract', reviewed);
+    await this.invalidateSuite(projectId);
     if (rulesAwaitingReview(reviewed).length === 0) {
       await this.activation.stage('contract_confirmed', projectId);
     }
@@ -666,6 +679,8 @@ export class Service {
       );
     }
     const schema = await this.schemaOf(project);
+    await this.store.writeArtefact(projectId, 'schema', schema);
+    const inputs = await this.suiteInputs(projectId);
     const { fixture } = await this.registerFor(project, schema);
     const { benchmark } = await generateBenchmark(
       this.workspace.environment(project, schema),
@@ -673,15 +688,13 @@ export class Service {
       [fixture],
       { caseTimeoutMs: project.budgets.caseMs },
     );
-    await this.store.writeArtefact(projectId, 'benchmark', benchmark);
-    // A quality check describes the suite it checked. A regenerated suite has
-    // not been checked, and carrying the old verdict forward would put a
-    // number on a run that was never measured.
-    await this.store.deleteArtefact(projectId, 'quality');
+    await this.assertInputsCurrent(projectId, inputs);
+    await this.publishSuite(projectId, benchmark, { ...inputs, origin: 'generated' });
 
+    const current = await this.store.read(projectId);
     const updated: Project = {
-      ...project,
-      timings: { ...project.timings, benchmarkGeneratedAt: this.now().toISOString() },
+      ...current,
+      timings: { ...current.timings, benchmarkGeneratedAt: this.now().toISOString() },
     };
     await this.store.write(updated);
     await this.activation.stage('benchmark_built', projectId);
@@ -798,14 +811,15 @@ export class Service {
     };
 
     await this.store.writeArtefact(projectId, 'contract', contract);
-    await this.store.writeArtefact(projectId, 'benchmark', benchmark);
     await this.store.writeArtefact(projectId, 'schema', pack.schema);
-    // A quality check describes the suite it checked; this is a new suite.
-    await this.store.deleteArtefact(projectId, 'quality');
+    await this.publishSuite(projectId, benchmark, {
+      ...await this.suiteInputs(projectId), origin: 'pack', packId: pack.id,
+    });
 
+    const current = await this.store.read(projectId);
     const updated: Project = {
-      ...project,
-      timings: { ...project.timings, benchmarkGeneratedAt: this.now().toISOString() },
+      ...current,
+      timings: { ...current.timings, benchmarkGeneratedAt: this.now().toISOString() },
     };
     await this.store.write(updated);
     if (rulesAwaitingReview(contract).length === 0) {
@@ -1037,7 +1051,7 @@ export class Service {
     // A regression case is replayed against a world RigorRun installs; a pack
     // makes its records per case from a recipe, which only the pack can write.
     refuseForPack(project, 'extended with a replayed failure');
-    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
+    const { benchmark, source } = await this.readCurrentSuite(projectId);
     const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
     if (!benchmark || !contract) {
       throw new Error('Build a suite first. A failure is added to a suite, not instead of one.');
@@ -1053,10 +1067,11 @@ export class Service {
     const caseId = `case_incident_${randomBytes(4).toString('hex')}`;
     const replayed = await replayFailure(adapter, contract, { ...failure }, caseId);
 
-    await this.store.writeArtefact(projectId, 'benchmark', {
+    await this.assertSuiteCurrent(projectId, source);
+    await this.publishSuite(projectId, {
       ...benchmark,
       cases: [...benchmark.cases, replayed.testCase],
-    });
+    }, source);
     return {
       caseId,
       shouldPerform: replayed.shouldPerform,
@@ -1093,8 +1108,7 @@ export class Service {
       });
       if (problem) throw new Error(problem);
     }
-    const suite = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
-    if (!suite) throw new Error('There is no benchmark to run yet.');
+    const { benchmark: suite, source } = await this.readCurrentSuite(projectId);
     const benchmark = selectCases(suite, options.caseIds ?? []);
     const subset = benchmark.cases.length !== suite.cases.length;
 
@@ -1165,12 +1179,19 @@ export class Service {
     }
     if (subset) result = await withSubsetLimit(result, suite, benchmark);
     await this.store.writeRun(projectId, result.runId, result);
+    try {
+      await this.assertSuiteCurrent(projectId, source);
+    } catch (error) {
+      if (!(error instanceof SuiteIntegrityError)) throw error;
+      throw new SuiteIntegrityError('stale', `${error.message} Historical evidence was saved as ${result.runId}.`, result.runId);
+    }
 
     const score = result.scores[0];
+    const current = await this.store.read(projectId);
     const updated: Project = {
-      ...project,
+      ...current,
       runs: [
-        ...project.runs,
+        ...current.runs,
         {
           runId: result.runId,
           agentId: config.id,
@@ -1197,21 +1218,21 @@ export class Service {
         },
       ],
       timings: {
-        ...project.timings,
+        ...current.timings,
         // The clock stops on the first verdict from a real agent against a real
         // system, whichever way that verdict went. A failure is a result.
-        firstVerdictAt: project.timings.firstVerdictAt ?? this.now().toISOString(),
+        firstVerdictAt: current.timings.firstVerdictAt ?? this.now().toISOString(),
       },
       // A run of a few cases is not something to measure the whole suite
       // against later, so it never becomes the baseline by default.
-      baselineRunId: project.baselineRunId ?? (subset ? null : result.runId),
+      baselineRunId: current.baselineRunId ?? (subset ? null : result.runId),
     };
     await this.store.write(updated);
 
     // A8 whichever way the verdict went — a failure is a result, and a person
     // who got one has activated. A9 is the one that says they came back.
     await this.activation.stage(
-      project.runs.length === 0 ? 'first_real_verdict' : 'second_run_completed',
+      current.runs.length === 0 ? 'first_real_verdict' : 'second_run_completed',
       projectId,
     );
     return result;
@@ -1384,6 +1405,74 @@ export class Service {
 
   // ------------------------------------------------------------------ helpers
 
+  /** Single-writer checkpoints, not a transaction or a cross-process lock. */
+  private async suiteInputs(projectId: string): Promise<Pick<SuiteSource, 'contractDigest' | 'configurationDigest'>> {
+    const project = await this.store.read(projectId);
+    const contract = await this.store.readArtefact<EnvironmentContract>(projectId, 'contract');
+    if (!contract) throw new SuiteIntegrityError('missing', 'The suite has no stored contract. Regenerate or reinstall it.');
+    const schema = await this.store.readArtefact<EnvironmentSchema>(projectId, 'schema');
+    return {
+      contractDigest: await hashValue(contract),
+      configurationDigest: await configurationDigest(project, schema),
+    };
+  }
+
+  private async assertInputsCurrent(projectId: string, inputs: Pick<SuiteSource, 'contractDigest' | 'configurationDigest'>): Promise<void> {
+    const current = await this.suiteInputs(projectId);
+    if (current.contractDigest !== inputs.contractDigest || current.configurationDigest !== inputs.configurationDigest) {
+      throw new SuiteIntegrityError('stale', 'The contract or environment configuration changed. Regenerate or reinstall the suite.');
+    }
+  }
+
+  private async publishSuite(projectId: string, benchmark: Benchmark, inputs: Omit<SuiteSource, 'version' | 'benchmarkDigest'>): Promise<void> {
+    await this.store.deleteArtefact(projectId, 'suite-source');
+    await this.store.deleteArtefact(projectId, 'quality');
+    await this.store.deleteArtefact(projectId, 'quality-source');
+    await this.store.writeArtefact(projectId, 'benchmark', benchmark);
+    const source: SuiteSource = { ...inputs, version: 1, benchmarkDigest: await hashValue(benchmark) };
+    await this.store.writeArtefact(projectId, 'suite-source', source);
+  }
+
+  private async invalidateSuite(projectId: string): Promise<void> {
+    for (const name of ['suite-source', 'benchmark', 'quality-source', 'quality']) {
+      await this.store.deleteArtefact(projectId, name);
+    }
+    const project = await this.store.read(projectId);
+    await this.store.write({ ...project, timings: { ...project.timings, benchmarkGeneratedAt: null } });
+  }
+
+  private async invalidateConfigurationChange(before: Project, after: Project): Promise<void> {
+    if (await configurationDigest(before, null) !== await configurationDigest(after, null)) {
+      await this.invalidateSuite(after.id);
+    }
+  }
+
+  async readCurrentSuite(projectId: string): Promise<{ benchmark: Benchmark; source: SuiteSource }> {
+    const benchmark = await this.store.readArtefact<Benchmark>(projectId, 'benchmark');
+    const source = await this.store.readArtefact<unknown>(projectId, 'suite-source');
+    if (!benchmark || !source) {
+      throw new SuiteIntegrityError('missing', 'The suite or its source record is missing. Explicitly regenerate or reinstall the suite.');
+    }
+    if (!isSuiteSource(source) || !BenchmarkSchema.safeParse(benchmark).success) {
+      throw new SuiteIntegrityError('stale', 'The suite or its source record is invalid. Regenerate or reinstall the suite.');
+    }
+    await this.assertInputsCurrent(projectId, source);
+    if (await hashValue(benchmark) !== source.benchmarkDigest) {
+      throw new SuiteIntegrityError('stale', 'The benchmark changed since publication. Regenerate or reinstall the suite.');
+    }
+    return { benchmark, source };
+  }
+
+  async assertSuiteCurrent(projectId: string, source: SuiteSource): Promise<void> {
+    try {
+      const current = await this.readCurrentSuite(projectId);
+      if (await hashValue(current.source) === await hashValue(source)) return;
+    } catch (error) {
+      if (!(error instanceof SuiteIntegrityError)) throw error;
+    }
+    throw new SuiteIntegrityError('stale', 'The suite source changed during this operation. Regenerate or reinstall it and run again.');
+  }
+
   /** Header values, from the credential store, at the moment they are sent. */
   private async resolveHeaders(byName: Record<string, string>): Promise<Record<string, string>> {
     const out: Record<string, string> = {};
@@ -1450,7 +1539,6 @@ export class Service {
         fixtures: [fixture],
         create: build,
       });
-      await this.store.writeArtefact(project.id, 'schema', schema);
       return { fixture };
     }
     const environment = build();
@@ -1477,7 +1565,6 @@ export class Service {
       fixtures: [fixture],
       create: build,
     });
-    await this.store.writeArtefact(project.id, 'schema', schema);
     return { fixture };
   }
 }
