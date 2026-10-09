@@ -37,7 +37,7 @@
 
 ## Execution layout and ownership
 
-All implementation paths below refer to the pinned modern baseline, **not** the old current checkout. This document is a plan; none of its unchecked steps have been executed.
+All implementation paths below refer to the pinned modern baseline, **not** the old current checkout. The original proposal/checklists below are retained as the planning record. Execution, approved scope corrections, actual verification and final independent review are recorded in [MVP_DELIVERY.md](../../product/MVP_DELIVERY.md) and [MVP_RUNBOOK.md](../../product/MVP_RUNBOOK.md); all six tasks and the optional workflow selector were completed.
 
 | Owner       | Exclusive writes                                                                                                                                                          | Deliverable / budget                                                                              |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
