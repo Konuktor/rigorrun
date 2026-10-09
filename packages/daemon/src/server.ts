@@ -20,6 +20,7 @@ import { serve, type ServerType } from '@hono/node-server';
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
+import { z } from 'zod';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 import {
@@ -41,6 +42,14 @@ import {
 import type { Service } from './service.ts';
 
 const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]', '::1']);
+
+const PackSuiteRequestSchema = z
+  .object({
+    params: z.unknown().optional(),
+    confirmedRuleIds: z.array(z.string()).default([]),
+    rejectedRuleIds: z.array(z.string()).default([]),
+  })
+  .strict();
 
 const CONTENT_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -443,17 +452,14 @@ export class Runner {
       });
     });
 
-    // A pack's own suite, built from the answers it asked for. The rules a
-    // person confirms are named here; every other rule stays a proposal.
+    // A pack's own suite, built from the answers it asked for. Decisions are
+    // explicit in either direction; every unmentioned rule stays a proposal.
     app.post('/api/projects/:id/pack-suite', async (context) => {
-      const body = await context.req.json<{ params?: unknown; confirmedRuleIds?: unknown }>();
-      const confirmedRuleIds = Array.isArray(body.confirmedRuleIds)
-        ? body.confirmedRuleIds.filter((entry): entry is string => typeof entry === 'string')
-        : [];
+      const body = PackSuiteRequestSchema.parse(await context.req.json<unknown>());
       const { contract, benchmark } = await service.installPackSuite(
         context.req.param('id'),
         body.params,
-        { confirmedRuleIds },
+        { confirmedRuleIds: body.confirmedRuleIds, rejectedRuleIds: body.rejectedRuleIds },
       );
       return context.json({
         contract,
@@ -464,6 +470,10 @@ export class Runner {
         })),
       });
     });
+
+    app.get('/api/projects/:id/gate-readiness', async (context) =>
+      context.json(await service.gateReadiness(context.req.param('id'))),
+    );
 
     // ------------------------------------------------------------- agents
 

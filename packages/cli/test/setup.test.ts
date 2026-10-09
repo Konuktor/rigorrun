@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { ProjectStore } from '@rigorrun/daemon';
+import type { EnvironmentContract } from '@rigorrun/core';
 import { main } from '../src/main.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -66,6 +67,81 @@ afterAll(async () => {
 });
 
 describe('rigorrun setup', () => {
+  async function reviewSetup(review: { confirm?: string[]; reject?: string[] }) {
+    process.env['RR_SETUP_TEST_DESK_SHAPE'] = 'text-json';
+    const isolatedHome = await mkdtemp(join(scratch, 'review-home-'));
+    const path = join(isolatedHome, 'spec.json');
+    await writeFile(
+      path,
+      JSON.stringify({
+        ...spec,
+        review,
+        quality: true,
+        agents: [{ name: 'Must not be registered on refusal', endpoint: 'http://127.0.0.1:1' }],
+      }),
+    );
+    const result = await cli('setup', path, '--home', isolatedHome, '--json');
+    const store = new ProjectStore(isolatedHome);
+    const projects = (await store.listAll()).projects;
+    return { ...result, store, projects };
+  }
+
+  async function expectNoDownstream(store: ProjectStore, projectId: string) {
+    for (const artefact of ['benchmark', 'suite-source', 'quality', 'quality-source']) {
+      expect(await store.readArtefact(projectId, artefact)).toBeUndefined();
+    }
+    expect((await store.read(projectId)).agents).toEqual([]);
+    expect((await store.read(projectId)).runs).toEqual([]);
+  }
+
+  it('retains unmatched inferred rules and stops before suite, assessment and agent registration', async () => {
+    const result = await reviewSetup({ confirm: ['pattern-that-matches-no-rule'] });
+    expect(result.code).toBe(2);
+    expect(result.projects).toHaveLength(1);
+    const id = result.projects[0]!.id;
+    const contract = await result.store.readArtefact<EnvironmentContract>(id, 'contract');
+    const pending = contract!.rules.filter((rule) => rule.status === 'inferred');
+    expect(pending.length).toBeGreaterThan(0);
+    expect(contract!.rules.filter((rule) => rule.status === 'rejected')).toEqual([]);
+    expect(result.err).toContain(id);
+    for (const rule of pending) expect(result.err).toContain(rule.id);
+    await expectNoDownstream(result.store, id);
+  }, 180_000);
+
+  it('persists explicit rejection while leaving unmatched rules pending', async () => {
+    const result = await reviewSetup({ reject: ['must happen before'] });
+    expect(result.code).toBe(2);
+    const id = result.projects[0]!.id;
+    const contract = await result.store.readArtefact<EnvironmentContract>(id, 'contract');
+    expect(contract!.rules.some((rule) => rule.status === 'rejected')).toBe(true);
+    expect(contract!.rules.some((rule) => rule.status === 'inferred')).toBe(true);
+    await expectNoDownstream(result.store, id);
+  }, 180_000);
+
+  it('refuses overlapping confirm and reject matches without persisting either decision', async () => {
+    const result = await reviewSetup({ confirm: ['.'], reject: ['.'] });
+    expect(result.code).toBe(2);
+    const id = result.projects[0]!.id;
+    const contract = await result.store.readArtefact<EnvironmentContract>(id, 'contract');
+    expect(contract!.rules.some((rule) => rule.status === 'inferred')).toBe(true);
+    expect(
+      contract!.rules.some((rule) => rule.status === 'confirmed' || rule.status === 'rejected'),
+    ).toBe(false);
+    expect(result.err).toContain(id);
+    expect(result.err).toMatch(/both|conflict/i);
+    await expectNoDownstream(result.store, id);
+  }, 180_000);
+
+  it.each(['confirm', 'reject'] as const)(
+    'refuses an invalid %s regex before creating a project',
+    async (decision) => {
+      const result = await reviewSetup({ [decision]: ['['] });
+      expect(result.code).toBe(2);
+      expect(result.err).toMatch(/pattern|regular expression|regex/i);
+      expect(result.projects).toEqual([]);
+    },
+  );
+
   it('creates, teaches, compiles and builds a project from a spec', async () => {
     // The JSON-in-text shape, so a headless setup also proves R-8 end to end.
     process.env['RR_SETUP_TEST_DESK_SHAPE'] = 'text-json';
@@ -77,11 +153,15 @@ describe('rigorrun setup', () => {
     expect(summary.projectId).toMatch(/^p_/);
     expect(summary.records).toContain('Booking');
     expect(summary.cases).toBeGreaterThan(0);
+    expect(summary.rules.confirmed).toBeGreaterThan(0);
 
     const store = new ProjectStore(home);
     const project = await store.read(summary.projectId);
     expect(project.verifierReads).toHaveLength(3);
     expect(await store.readArtefact(summary.projectId, 'benchmark')).toBeDefined();
+    const contract = await store.readArtefact<EnvironmentContract>(summary.projectId, 'contract');
+    expect(contract!.rules.some((rule) => rule.status === 'inferred')).toBe(false);
+    expect(contract!.rules.some((rule) => rule.status === 'rejected')).toBe(false);
     // The value went to the credential store, and the spec never held it.
     expect(await store.secret('DESK_RESULT_SHAPE')).toBe('text-json');
     expect(await readFile(path, 'utf8')).not.toContain('text-json');

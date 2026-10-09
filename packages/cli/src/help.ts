@@ -278,7 +278,10 @@ build the suite, optionally check it, register agents. Prints the project id.
 A spec names the environment variable each secret comes from ("secrets":
 {"API_TOKEN": "MY_TOKEN_VAR"}); values are never read from the spec. A rule
 RigorRun only inferred is confirmed only when a "review.confirm" pattern
-matches its statement; every other inferred rule is rejected.
+matches its statement; rejection requires a "review.reject" pattern. Patterns
+are regular expressions, matched case-insensitively. Unmatched rules remain
+inferred and stop setup before suite generation, assessment or agent registration
+with exit 2 and the project/rule IDs. Conflicting decisions are refused.
 
 OPTIONS
       --home <dir>   Where the project store lives.
