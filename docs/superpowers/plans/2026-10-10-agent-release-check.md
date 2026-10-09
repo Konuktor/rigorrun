@@ -51,7 +51,7 @@
 
 ### Task 2: Guided Helpdesk browser path
 
-**Files:** UI allowlist in task brief, with optional narrow `apps/app/src/product/HelpdeskFlow.tsx`; new onboarding spec/config.
+**Files:** UI allowlist in task brief, with narrow pack-specific `apps/app/src/packs/HelpdeskFlow.tsx`; new onboarding spec/config. Keep pack identity/defaults/copy in this component; generic product pages consume its component and support predicate without pack literals. Leave the domain checker unchanged.
 **Interfaces:** consumes shared API, existing connect/addAgent/run/project/report. Produces wrapper signatures above and user route within Projects/Project.
 
 - [ ] Write a user-visible Playwright regression using the real CLI daemon/twin and external deterministic HTTP control with fresh state. Path: create project → Helpdesk twin URL and safety → draft rules → explicit confirm/reject → own endpoint/probe → readiness → run → evidence/report → reload/repeat.

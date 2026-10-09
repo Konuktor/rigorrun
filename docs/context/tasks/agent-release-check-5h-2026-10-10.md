@@ -14,7 +14,7 @@ Complete the existing Helpdesk twin → own HTTP agent → explicit rules review
 ## Ownership and allowed files
 
 - Backend: `packages/cli/src/setup.ts`, narrow new setup helper under `packages/cli/src/`, `packages/cli/src/help.ts`, `packages/cli/test/setup.test.ts`, `packages/cli/test/generateReview.test.ts`, `packages/cli/test/gateQuality.test.ts`, `packages/daemon/src/server.ts`, new focused tests under `packages/daemon/test/`. Service logic may be read but not rewritten.
-- UI: `apps/app/src/product/**`; new `e2e/helpdesk-onboarding.spec.ts` and `e2e/playwright.helpdesk.config.ts`. No backend/report edits.
+- UI: `apps/app/src/product/**`; new pack-specific `apps/app/src/packs/HelpdeskFlow.tsx`; new `e2e/helpdesk-onboarding.spec.ts` and `e2e/playwright.helpdesk.config.ts`. No backend/report edits. Keep business labels/pack identity in the pack-specific component so the generic-code domain checker stays unchanged.
 - Evidence: `packages/report/src/**`, `packages/report/test/**`. No app/server edits.
 - Root: this brief, supplied design spec, `docs/superpowers/plans/2026-10-10-agent-release-check.md`, new `docs/product/AGENT_RELEASE_CHECK_QUICKSTART.md`, `docs/product/AGENT_RELEASE_CHECK_DELIVERY.md`, `scripts/agent-release-check-acceptance.mjs`, focused CLI acceptance test/fixtures if necessary under `packages/cli/test/`, `fixtures/external/helpdesk-release-control/**`. Worker areas require explicit ownership transfer before root edits.
 
