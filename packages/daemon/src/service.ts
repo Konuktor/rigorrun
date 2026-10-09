@@ -637,15 +637,11 @@ export class Service {
     const ruleIds = new Set(draft.rules.map((rule) => rule.id));
     const confirmed = decisions.confirmedRuleIds ?? [];
     const rejected = decisions.rejectedRuleIds ?? [];
-    for (const ids of [confirmed, rejected]) {
-      if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string' || !ruleIds.has(id))) {
+    this.validateDecisionArrays(confirmed, rejected, (ids) => {
+      if (ids.some((id) => !ruleIds.has(id))) {
         throw new Error('Review decisions must name rules in this contract.');
       }
-      if (new Set(ids).size !== ids.length) throw new Error('Duplicate rule in review decisions.');
-    }
-    if (confirmed.some((id) => rejected.includes(id))) {
-      throw new Error('A rule cannot be both confirmed and rejected.');
-    }
+    });
     const reviewed = applyReview(draft, {
       confirmedRuleIds: confirmed,
       rejectedRuleIds: rejected,
@@ -656,6 +652,25 @@ export class Service {
       await this.activation.stage('contract_confirmed', projectId);
     }
     return reviewed;
+  }
+
+  private validateDecisionArrays(
+    confirmed: string[],
+    rejected: string[],
+    validateIds?: (ids: string[]) => void,
+  ): void {
+    for (const ids of [confirmed, rejected]) {
+      if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string')) {
+        throw new Error('Review decisions must name rules in this contract.');
+      }
+      // The caller owns unknown-ID diagnostics; this position preserves review's
+      // existing error order when an array contains both unknown and duplicate IDs.
+      validateIds?.(ids);
+      if (new Set(ids).size !== ids.length) throw new Error('Duplicate rule in review decisions.');
+    }
+    if (confirmed.some((id) => rejected.includes(id))) {
+      throw new Error('A rule cannot be both confirmed and rejected.');
+    }
   }
 
   // ------------------------------------------------- step 5: build the suite
@@ -767,15 +782,7 @@ export class Service {
     const ruleIds = new Set(parsedContract.data.rules.map((rule) => rule.id));
     const confirmedRuleIds = decisions.confirmedRuleIds ?? [];
     const rejectedRuleIds = decisions.rejectedRuleIds ?? [];
-    for (const ids of [confirmedRuleIds, rejectedRuleIds]) {
-      if (!Array.isArray(ids) || ids.some((id) => typeof id !== 'string')) {
-        throw new Error('Review decisions must name rules in this contract.');
-      }
-      if (new Set(ids).size !== ids.length) throw new Error('Duplicate rule in review decisions.');
-    }
-    if (confirmedRuleIds.some((id) => rejectedRuleIds.includes(id))) {
-      throw new Error('A rule cannot be both confirmed and rejected.');
-    }
+    this.validateDecisionArrays(confirmedRuleIds, rejectedRuleIds);
     const unknownRules = [...confirmedRuleIds, ...rejectedRuleIds].filter((id) => !ruleIds.has(id));
     if (unknownRules.length > 0) {
       throw new Error(
