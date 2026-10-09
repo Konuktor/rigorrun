@@ -50,9 +50,11 @@ npx rigorrun@0.6.1 --no-open
 Open the one-time pairing URL printed by the runner. From Projects:
 
 1. Create a project and select **Helpdesk twin**.
-2. Enter the local MCP URL and explicitly select local/ephemeral safety.
+2. Enter the local MCP URL, explicitly select local/ephemeral safety, then click
+   **Connect twin and draft rules**.
 3. Confirm or reject every proposed rule. Pending rules keep the suite unready;
-   rejected boundaries are not enforced.
+   rejected boundaries are not enforced. Click **Save decisions and install
+   suite**, then wait for **Ready for the checked suite** before continuing.
 4. Add your HTTP endpoint as a black-box agent. Set the claim path to the field
    in your reply (`output` above). Probe the agent; a failed probe remains failed.
 5. Run the suite and inspect each case's task and policy results, observed

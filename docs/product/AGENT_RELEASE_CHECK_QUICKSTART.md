@@ -83,8 +83,10 @@ decision requires your own candidate endpoint.
 
 Open the one-time pairing URL printed by the local runner. In Projects, create
 a project and select the Helpdesk twin path. Enter the local MCP URL and choose
-local/ephemeral safety explicitly. Review every proposed rule: confirm or reject
-it. Pending rules keep the suite unready. Rejected rules are not enforced; any
+local/ephemeral safety explicitly, then click **Connect twin and draft rules**.
+Review every proposed rule: confirm or reject it. Click **Save decisions and
+install suite** and wait for **Ready for the checked suite**. Pending rules keep
+the suite unready. Rejected rules are not enforced; any
 retained diagnostic checks do not prove that rejected boundary.
 
 Connect your HTTP endpoint as a black-box agent and select the correct reply

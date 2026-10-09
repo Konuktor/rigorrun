@@ -12,7 +12,7 @@ no person.
 | `0`  | Passed.                                                                                                                                                        |
 | `1`  | The agent failed, or the gate was not met.                                                                                                                     |
 | `2`  | Something is wrong with the setup.                                                                                                                             |
-| `3`  | It ran, but too many cases reached no verdict: RigorRun abstained for lack of evidence, or the harness failed. Raise `--max-inconclusive` only if you mean it. |
+| `3`  | Inconclusive evidence, or a missing, stale, unreviewed or refused suite. The candidate need not have run. Raise `--max-inconclusive` only if you deliberately intend that policy. |
 
 A build server cannot tell those apart from prose, so `2` never means "the agent
 was bad" — it means RigorRun could not run the question — and `3` never means
