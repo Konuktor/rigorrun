@@ -164,6 +164,18 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium firefox webkit
 
+      # The base is public. An authenticated Docker Hub outage can break the
+      # runner's bundled credentials while anonymous pulls still work. Prepare
+      # the same image without reading or changing those credentials; the
+      # unchanged sandbox tests must still build/run their isolated targets.
+      - name: Prepare the public sandbox base image
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          rigorrun_docker_config="$(mktemp -d "$RUNNER_TEMP/rigorrun-public-docker-XXXXXX")"
+          docker --config "$rigorrun_docker_config" pull node:20-alpine
+          docker --config "$rigorrun_docker_config" image inspect node:20-alpine --format '{{json .RepoDigests}}'
+
       - name: Unit and integration tests
         run: pnpm test
 
