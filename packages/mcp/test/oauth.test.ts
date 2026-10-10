@@ -36,6 +36,7 @@ let issuer = '';
 /** Every request the authorization server received, for the assertions below. */
 const requests: { method: string; path: string; query: URLSearchParams }[] = [];
 const codes = new Map<string, { challenge: string; redirect: string }>();
+const tokenRequests: URLSearchParams[] = [];
 /** What the client registered, so the test can assert on the redirect URI. */
 let registered: Record<string, unknown> = {};
 
@@ -110,6 +111,7 @@ beforeAll(async () => {
       request.on('data', (chunk: Buffer) => chunks.push(chunk));
       request.on('end', () => {
         const body = new URLSearchParams(Buffer.concat(chunks).toString());
+        tokenRequests.push(body);
         const record = codes.get(body.get('code') ?? '');
         const verifier = body.get('code_verifier') ?? '';
         const computed = createHash('sha256').update(verifier).digest('base64url');
@@ -141,6 +143,78 @@ afterAll(async () => {
 });
 
 describe('the half of OAuth that belongs to the client', () => {
+  for (const part of ['client', 'tokens'] as const) {
+    for (const legacyIssuer of [undefined, '', '  ', null, 42]) {
+      it(`requires fresh sign-in for ${part} with invalid issuer ${String(legacyIssuer)}`, async () => {
+        const store = memoryStore();
+        await store.set(
+          'oauth:desk:client',
+          JSON.stringify({ client_id: 'old-client', issuer: 'https://old.example.test' }),
+        );
+        await store.set(
+          'oauth:desk:tokens',
+          JSON.stringify({
+            access_token: 'old-access',
+            token_type: 'Bearer',
+            issuer: 'https://old.example.test',
+          }),
+        );
+        await store.set(
+          `oauth:desk:${part}`,
+          JSON.stringify(
+            part === 'client'
+              ? {
+                  client_id: 'legacy-client',
+                  client_secret: 'synthetic-secret',
+                  issuer: legacyIssuer,
+                }
+              : {
+                  access_token: 'legacy-access',
+                  refresh_token: 'legacy-refresh',
+                  token_type: 'Bearer',
+                  issuer: legacyIssuer,
+                },
+          ),
+        );
+        await store.set('oauth:desk:verifier', 'stale-verifier');
+        await store.set('oauth:unrelated:tokens', 'unrelated-credential');
+        const provider = new LocalOAuthProvider({ serverKey: 'desk', store });
+
+        expect(
+          await (part === 'client' ? provider.clientInformation() : provider.tokens()),
+        ).toBeUndefined();
+        expect([...store.seen.keys()]).toEqual(['oauth:unrelated:tokens']);
+        expect(store.seen.get('oauth:unrelated:tokens')).toBe('unrelated-credential');
+      });
+    }
+  }
+
+  it('preserves the issuer on saved credentials and tokens across provider instances', async () => {
+    const store = memoryStore();
+    const provider = new LocalOAuthProvider({ serverKey: 'desk', store });
+    await provider.saveClientInformation({
+      client_id: 'bound-client',
+      issuer: 'https://auth.example.test',
+    });
+    await provider.saveTokens({
+      access_token: 'bound-access',
+      refresh_token: 'bound-refresh',
+      token_type: 'Bearer',
+      issuer: 'https://auth.example.test',
+    });
+    const reopened = new LocalOAuthProvider({ serverKey: 'desk', store });
+    expect(await reopened.clientInformation()).toEqual({
+      client_id: 'bound-client',
+      issuer: 'https://auth.example.test',
+    });
+    expect(await reopened.tokens()).toEqual({
+      access_token: 'bound-access',
+      refresh_token: 'bound-refresh',
+      token_type: 'Bearer',
+      issuer: 'https://auth.example.test',
+    });
+  });
+
   it('signs in through a browser and keeps the tokens with the credentials', async () => {
     const store = memoryStore();
     const opened: string[] = [];
@@ -158,8 +232,12 @@ describe('the half of OAuth that belongs to the client', () => {
     const waiting = provider.waitForCode();
     // The SDK owns discovery, PKCE and exchange; this drives the same calls it
     // would, so the assertions are about RigorRun's half.
-    const { startAuthorization, exchangeAuthorization, registerClient, discoverAuthorizationServerMetadata } =
-      await import('@modelcontextprotocol/sdk/client/auth.js');
+    const {
+      startAuthorization,
+      exchangeAuthorization,
+      registerClient,
+      discoverAuthorizationServerMetadata,
+    } = await import('@modelcontextprotocol/sdk/client/auth.js');
 
     const metadata = await discoverAuthorizationServerMetadata(issuer);
     if (!metadata) throw new Error('The authorization server published no metadata.');
@@ -169,7 +247,9 @@ describe('the half of OAuth that belongs to the client', () => {
       metadata,
       clientMetadata: provider.clientMetadata,
     });
-    await provider.saveClientInformation(client);
+    // These low-level SDK helpers do not stamp credentials; the complete
+    // transport flow tested below does. This manual flow binds them explicitly.
+    await provider.saveClientInformation({ ...client, issuer });
 
     const { authorizationUrl, codeVerifier } = await startAuthorization(issuer, {
       metadata,
@@ -195,13 +275,15 @@ describe('the half of OAuth that belongs to the client', () => {
       codeVerifier: await provider.codeVerifier(),
       redirectUri: provider.redirectUrl,
     });
-    await provider.saveTokens(tokens);
+    await provider.saveTokens({ ...tokens, issuer });
 
     // Where they went. Not into a project file, which is what makes a project
     // safe to copy or attach to a support request.
     // The redirect the server holds is a loopback address on this machine.
     // Nobody else's server is ever handed a code for your system.
-    expect((registered['redirect_uris'] as string[])[0]).toMatch(/^http:\/\/127\.0\.0\.1:\d+\/callback$/);
+    expect((registered['redirect_uris'] as string[])[0]).toMatch(
+      /^http:\/\/127\.0\.0\.1:\d+\/callback$/,
+    );
 
     expect([...store.seen.keys()]).toContain('oauth:desk:tokens');
     expect(store.seen.get('oauth:desk:tokens')).toContain('an-access-token');
@@ -258,10 +340,12 @@ describe('the half of OAuth that belongs to the client', () => {
     await new LocalOAuthProvider({ serverKey: 'desk', store }).saveTokens({
       access_token: 'desk-token',
       token_type: 'Bearer',
+      issuer: 'https://desk-auth.example.test',
     });
     await new LocalOAuthProvider({ serverKey: 'billing', store }).saveTokens({
       access_token: 'billing-token',
       token_type: 'Bearer',
+      issuer: 'https://billing-auth.example.test',
     });
 
     expect(await new LocalOAuthProvider({ serverKey: 'desk', store }).tokens()).toMatchObject({
@@ -292,14 +376,20 @@ describe('connecting to an MCP server that requires signing in', () => {
   let desk: ChildProcess;
   let gateway: Server;
   let resourceServer: Server;
+  const authorizations: (string | undefined)[] = [];
 
   beforeAll(async () => {
     const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
-    desk = spawn(join(repoRoot, 'node_modules', '.bin', 'tsx'), [
-      join(repoRoot, 'fixtures', 'external', 'mcp-venue-desk', 'src', 'http.ts'),
-    ], { env: { ...process.env, PORT: String(DESK_PORT) }, stdio: ['ignore', 'pipe', 'pipe'] });
+    desk = spawn(
+      join(repoRoot, 'node_modules', '.bin', 'tsx'),
+      [join(repoRoot, 'fixtures', 'external', 'mcp-venue-desk', 'src', 'http.ts')],
+      { env: { ...process.env, PORT: String(DESK_PORT) }, stdio: ['ignore', 'pipe', 'pipe'] },
+    );
     await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('the fixture never said it was listening')), 30_000);
+      const timer = setTimeout(
+        () => reject(new Error('the fixture never said it was listening')),
+        30_000,
+      );
       desk.stdout?.on('data', (chunk: Buffer) => {
         if (chunk.toString().includes('listening')) {
           clearTimeout(timer);
@@ -323,6 +413,7 @@ describe('connecting to an MCP server that requires signing in', () => {
     });
 
     gateway = createServer((incoming, response) => {
+      authorizations.push(incoming.headers.authorization);
       if (incoming.url?.startsWith('/.well-known/')) {
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(
@@ -330,7 +421,11 @@ describe('connecting to an MCP server that requires signing in', () => {
         );
         return;
       }
-      if (incoming.headers.authorization !== 'Bearer an-access-token') {
+      if (
+        !['Bearer an-access-token', 'Bearer legacy-access-token'].includes(
+          incoming.headers.authorization ?? '',
+        )
+      ) {
         // What makes this an OAuth resource server rather than a locked door.
         response.writeHead(401, {
           'www-authenticate': `Bearer realm="desk", resource_metadata="${gatewayPortHolder.url}/.well-known/oauth-protected-resource"`,
@@ -422,7 +517,7 @@ describe('connecting to an MCP server that requires signing in', () => {
     const store = memoryStore();
     await store.set(
       'oauth:protected-desk:tokens',
-      JSON.stringify({ access_token: 'an-access-token', token_type: 'Bearer' }),
+      JSON.stringify({ access_token: 'an-access-token', token_type: 'Bearer', issuer }),
     );
     let opened = 0;
     const provider = new LocalOAuthProvider({
@@ -443,5 +538,96 @@ describe('connecting to an MCP server that requires signing in', () => {
     }
     // Signing in once is the whole point of keeping the token.
     expect(opened).toBe(0);
+  }, 60_000);
+
+  it('requires a new sign-in rather than sending an issuerless legacy token the server would accept', async () => {
+    const store = memoryStore();
+    await store.set(
+      'oauth:protected-desk:tokens',
+      JSON.stringify({
+        access_token: 'legacy-access-token',
+        refresh_token: 'legacy-refresh',
+        token_type: 'Bearer',
+      }),
+    );
+    await store.set(
+      'oauth:protected-desk:client',
+      JSON.stringify({ client_id: 'legacy-client', client_secret: 'legacy-secret' }),
+    );
+    const start = authorizations.length;
+    let opened = 0;
+    const provider = new LocalOAuthProvider({
+      serverKey: 'protected-desk',
+      store,
+      open: async (url) => {
+        opened += 1;
+        await fetch(url, { redirect: 'follow' });
+      },
+    });
+    const connection = await McpConnection.open({
+      transport: 'http',
+      url: `${gatewayPortHolder.url}/mcp`,
+      auth: provider,
+    });
+    try {
+      expect((await connection.call('list_venues', {})).ok).toBe(true);
+      expect(opened).toBe(1);
+      expect(authorizations.slice(start)).not.toContain('Bearer legacy-access-token');
+      expect(await provider.tokens()).toMatchObject({ issuer });
+      expect(await provider.clientInformation()).toMatchObject({ issuer });
+    } finally {
+      await connection.close();
+    }
+  }, 60_000);
+
+  it('does not refresh or present client secrets to a different authorization server issuer', async () => {
+    const store = memoryStore();
+    await store.set(
+      'oauth:protected-desk:client',
+      JSON.stringify({
+        client_id: 'old-client',
+        client_secret: 'different-issuer-secret',
+        issuer: 'https://previous.example.test',
+      }),
+    );
+    await store.set(
+      'oauth:protected-desk:tokens',
+      JSON.stringify({
+        access_token: 'expired-access',
+        refresh_token: 'different-issuer-refresh',
+        token_type: 'Bearer',
+        issuer: 'https://previous.example.test',
+      }),
+    );
+    const start = tokenRequests.length;
+    let opened = 0;
+    const provider = new LocalOAuthProvider({
+      serverKey: 'protected-desk',
+      store,
+      open: async (url) => {
+        opened += 1;
+        await fetch(url, { redirect: 'follow' });
+      },
+    });
+    const connection = await McpConnection.open({
+      transport: 'http',
+      url: `${gatewayPortHolder.url}/mcp`,
+      auth: provider,
+    });
+    try {
+      expect((await connection.call('list_venues', {})).ok).toBe(true);
+      expect(opened).toBe(1);
+      expect(tokenRequests.slice(start)).toHaveLength(1);
+      for (const body of tokenRequests.slice(start)) {
+        expect(body.get('grant_type')).toBe('authorization_code');
+        expect(body.get('client_id')).toBe('client-abc');
+        expect(body.get('refresh_token')).not.toBe('different-issuer-refresh');
+        expect(body.get('client_secret')).not.toBe('different-issuer-secret');
+      }
+      expect(await provider.tokens()).toMatchObject({ issuer });
+      expect(await provider.clientInformation()).toMatchObject({ issuer });
+    } finally {
+      await connection.close();
+    }
   }, 60_000);
 });

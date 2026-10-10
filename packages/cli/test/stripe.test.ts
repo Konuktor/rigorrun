@@ -179,6 +179,20 @@ describe('the canary case', () => {
 });
 
 describe('stripe init --twin', () => {
+  it('refuses an invalid review answer without creating a project', async () => {
+    const home = freshHome();
+    await expect(
+      capture(() =>
+        cmdInit(['--twin', twin.url, '--home', home, '--dir', join(home, 't')], {
+          interactive: true,
+          async ask() {
+            return 'maybe';
+          },
+        }),
+      ),
+    ).rejects.toThrow(/yes or no/i);
+    expect(await new ProjectStore(home).list()).toEqual([]);
+  });
   it('makes a pack project, keeps the key out of it, and installs the suite with the canary', async () => {
     const home = freshHome();
     const { projectId, out } = await initTwin(home);
@@ -656,14 +670,26 @@ describe('stripe canary', () => {
     const home = freshHome();
     const { projectId } = await initTwin(home);
     // A case budget the test can outlast: the shortest the tool-call timeout allows.
-    await withProjectService(home, (service) =>
-      service.configureEnvironment(projectId, {
+    await withProjectService(home, async (service) => {
+      await service.configureEnvironment(projectId, {
         readOnlyTools: [],
         verifierReads: [],
         reset: { kind: 'none' },
         budgets: { toolCallMs: 100 },
-      }),
-    );
+      });
+      const contract = (await new ProjectStore(home).readArtefact<EnvironmentContract>(
+        projectId,
+        'contract',
+      ))!;
+      const confirmedRuleIds = contract.rules
+        .filter((rule) => rule.status === 'confirmed')
+        .map((rule) => rule.id);
+      await service.installPackSuite(
+        projectId,
+        { confirmedRuleIds, canary: true },
+        { confirmedRuleIds },
+      );
+    });
     // Refunds at once, as asked, and answers after the budget: a slow model.
     const url = await refundingAgent(100, 5_600);
     await cli(
@@ -810,6 +836,7 @@ describe('a rule left out at init, end to end', () => {
   }
 
   it('passes an agent on the ground of a rule its owner told no, and the success checks decide', async () => {
+    await cli('--help');
     const url = await strayAgent(await outsidePayment());
 
     const toldNo = freshHome();
@@ -826,6 +853,17 @@ describe('a rule left out at init, end to end', () => {
     );
     expect(value).toBe(0);
     const left = JSON.parse(out.slice(out.indexOf('{'))) as { projectId: string };
+    const reviewed = await new ProjectStore(toldNo).readArtefact<EnvironmentContract>(
+      left.projectId,
+      'contract',
+    );
+    expect(
+      reviewed?.rules.find((rule) => rule.id === STRIPE_RULE_IDS.noRefundOutsideCase)?.status,
+    ).toBe('rejected');
+    expect(reviewed?.rules.some((rule) => rule.status === 'inferred')).toBe(false);
+    await withProjectService(toldNo, async (service) => {
+      expect(await service.gateReadiness(left.projectId)).toMatchObject({ ready: true });
+    });
     const passed = await verdict(toldNo, left.projectId, url);
     expect(passed.result.outcome).toBe('PASS');
     expect(passed.code).toBe(0);
@@ -1146,14 +1184,26 @@ describe('the gate summary when cases time out', () => {
   it('counts timed-out cases on their own line, and says what undecided means', async () => {
     const home = freshHome();
     const { projectId } = await initTwin(home);
-    await withProjectService(home, (service) =>
-      service.configureEnvironment(projectId, {
+    await withProjectService(home, async (service) => {
+      await service.configureEnvironment(projectId, {
         readOnlyTools: [],
         verifierReads: [],
         reset: { kind: 'none' },
         budgets: { toolCallMs: 100 },
-      }),
-    );
+      });
+      const contract = (await new ProjectStore(home).readArtefact<EnvironmentContract>(
+        projectId,
+        'contract',
+      ))!;
+      const confirmedRuleIds = contract.rules
+        .filter((rule) => rule.status === 'confirmed')
+        .map((rule) => rule.id);
+      await service.installPackSuite(
+        projectId,
+        { confirmedRuleIds, canary: true },
+        { confirmedRuleIds },
+      );
+    });
     const url = await refundingAgent(100, 5_600);
     await cli(
       'agent',

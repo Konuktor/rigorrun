@@ -8,7 +8,8 @@
  * builds the marketing page. This is it running over somebody's own suite,
  * against their own system.
  */
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import * as qualityModule from '@rigorrun/quality';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -113,4 +114,20 @@ describe('checking the suite against known-broken behaviour', () => {
     await expect(service.assessSuite(project.id)).rejects.toThrow(/production/);
     await store.write(saved);
   }, 60_000);
+
+  it('does not publish an assessment after its suite changes during assessment', async () => {
+    const previous = await service.quality(project.id);
+    const original = qualityModule.assessBenchmark;
+    const spy = vi.spyOn(qualityModule, 'assessBenchmark').mockImplementation(async (...args) => {
+      const result = await original(...args);
+      await service.review(project.id, {});
+      return result;
+    });
+    try {
+      expect(previous).toBeDefined();
+      await expect(service.assessSuite(project.id)).rejects.toMatchObject({ kind: 'stale' });
+      expect(await store.readArtefact(project.id, 'quality')).toBeUndefined();
+      expect(await store.readArtefact(project.id, 'quality-source')).toBeUndefined();
+    } finally { spy.mockRestore(); }
+  }, 300_000);
 });

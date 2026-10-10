@@ -95,7 +95,7 @@ export interface RunOptions {
   /**
    * The name of the pack whose own suite this is, when it is one. The suite
    * check measures suites induced from a demonstration and is refused for a
-   * pack's, which is written and qualified with the pack. Telling somebody to
+   * pack's, which is bundled by its author. Telling somebody to
    * run a check they cannot run would be a remedy that does not exist, so a
    * pack's unassessed suite is reported as what it is instead.
    */
@@ -166,11 +166,11 @@ export async function runBenchmark(
     limits.push({
       id: 'suite_from_pack',
       limit:
-        `The suite was written and qualified with the ${options.suiteFromPack} pack, not induced ` +
+        `The suite is bundled with the ${options.suiteFromPack} pack, not induced ` +
         'from a demonstration, so the suite check, which measures induced suites, was not run on it.',
       remedy:
-        'What the suite was shown to catch is in the pack’s pre-registered qualification, ' +
-        'not in this run.',
+        'Check the pack’s scoped controls and historical evidence. Past qualification applies ' +
+        'to its recorded code and scope, not automatically to this build.',
     });
   } else if (options.suiteQuality && !options.suiteQuality.assessed) {
     limits.push({

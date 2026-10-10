@@ -8,7 +8,7 @@
  * could be read back from is a different claim from a pass against one that
  * could, and only one of them is worth acting on.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Panel, SectionLabel, StatusMark, Tag } from '../components/primitives.tsx';
 import { Checkbox, Field, Problem, Select, TextArea, TextInput } from './inputs.tsx';
 import {
@@ -21,14 +21,28 @@ import {
   type RunView,
   type WaitingView,
 } from './api.ts';
+import type { ProjectWriteLock } from './projectWriteLock.ts';
 
 export function ConnectAgent({
   project,
   onConnected,
+  onDraftChanged,
+  writeLock,
 }: {
   project: ProjectView;
   onConnected: (project: ProjectView) => void;
+  onDraftChanged?: () => void;
+  writeLock?: ProjectWriteLock;
 }) {
+  const active = useRef(true);
+  const requestVersion = useRef(0);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+      requestVersion.current++;
+    };
+  }, [project.id]);
   const [name, setName] = useState('');
   // Black box first: it asks nothing of the agent but an address it already
   // answers on, which is what a founder with an agent in the cloud has.
@@ -49,7 +63,18 @@ export function ConnectAgent({
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
+  function changedEndpoint(): void {
+    requestVersion.current++;
+    setBusy(false);
+    setProblem('');
+    setKey('');
+    onDraftChanged?.();
+  }
+
   async function add(): Promise<void> {
+    const finish = writeLock?.begin('agent');
+    if (writeLock && !finish) return;
+    const version = ++requestVersion.current;
     setBusy(true);
     setProblem('');
     try {
@@ -81,6 +106,7 @@ export function ConnectAgent({
                 }
               : { name: name.trim(), endpoint: endpoint.trim() },
       );
+      if (!active.current || version !== requestVersion.current) return;
       if (result.key) {
         setKey(result.key);
         setKeyFor(result.agent.id);
@@ -92,9 +118,11 @@ export function ConnectAgent({
       }
       onConnected(result.project);
     } catch (error) {
-      setProblem((error as Error).message);
+      if (active.current && version === requestVersion.current)
+        setProblem((error as Error).message);
     } finally {
-      setBusy(false);
+      if (active.current && version === requestVersion.current) setBusy(false);
+      finish?.();
     }
   }
 
@@ -111,7 +139,10 @@ export function ConnectAgent({
               <Select
                 id={id}
                 value={kind}
-                onChange={(value) => setKind(value as 'blackbox' | 'http' | 'process' | 'external')}
+                onChange={(value) => {
+                  changedEndpoint();
+                  setKind(value as 'blackbox' | 'http' | 'process' | 'external');
+                }}
                 testId="agent-kind"
                 options={[
                   {
@@ -207,6 +238,7 @@ export function ConnectAgent({
                     describedBy={describedBy}
                     value={bbEndpoint}
                     onChange={(value) => {
+                      changedEndpoint();
                       setBbEndpoint(value);
                       setBbAgreed(false);
                     }}
@@ -287,7 +319,10 @@ export function ConnectAgent({
                   id={id}
                   describedBy={describedBy}
                   value={endpoint}
-                  onChange={setEndpoint}
+                  onChange={(value) => {
+                    changedEndpoint();
+                    setEndpoint(value);
+                  }}
                   testId="agent-endpoint"
                 />
               )}
@@ -330,6 +365,7 @@ export function ConnectAgent({
               onClick={add}
               disabled={
                 busy ||
+                !!writeLock?.operation ||
                 (kind === 'blackbox' && (!bbEndpoint.trim() || (remoteHost !== null && !bbAgreed)))
               }
               testId="add-agent"
@@ -474,11 +510,23 @@ export function RunAndVerdict({
   project,
   activation,
   onRan,
+  beforeRun,
+  writeLock,
 }: {
   project: ProjectView;
   activation: ActivationView | null;
-  onRan: () => void;
+  onRan?: () => void;
+  /** Release-check flows recheck suite readiness before any candidate call. */
+  beforeRun?: () => Promise<boolean>;
+  writeLock?: ProjectWriteLock;
 }) {
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, [project.id]);
   const [run, setRun] = useState<RunView | null>(null);
   const [comparison, setComparison] = useState<ComparisonView | null>(null);
   const [busy, setBusy] = useState(false);
@@ -490,24 +538,34 @@ export function RunAndVerdict({
   const driven = ready.find((agent) => agent.id === running && agent.kind === 'external');
 
   async function go(agentId: string): Promise<void> {
+    const finish = writeLock?.begin('run');
+    if (writeLock && !finish) return;
     setRunning(agentId);
     setBusy(true);
     setProblem('');
     setComparison(null);
+    setRun(null);
     try {
+      if (beforeRun && !(await beforeRun())) return;
+      if (!active.current) return;
       const result = await api.run(project.id, agentId);
+      if (!active.current) return;
       setRun(result.run);
       // A first run has nothing to compare against, and the runner says so by
       // failing rather than by inventing an empty diff. That is not an error
       // worth showing anybody.
       const compared = await api.compare(project.id, result.run.runId).catch(() => null);
+      if (!active.current) return;
       if (compared) setComparison(compared.comparison);
-      onRan();
+      onRan?.();
     } catch (error) {
-      setProblem((error as Error).message);
+      if (active.current) setProblem((error as Error).message);
     } finally {
-      setBusy(false);
-      setRunning('');
+      if (active.current) {
+        setBusy(false);
+        setRunning('');
+      }
+      finish?.();
     }
   }
 
@@ -528,10 +586,10 @@ export function RunAndVerdict({
               <Button
                 key={agent.id}
                 onClick={() => go(agent.id)}
-                disabled={busy}
+                disabled={busy || !!writeLock?.operation}
                 testId={`run-${agent.id}`}
               >
-                {busy ? 'Running…' : `Run ${agent.name}`}
+                {busy || writeLock?.operation === 'run' ? 'Running…' : `Run ${agent.name}`}
               </Button>
             ))}
           </div>
@@ -917,7 +975,9 @@ function CaseRow({ entry }: { entry: CaseResultView }) {
 
           <Evidence label="What the agent did">
             {entry.steps.length === 0 ? (
-              <p className="text-meta text-muted">It called nothing.</p>
+              <p className="text-meta text-muted">
+                No internal calls were observed by RigorRun. Inspect the system evidence below.
+              </p>
             ) : (
               <ol className="flex flex-col gap-1">
                 {entry.steps.map((step, index) => (

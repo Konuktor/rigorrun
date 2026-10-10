@@ -208,6 +208,9 @@ export interface PackDefinition {
 // ------------------------------------------------------------------- registry
 
 const packs = new Map<string, PackDefinition>();
+// Granted by trusted application bootstrap, never by a pack definition or
+// project file. Replacing a registration revokes the previous capability.
+const releaseGatePacks = new Set<string>();
 
 /**
  * Makes a pack available by id.
@@ -216,13 +219,22 @@ const packs = new Map<string, PackDefinition>();
  * mis-annotated role corrupts thresholds, boundaries and the projection all at
  * once, and silently, so it must not be possible to register one.
  */
-export function registerPack(pack: PackDefinition): void {
+export function registerPack(
+  pack: PackDefinition,
+  capabilities: { projectReleaseGate?: boolean } = {},
+): void {
   const problems = validateSchema(pack.schema);
   if (problems.length > 0) {
     const detail = problems.map((p) => `  ${p.path}: ${p.message}`).join('\n');
     throw new Error(`Pack "${pack.id}" has an invalid schema:\n${detail}`);
   }
   packs.set(pack.id, pack);
+  releaseGatePacks.delete(pack.id);
+  if (capabilities.projectReleaseGate === true) releaseGatePacks.add(pack.id);
+}
+
+export function supportsProjectReleaseGate(id: string): boolean {
+  return packs.has(id) && releaseGatePacks.has(id);
 }
 
 export function getPack(id: string): PackDefinition {
@@ -245,6 +257,7 @@ export function listPacks(): PackDefinition[] {
 /** Test helper. Never called by product code. */
 export function clearPacks(): void {
   packs.clear();
+  releaseGatePacks.clear();
 }
 
 // ---------------------------------------------------------------- the adapter

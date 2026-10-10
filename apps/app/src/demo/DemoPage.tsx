@@ -2,7 +2,10 @@
  * The demo shell: step progress, the current step's screen, and the CLI
  * equivalent of whatever the user is looking at.
  */
-import { STEPS, STEP_META, reachedSteps, useDemo, type Step } from './useDemo.ts';
+import { useEffect, useState } from 'react';
+import { STEPS, STEP_META, WORKFLOWS, reachedSteps, useDemo, type Step } from './useDemo.ts';
+import { DEMO_WORKFLOW_KEYS, demoHash, demoRoute } from './route.ts';
+import { Field, Select } from '../product/inputs.tsx';
 import {
   BenchmarkStep,
   ContractStep,
@@ -15,17 +18,59 @@ import { VerdictStep } from './verdict.tsx';
 import { Button, Panel, Spinner, Tag } from '../components/primitives.tsx';
 
 export function DemoPage() {
-  const { state, setStep, compile, toggleRule, approveAndGenerate, run, reset } = useDemo();
+  const [route, setRoute] = useState(() => demoRoute(window.location.hash));
+  useEffect(() => {
+    const onHashChange = () => {
+      if (!window.location.hash.startsWith('#/demo')) return;
+      const next = demoRoute(window.location.hash);
+      setRoute(next);
+      const canonical = demoHash(next.workflowKey, next.step);
+      if (window.location.hash !== canonical) window.history.replaceState(null, '', canonical);
+    };
+    onHashChange();
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  return <WorkflowDemo key={route.workflowKey} workflowKey={route.workflowKey} />;
+}
+
+/** A changed URL key discards the previous example's hook state and artifacts. */
+function WorkflowDemo({ workflowKey }: { workflowKey: string }) {
+  const { state, setStep, compile, toggleRule, confirmAll, approveAndGenerate, run, reset } =
+    useDemo(workflowKey);
   const reached = reachedSteps(state);
   const currentIndex = STEPS.indexOf(state.step);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-5 py-6">
+      <div className="mb-5 grid gap-3 sm:grid-cols-[minmax(12rem,18rem)_1fr] sm:items-end">
+        <fieldset disabled={state.running || state.hydrating}>
+          <Field label="Example workflow">
+            {({ id }) => (
+              <Select
+                id={id}
+                value={workflowKey}
+                onChange={(key) => {
+                  window.location.hash = demoHash(key, 'record');
+                }}
+                options={WORKFLOWS.filter((workflow) =>
+                  (DEMO_WORKFLOW_KEYS as readonly string[]).includes(workflow.key),
+                ).map((workflow) => ({ value: workflow.key, label: workflow.title }))}
+                testId="workflow-selector"
+              />
+            )}
+          </Field>
+        </fieldset>
+        <p className="text-meta text-muted">
+          Synthetic data · scripted agents · executed locally · not a qualified release suite
+        </p>
+      </div>
       <StepProgress
         current={state.step}
         reached={reached}
         onSelect={setStep}
-        disabled={state.running}
+        disabled={state.running || state.hydrating}
       />
 
       <div className="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_13rem]">
@@ -77,9 +122,9 @@ export function DemoPage() {
       <footer className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-4 text-meta text-muted">
         <Tag>Offline</Tag>
         <span className="min-w-[16rem] flex-1">
-          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend and
-          no API key — the same packages power the CLI and CI. The application, its customers and
-          its orders are invented.
+          Step {currentIndex + 1} of {STEPS.length}. Executed in this browser with no backend and no
+          API key — the same packages power the CLI and CI. The application, its customers and its
+          orders are invented.
         </span>
       </footer>
     </div>
@@ -91,6 +136,11 @@ export function DemoPage() {
         <RecordStep
           trace={state.trace}
           environmentName={state.workflow.registration.name}
+          demoAppUrl={
+            state.workflow.key === 'refund'
+              ? (import.meta.env['VITE_CRM_URL'] ?? 'http://127.0.0.1:5174')
+              : `${import.meta.env['VITE_OPS_URL'] ?? 'http://127.0.0.1:5175'}/#/${state.workflow.registration.id}`
+          }
           onCompile={() => void compile()}
         />
       );
@@ -98,12 +148,7 @@ export function DemoPage() {
 
     if (state.step === 'learned') {
       if (!state.draftContract) return <Hydrating step="learned" />;
-      return (
-        <LearnedStep
-          contract={state.draftContract}
-          onContinue={() => setStep('confirm')}
-        />
-      );
+      return <LearnedStep contract={state.draftContract} onContinue={() => setStep('confirm')} />;
     }
 
     if (state.step === 'confirm') {
@@ -114,6 +159,7 @@ export function DemoPage() {
           rejected={state.rejected}
           confirmed={state.confirmed}
           onDecide={toggleRule}
+          onConfirmAll={confirmAll}
           onApprove={() => void approveAndGenerate()}
         />
       );

@@ -10,14 +10,14 @@
  * Two things a spec never contains. Credential *values*: a spec names the
  * environment variable each secret comes from, and the value goes straight to
  * the credential store. And a silent confirmation: a rule RigorRun only
- * inferred is confirmed only if a `review.confirm` pattern names it; every
- * other inferred rule is rejected, so nothing gates an agent because a file
- * forgot to mention it.
+ * inferred is confirmed or rejected only if an explicit review pattern names
+ * it. Unmatched rules stay inferred and stop setup for review.
  */
 import { readFile } from 'node:fs/promises';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { z } from 'zod';
 import { ProjectStore, Service, storeRoot } from '@rigorrun/daemon';
+import { rulesAwaitingReview } from '@rigorrun/core';
 import { ProxyServer } from '@rigorrun/proxy';
 import { CliError } from './io.ts';
 import { c, heading, line } from './ui.ts';
@@ -84,6 +84,18 @@ export async function cmdSetup(specPath: string | undefined, flags: Flags): Prom
   } catch (error) {
     throw new CliError(`${specPath} is not a usable spec: ${(error as Error).message}`);
   }
+  const compilePatterns = (patterns: string[], decision: string) =>
+    patterns.map((pattern) => {
+      try {
+        return new RegExp(pattern, 'i');
+      } catch (error) {
+        throw new CliError(
+          `Invalid review.${decision} pattern ${JSON.stringify(pattern)}: ${(error as Error).message}`,
+        );
+      }
+    });
+  const confirmPatterns = compilePatterns(spec.review.confirm, 'confirm');
+  const rejectPatterns = compilePatterns(spec.review.reject, 'reject');
 
   // Refused before anything is created: a half-made project is worse than none.
   const missing = Object.entries(spec.secrets)
@@ -151,17 +163,35 @@ export async function cmdSetup(specPath: string | undefined, flags: Flags): Prom
     await service.answerSchema(project.id, answers);
 
     const draft = await service.compile(project.id);
-    const matches = (patterns: string[], text: string) => patterns.some((pattern) => new RegExp(pattern, 'i').test(text));
     const confirmed: string[] = [];
     const rejected: string[] = [];
+    const conflicting: string[] = [];
     for (const rule of draft.rules) {
       if (rule.status !== 'inferred') continue;
-      if (matches(spec.review.reject, rule.statement)) rejected.push(rule.id);
-      else if (matches(spec.review.confirm, rule.statement)) confirmed.push(rule.id);
-      else rejected.push(rule.id);
+      const confirm = confirmPatterns.some((pattern) => pattern.test(rule.statement));
+      const reject = rejectPatterns.some((pattern) => pattern.test(rule.statement));
+      if (confirm && reject) conflicting.push(rule.id);
+      else if (confirm) confirmed.push(rule.id);
+      else if (reject) rejected.push(rule.id);
     }
-    await service.review(project.id, { confirmedRuleIds: confirmed, rejectedRuleIds: rejected });
-    say(`  compiled        ${draft.rules.length} rule(s): ${confirmed.length} confirmed, ${rejected.length} rejected`);
+    if (conflicting.length > 0) {
+      throw new CliError(
+        `Project ${project.id}: rules match both confirm and reject patterns: ${conflicting.join(', ')}. Resolve the conflicting review decisions before continuing.`,
+      );
+    }
+    const reviewed = await service.review(project.id, {
+      confirmedRuleIds: confirmed,
+      rejectedRuleIds: rejected,
+    });
+    say(
+      `  compiled        ${draft.rules.length} rule(s): ${confirmed.length} confirmed, ${rejected.length} rejected`,
+    );
+    const pending = rulesAwaitingReview(reviewed);
+    if (pending.length > 0) {
+      throw new CliError(
+        `Project ${project.id} needs explicit review for rule(s): ${pending.map((rule) => rule.id).join(', ')}. Unmatched rules remain inferred. Review this project before building its suite.`,
+      );
+    }
 
     const benchmark = await service.generate(project.id);
     say(`  suite           ${benchmark.cases.length} case(s)`);

@@ -70,6 +70,12 @@ pre{background:#0e1116;border:1px solid var(--line);border-radius:8px;padding:10
 .failure > .head{display:flex;justify-content:space-between;gap:12px;align-items:center;
   background:var(--panel-2);padding:10px 14px;border-bottom:1px solid var(--line)}
 .failure > .body{padding:14px}
+.passing{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.passing > summary{cursor:pointer;padding:10px 14px;background:var(--panel-2)}
+.passing > summary .dim{margin-left:8px}
+.passing > .body{padding:14px}
+.checks{overflow:auto}
+.checks table{min-width:760px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:12px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;font-family:var(--mono);font-size:11.5px;word-break:break-all}

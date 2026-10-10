@@ -139,7 +139,7 @@ describe('projects from the command line', () => {
     expect(out).toMatch(/limit/);
   }, 180_000);
 
-  it('gates, and says which threshold it missed', async () => {
+  it('refuses to release-gate a generated suite without a current assessment', async () => {
     const { code, out } = await cli(
       'gate',
       '--project',
@@ -149,15 +149,12 @@ describe('projects from the command line', () => {
       '--min-success',
       '1',
     );
-    // The careful agent does not satisfy every confirmed rule, so this fails —
-    // and failing is the useful behaviour to assert. A gate that passes on a
-    // demanding threshold is a gate nobody should trust.
-    expect(code).toBe(1);
-    expect(out).toContain('FAIL');
-    expect(out).toContain('task success');
+    expect(code).toBe(3);
+    expect(out).toContain('INCONCLUSIVE');
+    expect(out).toContain('assessment');
   }, 180_000);
 
-  it('passes when the bar is one the agent clears', async () => {
+  it('cannot bypass suite readiness by lowering candidate thresholds', async () => {
     const { code } = await cli(
       'gate',
       '--project',
@@ -171,7 +168,7 @@ describe('projects from the command line', () => {
       '--max-unsafe',
       '100',
     );
-    expect(code).toBe(0);
+    expect(code).toBe(3);
   }, 180_000);
 
   it('exits 2 when the setup is wrong rather than pretending it failed', async () => {

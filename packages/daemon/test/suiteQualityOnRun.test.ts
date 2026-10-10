@@ -48,6 +48,14 @@ describe('suiteQualityOf', () => {
     expect(suiteQualityOf(quality({})).warnings).toEqual([]);
   });
 
+  it('carries failed harmless controls into diagnostic run warnings', () => {
+    const summary = suiteQualityOf(quality({ mutants: [{
+      id: 'harmless', defect: 'Extra read', independence: 'environment_derived',
+      expectation: 'must_survive', caught: true, asExpected: false, caughtOn: 1,
+    }] }));
+    expect(summary.warnings.join(' ')).toMatch(/harmless.*failed/);
+  });
+
   it('names every reason a PASS from this suite is worth less than it looks', () => {
     const summary = suiteQualityOf(
       quality({
@@ -79,13 +87,14 @@ describe('suiteQualityOf', () => {
 });
 
 describe('packSuiteQuality', () => {
-  it('says a pack’s suite was qualified with the pack, not that it was never checked', () => {
+  it('describes bundled suites without claiming this build is qualified', () => {
     const summary = packSuiteQuality('The fake pack');
     expect(summary.assessed).toBe(false);
     expect(summary.warnings).toHaveLength(1);
     expect(summary.warnings[0]).toContain(
-      'came with the The fake pack pack and was qualified with it',
+      'bundled with the The fake pack pack',
     );
+    expect(summary.warnings[0]).toContain('not automatically to this build');
     expect(summary.warnings.join(' ')).not.toMatch(/not been quality-checked/);
   });
 });

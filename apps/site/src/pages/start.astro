@@ -1,16 +1,14 @@
 ---
 /**
- * The founder's path, in the order it is walked: see a recording, try the
- * Stripe pack on the twin, move to test mode, connect the agent with no code changes, run
- * the canary, gate, and put the gate in CI. The general path — your own
- * system through MCP, OpenAPI or a browser — follows it, unchanged.
+ * Start with the no-key Helpdesk twin, retain the concrete Stripe walkthrough,
+ * and distinguish general demonstration tooling from custom permission packs.
  */
 import Base from '../layouts/Base.astro';
 import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Command from '../components/Command.astro';
 import Button from '../components/Button.astro';
-import { DOCS_URL, RELEASE_LABEL, REPO_URL } from '../site';
+import { DOCS_URL, PILOT_HREF, RELEASE_LABEL, REPO_URL } from '../site';
 
 const EXAMPLE_AGENT = `${REPO_URL}/tree/master/examples/stripe-support-agent`;
 const CI_GUIDE = `${REPO_URL}/blob/master/docs/CI.md`;
@@ -67,7 +65,7 @@ npx rigorrun stripe init --key-env STRIPE_TEST_KEY --safety staging`,
     title: 'Put the gate in CI',
     body: 'The GitHub Action runs the same gate as a step in your workflow, publishes its summary and uploads the HTML report.',
     code: `- name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.6.0
+  uses: Konuktor/rigorrun@v0.6.1
   with:
     project: \${{ vars.RIGORRUN_PROJECT }}`,
     link: { href: CI_GUIDE, label: 'The CI guide' },
@@ -88,15 +86,15 @@ const general = [
     body: 'RigorRun reads your system before you start and again when you finish, and works out what the rules must be from what changed. You rule on each one; a rule you reject cannot fail your agent.',
   },
   {
-    title: 'Point it at your agent, and gate',
-    body: 'The same black-box connection as above, the same verdicts, and the same gate.',
+    title: 'Assess the suite before using a release gate',
+    body: 'Generated suites are diagnostics until current quality evidence establishes that their checks are meaningful. Assessment performs repeated test writes; choose a resettable safe environment and inspect its limits. Custom two-tenant permission packs are not generally available.',
   },
 ];
 ---
 
 <Base
   title="Get started"
-  description="Try RigorRun on a recorded run, then on your own Stripe support agent: a local Stripe twin with no keys, your Stripe test mode, your agent connected with no code changes, a canary, a gate and a GitHub Action. Node 20.11 or newer; nothing to sign up for."
+  description="Start with a no-key Helpdesk twin, then connect your agent to a bundled permission suite. A separate Stripe walkthrough and experimental custom-workflow path show the setup, evidence and limits."
 >
   <Section>
     <div class="grid gap-12 lg:grid-cols-[1fr_0.85fr] lg:gap-16">
@@ -106,8 +104,9 @@ const general = [
           From a recorded run to a gate on your own agent.
         </h1>
         <p class="mt-6 max-w-xl text-lead text-secondary">
-          The path for an agent that issues Stripe refunds. Everything runs on your machine; there is
-          no account, and nothing here sends your keys or your agent’s answers to us.
+          Begin with customer-support permissions, not a payment integration. Everything runs on
+          your machine; there is no account. The Stripe walkthrough below is a separate example,
+          not the boundary of the product.
         </p>
         <div class="mt-8"><Command command="npx rigorrun demo" size="lg" /></div>
       </div>
@@ -138,6 +137,41 @@ const general = [
   </Section>
 
   <Section ruled tight>
+    <div class="grid gap-8 lg:grid-cols-[1fr_1fr] lg:gap-16">
+      <div>
+        <h2 class="text-title font-medium">Start with the Helpdesk twin</h2>
+        <p class="mt-4 text-support text-secondary">
+          A model-free, scripted pair in a simulated two-organisation helpdesk: compare scoped
+          credentials with a broad service token, and read the twin’s access, refund and outbox
+          evidence. No provider key or external account. This illustrates a permission failure;
+          it is not a general-purpose LLM evaluation or a live helpdesk integration.
+        </p>
+        <p class="mt-4 text-support text-secondary">
+          The pair command exits successfully when the demonstration completes, even when one
+          control fails cases. Its process exit is not a passing candidate release gate.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <Button href="/replay/helpdesk" variant="secondary">See the recorded Helpdesk run</Button>
+          <Button href={PILOT_HREF} variant="ghost">Scope your workflow</Button>
+        </div>
+      </div>
+      <div class="flex flex-col items-start justify-center gap-5">
+        <Command command="npx rigorrun helpdesk try" size="lg" />
+        <p class="max-w-md text-support text-secondary">
+          For your own HTTP agent, open the local runner, select Helpdesk twin,
+          explicitly review the rules, connect the candidate and inspect the run's system evidence.
+          Repeat the saved project, then use the same suite in a CLI release gate.
+          A verdict applies only to the checked suite and observable environment.
+        </p>
+        <Button href={`${DOCS_URL}/start/agent-release-check/`} variant="secondary">
+          Guided Agent Release Check
+        </Button>
+      </div>
+    </div>
+  </Section>
+
+  <Section ruled tight>
+    <h2 class="mb-6 text-title font-medium">A concrete Stripe workflow</h2>
     <ol class="ruled rounded-panel border border-line bg-surface">
       {
         steps.map((step, index) => (
@@ -180,10 +214,11 @@ const general = [
   <Section ruled tight>
     <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
       <div>
-        <h2 class="text-title font-medium">Not on Stripe?</h2>
+        <h2 class="text-title font-medium">Your own workflow — experimental</h2>
         <p class="mt-3 max-w-sm text-support text-secondary">
-          The same verdicts for any system RigorRun can reach and read back, set up in a local
-          interface instead of a pack.
+          Demonstration, rule review and generated diagnostic suites exist. A supported custom
+          permission pack still needs an adapter, safe reset and trustworthy readbacks; connecting
+          an API alone does not qualify it. Discuss feasibility before buying a pilot.
         </p>
         <div class="mt-6"><Command command="npx rigorrun" /></div>
       </div>

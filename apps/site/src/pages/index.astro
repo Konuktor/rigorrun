@@ -21,7 +21,7 @@ import ClaimGap from '../components/ClaimGap.astro';
 import ClaimReality from '../components/ClaimReality.astro';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { RELEASE_LABEL, DOCS_URL, REPO_URL, CONTACT_EMAIL, contactHref } from '../site';
+import { RELEASE_LABEL, VERSION, DOCS_URL, REPO_URL, CONTACT_EMAIL, PILOT_HREF, contactHref } from '../site';
 import { helpdeskReplay, stripeReplay } from '../lib/replay';
 
 /**
@@ -34,17 +34,19 @@ const featuredPath = featured === helpdeskReplay ? '/replay/helpdesk' : '/replay
 const headline = featured?.headline ?? null;
 
 /**
- * The demo video, when it has been made. `scripts/record-demo-video.mjs` films
- * it from the flagship recording into public/media/; until demo.mp4 is there,
+ * The approved Agent Release Check walkthrough uses real UI captures with
+ * scripted controls in the simulated Helpdesk twin. Until its media is there,
  * the hero has no player at all rather than one that fails to load. Astro
  * reads `public/` from the project root, which is the directory the build runs
  * in (no `root` is configured), so this looks exactly where the build copies from.
  */
 const media = join(process.cwd(), 'public', 'media');
-const demoVideo = existsSync(join(media, 'demo.mp4'))
+const demoVideo = existsSync(join(media, 'agent-release-check.mp4'))
   ? {
-      webm: existsSync(join(media, 'demo.webm')),
-      poster: existsSync(join(media, 'demo-poster.png')) ? '/media/demo-poster.png' : undefined,
+      webm: existsSync(join(media, 'agent-release-check.webm')),
+      poster: existsSync(join(media, 'agent-release-check-poster.webp'))
+        ? '/media/agent-release-check-poster.webp'
+        : undefined,
     }
   : null;
 
@@ -134,7 +136,7 @@ const limits = [
 
 <Base
   title="RigorRun"
-  description="Your agent acts for one customer at a time. RigorRun tests that it stays there: it sends the agent tickets that tempt it across the line, then reads the system itself — a multi-tenant helpdesk twin, or Stripe — and shows what happened beside what the agent said. Open source; runs on your machine."
+  description="Verify what your AI agents actually do. Pre-deployment permission and scope tests, with system evidence rather than a model grading the reply. Open-source runner; start with Helpdesk and Stripe, or discuss a scoped integration pilot."
 >
   <!-- ───────────────────────────────────────────────────────────────── hero -->
   <section>
@@ -146,24 +148,25 @@ const limits = [
         {RELEASE_LABEL}
       </p>
 
-      <!--
-        Two sizes in one heading: the fact at hero size, the habit it exposes a
-        step down. Both are the sentence; the second is set so it fits one line
-        at desktop width, which keeps the recorded case above the fold.
-      -->
-      <h1 class="mt-6 font-medium text-balance">
-        <span class="block text-hero">Your agent acts for one customer at a time.</span>
-        <span class="mt-2 block text-display text-muted">You check it stays there by reading the transcript.</span>
+      <h1 class="mt-6 max-w-5xl font-medium text-balance">
+        <span class="block text-hero">Verify what your AI agents actually do.</span>
       </h1>
+      <p class="mt-4 max-w-3xl text-display text-muted text-balance">Before they act for your customers.</p>
 
       <div class="mt-10 grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div>
           <p class="max-w-xl text-lead text-secondary">
-            RigorRun sends your agent tickets that tempt it across the line — somebody else&rsquo;s
-            order, a decision that is not its to make, an instruction hidden in the customer&rsquo;s
-            message — then reads the system itself and puts what actually happened next to what the
-            agent said it did. It reads two systems today: a multi-tenant helpdesk twin, and Stripe —
-            your test mode, or a local twin with no keys.
+            Test agent permissions, scope and side effects before deployment — with evidence from
+            the system. A model, prompt or credential change can break a workflow even when the reply
+            sounds right. RigorRun puts what actually happened beside what the agent said.
+          </p>
+          <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Button href="/replay/helpdesk" size="lg">See the demo</Button>
+            <Button href={PILOT_HREF} variant="secondary" size="lg">Discuss a paid pilot</Button>
+          </div>
+          <p class="mt-4 max-w-xl text-support text-muted">
+            Available today: a multi-tenant Helpdesk twin and Stripe refunds. Broader workflow and
+            custom-system permission tests are being built. RigorRun does not block production actions.
           </p>
 
           <ol class="mt-8 max-w-xl space-y-5" aria-label="How to try it">
@@ -200,8 +203,9 @@ const limits = [
             </li>
           </ol>
 
-          <p class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-support">
+          <p class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-support">
             <a class="rr-link font-medium" href="/start">Get started</a>
+            <a class="rr-link" href={`${DOCS_URL}/start/agent-release-check/`}>Connect your own HTTP agent</a>
             <a class="rr-link" href={featuredPath}>The recorded run, case by case</a>
             <a class="rr-link" href={contactHref(CONTACT_EMAIL)}>Set it up with me on a call</a>
             <span class="text-muted">MIT · runs on your machine · no account</span>
@@ -266,14 +270,18 @@ const limits = [
                   controls
                   preload="none"
                   poster={demoVideo.poster}
-                  aria-label="The demo, filmed: npx rigorrun demo in a terminal, then the recorded run on this site."
+                  aria-label="Agent Release Check: real Helpdesk interface, reviewed rules, your HTTP agent, PASS and FAIL evidence, and a repeat run. Scripted controls in a simulated twin."
                   data-demo-video
                 >
-                  {demoVideo.webm && <source data-src="/media/demo.webm" type="video/webm" />}
-                  <source data-src="/media/demo.mp4" type="video/mp4" />
+                  {demoVideo.webm && <source data-src="/media/agent-release-check.webm" type="video/webm" />}
+                  <source data-src="/media/agent-release-check.mp4" type="video/mp4" />
                 </video>
+                <button type="button" class="rr-link mt-2 text-meta" data-demo-play hidden>
+                  Play demo
+                </button>
                 <figcaption class="mt-2 text-meta text-muted">
-                  <a class="rr-link" href="/media/demo.mp4">Watch the 60-second run</a>
+                  <a class="rr-link" href="/media/agent-release-check.mp4">Watch the 60-second Agent Release Check</a>
+                  <span class="block">Scripted controls · simulated Helpdesk twin · checked scenarios only</span>
                 </figcaption>
               </figure>
             )
@@ -299,9 +307,18 @@ const limits = [
     };
     for (const video of document.querySelectorAll<HTMLVideoElement>('[data-demo-video]')) {
       if (reduce) {
-        video.addEventListener('play', () => video.querySelector('source[data-src]') && load(video), {
-          once: true,
-        });
+        const button = video.parentElement?.querySelector<HTMLButtonElement>('[data-demo-play]');
+        if (button) {
+          // Empty-source native controls cannot initiate resource loading.
+          // Show the explicit Play action until a source is loaded instead.
+          video.controls = false;
+          button.hidden = false;
+          button.addEventListener('click', () => {
+            if (video.querySelector('source[data-src]')) load(video);
+            video.controls = true;
+            void video.play().then(() => { button.hidden = true; }).catch(() => {});
+          });
+        }
         continue;
       }
       const seen = new IntersectionObserver((entries) => {
@@ -314,6 +331,33 @@ const limits = [
     }
   </script>
 
+  <Section ruled id="workflows">
+    <div class="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+      <div>
+        <Eyebrow>One product, different workflows</Eyebrow>
+        <h2 class="mt-4 text-display font-medium text-balance">The boundary matters. Not the payment provider.</h2>
+        <p class="mt-5 text-lead text-secondary">
+          For teams shipping agents with tools: support, finance operations and access provisioning.
+          Start with one job, one safe test environment and the rules it must respect.
+        </p>
+      </div>
+      <dl class="ruled rounded-panel border border-line bg-surface">
+        <div class="p-6">
+          <dt class="text-title font-medium">Support · available on the Helpdesk twin</dt>
+          <dd class="mt-2 text-support text-secondary">Check another organisation&rsquo;s records, changes outside the agent&rsquo;s role and data sent to the wrong recipient. Evidence comes from the twin&rsquo;s access log, tables and outbox.</dd>
+        </div>
+        <div class="p-6">
+          <dt class="text-title font-medium">Payments · available with the Stripe pack</dt>
+          <dd class="mt-2 text-support text-secondary">Check the customer, amount and resulting refund. Test mode or a local twin; every verdict is PARTIAL.</dd>
+        </div>
+        <div class="p-6">
+          <dt class="text-title font-medium">Approvals and access · experimental examples</dt>
+          <dd class="mt-2 text-support text-secondary">Broader workflows are being built. Bundled synthetic invoice and access examples illustrate the shared engine; they are not qualified integrations with your finance or identity systems.</dd>
+        </div>
+      </dl>
+    </div>
+  </Section>
+
   <!-- ────────────────────────────────────────────────────────── how it works -->
   <Section ruled id="how">
     <Eyebrow>How it works</Eyebrow>
@@ -324,10 +368,11 @@ const limits = [
     <ol class="mt-12 grid gap-px overflow-hidden rounded-panel border border-line bg-line lg:grid-cols-3">
       <li class="flex flex-col bg-surface p-6" data-reveal>
         <span class="font-mono text-meta text-accent">1</span>
-        <h3 class="mt-3 text-title font-medium">Set up the Stripe pack</h3>
+        <h3 class="mt-3 text-title font-medium">Choose a workflow and safe system</h3>
         <p class="mt-2 flex-1 text-support text-secondary">
-          The support tickets below and the checks that decide them, as a project on your machine.
-          Run them on a local Stripe twin with no keys, or on your Stripe test mode.
+          Start with the Helpdesk twin or Stripe test mode. Agree on the customer boundary,
+          permitted work and evidence the system can provide. Custom permission packs are next,
+          not automatic compatibility with every tool.
         </p>
         <pre
           data-theme="ink"
@@ -341,10 +386,8 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
         <span class="font-mono text-meta text-accent">2</span>
         <h3 class="mt-3 text-title font-medium">Point it at your agent</h3>
         <p class="mt-2 flex-1 text-support text-secondary">
-          RigorRun posts each ticket to the endpoint your agent already serves. Your agent works it
-          with its own Stripe key; afterwards RigorRun reads Stripe with a key of its own. Each
-          ticket names the customer&rsquo;s email and a charge id, so the agent finds the order in
-          Stripe.
+          RigorRun sends each task over HTTP. Your agent uses its own tools and credentials;
+          afterwards RigorRun reads the system. Agent claims and observed evidence stay separate.
         </p>
         <pre
           data-theme="ink"
@@ -359,15 +402,15 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
         <span class="font-mono text-meta text-accent">3</span>
         <h3 class="mt-3 text-title font-medium">Gate every change</h3>
         <p class="mt-2 flex-1 text-support text-secondary">
-          The same tickets on every pull request. A failed case exits 1 and stops the build, and the
-          HTML report is attached to the run.
+          Rerun the agreed checks when prompts, models or credentials change. Read the HTML evidence
+          and the limits. A scoped gate is not a promise that every possible failure was tested.
         </p>
         <pre
           data-theme="ink"
           class="mt-5 rounded-well border border-line bg-canvas px-4 py-3 font-mono text-meta leading-relaxed text-fg"
           tabindex="0"
           role="region"
-          aria-label="Step 3 workflow step"><code>{`- uses: Konuktor/rigorrun@v0.6.0
+          aria-label="Step 3 workflow step"><code>{`- uses: Konuktor/rigorrun@v${VERSION}
   with:
     project: \${{ vars.RIGORRUN_PROJECT }}`}</code></pre>
       </li>
@@ -378,7 +421,7 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
   <Section ruled id="cases">
     <div class="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:items-end lg:gap-16">
       <div>
-        <Eyebrow>The Stripe pack</Eyebrow>
+        <Eyebrow>One concrete pack: Stripe</Eyebrow>
         <h2 class="mt-4 text-display font-medium text-balance">
           {tickets.length} tickets, each with one right answer Stripe can confirm.
         </h2>
@@ -423,6 +466,22 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
         </p>
       </li>
     </ul>
+  </Section>
+
+  <Section ruled id="business-model">
+    <div class="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+      <div>
+        <Eyebrow>Open source and commercial work</Eyebrow>
+        <h2 class="mt-4 text-display font-medium text-balance">Open source is the entry point. Your workflow is the paid work.</h2>
+        <p class="mt-5 text-lead text-secondary">Keep the runner free. Pay for a scoped pilot that makes your own workflow testable: agreed rules, integration, test data, readbacks and a repeatable release check.</p>
+      </div>
+      <ol class="space-y-6">
+        <li><h3 class="text-title font-medium">Use the MIT runner</h3><p class="mt-2 text-support text-secondary">Run locally, inspect the code and try the bundled scenarios. No account or subscription required.</p></li>
+        <li><h3 class="text-title font-medium">Agree a paid pilot</h3><p class="mt-2 text-support text-secondary">One workflow, explicit integration scope and acceptance criteria. Feasibility and price are agreed before work; unsupported systems are not sold as ready-made packs.</p></li>
+        <li><h3 class="text-title font-medium">Team workspace — planned</h3><p class="mt-2 text-support text-secondary">Shared run history, approvals and managed workflow checks are the proposed subscription value. Not built yet; there is no hosted tier or checkout today.</p></li>
+      </ol>
+    </div>
+    <p class="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-support"><a class="rr-link" href="/access">Compare the offers</a><a class="rr-link" href="/company">The product thesis and next milestones</a></p>
   </Section>
 
   <!-- ─────────────────────────────────────────────────────────── what you get -->
@@ -549,14 +608,14 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
       <div class="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
         <div>
           <h2 class="text-display font-medium text-balance">
-            See it on a recording. Then run it on yours.
+            Bring one workflow you need to trust.
           </h2>
           <p class="mt-5 max-w-lg text-lead text-secondary">
-            The demo needs nothing. The Stripe pack needs Node 20.11 or newer, your agent reachable
-            over HTTP, and — when you leave the twin — a Stripe test key.
+            Show the team a recorded run, try the local twin, then discuss your integration.
+            A pilot starts with observable state, a safe test environment and one failure worth catching.
           </p>
           <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button href="/start" size="lg">Get started</Button>
+            <Button href={PILOT_HREF} size="lg">Discuss a paid pilot</Button>
             <Button href={DOCS_URL} variant="secondary" size="lg" external>Read the docs</Button>
           </div>
         </div>
@@ -574,8 +633,8 @@ npx rigorrun stripe init --twin --yes`}</code></pre>
             label="Command, again: npx rigorrun stripe init --twin --yes"
           />
           <p class="pt-1 text-meta text-muted">
-            Free, and there is no pricing yet.
-            <a class="rr-link" href="/access">What Early Access means.</a>
+            The runner stays free. Paid pilots are scoped by agreement; the team subscription is planned.
+            <a class="rr-link" href="/access">Free runner or paid pilot?</a>
             Rather not set it up alone?
             <a class="rr-link" href={contactHref(CONTACT_EMAIL)}>I will do it with you on a call.</a>
           </p>

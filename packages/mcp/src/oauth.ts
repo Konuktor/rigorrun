@@ -74,9 +74,7 @@ export class LocalOAuthProvider {
   private redirect = '';
   private issuedState = '';
   private arrival: Promise<string> | undefined;
-  private settle:
-    | { resolve: (code: string) => void; reject: (error: Error) => void }
-    | undefined;
+  private settle: { resolve: (code: string) => void; reject: (error: Error) => void } | undefined;
 
   constructor(private readonly options: OAuthOptions) {}
 
@@ -106,8 +104,7 @@ export class LocalOAuthProvider {
   }
 
   async clientInformation(): Promise<OAuthClientInformationMixed | undefined> {
-    const saved = await this.options.store.get(this.key('client'));
-    return saved ? (JSON.parse(saved) as OAuthClientInformationMixed) : undefined;
+    return this.boundCredential<OAuthClientInformationMixed>('client');
   }
 
   async saveClientInformation(info: OAuthClientInformationMixed): Promise<void> {
@@ -115,8 +112,22 @@ export class LocalOAuthProvider {
   }
 
   async tokens(): Promise<OAuthTokens | undefined> {
-    const saved = await this.options.store.get(this.key('tokens'));
-    return saved ? (JSON.parse(saved) as OAuthTokens) : undefined;
+    return this.boundCredential<OAuthTokens>('tokens');
+  }
+
+  private async boundCredential<T extends { issuer?: string | undefined }>(
+    part: 'client' | 'tokens',
+  ): Promise<T | undefined> {
+    const saved = await this.options.store.get(this.key(part));
+    if (!saved) return undefined;
+    const value = JSON.parse(saved) as T | null;
+    if (typeof value?.issuer === 'string' && value.issuer.trim()) return value;
+    // Old SDK saves have no trustworthy authorization-server binding. Never
+    // infer it from the server we are connecting to now: that is an untrusted
+    // peer. Clear only this server's OAuth session and let the SDK ask for a
+    // fresh interactive sign-in. Preserve complete bound objects on new saves.
+    await this.invalidateCredentials('all');
+    return undefined;
   }
 
   async saveTokens(tokens: OAuthTokens): Promise<void> {

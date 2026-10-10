@@ -6,7 +6,6 @@
  */
 import { join } from 'node:path';
 import {
-  applyReview,
   blockingRules,
   caseOutcome,
   parseBenchmark,
@@ -348,14 +347,13 @@ export async function cmdGenerate(contractPath: string | undefined, flags: Flags
     throw new CliError('Give me a contract file. Try `rigorrun generate contract.json`.');
   }
   const draft = parseContractOrFail(await readJson(contractPath), contractPath);
-  // Without an interactive review, every proposed rule is confirmed. The
-  // reviewed artefact is what `rigorrun demo` writes; this is the batch path.
-  const contract =
-    rulesAwaitingReview(draft).length > 0
-      ? applyReview(draft, {
-          confirmedRuleIds: rulesAwaitingReview(draft).map((rule) => rule.id),
-        })
-      : draft;
+  if (rulesAwaitingReview(draft).length > 0) {
+    throw new CliError(
+      'This contract still has inferred rules awaiting your decision. ' +
+        'Review them explicitly in the project interface, or supply an already reviewed contract.',
+    );
+  }
+  const contract = draft;
 
   const registration = listEnvironments().find((r) => r.id === contract.environmentId);
   if (!registration) throw new CliError(`Unknown environment "${contract.environmentId}".`);

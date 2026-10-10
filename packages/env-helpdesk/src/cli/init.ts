@@ -88,16 +88,21 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo): Promise<
     say('Rules — only the ones you confirm can fail your agent');
   }
   const confirmedRuleIds: string[] = [];
+  const rejectedRuleIds: string[] = [];
   for (const rule of toAsk) {
     let yes = values.yes;
     if (!yes) {
       say(`  ${rule.statement}`);
       const answer = (await io.ask('    Confirm? [Y/n] ')).trim().toLowerCase();
+      if (!['', 'y', 'yes', 'n', 'no'].includes(answer)) {
+        throw new HelpdeskUsageError('Answer yes or no to each rule. No project was created.');
+      }
       yes = answer === '' || answer === 'y' || answer === 'yes';
     } else if (human) {
       say(`  ✓ ${rule.statement}`);
     }
     if (yes) confirmedRuleIds.push(rule.id);
+    else rejectedRuleIds.push(rule.id);
   }
 
   registerHelpdeskPack();
@@ -121,7 +126,7 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo): Promise<
     const installed = await service.installPackSuite(
       project.id,
       { confirmedRuleIds, createdAt: new Date().toISOString() },
-      { confirmedRuleIds },
+      { confirmedRuleIds, rejectedRuleIds },
     );
     projectId = project.id;
     caseIds = installed.benchmark.cases.map((testCase) => testCase.id);
@@ -137,7 +142,11 @@ export async function cmdInit(argv: string[], io: InitIo = terminalIo): Promise<
   ];
   if (values.json) {
     say(
-      JSON.stringify({ projectId, name, baseUrl, confirmedRuleIds, cases: caseIds, next }, null, 2),
+      JSON.stringify(
+        { projectId, name, baseUrl, confirmedRuleIds, rejectedRuleIds, cases: caseIds, next },
+        null,
+        2,
+      ),
     );
     return 0;
   }

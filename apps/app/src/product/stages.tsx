@@ -146,9 +146,9 @@ function ConnectorChoice({
         the verdict screen is finding it out too late.
       */}
       <p className="mt-3 max-w-2xl text-meta text-muted">
-        Reading the system back afterwards is what makes a verdict worth having. A browser can
-        watch what your agent does, and you can attach an MCP server or an API for the same system
-        later to have the result checked against records.
+        Reading the system back afterwards is what makes a verdict worth having. A browser can watch
+        what your agent does, and you can attach an MCP server or an API for the same system later
+        to have the result checked against records.
       </p>
     </fieldset>
   );
@@ -171,7 +171,9 @@ export function ConnectEnvironment({
   const openapi = saved?.kind === 'openapi' ? saved : undefined;
 
   const browser = saved?.kind === 'browser' ? saved : undefined;
-  const [kind, setKind] = useState<'mcp' | 'openapi' | 'browser'>(saved?.kind ?? 'mcp');
+  const [kind, setKind] = useState<'mcp' | 'openapi' | 'browser'>(
+    saved?.kind === 'pack' ? 'mcp' : (saved?.kind ?? 'mcp'),
+  );
   const [transport, setTransport] = useState<'stdio' | 'http'>(mcp?.transport ?? 'stdio');
   const [command, setCommand] = useState(mcp?.command ?? '');
   const [args, setArgs] = useState((mcp?.args ?? []).join('\n'));
@@ -201,16 +203,22 @@ export function ConnectEnvironment({
     if (declared && !tokenUrlTouched) setTokenUrl(declared);
   }, [declared, tokenUrlTouched]);
   const [startUrl, setStartUrl] = useState(browser?.startUrl ?? '');
-  const [secretNames, setSecretNames] = useState((saved?.secretNames ?? []).join('\n'));
+  const [secretNames, setSecretNames] = useState(
+    (saved?.kind === 'pack' ? [] : (saved?.secretNames ?? [])).join('\n'),
+  );
   // Nothing is pre-selected for a new connection. Whether RigorRun may write to
   // a system is the one decision it must never make on somebody's behalf.
-  const [safety, setSafety] = useState<ProjectView['safety'] | ''>(project.connector ? project.safety : '');
+  const [safety, setSafety] = useState<ProjectView['safety'] | ''>(
+    project.connector ? project.safety : '',
+  );
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState('');
 
   async function connect(): Promise<void> {
     if (!safety) {
-      setProblem('Say what kind of system this is first. RigorRun will not guess whether it may write to it.');
+      setProblem(
+        'Say what kind of system this is first. RigorRun will not guess whether it may write to it.',
+      );
       return;
     }
     setBusy(true);
@@ -401,7 +409,10 @@ export function ConnectEnvironment({
                   testId="openapi-auth"
                   options={[
                     { value: 'header', label: 'A credential you already have' },
-                    { value: 'client_credentials', label: 'A client id and secret, exchanged for a token' },
+                    {
+                      value: 'client_credentials',
+                      label: 'A client id and secret, exchanged for a token',
+                    },
                   ]}
                 />
               )}
@@ -469,7 +480,10 @@ export function ConnectEnvironment({
                     />
                   )}
                 </Field>
-                <Field label="Scope" hint="Optional, space separated. Leave it empty unless the API asks for one.">
+                <Field
+                  label="Scope"
+                  hint="Optional, space separated. Leave it empty unless the API asks for one."
+                >
                   {({ id, describedBy }) => (
                     <TextInput
                       id={id}
@@ -1343,7 +1357,7 @@ export function RuleOnRules({
       const result = await api.compile(project.id);
       setRules(result.contract.rules);
       setFacts(result.contract.observedFacts);
-      setDecisions(Object.fromEntries(result.contract.rules.map((rule) => [rule.id, 'yes'])));
+      setDecisions({});
     } catch (error) {
       setProblem((error as Error).message);
     } finally {
@@ -1352,6 +1366,7 @@ export function RuleOnRules({
   }
 
   async function generate(): Promise<void> {
+    if (busy || rules?.some((rule) => rule.status === 'inferred' && !decisions[rule.id])) return;
     setBusy(true);
     setProblem('');
     try {
@@ -1379,7 +1394,8 @@ export function RuleOnRules({
         <div className="flex flex-col gap-3">
           <p className="max-w-2xl text-body text-secondary">
             RigorRun will now turn what it watched into rules about how the job should be done. None
-            of them can fail your agent until you have said yes to it.
+            of the proposed rules can fail your agent until you have said yes to it. Observed facts
+            remain part of the checks.
           </p>
           {problem ? <Problem>{problem}</Problem> : null}
           <div>
@@ -1391,6 +1407,13 @@ export function RuleOnRules({
       </Panel>
     );
   }
+
+  const proposed = rules.filter((rule) => rule.status === 'inferred');
+  const pending = proposed.filter((rule) => !decisions[rule.id]).length;
+  const enforced = rules.filter(
+    (rule) =>
+      rule.status === 'observed' || rule.status === 'confirmed' || decisions[rule.id] === 'yes',
+  ).length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -1410,10 +1433,27 @@ export function RuleOnRules({
       <section className="flex flex-col gap-3">
         <SectionLabel>What it thinks the rules are</SectionLabel>
         <p className="max-w-2xl text-body text-secondary">
-          Guesses, every one. A rule you say no to cannot fail your agent, so saying no costs you
-          nothing — RigorRun deliberately proposes more than it expects you to keep, because missing
-          a real rule is far worse than proposing one you do not want.
+          Decide each proposed rule. A rule you reject generates no enforcing checks. Observed facts
+          and previously confirmed rules do not need a new decision.
         </p>
+        <p className="text-meta text-muted" aria-live="polite">
+          {enforced} confirmed or observed rules will be enforced · {pending} pending decisions
+        </p>
+        <div>
+          <Button
+            variant="secondary"
+            disabled={busy || pending === 0}
+            testId="confirm-all-rules"
+            onClick={() =>
+              setDecisions((current) => ({
+                ...Object.fromEntries(proposed.map((rule) => [rule.id, 'yes' as const])),
+                ...current,
+              }))
+            }
+          >
+            Confirm all proposed rules
+          </Button>
+        </div>
         {rules.map((rule) => (
           <Panel padded key={rule.id}>
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -1423,24 +1463,32 @@ export function RuleOnRules({
                   <span className="text-meta text-muted">{rule.question.text}</span>
                 ) : null}
               </div>
-              <div className="flex shrink-0 gap-2">
-                <Button
-                  variant={decisions[rule.id] === 'yes' ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setDecisions((current) => ({ ...current, [rule.id]: 'yes' }))}
-                  testId={`yes-${rule.id}`}
-                >
-                  Yes
-                </Button>
-                <Button
-                  variant={decisions[rule.id] === 'no' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setDecisions((current) => ({ ...current, [rule.id]: 'no' }))}
-                  testId={`no-${rule.id}`}
-                >
-                  No
-                </Button>
-              </div>
+              {rule.status === 'inferred' ? (
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    disabled={busy}
+                    aria-pressed={decisions[rule.id] === 'yes'}
+                    variant={decisions[rule.id] === 'yes' ? 'primary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setDecisions((current) => ({ ...current, [rule.id]: 'yes' }))}
+                    testId={`yes-${rule.id}`}
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    disabled={busy}
+                    aria-pressed={decisions[rule.id] === 'no'}
+                    variant={decisions[rule.id] === 'no' ? 'secondary' : 'ghost'}
+                    size="sm"
+                    onClick={() => setDecisions((current) => ({ ...current, [rule.id]: 'no' }))}
+                    testId={`no-${rule.id}`}
+                  >
+                    No
+                  </Button>
+                </div>
+              ) : (
+                <Tag tone={rule.status === 'rejected' ? 'neutral' : 'pass'}>{rule.status}</Tag>
+              )}
             </div>
           </Panel>
         ))}
@@ -1448,7 +1496,7 @@ export function RuleOnRules({
 
       {problem ? <Problem>{problem}</Problem> : null}
       <div>
-        <Button onClick={generate} disabled={busy} testId="generate">
+        <Button onClick={generate} disabled={busy || pending > 0} testId="generate">
           {busy ? 'Building the suite…' : 'Build the suite'}
         </Button>
       </div>

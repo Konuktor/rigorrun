@@ -27,7 +27,7 @@ same principle [`rigorrun verify`](/cli/verify/) applies to published servers.
 
 ## Reporting a vulnerability
 
-Write to **security@rigorrun.xyz** with what you did, what happened, and the output of
+Write to **erbol@rigorrun.xyz** with what you did, what happened, and the output of
 `rigorrun --version`. You will get a reply within 72 hours.
 
 Please do not open a public issue for anything that could be used against somebody else's machine

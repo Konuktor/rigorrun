@@ -13,6 +13,9 @@
 import {
   ProjectStore,
   Service,
+  SuiteIntegrityError,
+  budgetProblem,
+  selectCases,
   compareRuns,
   describeConnector,
   secretEnvName,
@@ -153,6 +156,20 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
       throw new CliError(`No project "${projectId}" on this machine.`);
     });
     const agent = agentToGate(project, projectId, flags.agent[0]);
+    const problem =
+      flags.caseTimeoutMs === undefined
+        ? null
+        : budgetProblem({
+            toolCallMs: project.budgets.toolCallMs,
+            caseMs: flags.caseTimeoutMs,
+          });
+    if (problem) throw new CliError(problem);
+    const { benchmark: fullSuite, source: initialSource } =
+      await service.readCurrentSuite(projectId);
+    selectCases(fullSuite, flags.caseIds ?? []);
+    const readiness = await service.gateReadiness(projectId);
+    if (!readiness.ready || !readiness.source) return refuseProjectGate(readiness.reasons, flags);
+    await service.assertSuiteCurrent(projectId, initialSource);
 
     const result = await service.runAgent(projectId, agent.id, runOptions(flags));
     await writeProjectReport(projectId, result, flags);
@@ -191,18 +208,18 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
     // A gate over some of the suite's cases says nothing about the rest, and
     // an agent can pass the ones chosen and fail the ones left out. Useful to
     // look at; never a release verdict. A subset that fails still fails.
-    const suite = await new ProjectStore(storeRoot(flags.home)).readArtefact<Benchmark>(
-      projectId,
-      'benchmark',
-    );
     const selectedCases = [...new Set(result.caseResults.map((entry) => entry.caseId))];
-    const suiteCaseCount = suite?.cases.length ?? selectedCases.length;
+    const suiteCaseCount = fullSuite.cases.length;
     if ((flags.caseIds?.length ?? 0) > 0 && selectedCases.length < suiteCaseCount) {
       inconclusive.push(
         `gate over ${selectedCases.length} of ${suiteCaseCount} cases is not a release verdict; run without --case`,
       );
     }
 
+    await service.assertSuiteCurrent(projectId, readiness.source);
+    const finalReadiness = await service.gateReadiness(projectId);
+    if (!finalReadiness.ready)
+      return refuseProjectGate(finalReadiness.reasons, flags, result.runId);
     const exitCode = failures.length > 0 ? 1 : inconclusive.length > 0 ? 3 : 0;
     if (flags.json) {
       line(
@@ -286,7 +303,28 @@ export async function cmdProjectGate(projectId: string | undefined, flags: Flags
       );
     }
     return exitCode;
+  }).catch((error: unknown) => {
+    if (error instanceof SuiteIntegrityError)
+      return refuseProjectGate([error.message], flags, error.runId);
+    throw error;
   });
+}
+
+function refuseProjectGate(reasons: string[], flags: Flags, runId?: string): number {
+  if (flags.json) {
+    line(
+      JSON.stringify(
+        { passed: false, failures: reasons, inconclusive: true, ...(runId ? { runId } : {}) },
+        null,
+        2,
+      ),
+    );
+  } else {
+    heading('Gate: INCONCLUSIVE');
+    for (const reason of reasons) line(reason);
+    if (runId) line(`Historical evidence: ${runId}`);
+  }
+  return 3;
 }
 
 /**

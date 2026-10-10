@@ -15,7 +15,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { expectNoOffOriginRequests, watchPage } from './support/journeys.ts';
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
@@ -30,7 +30,7 @@ const tsx = join(root, 'node_modules', '.bin', 'tsx');
  * Somebody reading a claim that this works should be able to look at what the
  * person actually saw, at each point where the product asserts something.
  */
-const SHOTS = join(root, 'docs', 'external-user-run');
+const SHOTS = process.env['RIGORRUN_E2E_SHOTS'] ?? join(root, 'docs', 'external-user-run');
 let shot = 0;
 async function evidence(page: Page, name: string): Promise<void> {
   shot += 1;
@@ -80,7 +80,9 @@ function startAndWait(
   ready: RegExp,
 ): Promise<{ child: ChildProcess; match: string }> {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env } });
+    const childEnv: NodeJS.ProcessEnv = { ...process.env, ...env };
+    delete childEnv['FORCE_COLOR'];
+    const child = spawn(command, args, { cwd: root, env: childEnv });
     let buffer = '';
     const timer = setTimeout(() => reject(new Error(`timed out waiting for ${ready}`)), 90_000);
     const onData = (chunk: Buffer): void => {
@@ -153,10 +155,12 @@ test.afterAll(async () => {
  */
 async function runCli(args: string[]): Promise<{ code: number; out: string }> {
   return new Promise((resolve) => {
+    const childEnv: NodeJS.ProcessEnv = { ...process.env, RIGORRUN_HOME: home, NO_COLOR: '1' };
+    delete childEnv['FORCE_COLOR'];
     const child = spawn(
       PACKAGED ?? tsx,
       [...(PACKAGED ? [] : [join(root, 'packages', 'cli', 'src', 'bin.ts')]), ...args],
-      { cwd: root, env: { ...process.env, RIGORRUN_HOME: home, NO_COLOR: '1' } },
+      { cwd: root, env: childEnv },
     );
     let out = '';
     child.stdout?.on('data', (chunk: Buffer) => (out += chunk.toString()));
@@ -279,7 +283,10 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // ------------------------------------------------------ 6. rule, then build
   await page.getByTestId('compile').click();
-  await expect(page.getByText('Guesses, every one.')).toBeVisible();
+  await expect(page.getByText(/Decide each proposed rule/)).toBeVisible();
+  await expect(page.getByTestId('generate')).toBeDisabled();
+  await page.getByRole('button', { name: 'Confirm all proposed rules', exact: true }).click();
+  await expect(page.getByTestId('generate')).toBeEnabled();
   await page.getByTestId('generate').click();
 
   await expect(page.getByTestId('suite-size')).toContainText('cases built');
@@ -429,13 +436,22 @@ test('a stranger connects their own system and their own agent, and gets a verdi
 
   // ------------------------------------------------ 11. and then, in CI
   //
-  // The last thing the quickstart promises: the project you just set up in a
-  // browser is the one a build server runs, with no interface and no person.
-  // Exactly the command `docs/CI.md` tells people to write, against the
-  // workspace this test has been filling in, asserting the exit-code contract
-  // a build server actually depends on.
+  // Diagnostic runs above can reveal unsafe behavior even when this generated
+  // suite is inadequate for a release verdict. After adding a case, the old
+  // assessment is invalidated. CI must refuse before contacting the candidate
+  // or implicitly assessing a suite that performs writes in the test system.
   const projectId = /#\/projects\/(p_[A-Za-z0-9_-]+)/.exec(page.url())?.[1];
   expect(projectId, 'the URL should name the project').toBeTruthy();
+
+  const projectDir = join(home, 'projects', projectId!);
+  const runsBeforeGate = (await readdir(join(projectDir, 'runs'))).sort();
+  expect(runsBeforeGate.length, 'earlier diagnostic runs remain available').toBeGreaterThan(0);
+  const readQuality = () =>
+    readFile(join(projectDir, 'quality.json'), 'utf8').catch((error: NodeJS.ErrnoException) => {
+      if (error.code === 'ENOENT') return null;
+      throw error;
+    });
+  const qualityBeforeGate = await readQuality();
 
   // The project holds both agents by now, so the build server names the one it
   // gates: with several agents RigorRun refuses to pick one for you.
@@ -448,12 +464,16 @@ test('a stranger connects their own system and their own agent, and gets a verdi
     '--min-success',
     '0.95',
   ]);
-  // 1, not 2: the agent missed the bar, and RigorRun could run the question.
-  // A build server cannot tell those apart from prose, which is why the codes
-  // are the contract.
-  expect(gate.code, gate.out).toBe(1);
-  expect(gate.out).toMatch(/task success/);
-  expect(gate.out).toMatch(/verification|isolation/);
+  // The original 95% success threshold remains; strict suite readiness is
+  // checked before it, so inadequate evidence yields 3 rather than agent FAIL.
+  expect(gate.code, gate.out).toBe(3);
+  expect(gate.out).toMatch(/Gate:\s*INCONCLUSIVE/);
+  expect(gate.out).toMatch(/current complete quality assessment is required/);
+  expect(gate.out).toMatch(/explicitly with consent/);
+  expect(gate.out).toMatch(/writes in the test environment/);
+  expect(gate.out).not.toMatch(/task success/);
+  expect((await readdir(join(projectDir, 'runs'))).sort()).toEqual(runsBeforeGate);
+  expect(await readQuality()).toBe(qualityBeforeGate);
 
   const listed = await runCli(['projects']);
   expect(listed.code).toBe(0);

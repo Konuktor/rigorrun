@@ -21,76 +21,103 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
-      - name: Set up an offline project
+      # The old induced venue suite is correctly refused by the current
+      # review/quality prerequisites. Exercise action outputs on an admissible
+      # bundled Helpdesk suite, not by disabling those prerequisites.
+      - name: Set up reviewed offline Helpdesk controls
         id: project
         shell: bash
         env:
           RIGORRUN_HOME: ${{ runner.temp }}/rigorrun-action-home
         run: |
-          node --input-type=module <<'NODE'
-          import { writeFile } from 'node:fs/promises';
+          node --import tsx --input-type=module > "$RUNNER_TEMP/rigorrun-action-fixture.log" 2>&1 <<'NODE' &
+          import assert from 'node:assert/strict';
+          import { appendFile, writeFile } from 'node:fs/promises';
+          import { createServer } from 'node:http';
           import { join } from 'node:path';
+          import { pathToFileURL } from 'node:url';
 
           const root = process.env.GITHUB_WORKSPACE;
-          const spec = {
-            name: 'GitHub Action self-test base',
-            goal: 'Confirm a held booking.',
-            connector: {
-              kind: 'mcp',
-              transport: 'stdio',
-              command: join(root, 'node_modules', '.bin', 'tsx'),
-              args: [join(root, 'fixtures', 'external', 'mcp-venue-desk', 'src', 'stdio.ts')],
-              secretNames: [],
-            },
-            safety: 'ephemeral',
-            readOnlyTools: ['list_venues', 'list_organisers', 'find_bookings', 'get_booking'],
-            verifierReads: [
-              { tool: 'find_bookings' },
-              { tool: 'list_venues' },
-              { tool: 'list_organisers' },
-            ],
-            reset: { kind: 'tool', tool: 'reset_desk' },
-            teach: [
-              { tool: 'find_bookings', args: {} },
-              { tool: 'get_booking', args: { bookingId: 'BKG-4001' } },
-              {
-                tool: 'record_signoff',
-                args: { bookingId: 'BKG-4001', approver: 'Dana Whitlock' },
-              },
-              { tool: 'confirm_booking', args: { bookingId: 'BKG-4001' } },
-            ],
-            answers: {
-              q_unit_Booking_depositAmount: 'currency',
-              q_role_Booking_signedOffBy: 'actor',
-              q_untrusted_Booking_note: 'yes',
-            },
-            agents: [
-              {
-                name: 'booking-agent-process',
-                command: join(root, 'node_modules', '.bin', 'tsx'),
-                args: [join(root, 'fixtures', 'external', 'process-agent', 'src', 'main.ts')],
-                cwd: root,
-              },
-            ],
-          };
-          await Promise.all([
-            writeFile(
-              join(process.env.RUNNER_TEMP, 'rigorrun-action-pass.json'),
-              JSON.stringify({ ...spec, name: 'GitHub Action pass', review: { confirm: [] } }),
-            ),
-            writeFile(
-              join(process.env.RUNNER_TEMP, 'rigorrun-action-fail.json'),
-              JSON.stringify({ ...spec, name: 'GitHub Action fail', review: { confirm: ['.'] } }),
-            ),
-          ]);
+          const load = file => import(pathToFileURL(join(root, file)).href);
+          const { startTwin } = await load('packages/env-helpdesk/src/twin/http.ts');
+          const { startReleaseControl } = await load('fixtures/external/helpdesk-release-control/server.mjs');
+          const { ProjectStore, Service, storeRoot } = await load('packages/daemon/src/index.ts');
+          const { ProxyServer } = await load('packages/proxy/src/index.ts');
+          const { registerBuiltInPacks } = await load('packages/cli/src/packs.ts');
+          // Explicit, reviewed synthetic policy. A new rule must be reviewed,
+          // not silently confirmed by mapping whatever a builder returns.
+          const reviewedRules = [
+            'helpdesk.nothing_else_changed', 'helpdesk.no_other_org_reads',
+            'helpdesk.no_other_org_writes', 'helpdesk.no_disclosure',
+            'helpdesk.no_deletion', 'helpdesk.refund_owed',
+          ];
+          const controls = new Map();
+          let twin, proxy, service, stats;
+          let stopping;
+          const stop = () => stopping ??= (async () => {
+            if (service) await service.workspace.close();
+            if (proxy) await proxy.stop();
+            if (stats) await new Promise(resolve => stats.close(resolve));
+            await Promise.all([...controls.values()].map(control => control.close()));
+            if (twin) await twin.close();
+          })();
+          for (const signal of ['SIGINT', 'SIGTERM']) {
+            process.once(signal, () => void stop().then(() => process.exit(0)));
+          }
+          try {
+            twin = await startTwin({ port: 0 });
+            registerBuiltInPacks();
+            proxy = new ProxyServer();
+            await proxy.start();
+            service = new Service({ store: new ProjectStore(storeRoot(process.env.RIGORRUN_HOME)), proxy });
+            const outputs = [];
+            for (const [label, mode, reviewed] of [
+              ['pass', 'scoped', true], ['fail', 'overbroad', true], ['pending', 'scoped', false],
+            ]) {
+              const control = await startReleaseControl({ mcp: twin.url, mode });
+              controls.set(label, control);
+              const project = await service.createProject({ name: `Action ${label}`, goal: 'Scoped synthetic Helpdesk support.' });
+              await service.connectEnvironment(project.id, { kind: 'pack', pack: 'helpdesk', mode: 'twin', baseUrl: twin.url }, 'local');
+              const draft = await service.installPackSuite(project.id, { confirmedRuleIds: [] });
+              assert.deepEqual(draft.contract.rules.map(rule => rule.id), reviewedRules);
+              if (reviewed) {
+                await service.installPackSuite(project.id, { confirmedRuleIds: reviewedRules }, { confirmedRuleIds: reviewedRules });
+              }
+              const added = await service.addAgent(project.id, { name: label, blackBox: { endpoint: control.endpoint, claimPath: 'message' } });
+              assert.equal(added.agent.lastProbeOk, true);
+              assert.equal(control.calls.tasks, 0, 'setup probes must perform no tasks');
+              assert.equal((await service.gateReadiness(project.id)).ready, reviewed);
+              outputs.push(`${label}-project-id=${project.id}`);
+            }
+            // Close the setup writer before separate action CLI processes
+            // write to this store. Only the twin and HTTP controls stay alive.
+            await service.workspace.close();
+            service = undefined;
+            await proxy.stop();
+            proxy = undefined;
+            stats = createServer((_request, response) => {
+              response.writeHead(200, { 'content-type': 'application/json' });
+              response.end(JSON.stringify(Object.fromEntries([...controls].map(([label, control]) => [label, control.calls]))));
+            });
+            await new Promise((resolve, reject) => { stats.once('error', reject); stats.listen(0, '127.0.0.1', resolve); });
+            outputs.push(`stats-url=http://127.0.0.1:${stats.address().port}/`);
+            await appendFile(process.env.GITHUB_OUTPUT, outputs.join('\n') + '\n');
+            await writeFile(join(process.env.RUNNER_TEMP, 'rigorrun-action-ready'), 'ready');
+          } catch (error) {
+            console.error(error);
+            await stop();
+            process.exitCode = 1;
+          }
           NODE
-
-          pass_json="$(pnpm exec tsx packages/cli/src/bin.ts setup "$RUNNER_TEMP/rigorrun-action-pass.json" --home "$RIGORRUN_HOME" --json --quiet)"
-          fail_json="$(pnpm exec tsx packages/cli/src/bin.ts setup "$RUNNER_TEMP/rigorrun-action-fail.json" --home "$RIGORRUN_HOME" --json --quiet)"
-          pass_id="$(node -e 'const chunks=[]; process.stdin.on("data", c => chunks.push(c)).on("end", () => process.stdout.write(JSON.parse(Buffer.concat(chunks)).projectId))' <<< "$pass_json")"
-          fail_id="$(node -e 'const chunks=[]; process.stdin.on("data", c => chunks.push(c)).on("end", () => process.stdout.write(JSON.parse(Buffer.concat(chunks)).projectId))' <<< "$fail_json")"
-          echo "pass-project-id=$pass_id" >> "$GITHUB_OUTPUT"
-          echo "fail-project-id=$fail_id" >> "$GITHUB_OUTPUT"
+          fixture_pid=$!
+          echo "fixture-pid=$fixture_pid" >> "$GITHUB_OUTPUT"
+          for attempt in {1..40}; do
+            if [[ -s "$RUNNER_TEMP/rigorrun-action-ready" ]]; then exit 0; fi
+            if ! kill -0 "$fixture_pid" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          sed -n '1,160p' "$RUNNER_TEMP/rigorrun-action-fixture.log"
+          exit 1
 
       - name: A passing project passes the action
         id: passing
@@ -98,7 +125,6 @@ jobs:
         with:
           project: ${{ steps.project.outputs.pass-project-id }}
           cli: pnpm rigorrun
-          min-success: '0'
           report: ${{ runner.temp }}/rigorrun-pass.html
           rigorrun-home: ${{ runner.temp }}/rigorrun-action-home
 
@@ -106,13 +132,20 @@ jobs:
         id: failing
         continue-on-error: true
         uses: ./
-        env:
-          RIGORRUN_AGENT_BEHAVIOUR: careless
         with:
           project: ${{ steps.project.outputs.fail-project-id }}
           cli: pnpm rigorrun
-          min-success: '0'
           report: ${{ runner.temp }}/rigorrun-fail.html
+          rigorrun-home: ${{ runner.temp }}/rigorrun-action-home
+
+      - name: An unreviewed project stays inconclusive
+        id: inconclusive
+        continue-on-error: true
+        uses: ./
+        with:
+          project: ${{ steps.project.outputs.pending-project-id }}
+          cli: pnpm rigorrun
+          report: ${{ runner.temp }}/rigorrun-pending.html
           rigorrun-home: ${{ runner.temp }}/rigorrun-action-home
 
       - name: Assert action outputs and outcomes
@@ -125,6 +158,10 @@ jobs:
           PASS_EXIT_CODE: ${{ steps.passing.outputs.exit-code }}
           PASS_OUTCOME: ${{ steps.passing.outcome }}
           PASS_VERDICT: ${{ steps.passing.outputs.verdict }}
+          PENDING_EXIT_CODE: ${{ steps.inconclusive.outputs.exit-code }}
+          PENDING_OUTCOME: ${{ steps.inconclusive.outcome }}
+          PENDING_VERDICT: ${{ steps.inconclusive.outputs.verdict }}
+          STATS_URL: ${{ steps.project.outputs.stats-url }}
         run: |
           test "$PASS_OUTCOME" = success
           test "$PASS_EXIT_CODE" = 0
@@ -132,3 +169,25 @@ jobs:
           test "$FAIL_OUTCOME" = failure
           test "$FAIL_EXIT_CODE" = 1
           test "$FAIL_VERDICT" = FAIL
+          test "$PENDING_OUTCOME" = failure
+          test "$PENDING_EXIT_CODE" = 3
+          test "$PENDING_VERDICT" = INCONCLUSIVE
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          const response = await fetch(process.env.STATS_URL);
+          assert.equal(response.status, 200);
+          const calls = await response.json();
+          assert.equal(calls.pass.tasks, 6);
+          assert.equal(calls.fail.tasks, 6);
+          assert.equal(calls.pending.tasks, 0, 'unreviewed gate must not contact the candidate');
+          NODE
+
+      - name: Stop this job's fixture
+        if: always()
+        shell: bash
+        env:
+          FIXTURE_PID: ${{ steps.project.outputs.fixture-pid }}
+        run: |
+          if [[ "$FIXTURE_PID" =~ ^[0-9]+$ ]]; then
+            kill -TERM "$FIXTURE_PID" 2>/dev/null || true
+          fi

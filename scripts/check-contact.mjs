@@ -13,8 +13,8 @@
  * either way, which is why this is a diagnostic (`pnpm contact`) rather than a
  * release gate: it answers "is the address live yet", not "is it safe to ship".
  *
- * It checks that mail can be delivered, which is what an address has to do to
- * be worth printing. It cannot check that anybody reads the mailbox.
+ * It checks domain MX configuration, not mailbox existence or delivery.
+ * A real inbox delivery test must be performed separately by its owner.
  */
 import { resolveMx, resolveTxt } from 'node:dns/promises';
 import { readFile } from 'node:fs/promises';
@@ -31,9 +31,13 @@ const site = await readFile(
 );
 
 /** Every address the site is configured to print. */
-const addresses = [...site.matchAll(/'([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})'/g)].map(
-  (match) => match[1],
-);
+const addresses = [
+  ...new Set(
+    [...site.matchAll(/'([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})'/g)].map(
+      (match) => match[1],
+    ),
+  ),
+];
 
 if (addresses.length === 0) {
   console.log('No contact address is published. Nothing to check.');
@@ -52,7 +56,8 @@ for (const domain of domains) {
       .sort((a, b) => a.priority - b.priority)
       .map((record) => record.exchange)
       .join(', ');
-    console.log(`${green('deliverable')}  ${shown}  ${dim(hosts)}`);
+    console.log(`${green('MX configured')}  ${shown}  ${dim(hosts)}`);
+    console.log(dim('             Inbox existence and message delivery have not been tested.'));
   } catch (error) {
     failed = true;
     console.error(

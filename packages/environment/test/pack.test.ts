@@ -19,6 +19,7 @@ import {
   listPacks,
   mayRepeatMutatingCases,
   registerPack,
+  supportsProjectReleaseGate,
   verificationStrength,
   type CanonicalState,
   type PackCaseContext,
@@ -101,6 +102,17 @@ const PACK: PackDefinition = {
 afterEach(() => clearPacks());
 
 describe('the pack registry', () => {
+  it('defaults release gates to denied and revokes trusted registration on replacement', () => {
+    registerPack(PACK);
+    expect(supportsProjectReleaseGate(PACK.id)).toBe(false);
+    registerPack(PACK, { projectReleaseGate: true });
+    expect(supportsProjectReleaseGate(PACK.id)).toBe(true);
+    registerPack({ ...PACK });
+    expect(supportsProjectReleaseGate(PACK.id)).toBe(false);
+    registerPack(PACK, { projectReleaseGate: true });
+    clearPacks();
+    expect(supportsProjectReleaseGate(PACK.id)).toBe(false);
+  });
   it('finds a registered pack by id, and lists packs in a stable order', () => {
     registerPack({ ...PACK, id: 'zeta' });
     registerPack(PACK);

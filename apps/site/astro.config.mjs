@@ -57,7 +57,7 @@ if (!mailWorks) {
   console.warn(
     '[rigorrun] rigorrun.xyz has no MX record. Building without a published email address;\n' +
       '           contact routes to GitHub issues instead. Enable Cloudflare Email Routing\n' +
-      '           on the zone and rebuild to publish security@ and hello@.',
+      '           on the zone and rebuild to publish erbol@rigorrun.xyz.',
   );
 }
 

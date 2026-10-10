@@ -9,6 +9,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import {
   firstCaseId,
+  deepLinkToVerdict,
   WEAK,
   goToBenchmark,
   goToContract,
@@ -76,8 +77,7 @@ test.describe('accessibility', () => {
   });
 
   test('evidence dialog has no violations', async ({ page }) => {
-    await page.goto('/#/demo/verdict');
-    await expect(page.getByTestId('verdict')).toBeVisible({ timeout: 90_000 });
+    await deepLinkToVerdict(page);
     await openEvidence(page, WEAK, await firstCaseId(page, WEAK));
     const { violations } = await scan(page);
     expect(violations, `\n  ${describeViolations(violations)}`).toEqual([]);

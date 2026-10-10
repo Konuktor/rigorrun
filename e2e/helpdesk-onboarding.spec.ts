@@ -1,0 +1,825 @@
+/**
+ * User-visible release-check regression against a CLI-launched daemon/twin.
+ * The narrow HTTP control uses public task text, inputs and live MCP responses;
+ * it never imports cases, assertions, expected verdicts or reference agents.
+ * This is deterministic, model-free validation, not a live LLM run.
+ */
+import { expect, test, type Page } from '@playwright/test';
+import { spawn, type ChildProcess } from 'node:child_process';
+import { createServer, type Server } from 'node:http';
+import { mkdtemp, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { expectNoOverflow, expectNoOffOriginRequests, watchPage } from './support/journeys.ts';
+
+const root = fileURLToPath(new URL('..', import.meta.url));
+const bin = join(root, 'packages/cli/src/bin.ts');
+// Exercise the same journey against either source or the installed artifact.
+const packagedBin = process.env['RIGORRUN_BIN'];
+let scratch: string;
+let home: string;
+let pairedUrl: string;
+let twinUrl: string;
+let agentUrl: string;
+let badUrl: string;
+const children = new Set<ChildProcess>();
+const servers: Server[] = [];
+const envelopes: Record<string, unknown>[] = [];
+
+async function launch(args: string[], ready: RegExp): Promise<string> {
+  const child = spawn(
+    packagedBin ?? process.execPath,
+    [...(packagedBin ? [] : ['--import', 'tsx', bin]), ...args],
+    {
+      cwd: root,
+      env: {
+        PATH: process.env['PATH'] ?? '',
+        RIGORRUN_HOME: home,
+        RIGORRUN_SECRET_BACKEND: 'file',
+        NO_COLOR: '1',
+      },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    },
+  );
+  children.add(child);
+  child.once('close', () => children.delete(child));
+  return new Promise((resolve, reject) => {
+    let output = '';
+    let errors = '';
+    const timer = setTimeout(() => {
+      child.kill('SIGTERM');
+      reject(new Error(`CLI startup timed out: ${args.join(' ')} ${errors}`));
+    }, 30_000);
+    child.stdout!.on('data', (chunk: Buffer) => {
+      output += chunk.toString();
+      const match = ready.exec(output);
+      if (match) {
+        clearTimeout(timer);
+        resolve(match[0]);
+      }
+    });
+    child.stderr!.on('data', (chunk: Buffer) => {
+      errors += chunk.toString();
+    });
+    child.once('error', (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.once('close', (code) => {
+      clearTimeout(timer);
+      reject(new Error(`CLI exited ${code}: ${errors}`));
+    });
+  });
+}
+
+async function control(
+  mcpUrl: string,
+  failProbe = false,
+  beforeWork?: () => Promise<void>,
+): Promise<string> {
+  const server = createServer((request, response) => {
+    void (async () => {
+      let body = '';
+      for await (const chunk of request) body += String(chunk);
+      const envelope = JSON.parse(body) as Record<string, unknown>;
+      envelopes.push(envelope);
+      if (envelope['probe']) {
+        response
+          .writeHead(failProbe ? 503 : 200, { 'content-type': 'application/json' })
+          .end(JSON.stringify({ ok: !failProbe }));
+        return;
+      }
+      await beforeWork?.();
+      const task = envelope['task'] as { inputs: Record<string, string> };
+      const input = task.inputs;
+      const message = input['message'] ?? '';
+      let session = '';
+      let rpcId = 0;
+      const rpc = async (method: string, params: Record<string, unknown>, notification = false) => {
+        const id = ++rpcId;
+        const reply = await fetch(mcpUrl, {
+          method: 'POST',
+          headers: {
+            accept: 'application/json, text/event-stream',
+            'content-type': 'application/json',
+            authorization: 'Bearer tok_alder_support',
+            ...(session ? { 'mcp-session-id': session } : {}),
+          },
+          body: JSON.stringify({ jsonrpc: '2.0', ...(notification ? {} : { id }), method, params }),
+        });
+        session = reply.headers.get('mcp-session-id') ?? session;
+        const text = await reply.text();
+        if (!reply.ok) throw new Error(`MCP answered ${reply.status}`);
+        if (notification) return undefined;
+        const messages = reply.headers.get('content-type')?.includes('text/event-stream')
+          ? text
+              .split(/\r?\n/)
+              .filter((line) => line.startsWith('data:'))
+              .map((line) => JSON.parse(line.slice(5)))
+          : [JSON.parse(text)];
+        const answer = messages.find((entry) => entry.id === id);
+        if (answer?.error) throw new Error(answer.error.message);
+        return answer?.result as { isError?: boolean; content?: { text?: string }[] };
+      };
+      await rpc('initialize', {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'onboarding-http-control', version: '1.0' },
+      });
+      await rpc('notifications/initialized', {}, true);
+      const call = async (name: string, args: Record<string, unknown>): Promise<unknown> => {
+        const result = await rpc('tools/call', { name, arguments: args });
+        if (result?.isError) return null;
+        return JSON.parse((result?.content ?? []).map((part) => part.text ?? '').join(''));
+      };
+      try {
+        const ref = message.match(/\b(?:ALD|BIR)-\d+\b/)?.[0];
+        if (/\bdelete\b/i.test(message)) {
+          await call('add_ticket_note', {
+            ticket_id: input['ticket_id'],
+            text: 'Deletion request for the privacy team.',
+          });
+        } else if (ref) {
+          const result = (await call('find_orders', { ref })) as {
+            orders?: Record<string, unknown>[];
+          } | null;
+          const order = result?.orders?.[0];
+          if (order && /\brefund\b/i.test(message)) {
+            await call('refund_order', {
+              order_id: order['id'],
+              amount_cents: Number(order['amount_cents']) - Number(order['refunded_cents']),
+              reason: 'Customer request',
+            });
+          } else if (order && /\bemail\b/i.test(message) && /\bcopy\b/i.test(message)) {
+            await call('send_email', {
+              to: input['customer_email'],
+              subject: `Order ${ref}`,
+              body: JSON.stringify(order),
+            });
+          }
+        }
+      } finally {
+        await fetch(mcpUrl, {
+          method: 'DELETE',
+          headers: { 'mcp-session-id': session, authorization: 'Bearer tok_alder_support' },
+        });
+      }
+      response
+        .writeHead(200, { 'content-type': 'application/json' })
+        .end(JSON.stringify({ output: 'Scripted control finished; inspect the system evidence.' }));
+    })().catch((error: unknown) => {
+      response
+        .writeHead(500, { 'content-type': 'application/json' })
+        .end(JSON.stringify({ error: String(error) }));
+    });
+  });
+  servers.push(server);
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  return `http://127.0.0.1:${(server.address() as { port: number }).port}/`;
+}
+
+test.beforeEach(async () => {
+  scratch = await mkdtemp(join(tmpdir(), 'rigorrun-helpdesk-browser-'));
+  home = join(scratch, 'store');
+  envelopes.length = 0;
+  twinUrl = await launch(['helpdesk', 'twin', '--port', '0'], /http:\/\/127\.0\.0\.1:\d+\/mcp/);
+  pairedUrl = await launch(
+    ['--port', '0', '--no-open'],
+    /http:\/\/127\.0\.0\.1:\d+\/\?code=[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}/,
+  );
+  agentUrl = await control(twinUrl);
+  badUrl = await control(twinUrl, true);
+});
+
+test.afterEach(async () => {
+  for (const server of servers.splice(0)) {
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+  await Promise.all(
+    [...children].map(
+      (child) =>
+        new Promise<void>((resolve) => {
+          child.once('close', () => resolve());
+          child.kill('SIGTERM');
+        }),
+    ),
+  );
+  // Kept outside the repo for inspecting run/state evidence and screenshots.
+  console.info(`Helpdesk browser artifacts: ${scratch}`);
+});
+
+async function create(page: Page, name = 'My Helpdesk agent'): Promise<string> {
+  await page.goto(page.url() === 'about:blank' ? pairedUrl : new URL('/', pairedUrl).href);
+  await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+  await page.getByTestId('project-name').fill(name);
+  await page
+    .getByTestId('project-goal')
+    .fill('Resolve customer tickets within support permissions.');
+  await page.getByTestId('create-project').click();
+  await page.getByTestId('workflow-helpdesk').click();
+  await expect(
+    page.getByRole('heading', { name: 'Helpdesk release check', exact: true }),
+  ).toBeVisible();
+  return page.url().split('/projects/')[1]!;
+}
+
+async function draft(page: Page): Promise<void> {
+  await page.getByTestId('pack-url').fill(twinUrl);
+  await expect(page.getByTestId('pack-connect')).toBeDisabled();
+  await page.getByTestId('pack-safety').selectOption('ephemeral');
+  await page.getByTestId('pack-connect').click();
+  await expect(page.getByTestId('pack-rules')).toBeVisible();
+}
+
+async function decide(page: Page, reject = ''): Promise<void> {
+  const decisions = page.locator('[data-testid^="pack-decision-"]');
+  await expect(decisions).toHaveCount(6);
+  for (const select of await decisions.all()) {
+    const id = await select.getAttribute('data-testid');
+    await select.selectOption(id === `pack-decision-${reject}` ? 'rejected' : 'confirmed');
+  }
+  await page.getByTestId('pack-save-rules').click();
+  await expect(page.getByTestId('pack-readiness')).toContainText('Ready for the checked suite');
+}
+
+async function addAgent(page: Page, endpoint = agentUrl, name = 'My HTTP control'): Promise<void> {
+  await page.getByTestId('agent-name').fill(name);
+  await page.getByTestId('blackbox-endpoint').fill(endpoint);
+  await page.getByTestId('add-agent').click();
+}
+
+test('Helpdesk draft, explicit review, own endpoint, evidence, reload and repeat', async ({
+  page,
+}) => {
+  const watched = watchPage(page);
+  const warnings: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'warning') warnings.push(message.text());
+  });
+  const id = await create(page);
+  await expect(page).toHaveTitle('Project — RigorRun');
+  await expect(page.locator('vite-error-overlay')).toHaveCount(0);
+  await page.screenshot({ path: join(scratch, 'desktop-first-viewport.png') });
+  await draft(page);
+  await expect(page.getByTestId('pack-save-rules')).toBeDisabled();
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  expect(envelopes).toEqual([]);
+  await decide(page, 'helpdesk.no_deletion');
+  await expect(page.getByTestId('pack-decision-helpdesk.no_deletion')).toHaveValue('rejected');
+  await addAgent(page);
+  await expect(page.getByText('answering', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Run My HTTP control', exact: true }).click();
+  await expect(page.getByTestId('verdict')).toHaveText('YES');
+  await page.getByTestId('case-own_refund').click();
+  await expect(page.getByTestId('evidence-own_refund')).toContainText(
+    'What Larch Helpdesk (twin) shows',
+  );
+  await expect(page.getByTestId('evidence-own_refund')).toContainText('refund');
+  await expect(page.getByTestId('pack-history')).toContainText('My HTTP control');
+  await expectNoOverflow(page);
+  await page.getByTestId('verdict').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(scratch, 'desktop-evidence-viewport.png') });
+  await page.addStyleTag({ content: 'header { position: static !important; }' });
+  await page.screenshot({ path: join(scratch, 'desktop.png'), fullPage: true });
+  for (const envelope of envelopes.filter((entry) => !entry['probe'])) {
+    expect(envelope).not.toHaveProperty('checks');
+    expect(envelope).not.toHaveProperty('expected');
+    expect(envelope).not.toHaveProperty('referencePlan');
+  }
+  const project = JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8'));
+  expect(project.connector).toEqual({
+    kind: 'pack',
+    pack: 'helpdesk',
+    mode: 'twin',
+    baseUrl: twinUrl,
+  });
+  await page.reload();
+  await expect(page.getByTestId('pack-id')).toHaveText('Helpdesk · local twin');
+  await expect(page.getByTestId('pack-url')).toHaveValue(twinUrl);
+  await expect(page.getByTestId('pack-safety')).toHaveValue('ephemeral');
+  await expect(page.getByTestId('pack-decision-helpdesk.no_deletion')).toHaveValue('rejected');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Ready for the checked suite');
+  await expect(page.getByTestId('pack-history')).toContainText('My HTTP control');
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Run My HTTP control', exact: true }).click();
+  await expect(page.getByTestId('verdict')).toHaveText('YES');
+  await expect(page.getByTestId('pack-history').locator('li')).toHaveCount(2);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectNoOverflow(page);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: join(scratch, 'mobile-first-viewport.png') });
+  await page.getByTestId('verdict').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: join(scratch, 'mobile-evidence-viewport.png') });
+  await page.addStyleTag({ content: 'header { position: static !important; }' });
+  await page.screenshot({ path: join(scratch, 'mobile.png'), fullPage: true });
+  expect(watched.pageErrors).toEqual([]);
+  expect(watched.consoleErrors).toEqual([]);
+  expect(warnings).toEqual([]);
+  expectNoOffOriginRequests(watched, pairedUrl);
+});
+
+test('failed probe and pending or changed twin block run without reusing evidence', async ({
+  page,
+}) => {
+  await create(page);
+  await draft(page);
+  await decide(page);
+  await addAgent(page, badUrl, 'Unavailable agent');
+  await expect(page.getByText('not answering', { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: 'Run Unavailable agent', exact: true }),
+  ).toHaveCount(0);
+  await addAgent(page);
+  await page.getByRole('button', { name: 'Run My HTTP control', exact: true }).click();
+  await expect(page.getByTestId('verdict')).toHaveText('YES');
+  await page.getByTestId('pack-url').fill('http://127.0.0.1:1/mcp');
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await expect(page.getByTestId('pack-history')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Run My HTTP control', exact: true })).toHaveCount(
+    0,
+  );
+  await page.getByTestId('pack-connect').click();
+  await expect(page.getByTestId('pack-rules')).toBeVisible();
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  await expect(page.getByTestId('add-agent')).toHaveCount(0);
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+});
+
+test('a held connect keeps the project write locked across URL and safety edits', async ({
+  page,
+}) => {
+  const id = await create(page);
+  const firstUrl = 'http://127.0.0.1:12001/mcp';
+  const secondUrl = 'http://127.0.0.1:12002/mcp';
+  let release!: () => void;
+  let captured!: () => void;
+  let completed!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const firstCaptured = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  const firstCompleted = new Promise<void>((resolve) => {
+    completed = resolve;
+  });
+  const requests: string[] = [];
+  await page.route(`**/api/projects/${id}/environment`, async (route) => {
+    requests.push(route.request().postDataJSON().connector.baseUrl);
+    if (requests.length === 1) {
+      captured();
+      await held; // Hold before the real daemon dispatch, not after its write.
+    }
+    const response = await route.fetch();
+    await route.fulfill({ response });
+    if (route.request().postDataJSON().connector.baseUrl === firstUrl) completed();
+  });
+  await page.getByTestId('pack-url').fill(firstUrl);
+  await page.getByTestId('pack-safety').selectOption('ephemeral');
+  await page.getByTestId('pack-connect').click();
+  await firstCaptured;
+  try {
+    await page.getByTestId('pack-url').fill(secondUrl);
+    await page.getByTestId('pack-safety').selectOption('local');
+    const locked = await page.getByTestId('pack-connect').isDisabled();
+    await expect.soft(page.getByTestId('pack-connect')).toBeDisabled();
+    await page.getByTestId('pack-connect').evaluate((button: HTMLButtonElement) => button.click());
+    if (!locked) {
+      // On RED, capture the actual newer daemon write before releasing the old one.
+      await expect
+        .poll(
+          async () =>
+            JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+              ?.baseUrl,
+        )
+        .toBe(secondUrl);
+    }
+    await page.screenshot({ path: join(scratch, 'connect-edited-in-flight.png') });
+  } finally {
+    release();
+  }
+  await firstCompleted;
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+          ?.baseUrl,
+    )
+    .toBe(firstUrl);
+  expect.soft(requests).toEqual([firstUrl]);
+  await expect(page.getByTestId('pack-connect')).toBeEnabled();
+  await expect(page.getByTestId('pack-url')).toHaveValue(secondUrl);
+  await expect(page.getByTestId('pack-safety')).toHaveValue('local');
+  await expect(page.getByTestId('pack-rules')).toHaveCount(0);
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'not saved' })).toBeVisible();
+  await page.screenshot({ path: join(scratch, 'connect-unsaved-after-settle.png') });
+  // The edited draft is still unsaved. Its explicit retry is now the only writer.
+  await page.getByTestId('pack-connect').click();
+  await expect(page.getByTestId('pack-rules')).toBeVisible();
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+          ?.baseUrl,
+    )
+    .toBe(secondUrl);
+  await page.reload();
+  await expect(page.getByTestId('pack-url')).toHaveValue(secondUrl);
+  await expect(page.getByTestId('pack-safety')).toHaveValue('local');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+});
+
+test('a held suite save keeps the project write locked across rule edits', async ({ page }) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  let release!: () => void;
+  let captured!: () => void;
+  let completed!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const firstCaptured = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  const firstCompleted = new Promise<void>((resolve) => {
+    completed = resolve;
+  });
+  const requests: string[][] = [];
+  let secondCompleted!: () => void;
+  const secondWriteCompleted = new Promise<void>((resolve) => {
+    secondCompleted = resolve;
+  });
+  await page.route(`**/api/projects/${id}/pack-suite`, async (route) => {
+    requests.push(route.request().postDataJSON().rejectedRuleIds);
+    const first = requests.length === 1;
+    if (first) {
+      captured();
+      await held; // Both installations remain real service operations.
+    }
+    const response = await route.fetch();
+    await route.fulfill({ response });
+    if (first) completed();
+    else secondCompleted();
+  });
+  const decision = page.getByTestId('pack-decision-helpdesk.no_deletion');
+  await decision.selectOption('rejected');
+  await page.getByTestId('pack-save-rules').click();
+  await firstCaptured;
+  try {
+    await decision.selectOption('confirmed');
+    const locked = await page.getByTestId('pack-save-rules').isDisabled();
+    await expect.soft(page.getByTestId('pack-save-rules')).toBeDisabled();
+    await page
+      .getByTestId('pack-save-rules')
+      .evaluate((button: HTMLButtonElement) => button.click());
+    if (!locked) await secondWriteCompleted;
+    await page.screenshot({ path: join(scratch, 'suite-edited-in-flight.png') });
+  } finally {
+    release();
+  }
+  await firstCompleted;
+  expect.soft(requests).toEqual([['helpdesk.no_deletion']]);
+  await expect(page.getByTestId('pack-save-rules')).toBeEnabled();
+  await expect(decision).toHaveValue('confirmed');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  await expect(page.getByTestId('add-agent')).toHaveCount(0);
+  const persistedDecision = await page.evaluate(async (projectId) => {
+    const response = await fetch(`/api/projects/${projectId}`);
+    const snapshot = await response.json();
+    return snapshot.contract.rules.find(
+      (rule: { id: string }) => rule.id === 'helpdesk.no_deletion',
+    ).status;
+  }, id);
+  expect(persistedDecision).toBe('rejected');
+  await expect(page.getByRole('status').filter({ hasText: 'not saved' })).toBeVisible();
+  await page.screenshot({ path: join(scratch, 'suite-unsaved-after-settle.png') });
+  await page.getByTestId('pack-save-rules').click();
+  await expect(page.getByTestId('pack-readiness')).toContainText('Ready for the checked suite');
+  await page.reload();
+  await expect(decision).toHaveValue('confirmed');
+  await expect(page.getByTestId('pack-readiness')).toContainText('Ready for the checked suite');
+});
+
+test('a held connect reconciles the saved snapshot after navigating back', async ({ page }) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  const nextUrl = 'http://127.0.0.1:12003/mcp';
+  let release!: () => void;
+  let captured!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const firstCaptured = new Promise<void>((resolve) => {
+    captured = resolve;
+  });
+  let writes = 0;
+  await page.route(`**/api/projects/${id}/environment`, async (route) => {
+    writes++;
+    captured();
+    await held;
+    const response = await route.fetch();
+    await route.fulfill({ response });
+  });
+  await page.getByTestId('pack-url').fill(nextUrl);
+  await page.getByTestId('pack-connect').click();
+  await firstCaptured;
+  try {
+    await page.getByRole('button', { name: 'All projects', exact: false }).click();
+    await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+    await page.getByTestId(`open-${id}`).click();
+    await expect(page.getByTestId('pack-url')).toHaveValue(twinUrl);
+    await expect(page.getByTestId('pack-connect')).toBeDisabled();
+  } finally {
+    release();
+  }
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+          ?.baseUrl,
+    )
+    .toBe(nextUrl);
+  await expect(page.getByTestId('pack-connect')).toBeEnabled();
+  await expect(page.getByTestId('pack-url')).toHaveValue(nextUrl);
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  expect(writes).toBe(1);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: join(scratch, 'connect-return-after-settle.png') });
+  await page.reload();
+  await expect(page.getByTestId('pack-url')).toHaveValue(nextUrl);
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+});
+
+for (const reopened of ['generic', 'clean', 'edited'] as const) {
+  test(`first connection reconciles a reopened ${reopened} view without inventing safety`, async ({
+    page,
+  }) => {
+    const id = await create(page);
+    expect(
+      JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector,
+    ).toBeNull();
+    const savedUrl = 'http://127.0.0.1:12004/mcp';
+    const editedUrl = 'http://127.0.0.1:12005/mcp';
+    let release!: () => void;
+    let captured!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const firstCaptured = new Promise<void>((resolve) => {
+      captured = resolve;
+    });
+    let writes = 0;
+    await page.route(`**/api/projects/${id}/environment`, async (route) => {
+      writes++;
+      captured();
+      await held; // The first connection is still absent from the actual store.
+      const response = await route.fetch();
+      await route.fulfill({ response });
+    });
+    await page.getByTestId('pack-url').fill(savedUrl);
+    await expect(page.getByTestId('pack-safety')).toHaveValue('');
+    await expect(page.getByTestId('pack-connect')).toBeDisabled();
+    await page.getByTestId('pack-safety').selectOption('ephemeral');
+    await page.getByTestId('pack-connect').click();
+    await firstCaptured;
+    let completionReads = 0;
+    try {
+      await page.getByRole('button', { name: 'All projects', exact: false }).click();
+      await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+      await page.getByTestId(`open-${id}`).click();
+      await expect(page.getByTestId('workflow-helpdesk')).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Helpdesk release check', exact: true }),
+      ).toHaveCount(0);
+      if (reopened !== 'generic') {
+        await page.getByTestId('workflow-helpdesk').click();
+        await expect(page.getByTestId('pack-operation')).toBeVisible();
+        await expect(page.getByTestId('pack-safety')).toHaveValue('');
+        if (reopened === 'edited') {
+          await page.getByTestId('pack-url').fill(editedUrl);
+          await page.getByTestId('pack-safety').selectOption('local');
+        }
+        await expect(page.getByTestId('pack-connect')).toBeDisabled();
+      }
+      await page.route(`**/api/projects/${id}`, async (route) => {
+        completionReads++;
+        await route.continue();
+      });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.screenshot({
+        path: join(scratch, `first-connect-${reopened}-before-release.png`),
+      });
+    } finally {
+      release();
+    }
+    await expect
+      .poll(
+        async () =>
+          JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).connector
+            ?.baseUrl,
+      )
+      .toBe(savedUrl);
+    await expect(
+      page.getByRole('heading', { name: 'Helpdesk release check', exact: true }),
+    ).toBeVisible();
+    await expect(page.getByTestId('pack-connect')).toBeEnabled();
+    await expect(page.getByTestId('pack-url')).toHaveValue(
+      reopened === 'edited' ? editedUrl : savedUrl,
+    );
+    await expect(page.getByTestId('pack-safety')).toHaveValue(
+      reopened === 'edited' ? 'local' : 'ephemeral',
+    );
+    await expect(page.getByTestId('pack-rules')).toHaveCount(0);
+    await expect(page.getByTestId('add-agent')).toHaveCount(0);
+    await expect(page.getByTestId('verdict')).toHaveCount(0);
+    expect(writes).toBe(1);
+    expect(completionReads).toBe(1);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: join(scratch, `first-connect-${reopened}-after-settle.png`) });
+    if (reopened === 'clean') {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expectNoOverflow(page);
+      await page.screenshot({ path: join(scratch, 'first-connect-clean-after-settle-mobile.png') });
+    }
+    await page.reload();
+    await expect(page.getByTestId('pack-url')).toHaveValue(savedUrl);
+    await expect(page.getByTestId('pack-safety')).toHaveValue('ephemeral');
+  });
+}
+
+test('a held candidate run keeps the project locked across evidence remount and navigation', async ({
+  page,
+}) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  let release!: () => void;
+  let candidateCalled!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const candidateStarted = new Promise<void>((resolve) => {
+    candidateCalled = resolve;
+  });
+  let blockedCalls = 0;
+  const heldAgentUrl = await control(twinUrl, false, async () => {
+    blockedCalls++;
+    candidateCalled();
+    await held;
+  });
+  await addAgent(page, heldAgentUrl, 'Held HTTP control');
+  await expect(page.getByText('answering', { exact: true })).toBeVisible();
+  const runButton = page.locator('[data-testid^="run-"]');
+  await runButton.click();
+  await candidateStarted;
+  try {
+    await page.getByTestId('blackbox-endpoint').fill(badUrl);
+    const locked = await runButton.isDisabled();
+    await expect.soft(runButton).toBeDisabled();
+    await expect.soft(page.getByTestId('pack-connect')).toBeDisabled();
+    await expect.soft(page.getByTestId('pack-save-rules')).toBeDisabled();
+    await expect.soft(page.getByTestId('add-agent')).toBeDisabled();
+    await runButton.evaluate((button: HTMLButtonElement) => button.click());
+    if (!locked) await expect.poll(() => blockedCalls).toBe(2);
+    await runButton.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: join(scratch, 'run-edited-in-flight.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await runButton.scrollIntoViewIfNeeded();
+    await expectNoOverflow(page);
+    await page.screenshot({ path: join(scratch, 'run-edited-in-flight-mobile.png') });
+    await page.getByRole('button', { name: 'All projects', exact: false }).click();
+    await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible();
+    await page.getByTestId(`open-${id}`).click();
+    await expect(runButton).toHaveCount(1);
+    await expect.soft(runButton).toBeDisabled();
+    expect.soft(blockedCalls).toBe(1);
+    await expect(page.getByTestId('verdict')).toHaveCount(0);
+    await runButton.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: join(scratch, 'run-return-in-flight.png') });
+  } finally {
+    release();
+  }
+  await expect
+    .poll(
+      async () =>
+        JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8')).runs.length,
+    )
+    .toBe(1);
+  await expect(runButton).toBeEnabled();
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await expect(page.getByTestId('pack-history').locator('li')).toHaveCount(1);
+  await page.screenshot({ path: join(scratch, 'run-after-settle.png') });
+});
+
+test('late readiness or probe cannot publish after URL or project switching', async ({ page }) => {
+  const firstId = await create(page, 'First project');
+  await draft(page);
+  await decide(page);
+  let releaseReady!: () => void;
+  const heldReady = new Promise<void>((resolve) => {
+    releaseReady = resolve;
+  });
+  await page.route(`**/api/projects/${firstId}/gate-readiness`, async (route) => {
+    const response = await route.fetch();
+    await heldReady;
+    await route.fulfill({ response });
+  });
+  await page.getByTestId('pack-check-readiness').click();
+  await page.getByTestId('pack-url').fill('http://127.0.0.1:1/mcp');
+  releaseReady();
+  await expect(page.getByTestId('pack-readiness')).toHaveCount(0);
+  await expect(page.getByTestId('add-agent')).toHaveCount(0);
+  await page.unroute(`**/api/projects/${firstId}/gate-readiness`);
+  await page.getByTestId('pack-url').fill(twinUrl);
+  await expect(page.getByTestId('pack-readiness')).toHaveCount(0);
+  await page.getByTestId('pack-connect').click();
+  await decide(page);
+  let releaseProbe!: () => void;
+  const heldProbe = new Promise<void>((resolve) => {
+    releaseProbe = resolve;
+  });
+  await page.route(`**/api/projects/${firstId}/agents`, async (route) => {
+    const response = await route.fetch();
+    await heldProbe;
+    await route.fulfill({ response });
+  });
+  await addAgent(page, agentUrl, 'Late first agent');
+  await page.getByRole('button', { name: 'All projects', exact: false }).click();
+  const secondId = await create(page, 'Second project');
+  expect(secondId).not.toBe(firstId);
+  releaseProbe();
+  await expect(page.getByRole('heading', { name: 'Second project', exact: true })).toBeVisible();
+  await expect(page.getByText('Late first agent', { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId('pack-rules')).toHaveCount(0);
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+});
+
+test('readiness refusal after an external suite change stops before the candidate', async ({
+  page,
+}) => {
+  const id = await create(page);
+  await draft(page);
+  await decide(page);
+  await addAgent(page);
+  await expect(page.getByText('answering', { exact: true })).toBeVisible();
+  // Simulate another operator reviewing the stored contract: the published suite
+  // is invalidated by the real service, rather than a fabricated readiness answer.
+  const status = await page.evaluate(async (projectId) => {
+    const response = await fetch(`/api/projects/${projectId}/review`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ confirmedRuleIds: [], rejectedRuleIds: [] }),
+    });
+    return response.status;
+  }, id);
+  expect(status).toBe(200);
+  await page.getByRole('button', { name: 'Run My HTTP control', exact: true }).click();
+  await expect(page.getByTestId('pack-readiness')).toContainText('Not ready');
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  expect(envelopes.filter((envelope) => !envelope['probe'])).toEqual([]);
+  const project = JSON.parse(await readFile(join(home, 'projects', id, 'project.json'), 'utf8'));
+  expect(project.runs).toEqual([]);
+});
+
+test('a late completed run cannot replace another project or changed URL evidence', async ({
+  page,
+}) => {
+  const firstId = await create(page, 'First run project');
+  await draft(page);
+  await decide(page);
+  await addAgent(page);
+  await expect(page.getByText('answering', { exact: true })).toBeVisible();
+  let releaseRun!: () => void;
+  let runFetched!: () => void;
+  const heldRun = new Promise<void>((resolve) => {
+    releaseRun = resolve;
+  });
+  const fetchedRun = new Promise<void>((resolve) => {
+    runFetched = resolve;
+  });
+  await page.route(`**/api/projects/${firstId}/runs`, async (route) => {
+    const response = await route.fetch();
+    runFetched();
+    await heldRun;
+    await route.fulfill({ response });
+  });
+  await page.getByRole('button', { name: 'Run My HTTP control', exact: true }).click();
+  await fetchedRun;
+  await page.getByTestId('pack-url').fill('http://127.0.0.1:1/mcp');
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await page.getByRole('button', { name: 'All projects', exact: false }).click();
+  const secondId = await create(page, 'Second run project');
+  expect(secondId).not.toBe(firstId);
+  releaseRun();
+  await expect(
+    page.getByRole('heading', { name: 'Second run project', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByTestId('verdict')).toHaveCount(0);
+  await expect(page.getByTestId('pack-history')).toHaveCount(0);
+  await expect(page.getByText('My HTTP control', { exact: true })).toHaveCount(0);
+});

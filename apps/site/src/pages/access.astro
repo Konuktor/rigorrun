@@ -4,71 +4,67 @@ import Section from '../components/Section.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import Command from '../components/Command.astro';
 import Button from '../components/Button.astro';
-import { CONTACT_EMAIL, contactHref } from '../site';
+import { PILOT_HREF, REPO_URL } from '../site';
 ---
-<Base
-  title="Access and price"
-  description="RigorRun is free and there is no pricing. It runs on your machine, there is no account, and no external team has used it yet. What Early Access does and does not mean."
->
+
+<Base title="Free runner and paid pilots" description="Use RigorRun's MIT runner for free. Discuss a paid, scoped verification pilot for one agent workflow. A hosted team subscription is planned, not available today.">
   <Section>
     <div class="rr-prose-width">
-      <Eyebrow>Access</Eyebrow>
-      <h1 class="mt-4 text-display font-medium text-balance">Free, and there is no price yet.</h1>
-      <p class="mt-7 text-lead text-secondary">
-        Not free-for-now-then-we-will-see. There is no billing, no account, no seat, no quota and no
-        usage meter, because there is no server: the thing you install runs entirely on your machine
-        and never talks to us.
-      </p>
+      <Eyebrow>Access and business model</Eyebrow>
+      <h1 class="mt-4 text-display font-medium text-balance">Free runner. Paid pilots. Team cloud next.</h1>
+      <p class="mt-7 text-lead text-secondary">You do not pay to unlock the open-source code. A paid pilot covers the work of making your own agent workflow testable: integration, agreed rules, evidence and repeatable checks.</p>
     </div>
   </Section>
-
   <Section ruled tight>
-    <div class="grid gap-6 lg:grid-cols-2">
-      <div class="rounded-panel border border-line bg-surface p-6">
-        <h2 class="text-title font-medium">What Early Access means</h2>
-        <ul class="mt-4 space-y-3 text-support text-secondary">
-          <li>The published package works and is verified end to end from a clean machine before every release.</li>
-          <li>Parts of it are honestly unfinished, and they are <a class="rr-link" href="/what-is-built">listed rather than hidden</a>.</li>
-          <li>Interfaces may change between minor versions while this says Early Access.</li>
-          <li>Nothing is deprecated without it appearing in the <a class="rr-link" href="/changelog">changelog</a>.</li>
+    <div class="grid gap-6 lg:grid-cols-3">
+      <article class="flex flex-col rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">Open-source runner</h2>
+        <p class="mt-3 text-section font-medium">Free · MIT · self-hosted</p>
+        <p class="mt-4 text-support text-secondary">For developers who want to run, inspect and extend the checks themselves. No account, hosted service or subscription required.</p>
+        <ul class="mt-5 flex-1 space-y-3 text-support text-secondary">
+          <li>Bundled Helpdesk and Stripe scenarios.</li>
+          <li>Local execution, scoped verdicts and HTML evidence.</li>
+          <li>Source code and CLI for your own setup.</li>
         </ul>
-      </div>
-
-      <div class="rounded-panel border border-line bg-surface p-6">
-        <h2 class="text-title font-medium">What it does not mean</h2>
-        <ul class="mt-4 space-y-3 text-support text-secondary">
-          <li>
-            <span class="text-fg">There is no cohort.</span> No waitlist, no invitation, no
-            application. I am looking for 3–5 design partners — teams whose agent acts for many
-            customers — and none has joined yet.
-          </li>
-          <li>
-            <span class="text-fg">There are no customers.</span> No external team has run this yet.
-            Sooner or later a page like this says "trusted by"; this one cannot.
-          </li>
-          <li>
-            <span class="text-fg">Nothing is being withheld to sell later.</span> There is no paid
-            tier that exists and is switched off.
-          </li>
+        <div class="mt-6"><Button href="/start" variant="secondary">Start with the free runner</Button></div>
+      </article>
+      <article class="flex flex-col rounded-panel border border-line-strong bg-surface p-6">
+        <h2 class="text-title font-medium">Scoped verification pilot</h2>
+        <p class="mt-3 text-section font-medium">Paid work · quoted after scoping</p>
+        <p class="mt-4 text-support text-secondary">For an engineering team with a tool-using agent and a failure that should become a repeatable release check.</p>
+        <ul class="mt-5 flex-1 space-y-3 text-support text-secondary">
+          <li>One agreed workflow and explicit business rules.</li>
+          <li>Compatibility review, sandbox data and observable readbacks.</li>
+          <li>Agreed defect cases, evidence report and CI handoff.</li>
         </ul>
+        <div class="mt-6"><Button href={PILOT_HREF}>Discuss a paid pilot</Button></div>
+      </article>
+      <article class="flex flex-col rounded-panel border border-line bg-surface p-6">
+        <h2 class="text-title font-medium">Team workspace — planned</h2>
+        <p class="mt-3 text-section font-medium">Proposed subscription · not built yet</p>
+        <p class="mt-4 text-support text-secondary">The proposed recurring product is shared workflow verification, not a paywall on the runner. We need to validate repeated team use before setting a price.</p>
+        <ul class="mt-5 flex-1 space-y-3 text-support text-secondary">
+          <li>Planned: shared run history and regression comparisons.</li>
+          <li>Planned: approvals and managed workflow checks.</li>
+          <li>No hosted team tier or subscription checkout today.</li>
+        </ul>
+        <p class="mt-6 text-support"><a class="rr-link" href="/company">Read the product thesis</a></p>
+      </article>
+    </div>
+  </Section>
+  <Section ruled tight>
+    <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+      <div><h2 class="text-display font-medium text-balance">Agree what success means before paying.</h2></div>
+      <div>
+        <p class="text-lead text-secondary">Start by describing your agent, its tools and the failure you want caught. We check whether the system exposes enough state and whether tests can run safely before agreeing scope, acceptance and price.</p>
+        <p class="mt-4 text-support text-muted">Custom permission packs are not built yet. A pilot is scoped integration work, not a claim that every MCP server or API is supported. No production writes, no security assurance beyond the agreed checks, and no automatic purchase on this site.</p>
+        <div class="mt-7 flex flex-wrap gap-3"><Button href={PILOT_HREF}>Discuss a paid pilot</Button><Button href={REPO_URL} variant="secondary" external>Inspect the source</Button></div>
       </div>
     </div>
   </Section>
-
   <Section ruled tight>
-    <div class="rounded-panel border border-line bg-surface p-8 sm:p-10">
-      <h2 class="max-w-2xl text-display font-medium text-balance">
-        Bring the agent that acts for your customers.
-      </h2>
-      <p class="mt-5 max-w-2xl text-lead text-secondary">
-        Run the recorded demo first; nothing needs to be arranged. Then I will write the first
-        permission tests for your agent with you, on your staging, and show you what could not be
-        verified as well as what could.
-      </p>
-      <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <Command command="npx rigorrun demo" size="lg" />
-        <Button href={contactHref(CONTACT_EMAIL)} size="lg">Talk to me</Button>
-      </div>
-    </div>
+    <h2 class="text-title font-medium">Try before the conversation.</h2>
+    <p class="mt-3 max-w-2xl text-support text-secondary">The built-in Helpdesk demo uses synthetic data and scripted agents. It runs locally, with no model key, so you can see what a boundary failure and its evidence look like.</p>
+    <div class="mt-6"><Command command="npx rigorrun helpdesk try" size="lg" /></div>
   </Section>
 </Base>

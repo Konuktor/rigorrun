@@ -26,6 +26,13 @@ const ROUTES = [
   '/terms',
 ] as const;
 
+// The build deliberately selects these exact GitHub contacts when MX cannot
+// be established. That supported fallback must not turn a valid build red.
+const PILOT_CONTACT_HREF =
+  /^(?:mailto:erbol@rigorrun\.xyz\?subject=.+|https:\/\/github\.com\/Konuktor\/rigorrun\/issues\/new\?title=Scoped%20verification%20pilot)$/;
+const INVESTOR_CONTACT_HREF =
+  /^(?:mailto:erbol@rigorrun\.xyz\?subject=.+|https:\/\/github\.com\/Konuktor\/rigorrun\/issues\/new\?title=Product%20thesis%20and%20demo)$/;
+
 test.describe('every route', () => {
   for (const path of ROUTES) {
     test(`${path} serves a complete document`, async ({ page }) => {
@@ -73,7 +80,9 @@ test.describe('the page arrives without JavaScript', () => {
    */
   test('the home page is readable with scripting disabled', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('reading the transcript');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      'Verify what your AI agents actually do.',
+    );
     await expect(page.getByText('npx rigorrun').first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Evidence' }).first()).toBeVisible();
   });
@@ -136,6 +145,26 @@ test.describe('crawler surface', () => {
 });
 
 test.describe('claims that must not drift', () => {
+  test('contact assertions permit the supported DNS fallback without accepting arbitrary links', () => {
+    for (const [pattern, fallback] of [
+      [
+        PILOT_CONTACT_HREF,
+        'https://github.com/Konuktor/rigorrun/issues/new?title=Scoped%20verification%20pilot',
+      ],
+      [
+        INVESTOR_CONTACT_HREF,
+        'https://github.com/Konuktor/rigorrun/issues/new?title=Product%20thesis%20and%20demo',
+      ],
+    ] as const) {
+      expect('mailto:erbol@rigorrun.xyz?subject=RigorRun').toMatch(pattern);
+      expect(fallback).toMatch(pattern);
+      expect('mailto:hello@rigorrun.xyz?subject=RigorRun').not.toMatch(pattern);
+      expect('https://github.com/unrelated/repo/issues/new').not.toMatch(pattern);
+      expect('https://github.com/Konuktor/rigorrun/issues/new?title=Subscribe').not.toMatch(
+        pattern,
+      );
+    }
+  });
   /*
    * These are the sentences the product is judged on. A redesign is exactly
    * the kind of change that quietly rounds "19 of 37" up to "verified" and
@@ -173,10 +202,77 @@ test.describe('claims that must not drift', () => {
     await expect(card.locator('[data-outcome]')).toHaveAttribute('data-outcome', /^(PASS|FAIL)$/);
   });
 
-  test('the access page claims no customers and no pricing', async ({ page }) => {
+  test('free OSS and a paid pilot are different offers, not a fake SaaS checkout', async ({
+    page,
+  }) => {
     await page.goto('/access');
-    await expect(page.getByText('There are no customers')).toBeVisible();
-    await expect(page.getByText('There is no cohort')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Open-source runner' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Scoped verification pilot' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Team workspace — planned' })).toBeVisible();
+    const pilot = page.getByRole('link', { name: 'Discuss a paid pilot', exact: true }).first();
+    await expect(pilot).toHaveAttribute('href', PILOT_CONTACT_HREF);
+    await expect(page.getByRole('button', { name: /subscribe|checkout|pay now/i })).toHaveCount(0);
+  });
+
+  test('the landing gives a demo and a pilot path while preserving evidence', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('link', { name: 'See the demo', exact: true })).toHaveAttribute(
+      'href',
+      '/replay/helpdesk',
+    );
+    await expect(
+      page.getByRole('link', { name: 'Discuss a paid pilot', exact: true }).first(),
+    ).toHaveAttribute('href', PILOT_CONTACT_HREF);
+    await expect(page.getByTestId('claim-reality')).toBeVisible();
+    await expect(page.getByText(/does not block production actions/).first()).toBeVisible();
+    await expect(
+      page.getByRole('heading', {
+        name: 'Open source is the entry point. Your workflow is the paid work.',
+      }),
+    ).toBeVisible();
+  });
+
+  test('the company page explains the thesis without turning a roadmap into traction', async ({
+    page,
+  }) => {
+    await page.goto('/company');
+    await expect(page.getByRole('heading', { name: 'The investment thesis' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Next milestones, not traction claims' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Discuss the thesis', exact: true }),
+    ).toHaveAttribute('href', INVESTOR_CONTACT_HREF);
+  });
+
+  test('all published mail links in the site routes use the founder inbox', async ({ page }) => {
+    for (const path of ROUTES) {
+      await page.goto(path);
+      const hrefs = await page
+        .locator('a[href^="mailto:"]')
+        .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')));
+      for (const href of hrefs) expect(href, path).toMatch(/^mailto:erbol@rigorrun\.xyz(?:\?|$)/);
+    }
+  });
+
+  test('onboarding starts beyond payments and does not sell custom packs as qualified', async ({
+    page,
+    request,
+  }) => {
+    await page.goto('/start');
+    await expect(page.getByRole('heading', { name: 'Start with the Helpdesk twin' })).toBeVisible();
+    await expect(
+      page.getByRole('region', { name: 'Command: npx rigorrun helpdesk try', exact: true }),
+    ).toBeVisible();
+    await page.goto('/how-it-works');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('agent’s scope');
+    await expect(
+      page.getByText(/Generated suites need a current quality assessment/),
+    ).toBeVisible();
+    const llms = await (await request.get('/llms.txt')).text();
+    expect(llms).toContain('Scoped verification pilot');
+    expect(llms).toContain('Team workspace — planned');
+    expect(llms).toContain('erbol@rigorrun.xyz');
   });
 
   test('security names what leaves the machine rather than claiming nothing does', async ({

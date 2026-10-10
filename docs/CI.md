@@ -12,7 +12,7 @@ no person.
 | `0`  | Passed.                                                                                                                                                        |
 | `1`  | The agent failed, or the gate was not met.                                                                                                                     |
 | `2`  | Something is wrong with the setup.                                                                                                                             |
-| `3`  | It ran, but too many cases reached no verdict: RigorRun abstained for lack of evidence, or the harness failed. Raise `--max-inconclusive` only if you mean it. |
+| `3`  | Inconclusive evidence, or a missing, stale, unreviewed or refused suite. The candidate need not have run. Raise `--max-inconclusive` only if you deliberately intend that policy. |
 
 A build server cannot tell those apart from prose, so `2` never means "the agent
 was bad" — it means RigorRun could not run the question — and `3` never means
@@ -71,10 +71,10 @@ travel together.
 
 ```yaml
 - name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.6.0
+  uses: Konuktor/rigorrun@v0.6.1
   with:
     project: ${{ vars.RIGORRUN_PROJECT }}
-    version: 0.6.0
+    version: 0.6.1
     min-success: '0.95'
     report: rigorrun-report.html
     node-version: 22
@@ -88,7 +88,7 @@ when the gate fails, and uploads the HTML report as a workflow artifact.
 | Input           | Required | Default                             | Meaning                                                                                      |
 | --------------- | -------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
 | `project`       | Yes      | —                                   | Project id passed to `gate --project`.                                                       |
-| `version`       | No       | `0.6.0`                             | Exact npm package version. The action never defaults to `latest`.                            |
+| `version`       | No       | `0.6.1`                             | Exact npm package version. The action never defaults to `latest`.                            |
 | `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                                                    |
 | `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.                                       |
 | `rigorrun-home` | No       | `${{ github.workspace }}/.rigorrun` | Project store, exported as `RIGORRUN_HOME`.                                                  |

@@ -17,7 +17,7 @@ project with more than one agent needs `--agent <name>`: the gate never picks on
 | `0`  | The gate passed.                                                 |
 | `1`  | The agent failed, or the gate was not met.                       |
 | `2`  | Configuration or runtime error. Never a finding about the agent. |
-| `3`  | The run completed, but too many cases reached no verdict.        |
+| `3`  | Inconclusive evidence, or a missing, stale, unreviewed or refused suite. |
 
 ## Thresholds
 
@@ -35,10 +35,10 @@ actions. Set them to what you would actually block a release on.
 
 ```yaml
 - name: RigorRun gate
-  uses: Konuktor/rigorrun@v0.6.0
+  uses: Konuktor/rigorrun@v0.6.1
   with:
     project: ${{ vars.RIGORRUN_PROJECT }}
-    version: 0.6.0
+    version: 0.6.1
     min-success: '0.95'
     report: rigorrun-report.html
     node-version: 22
@@ -53,7 +53,7 @@ the gate's exit code.
 | --------------- | -------- | ----------------------------------- | ------------------------------------------------------------------ |
 | `project`       | Yes      | —                                   | Project id passed to `gate --project`.                             |
 | `agent`         | No       | —                                   | Agent passed to `--agent`; needed when the project has several.    |
-| `version`       | No       | `0.6.0`                             | Exact npm package version; never `latest`.                         |
+| `version`       | No       | `0.6.1`                             | Exact npm package version; never `latest`.                         |
 | `min-success`   | No       | Gate default (`0.95`)               | Optional value passed to `--min-success`.                          |
 | `report`        | No       | `rigorrun-report.html`              | Path passed to `--report` and uploaded when it exists.             |
 | `rigorrun-home` | No       | `${{ github.workspace }}/.rigorrun` | Project store, exported as `RIGORRUN_HOME`.                        |

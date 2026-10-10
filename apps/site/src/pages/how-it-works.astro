@@ -45,7 +45,7 @@ const demonstrationSteps = [
     title: 'Rule on what it worked out',
     stat: `${demo.observedFacts} observed · ${demo.rulesProposed} proposed`,
     body: 'Each proposed rule shows the evidence behind it, so you disagree with the evidence rather than with a verdict. The ones it is least sure about come first. RigorRun deliberately proposes more than it expects you to keep: missing a real rule is far worse than proposing one you do not want.',
-    aside: 'A rule you reject cannot fail your agent, so rejecting one costs you nothing. Only rules that were observed outright or that you confirmed are allowed to block a release.',
+    aside: 'Rejected rules are excluded from the suite. Keep intended boundaries explicit; rejecting a real safety rule reduces what the test can establish. Review alone does not establish suite quality.',
   },
   {
     n: '03',
@@ -70,32 +70,34 @@ const demonstrationSteps = [
   },
   {
     n: '06',
-    title: 'Gate the next change',
-    stat: 'exit 1 stops the build',
-    body: 'The same suite runs from the command line against a threshold you set. Change a prompt, swap a model, upgrade a tool — the run tells you which specific case regressed rather than that a score moved.',
-    aside: 'Until 0.2.0 the documented gate example ran the reference implementation, which is handed the answer. A documented gate that could not fail is worse than none, so gate now refuses it.',
+    title: 'Establish quality, then gate the next change',
+    stat: 'diagnostics are not release evidence',
+    body: 'A generated suite needs an explicit quality assessment in a resettable test environment. Reference replay and independent defect controls test whether the suite can distinguish expected behaviour from faults. Then rerun a current accepted suite when a prompt, model or tool changes.',
+    aside: 'Assessment makes repeated test writes. A gate must not silently start it. The local MVP refuses generated release gates with missing, stale or inadequate evidence; it does not block production actions.',
   },
 ];
 ---
 <Base
   title="How permission and scope tests work"
-  description="Set up the Stripe refunds pack, point it at your agent with no code changes, and gate each change on what Stripe holds afterwards rather than on the transcript."
+  description="Verify an AI agent’s scope before deployment by checking system state, access and outbox evidence. Start with Helpdesk or Stripe; experimental custom workflows need adapters and suite-quality evidence."
 >
   <Section>
     <div class="rr-prose-width">
       <Eyebrow>How it works</Eyebrow>
       <h1 class="mt-4 text-display font-medium text-balance">
-        Give the agent one customer. Check it touched no one else.
+        Define your agent’s scope. Check what actually happened.
       </h1>
       <p class="mt-7 text-lead text-secondary">
-        The Stripe refunds pack sends tickets that name a customer and a charge, then reads Stripe
-        after the agent finishes. The transcript is shown beside the result, but it does not decide
-        the verdict.
+        In the Helpdesk twin, check which organisation was read, which order changed and where
+        customer data was emailed. In the Stripe pack, inspect the resulting payment state.
+        Both illustrate the same approach: the transcript is shown beside the result, but it does
+        not decide the verdict. Coverage depends on what the environment can actually expose.
       </p>
     </div>
   </Section>
 
   <Section ruled tight>
+    <h2 class="mb-6 text-title font-medium">One bundled example: Stripe refunds</h2>
     <ol class="ruled rounded-panel border border-line bg-surface">
       {
         permissionSteps.map((step) => (
@@ -133,7 +135,13 @@ const demonstrationSteps = [
       <h2 class="text-title font-medium">For a system with no pack</h2>
       <p class="mt-4 text-support text-secondary">
         This is the general path from v0.2 for a system with no pack: demonstrate the job, confirm
-        the proposed rules, and run the resulting suite against the agent.
+        the proposed rules, and run the resulting diagnostic suite against the agent. It is not an
+        off-the-shelf custom permission pack or evidence that every API is supported.
+      </p>
+      <p class="mt-4 text-support text-secondary">
+        Generated suites need a current quality assessment before the local MVP accepts a release
+        gate. The development safeguards are not yet an npm release; existing public replays and
+        qualification reports describe their recorded builds, not the changed MVP.
       </p>
     </div>
     <ol class="ruled mt-8 rounded-panel border border-line bg-surface">

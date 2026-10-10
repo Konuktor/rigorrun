@@ -13,6 +13,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ProjectStore, Service } from '@rigorrun/daemon';
 import { clearPacks } from '@rigorrun/environment';
 import { ProxyServer } from '@rigorrun/proxy';
+import type { Benchmark, EnvironmentContract } from '@rigorrun/core';
+import { registerBuiltInPacks } from '../../cli/src/packs.ts';
 import { registerHelpdeskPack, startTwin, type RunningTwin } from '../src/index.ts';
 import { cmdInit } from '../src/cli/init.ts';
 import { cmdTry } from '../src/cli/try.ts';
@@ -146,6 +148,67 @@ async function correctAgent(mcpUrl: string): Promise<{ url: string; server: Serv
 }
 
 describe('rigorrun helpdesk init, then a run through the project', () => {
+  it('records an explicit no as rejected and leaves the reviewed suite gate-ready', async () => {
+    const home = await mkdtemp(join(tmpdir(), 'rr-helpdesk-no-'));
+    cleanup.push(() => rm(home, { recursive: true, force: true }));
+    const twin = await startTwin({ port: 0 });
+    cleanup.push(() => twin.close());
+    registerBuiltInPacks();
+    const out = captureStdout();
+    let asked = 0;
+    expect(
+      await cmdInit(['--json', '--twin', twin.url, '--home', home], {
+        async ask() {
+          return ++asked === 1 ? 'no' : '';
+        },
+      }),
+    ).toBe(0);
+    vi.restoreAllMocks();
+    const made = JSON.parse(out().slice(out().indexOf('{'))) as {
+      projectId: string;
+      rejectedRuleIds: string[];
+    };
+    expect(asked).toBe(5);
+    expect(made.rejectedRuleIds).toEqual(['helpdesk.no_other_org_reads']);
+    const store = new ProjectStore(home);
+    const contract = (await store.readArtefact<EnvironmentContract>(made.projectId, 'contract'))!;
+    expect(contract.rules.find((rule) => rule.id === 'helpdesk.no_other_org_reads')?.status).toBe(
+      'rejected',
+    );
+    expect(contract.rules.find((rule) => rule.id === 'helpdesk.nothing_else_changed')?.status).toBe(
+      'confirmed',
+    );
+    expect(contract.rules.some((rule) => rule.status === 'inferred')).toBe(false);
+    const benchmark = (await store.readArtefact<Benchmark>(made.projectId, 'benchmark'))!;
+    expect(
+      benchmark.cases
+        .flatMap((entry) => entry.checks)
+        .some((check) => check.ruleId === 'helpdesk.no_other_org_reads'),
+    ).toBe(false);
+    const proxy = new ProxyServer();
+    await proxy.start();
+    const service = new Service({ store, proxy });
+    cleanup.push(async () => {
+      await service.workspace.close();
+      await proxy.stop();
+    });
+    expect(await service.gateReadiness(made.projectId)).toMatchObject({ ready: true });
+  });
+
+  it('refuses an invalid review answer without creating a project', async () => {
+    const home = await mkdtemp(join(tmpdir(), 'rr-helpdesk-invalid-'));
+    cleanup.push(() => rm(home, { recursive: true, force: true }));
+    captureStdout();
+    await expect(
+      cmdInit(['--home', home], {
+        async ask() {
+          return 'maybe';
+        },
+      }),
+    ).rejects.toThrow(/yes or no/i);
+    expect(await new ProjectStore(home).list()).toEqual([]);
+  });
+
   it('installs the suite and holds a correct agent to it', async () => {
     const home = await mkdtemp(join(tmpdir(), 'rr-helpdesk-init-'));
     cleanup.push(() => rm(home, { recursive: true, force: true }));

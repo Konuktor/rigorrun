@@ -38,7 +38,7 @@ import {
 } from '@rigorrun/connector';
 import { OpenApiConnection } from '@rigorrun/env-openapi';
 import { BrowserConnection } from '@rigorrun/env-browser';
-import type { ActionLogEntry } from '@rigorrun/core';
+import { hashValue, type ActionLogEntry } from '@rigorrun/core';
 import {
   getPack,
   type CanonicalState,
@@ -85,6 +85,7 @@ interface SavedDemonstration {
 
 export interface LiveProject {
   connection: SystemConnection;
+  connectionDigest: string;
   induced: InducedSchema | undefined;
   demonstration: Demonstration | undefined;
   /** Claims this system made that its own behaviour contradicted. */
@@ -293,12 +294,21 @@ export class Workspace {
   }
 
   async connect(project: Project): Promise<SystemConnection> {
+    // Bind the process-local session to the saved configuration, not just its
+    // project ID. Another Service may have reconnected and republished a suite.
+    // Secret references are configuration; resolved credentials never enter this hash.
+    const connectionDigest = await hashValue({
+      connector: project.connector,
+      safety: project.safety,
+    });
     const existing = this.live.get(project.id);
-    if (existing) return existing.connection;
+    if (existing?.connectionDigest === connectionDigest) return existing.connection;
+    if (existing) await this.disconnect(project.id);
     assertConnectorTrusted(project);
     const connection = await this.openConnection(project);
     this.live.set(project.id, {
       connection,
+      connectionDigest,
       induced: undefined,
       demonstration: undefined,
       mismatches: [],

@@ -29,15 +29,9 @@ import {
   type WorkflowDefinition,
 } from '@rigorrun/environments';
 import { induceContract } from '@rigorrun/compiler';
+import { demoHash, demoRoute } from './route.ts';
 
-export const STEPS = [
-  'record',
-  'learned',
-  'confirm',
-  'benchmark',
-  'run',
-  'verdict',
-] as const;
+export const STEPS = ['record', 'learned', 'confirm', 'benchmark', 'run', 'verdict'] as const;
 export type Step = (typeof STEPS)[number];
 
 /**
@@ -130,9 +124,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export function stepFromHash(hash: string): Step | null {
-  const match = /^#\/demo\/([a-z]+)/.exec(hash);
-  const candidate = match?.[1];
-  return candidate && (STEPS as readonly string[]).includes(candidate) ? (candidate as Step) : null;
+  return hash.startsWith('#/demo') ? demoRoute(hash).step : null;
 }
 
 export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
@@ -161,14 +153,25 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  const setStep = useCallback((step: Step, replace = false) => {
-    const target = `#/demo/${step}`;
-    if (window.location.hash !== target) {
-      if (replace) window.history.replaceState(null, '', target);
-      else window.location.hash = target;
-    }
-    setState((prev) => ({ ...prev, step }));
-  }, []);
+  const setStep = useCallback(
+    (step: Step, replace = false) => {
+      const target = demoHash(workflowKey, step);
+      if (window.location.hash !== target) {
+        if (replace) window.history.replaceState(null, '', target);
+        else window.location.hash = target;
+      }
+      setState((prev) => ({ ...prev, step }));
+    },
+    [workflowKey],
+  );
+
+  // Invalidate async work from an example as soon as its keyed child unmounts.
+  useEffect(
+    () => () => {
+      runToken.current += 1;
+    },
+    [],
+  );
 
   /** Replays the recording to capture authoritative state either side of it. */
   const buildTrace = useCallback(
@@ -186,18 +189,19 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   );
 
   const buildBenchmark = useCallback(
-    async (draft: EnvironmentContract, rejected: Set<string>) => {
+    async (draft: EnvironmentContract, confirmed: Set<string>, rejected: Set<string>) => {
       const contract = applyReview(draft, {
-        confirmedRuleIds: draft.rules
-          .map((rule) => rule.id)
-          .filter((id) => !rejected.has(id)),
+        confirmedRuleIds: [...confirmed],
         rejectedRuleIds: [...rejected],
       });
       const generation = await generateBenchmark(
         workflow.registration.create(),
         contract,
         [fixtureFor(workflow, workflow.fixtureId)],
-        { benchmarkId: `bm_${workflow.key}` },
+        {
+          benchmarkId: `bm_${workflow.key}`,
+          name: `${workflow.title} — synthetic data · scripted agents · executed locally · not a qualified release suite`,
+        },
       );
       return { contract, benchmark: generation.benchmark };
     },
@@ -273,6 +277,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
   /* ------------------------------------------------------------- actions */
 
   const compile = useCallback(async () => {
+    const token = runToken.current;
     const current = stateRef.current;
     if (current.draftContract) {
       setStep('learned');
@@ -281,6 +286,7 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     setState((prev) => ({ ...prev, hydrating: true }));
     try {
       const recorded = current.trace ?? (await buildTrace());
+      if (runToken.current !== token) return;
       setState((prev) => ({
         ...prev,
         trace: recorded,
@@ -289,12 +295,18 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
       }));
       setStep('learned');
     } catch (error) {
+      if (runToken.current !== token) return;
       setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
     }
   }, [buildContract, buildTrace, setStep]);
 
   const toggleRule = useCallback((ruleId: string, decision: 'confirm' | 'reject') => {
     setState((prev) => {
+      if (
+        prev.hydrating ||
+        !prev.draftContract?.rules.some((rule) => rule.id === ruleId && rule.status === 'inferred')
+      )
+        return prev;
       const rejected = new Set(prev.rejected);
       const confirmed = new Set(prev.confirmed);
       if (decision === 'reject') {
@@ -307,16 +319,52 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         else confirmed.add(ruleId);
       }
       // A change upstream invalidates everything downstream.
-      return { ...prev, rejected, confirmed, benchmark: null, result: null, liveResults: [] };
+      return {
+        ...prev,
+        rejected,
+        confirmed,
+        contract: null,
+        benchmark: null,
+        result: null,
+        liveResults: [],
+      };
+    });
+  }, []);
+
+  const confirmAll = useCallback(() => {
+    setState((prev) => {
+      if (prev.hydrating || !prev.draftContract) return prev;
+      const confirmed = new Set(prev.confirmed);
+      for (const rule of prev.draftContract.rules) {
+        if (rule.status === 'inferred' && !prev.rejected.has(rule.id)) confirmed.add(rule.id);
+      }
+      return { ...prev, confirmed, contract: null, benchmark: null, result: null, liveResults: [] };
     });
   }, []);
 
   const approveAndGenerate = useCallback(async () => {
+    const token = runToken.current;
     const current = stateRef.current;
+    if (current.hydrating || !current.draftContract) return;
+    if (
+      current.draftContract.rules.some(
+        (rule) =>
+          rule.status === 'inferred' &&
+          !current.confirmed.has(rule.id) &&
+          !current.rejected.has(rule.id),
+      )
+    )
+      return;
+    setState((prev) => ({ ...prev, hydrating: true }));
     const recorded = current.trace ?? (await buildTrace());
     const draft = current.draftContract ?? buildContract(recorded);
     try {
-      const { contract, benchmark } = await buildBenchmark(draft, current.rejected);
+      const { contract, benchmark } = await buildBenchmark(
+        draft,
+        current.confirmed,
+        current.rejected,
+      );
+      if (runToken.current !== token) return;
       setState((prev) => ({
         ...prev,
         trace: recorded,
@@ -326,10 +374,12 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         result: null,
         liveResults: [],
         error: null,
+        hydrating: false,
       }));
       setStep('benchmark');
     } catch (error) {
-      setState((prev) => ({ ...prev, error: (error as Error).message }));
+      if (runToken.current !== token) return;
+      setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
     }
   }, [buildBenchmark, buildContract, buildTrace, setStep]);
 
@@ -369,9 +419,8 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
 
   /**
    * A deep link or a refresh lands on a step whose artefacts do not exist yet.
-   * Because the pipeline is deterministic, rebuilding them reproduces exactly
-   * what the user would have had — including re-executing the benchmark, which
-   * is a real run, not a replay of stored numbers.
+   * The trace and inferred draft can be rebuilt. Human consent cannot: a later
+   * step without this session's reviewed benchmark returns to review.
    */
   useEffect(() => {
     const target = stepFromHash(window.location.hash);
@@ -387,25 +436,13 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
         const draft = buildContract(recorded);
         if (cancelled) return;
 
-        if (target === 'learned' || target === 'confirm') {
-          setState((prev) => ({ ...prev, trace: recorded, draftContract: draft, hydrating: false }));
-          return;
-        }
-
-        const { contract, benchmark } = await buildBenchmark(draft, new Set());
-        if (cancelled) return;
         setState((prev) => ({
           ...prev,
           trace: recorded,
           draftContract: draft,
-          contract,
-          benchmark,
           hydrating: false,
         }));
-
-        if (target === 'run' || target === 'verdict') {
-          await execute(benchmark, { animate: target === 'run' });
-        }
+        if (target !== 'learned' && target !== 'confirm') setStep('confirm', true);
       } catch (error) {
         if (!cancelled) {
           setState((prev) => ({ ...prev, hydrating: false, error: (error as Error).message }));
@@ -416,9 +453,8 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     return () => {
       cancelled = true;
     };
-    // Intentionally mount-only: later navigation is driven by the actions
-    // above, and the callbacks it closes over are stable.
-  }, [buildContract, buildBenchmark, buildTrace, execute]);
+    // A manually changed URL can request a step whose draft does not yet exist.
+  }, [buildContract, buildTrace, setStep, state.step]);
 
   /**
    * The recording is replayed as soon as the page opens.
@@ -441,19 +477,25 @@ export function useDemo(workflowKey: string = DEFAULT_WORKFLOW) {
     return () => {
       cancelled = true;
     };
-  }, [buildTrace]);
+  }, [buildTrace, state.trace]);
 
   /** Back and forward move between steps without discarding anything. */
   useEffect(() => {
     const onHashChange = () => {
       const target = stepFromHash(window.location.hash);
-      if (target) setState((prev) => (prev.step === target ? prev : { ...prev, step: target }));
+      if (!target) return;
+      if (demoRoute(window.location.hash).workflowKey !== workflowKey) return;
+      if (STEPS.indexOf(target) > STEPS.indexOf('confirm') && !stateRef.current.benchmark) {
+        setStep('confirm', true);
+        return;
+      }
+      setState((prev) => (prev.step === target ? prev : { ...prev, step: target }));
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+  }, [setStep, workflowKey]);
 
-  return { state, setStep, compile, toggleRule, approveAndGenerate, run, reset };
+  return { state, setStep, compile, toggleRule, confirmAll, approveAndGenerate, run, reset };
 }
 
 /** Steps the user may jump to, based on what has actually been produced. */

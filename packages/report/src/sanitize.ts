@@ -9,7 +9,7 @@
  * The removal is structural, not a text filter — private fields are dropped
  * rather than scrubbed, so nothing can survive by being formatted unusually.
  */
-import type { CaseResult, RunResult } from '@rigorrun/core';
+import { redactText, type CaseResult, type RunResult } from '@rigorrun/core';
 
 /**
  * Record identifiers (CUST-2016, ORD-3001, TCK-4001, REF-7001 …) and money
@@ -31,7 +31,7 @@ const MONEY = /\$\d[\d,]*(?:\.\d{1,2})?/g;
 const WITHHELD = '(withheld from the published report)';
 
 export function maskPrivateText(text: string): string {
-  return text
+  return redactText(text)
     .replace(EMAIL, '\u2039address\u203a')
     .replace(RECORD_ID, '\u2039id\u203a')
     .replace(PREFIXED_ID, '\u2039id\u203a')
@@ -64,14 +64,14 @@ function sanitizeCaseResult(result: CaseResult, index: number): CaseResult {
       tool: step.tool,
       args: {},
       ok: step.ok,
-      ...(step.error ? { error: step.error } : {}),
+      ...(step.error ? { error: WITHHELD } : {}),
     })),
     actions: result.actions.map((action) => ({
       type: action.type,
       at: action.at,
       payload: {},
       ok: action.ok,
-      ...(action.error ? { error: action.error } : {}),
+      ...(action.error ? { error: WITHHELD } : {}),
     })),
     assertions: result.assertions.map((assertion) => ({
       assertionId: assertion.assertionId,
@@ -108,6 +108,8 @@ export const SANITIZATION_NOTES = [
   'Case names are replaced with case numbers; only the category label is kept.',
   'Record identifiers and money amounts inside check descriptions are masked.',
   'Tool arguments and tool results are removed; only the tool name and outcome remain.',
+  'Tool and action error messages are removed.',
+  'Optional workflow contract text and benchmark tasks are omitted.',
   'Assertion evidence (observed and expected values) is removed; only PASS/FAIL/ERROR remains.',
   'Agent prose reports are removed.',
   'What the system showed at the end of each case is removed; only whose account it was remains.',

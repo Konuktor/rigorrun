@@ -2,7 +2,7 @@
  * A pack's suite is not an unassessed suite.
  *
  * The suite check measures suites induced from a demonstration, and it is
- * refused for a pack's suite, which is written and qualified with the pack.
+ * refused for a pack's suite, which is bundled by its author.
  * Before this, every pack run carried the unassessed-suite limit, whose remedy
  * was to run that check: advice somebody could only follow into a refusal.
  */
@@ -26,7 +26,7 @@ const unassessed: SuiteQuality = {
 };
 
 describe('the limit a suite carries', () => {
-  it('says a pack’s suite was qualified with the pack, and sends nobody to the suite check', async () => {
+  it('describes the bundled pack suite without promoting past qualification to this build', async () => {
     registerFakePack(fakeSession());
     const result = await runBenchmark(fakeBenchmark(), [adder('correct', 5)], {
       suiteQuality: unassessed,
@@ -36,9 +36,9 @@ describe('the limit a suite carries', () => {
     expect(ids).toContain('suite_from_pack');
     expect(ids).not.toContain('suite_quality_unassessed');
     const limit = result.limits.find((entry) => entry.id === 'suite_from_pack')!;
-    expect(limit.limit).toContain('written and qualified with the The fake pack pack');
+    expect(limit.limit).toContain('bundled with the The fake pack pack');
     expect(limit.limit).toContain('not induced from a demonstration');
-    expect(limit.remedy).toMatch(/pre-registered qualification/);
+    expect(limit.remedy).toMatch(/not automatically to this build/);
     expect(limit.remedy).not.toMatch(/run the suite check/i);
   });
 
