@@ -22,6 +22,26 @@ Authentication is either a credential you already hold, sent as a header, or OAu
 your browser once; the tokens go into this machine's credential store with everything else, and
 never into the project file. A second connection opens no browser.
 
+### Upgrading an existing OAuth connection to 0.6.1
+
+This release requires MCP SDK 1.32.1 or newer. OAuth credentials saved by an older
+SDK may not record their authorization server (`issuer`). RigorRun does not guess
+that issuer from the MCP server's current metadata. On the next connection it
+discards an unbound OAuth session for that server only and asks you to sign in
+again. Other servers and non-OAuth credentials are unchanged.
+
+Use **Reconnect**, then complete the sign-in for a server you trust. Headless
+sessions print the sign-in URL; open it in a browser on the machine running
+RigorRun. Newly saved client information and tokens retain their issuer. If the
+authorization server changes, credentials bound to the old issuer are not sent
+to the new authorization server; a new sign-in is required.
+
+This does not establish that earlier credentials were compromised. If you
+previously connected an OAuth client to an untrusted or compromised MCP server,
+revoke its tokens and rotate any affected client secret with your identity
+provider, as described in the
+[SDK security advisory](https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-6qxp-vccf-f47h).
+
 ## Two questions RigorRun has to ask
 
 Neither can be worked out from the outside.
